@@ -5,7 +5,7 @@ interface FAQItem { q: string; a: string; }
 interface NoticeItem { date: string; title: string; content: string; isNew: boolean; }
 
 export default function AdminContents() {
-  const [activeTab, setActiveTab] = useState<'terms' | 'faq' | 'notice'>('terms');
+  const [activeTab, setActiveTab] = useState<'terms' | 'faq' | 'notice' | 'ai_prompt'>('terms');
   const [terms, setTerms] = useState(`<h2>제1조 (목적)</h2>
 <p>본 약관은 청첩장 작업실이 제공하는 모바일 청첩장 제작 서비스의 이용조건 및 절차에 관한 사항을 규정함을 목적으로 합니다.</p>
 
@@ -23,6 +23,7 @@ export default function AdminContents() {
     { date: '2026.01.10', title: '🎉 청첩장 작업실 그랜드 오픈!', content: '안녕하세요! 청첩장 작업실이 정식 오픈했습니다.', isNew: true },
     { date: '2026.01.08', title: '구글 로그인 추가', content: '카카오 로그인 외에 구글 로그인이 추가되었습니다.', isNew: false },
   ]);
+  const [aiPrompt, setAiPrompt] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -33,10 +34,11 @@ export default function AdminContents() {
   const fetchContents = async () => {
     const token = localStorage.getItem('token');
     try {
-      const [termsRes, faqRes, noticeRes] = await Promise.all([
+      const [termsRes, faqRes, noticeRes, aiPromptRes] = await Promise.all([
         fetch(`${import.meta.env.VITE_API_URL}/admin/contents/terms`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${import.meta.env.VITE_API_URL}/admin/contents/faq`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${import.meta.env.VITE_API_URL}/admin/contents/notice`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${import.meta.env.VITE_API_URL}/admin/contents/wedding_ai_prompt`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (termsRes.ok) {
@@ -54,6 +56,10 @@ export default function AdminContents() {
         if (data?.content) {
           try { setNotices(JSON.parse(data.content)); } catch {}
         }
+      }
+      if (aiPromptRes.ok) {
+        const data = await aiPromptRes.json();
+        if (data?.content) setAiPrompt(data.content);
       }
     } catch (e) {
       console.error('Failed to fetch:', e);
@@ -101,7 +107,7 @@ export default function AdminContents() {
       </div>
 
       <div className="flex gap-2">
-        {(['terms', 'faq', 'notice'] as const).map(tab => (
+        {(['terms', 'faq', 'notice', 'ai_prompt'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -109,7 +115,7 @@ export default function AdminContents() {
               activeTab === tab ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
             }`}
           >
-            {tab === 'terms' ? '이용약관' : tab === 'faq' ? '자주 묻는 질문' : '공지사항'}
+            {tab === 'terms' ? '이용약관' : tab === 'faq' ? '자주 묻는 질문' : tab === 'notice' ? '공지사항' : '웨딩이 프롬프트'}
           </button>
         ))}
       </div>
@@ -273,6 +279,31 @@ export default function AdminContents() {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'ai_prompt' && (
+        <div className="bg-white rounded-2xl border border-stone-200 p-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-medium text-stone-800 mb-2">웨딩이 AI 프롬프트</h3>
+            <p className="text-sm text-stone-500">웨딩이가 고객과 대화할 때 사용하는 시스템 프롬프트입니다.</p>
+          </div>
+          <textarea
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            className="w-full h-[500px] px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 font-mono text-sm"
+            placeholder="웨딩이 프롬프트를 입력하세요..."
+          />
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={() => saveContent('wedding_ai_prompt', aiPrompt)}
+              disabled={saving}
+              className="flex items-center gap-2 px-6 py-3 bg-stone-800 text-white rounded-xl hover:bg-stone-900 disabled:opacity-50"
+            >
+              <Save className="w-5 h-5" />
+              {saving ? '저장 중...' : '저장하기'}
+            </button>
+          </div>
         </div>
       )}
     </div>
