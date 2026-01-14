@@ -1,0 +1,179 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Gift, Check, Sparkles, AlertCircle } from 'lucide-react';
+
+export default function GiftRedeem() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [code, setCode] = useState(searchParams.get('code') || '');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<{ packageName: string } | null>(null);
+  const [autoRedeemTriggered, setAutoRedeemTriggered] = useState(false);
+
+  const handleRedeem = useCallback(async (giftCode: string) => {
+    if (!giftCode.trim()) return;
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      localStorage.setItem('pendingGiftCode', giftCode);
+      localStorage.setItem('redirectAfterLogin', '/gift/redeem');
+      window.location.href = `${import.meta.env.VITE_API_URL}/oauth/kakao`;
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/gift/redeem`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ code: giftCode.trim().toUpperCase() })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || '선물 사용에 실패했습니다');
+      } else {
+        setSuccess({ packageName: data.packageName });
+      }
+    } catch (e) {
+      console.error('Gift redeem error:', e);
+      setError('네트워크 오류가 발생했습니다');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const pendingCode = localStorage.getItem('pendingGiftCode');
+    const token = localStorage.getItem('token');
+    
+    if (pendingCode && token && !autoRedeemTriggered) {
+      setCode(pendingCode);
+      localStorage.removeItem('pendingGiftCode');
+      localStorage.removeItem('redirectAfterLogin');
+      setAutoRedeemTriggered(true);
+      setTimeout(() => handleRedeem(pendingCode), 500);
+    }
+  }, [handleRedeem, autoRedeemTriggered]);
+
+  const goToCreate = () => {
+    navigate('/create');
+  };
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl"
+        >
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", delay: 0.2 }}
+            className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"
+          >
+            <Check className="w-10 h-10 text-white" />
+          </motion.div>
+          <h1 className="text-2xl font-medium text-stone-800 mb-2">선물 사용 완료! 🎉</h1>
+          <p className="text-stone-500 mb-6">
+            <span className="font-semibold text-stone-800">{success.packageName}</span> 패키지가<br />
+            계정에 추가되었습니다
+          </p>
+          <button
+            onClick={goToCreate}
+            className="w-full py-4 bg-stone-800 text-white rounded-xl hover:bg-stone-900 transition-colors font-medium text-lg"
+          >
+            청첩장 만들러 가기 →
+          </button>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="w-full py-3 text-stone-500 hover:text-stone-700 transition-colors mt-3"
+          >
+            대시보드로 이동
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex items-center justify-center px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-2xl p-8 max-w-md w-full shadow-xl"
+      >
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-gradient-to-br from-stone-100 to-stone-200 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Gift className="w-10 h-10 text-stone-700" />
+          </div>
+          <h1 className="text-2xl font-medium text-stone-800 mb-2">선물 받기</h1>
+          <p className="text-stone-500">선물 코드를 입력해주세요</p>
+        </div>
+
+        <input
+          type="text"
+          value={code}
+          onChange={(e) => {
+            setCode(e.target.value.toUpperCase());
+            setError(null);
+          }}
+          placeholder="GIFT-XXXXXXXX"
+          className="w-full px-4 py-4 border border-stone-200 rounded-xl text-center text-lg tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent mb-4"
+          disabled={loading}
+        />
+
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mb-4"
+          >
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+            <p className="text-red-600 text-sm">{error}</p>
+          </motion.div>
+        )}
+
+        <button
+          onClick={() => handleRedeem(code)}
+          disabled={loading || !code.trim()}
+          className="w-full py-4 bg-stone-800 text-white rounded-xl hover:bg-stone-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
+        >
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5" />
+              선물 사용하기
+            </>
+          )}
+        </button>
+
+        {!localStorage.getItem('token') && (
+          <p className="text-sm text-stone-400 text-center mt-4">
+            로그인이 필요합니다. 버튼을 누르면 로그인 후 자동으로 선물이 사용됩니다.
+          </p>
+        )}
+
+        <div className="mt-6 pt-6 border-t border-stone-100">
+          <button
+            onClick={() => navigate('/')}
+            className="w-full py-3 text-stone-500 hover:text-stone-700 transition-colors text-sm"
+          >
+            ← 홈으로 돌아가기
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

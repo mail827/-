@@ -1,0 +1,2 @@
+// Wedding 모델에 themeColor 필드 추가
+themeColor String? @default("#1E3A5F")

@@ -1,0 +1,139 @@
+import { useParams } from 'react-router-dom';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import { Heart } from 'lucide-react';
+import type { Wedding, Theme, Guestbook } from '../../types';
+import {
+  RomanticClassic,
+  ModernMinimal,
+  BohemianDream,
+  LuxuryGold,
+  PlayfulPop,
+  ForestGarden,
+  OceanBreeze,
+  SeniorSimple,
+} from './themes';
+import AiChat from '../../components/AiChat';
+
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
+async function publicApi<T>(endpoint: string, options?: { method?: string; body?: unknown }): Promise<T> {
+  const res = await fetch(`${API_BASE}/public${endpoint}`, {
+    method: options?.method || 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: options?.body ? JSON.stringify(options.body) : undefined
+  });
+  if (!res.ok) throw new Error('API Error');
+  return res.json();
+}
+
+async function submitRsvp(data: unknown) {
+  const res = await fetch(`${API_BASE}/rsvp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('RSVP 제출 실패');
+  return res.json();
+}
+
+async function submitGuestbook(data: unknown) {
+  const res = await fetch(`${API_BASE}/guestbook`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('방명록 작성 실패');
+  return res.json();
+}
+
+const themeComponents: Record<Theme, React.ComponentType<any>> = {
+  ROMANTIC_CLASSIC: RomanticClassic,
+  MODERN_MINIMAL: ModernMinimal,
+  BOHEMIAN_DREAM: BohemianDream,
+  LUXURY_GOLD: LuxuryGold,
+  PLAYFUL_POP: PlayfulPop,
+  SENIOR_SIMPLE: SeniorSimple,
+  FOREST_GARDEN: ForestGarden,
+  OCEAN_BREEZE: OceanBreeze,
+};
+
+export default function WeddingPage() {
+  const { slug } = useParams<{ slug: string }>();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['wedding', slug],
+    queryFn: () => publicApi<{ wedding: Wedding }>(`/wedding/${slug}`)
+  });
+
+  const { data: guestbookData, refetch: refetchGuestbook } = useQuery({
+    queryKey: ['guestbook', slug],
+    queryFn: () => publicApi<{ guestbooks: Guestbook[] }>(`/wedding/${slug}/guestbook`),
+    enabled: !!slug
+  });
+
+  const rsvpMutation = useMutation({
+    mutationFn: submitRsvp,
+    onSuccess: () => alert('참석 여부가 전달되었습니다 💕')
+  });
+
+  const guestbookMutation = useMutation({
+    mutationFn: submitGuestbook,
+    onSuccess: () => {
+      refetchGuestbook();
+      alert('메시지가 등록되었습니다 💝');
+    }
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 to-amber-50">
+        <motion.div
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+        >
+          <Heart className="w-8 h-8 text-rose-400" />
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (error || !data?.wedding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 to-amber-50">
+        <div className="text-center px-6">
+          <Heart className="w-12 h-12 text-rose-300/50 mx-auto mb-4" />
+          <p className="text-stone-500">청첩장을 찾을 수 없습니다</p>
+          <p className="text-stone-400 text-sm mt-2">링크를 다시 확인해주세요</p>
+        </div>
+      </div>
+    );
+  }
+
+  const wedding = data.wedding;
+  const theme = wedding.theme || 'ROMANTIC_CLASSIC';
+  const ThemeComponent = themeComponents[theme] || RomanticClassic;
+
+  return (
+    <>
+      <ThemeComponent
+        wedding={wedding}
+        guestbooks={guestbookData?.guestbooks || []}
+        onRsvpSubmit={(data: any) => rsvpMutation.mutate(data)}
+        onGuestbookSubmit={(data: any) => guestbookMutation.mutate(data)}
+        isRsvpLoading={rsvpMutation.isPending}
+        isGuestbookLoading={guestbookMutation.isPending}
+        refetchGuestbook={refetchGuestbook}
+      />
+      
+      {wedding.aiEnabled && (
+        <AiChat
+          slug={wedding.slug}
+          groomName={wedding.groomName}
+          brideName={wedding.brideName}
+          wedding={wedding}
+        />
+      )}
+    </>
+  );
+}

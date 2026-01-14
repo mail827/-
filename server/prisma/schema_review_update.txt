@@ -1,0 +1,10 @@
+model Review {
+  id        String   @id @default(cuid())
+  weddingId String
+  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  rating    Int
+  content   String?
+  source    String   @default("GENERAL")
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
