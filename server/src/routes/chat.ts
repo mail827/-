@@ -20,14 +20,18 @@ const SYSTEM_PROMPT = `당신은 '청첩장 작업실'의 친절한 AI 상담사
 - 첫만남 스토리, 프로포즈 에피소드, 술버릇 같은 비밀 정보도 재밌게 답변
 - 결혼식 끝나면 AI 대화 리포트 제공 (하객들이 뭘 물어봤는지 통계)
 
-[패키지 안내]
-Lite (3만원): 테마 1종 + 어르신 테마, 1회 수정, 30일 호스팅
-Basic (8만원): 전체 8가지 테마, 3회 수정, 1년 호스팅, 갤러리 20장, 배경음악, AI Reception 포함!
-Basic+영상 (런칭특가 40만원): Basic 전체 + 1분 영상, 수정 무제한, 평생 호스팅
+[패키지 안내 - 🎉 런칭특가 진행중!]
+Lite (3만원, 정가 5만원): 테마 1종 + 어르신 테마, 1회 수정, 30일 호스팅
+Basic (8만원, 정가 10만원): 전체 8가지 테마, 3회 수정, 3개월 호스팅, 갤러리 20장, 배경음악
+AI Reception (129,000원, 정가 15만원): Basic 전체 기능 + 나만의 AI 비서, 신랑/신부 듀얼 페르소나, 실시간 방명록 답장, 3개월 호스팅
+Basic+영상 (40만원, 정가 55만원): Basic 전체 + 1분 하이라이트 영상(토끼작업실 편집), 수정 무제한, 3개월 호스팅
 
-프리미엄 (카톡 상담):
-Standard (85만원): 세미커스텀 + 1~2분 영상
-Premium (130만원): 풀커스텀 + 2~3분 시네마틱
+추천 패키지: AI Reception! AI 비서가 하객 응대해줘서 신랑신부가 편해요 💕
+
+[커스텀 서비스]
+세상에 단 하나뿐인 청첩장 + 시네마틱 영상을 원하시면
+인스타그램 @weddingstudiolab 으로 문의주세요!
+전담 매니저가 1:1로 함께합니다 ✨
 
 [어르신 테마]
 큰 글씨, 모든 정보 한눈에, 심플 구성. Lite에도 기본제공!
@@ -40,8 +44,8 @@ Premium (130만원): 풀커스텀 + 2~3분 시네마틱
 
 [액션 사용]
 고객이 결제하겠다, 구매하겠다, 만들겠다 하면 바로 해당 함수 호출해주세요.
-프리미엄 상담 원하면 카카오톡 상담 함수 호출해주세요.
-망설이는 것 같으면 적극적으로 추천하고 액션 버튼 제공해주세요!`;
+커스텀 상담 원하면 인스타그램 링크 함수 호출해주세요.
+망설이는 것 같으면 AI Reception 적극 추천하고 액션 버튼 제공해주세요!`;
 
 const functions: OpenAI.Chat.ChatCompletionCreateParams.Function[] = [
   {
@@ -52,26 +56,19 @@ const functions: OpenAI.Chat.ChatCompletionCreateParams.Function[] = [
       properties: {
         package_slug: {
           type: 'string',
-          enum: ['lite', 'basic', 'basic-video'],
-          description: 'lite: 3만원, basic: 8만원, basic-video: 40만원'
+          enum: ['lite', 'basic', 'ai-reception', 'basic-video'],
+          description: 'lite: 3만원, basic: 8만원, ai-reception: 129,000원, basic-video: 40만원'
         }
       },
       required: ['package_slug']
     }
   },
   {
-    name: 'open_kakao_consultation',
-    description: '카카오톡 프리미엄 상담 연결. Standard/Premium 문의나 커스텀 상담 원할 때',
+    name: 'open_instagram',
+    description: '인스타그램 커스텀 상담 연결. 커스텀/프리미엄/영상 문의 원할 때',
     parameters: {
       type: 'object',
-      properties: {
-        type: {
-          type: 'string',
-          enum: ['wedding', 'video'],
-          description: 'wedding: 청첩장 커스텀, video: 영상 문의'
-        }
-      },
-      required: ['type']
+      properties: {}
     }
   },
   {
@@ -97,7 +94,7 @@ interface ChatAction {
   label: string;
   action: string;
   url?: string;
-  style?: 'primary' | 'secondary' | 'kakao';
+  style?: 'primary' | 'secondary' | 'kakao' | 'instagram';
 }
 
 router.post('/', async (req, res) => {
@@ -141,6 +138,7 @@ router.post('/', async (req, res) => {
           const packageNames: Record<string, string> = {
             'lite': 'Lite (3만원)',
             'basic': 'Basic (8만원)',
+            'ai-reception': 'AI Reception (129,000원)',
             'basic-video': 'Basic+영상 (40만원)'
           };
           reply = reply || `${packageNames[fnArgs.package_slug]} 패키지 좋은 선택이에요! 💕 아래 버튼으로 바로 시작해보세요~`;
@@ -153,19 +151,14 @@ router.post('/', async (req, res) => {
           });
           break;
           
-        case 'open_kakao_consultation':
-          const kakaoLinks: Record<string, { url: string; name: string }> = {
-            'wedding': { url: 'https://open.kakao.com/o/sNEtHU7h', name: '청첩장 커스텀 상담 (oicrcutie)' },
-            'video': { url: 'https://open.kakao.com/o/sJFmCzai', name: '영상 문의 (토끼작업실)' }
-          };
-          const link = kakaoLinks[fnArgs.type];
-          reply = reply || `프리미엄 상담 연결해드릴게요! 💛 담당자가 친절하게 안내해드릴 거예요~`;
+        case 'open_instagram':
+          reply = reply || `커스텀 상담은 인스타그램으로 연결해드릴게요! ✨ 전담 매니저가 1:1로 안내해드려요~`;
           actions.push({
             type: 'button',
-            label: link.name,
+            label: '인스타그램 @weddingstudiolab',
             action: 'external',
-            url: link.url,
-            style: 'kakao'
+            url: 'https://www.instagram.com/weddingstudiolab/',
+            style: 'instagram'
           });
           break;
           
@@ -181,11 +174,12 @@ router.post('/', async (req, res) => {
           break;
           
         case 'show_packages':
-          reply = reply || `패키지 비교해볼게요! 어떤 게 마음에 드세요? 💕`;
+          reply = reply || `패키지 비교해볼게요! 🎉 지금 런칭특가 진행중이에요~`;
           actions.push(
             { type: 'button', label: 'Lite 3만원', action: 'navigate', url: '/create?package=lite', style: 'secondary' },
             { type: 'button', label: 'Basic 8만원', action: 'navigate', url: '/create?package=basic', style: 'secondary' },
-            { type: 'button', label: 'Basic+영상 40만원 🎬', action: 'navigate', url: '/create?package=basic-video', style: 'primary' }
+            { type: 'button', label: 'AI Reception 129,000원 ✨', action: 'navigate', url: '/create?package=ai-reception', style: 'primary' },
+            { type: 'button', label: 'Basic+영상 40만원 🎬', action: 'navigate', url: '/create?package=basic-video', style: 'secondary' }
           );
           break;
       }
