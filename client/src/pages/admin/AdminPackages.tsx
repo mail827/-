@@ -10,6 +10,7 @@ interface PackageData {
   features: string[];
   isActive: boolean;
   sortOrder: number;
+  maxEdits: number;
 }
 
 export default function AdminPackages() {
@@ -37,7 +38,7 @@ export default function AdminPackages() {
   const updatePackage = async (pkg: PackageData) => {
     setSaving(pkg.id);
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('token');
       const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/packages/${pkg.id}`, {
         method: 'PUT',
         headers: {
@@ -178,6 +179,18 @@ export default function AdminPackages() {
                       onChange={(e) => handleChange(pkg.id, 'sortOrder', parseInt(e.target.value))}
                       className="w-16 px-2 py-1 border border-stone-200 rounded-lg text-center"
                     />
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-stone-600">수정횟수:</span>
+                    <input
+                      type="number"
+                      value={pkg.maxEdits}
+                      onChange={(e) => handleChange(pkg.id, 'maxEdits', parseInt(e.target.value))}
+                      className="w-20 px-2 py-1 border border-stone-200 rounded-lg text-center"
+                      title="-1 = 무제한"
+                    />
+                    <span className="text-xs text-stone-400">(-1=무제한)</span>
                   </div>
                 </div>
               </div>

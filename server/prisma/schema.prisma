@@ -36,6 +36,7 @@ model Package {
   features    String[]
   isActive    Boolean  @default(true)
   sortOrder   Int      @default(0)
+  maxEdits    Int      @default(-1)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   orders      Order[]
@@ -79,6 +80,7 @@ model Wedding {
   themeColor      String?  @default("#1E3A5F")
   isPublished     Boolean  @default(false)
   isArchived      Boolean  @default(false)
+  editCount       Int      @default(0)
   weddingDate     DateTime
   weddingTime     String
   groomName       String

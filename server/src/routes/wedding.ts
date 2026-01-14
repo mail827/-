@@ -143,13 +143,28 @@ router.put('/:id', authMiddleware, async (req, res) => {
   const user = (req as any).user;
   const data = req.body;
   
-  const existing = await prisma.wedding.findUnique({ where: { id } });
+  const existing = await prisma.wedding.findUnique({ 
+    where: { id },
+    include: { order: { include: { package: true } } }
+  });
   if (!existing) return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
   if (user.role !== 'ADMIN' && existing.userId !== user.id) {
     return res.status(403).json({ error: '접근 권한이 없습니다' });
   }
   
-  const { id: _id, createdAt, updatedAt, galleries, _count, userId, orderId, ...updateData } = data;
+  // 수정 횟수 체크 (관리자는 무제한)
+  if (user.role !== 'ADMIN' && existing.order?.package) {
+    const maxEdits = existing.order.package.maxEdits;
+    if (maxEdits !== -1 && existing.editCount >= maxEdits) {
+      return res.status(403).json({ 
+        error: `수정 횟수(${maxEdits}회) 초과. 추가 수정은 문의해주세요.`,
+        editCount: existing.editCount,
+        maxEdits
+      });
+    }
+  }
+  
+  const { id: _id, createdAt, updatedAt, galleries, _count, userId, orderId, editCount, ...updateData } = data;
   
   try {
     const wedding = await prisma.wedding.update({
@@ -157,6 +172,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       data: {
         ...updateData,
         weddingDate: updateData.weddingDate ? new Date(updateData.weddingDate) : undefined,
+        editCount: user.role !== 'ADMIN' ? { increment: 1 } : undefined,
       },
     });
     
