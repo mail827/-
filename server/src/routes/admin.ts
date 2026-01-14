@@ -255,3 +255,21 @@ router.delete('/reviews/:id', authMiddleware, adminMiddleware, async (req, res) 
     res.status(500).json({ error: 'Failed to delete review' });
   }
 });
+
+// 패키지 관리 API
+router.put('/packages/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, price, description, features, isActive, sortOrder } = req.body;
+    
+    const updated = await prisma.package.update({
+      where: { id },
+      data: { name, price, description, features, isActive, sortOrder }
+    });
+    
+    res.json(updated);
+  } catch (error) {
+    console.error('Update package error:', error);
+    res.status(500).json({ error: 'Failed to update package' });
+  }
+});

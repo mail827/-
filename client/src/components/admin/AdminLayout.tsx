@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, Crown, FileText, Gift, Star, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, Crown, FileText, Gift, Star, Menu, X, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminLayout() {
@@ -22,6 +22,7 @@ export default function AdminLayout() {
     { path: '/admin/contents', icon: FileText, label: '콘텐츠 관리' },
     { path: '/admin/gifts', icon: Gift, label: '선물 관리' },
     { path: '/admin/reviews', icon: Star, label: '리뷰 관리' },
+    { path: '/admin/packages', icon: Package, label: '패키지 관리' },
   ];
 
   return (

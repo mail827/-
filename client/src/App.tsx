@@ -15,6 +15,7 @@ import AdminGift from "./pages/admin/AdminGift";
 import AdminRsvpList from './pages/admin/AdminRsvpList';
 import AdminGuestbookList from './pages/admin/AdminGuestbookList';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminPackages from './pages/admin/AdminPackages';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminInquiries from './pages/admin/AdminInquiries';
 import AdminContents from './pages/admin/AdminContents';
@@ -82,6 +83,7 @@ export default function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="orders" element={<AdminOrders />} />
+        <Route path="packages" element={<AdminPackages />} />
         <Route path="inquiries" element={<AdminInquiries />} />
         <Route path="weddings" element={<AdminWeddingList />} />
         <Route path="weddings/create" element={<AdminWeddingCreate />} />
