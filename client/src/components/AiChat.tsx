@@ -533,7 +533,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) { sendMessage(); } }}
                   placeholder={placeholders[placeholderIndex]}
                   className="flex-1 px-3 py-2 bg-white rounded-lg outline-none text-sm border border-stone-200 focus:border-stone-400"
                 />

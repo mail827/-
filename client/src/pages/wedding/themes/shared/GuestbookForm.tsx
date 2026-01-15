@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 interface GuestbookFormProps {
   weddingId: string;
-  onSubmit: (data: { name: string; password: string; message: string }) => Promise<void>;
+  onSubmit: (data: { weddingId: string; name: string; password: string; message: string }) => Promise<void>;
   isLoading: boolean;
   variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean';
 }
@@ -14,7 +14,7 @@ export default function GuestbookForm({ weddingId: _weddingId, onSubmit, isLoadi
 
   const handleSubmit = async () => {
     if (!name || !password || !message) return;
-    await onSubmit({ name, password, message });
+    await onSubmit({ weddingId: _weddingId, name, password, message });
     setName('');
     setPassword('');
     setMessage('');
