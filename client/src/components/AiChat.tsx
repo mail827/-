@@ -165,6 +165,23 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
     inputRef.current?.focus();
   };
 
+
+  const saveLog = async (userMessage?: string, assistantMessage?: string) => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/ai/${slug}/log`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          visitorId: visitorId.current,
+          userMessage,
+          assistantMessage
+        })
+      });
+    } catch (e) {
+      console.error("Log save failed:", e);
+    }
+  };
+
   const handleAction = (action: Action) => {
     switch (action.type) {
       case 'date':
@@ -297,41 +314,49 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
     const lowerInput = currentInput.toLowerCase();
     
     if (lowerInput.includes('계좌') || lowerInput.includes('송금') || lowerInput.includes('축의금')) {
+      saveLog(currentInput, '계좌 정보를 안내해 드릴게요.');
       handleAction({ type: 'account', label: '' });
       setIsLoading(false);
       return;
     }
     if (lowerInput.includes('전화') || lowerInput.includes('연락')) {
+      saveLog(currentInput, '연락처를 안내해 드릴게요.');
       handleAction({ type: 'call', label: '' });
       setIsLoading(false);
       return;
     }
     if (lowerInput.includes('지도') || lowerInput.includes('길') || lowerInput.includes('위치') || lowerInput.includes('주소') || lowerInput.includes('어디') || lowerInput.includes('주차')) {
+      saveLog(currentInput, '지도를 열어드릴게요.');
       handleAction({ type: 'map', label: '' });
       setIsLoading(false);
       return;
     }
     if (lowerInput.includes('공유') || lowerInput.includes('링크')) {
+      saveLog(currentInput, '공유 기능을 안내해 드릴게요.');
       handleAction({ type: 'share', label: '' });
       setIsLoading(false);
       return;
     }
     if (lowerInput.includes('날짜') || lowerInput.includes('언제') || lowerInput.includes('시간') || lowerInput.includes('일시') || lowerInput.includes('장소')) {
+      saveLog(currentInput, '날짜 정보를 안내해 드릴게요.');
       handleAction({ type: 'date', label: '' });
       setIsLoading(false);
       return;
     }
     if (lowerInput.includes('참석') || lowerInput.includes('불참') || lowerInput.includes('rsvp')) {
+      saveLog(currentInput, 'RSVP 페이지로 이동합니다.');
       handleAction({ type: 'rsvp', label: '' });
       setIsLoading(false);
       return;
     }
     if (lowerInput.includes('방명록') || lowerInput.includes('축하') || lowerInput.includes('메시지')) {
+      saveLog(currentInput, '방명록 페이지로 이동합니다.');
       handleAction({ type: 'guestbook', label: '' });
       setIsLoading(false);
       return;
     }
     if (lowerInput.includes('비밀') || lowerInput.includes('술버릇') || lowerInput.includes('tmi')) {
+      saveLog(currentInput, '비밀 정보를 알려드릴게요.');
       handleAction({ type: 'secret', label: '' });
       setIsLoading(false);
       return;
