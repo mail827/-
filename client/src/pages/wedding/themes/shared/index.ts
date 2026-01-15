@@ -7,6 +7,7 @@ export { default as ShareModal } from './ShareModal';
 
 export interface WeddingData {
   id: string;
+  theme: string;
   slug: string;
   groomName: string;
   brideName: string;
@@ -56,11 +57,13 @@ export interface WeddingData {
   bgMusicAutoPlay?: boolean;
   showDday?: boolean;
   themeColor?: string;
-  galleries?: { id: string; mediaUrl: string; mediaType: 'IMAGE' | 'VIDEO'; order: number }[];
+  galleries?: { id: string;
+  theme: string; mediaUrl: string; mediaType: 'IMAGE' | 'VIDEO'; order: number }[];
 }
 
 export interface GuestbookData {
   id: string;
+  theme: string;
   name: string;
   message: string;
   createdAt: string;

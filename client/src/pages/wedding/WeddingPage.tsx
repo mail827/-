@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
@@ -60,6 +60,7 @@ const themeComponents: Record<Theme, React.ComponentType<any>> = {
 
 export default function WeddingPage() {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['wedding', slug],
@@ -111,7 +112,8 @@ export default function WeddingPage() {
   }
 
   const wedding = data.wedding;
-  const theme = wedding.theme || 'ROMANTIC_CLASSIC';
+  const urlTheme = searchParams.get('theme') as Theme | null;
+  const theme = urlTheme || wedding.theme || 'ROMANTIC_CLASSIC';
   const ThemeComponent = themeComponents[theme] || RomanticClassic;
 
   return (

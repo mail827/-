@@ -41,7 +41,8 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
   };
 
   const handleShare = async (type: 'kakao' | 'instagram' | 'sms') => {
-    const url = window.location.href;
+    const baseUrl = window.location.origin + window.location.pathname;
+    const url = `${baseUrl}?theme=${wedding.theme}`;
     const title = `${wedding.groomName} ♥ ${wedding.brideName}`;
     
     if (type === 'kakao' && window.Kakao) {

@@ -245,7 +245,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
               </div>
             )}
             {(wedding.tossLink || wedding.kakaoPayLink) && (
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 {wedding.tossLink && <a href={wedding.tossLink} target="_blank" className="flex-1 py-4 bg-[#0064FF] text-white rounded-xl text-lg font-medium text-center">토스</a>}
                 {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" className="flex-1 py-4 bg-[#FEE500] text-gray-800 rounded-xl text-lg font-medium text-center">카카오페이</a>}
               </div>
@@ -258,9 +258,9 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           {guestbookSubmitted && <p className="text-center text-lg mb-4" style={{ color: C }}>메시지가 등록되었습니다</p>}
           <div className="space-y-3">
-            <div className="flex gap-3">
-              <input type="text" placeholder="이름" value={guestbookData.name} onChange={(e) => setGuestbookData({ ...guestbookData, name: e.target.value })} className="flex-1 px-4 py-3 rounded-xl border-2 text-lg outline-none" style={{ borderColor: C_medium }} />
-              <input type="password" placeholder="비밀번호" value={guestbookData.password} onChange={(e) => setGuestbookData({ ...guestbookData, password: e.target.value })} className="w-28 px-4 py-3 rounded-xl border-2 text-lg outline-none" style={{ borderColor: C_medium }} />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input type="text" placeholder="이름" value={guestbookData.name} onChange={(e) => setGuestbookData({ ...guestbookData, name: e.target.value })} className="w-full sm:flex-1 px-4 py-3 rounded-xl border-2 text-lg outline-none" style={{ borderColor: C_medium }} />
+              <input type="password" placeholder="비밀번호" value={guestbookData.password} onChange={(e) => setGuestbookData({ ...guestbookData, password: e.target.value })} className="w-full sm:w-28 px-4 py-3 rounded-xl border-2 text-lg outline-none" style={{ borderColor: C_medium }} />
             </div>
             <textarea placeholder="축하 메시지를 남겨주세요" value={guestbookData.message} onChange={(e) => setGuestbookData({ ...guestbookData, message: e.target.value })} rows={3} className="w-full px-4 py-3 rounded-xl border-2 text-lg outline-none resize-none" style={{ borderColor: C_medium }} />
             <button onClick={handleGuestbookSubmit} disabled={isGuestbookLoading || !guestbookData.name || !guestbookData.password || !guestbookData.message} className="w-full py-4 text-white rounded-xl text-lg font-medium disabled:opacity-50" style={{ backgroundColor: C }}>{isGuestbookLoading ? '등록 중...' : '메시지 남기기'}</button>

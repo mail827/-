@@ -37,7 +37,8 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
   };
 
   const handleShare = async (type: 'kakao' | 'instagram' | 'sms') => {
-    const url = window.location.href;
+    const baseUrl = window.location.origin + window.location.pathname;
+    const url = `${baseUrl}?theme=${wedding.theme}`;
     const title = `${wedding.groomName} & ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
       window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'korean'), imageUrl: wedding.heroMedia || '', link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
