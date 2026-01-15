@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, MessageCircle, X, Send, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Check, MessageCircle, X, Send, Sparkles, ChevronLeft, ChevronRight, Mail, Loader2 } from 'lucide-react';
 
 interface Package {
   id: string;
@@ -25,6 +25,12 @@ export default function Landing() {
   const [reviews, setReviews] = useState<{id: string; rating: number; content: string; source: string; groomName: string; brideName: string; createdAt: string}[]>([]);
   const [reviewIndex, setReviewIndex] = useState(0);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [showEmailLogin, setShowEmailLogin] = useState(false);
+  const [emailStep, setEmailStep] = useState<'email' | 'code'>('email');
+  const [emailInput, setEmailInput] = useState('');
+  const [codeInput, setCodeInput] = useState('');
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
   const isLoggedIn = !!localStorage.getItem('token');
   const [inquiryForm, setInquiryForm] = useState({ name: '', email: '', phone: '', type: 'general', message: '' });
   const [inquirySending, setInquirySending] = useState(false);
@@ -47,7 +53,6 @@ export default function Landing() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-
   useEffect(() => {
     if (chatOpen) {
       document.body.style.overflow = "hidden";
@@ -55,6 +60,7 @@ export default function Landing() {
       document.body.style.overflow = "";
     }
   }, [chatOpen]);
+
   const fetchPackages = async () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/payment/packages`);
@@ -128,6 +134,59 @@ export default function Landing() {
 
   const handleLogin = (provider: 'kakao' | 'google') => {
     window.location.href = `${import.meta.env.VITE_API_URL}/oauth/${provider}`;
+  };
+
+  const handleSendCode = async () => {
+    if (!emailInput || !emailInput.includes('@')) {
+      setEmailError('유효한 이메일을 입력해주세요');
+      return;
+    }
+    setEmailLoading(true);
+    setEmailError('');
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/send-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEmailStep('code');
+      } else {
+        setEmailError(data.error || '발송에 실패했습니다');
+      }
+    } catch {
+      setEmailError('네트워크 오류가 발생했습니다');
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (codeInput.length !== 6) {
+      setEmailError('6자리 인증번호를 입력해주세요');
+      return;
+    }
+    setEmailLoading(true);
+    setEmailError('');
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/verify-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput, code: codeInput }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        window.location.href = '/dashboard';
+      } else {
+        setEmailError(data.error || '인증에 실패했습니다');
+      }
+    } catch {
+      setEmailError('네트워크 오류가 발생했습니다');
+    } finally {
+      setEmailLoading(false);
+    }
   };
 
   const scrollToSection = (id: string) => {
@@ -205,6 +264,17 @@ export default function Landing() {
               Google로 시작하기
             </motion.button>
           </div>
+          
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+            onClick={() => setShowEmailLogin(true)}
+            className="mt-4 text-stone-400 hover:text-stone-600 text-sm flex items-center justify-center gap-2 mx-auto transition-colors"
+          >
+            <Mail className="w-4 h-4" />
+            이메일로 시작하기
+          </motion.button>
           
           <motion.p
             initial={{ opacity: 0 }}
@@ -445,7 +515,7 @@ export default function Landing() {
               </p>
               
               <div className="flex flex-col items-center gap-6">
-                <a
+                
                   href="https://www.instagram.com/weddingstudiolab/"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -467,11 +537,10 @@ export default function Landing() {
       </section>
 
       <footer className="py-12 px-4 border-t border-stone-100 relative bg-stone-50">
-        <a href="/admin/login" className="absolute bottom-4 right-4 w-2 h-2 rounded-full bg-stone-200 hover:bg-stone-400 transition-colors" title="" />
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <p className="font-serif text-xl text-stone-800 mb-4">청첩장 작업실</p>
-            <div className="flex items-center justify-center gap-6 text-sm">
+            <div className="flex items-center justify-center gap-6 text-sm flex-wrap">
               <a href="/notice" className="text-stone-500 hover:text-stone-800 transition-colors">공지사항</a>
               <a href="/faq" className="text-stone-500 hover:text-stone-800 transition-colors">자주 묻는 질문</a>
               <a href="/terms" className="text-stone-500 hover:text-stone-800 transition-colors">이용약관</a>
@@ -624,6 +693,101 @@ export default function Landing() {
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showEmailLogin && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
+            onClick={() => setShowEmailLogin(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl max-w-sm w-full p-6"
+            >
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="w-6 h-6 text-stone-600" />
+                </div>
+                <h3 className="text-xl font-medium text-stone-800">이메일로 시작하기</h3>
+                <p className="text-sm text-stone-500 mt-1">
+                  {emailStep === 'email' ? '이메일로 인증번호를 보내드려요' : '이메일로 발송된 인증번호를 입력해주세요'}
+                </p>
+              </div>
+
+              {emailStep === 'email' ? (
+                <div className="space-y-4">
+                  <input
+                    type="email"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    placeholder="이메일 주소"
+                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm"
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendCode()}
+                  />
+                  {emailError && <p className="text-sm text-rose-500">{emailError}</p>}
+                  <button
+                    onClick={handleSendCode}
+                    disabled={emailLoading}
+                    className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    인증번호 받기
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <p className="text-sm text-stone-500 mb-2">{emailInput}</p>
+                    <button
+                      onClick={() => { setEmailStep('email'); setCodeInput(''); setEmailError(''); }}
+                      className="text-xs text-stone-400 hover:text-stone-600 underline"
+                    >
+                      다른 이메일로 변경
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={codeInput}
+                    onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="인증번호 6자리"
+                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm text-center text-2xl tracking-[0.5em]"
+                    onKeyPress={(e) => e.key === 'Enter' && handleVerifyCode()}
+                  />
+                  {emailError && <p className="text-sm text-rose-500 text-center">{emailError}</p>}
+                  <button
+                    onClick={handleVerifyCode}
+                    disabled={emailLoading || codeInput.length !== 6}
+                    className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    확인
+                  </button>
+                  <button
+                    onClick={handleSendCode}
+                    disabled={emailLoading}
+                    className="w-full py-2 text-sm text-stone-500 hover:text-stone-700"
+                  >
+                    인증번호 다시 받기
+                  </button>
+                </div>
+              )}
+
+              <button
+                onClick={() => { setShowEmailLogin(false); setEmailStep('email'); setEmailInput(''); setCodeInput(''); setEmailError(''); }}
+                className="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
