@@ -97,3 +97,66 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
 });
 
 export const rsvpRouter = router;
+
+router.post('/verify/:slug', async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const { password } = req.body;
+
+  try {
+    const wedding = await prisma.wedding.findUnique({
+      where: { slug },
+      select: { 
+        id: true, 
+        groomName: true, 
+        brideName: true,
+        groomPhone: true,
+        weddingDate: true,
+      },
+    });
+
+    if (!wedding) {
+      return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
+    }
+
+    const groomPhoneLast4 = wedding.groomPhone?.slice(-4) || '';
+    if (password !== groomPhoneLast4) {
+      return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
+    }
+
+    const rsvps = await prisma.rsvp.findMany({
+      where: { weddingId: wedding.id },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        side: true,
+        attending: true,
+        guestCount: true,
+        mealCount: true,
+        message: true,
+        createdAt: true,
+      },
+    });
+
+    const stats = {
+      total: rsvps.length,
+      attending: rsvps.filter(r => r.attending).length,
+      notAttending: rsvps.filter(r => !r.attending).length,
+      totalGuests: rsvps.filter(r => r.attending).reduce((sum, r) => sum + r.guestCount, 0),
+      totalMeals: rsvps.filter(r => r.attending).reduce((sum, r) => sum + r.mealCount, 0),
+    };
+
+    res.json({ 
+      wedding: {
+        groomName: wedding.groomName,
+        brideName: wedding.brideName,
+        weddingDate: wedding.weddingDate,
+      },
+      rsvps, 
+      stats 
+    });
+  } catch (error) {
+    console.error('RSVP verify error:', error);
+    res.status(500).json({ error: 'RSVP 조회 실패' });
+  }
+});

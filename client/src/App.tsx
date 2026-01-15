@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import CreateWedding from './pages/CreateWedding';
 import EditWedding from './pages/EditWedding';
 import WeddingPage from './pages/wedding/WeddingPage';
+import RsvpCheck from './pages/RsvpCheck';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminWeddingList from './pages/admin/AdminWeddingList';
@@ -62,6 +63,7 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/oauth/callback" element={<OAuthCallback />} />
       <Route path="/w/:slug" element={<WeddingPage />} />
+        <Route path="/w/:slug/rsvp" element={<RsvpCheck />} />
       <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
       <Route path="/admin/login" element={<AdminLogin />} />
       
