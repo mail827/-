@@ -870,6 +870,38 @@ export default function EditWedding() {
                       </div>
                     </label>
                   </div>
+
+                  {/* 세부 스타일 Select */}
+                  <div className="mt-4">
+                    <label className="block text-sm text-stone-600 mb-2">세부 성격 스타일</label>
+                    <select
+                      value={wedding.aiToneStyle || "default"}
+                      onChange={(e) => updateField("aiToneStyle", e.target.value)}
+                      className="w-full px-4 py-3 border border-stone-200 rounded-xl bg-white"
+                    >
+                      {(wedding.aiMode === "classic" || !wedding.aiMode) && (
+                        <>
+                          <option value="default">정석 호텔 지배인 - 품격있고 예의바름</option>
+                          <option value="romantic">감성 시인 - 문학적이고 부드러움</option>
+                          <option value="smart">똑똑한 비서 - 명료하고 또박또박</option>
+                        </>
+                      )}
+                      {wedding.aiMode === "variety" && (
+                        <>
+                          <option value="bestie">10년지기 찐친 - 살짝 선넘는 TMI</option>
+                          <option value="fanclub">주접킹 팬클럽 회장 - 하이텐션 칭찬</option>
+                          <option value="siri">시크한 AI - 무미건조한데 웃김</option>
+                        </>
+                      )}
+                      {wedding.aiMode === "active" && (
+                        <>
+                          <option value="planner">열정적인 웨딩 플래너 - 꼼꼼하게 리드</option>
+                          <option value="sheriff">동네 보안관 - 듬직한 편의 안내</option>
+                          <option value="reporter">라이브 리포터 - 생동감 넘치는 중계</option>
+                        </>
+                      )}
+                    </select>
+                  </div>
                 </Section>
                 <Section title="신랑신부 성격·말투">
                   <p className="text-sm text-stone-500 mb-4">AI가 두 분의 말투를 흉내낼 수 있도록 성격과 말투를 알려주세요</p>
@@ -901,21 +933,21 @@ export default function EditWedding() {
                   <p className="text-sm text-stone-500 mb-4">하객들이 물어보면 AI가 재밌게 풀어줄 비밀 이야기들!</p>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">신랑 술버릇</label>
+                      <label className="block text-sm text-stone-600 mb-2">신랑의 비밀</label>
                       <textarea
-                        value={wedding.aiSecrets?.groomDrinkingHabit || ''}
-                        onChange={(e) => updateAiSecrets('groomDrinkingHabit', e.target.value)}
-                        placeholder="예: 취하면 말이 많아짐"
+                        value={wedding.aiSecrets?.groomSecret || ''}
+                        onChange={(e) => updateAiSecrets('groomSecret', e.target.value)}
+                        placeholder="예: 사실 프로포즈 3번 실패함"
                         rows={2}
                         className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">신부 술버릇</label>
+                      <label className="block text-sm text-stone-600 mb-2">신부의 비밀</label>
                       <textarea
-                        value={wedding.aiSecrets?.brideDrinkingHabit || ''}
-                        onChange={(e) => updateAiSecrets('brideDrinkingHabit', e.target.value)}
-                        placeholder="예: 취하면 잠이 많아짐"
+                        value={wedding.aiSecrets?.brideSecret || ''}
+                        onChange={(e) => updateAiSecrets('brideSecret', e.target.value)}
+                        placeholder="예: 첫만남 때 신랑 별로였음"
                         rows={2}
                         className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
                       />

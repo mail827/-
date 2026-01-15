@@ -81,6 +81,7 @@ export interface Wedding {
   aiEnabled?: boolean;
   aiName?: string;
   aiMode?: string;
+  aiToneStyle?: string;
   aiGroomPersonality?: string;
   aiBridePersonality?: string;
   aiSecrets?: AiSecrets;

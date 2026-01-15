@@ -153,6 +153,7 @@ model Wedding {
   aiCustomQna         Json?
   aiName            String?
   aiMode            String?   @default("classic")
+  aiToneStyle       String?   @default("default")
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
