@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { authRouter } from './routes/auth.js';
+import { emailAuthRouter } from './routes/emailAuth.js';
 import { oauthRouter } from './routes/oauth.js';
 import { weddingRouter } from './routes/wedding.js';
 import { uploadRouter } from './routes/upload.js';
@@ -41,6 +42,7 @@ app.use(express.json({ limit: '50mb' }));
 app.get('/health', (_, res) => res.json({ status: 'ok' }));
 
 app.use('/api/auth', authRouter);
+app.use('/api/email-auth', emailAuthRouter);
 app.use('/api/oauth', oauthRouter);
 app.use('/api/weddings', weddingRouter);
 app.use('/api/upload', uploadRouter);

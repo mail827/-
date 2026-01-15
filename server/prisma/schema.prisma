@@ -235,6 +235,7 @@ model SiteContent {
 }
 
 enum Provider {
+  EMAIL
   KAKAO
   GOOGLE
 }
