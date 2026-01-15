@@ -7,6 +7,7 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 interface Rsvp {
   id: string;
+  phone?: string;
   name: string;
   side: 'GROOM' | 'BRIDE';
   attending: boolean;
@@ -164,7 +165,7 @@ export default function RsvpCheck() {
                     groomRsvps.map((rsvp) => (
                       <div key={rsvp.id} className="px-4 py-3 flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-stone-700">{rsvp.name}</p>
+                          <p className="font-medium text-stone-700">{rsvp.name} {rsvp.phone && <span className="text-stone-400 text-xs ml-1">{rsvp.phone}</span>}</p>
                           {rsvp.message && <p className="text-xs text-stone-400 mt-1">{rsvp.message}</p>}
                         </div>
                         <div className="text-right">
@@ -197,7 +198,7 @@ export default function RsvpCheck() {
                     brideRsvps.map((rsvp) => (
                       <div key={rsvp.id} className="px-4 py-3 flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-stone-700">{rsvp.name}</p>
+                          <p className="font-medium text-stone-700">{rsvp.name} {rsvp.phone && <span className="text-stone-400 text-xs ml-1">{rsvp.phone}</span>}</p>
                           {rsvp.message && <p className="text-xs text-stone-400 mt-1">{rsvp.message}</p>}
                         </div>
                         <div className="text-right">
