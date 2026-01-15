@@ -30,6 +30,7 @@ import GiftSend from "./pages/GiftSend";
 import MyGifts from "./pages/MyGifts";
 import FAQ from './pages/info/FAQ';
 import Notice from './pages/info/Notice';
+import RefundPolicy from './pages/info/RefundPolicy';
 import PaymentSuccess from './pages/PaymentSuccess';
 import AdminLogin from './pages/AdminLogin';
 
@@ -80,6 +81,7 @@ export default function App() {
       <Route path="/gift/send" element={<ProtectedRoute><GiftSend /></ProtectedRoute>} />
       <Route path="/faq" element={<FAQ />} />
       <Route path="/notice" element={<Notice />} />
+      <Route path="/refund-policy" element={<RefundPolicy />} />
       
       <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
         <Route index element={<AdminDashboard />} />

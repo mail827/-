@@ -476,6 +476,7 @@ export default function Landing() {
               <a href="/faq" className="text-stone-500 hover:text-stone-800 transition-colors">자주 묻는 질문</a>
               <a href="/terms" className="text-stone-500 hover:text-stone-800 transition-colors">이용약관</a>
               <a href="/privacy" className="text-stone-500 hover:text-stone-800 transition-colors">개인정보처리방침</a>
+              <a href="/refund-policy" className="text-stone-500 hover:text-stone-800 transition-colors">환불정책</a>
             </div>
           </div>
           <div className="border-t border-stone-200 pt-6">
@@ -486,7 +487,8 @@ export default function Landing() {
                 <p><span className="text-stone-500">사업자등록번호</span> 413-03-96815</p>
               </div>
               <div className="space-y-1">
-                <p><span className="text-stone-500">주소</span> 부산진구 전포대로 224번길 22</p>
+                <p><span className="text-stone-500">주소</span> 부산광역시 부산진구 전포대로 224번길 22</p>
+                <p><span className="text-stone-500">연락처</span> 010-2768-3187</p>
                 <p><span className="text-stone-500">이메일</span> mail@weddingshop.cloud</p>
                 <p><span className="text-stone-500">통신판매업신고</span> 제2026-부산진-0007741호</p>
               </div>
