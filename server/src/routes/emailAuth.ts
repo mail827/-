@@ -87,7 +87,7 @@ router.post('/verify-code', async (req: Request, res: Response) => {
           name: email.split('@')[0],
           provider: 'EMAIL',
           providerId: email,
-          role: 'USER',
+          role: 'CUSTOMER',
         },
       });
     }

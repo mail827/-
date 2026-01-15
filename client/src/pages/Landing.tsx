@@ -516,6 +516,7 @@ export default function Landing() {
               
               <div className="flex flex-col items-center gap-6">
                 
+                <a
                   href="https://www.instagram.com/weddingstudiolab/"
                   target="_blank"
                   rel="noopener noreferrer"
