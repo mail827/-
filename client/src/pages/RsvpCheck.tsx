@@ -70,15 +70,15 @@ export default function RsvpCheck() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8"
         >
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock className="w-8 h-8 text-rose-400" />
+            <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-8 h-8 text-stone-400" />
             </div>
             <h1 className="text-xl font-medium text-stone-800 mb-2">참석 현황 조회</h1>
             <p className="text-stone-500 text-sm">신랑 전화번호 뒷자리 4자리를 입력해주세요</p>
@@ -91,7 +91,7 @@ export default function RsvpCheck() {
             value={password}
             onChange={(e) => setPassword(e.target.value.replace(/\D/g, ''))}
             onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-            className="w-full text-center text-2xl tracking-[1em] py-4 border-2 border-stone-200 rounded-xl focus:border-rose-300 outline-none transition-colors mb-4"
+            className="w-full text-center text-2xl tracking-[1em] py-4 border-2 border-stone-200 rounded-xl focus:border-stone-300 outline-none transition-colors mb-4"
           />
 
           {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
@@ -99,7 +99,7 @@ export default function RsvpCheck() {
           <button
             onClick={handleSubmit}
             disabled={isLoading || password.length !== 4}
-            className="w-full py-4 bg-rose-400 text-white rounded-xl font-medium hover:bg-rose-500 transition-colors disabled:opacity-50"
+            className="w-full py-4 bg-stone-400 text-white rounded-xl font-medium hover:bg-stone-500 transition-colors disabled:opacity-50"
           >
             {isLoading ? '확인 중...' : '조회하기'}
           </button>
@@ -112,11 +112,11 @@ export default function RsvpCheck() {
   const brideRsvps = data.rsvps.filter(r => r.side === 'BRIDE');
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white">
       <div className="max-w-lg mx-auto px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="text-center mb-8">
-            <Heart className="w-8 h-8 text-rose-400 mx-auto mb-2" />
+            <Heart className="w-8 h-8 text-stone-400 mx-auto mb-2" />
             <h1 className="text-xl font-medium text-stone-800">
               {data.wedding.groomName} ♥ {data.wedding.brideName}
             </h1>
@@ -141,8 +141,8 @@ export default function RsvpCheck() {
               <p className="text-xs text-stone-500">참석 인원</p>
             </div>
             <div className="bg-white rounded-xl p-4 text-center shadow-sm">
-              <UserX className="w-6 h-6 text-rose-300 mx-auto mb-2" />
-              <p className="text-2xl font-semibold text-rose-400">{data.stats.notAttending}</p>
+              <UserX className="w-6 h-6 text-stone-300 mx-auto mb-2" />
+              <p className="text-2xl font-semibold text-stone-400">{data.stats.notAttending}</p>
               <p className="text-xs text-stone-500">불참</p>
             </div>
           </div>
@@ -171,7 +171,7 @@ export default function RsvpCheck() {
                           {rsvp.attending ? (
                             <span className="text-emerald-600 text-sm font-medium">{rsvp.guestCount}명 참석</span>
                           ) : (
-                            <span className="text-rose-400 text-sm">불참</span>
+                            <span className="text-stone-400 text-sm">불참</span>
                           )}
                         </div>
                       </div>
@@ -184,10 +184,10 @@ export default function RsvpCheck() {
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               <button
                 onClick={() => setShowBride(!showBride)}
-                className="w-full px-4 py-3 flex items-center justify-between bg-rose-50"
+                className="w-full px-4 py-3 flex items-center justify-between bg-stone-50"
               >
-                <span className="font-medium text-rose-800">신부측 ({brideRsvps.length}명)</span>
-                {showBride ? <ChevronUp className="w-5 h-5 text-rose-400" /> : <ChevronDown className="w-5 h-5 text-rose-400" />}
+                <span className="font-medium text-stone-800">신부측 ({brideRsvps.length}명)</span>
+                {showBride ? <ChevronUp className="w-5 h-5 text-stone-400" /> : <ChevronDown className="w-5 h-5 text-stone-400" />}
               </button>
               {showBride && (
                 <div className="divide-y divide-stone-100">
@@ -204,7 +204,7 @@ export default function RsvpCheck() {
                           {rsvp.attending ? (
                             <span className="text-emerald-600 text-sm font-medium">{rsvp.guestCount}명 참석</span>
                           ) : (
-                            <span className="text-rose-400 text-sm">불참</span>
+                            <span className="text-stone-400 text-sm">불참</span>
                           )}
                         </div>
                       </div>
