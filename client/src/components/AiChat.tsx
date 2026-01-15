@@ -37,6 +37,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
   const inputRef = useRef<HTMLInputElement>(null);
 
   const aiMode = wedding.aiMode || 'classic';
+  const aiToneStyle = wedding.aiToneStyle || 'default';
   const aiName = wedding.aiName || '웨딩 컨시어지';
 
   const placeholders = [
@@ -47,48 +48,80 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
     `뷔페 뭐가 맛있어?`,
   ];
 
-  const getToastMessages = (): Record<string, { section: string; messages: string[] }> => ({
-    gallery: {
-      section: "gallery-section",
-      messages: [
-        `이 사진 고르느라 둘이 싸웠어요 (거짓말)`,
-        `어떤 사진이 제일 맘에 드세요?`,
-        `${brideName}님이 제일 좋아하는 사진도 있어요`,
-      ]
-    },
-    venue: {
-      section: "venue-section",
-      messages: wedding.aiTransportInfo?.parking 
-        ? [`주차: ${wedding.aiTransportInfo.parking}`, `늦지 않게 와주세요, 맛있는 거 준비해뒀어요`]
-        : wedding.aiTransportInfo?.publicTransport
-        ? [`대중교통: ${wedding.aiTransportInfo.publicTransport}`]
-        : [`길 헤매시면 안 돼요, 지도 버튼 눌러보세요`]
-    },
-    account: {
-      section: "account-section",
-      messages: [
-        `마음만 받을게요... 근데 계좌는 여기 있어요`,
-        `부담 갖지 마세요, 진짜로`,
-        `와주시는 것만으로 충분해요 (진심)`,
-      ]
-    },
-    rsvp: {
-      section: "rsvp-section",
-      messages: [
-        `오실 거죠? 밥 준비해야 해서요`,
-        `안 오시면 밥이 남아요...`,
-        `참석 여부만 살짝 알려주세요`,
-      ]
-    },
-    guestbook: {
-      section: "guestbook-section",
-      messages: [
-        `짧아도 괜찮아요, 마음이 중요하니까`,
-        `결혼식 날 몰래 읽어볼게요`,
-        `한 줄이면 충분해요, 평생 간직할게요`,
-      ]
-    },
-  });
+  const getToastMessages = (): Record<string, { section: string; messages: string[] }> => {
+    // 액티브 모드 스타일별 메시지
+    if (aiToneStyle === 'sheriff') {
+      return {
+        gallery: { section: "gallery-section", messages: [
+          `사진 구경 좀 하고 가세요!`,
+          `여기 볼거리가 있어요`,
+        ]},
+        venue: { section: "venue-section", messages: wedding.aiTransportInfo?.parking 
+          ? [`주차장 안내해드릴게요! ${wedding.aiTransportInfo.parking}`]
+          : [`길 잃으면 안 돼요! 지도 확인하세요`]
+        },
+        account: { section: "account-section", messages: [
+          `축의금 계좌는 여기 있어요!`,
+          `부담 갖지 말고 형편대로 하세요`,
+        ]},
+        rsvp: { section: "rsvp-section", messages: [
+          `참석 여부 꼭 알려주세요!`,
+          `밥 준비해야 하니까 미리 알려주세요`,
+        ]},
+        guestbook: { section: "guestbook-section", messages: [
+          `축하 인사 한마디 남기고 가세요!`,
+          `방명록에 이름 좀 적어주세요`,
+        ]},
+      };
+    }
+    if (aiToneStyle === 'reporter') {
+      return {
+        gallery: { section: "gallery-section", messages: [
+          `속보! 갤러리에서 인생샷 발견됐습니다!`,
+          `현장에서 전해드립니다, 사진이 예술입니다!`,
+        ]},
+        venue: { section: "venue-section", messages: wedding.aiTransportInfo?.parking 
+          ? [`긴급 속보! 주차 정보 입수했습니다! ${wedding.aiTransportInfo.parking}`]
+          : [`실시간 교통 정보! 지도 확인하세요!`]
+        },
+        account: { section: "account-section", messages: [
+          `단독 입수! 축의금 계좌 정보입니다!`,
+          `현장 취재 결과, 마음이 제일 중요하답니다!`,
+        ]},
+        rsvp: { section: "rsvp-section", messages: [
+          `긴급 요청! 참석 여부 알려주세요!`,
+          `속보입니다! 밥 수량 파악 중입니다!`,
+        ]},
+        guestbook: { section: "guestbook-section", messages: [
+          `현장 중계! 축하 메시지 접수 중입니다!`,
+          `독점 공개! 방명록 섹션입니다!`,
+        ]},
+      };
+    }
+    // planner (default for active)
+    return {
+      gallery: { section: "gallery-section", messages: [
+        `잠시만요! 사진 한번 구경해보실래요?`,
+        `여기 예쁜 사진들 준비해뒀어요!`,
+      ]},
+      venue: { section: "venue-section", messages: wedding.aiTransportInfo?.parking 
+        ? [`잠깐요! 주차 정보 알려드릴게요! ${wedding.aiTransportInfo.parking}`]
+        : [`여기요! 오시는 길 헤매시면 안 돼요!`]
+      },
+      account: { section: "account-section", messages: [
+        `축의금 계좌 안내해드릴게요!`,
+        `마음만 받을게요, 근데 계좌는 여기요!`,
+      ]},
+      rsvp: { section: "rsvp-section", messages: [
+        `잠시만요! 참석 여부 좀 알려주세요!`,
+        `밥 준비해야 해서요, 꼭 체크해주세요!`,
+      ]},
+      guestbook: { section: "guestbook-section", messages: [
+        `여기요! 축하 한마디 남겨주실래요?`,
+        `짧아도 괜찮아요, 평생 간직할게요!`,
+      ]},
+    };
+  };
 
   const visitorId = useRef(
     localStorage.getItem(`visitor_${slug}`) || 
