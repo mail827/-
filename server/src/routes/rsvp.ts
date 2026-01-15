@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middleware/auth.js';
+import { sendRsvpNotification } from '../utils/solapi.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -40,6 +41,46 @@ router.post('/', async (req: Request, res: Response) => {
         message,
       },
     });
+
+    const wedding = await prisma.wedding.findUnique({
+      where: { id: weddingId },
+      select: { 
+        groomName: true, 
+        brideName: true, 
+        groomPhone: true,
+        bridePhone: true,
+        slug: true,
+        notificationEnabled: true,
+      },
+    });
+
+    if (wedding?.notificationEnabled) {
+      const weddingUrl = `https://weddingshop.cloud/w/${wedding.slug}`;
+      
+      if (wedding.groomPhone) {
+        sendRsvpNotification({
+          to: wedding.groomPhone,
+          groomName: wedding.groomName,
+          brideName: wedding.brideName,
+          guestName: name,
+          attending,
+          guestCount: guestCount || 1,
+          weddingUrl,
+        });
+      }
+      
+      if (wedding.bridePhone && wedding.bridePhone !== wedding.groomPhone) {
+        sendRsvpNotification({
+          to: wedding.bridePhone,
+          groomName: wedding.groomName,
+          brideName: wedding.brideName,
+          guestName: name,
+          attending,
+          guestCount: guestCount || 1,
+          weddingUrl,
+        });
+      }
+    }
     
     res.status(201).json(rsvp);
   } catch (error) {

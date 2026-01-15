@@ -93,6 +93,7 @@ model Wedding {
   brideName       String
   brideNameEn     String?
   bridePhone      String?
+  notificationEnabled Boolean @default(true)
   brideFatherName String?
   brideMotherName String?
   brideFatherPhone String?
