@@ -40,3 +40,100 @@ export async function sendRsvpNotification(data: RsvpNotificationData) {
     return null;
   }
 }
+
+interface SummaryNotificationData {
+  to: string;
+  groomName: string;
+  brideName: string;
+  totalGuests: number;
+  attending: number;
+  notAttending: number;
+  totalPersons: number;
+}
+
+export async function sendSummaryNotification(data: SummaryNotificationData) {
+  try {
+    const message = `[${data.groomName}♥${data.brideName} 청첩장]
+📊 RSVP 현황 알림
+
+총 응답: ${data.totalGuests}명
+✅ 참석: ${data.attending}명 (총 ${data.totalPersons}인)
+❌ 불참: ${data.notAttending}명
+
+from. 청첩장 작업실`;
+
+    const result = await messageService.send({
+      to: data.to,
+      from: process.env.SOLAPI_SENDER_NUMBER!,
+      text: message,
+    });
+    console.log('현황 알림 발송 성공:', result);
+    return result;
+  } catch (error) {
+    console.error('현황 알림 발송 실패:', error);
+    return null;
+  }
+}
+
+interface ReminderNotificationData {
+  to: string;
+  groomName: string;
+  brideName: string;
+  dDay: number;
+  weddingDate: string;
+  weddingUrl: string;
+}
+
+export async function sendReminderNotification(data: ReminderNotificationData) {
+  try {
+    const dDayText = data.dDay === 0 ? 'D-Day' : data.dDay > 0 ? `D-${data.dDay}` : `D+${Math.abs(data.dDay)}`;
+    const message = `[${data.groomName}♥${data.brideName} 청첩장]
+💒 결혼식 ${dDayText}
+
+📅 ${data.weddingDate}
+
+💌 청첩장 보기
+${data.weddingUrl}
+
+from. 청첩장 작업실`;
+
+    const result = await messageService.send({
+      to: data.to,
+      from: process.env.SOLAPI_SENDER_NUMBER!,
+      text: message,
+    });
+    console.log('리마인더 발송 성공:', result);
+    return result;
+  } catch (error) {
+    console.error('리마인더 발송 실패:', error);
+    return null;
+  }
+}
+
+interface CustomNotificationData {
+  to: string;
+  groomName: string;
+  brideName: string;
+  message: string;
+}
+
+export async function sendCustomNotification(data: CustomNotificationData) {
+  try {
+    const message = `[${data.groomName}♥${data.brideName} 청첩장]
+
+${data.message}
+
+from. 청첩장 작업실`;
+
+    const result = await messageService.send({
+      to: data.to,
+      from: process.env.SOLAPI_SENDER_NUMBER!,
+      text: message,
+    });
+    console.log('커스텀 알림 발송 성공:', result);
+    return result;
+  } catch (error) {
+    console.error('커스텀 알림 발송 실패:', error);
+    return null;
+  }
+}
