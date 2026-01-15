@@ -71,8 +71,8 @@ export interface GuestbookData {
 
 export interface RsvpData {
   name: string;
-  contact: string;
-  attendance: boolean;
+  phone: string;
+  attending: boolean;
   guestCount: number;
   message?: string;
 }

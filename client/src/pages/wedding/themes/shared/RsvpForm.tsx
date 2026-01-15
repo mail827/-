@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 interface RsvpFormProps {
   weddingId: string;
-  onSubmit: (data: { weddingId: string; name: string; contact: string; attendance: boolean; guestCount: number; message?: string }) => Promise<void>;
+  onSubmit: (data: { weddingId: string; name: string; phone: string; attending: boolean; guestCount: number; message?: string }) => Promise<void>;
   isLoading: boolean;
   variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean';
 }
@@ -18,7 +18,7 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
 
   const handleSubmit = async () => {
     if (!name || !contact || attendance === null) return;
-    await onSubmit({ weddingId: _weddingId, name, contact, attendance, guestCount, message });
+    await onSubmit({ weddingId: _weddingId, name, phone: contact, attending: attendance, guestCount, message });
     setSubmitted(true);
   };
 

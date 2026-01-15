@@ -33,7 +33,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
 
   const handleRsvpSubmit = async () => {
     if (!rsvpData.name || !rsvpData.contact) return;
-    await onRsvpSubmit(rsvpData);
+    await onRsvpSubmit({ name: rsvpData.name, phone: rsvpData.contact, attending: rsvpData.attendance, guestCount: rsvpData.guestCount });
     setRsvpSubmitted(true);
   };
 

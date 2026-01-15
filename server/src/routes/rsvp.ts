@@ -14,7 +14,7 @@ router.post('/verify/:slug', async (req: Request, res: Response) => {
     const wedding = await prisma.wedding.findUnique({
       where: { slug },
       select: { 
-        id: true, 
+        id: true,
         groomName: true, 
         brideName: true,
         groomPhone: true,
@@ -36,6 +36,7 @@ router.post('/verify/:slug', async (req: Request, res: Response) => {
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
+        phone: true,
         name: true,
         side: true,
         attending: true,
