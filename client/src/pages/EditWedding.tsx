@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Eye, X, Plus, Music, Film, Image, Sparkles } from 'lucide-react';
+import AiWritingAssistant from '../components/AiWritingAssistant';
 
 const THEMES = [
   { id: 'ROMANTIC_CLASSIC', name: '로맨틱 클래식' },
@@ -915,6 +916,11 @@ export default function EditWedding() {
                         rows={3}
                         className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
                       />
+                      <AiWritingAssistant
+                        fieldType="groomPersonality"
+                        context={{ groomName: wedding.groomName }}
+                        onSelect={(value) => updateField('aiGroomPersonality', value)}
+                      />
                     </div>
                     <div>
                       <label className="block text-sm text-stone-600 mb-2">신부 {wedding.brideName}의 말투</label>
@@ -924,6 +930,11 @@ export default function EditWedding() {
                         placeholder="예: 다정하고 따뜻한 성격"
                         rows={3}
                         className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                      />
+                      <AiWritingAssistant
+                        fieldType="bridePersonality"
+                        context={{ brideName: wedding.brideName }}
+                        onSelect={(value) => updateField('aiBridePersonality', value)}
                       />
                     </div>
                   </div>
