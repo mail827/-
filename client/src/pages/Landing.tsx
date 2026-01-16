@@ -26,7 +26,9 @@ export default function Landing() {
   const [reviewIndex, setReviewIndex] = useState(0);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [showEmailLogin, setShowEmailLogin] = useState(false);
-  const [emailStep, setEmailStep] = useState<'email' | 'code'>('email');
+  const [emailStep, setEmailStep] = useState<'email' | 'code' | 'password' | 'setPassword'>('email');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [_isNewUser, setIsNewUser] = useState(false);
   const [emailInput, setEmailInput] = useState('');
   const [codeInput, setCodeInput] = useState('');
   const [emailLoading, setEmailLoading] = useState(false);
@@ -136,57 +138,53 @@ export default function Landing() {
     window.location.href = `${import.meta.env.VITE_API_URL}/oauth/${provider}`;
   };
 
-  const handleSendCode = async () => {
-    if (!emailInput || !emailInput.includes('@')) {
-      setEmailError('유효한 이메일을 입력해주세요');
-      return;
-    }
-    setEmailLoading(true);
-    setEmailError('');
+  const handleCheckEmail = async () => {
+    if (!emailInput || !emailInput.includes('@')) { setEmailError('유효한 이메일을 입력해주세요'); return; }
+    setEmailLoading(true); setEmailError('');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/send-code`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailInput }),
-      });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/check-email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput }) });
       const data = await res.json();
-      if (res.ok) {
-        setEmailStep('code');
-      } else {
-        setEmailError(data.error || '발송에 실패했습니다');
-      }
-    } catch {
-      setEmailError('네트워크 오류가 발생했습니다');
-    } finally {
-      setEmailLoading(false);
-    }
+      if (data.exists && data.hasPassword) { setIsNewUser(false); setEmailStep('password'); }
+      else { setIsNewUser(true); await handleSendCode(); }
+    } catch { setEmailError('네트워크 오류가 발생했습니다'); } finally { setEmailLoading(false); }
+  };
+
+  const handleSendCode = async () => {
+    setEmailLoading(true); setEmailError('');
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/send-code`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput }) });
+      if (res.ok) { setEmailStep('code'); } else { const data = await res.json(); setEmailError(data.error || '발송 실패'); }
+    } catch { setEmailError('네트워크 오류'); } finally { setEmailLoading(false); }
   };
 
   const handleVerifyCode = async () => {
-    if (codeInput.length !== 6) {
-      setEmailError('6자리 인증번호를 입력해주세요');
-      return;
-    }
-    setEmailLoading(true);
-    setEmailError('');
+    if (codeInput.length !== 6) { setEmailError('6자리 인증번호를 입력해주세요'); return; }
+    setEmailLoading(true); setEmailError('');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/verify-code`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailInput, code: codeInput }),
-      });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/verify-code`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput, code: codeInput }) });
       const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem('token', data.token);
-        window.location.href = '/dashboard';
-      } else {
-        setEmailError(data.error || '인증에 실패했습니다');
-      }
-    } catch {
-      setEmailError('네트워크 오류가 발생했습니다');
-    } finally {
-      setEmailLoading(false);
-    }
+      if (res.ok && data.verified) { setEmailStep('setPassword'); } else { setEmailError(data.error || '인증 실패'); }
+    } catch { setEmailError('네트워크 오류'); } finally { setEmailLoading(false); }
+  };
+
+  const handleEmailLogin = async () => {
+    if (!passwordInput) { setEmailError('비밀번호를 입력해주세요'); return; }
+    setEmailLoading(true); setEmailError('');
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput, password: passwordInput }) });
+      const data = await res.json();
+      if (res.ok) { localStorage.setItem('token', data.token); window.location.href = '/dashboard'; } else { setEmailError(data.error || '로그인 실패'); }
+    } catch { setEmailError('네트워크 오류'); } finally { setEmailLoading(false); }
+  };
+
+  const handleRegister = async () => {
+    if (!passwordInput || passwordInput.length < 6) { setEmailError('비밀번호는 6자 이상이어야 합니다'); return; }
+    setEmailLoading(true); setEmailError('');
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput, password: passwordInput }) });
+      const data = await res.json();
+      if (res.ok) { localStorage.setItem('token', data.token); window.location.href = '/dashboard'; } else { setEmailError(data.error || '회원가입 실패'); }
+    } catch { setEmailError('네트워크 오류'); } finally { setEmailLoading(false); }
   };
 
   const scrollToSection = (id: string) => {
@@ -697,101 +695,64 @@ export default function Landing() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {showEmailLogin && (
+
+      {showEmailLogin && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
+          onClick={() => setShowEmailLogin(false)}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
-            onClick={() => setShowEmailLogin(false)}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl max-w-sm w-full p-6 relative"
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl max-w-sm w-full p-6"
-            >
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Mail className="w-6 h-6 text-stone-600" />
-                </div>
-                <h3 className="text-xl font-medium text-stone-800">이메일로 시작하기</h3>
-                <p className="text-sm text-stone-500 mt-1">
-                  {emailStep === 'email' ? '이메일로 인증번호를 보내드려요' : '이메일로 발송된 인증번호를 입력해주세요'}
-                </p>
+            <button onClick={() => { setShowEmailLogin(false); setEmailStep('email'); setEmailInput(''); setCodeInput(''); setPasswordInput(''); setEmailError(''); }} className="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-600"><X className="w-5 h-5" /></button>
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4"><Mail className="w-6 h-6 text-stone-600" /></div>
+              <h3 className="text-xl font-medium text-stone-800">{emailStep === 'setPassword' ? '비밀번호 설정' : emailStep === 'password' ? '로그인' : '이메일로 시작하기'}</h3>
+              <p className="text-sm text-stone-500 mt-1">{emailStep === 'email' ? '이메일을 입력해주세요' : emailStep === 'code' ? '인증번호를 입력해주세요' : emailStep === 'password' ? '비밀번호를 입력해주세요' : '사용할 비밀번호를 설정해주세요'}</p>
+            </div>
+            {emailStep === 'email' && (
+              <div className="space-y-4">
+                <input type="email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} placeholder="이메일 주소" className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm" onKeyPress={(e) => e.key === 'Enter' && handleCheckEmail()} />
+                {emailError && <p className="text-sm text-rose-500">{emailError}</p>}
+                <button onClick={handleCheckEmail} disabled={emailLoading} className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2">{emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}계속하기</button>
               </div>
-
-              {emailStep === 'email' ? (
-                <div className="space-y-4">
-                  <input
-                    type="email"
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder="이메일 주소"
-                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm"
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendCode()}
-                  />
-                  {emailError && <p className="text-sm text-rose-500">{emailError}</p>}
-                  <button
-                    onClick={handleSendCode}
-                    disabled={emailLoading}
-                    className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                    인증번호 받기
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <p className="text-sm text-stone-500 mb-2">{emailInput}</p>
-                    <button
-                      onClick={() => { setEmailStep('email'); setCodeInput(''); setEmailError(''); }}
-                      className="text-xs text-stone-400 hover:text-stone-600 underline"
-                    >
-                      다른 이메일로 변경
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    value={codeInput}
-                    onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    placeholder="인증번호 6자리"
-                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm text-center text-2xl tracking-[0.5em]"
-                    onKeyPress={(e) => e.key === 'Enter' && handleVerifyCode()}
-                  />
-                  {emailError && <p className="text-sm text-rose-500 text-center">{emailError}</p>}
-                  <button
-                    onClick={handleVerifyCode}
-                    disabled={emailLoading || codeInput.length !== 6}
-                    className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                    확인
-                  </button>
-                  <button
-                    onClick={handleSendCode}
-                    disabled={emailLoading}
-                    className="w-full py-2 text-sm text-stone-500 hover:text-stone-700"
-                  >
-                    인증번호 다시 받기
-                  </button>
-                </div>
-              )}
-
-              <button
-                onClick={() => { setShowEmailLogin(false); setEmailStep('email'); setEmailInput(''); setCodeInput(''); setEmailError(''); }}
-                className="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </motion.div>
+            )}
+            {emailStep === 'password' && (
+              <div className="space-y-4">
+                <p className="text-sm text-stone-500 text-center mb-2">{emailInput}</p>
+                <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="비밀번호" className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm" onKeyPress={(e) => e.key === 'Enter' && handleEmailLogin()} />
+                {emailError && <p className="text-sm text-rose-500">{emailError}</p>}
+                <button onClick={handleEmailLogin} disabled={emailLoading} className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2">{emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}로그인</button>
+                <button onClick={() => { setEmailStep('email'); setPasswordInput(''); setEmailError(''); }} className="w-full py-2 text-sm text-stone-500 hover:text-stone-700">다른 이메일로 변경</button>
+              </div>
+            )}
+            {emailStep === 'code' && (
+              <div className="space-y-4">
+                <p className="text-sm text-stone-500 text-center mb-2">{emailInput}</p>
+                <input type="text" value={codeInput} onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="인증번호 6자리" className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm text-center text-2xl tracking-[0.5em]" onKeyPress={(e) => e.key === 'Enter' && handleVerifyCode()} />
+                {emailError && <p className="text-sm text-rose-500 text-center">{emailError}</p>}
+                <button onClick={handleVerifyCode} disabled={emailLoading || codeInput.length !== 6} className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2">{emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}확인</button>
+                <button onClick={handleSendCode} disabled={emailLoading} className="w-full py-2 text-sm text-stone-500 hover:text-stone-700">인증번호 다시 받기</button>
+              </div>
+            )}
+            {emailStep === 'setPassword' && (
+              <div className="space-y-4">
+                <p className="text-sm text-stone-500 text-center mb-2">{emailInput}</p>
+                <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="비밀번호 (6자 이상)" className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm" onKeyPress={(e) => e.key === 'Enter' && handleRegister()} />
+                {emailError && <p className="text-sm text-rose-500">{emailError}</p>}
+                <button onClick={handleRegister} disabled={emailLoading || passwordInput.length < 6} className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2">{emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}회원가입 완료</button>
+              </div>
+            )}
           </motion.div>
-        )}
-      </AnimatePresence>
-
+        </motion.div>
+      )}
       {showInquiryForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
           <motion.div 

@@ -5,6 +5,17 @@ import { authMiddleware } from '../middleware/auth.js';
 const router = Router();
 const prisma = new PrismaClient();
 
+router.get('/wedding/:id', authMiddleware, async (req: Request, res: Response) => {
+  const { id } = req.params;
+  
+  const guestbooks = await prisma.guestbook.findMany({
+    where: { weddingId: id },
+    orderBy: { createdAt: 'desc' },
+  });
+  
+  res.json({ guestbooks });
+});
+
 router.get('/:weddingId', async (req: Request, res: Response) => {
   const { weddingId } = req.params;
   

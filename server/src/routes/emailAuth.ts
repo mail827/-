@@ -2,57 +2,42 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import bcrypt from 'bcryptjs';
 
 const router = Router();
 const prisma = new PrismaClient();
-
 const verificationCodes = new Map<string, { code: string; expiresAt: Date }>();
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
+  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
+});
+
+router.post('/check-email', async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email || !email.includes('@')) return res.status(400).json({ error: '유효한 이메일을 입력해주세요' });
+    const user = await prisma.user.findFirst({ where: { email, provider: 'EMAIL' } });
+    res.json({ exists: !!user, hasPassword: !!(user?.password) });
+  } catch (error) {
+    res.status(500).json({ error: '확인에 실패했습니다' });
+  }
 });
 
 router.post('/send-code', async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
-    
-    if (!email || !email.includes('@')) {
-      return res.status(400).json({ error: '유효한 이메일을 입력해주세요' });
-    }
-
+    if (!email || !email.includes('@')) return res.status(400).json({ error: '유효한 이메일을 입력해주세요' });
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-
-    verificationCodes.set(email, { code, expiresAt });
-
+    verificationCodes.set(email, { code, expiresAt: new Date(Date.now() + 10 * 60 * 1000) });
     await transporter.sendMail({
       from: `"청첩장 작업실" <${process.env.GMAIL_USER}>`,
       to: email,
-      subject: '[청첩장 작업실] 로그인 인증번호',
-      html: `
-        <div style="max-width: 400px; margin: 0 auto; padding: 40px 20px; font-family: -apple-system, sans-serif;">
-          <h2 style="color: #1c1917; margin-bottom: 24px; font-size: 20px;">청첩장 작업실 로그인</h2>
-          <p style="color: #57534e; margin-bottom: 32px; line-height: 1.6;">
-            아래 인증번호를 입력해주세요.<br/>
-            인증번호는 10분간 유효합니다.
-          </p>
-          <div style="background: #f5f5f4; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 32px;">
-            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1c1917;">${code}</span>
-          </div>
-          <p style="color: #a8a29e; font-size: 12px;">
-            본인이 요청하지 않았다면 이 메일을 무시해주세요.
-          </p>
-        </div>
-      `,
+      subject: '[청첩장 작업실] 인증번호',
+      html: `<div style="max-width:400px;margin:0 auto;padding:40px 20px;font-family:-apple-system,sans-serif;"><h2 style="color:#1c1917;margin-bottom:24px;font-size:20px;">청첩장 작업실</h2><p style="color:#57534e;margin-bottom:32px;">인증번호는 10분간 유효합니다.</p><div style="background:#f5f5f4;border-radius:12px;padding:24px;text-align:center;"><span style="font-size:32px;font-weight:bold;letter-spacing:8px;color:#1c1917;">${code}</span></div></div>`,
     });
-
-    res.json({ success: true, message: '인증번호가 발송되었습니다' });
+    res.json({ success: true });
   } catch (error) {
-    console.error('Send code error:', error);
     res.status(500).json({ error: '인증번호 발송에 실패했습니다' });
   }
 });
@@ -60,48 +45,49 @@ router.post('/send-code', async (req: Request, res: Response) => {
 router.post('/verify-code', async (req: Request, res: Response) => {
   try {
     const { email, code } = req.body;
-
     const stored = verificationCodes.get(email);
-    
-    if (!stored) {
-      return res.status(400).json({ error: '인증번호를 먼저 요청해주세요' });
-    }
-
-    if (new Date() > stored.expiresAt) {
-      verificationCodes.delete(email);
-      return res.status(400).json({ error: '인증번호가 만료되었습니다' });
-    }
-
-    if (stored.code !== code) {
-      return res.status(400).json({ error: '인증번호가 일치하지 않습니다' });
-    }
-
+    if (!stored) return res.status(400).json({ error: '인증번호를 먼저 요청해주세요' });
+    if (new Date() > stored.expiresAt) { verificationCodes.delete(email); return res.status(400).json({ error: '인증번호가 만료되었습니다' }); }
+    if (stored.code !== code) return res.status(400).json({ error: '인증번호가 일치하지 않습니다' });
     verificationCodes.delete(email);
+    res.json({ verified: true });
+  } catch (error) {
+    res.status(500).json({ error: '인증에 실패했습니다' });
+  }
+});
 
-    let user = await prisma.user.findFirst({ where: { email } });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email,
-          name: email.split('@')[0],
-          provider: 'EMAIL',
-          providerId: email,
-          role: 'CUSTOMER',
-        },
-      });
+router.post('/register', async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: '이메일과 비밀번호를 입력해주세요' });
+    if (password.length < 6) return res.status(400).json({ error: '비밀번호는 6자 이상이어야 합니다' });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    let user = await prisma.user.findFirst({ where: { email, provider: 'EMAIL' } });
+    if (user) {
+      if (user.password) return res.status(400).json({ error: '이미 가입된 이메일입니다' });
+      user = await prisma.user.update({ where: { id: user.id }, data: { password: hashedPassword } });
+    } else {
+      user = await prisma.user.create({ data: { email, name: email.split('@')[0], provider: 'EMAIL', providerId: email, password: hashedPassword, role: 'CUSTOMER' } });
     }
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email, name: user.name, role: user.role },
-      process.env.JWT_SECRET!,
-      { expiresIn: '7d' }
-    );
-
+    const token = jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role }, process.env.JWT_SECRET!, { expiresIn: '7d' });
     res.json({ token, user });
   } catch (error) {
-    console.error('Verify code error:', error);
-    res.status(500).json({ error: '인증에 실패했습니다' });
+    res.status(500).json({ error: '회원가입에 실패했습니다' });
+  }
+});
+
+router.post('/login', async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: '이메일과 비밀번호를 입력해주세요' });
+    const user = await prisma.user.findFirst({ where: { email, provider: 'EMAIL' } });
+    if (!user || !user.password) return res.status(401).json({ error: '이메일 또는 비밀번호가 올바르지 않습니다' });
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(401).json({ error: '이메일 또는 비밀번호가 올바르지 않습니다' });
+    const token = jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role }, process.env.JWT_SECRET!, { expiresIn: '7d' });
+    res.json({ token, user });
+  } catch (error) {
+    res.status(500).json({ error: '로그인에 실패했습니다' });
   }
 });
 

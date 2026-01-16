@@ -70,6 +70,17 @@ router.post('/verify/:slug', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/wedding/:id', authMiddleware, async (req: Request, res: Response) => {
+  const { id } = req.params;
+  
+  const rsvps = await prisma.rsvp.findMany({
+    where: { weddingId: id },
+    orderBy: { createdAt: 'desc' },
+  });
+  
+  res.json({ rsvps });
+});
+
 router.get('/:weddingId', authMiddleware, async (req: Request, res: Response) => {
   const { weddingId } = req.params;
   
