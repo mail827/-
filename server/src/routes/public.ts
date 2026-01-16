@@ -115,7 +115,17 @@ router.get('/reviews', async (req, res) => {
       where: { isPublic: true },
       include: { 
         wedding: { 
-          select: { groomName: true, brideName: true } 
+          select: { 
+            groomName: true, 
+            brideName: true,
+            order: {
+              select: {
+                package: {
+                  select: { name: true }
+                }
+              }
+            }
+          } 
         } 
       },
       orderBy: { createdAt: 'desc' },
@@ -129,6 +139,7 @@ router.get('/reviews', async (req, res) => {
       source: r.source,
       groomName: r.wedding.groomName,
       brideName: r.wedding.brideName,
+      packageName: r.wedding.order?.package?.name || null,
       createdAt: r.createdAt
     })));
   } catch (error) {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, MessageSquare, Clock, CheckCircle, XCircle, User, Mail, Calendar, Gift, ChevronRight } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Clock, CheckCircle, XCircle, User, Mail, Calendar, Gift, ChevronRight, Star, Pencil } from 'lucide-react';
 
 interface Inquiry {
   id: string;
@@ -21,12 +21,28 @@ interface UserInfo {
   createdAt: string;
 }
 
+interface WeddingReview {
+  id: string;
+  groomName: string;
+  brideName: string;
+  weddingDate: string;
+  packageName: string | null;
+  canReview: boolean;
+  hasReview: boolean;
+  review: { id: string; rating: number; content: string } | null;
+}
+
 export default function MyPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserInfo | null>(null);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [weddings, setWeddings] = useState<WeddingReview[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'inquiries'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'inquiries' | 'reviews'>('profile');
+  
+  const [reviewModal, setReviewModal] = useState<{ open: boolean; wedding: WeddingReview | null }>({ open: false, wedding: null });
+  const [reviewForm, setReviewForm] = useState({ rating: 5, content: '' });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -40,11 +56,14 @@ export default function MyPage() {
     }
 
     try {
-      const [userRes, inquiriesRes] = await Promise.all([
+      const [userRes, inquiriesRes, weddingsRes] = await Promise.all([
         fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${import.meta.env.VITE_API_URL}/auth/user/inquiries`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${import.meta.env.VITE_API_URL}/auth/user/weddings`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -58,10 +77,54 @@ export default function MyPage() {
         const inquiriesData = await inquiriesRes.json();
         setInquiries(inquiriesData);
       }
+
+      if (weddingsRes.ok) {
+        const weddingsData = await weddingsRes.json();
+        setWeddings(weddingsData);
+      }
     } catch (e) {
       console.error('Failed to fetch data:', e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openReviewModal = (wedding: WeddingReview) => {
+    setReviewForm({
+      rating: wedding.review?.rating || 5,
+      content: wedding.review?.content || ''
+    });
+    setReviewModal({ open: true, wedding });
+  };
+
+  const submitReview = async () => {
+    if (!reviewModal.wedding) return;
+    
+    setSubmitting(true);
+    const token = localStorage.getItem('token');
+    
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/review`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          weddingId: reviewModal.wedding.id,
+          rating: reviewForm.rating,
+          content: reviewForm.content
+        }),
+      });
+      
+      if (res.ok) {
+        setReviewModal({ open: false, wedding: null });
+        fetchData();
+      }
+    } catch (e) {
+      console.error('Failed to submit review:', e);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -113,7 +176,15 @@ export default function MyPage() {
               activeTab === 'inquiries' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600'
             }`}
           >
-            문의 내역 {inquiries.length > 0 && `(${inquiries.length})`}
+            문의 {inquiries.length > 0 && `(${inquiries.length})`}
+          </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
+              activeTab === 'reviews' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600'
+            }`}
+          >
+            리뷰
           </button>
         </div>
 
@@ -205,7 +276,115 @@ export default function MyPage() {
             )}
           </div>
         )}
+
+        {activeTab === 'reviews' && (
+          <div className="space-y-4">
+            {weddings.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center">
+                <Star className="w-12 h-12 text-stone-300 mx-auto mb-3" />
+                <p className="text-stone-500">아직 청첩장이 없습니다</p>
+                <p className="text-sm text-stone-400 mt-1">청첩장을 만들고 결혼식 후 리뷰를 남겨주세요!</p>
+              </div>
+            ) : (
+              weddings.map((wedding) => (
+                <div key={wedding.id} className="bg-white rounded-2xl border border-stone-200 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="font-medium text-stone-800">{wedding.groomName} ♥ {wedding.brideName}</h3>
+                      <p className="text-sm text-stone-500">{new Date(wedding.weddingDate).toLocaleDateString('ko-KR')}</p>
+                    </div>
+                    {wedding.packageName && (
+                      <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-full">
+                        {wedding.packageName}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {wedding.hasReview && wedding.review ? (
+                    <div className="bg-stone-50 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-4 h-4 ${i < wedding.review!.rating ? 'text-yellow-400 fill-yellow-400' : 'text-stone-200'}`} />
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => openReviewModal(wedding)}
+                          className="text-xs text-stone-500 hover:text-stone-700 flex items-center gap-1"
+                        >
+                          <Pencil className="w-3 h-3" />
+                          수정
+                        </button>
+                      </div>
+                      <p className="text-stone-600 text-sm">{wedding.review.content}</p>
+                    </div>
+                  ) : wedding.canReview ? (
+                    <button
+                      onClick={() => openReviewModal(wedding)}
+                      className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-700 transition-colors"
+                    >
+                      리뷰 작성하기
+                    </button>
+                  ) : (
+                    <div className="text-center py-3 bg-stone-50 rounded-xl">
+                      <p className="text-sm text-stone-400">결혼식 후 리뷰를 작성할 수 있어요</p>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </main>
+
+      {reviewModal.open && reviewModal.wedding && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6">
+            <h3 className="text-lg font-bold text-stone-800 mb-1">리뷰 작성</h3>
+            <p className="text-sm text-stone-500 mb-6">{reviewModal.wedding.groomName} ♥ {reviewModal.wedding.brideName}</p>
+            
+            <div className="mb-6">
+              <p className="text-sm text-stone-600 mb-3">서비스는 어떠셨나요?</p>
+              <div className="flex justify-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setReviewForm(f => ({ ...f, rating: star }))}
+                    className="p-1"
+                  >
+                    <Star className={`w-8 h-8 transition-colors ${star <= reviewForm.rating ? 'text-yellow-400 fill-yellow-400' : 'text-stone-200'}`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <textarea
+                value={reviewForm.content}
+                onChange={(e) => setReviewForm(f => ({ ...f, content: e.target.value }))}
+                placeholder="청첩장 작업실 이용 경험을 들려주세요!"
+                className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none h-32 focus:outline-none focus:ring-2 focus:ring-stone-300"
+              />
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setReviewModal({ open: false, wedding: null })}
+                className="flex-1 py-3 border border-stone-200 rounded-xl font-medium text-stone-600 hover:bg-stone-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={submitReview}
+                disabled={submitting}
+                className="flex-1 py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-700 disabled:opacity-50"
+              >
+                {submitting ? '저장 중...' : '저장'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

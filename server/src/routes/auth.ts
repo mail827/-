@@ -72,3 +72,90 @@ router.get('/user/inquiries', authMiddleware, async (req: Request, res: Response
   
   res.json(inquiries);
 });
+
+router.get('/user/weddings', authMiddleware, async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  
+  try {
+    const weddings = await prisma.wedding.findMany({
+      where: { userId: user.id },
+      include: {
+        order: {
+          include: {
+            package: { select: { name: true } }
+          }
+        },
+        reviews: {
+          where: { userId: user.id },
+          take: 1
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    res.json(weddings.map(w => ({
+      id: w.id,
+      groomName: w.groomName,
+      brideName: w.brideName,
+      weddingDate: w.weddingDate,
+      packageName: w.order?.package?.name || null,
+      canReview: new Date(w.weddingDate) < new Date(),
+      hasReview: w.reviews.length > 0,
+      review: w.reviews[0] || null
+    })));
+  } catch (error) {
+    console.error('Get user weddings error:', error);
+    res.status(500).json({ error: '청첩장 목록 조회 실패' });
+  }
+});
+
+router.post('/user/review', authMiddleware, async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  const { weddingId, rating, content } = req.body;
+  
+  if (!weddingId || !rating) {
+    return res.status(400).json({ error: '필수 항목을 입력해주세요' });
+  }
+  
+  try {
+    const wedding = await prisma.wedding.findFirst({
+      where: { id: weddingId, userId: user.id }
+    });
+    
+    if (!wedding) {
+      return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
+    }
+    
+    if (new Date(wedding.weddingDate) > new Date()) {
+      return res.status(400).json({ error: '결혼식 이후에 리뷰를 작성할 수 있습니다' });
+    }
+    
+    const existing = await prisma.review.findFirst({
+      where: { weddingId, userId: user.id }
+    });
+    
+    if (existing) {
+      const updated = await prisma.review.update({
+        where: { id: existing.id },
+        data: { rating, content, isPublic: true }
+      });
+      return res.json(updated);
+    }
+    
+    const review = await prisma.review.create({
+      data: {
+        weddingId,
+        userId: user.id,
+        rating,
+        content,
+        source: 'PURCHASE',
+        isPublic: true
+      }
+    });
+    
+    res.status(201).json(review);
+  } catch (error) {
+    console.error('Create review error:', error);
+    res.status(500).json({ error: '리뷰 작성 실패' });
+  }
+});

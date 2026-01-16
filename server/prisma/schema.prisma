@@ -24,6 +24,7 @@ model User {
   chatLogs      ChatLog[]
   giftsSent     Gift[]    @relation("GiftsSent")
   giftsReceived Gift[]    @relation("GiftsReceived")
+  reviews       Review[]
 
   @@unique([provider, providerId])
 }
@@ -235,6 +236,45 @@ model SiteContent {
   updatedAt DateTime @updatedAt
 }
 
+model ReportToken {
+  id          String   @id @default(cuid())
+  weddingId   String
+  wedding     Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  token       String   @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  weddingId String
+  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  rating    Int
+  content   String?
+  source    String   @default("GENERAL")
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Gift {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  packageId   String
+  package     Package   @relation(fields: [packageId], references: [id])
+  fromUserId  String?
+  fromUser    User?     @relation("GiftsSent", fields: [fromUserId], references: [id])
+  toEmail     String?
+  toUserId    String?
+  toUser      User?     @relation("GiftsReceived", fields: [toUserId], references: [id])
+  message     String?
+  isRedeemed  Boolean   @default(false)
+  redeemedAt  DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+}
+
 enum Provider {
   EMAIL
   KAKAO
@@ -288,41 +328,4 @@ enum InquiryStatus {
   PENDING
   REPLIED
   CLOSED
-}
-
-model ReportToken {
-  id          String   @id @default(cuid())
-  weddingId   String
-  wedding     Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  token       String   @unique
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
-}
-
-model Review {
-  id        String   @id @default(cuid())
-  weddingId String
-  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  rating    Int
-  content   String?
-  source    String   @default("GENERAL")
-  isPublic  Boolean  @default(false)
-  createdAt DateTime @default(now())
-}
-
-model Gift {
-  id          String    @id @default(cuid())
-  code        String    @unique
-  packageId   String
-  package     Package   @relation(fields: [packageId], references: [id])
-  fromUserId  String?
-  fromUser    User?     @relation("GiftsSent", fields: [fromUserId], references: [id])
-  toEmail     String?
-  toUserId    String?
-  toUser      User?     @relation("GiftsReceived", fields: [toUserId], references: [id])
-  message     String?
-  isRedeemed  Boolean   @default(false)
-  redeemedAt  DateTime?
-  expiresAt   DateTime
-  createdAt   DateTime  @default(now())
 }
