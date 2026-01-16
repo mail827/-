@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 interface RsvpFormProps {
   weddingId: string;
-  onSubmit: (data: { weddingId: string; name: string; phone: string; attending: boolean; guestCount: number; message?: string }) => Promise<void>;
+  onSubmit: (data: { weddingId: string; name: string; phone: string; side: 'GROOM' | 'BRIDE'; attending: boolean; guestCount: number; message?: string }) => Promise<void>;
   isLoading: boolean;
   variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean';
 }
@@ -11,14 +11,15 @@ interface RsvpFormProps {
 export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, variant = 'classic' }: RsvpFormProps) {
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
+  const [side, setSide] = useState<'GROOM' | 'BRIDE' | null>(null);
   const [attendance, setAttendance] = useState<boolean | null>(null);
   const [guestCount, setGuestCount] = useState(1);
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async () => {
-    if (!name || !contact || attendance === null) return;
-    await onSubmit({ weddingId: _weddingId, name, phone: contact, attending: attendance, guestCount, message });
+    if (!name || !contact || !side || attendance === null) return;
+    await onSubmit({ weddingId: _weddingId, name, phone: contact, side, attending: attendance, guestCount, message });
     setSubmitted(true);
   };
 
@@ -49,6 +50,11 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
       <input type="tel" placeholder="연락처" value={contact} onChange={e => setContact(e.target.value)} className={`w-full px-4 py-3 rounded-lg border text-sm outline-none transition-colors ${s.input}`} />
       
       <div className="flex gap-2">
+        <button onClick={() => setSide('GROOM')} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${side === 'GROOM' ? s.active : s.inactive}`}>신랑측</button>
+        <button onClick={() => setSide('BRIDE')} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${side === 'BRIDE' ? s.active : s.inactive}`}>신부측</button>
+      </div>
+
+      <div className="flex gap-2">
         <button onClick={() => setAttendance(true)} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${attendance === true ? s.active : s.inactive}`}>참석</button>
         <button onClick={() => setAttendance(false)} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${attendance === false ? s.active : s.inactive}`}>불참</button>
       </div>
@@ -66,7 +72,7 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
       
       <textarea placeholder="메시지 (선택)" value={message} onChange={e => setMessage(e.target.value)} rows={3} className={`w-full px-4 py-3 rounded-lg border text-sm outline-none transition-colors resize-none ${s.input}`} />
       
-      <button onClick={handleSubmit} disabled={isLoading || !name || !contact || attendance === null} className={`w-full py-3 rounded-lg text-white text-sm transition-colors disabled:opacity-50 ${s.button}`}>
+      <button onClick={handleSubmit} disabled={isLoading || !name || !contact || !side || attendance === null} className={`w-full py-3 rounded-lg text-white text-sm transition-colors disabled:opacity-50 ${s.button}`}>
         {isLoading ? '전송 중...' : '참석 여부 전달하기'}
       </button>
     </div>

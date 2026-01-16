@@ -1,9 +1,16 @@
-import { SolapiMessageService } from 'solapi';
+import crypto from 'crypto';
 
-const messageService = new SolapiMessageService(
-  process.env.SOLAPI_API_KEY!,
-  process.env.SOLAPI_API_SECRET!
-);
+const SOLAPI_API_URL = 'https://api.solapi.com/messages/v4/send';
+
+function getAuthHeader() {
+  const apiKey = process.env.SOLAPI_API_KEY!;
+  const apiSecret = process.env.SOLAPI_API_SECRET!;
+  const date = new Date().toISOString();
+  const salt = crypto.randomBytes(32).toString('hex');
+  const signature = crypto.createHmac('sha256', apiSecret).update(date + salt).digest('hex');
+  
+  return `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${signature}`;
+}
 
 const cleanPhone = (phone: string) => phone.replace(/[^0-9]/g, '');
 
@@ -19,29 +26,47 @@ interface RsvpNotificationData {
 
 export async function sendRsvpNotification(data: RsvpNotificationData) {
   const toPhone = cleanPhone(data.to);
-  console.log('RSVP 알림 발송 시도:', { to: toPhone, from: process.env.SOLAPI_SENDER_NUMBER });
+  const fromPhone = cleanPhone(process.env.SOLAPI_SENDER_NUMBER!);
+  console.log('RSVP 알림톡 발송 시도:', { to: toPhone, from: fromPhone });
   
   try {
-    const result = await messageService.send({
-      to: toPhone,
-      from: process.env.SOLAPI_SENDER_NUMBER!,
-      kakaoOptions: {
-        pfId: process.env.KAKAO_CHANNEL_ID!,
-        templateId: process.env.KAKAO_RSVP_TEMPLATE_ID!,
-        variables: {
-          '#{신랑이름}': data.groomName,
-          '#{신부이름}': data.brideName,
-          '#{게스트이름}': data.guestName,
-          '#{참석여부}': data.attending ? '참석' : '불참',
-          '#{인원수}': String(data.guestCount),
-          '#{링크}': data.weddingUrl,
-        },
+    const response = await fetch(SOLAPI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': getAuthHeader(),
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        message: {
+          to: toPhone,
+          from: fromPhone,
+          kakaoOptions: {
+            pfId: process.env.KAKAO_CHANNEL_ID!,
+            templateId: process.env.KAKAO_RSVP_TEMPLATE_ID!,
+            variables: {
+              '#{신랑이름}': data.groomName,
+              '#{신부이름}': data.brideName,
+              '#{게스트이름}': data.guestName,
+              '#{참석여부}': data.attending ? '참석' : '불참',
+              '#{인원수}': String(data.guestCount),
+              '#{링크}': data.weddingUrl,
+            },
+          },
+        }
+      }),
     });
-    console.log('알림톡 발송 성공:', result);
+    
+    const result = await response.json();
+    console.log('RSVP 알림톡 응답:', JSON.stringify(result, null, 2));
+    
+    if (!response.ok || result.errorCode) {
+      console.error('RSVP 알림톡 발송 실패:', result);
+      return null;
+    }
+    
     return result;
   } catch (error: any) {
-    console.error('알림톡 발송 실패:', error?.message || error);
+    console.error('RSVP 알림톡 발송 에러:', error?.message || error);
     return null;
   }
 }
@@ -69,18 +94,28 @@ export async function sendSummaryNotification(data: SummaryNotificationData) {
   try {
     const text = `[${data.groomName}♥${data.brideName} 청첩장]\n📊 RSVP 현황 알림\n\n총 응답: ${data.totalGuests}명\n✅ 참석: ${data.attending}명 (총 ${data.totalPersons}인)\n❌ 불참: ${data.notAttending}명\n\nfrom. 청첩장 작업실`;
 
-    const result = await messageService.send({
-      to: toPhone,
-      from: fromPhone,
-      text,
-      type: 'LMS',
+    const response = await fetch(SOLAPI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: { to: toPhone, from: fromPhone, text, type: 'LMS' }
+      }),
     });
-    console.log('현황 알림 발송 성공:', result);
+    
+    const result = await response.json();
+    console.log('현황 알림 응답:', JSON.stringify(result, null, 2));
+    
+    if (!response.ok || result.errorCode) {
+      console.error('현황 알림 발송 실패:', result);
+      return null;
+    }
+    
     return result;
   } catch (error: any) {
-    console.error('현황 알림 발송 실패:', error?.message || error);
-    if (error?.cause) console.error('에러 cause:', error.cause);
-    if (error?.response) console.error('에러 response:', error.response);
+    console.error('현황 알림 발송 에러:', error?.message || error);
     return null;
   }
 }
@@ -108,18 +143,28 @@ export async function sendReminderNotification(data: ReminderNotificationData) {
     const dDayText = data.dDay === 0 ? 'D-Day' : data.dDay > 0 ? `D-${data.dDay}` : `D+${Math.abs(data.dDay)}`;
     const text = `[${data.groomName}♥${data.brideName} 청첩장]\n💒 결혼식 ${dDayText}\n\n📅 ${data.weddingDate}\n\n💌 청첩장 보기\n${data.weddingUrl}\n\nfrom. 청첩장 작업실`;
 
-    const result = await messageService.send({
-      to: toPhone,
-      from: fromPhone,
-      text,
-      type: 'LMS',
+    const response = await fetch(SOLAPI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: { to: toPhone, from: fromPhone, text, type: 'LMS' }
+      }),
     });
-    console.log('리마인더 발송 성공:', result);
+    
+    const result = await response.json();
+    console.log('리마인더 응답:', JSON.stringify(result, null, 2));
+    
+    if (!response.ok || result.errorCode) {
+      console.error('리마인더 발송 실패:', result);
+      return null;
+    }
+    
     return result;
   } catch (error: any) {
-    console.error('리마인더 발송 실패:', error?.message || error);
-    if (error?.cause) console.error('에러 cause:', error.cause);
-    if (error?.response) console.error('에러 response:', error.response);
+    console.error('리마인더 발송 에러:', error?.message || error);
     return null;
   }
 }
@@ -144,18 +189,28 @@ export async function sendCustomNotification(data: CustomNotificationData) {
   try {
     const text = `[${data.groomName}♥${data.brideName} 청첩장]\n\n${data.message}\n\nfrom. 청첩장 작업실`;
 
-    const result = await messageService.send({
-      to: toPhone,
-      from: fromPhone,
-      text,
-      type: 'LMS',
+    const response = await fetch(SOLAPI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: { to: toPhone, from: fromPhone, text, type: 'LMS' }
+      }),
     });
-    console.log('커스텀 알림 발송 성공:', result);
+    
+    const result = await response.json();
+    console.log('커스텀 알림 응답:', JSON.stringify(result, null, 2));
+    
+    if (!response.ok || result.errorCode) {
+      console.error('커스텀 알림 발송 실패:', result);
+      return null;
+    }
+    
     return result;
   } catch (error: any) {
-    console.error('커스텀 알림 발송 실패:', error?.message || error);
-    if (error?.cause) console.error('에러 cause:', error.cause);
-    if (error?.response) console.error('에러 response:', error.response);
+    console.error('커스텀 알림 발송 에러:', error?.message || error);
     return null;
   }
 }
