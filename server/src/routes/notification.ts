@@ -12,7 +12,7 @@ router.post('/summary/:weddingId', authMiddleware, async (req: Request, res: Res
   try {
     const wedding = await prisma.wedding.findUnique({
       where: { id: weddingId },
-      select: { groomName: true, brideName: true, groomPhone: true, bridePhone: true },
+      select: { groomName: true, brideName: true, groomPhone: true, bridePhone: true, slug: true },
     });
 
     if (!wedding) {
@@ -27,6 +27,8 @@ router.post('/summary/:weddingId', authMiddleware, async (req: Request, res: Res
       totalPersons: rsvps.filter(r => r.attending).reduce((sum, r) => sum + r.guestCount, 0),
     };
 
+    const weddingUrl = `https://weddingshop.cloud/w/${wedding.slug}/rsvp`;
+
     const recipients: string[] = [];
     if (wedding.groomPhone) recipients.push(wedding.groomPhone);
     if (wedding.bridePhone && wedding.bridePhone !== wedding.groomPhone) recipients.push(wedding.bridePhone);
@@ -36,6 +38,7 @@ router.post('/summary/:weddingId', authMiddleware, async (req: Request, res: Res
         to,
         groomName: wedding.groomName,
         brideName: wedding.brideName,
+        weddingUrl,
         ...stats,
       });
     }

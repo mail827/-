@@ -79,6 +79,7 @@ interface SummaryNotificationData {
   attending: number;
   notAttending: number;
   totalPersons: number;
+  weddingUrl: string;
 }
 
 export async function sendSummaryNotification(data: SummaryNotificationData) {
@@ -89,11 +90,9 @@ export async function sendSummaryNotification(data: SummaryNotificationData) {
   }
   
   const fromPhone = cleanPhone(process.env.SOLAPI_SENDER_NUMBER!);
-  console.log('현황 알림 발송 시도:', { to: toPhone, from: fromPhone });
+  console.log('현황 알림톡 발송 시도:', { to: toPhone, from: fromPhone });
   
   try {
-    const text = `[${data.groomName}♥${data.brideName} 청첩장]\n📊 RSVP 현황 알림\n\n총 응답: ${data.totalGuests}명\n✅ 참석: ${data.attending}명 (총 ${data.totalPersons}인)\n❌ 불참: ${data.notAttending}명\n\nfrom. 청첩장 작업실`;
-
     const response = await fetch(SOLAPI_API_URL, {
       method: 'POST',
       headers: {
@@ -101,21 +100,37 @@ export async function sendSummaryNotification(data: SummaryNotificationData) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        message: { to: toPhone, from: fromPhone, text, type: 'LMS' }
+        message: {
+          to: toPhone,
+          from: fromPhone,
+          kakaoOptions: {
+            pfId: process.env.KAKAO_CHANNEL_ID!,
+            templateId: process.env.KAKAO_SUMMARY_TEMPLATE_ID!,
+            variables: {
+              '#{신랑이름}': data.groomName,
+              '#{신부이름}': data.brideName,
+              '#{총응답}': String(data.totalGuests),
+              '#{참석}': String(data.attending),
+              '#{총인원}': String(data.totalPersons),
+              '#{불참}': String(data.notAttending),
+              '#{링크}': data.weddingUrl,
+            },
+          },
+        }
       }),
     });
     
     const result = await response.json();
-    console.log('현황 알림 응답:', JSON.stringify(result, null, 2));
+    console.log('현황 알림톡 응답:', JSON.stringify(result, null, 2));
     
     if (!response.ok || result.errorCode) {
-      console.error('현황 알림 발송 실패:', result);
+      console.error('현황 알림톡 발송 실패:', result);
       return null;
     }
     
     return result;
   } catch (error: any) {
-    console.error('현황 알림 발송 에러:', error?.message || error);
+    console.error('현황 알림톡 발송 에러:', error?.message || error);
     return null;
   }
 }
@@ -137,12 +152,11 @@ export async function sendReminderNotification(data: ReminderNotificationData) {
   }
   
   const fromPhone = cleanPhone(process.env.SOLAPI_SENDER_NUMBER!);
-  console.log('리마인더 발송 시도:', { to: toPhone, from: fromPhone });
+  console.log('리마인더 알림톡 발송 시도:', { to: toPhone, from: fromPhone });
   
   try {
     const dDayText = data.dDay === 0 ? 'D-Day' : data.dDay > 0 ? `D-${data.dDay}` : `D+${Math.abs(data.dDay)}`;
-    const text = `[${data.groomName}♥${data.brideName} 청첩장]\n💒 결혼식 ${dDayText}\n\n📅 ${data.weddingDate}\n\n💌 청첩장 보기\n${data.weddingUrl}\n\nfrom. 청첩장 작업실`;
-
+    
     const response = await fetch(SOLAPI_API_URL, {
       method: 'POST',
       headers: {
@@ -150,21 +164,35 @@ export async function sendReminderNotification(data: ReminderNotificationData) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        message: { to: toPhone, from: fromPhone, text, type: 'LMS' }
+        message: {
+          to: toPhone,
+          from: fromPhone,
+          kakaoOptions: {
+            pfId: process.env.KAKAO_CHANNEL_ID!,
+            templateId: process.env.KAKAO_REMINDER_TEMPLATE_ID!,
+            variables: {
+              '#{신랑이름}': data.groomName,
+              '#{신부이름}': data.brideName,
+              '#{디데이}': dDayText,
+              '#{결혼일}': data.weddingDate,
+              '#{링크}': data.weddingUrl,
+            },
+          },
+        }
       }),
     });
     
     const result = await response.json();
-    console.log('리마인더 응답:', JSON.stringify(result, null, 2));
+    console.log('리마인더 알림톡 응답:', JSON.stringify(result, null, 2));
     
     if (!response.ok || result.errorCode) {
-      console.error('리마인더 발송 실패:', result);
+      console.error('리마인더 알림톡 발송 실패:', result);
       return null;
     }
     
     return result;
   } catch (error: any) {
-    console.error('리마인더 발송 에러:', error?.message || error);
+    console.error('리마인더 알림톡 발송 에러:', error?.message || error);
     return null;
   }
 }

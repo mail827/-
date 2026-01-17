@@ -252,9 +252,13 @@ router.get('/:id/rsvp', authMiddleware, async (req, res) => {
       select: { userId: true },
     });
     
-    if (!wedding || wedding.userId !== user.id) {
-      return res.status(403).json({ error: '권한이 없습니다' });
-    }
+    if (!wedding) {
+  return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
+}
+
+if (wedding.userId !== user.id && user.role !== 'ADMIN') {
+  return res.status(403).json({ error: '권한이 없습니다' });
+}
     
     const rsvps = await prisma.rsvp.findMany({
       where: { weddingId: id },
