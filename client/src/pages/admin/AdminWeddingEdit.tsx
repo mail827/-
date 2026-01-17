@@ -314,7 +314,19 @@ export default function AdminWeddingEdit() {
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      {/* 모바일: 드롭다운 */}
+      <select
+        value={tab}
+        onChange={(e) => setTab(e.target.value)}
+        className="sm:hidden w-full px-4 py-3 bg-white border border-stone-200 rounded-xl text-sm font-medium text-stone-700 focus:outline-none focus:ring-2 focus:ring-stone-300 mb-4"
+      >
+        {tabs.map(t => (
+          <option key={t.id} value={t.id}>{t.name}</option>
+        ))}
+      </select>
+
+      {/* 데스크탑: 탭 버튼 */}
+      <div className="hidden sm:flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {tabs.map(t => (
           <button
             key={t.id}
