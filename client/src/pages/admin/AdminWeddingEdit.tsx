@@ -804,10 +804,20 @@ export default function AdminWeddingEdit() {
                   <div>
                     <label className="block text-sm text-stone-600 mb-2">신랑 {wedding.groomName}의 말투</label>
                     <textarea value={wedding.aiGroomPersonality || ''} onChange={(e) => updateField('aiGroomPersonality', e.target.value)} placeholder="예: 유머러스하고 장난기 많음" rows={3} className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none" />
+                      <AiWritingAssistant
+                        fieldType="groomPersonality"
+                        context={{ groomName: wedding.groomName }}
+                        onSelect={(value) => updateField('aiGroomPersonality', value)}
+                      />
                   </div>
                   <div>
                     <label className="block text-sm text-stone-600 mb-2">신부 {wedding.brideName}의 말투</label>
                     <textarea value={wedding.aiBridePersonality || ''} onChange={(e) => updateField('aiBridePersonality', e.target.value)} placeholder="예: 다정하고 따뜻한 성격" rows={3} className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none" />
+                      <AiWritingAssistant
+                        fieldType="bridePersonality"
+                        context={{ brideName: wedding.brideName }}
+                        onSelect={(value) => updateField('aiBridePersonality', value)}
+                      />
                   </div>
                 </div>
               </Section>
@@ -818,26 +828,56 @@ export default function AdminWeddingEdit() {
                   <div>
                     <label className="block text-sm text-stone-600 mb-2">신랑의 비밀</label>
                     <textarea value={wedding.aiSecrets?.groomSecret || ''} onChange={(e) => updateAiSecrets('groomSecret', e.target.value)} placeholder="예: 사실 프로포즈 3번 실패함" rows={2} className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none" />
+                      <AiWritingAssistant
+                        fieldType="secret"
+                        context={{ groomName: wedding.groomName, brideName: wedding.brideName, secretType: '신랑의 비밀' }}
+                        onSelect={(value) => updateAiSecrets('groomSecret', value)}
+                      />
                   </div>
                   <div>
                     <label className="block text-sm text-stone-600 mb-2">신부의 비밀</label>
                     <textarea value={wedding.aiSecrets?.brideSecret || ''} onChange={(e) => updateAiSecrets('brideSecret', e.target.value)} placeholder="예: 첫만남 때 신랑 별로였음" rows={2} className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none" />
+                      <AiWritingAssistant
+                        fieldType="secret"
+                        context={{ groomName: wedding.groomName, brideName: wedding.brideName, secretType: '신부의 비밀' }}
+                        onSelect={(value) => updateAiSecrets('brideSecret', value)}
+                      />
                   </div>
                   <div>
                     <label className="block text-sm text-stone-600 mb-2">첫만남 에피소드</label>
                     <textarea value={wedding.aiSecrets?.firstMeetStory || ''} onChange={(e) => updateAiSecrets('firstMeetStory', e.target.value)} placeholder="어디서 어떻게 처음 만났는지" rows={2} className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none" />
+                      <AiWritingAssistant
+                        fieldType="secret"
+                        context={{ groomName: wedding.groomName, brideName: wedding.brideName, secretType: '첫만남 에피소드' }}
+                        onSelect={(value) => updateAiSecrets('firstMeetStory', value)}
+                      />
                   </div>
                   <div>
                     <label className="block text-sm text-stone-600 mb-2">프로포즈 비하인드</label>
                     <textarea value={wedding.aiSecrets?.proposeStory || ''} onChange={(e) => updateAiSecrets('proposeStory', e.target.value)} placeholder="프로포즈 장소와 에피소드" rows={2} className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none" />
+                      <AiWritingAssistant
+                        fieldType="secret"
+                        context={{ groomName: wedding.groomName, brideName: wedding.brideName, secretType: '프로포즈 비하인드' }}
+                        onSelect={(value) => updateAiSecrets('proposeStory', value)}
+                      />
                   </div>
                   <div>
                     <label className="block text-sm text-stone-600 mb-2">웃긴 에피소드</label>
                     <textarea value={wedding.aiSecrets?.funnyStory || ''} onChange={(e) => updateAiSecrets('funnyStory', e.target.value)} placeholder="둘만 아는 재미있는 이야기" rows={2} className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none" />
+                      <AiWritingAssistant
+                        fieldType="secret"
+                        context={{ groomName: wedding.groomName, brideName: wedding.brideName, secretType: '웃긴 에피소드' }}
+                        onSelect={(value) => updateAiSecrets('funnyStory', value)}
+                      />
                   </div>
                   <div>
                     <label className="block text-sm text-stone-600 mb-2">서로의 첫인상</label>
                     <textarea value={wedding.aiSecrets?.firstImpression || ''} onChange={(e) => updateAiSecrets('firstImpression', e.target.value)} placeholder="서로의 첫인상과 지금 생각" rows={2} className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none" />
+                      <AiWritingAssistant
+                        fieldType="secret"
+                        context={{ groomName: wedding.groomName, brideName: wedding.brideName, secretType: '서로의 첫인상' }}
+                        onSelect={(value) => updateAiSecrets('firstImpression', value)}
+                      />
                   </div>
                 </div>
               </Section>
