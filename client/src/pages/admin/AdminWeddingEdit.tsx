@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Save, Eye, X, Plus, Music, Film, Image, Sparkles, Send, Bell, Calendar, MessageSquare, Loader2 } from 'lucide-react';
 import { api } from '../../utils/api';
+import AiWritingAssistant from '../../components/AiWritingAssistant';
 import type { Wedding } from '../../types';
 
 const THEMES = [
@@ -462,9 +463,27 @@ export default function AdminWeddingEdit() {
           <Section title="인사말">
             <Input label="인사말 제목" value={wedding.greetingTitle} onChange={v => updateField('greetingTitle', v)} />
             <textarea placeholder="인사말 내용" value={wedding.greeting || ''} onChange={(e) => updateField('greeting', e.target.value)} rows={6} className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none mt-4" />
-          </Section>
+          <AiWritingAssistant
+              fieldType="greeting"
+              context={{
+                groomName: wedding.groomName,
+                brideName: wedding.brideName,
+                weddingDate: wedding.weddingDate,
+                venue: wedding.venue,
+              }}
+              onSelect={(value) => updateField('greeting', value)}
+            />
+            </Section>
           <Section title="마무리 인사">
             <textarea placeholder="마무리 메시지 (선택)" value={wedding.closingMessage || ''} onChange={(e) => updateField('closingMessage', e.target.value)} rows={3} className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none" />
+              <AiWritingAssistant
+              fieldType="closingMessage"
+              context={{
+                groomName: wedding.groomName,
+                brideName: wedding.brideName,
+              }}
+              onSelect={(value) => updateField('closingMessage', value)}
+            />
           </Section>
         </div>
       )}
