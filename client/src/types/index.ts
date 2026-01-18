@@ -1,4 +1,4 @@
-export type Theme = 'ROMANTIC_CLASSIC' | 'MODERN_MINIMAL' | 'BOHEMIAN_DREAM' | 'LUXURY_GOLD' | 'PLAYFUL_POP' | 'SENIOR_SIMPLE' | 'FOREST_GARDEN' | 'OCEAN_BREEZE';
+export type Theme = 'ROMANTIC_CLASSIC' | 'MODERN_MINIMAL' | 'BOHEMIAN_DREAM' | 'LUXURY_GOLD' | 'POETIC_LOVE' | 'SENIOR_SIMPLE' | 'FOREST_GARDEN' | 'OCEAN_BREEZE';
 export type MediaType = 'IMAGE' | 'VIDEO';
 export type StoryType = 'PHOTO' | 'VIDEO';
 export type Side = 'GROOM' | 'BRIDE';
@@ -173,7 +173,7 @@ export const THEME_NAMES: Record<Theme, string> = {
   MODERN_MINIMAL: '모던 미니멀',
   BOHEMIAN_DREAM: '보헤미안 드림',
   LUXURY_GOLD: '럭셔리 골드',
-  PLAYFUL_POP: '플레이풀 팝',
+  POETIC_LOVE: '포에틱 러브',
   SENIOR_SIMPLE: '어르신용 심플',
   FOREST_GARDEN: '포레스트 가든',
   OCEAN_BREEZE: '오션 브리즈'
@@ -184,7 +184,7 @@ export const THEME_COLORS: Record<Theme, { primary: string; secondary: string; a
   MODERN_MINIMAL: { primary: '#2D2D2D', secondary: '#F5F5F5', accent: '#000000', bg: '#FFFFFF' },
   BOHEMIAN_DREAM: { primary: '#9CAF88', secondary: '#F5E6D3', accent: '#D4A574', bg: '#FAF7F2' },
   LUXURY_GOLD: { primary: '#C9A961', secondary: '#1A1A1A', accent: '#E8D5B7', bg: '#0D0D0D' },
-  PLAYFUL_POP: { primary: '#FF6B6B', secondary: '#4ECDC4', accent: '#FFE66D', bg: '#FFFFFF' },
+  POETIC_LOVE: { primary: '#C9B7E8', secondary: '#A393D3', accent: '#E5DDF5', bg: '#FBF9FD' },
   SENIOR_SIMPLE: { primary: '#1E3A5F', secondary: '#F0F4F8', accent: '#1E3A5F', bg: '#FFFEF8' },
   FOREST_GARDEN: { primary: '#5D7E5F', secondary: '#E8F0E8', accent: '#8BAD8B', bg: '#F5F9F5' },
   OCEAN_BREEZE: { primary: '#4A90A4', secondary: '#E0F0F5', accent: '#6BB5C9', bg: '#F5FAFC' }

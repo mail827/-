@@ -8,7 +8,7 @@ const THEMES = [
   { id: 'MODERN_MINIMAL', name: '모던 미니멀', desc: '깔끔하고 세련된 디자인', color: 'from-stone-100 to-gray-100' },
   { id: 'BOHEMIAN_DREAM', name: '보헤미안 드림', desc: '자유롭고 낭만적인 감성', color: 'from-amber-100 to-orange-100' },
   { id: 'LUXURY_GOLD', name: '럭셔리 골드', desc: '고급스러운 골드 테마', color: 'from-yellow-100 to-amber-100' },
-  { id: 'PLAYFUL_POP', name: '플레이풀 팝', desc: '밝고 경쾌한 분위기', color: 'from-stone-200 to-stone-100' },
+  { id: 'POETIC_LOVE', name: '포에틱 러브', desc: '시집 느낌의 문학적 감성', color: 'from-purple-100 to-violet-50' },
   { id: 'SENIOR_SIMPLE', name: '어르신용 심플', desc: '큰 글씨, 심플한 구성', color: 'from-blue-50 to-sky-100' },
   { id: 'FOREST_GARDEN', name: '포레스트 가든', desc: '자연 속 싱그러운 느낌', color: 'from-green-100 to-emerald-100' },
   { id: 'OCEAN_BREEZE', name: '오션 브리즈', desc: '시원한 바다 느낌', color: 'from-cyan-100 to-blue-100' },

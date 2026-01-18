@@ -8,7 +8,7 @@ const THEMES = [
   { id: 'MODERN_MINIMAL', name: '모던 미니멀' },
   { id: 'BOHEMIAN_DREAM', name: '보헤미안 드림' },
   { id: 'LUXURY_GOLD', name: '럭셔리 골드' },
-  { id: 'PLAYFUL_POP', name: '플레이풀 팝' },
+  { id: 'POETIC_LOVE', name: '포에틱 러브' },
   { id: 'SENIOR_SIMPLE', name: '어르신용 심플' },
   { id: 'FOREST_GARDEN', name: '포레스트 가든' },
   { id: 'OCEAN_BREEZE', name: '오션 브리즈' },

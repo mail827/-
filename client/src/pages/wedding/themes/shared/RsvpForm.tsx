@@ -5,7 +5,7 @@ interface RsvpFormProps {
   weddingId: string;
   onSubmit: (data: { weddingId: string; name: string; phone: string; side: 'GROOM' | 'BRIDE'; attending: boolean; guestCount: number; message?: string }) => Promise<void>;
   isLoading: boolean;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic';
 }
 
 export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, variant = 'classic' }: RsvpFormProps) {
@@ -38,6 +38,7 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
     bohemian: { input: 'bg-white border-[#5C6B54]/20 focus:border-[#5C6B54]', button: 'bg-[#5C6B54] hover:bg-[#4A5944]', active: 'bg-[#5C6B54] text-white', inactive: 'bg-white border-[#5C6B54]/20 text-[#5D5D5D]' },
     luxury: { input: 'bg-[#111] border-[#C9A96E]/30 focus:border-[#C9A96E] text-white', button: 'bg-[#C9A96E] hover:bg-[#D4B97A] text-black', active: 'bg-[#C9A96E] text-black', inactive: 'bg-[#111] border-[#C9A96E]/30 text-[#888]' },
     playful: { input: 'bg-white border-[#ddd] focus:border-[#333]', button: 'bg-[#333] hover:bg-[#444]', active: 'bg-[#333] text-white', inactive: 'bg-white border-[#ddd] text-[#666]' },
+    poetic: { input: 'bg-white border-[#E5DDF5] focus:border-[#C9B7E8]', button: 'bg-[#C9B7E8] hover:bg-[#A393D3]', active: 'bg-[#C9B7E8] text-white', inactive: 'bg-white border-[#E5DDF5] text-[#666]' },
     forest: { input: 'bg-white border-[#3D5A3D]/20 focus:border-[#3D5A3D]', button: 'bg-[#3D5A3D] hover:bg-[#2D4A2D]', active: 'bg-[#3D5A3D] text-white', inactive: 'bg-white border-[#3D5A3D]/20 text-[#555]' },
     ocean: { input: 'bg-white border-[#5B8FA8]/20 focus:border-[#5B8FA8]', button: 'bg-[#5B8FA8] hover:bg-[#4B7F98]', active: 'bg-[#5B8FA8] text-white', inactive: 'bg-white border-[#5B8FA8]/20 text-[#5B6B7B]' },
   };

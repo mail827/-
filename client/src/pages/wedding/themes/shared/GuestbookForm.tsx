@@ -4,7 +4,7 @@ interface GuestbookFormProps {
   weddingId: string;
   onSubmit: (data: { weddingId: string; name: string; password: string; message: string }) => Promise<void>;
   isLoading: boolean;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic';
 }
 
 export default function GuestbookForm({ weddingId: _weddingId, onSubmit, isLoading, variant = 'classic' }: GuestbookFormProps) {
@@ -26,6 +26,7 @@ export default function GuestbookForm({ weddingId: _weddingId, onSubmit, isLoadi
     bohemian: { input: 'bg-white border-[#5C6B54]/20 focus:border-[#5C6B54]', button: 'bg-[#5C6B54] hover:bg-[#4A5944]' },
     luxury: { input: 'bg-[#111] border-[#C9A96E]/30 focus:border-[#C9A96E] text-white placeholder:text-[#555]', button: 'bg-[#C9A96E] hover:bg-[#D4B97A] text-black' },
     playful: { input: 'bg-white border-[#ddd] focus:border-[#333]', button: 'bg-[#333] hover:bg-[#444]' },
+    poetic: { input: 'bg-white border-[#E5DDF5] focus:border-[#C9B7E8]', button: 'bg-[#C9B7E8] hover:bg-[#A393D3]' },
     forest: { input: 'bg-white border-[#3D5A3D]/20 focus:border-[#3D5A3D]', button: 'bg-[#3D5A3D] hover:bg-[#2D4A2D]' },
     ocean: { input: 'bg-white border-[#5B8FA8]/20 focus:border-[#5B8FA8]', button: 'bg-[#5B8FA8] hover:bg-[#4B7F98]' },
   };

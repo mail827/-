@@ -13,7 +13,7 @@ interface GuestbookListProps {
   guestbooks: GuestbookItem[];
   weddingSlug: string;
   onDelete?: (id: string) => void;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'senior';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'senior' | 'poetic';
 }
 
 export default function GuestbookList({ guestbooks, weddingSlug, onDelete, variant = 'classic' }: GuestbookListProps) {
@@ -28,6 +28,7 @@ export default function GuestbookList({ guestbooks, weddingSlug, onDelete, varia
     bohemian: { card: 'bg-white rounded-lg p-4 shadow-sm', text: 'text-[#5D5D5D]', subtext: 'text-[#7D7D7D]', date: 'text-[#ADADAD]', btn: 'text-[#5C6B54]/40 hover:text-[#5C6B54]', modal: 'bg-[#FAF8F5]', input: 'border-[#5C6B54]/20 focus:border-[#5C6B54]', confirmBtn: 'bg-[#5C6B54] hover:bg-[#4A5944]' },
     luxury: { card: 'border border-[#C9A96E]/10', text: 'text-[#C9A96E]', subtext: 'text-[#888]', date: 'text-[#555]', btn: 'text-[#C9A96E]/30 hover:text-[#C9A96E]', modal: 'bg-[#1a1a1a]', input: 'bg-[#111] border-[#C9A96E]/30 focus:border-[#C9A96E] text-white', confirmBtn: 'bg-[#C9A96E] hover:bg-[#D4B97A] text-black' },
     playful: { card: 'bg-white rounded-lg shadow-sm', text: 'text-[#555]', subtext: 'text-[#777]', date: 'text-[#bbb]', btn: 'text-[#ccc] hover:text-[#666]', modal: 'bg-white', input: 'border-[#ddd] focus:border-[#333]', confirmBtn: 'bg-[#333] hover:bg-[#444]' },
+    poetic: { card: 'bg-white rounded-sm border border-[#E5DDF5]', text: 'text-[#2A2A2A]', subtext: 'text-[#666]', date: 'text-[#C9B7E8]', btn: 'text-[#C9B7E8] hover:text-[#A393D3]', modal: 'bg-[#FBF9FD]', input: 'border-[#E5DDF5] focus:border-[#C9B7E8]', confirmBtn: 'bg-[#C9B7E8] hover:bg-[#A393D3]' },
     forest: { card: 'bg-white rounded p-4 shadow-sm border border-[#3D5A3D]/5', text: 'text-[#555]', subtext: 'text-[#777]', date: 'text-[#aaa]', btn: 'text-[#3D5A3D]/30 hover:text-[#3D5A3D]', modal: 'bg-[#F7F6F3]', input: 'border-[#3D5A3D]/20 focus:border-[#3D5A3D]', confirmBtn: 'bg-[#3D5A3D] hover:bg-[#2D4A2D]' },
     ocean: { card: 'bg-white rounded-xl p-4 shadow-sm border border-[#5B8FA8]/5', text: 'text-[#5B6B7B]', subtext: 'text-[#7B8B9B]', date: 'text-[#ABB]', btn: 'text-[#5B8FA8]/30 hover:text-[#5B8FA8]', modal: 'bg-[#F8FAFB]', input: 'border-[#5B8FA8]/20 focus:border-[#5B8FA8]', confirmBtn: 'bg-[#5B8FA8] hover:bg-[#4B7F98]' },
     senior: { card: 'pb-4 border-b-2 border-amber-50 last:border-0', text: 'text-gray-800 font-medium', subtext: 'text-gray-600', date: 'text-gray-400', btn: 'text-amber-300 hover:text-amber-500', modal: 'bg-white', input: 'border-2 border-amber-100 focus:border-amber-300', confirmBtn: 'bg-amber-500 hover:bg-amber-600' },
