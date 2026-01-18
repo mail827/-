@@ -1,12 +1,20 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  Heart, 
+  Heart,
   LayoutDashboard, 
-  FileHeart, 
+  FileHeart,
   LogOut,
   Sparkles,
-  Palette
+  Palette,
+  Users,
+  CreditCard,
+  Package,
+  Gift,
+  PlayCircle,
+  FileText,
+  MessageSquare,
+  Star
 } from 'lucide-react';
 import { useAuthStore } from '../../hooks/useAuth';
 
@@ -21,8 +29,16 @@ export default function AdminLayout() {
 
   const navItems = [
     { to: '/admin', icon: LayoutDashboard, label: '대시보드', end: true },
-    { to: '/admin/weddings', icon: FileHeart, label: '청첩장 관리', end: false },
-    { to: '/admin/theme-showcase', icon: Palette, label: '테마 쇼케이스', end: false }
+    { to: '/admin/weddings', icon: FileHeart, label: '청첩장', end: false },
+    { to: '/admin/users', icon: Users, label: '회원', end: false },
+    { to: '/admin/orders', icon: CreditCard, label: '주문', end: false },
+    { to: '/admin/packages', icon: Package, label: '패키지', end: false },
+    { to: '/admin/gifts', icon: Gift, label: '선물', end: false },
+    { to: '/admin/guides', icon: PlayCircle, label: '가이드', end: false },
+    { to: '/admin/theme-showcase', icon: Palette, label: '테마', end: false },
+    { to: '/admin/contents', icon: FileText, label: '콘텐츠', end: false },
+    { to: '/admin/inquiries', icon: MessageSquare, label: '문의', end: false },
+    { to: '/admin/reviews', icon: Star, label: '리뷰', end: false },
   ];
 
   return (
