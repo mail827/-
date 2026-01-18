@@ -115,14 +115,18 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
           )}
           
           <div className="space-y-6">
-            <div className="flex items-center justify-center gap-4">
-              <div className="h-px w-12" style={{ background: 'linear-gradient(90deg, transparent, #D4AF37)' }} />
-              <h1 className="text-[28px] tracking-[0.2em]" style={{ color: '#4A4035', fontFamily: 'Aritaburi, serif', fontWeight: 400 }}>
-                {wedding.groomName}
-                <span className="mx-4 text-lg" style={{ color: '#D4AF37' }}>&</span>
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex items-center justify-center gap-4">
+                <div className="h-px w-16" style={{ background: 'linear-gradient(90deg, transparent, #D4AF37)' }} />
+                <h1 className="text-[32px] tracking-[0.15em]" style={{ color: '#4A4035', fontFamily: 'Aritaburi, serif', fontWeight: 400 }}>
+                  {wedding.groomName}
+                </h1>
+                <div className="h-px w-16" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
+              </div>
+              <p className="text-[20px]" style={{ color: '#D4AF37' }}>&</p>
+              <h1 className="text-[32px] tracking-[0.15em]" style={{ color: '#4A4035', fontFamily: 'Aritaburi, serif', fontWeight: 400 }}>
                 {wedding.brideName}
               </h1>
-              <div className="h-px w-12" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
             </div>
             
             <div className="space-y-2" style={{ fontFamily: "'Nanum Myeongjo', serif" }}>
