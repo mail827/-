@@ -12,6 +12,7 @@ import {
   ForestGarden,
   OceanBreeze,
   SeniorSimple,
+  GlassBubble,
 } from './themes';
 import AiChat from '../../components/AiChat';
 
@@ -56,6 +57,7 @@ const themeComponents: Record<Theme, React.ComponentType<any>> = {
   SENIOR_SIMPLE: SeniorSimple,
   FOREST_GARDEN: ForestGarden,
   OCEAN_BREEZE: OceanBreeze,
+  GLASS_BUBBLE: GlassBubble,
 };
 
 export default function WeddingPage() {

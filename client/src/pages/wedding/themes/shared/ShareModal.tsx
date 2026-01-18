@@ -4,7 +4,7 @@ interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
   onShare: (type: 'kakao' | 'instagram' | 'sms') => void;
-  variant?: 'light' | 'dark';
+  variant?: 'light' | 'dark' | 'glass';
 }
 
 export default function ShareModal({ isOpen, onClose, onShare, variant = 'light' }: ShareModalProps) {
