@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Camera, User } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Camera, User, ChevronUp, ChevronDown } from 'lucide-react';
 import {
   RomanticClassic,
   ModernMinimal,
@@ -67,11 +67,13 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
   const [groomName, setGroomName] = useState('민준');
   const [brideName, setBrideName] = useState('서연');
   const [heroImage, setHeroImage] = useState<string | null>(null);
+  const [showCustomize, setShowCustomize] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       fetchShowcases();
+      setShowCustomize(false);
     }
   }, [isOpen]);
 
@@ -175,168 +177,226 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
-        onClick={onClose}
+        className="fixed inset-0 z-50 bg-black/95 overflow-hidden"
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          className="relative w-full max-w-6xl h-[90vh] flex flex-col md:flex-row gap-6"
-          onClick={(e) => e.stopPropagation()}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-white/70 hover:text-white transition-colors z-50"
         >
-          <button
-            onClick={onClose}
-            className="absolute -top-12 right-0 p-2 text-white/70 hover:text-white transition-colors z-10"
-          >
-            <X className="w-8 h-8" />
-          </button>
+          <X className="w-6 h-6" />
+        </button>
 
-          {loading ? (
-            <div className="flex-1 flex items-center justify-center text-white">
-              로딩 중...
-            </div>
-          ) : (
-            <>
-              <div className="w-full md:w-72 bg-white/10 backdrop-blur-sm rounded-2xl p-5 flex flex-col gap-4">
-                <h3 className="text-white font-medium text-center">내 이름으로 미리보기</h3>
-                
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-white/60 text-xs mb-1 block">신랑 이름</label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                      <input
-                        type="text"
-                        value={groomName}
-                        onChange={(e) => setGroomName(e.target.value)}
-                        placeholder="신랑 이름"
-                        className="w-full pl-10 pr-3 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/40 text-sm"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="text-white/60 text-xs mb-1 block">신부 이름</label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                      <input
-                        type="text"
-                        value={brideName}
-                        onChange={(e) => setBrideName(e.target.value)}
-                        placeholder="신부 이름"
-                        className="w-full pl-10 pr-3 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/40 text-sm"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="text-white/60 text-xs mb-1 block">대표 사진</label>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                    {heroImage ? (
-                      <div className="relative">
-                        <img src={heroImage} alt="미리보기" className="w-full h-32 object-cover rounded-xl" />
+        {loading ? (
+          <div className="h-full flex items-center justify-center text-white">
+            로딩 중...
+          </div>
+        ) : (
+          <div className="h-full flex flex-col md:flex-row">
+            {/* 모바일: 접히는 커스터마이즈 패널 */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setShowCustomize(!showCustomize)}
+                className="w-full py-3 px-4 bg-white/10 flex items-center justify-between text-white text-sm"
+              >
+                <span>내 이름으로 미리보기</span>
+                {showCustomize ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+              
+              <AnimatePresence>
+                {showCustomize && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="bg-white/10 px-4 pb-4 overflow-hidden"
+                  >
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <label className="text-white/60 text-xs mb-1 block">신랑</label>
+                        <input
+                          type="text"
+                          value={groomName}
+                          onChange={(e) => setGroomName(e.target.value)}
+                          className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-white/60 text-xs mb-1 block">신부</label>
+                        <input
+                          type="text"
+                          value={brideName}
+                          onChange={(e) => setBrideName(e.target.value)}
+                          className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-white/60 text-xs mb-1 block">사진</label>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
                         <button
-                          onClick={() => setHeroImage(null)}
-                          className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="p-2 bg-white/10 border border-white/20 rounded-lg text-white"
                         >
-                          <X className="w-4 h-4" />
+                          <Camera className="w-5 h-5" />
                         </button>
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full py-6 border-2 border-dashed border-white/20 rounded-xl text-white/40 hover:border-white/40 hover:text-white/60 transition-colors flex flex-col items-center gap-2"
-                      >
-                        <Camera className="w-6 h-6" />
-                        <span className="text-xs">사진 업로드</span>
-                      </button>
+                    </div>
+                    {heroImage && (
+                      <div className="mt-2 relative inline-block">
+                        <img src={heroImage} alt="" className="h-12 w-12 object-cover rounded-lg" />
+                        <button onClick={() => setHeroImage(null)} className="absolute -top-1 -right-1 p-0.5 bg-red-500 rounded-full">
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                      </div>
                     )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* 데스크톱: 사이드 패널 */}
+            <div className="hidden md:flex w-72 bg-white/10 backdrop-blur-sm p-5 flex-col gap-4">
+              <h3 className="text-white font-medium text-center">내 이름으로 미리보기</h3>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="text-white/60 text-xs mb-1 block">신랑 이름</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                    <input
+                      type="text"
+                      value={groomName}
+                      onChange={(e) => setGroomName(e.target.value)}
+                      placeholder="신랑 이름"
+                      className="w-full pl-10 pr-3 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/40 text-sm"
+                    />
                   </div>
                 </div>
-
-                <div className="mt-auto pt-4 border-t border-white/10">
-                  <p className="text-white/40 text-xs text-center">
-                    좌우로 스와이프해서<br />10가지 테마를 둘러보세요
-                  </p>
+                
+                <div>
+                  <label className="text-white/60 text-xs mb-1 block">신부 이름</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                    <input
+                      type="text"
+                      value={brideName}
+                      onChange={(e) => setBrideName(e.target.value)}
+                      placeholder="신부 이름"
+                      className="w-full pl-10 pr-3 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/40 text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="text-white/60 text-xs mb-1 block">대표 사진</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="desktop-file-input"
+                  />
+                  {heroImage ? (
+                    <div className="relative">
+                      <img src={heroImage} alt="미리보기" className="w-full h-32 object-cover rounded-xl" />
+                      <button
+                        onClick={() => setHeroImage(null)}
+                        className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label
+                      htmlFor="desktop-file-input"
+                      className="w-full py-6 border-2 border-dashed border-white/20 rounded-xl text-white/40 hover:border-white/40 hover:text-white/60 transition-colors flex flex-col items-center gap-2 cursor-pointer"
+                    >
+                      <Camera className="w-6 h-6" />
+                      <span className="text-xs">사진 업로드</span>
+                    </label>
+                  )}
                 </div>
               </div>
 
-              <div className="flex-1 flex flex-col">
-                <div className="text-center mb-4">
-                  <h2 className="text-xl font-medium text-white mb-1">{current?.title}</h2>
-                  {current?.description && (
-                    <p className="text-white/60 text-sm">{current.description}</p>
-                  )}
-                  <p className="text-white/40 text-xs mt-2">
-                    {currentIndex + 1} / {showcases.length}
-                  </p>
-                </div>
+              <div className="mt-auto pt-4 border-t border-white/10">
+                <p className="text-white/40 text-xs text-center">
+                  좌우 화살표 또는 스와이프로<br />10가지 테마를 둘러보세요
+                </p>
+              </div>
+            </div>
 
-                <div
-                  className="flex-1 flex items-center justify-center gap-4"
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={handleTouchEnd}
+            {/* 메인 프리뷰 영역 */}
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className="text-center py-3 md:py-4">
+                <h2 className="text-lg md:text-xl font-medium text-white">{current?.title}</h2>
+                <p className="text-white/40 text-xs mt-1">
+                  {currentIndex + 1} / {showcases.length}
+                </p>
+              </div>
+
+              <div
+                className="flex-1 flex items-center justify-center px-4 pb-4 min-h-0"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
+                <button
+                  onClick={goPrev}
+                  className="hidden md:flex p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors mr-4"
                 >
-                  <button
-                    onClick={goPrev}
-                    className="hidden md:flex p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-                  >
-                    <ChevronLeft className="w-6 h-6" />
-                  </button>
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
 
-                  <div className="relative">
-                    <div className="absolute -inset-3 bg-gradient-to-b from-white/20 to-white/5 rounded-[3rem] blur-xl" />
+                <div className="relative h-full max-h-[70vh] md:max-h-[75vh] aspect-[9/16]">
+                  <div className="absolute -inset-2 bg-gradient-to-b from-white/10 to-white/5 rounded-[2rem] blur-lg" />
+                  
+                  <div className="relative h-full bg-stone-900 rounded-[2rem] p-1.5 shadow-2xl">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-5 bg-stone-900 rounded-b-xl" />
                     
-                    <div className="relative bg-stone-900 rounded-[2.5rem] p-2 shadow-2xl">
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-6 bg-stone-900 rounded-b-2xl" />
-                      
-                      <div className="w-[280px] h-[540px] md:w-[300px] md:h-[580px] bg-white rounded-[2rem] overflow-hidden">
-                        <div className="w-full h-full overflow-y-auto scrollbar-hide">
-                          {ThemeComponent && (
-                            <ThemeComponent
-                              wedding={weddingData}
-                              guestbooks={[]}
-                              onRsvpSubmit={() => {}}
-                              onGuestbookSubmit={() => {}}
-                              isRsvpLoading={false}
-                              isGuestbookLoading={false}
-                            />
-                          )}
-                        </div>
+                    <div className="h-full bg-white rounded-[1.5rem] overflow-hidden">
+                      <div className="w-full h-full overflow-y-auto scrollbar-hide">
+                        {ThemeComponent && (
+                          <ThemeComponent
+                            wedding={weddingData}
+                            guestbooks={[]}
+                            onRsvpSubmit={() => {}}
+                            onGuestbookSubmit={() => {}}
+                            isRsvpLoading={false}
+                            isGuestbookLoading={false}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
-
-                  <button
-                    onClick={goNext}
-                    className="hidden md:flex p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-                  >
-                    <ChevronRight className="w-6 h-6" />
-                  </button>
                 </div>
 
-                <div className="flex justify-center gap-2 mt-4">
-                  {showcases.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentIndex(idx)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        idx === currentIndex ? 'bg-white w-6' : 'bg-white/30'
-                      }`}
-                    />
-                  ))}
-                </div>
+                <button
+                  onClick={goNext}
+                  className="hidden md:flex p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors ml-4"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
               </div>
-            </>
-          )}
-        </motion.div>
+
+              {/* 하단 도트 네비게이션 */}
+              <div className="flex justify-center gap-1.5 py-3">
+                {showcases.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentIndex(idx)}
+                    className={`h-1.5 rounded-full transition-all ${
+                      idx === currentIndex ? 'bg-white w-4' : 'bg-white/30 w-1.5'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </motion.div>
     </AnimatePresence>
   );
