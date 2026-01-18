@@ -12,6 +12,8 @@ const THEMES = [
   { id: 'SENIOR_SIMPLE', name: '어르신용 심플' },
   { id: 'FOREST_GARDEN', name: '포레스트 가든' },
   { id: 'OCEAN_BREEZE', name: '오션 브리즈' },
+  { id: 'GLASS_BUBBLE', name: '글라스 버블' },
+  { id: 'SPRING_BREEZE', name: '봄바람' },
 ];
 
 const SENIOR_COLORS = [
