@@ -12,6 +12,8 @@ const THEMES = [
   { id: 'SENIOR_SIMPLE', name: '어르신용 심플', desc: '큰 글씨, 심플한 구성', color: 'from-blue-50 to-sky-100' },
   { id: 'FOREST_GARDEN', name: '포레스트 가든', desc: '자연 속 싱그러운 느낌', color: 'from-green-100 to-emerald-100' },
   { id: 'OCEAN_BREEZE', name: '오션 브리즈', desc: '시원한 바다 느낌', color: 'from-cyan-100 to-blue-100' },
+  { id: 'GLASS_BUBBLE', name: '글라스 버블', desc: '투명하고 몽환적인 감성', color: 'from-violet-100 to-purple-100' },
+  { id: 'SPRING_BREEZE', name: '봄바람', desc: '따뜻하고 포근한 봄 느낌', color: 'from-pink-100 to-rose-100' },
 ];
 
 interface Package {
