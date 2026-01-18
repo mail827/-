@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, MessageCircle, X, Send, Sparkles, Mail, Loader2, Gift } from 'lucide-react';
+import { Check, MessageCircle, X, Send, Sparkles, Mail, Loader2, Gift, Eye } from 'lucide-react';
+import ThemeShowcaseModal from '../components/ThemeShowcaseModal';
 
 interface Package {
   id: string;
@@ -23,6 +24,7 @@ export default function Landing() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [reviews, setReviews] = useState<{id: string; rating: number; content: string; source: string; groomName: string; brideName: string; packageName: string | null; createdAt: string}[]>([]);
+  const [showThemeShowcase, setShowThemeShowcase] = useState(false);
   const [guides, setGuides] = useState<{id: string; title: string; description: string | null; videoUrl: string; category: string}[]>([]);
   const [selectedGuide, setSelectedGuide] = useState<{id: string; title: string; description: string | null; videoUrl: string; category: string} | null>(null);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
@@ -510,6 +512,27 @@ export default function Landing() {
         )}
       </AnimatePresence>
 
+      <section id="themes" className="py-20 px-4 bg-stone-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">THEMES</p>
+            <h2 className="font-serif text-3xl text-stone-800 mb-4">10가지 감성 테마</h2>
+            <p className="text-stone-500 mb-8">실제 청첩장을 미리 체험해보세요</p>
+            <button
+              onClick={() => setShowThemeShowcase(true)}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-stone-800 text-white rounded-full hover:bg-stone-900 transition-all hover:scale-105"
+            >
+              <Eye className="w-5 h-5" />
+              테마 미리보기
+            </button>
+          </motion.div>
+        </div>
+      </section>
+
       <section id="pricing" className="py-32 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.div
@@ -980,7 +1003,7 @@ export default function Landing() {
                     disabled={inquirySending || !inquiryForm.name || !inquiryForm.email || !inquiryForm.message}
                     className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {inquirySending ? '전송 중...' : '문의하기'}
+                {inquirySending ? '전송 중...' : '문의하기'}
                   </button>
                 </div>
               </>
@@ -988,6 +1011,8 @@ export default function Landing() {
           </motion.div>
         </div>
       )}
+
+      <ThemeShowcaseModal isOpen={showThemeShowcase} onClose={() => setShowThemeShowcase(false)} />
     </div>
   );
 }

@@ -343,3 +343,15 @@ model Guide {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model ThemeShowcase {
+  id          String   @id @default(cuid())
+  theme       Theme
+  title       String
+  description String?
+  sampleData  Json?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

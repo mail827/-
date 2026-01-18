@@ -5,7 +5,8 @@ import {
   LayoutDashboard, 
   FileHeart, 
   LogOut,
-  Sparkles
+  Sparkles,
+  Palette
 } from 'lucide-react';
 import { useAuthStore } from '../../hooks/useAuth';
 
@@ -20,7 +21,8 @@ export default function AdminLayout() {
 
   const navItems = [
     { to: '/admin', icon: LayoutDashboard, label: '대시보드', end: true },
-    { to: '/admin/weddings', icon: FileHeart, label: '청첩장 관리', end: false }
+    { to: '/admin/weddings', icon: FileHeart, label: '청첩장 관리', end: false },
+    { to: '/admin/theme-showcase', icon: Palette, label: '테마 쇼케이스', end: false }
   ];
 
   return (
