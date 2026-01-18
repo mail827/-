@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, MessageCircle, X, Send, Sparkles, Mail, Loader2 } from 'lucide-react';
+import { Check, MessageCircle, X, Send, Sparkles, Mail, Loader2, Gift } from 'lucide-react';
 
 interface Package {
   id: string;
@@ -522,6 +522,22 @@ export default function Landing() {
             <h2 className="font-serif text-3xl text-stone-800">요금 안내</h2>
           </motion.div>
           
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex justify-center mb-8"
+          >
+            <a
+              href="/gift/redeem"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-100 hover:bg-stone-200 rounded-full text-sm text-stone-600 transition-colors"
+            >
+              <Gift className="w-4 h-4" />
+              선물 코드가 있으신가요?
+            </a>
+          </motion.div>
+
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
             {packages.map((pkg, idx) => (
               <motion.div
