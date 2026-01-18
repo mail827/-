@@ -9,6 +9,7 @@ import RsvpCheck from './pages/RsvpCheck';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminWeddingList from './pages/admin/AdminWeddingList';
+import AdminGuides from "./pages/admin/AdminGuides";
 import AdminWeddingCreate from './pages/admin/AdminWeddingCreate';
 import AdminWeddingEdit from './pages/admin/AdminWeddingEdit';
 import AiReport from "./pages/admin/AiReport";
@@ -89,6 +90,7 @@ export default function App() {
         <Route path="orders" element={<AdminOrders />} />
         <Route path="packages" element={<AdminPackages />} />
         <Route path="inquiries" element={<AdminInquiries />} />
+        <Route path="guides" element={<AdminGuides />} />
         <Route path="weddings" element={<AdminWeddingList />} />
         <Route path="weddings/create" element={<AdminWeddingCreate />} />
         <Route path="weddings/new" element={<AdminWeddingCreate />} />

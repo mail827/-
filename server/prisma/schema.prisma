@@ -329,3 +329,15 @@ enum InquiryStatus {
   REPLIED
   CLOSED
 }
+
+model Guide {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  videoUrl    String
+  category    String   @default("GENERAL")
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

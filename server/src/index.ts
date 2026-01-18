@@ -18,6 +18,7 @@ import aiReportRouter from "./routes/aiReport.js";
 import reportRouter from "./routes/report.js";
 import { seedPackages } from './utils/seed.js';
 import giftRouter from "./routes/gift.js";
+import { guideRouter } from "./routes/guide.js";
 import { startScheduler } from "./utils/scheduler.js";
 import { writingAssistantRouter } from './routes/writingAssistant.js';
 
@@ -57,6 +58,7 @@ app.use('/api/admin', adminRouter);
 app.use("/api/weddings", aiReportRouter);
 app.use("/api/report", reportRouter);
 app.use("/api/gift", giftRouter);
+app.use("/api/guide", guideRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/writing-assistant', writingAssistantRouter);
 

@@ -23,6 +23,7 @@ export default function Landing() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [reviews, setReviews] = useState<{id: string; rating: number; content: string; source: string; groomName: string; brideName: string; packageName: string | null; createdAt: string}[]>([]);
+  const [guides, setGuides] = useState<{id: string; title: string; description: string | null; videoUrl: string; category: string}[]>([]);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [showEmailLogin, setShowEmailLogin] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -49,6 +50,7 @@ export default function Landing() {
     localStorage.setItem('visitorId', visitorId);
     fetchPackages();
     fetchReviews();
+    fetchGuides();
   }, []);
 
   useEffect(() => {
@@ -87,6 +89,18 @@ export default function Landing() {
     }
   };
 
+
+  const fetchGuides = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/guide`);
+      if (res.ok) {
+        const data = await res.json();
+        setGuides(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch guides:", e);
+    }
+  };
   const submitInquiry = async () => {
     if (!inquiryForm.name || !inquiryForm.email || !inquiryForm.message) return;
     setInquirySending(true);
@@ -399,6 +413,49 @@ export default function Landing() {
 )}
         </div>
       </section>
+
+      {guides.length > 0 && (
+        <section id="how-to-use" className="py-32 px-4 bg-stone-50">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl sm:text-4xl font-bold text-stone-800 mb-4">이용 방법</h2>
+              <p className="text-stone-500">청첩장 작업실, 이렇게 사용하세요</p>
+            </motion.div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {guides.map((guide, index) => (
+                <motion.div
+                  key={guide.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md transition-shadow"
+                >
+                  <div className="aspect-video bg-stone-100 relative">
+                    <video
+                      src={guide.videoUrl}
+                      controls
+                      className="w-full h-full object-cover"
+                      preload="metadata"
+                    />
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-semibold text-stone-800 mb-2">{guide.title}</h3>
+                    {guide.description && (
+                      <p className="text-sm text-stone-500">{guide.description}</p>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section id="pricing" className="py-32 px-4">
         <div className="max-w-6xl mx-auto">
