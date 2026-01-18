@@ -308,6 +308,7 @@ enum Theme {
   FOREST_GARDEN
   OCEAN_BREEZE
   GLASS_BUBBLE
+  SPRING_BREEZE
 }
 
 enum MediaType {

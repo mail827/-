@@ -7,3 +7,4 @@ export { default as ForestGarden } from './ForestGarden';
 export { default as OceanBreeze } from './OceanBreeze';
 export { default as SeniorSimple } from './SeniorSimple';
 export { default as GlassBubble } from './GlassBubble';
+export { default as SpringBreeze } from './SpringBreeze';

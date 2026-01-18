@@ -13,7 +13,7 @@ interface GuestbookListProps {
   guestbooks: GuestbookItem[];
   weddingSlug: string;
   onDelete?: (id: string) => void;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'senior' | 'poetic' | 'glass';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'senior' | 'poetic' | 'glass' | 'spring';
 }
 
 export default function GuestbookList({ guestbooks, weddingSlug, onDelete, variant = 'classic' }: GuestbookListProps) {
@@ -33,6 +33,8 @@ export default function GuestbookList({ guestbooks, weddingSlug, onDelete, varia
     ocean: { card: 'bg-white rounded-xl p-4 shadow-sm border border-[#5B8FA8]/5', text: 'text-[#5B6B7B]', subtext: 'text-[#7B8B9B]', date: 'text-[#ABB]', btn: 'text-[#5B8FA8]/30 hover:text-[#5B8FA8]', modal: 'bg-[#F8FAFB]', input: 'border-[#5B8FA8]/20 focus:border-[#5B8FA8]', confirmBtn: 'bg-[#5B8FA8] hover:bg-[#4B7F98]' },
     senior: { card: 'pb-4 border-b-2 border-amber-50 last:border-0', text: 'text-gray-800 font-medium', subtext: 'text-gray-600', date: 'text-gray-400', btn: 'text-amber-300 hover:text-amber-500', modal: 'bg-white', input: 'border-2 border-amber-100 focus:border-amber-300', confirmBtn: 'bg-amber-500 hover:bg-amber-600' },
     glass: { card: 'bg-white/40 backdrop-blur-md rounded-[16px] p-4 border border-white/50', text: 'text-[#6B5B8C]', subtext: 'text-[#8B7EB0]', date: 'text-[#B8B0D0]', btn: 'text-[#C4B8E8] hover:text-[#9B8EC2]', modal: 'bg-white/80 backdrop-blur-xl', input: 'bg-white/40 border-white/50 focus:border-[#C4B8E8]', confirmBtn: 'bg-gradient-to-r from-[#C4B8E8] to-[#A8D0E8] hover:opacity-90' },
+    spring: { card: 'bg-white/75 rounded-[14px] p-4 border border-[#FFE0E8]', text: 'text-[#6B5060]', subtext: 'text-[#8B7080]', date: 'text-[#C8A0B0]', btn: 'text-[#D4A0B0] hover:text-[#C08090]', modal: 'bg-white', input: 'border-[#FFE0E8] focus:border-[#E8B0C0]', confirmBtn: 'bg-gradient-to-r from-[#E8B0C0] to-[#D0A0C8] hover:opacity-90' },
+    glass_old: { card: 'bg-white/40 backdrop-blur-md rounded-[16px] p-4 border border-white/50', text: 'text-[#6B5B8C]', subtext: 'text-[#8B7EB0]', date: 'text-[#B8B0D0]', btn: 'text-[#C4B8E8] hover:text-[#9B8EC2]', modal: 'bg-white/80 backdrop-blur-xl', input: 'bg-white/40 border-white/50 focus:border-[#C4B8E8]', confirmBtn: 'bg-gradient-to-r from-[#C4B8E8] to-[#A8D0E8] hover:opacity-90' },
   };
 
   const s = styles[variant];

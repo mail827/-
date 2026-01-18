@@ -4,7 +4,7 @@ interface GuestbookFormProps {
   weddingId: string;
   onSubmit: (data: { weddingId: string; name: string; password: string; message: string }) => Promise<void>;
   isLoading: boolean;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring';
 }
 
 export default function GuestbookForm({ weddingId: _weddingId, onSubmit, isLoading, variant = 'classic' }: GuestbookFormProps) {
@@ -30,6 +30,7 @@ export default function GuestbookForm({ weddingId: _weddingId, onSubmit, isLoadi
     forest: { input: 'bg-white border-[#3D5A3D]/20 focus:border-[#3D5A3D]', button: 'bg-[#3D5A3D] hover:bg-[#2D4A2D]' },
     ocean: { input: 'bg-white border-[#5B8FA8]/20 focus:border-[#5B8FA8]', button: 'bg-[#5B8FA8] hover:bg-[#4B7F98]' },
     glass: { input: 'bg-white/40 backdrop-blur-md border-white/50 focus:border-[#C4B8E8]', button: 'bg-gradient-to-r from-[#C4B8E8] to-[#A8D0E8] hover:opacity-90' },
+    spring: { input: 'bg-white/75 border-[#FFE0E8] focus:border-[#E8B0C0]', button: 'bg-gradient-to-r from-[#E8B0C0] to-[#D0A0C8] hover:opacity-90' },
   };
 
   const s = styles[variant];

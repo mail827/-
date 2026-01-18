@@ -5,7 +5,7 @@ interface RsvpFormProps {
   weddingId: string;
   onSubmit: (data: { weddingId: string; name: string; phone: string; side: 'GROOM' | 'BRIDE'; attending: boolean; guestCount: number; message?: string }) => Promise<void>;
   isLoading: boolean;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring';
 }
 
 export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, variant = 'classic' }: RsvpFormProps) {
@@ -42,6 +42,7 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
     forest: { input: 'bg-white border-[#3D5A3D]/20 focus:border-[#3D5A3D]', button: 'bg-[#3D5A3D] hover:bg-[#2D4A2D]', active: 'bg-[#3D5A3D] text-white', inactive: 'bg-white border-[#3D5A3D]/20 text-[#555]' },
     ocean: { input: 'bg-white border-[#5B8FA8]/20 focus:border-[#5B8FA8]', button: 'bg-[#5B8FA8] hover:bg-[#4B7F98]', active: 'bg-[#5B8FA8] text-white', inactive: 'bg-white border-[#5B8FA8]/20 text-[#5B6B7B]' },
     glass: { input: 'bg-white/40 backdrop-blur-md border-white/50 focus:border-[#C4B8E8]', button: 'bg-gradient-to-r from-[#C4B8E8] to-[#A8D0E8] hover:opacity-90', active: 'bg-gradient-to-r from-[#C4B8E8] to-[#A8D0E8] text-white', inactive: 'bg-white/40 backdrop-blur-md border-white/50 text-[#7B6B9C]' },
+    spring: { input: 'bg-white/75 border-[#FFE0E8] focus:border-[#E8B0C0]', button: 'bg-gradient-to-r from-[#E8B0C0] to-[#D0A0C8] hover:opacity-90', active: 'bg-gradient-to-r from-[#E8B0C0] to-[#D0A0C8] text-white', inactive: 'bg-white/75 border-[#FFE0E8] text-[#8B6B7B]' },
   };
 
   const s = styles[variant];
