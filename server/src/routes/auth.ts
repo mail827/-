@@ -8,7 +8,12 @@ const router = Router();
 const prisma = new PrismaClient();
 
 router.get('/me', authMiddleware, async (req: Request, res: Response) => {
-  const user = (req as any).user;
+  const authUser = (req as any).user;
+  const user = await prisma.user.findUnique({
+    where: { id: authUser.id },
+    select: { id: true, email: true, name: true, role: true, createdAt: true }
+  });
+  if (!user) return res.status(404).json({ error: '사용자를 찾을 수 없습니다' });
   res.json(user);
 });
 
