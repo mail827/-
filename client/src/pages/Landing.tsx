@@ -329,7 +329,7 @@ export default function Landing() {
           
           <div className="grid md:grid-cols-3 gap-12">
             {[
-              { icon: '✨', title: '감각적인 디자인', desc: '트렌디하면서도 클래식한\n8가지 테마' },
+              { icon: '✨', title: '감각적인 디자인', desc: '트렌디하면서도 클래식한\n10가지 테마' },
               { icon: '⚡', title: '빠른 제작', desc: 'Lite는 5분 만에\n즉시 발행 가능' },
               { icon: '👴🏻', title: '어르신 배려', desc: '큰 글씨와 심플한 구성의\n어르신용 테마' },
               { icon: '💌', title: '간편한 공유', desc: '카카오톡, 문자, 인스타그램\n한 번에 공유' },
