@@ -24,6 +24,7 @@ export default function Landing() {
   const [chatOpen, setChatOpen] = useState(false);
   const [reviews, setReviews] = useState<{id: string; rating: number; content: string; source: string; groomName: string; brideName: string; packageName: string | null; createdAt: string}[]>([]);
   const [guides, setGuides] = useState<{id: string; title: string; description: string | null; videoUrl: string; category: string}[]>([]);
+  const [selectedGuide, setSelectedGuide] = useState<{id: string; title: string; description: string | null; videoUrl: string; category: string} | null>(null);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [showEmailLogin, setShowEmailLogin] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -434,15 +435,23 @@ export default function Landing() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md transition-shadow"
+                  onClick={() => setSelectedGuide(guide)}
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md transition-shadow cursor-pointer group"
                 >
-                  <div className="aspect-video bg-stone-100 relative">
+                  <div className="aspect-video bg-stone-100 relative overflow-hidden">
                     <video
                       src={guide.videoUrl}
-                      controls
                       className="w-full h-full object-cover"
                       preload="metadata"
+                      muted
                     />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
+                        <svg className="w-8 h-8 text-stone-800 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                   <div className="p-5">
                     <h3 className="font-semibold text-stone-800 mb-2">{guide.title}</h3>
@@ -456,6 +465,50 @@ export default function Landing() {
           </div>
         </section>
       )}
+
+      {/* 가이드 영상 모달 */}
+      <AnimatePresence>
+        {selectedGuide && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedGuide(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-4 border-b border-stone-100">
+                <h3 className="font-semibold text-stone-800">{selectedGuide.title}</h3>
+                <button
+                  onClick={() => setSelectedGuide(null)}
+                  className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-stone-500" />
+                </button>
+              </div>
+              <div className="flex-1 bg-black flex items-center justify-center">
+                <video
+                  src={selectedGuide.videoUrl}
+                  controls
+                  autoPlay
+                  className="max-w-full max-h-[70vh]"
+                />
+              </div>
+              {selectedGuide.description && (
+                <div className="p-4 border-t border-stone-100">
+                  <p className="text-sm text-stone-500">{selectedGuide.description}</p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <section id="pricing" className="py-32 px-4">
         <div className="max-w-6xl mx-auto">
