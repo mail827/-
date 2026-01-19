@@ -78,6 +78,7 @@ router.post('/', authMiddleware, async (req, res) => {
             slug,
             weddingDate: new Date(data.weddingDate),
             orderId: order.id,
+          expiresAt: new Date(Date.now() + (gift.package?.durationDays || 365) * 24 * 60 * 60 * 1000),
           },
         });
         
@@ -94,6 +95,7 @@ router.post('/', authMiddleware, async (req, res) => {
     
     if (orderIdFromClient) {
       const order = await prisma.order.findFirst({
+        include: { package: true },
         where: {
           OR: [
             { id: orderIdFromClient },
@@ -116,6 +118,7 @@ router.post('/', authMiddleware, async (req, res) => {
           slug,
           weddingDate: new Date(data.weddingDate),
           orderId: order.id,
+          expiresAt: new Date(Date.now() + (order.package?.durationDays || 365) * 24 * 60 * 60 * 1000),
         },
       });
       
@@ -128,6 +131,7 @@ router.post('/', authMiddleware, async (req, res) => {
         userId: user.id,
         slug,
         weddingDate: new Date(data.weddingDate),
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       },
     });
     

@@ -49,11 +49,16 @@ router.get('/wedding/:slug', async (req: Request, res: Response) => {
       }
     });
 
+
+    if (wedding?.expiresAt && new Date() > new Date(wedding.expiresAt)) {
+      return res.json({ wedding, status: "expired" });
+    }
+
     if (!wedding) {
       return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
     }
 
-    res.json({ wedding });
+    res.json({ wedding, status: "active" });
   } catch (error) {
     console.error('Get public wedding error:', error);
     res.status(500).json({ error: '청첩장 조회 중 오류가 발생했습니다' });
@@ -68,6 +73,8 @@ router.get('/wedding/:slug/guestbook', async (req: Request, res: Response) => {
       where: { slug },
       select: { id: true }
     });
+
+
 
     if (!wedding) {
       return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });

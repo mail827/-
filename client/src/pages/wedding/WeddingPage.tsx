@@ -114,6 +114,19 @@ export default function WeddingPage() {
     );
   }
 
+  if ((data as any)?.status === "expired") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
+        <div className="text-center px-6">
+          <Heart className="w-12 h-12 text-stone-300 mx-auto mb-4" />
+          <p className="text-stone-600 font-medium">청첩장 유효기간이 만료되었습니다</p>
+          <p className="text-stone-400 text-sm mt-2">이 청첩장은 더 이상 열람할 수 없습니다</p>
+        </div>
+      </div>
+    );
+  }
+
+
   if (error || !data?.wedding) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 to-amber-50">
