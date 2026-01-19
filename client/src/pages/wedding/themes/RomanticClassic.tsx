@@ -50,9 +50,9 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
     setTimeout(() => setCopiedAccount(null), 2000);
   };
 
-  const handleShare = async (type: 'kakao' | 'instagram' | 'sms') => {
+  const handleShare = async (type: 'kakao' | 'instagram' | 'sms', version?: string) => {
     const baseUrl = window.location.origin + window.location.pathname;
-    const url = `${baseUrl}?theme=${wedding.theme}`;
+    const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} ♥ ${wedding.brideName}`;
     
     if (type === 'kakao' && window.Kakao) {
@@ -426,7 +426,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
       </AnimatePresence>
 
       <AnimatePresence>
-        <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} variant="light" />
+        <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} variant="light" weddingId={wedding.id} />
       </AnimatePresence>
     </div>
   );

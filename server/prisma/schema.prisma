@@ -170,7 +170,19 @@ model Wedding {
   aiChats         AiChat[]
   reportTokens    ReportToken[]
   reviews         Review[]
+  snapshots       WeddingSnapshot[]
 }
+
+model WeddingSnapshot {
+  id          String   @id @default(cuid())
+  weddingId   String
+  wedding     Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  version     String   @unique
+  data        Json
+  sharedAt    DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
 
 model AiChat {
   id          String   @id @default(cuid())

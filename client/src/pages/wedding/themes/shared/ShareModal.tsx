@@ -1,16 +1,41 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onShare: (type: 'kakao' | 'instagram' | 'sms') => void;
+  onShare: (type: 'kakao' | 'instagram' | 'sms', version?: string) => void;
   variant?: 'light' | 'dark' | 'glass';
+  weddingId?: string;
 }
 
-export default function ShareModal({ isOpen, onClose, onShare, variant = 'light' }: ShareModalProps) {
+export default function ShareModal({ isOpen, onClose, onShare, variant = 'light', weddingId }: ShareModalProps) {
+  const [isCreating, setIsCreating] = useState(false);
+
   if (!isOpen) return null;
 
   const isDark = variant === 'dark';
+
+  const handleShareClick = async (type: 'kakao' | 'instagram' | 'sms') => {
+    if (!weddingId) {
+      onShare(type);
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/snapshot/${weddingId}`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      onShare(type, data.version);
+    } catch (error) {
+      console.error('Snapshot error:', error);
+      onShare(type);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <motion.div
@@ -27,12 +52,15 @@ export default function ShareModal({ isOpen, onClose, onShare, variant = 'light'
         onClick={(e) => e.stopPropagation()}
         className={`w-full max-w-md rounded-t-2xl p-6 ${isDark ? 'bg-[#1a1a1a]' : 'bg-white'}`}
       >
-        <p className={`text-center mb-6 ${isDark ? 'text-white' : 'text-stone-700'}`}>공유하기</p>
+        <p className={`text-center mb-6 ${isDark ? 'text-white' : 'text-stone-700'}`}>
+          {isCreating ? '공유 링크 생성 중...' : '공유하기'}
+        </p>
         
         <div className="flex justify-center gap-8">
           <button
-            onClick={() => onShare('kakao')}
-            className="flex flex-col items-center gap-2"
+            onClick={() => handleShareClick('kakao')}
+            disabled={isCreating}
+            className="flex flex-col items-center gap-2 disabled:opacity-50"
           >
             <div className="w-14 h-14 rounded-full bg-[#FEE500] flex items-center justify-center">
               <svg className="w-7 h-7" viewBox="0 0 24 24" fill="#3C1E1E">
@@ -43,8 +71,9 @@ export default function ShareModal({ isOpen, onClose, onShare, variant = 'light'
           </button>
 
           <button
-            onClick={() => onShare('instagram')}
-            className="flex flex-col items-center gap-2"
+            onClick={() => handleShareClick('instagram')}
+            disabled={isCreating}
+            className="flex flex-col items-center gap-2 disabled:opacity-50"
           >
             <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center">
               <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -55,8 +84,9 @@ export default function ShareModal({ isOpen, onClose, onShare, variant = 'light'
           </button>
 
           <button
-            onClick={() => onShare('sms')}
-            className="flex flex-col items-center gap-2"
+            onClick={() => handleShareClick('sms')}
+            disabled={isCreating}
+            className="flex flex-col items-center gap-2 disabled:opacity-50"
           >
             <div className={`w-14 h-14 rounded-full flex items-center justify-center ${isDark ? 'bg-[#333]' : 'bg-[#34C759]'}`}>
               <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">

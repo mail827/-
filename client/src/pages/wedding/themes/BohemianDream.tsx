@@ -36,9 +36,9 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
     setTimeout(() => setCopiedAccount(null), 2000);
   };
 
-  const handleShare = async (type: 'kakao' | 'instagram' | 'sms') => {
+  const handleShare = async (type: 'kakao' | 'instagram' | 'sms', version?: string) => {
     const baseUrl = window.location.origin + window.location.pathname;
-    const url = `${baseUrl}?theme=${wedding.theme}`;
+    const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} & ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
       window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'korean'), imageUrl: wedding.heroMedia || '', link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
@@ -239,7 +239,7 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
       <footer className="py-8 text-center text-[10px] tracking-widest" style={{ background: "#F5EDE0" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[#8B7355] hover:text-[#6B5540] transition-colors">Made by 청첩장 작업실 ›</a></footer>
 
       <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} />}</AnimatePresence>
-      <AnimatePresence><ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} variant="light" /></AnimatePresence>
+      <AnimatePresence><ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="light" /></AnimatePresence>
     </div>
   );
 }

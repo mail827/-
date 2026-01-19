@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Volume2, VolumeX, MapPin, Calendar, Clock } from 'lucide-react';
-import { KakaoMap, GuestbookList, GalleryModal, formatDate, formatTime, getDday, type ThemeProps } from './shared';
+import { KakaoMap, GuestbookList, GalleryModal, ShareModal, formatDate, formatTime, getDday, type ThemeProps } from './shared';
 
 export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -11,6 +11,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
   const [guestbookSubmitted, setGuestbookSubmitted] = useState(false);
   const [localGuestbooks, setLocalGuestbooks] = useState(guestbooks || []);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const C = wedding.themeColor || '#1E3A5F';
@@ -24,6 +25,25 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
       audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
     }
   }, [wedding.bgMusicAutoPlay]);
+
+  const handleShare = async (type: "kakao" | "instagram" | "sms", version?: string) => {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const url = version ? `${baseUrl}?v=${version}` : baseUrl;
+    const title = `${wedding.groomName} ♥ ${wedding.brideName}`;
+    if (type === "kakao" && window.Kakao) {
+      window.Kakao.Share.sendDefault({
+        objectType: "feed",
+        content: { title, description: `${formatDate(wedding.weddingDate, "korean")} ${formatTime(wedding.weddingTime)}`, imageUrl: wedding.heroMedia || "", link: { mobileWebUrl: url, webUrl: url } },
+        buttons: [{ title: "청첩장 보기", link: { mobileWebUrl: url, webUrl: url } }]
+      });
+    } else if (type === "instagram") {
+      await navigator.clipboard.writeText(url);
+      alert("링크가 복사되었습니다.");
+    } else if (type === "sms") {
+      window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${url}`)}`;
+    }
+    setShowShareModal(false);
+  };
 
   const toggleMusic = () => {
     if (!audioRef.current) return;
@@ -295,6 +315,17 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
           )}
         </div>
       </Section>
+
+
+      <Section bgColor={C_light}>
+        <div className="text-center">
+          <button onClick={() => setShowShareModal(true)} className="w-full py-4 text-lg font-medium rounded-xl" style={{ background: C, color: "white" }}>
+            공유하기
+          </button>
+        </div>
+      </Section>
+
+      <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="light" />
 
       <footer className="py-8 text-center" style={{ background: "#F5F5F5" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-600 transition-colors text-sm">Made by 청첩장 작업실 ›</a></footer>
 

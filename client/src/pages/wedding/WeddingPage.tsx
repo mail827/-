@@ -69,10 +69,17 @@ const themeComponents: Record<Theme, React.ComponentType<any>> = {
 export default function WeddingPage() {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
+  const version = searchParams.get("v");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['wedding', slug],
-    queryFn: () => publicApi<{ wedding: Wedding }>(`/wedding/${slug}`)
+    queryKey: ['wedding', slug, version],
+    queryFn: async () => {
+      if (version) {
+        const res = await fetch(`${API_BASE}/api/snapshot/${slug}/${version}`);
+        if (res.ok) return { wedding: await res.json() as Wedding };
+      }
+      return publicApi<{ wedding: Wedding }>(`/wedding/${slug}`);
+    }
   });
 
   const { data: guestbookData, refetch: refetchGuestbook } = useQuery({

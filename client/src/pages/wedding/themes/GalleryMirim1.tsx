@@ -46,8 +46,9 @@ export default function GalleryMirim1({ wedding, guestbooks, onRsvpSubmit, onGue
     setTimeout(() => setCopiedAccount(null), 2000);
   };
 
-  const handleShare = async (type: 'kakao' | 'instagram' | 'sms') => {
-    const url = window.location.href;
+  const handleShare = async (type: 'kakao' | 'instagram' | 'sms', version?: string) => {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} ♥ ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
       window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'korean'), imageUrl: wedding.heroMedia || '', link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
@@ -284,7 +285,7 @@ export default function GalleryMirim1({ wedding, guestbooks, onRsvpSubmit, onGue
       <footer className="py-12 text-center" style={{ background: "#F5EEE6" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.55rem] tracking-[0.2em] hover:opacity-70 transition-opacity" style={{ ...serifFont, color: "#9A8B75" }}>Made by 청첩장 작업실 ›</a></footer>
 
       {galleryIndex !== null && galleries.length > 0 && <GalleryModal galleries={galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} />}
-      <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} variant="light" />
+      <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="light" />
     </div>
   );
 }

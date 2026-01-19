@@ -40,9 +40,9 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
     setTimeout(() => setCopiedAccount(null), 2000);
   };
 
-  const handleShare = async (type: 'kakao' | 'instagram' | 'sms') => {
+  const handleShare = async (type: 'kakao' | 'instagram' | 'sms', version?: string) => {
     const baseUrl = window.location.origin + window.location.pathname;
-    const url = `${baseUrl}?theme=${wedding.theme}`;
+    const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} · ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
       window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'dots'), imageUrl: wedding.heroMedia || '', link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
@@ -374,7 +374,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
           onNavigate={setGalleryIndex}
         />
       )}
-      <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} variant="light" />
+      <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="light" />
     </div>
   );
 }
