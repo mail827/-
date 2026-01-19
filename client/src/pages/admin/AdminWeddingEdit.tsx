@@ -7,18 +7,18 @@ import AiWritingAssistant from '../../components/AiWritingAssistant';
 import type { Wedding } from '../../types';
 
 const THEMES = [
-  { id: 'ROMANTIC_CLASSIC', name: '로맨틱 클래식' },
-  { id: 'MODERN_MINIMAL', name: '모던 미니멀' },
-  { id: 'BOHEMIAN_DREAM', name: '보헤미안 드림' },
-  { id: 'LUXURY_GOLD', name: '럭셔리 골드' },
-  { id: 'POETIC_LOVE', name: '포에틱 러브' },
-  { id: 'SENIOR_SIMPLE', name: '어르신용 심플' },
-  { id: 'FOREST_GARDEN', name: '포레스트 가든' },
-  { id: 'OCEAN_BREEZE', name: '오션 브리즈' },
-  { id: 'GLASS_BUBBLE', name: '글라스 버블' },
-  { id: 'SPRING_BREEZE', name: '봄바람' },
-  { id: 'GALLERY_MIRIM_1', name: 'Gallery 美林-1' },
-  { id: 'GALLERY_MIRIM_2', name: 'Gallery 美林-2' },
+  { id: 'ROMANTIC_CLASSIC', name: '로맨틱 클래식', desc: '우아하고 낭만적인 클래식 디자인' },
+  { id: 'MODERN_MINIMAL', name: '모던 미니멀', desc: '깔끔한 여백과 타이포그래피' },
+  { id: 'BOHEMIAN_DREAM', name: '보헤미안 드림', desc: '자유롭고 따뜻한 보태니컬 감성' },
+  { id: 'LUXURY_GOLD', name: '럭셔리 골드', desc: '다크 배경에 골드 아르데코' },
+  { id: 'POETIC_LOVE', name: '포에틱 러브', desc: '시적인 감성의 라벤더 톤' },
+  { id: 'SENIOR_SIMPLE', name: '어르신용 심플', desc: '큰 글씨, 심플한 구성' },
+  { id: 'FOREST_GARDEN', name: '포레스트 가든', desc: '자연 속 싱그러운 그린 톤' },
+  { id: 'OCEAN_BREEZE', name: '오션 브리즈', desc: '시원한 바다 블루 컬러' },
+  { id: 'GLASS_BUBBLE', name: '글라스 버블', desc: '투명한 글라스모피즘 파스텔' },
+  { id: 'SPRING_BREEZE', name: '봄바람', desc: '손글씨 감성의 핑크 수채화' },
+  { id: 'GALLERY_MIRIM_1', name: 'Gallery 美林-1', desc: '따뜻한 세피아 종이 질감' },
+  { id: 'GALLERY_MIRIM_2', name: 'Gallery 美林-2', desc: '청량한 다크 필름 톤' },
 ];
 
 const SENIOR_COLORS = [
@@ -406,8 +406,9 @@ export default function AdminWeddingEdit() {
           <Section title="테마">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {THEMES.map(theme => (
-                <button key={theme.id} onClick={() => updateField('theme', theme.id)} className={`p-3 rounded-xl border-2 text-sm transition-all ${wedding.theme === theme.id ? 'border-stone-800 bg-stone-50' : 'border-stone-200 hover:border-stone-400'}`}>
-                  {theme.name}
+                <button key={theme.id} onClick={() => updateField("theme", theme.id)} className={`p-4 rounded-xl border-2 text-left transition-all ${wedding.theme === theme.id ? "border-stone-800 bg-stone-50" : "border-stone-200 hover:border-stone-400"}`}>
+                  <p className="font-medium text-stone-800">{theme.name}</p>
+                  <p className="text-xs text-stone-500 mt-1">{theme.desc}</p>
                 </button>
               ))}
             </div>

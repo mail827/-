@@ -4,7 +4,7 @@ interface GuestbookFormProps {
   weddingId: string;
   onSubmit: (data: { weddingId: string; name: string; password: string; message: string }) => Promise<void>;
   isLoading: boolean;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2';
 }
 
 export default function GuestbookForm({ weddingId: _weddingId, onSubmit, isLoading, variant = 'classic' }: GuestbookFormProps) {
@@ -31,6 +31,8 @@ export default function GuestbookForm({ weddingId: _weddingId, onSubmit, isLoadi
     ocean: { input: 'bg-white border-[#5B8FA8]/20 focus:border-[#5B8FA8]', button: 'bg-[#5B8FA8] hover:bg-[#4B7F98]' },
     glass: { input: 'bg-white/40 backdrop-blur-md border-white/50 focus:border-[#C4B8E8]', button: 'bg-gradient-to-r from-[#C4B8E8] to-[#A8D0E8] hover:opacity-90' },
     spring: { input: 'bg-white/75 border-[#FFE0E8] focus:border-[#E8B0C0]', button: 'bg-gradient-to-r from-[#E8B0C0] to-[#D0A0C8] hover:opacity-90' },
+    mirim1: { input: 'bg-black/[0.01] border-black/10 focus:border-black/30', button: 'bg-[#111] hover:bg-black' },
+    mirim2: { input: 'bg-[#1E2220] border-[#3A4B40] focus:border-[#5A6B60] text-[#D4E0D8] placeholder:text-[#5A6B60]', button: 'bg-[#A8BFB0] hover:bg-[#8AA090] text-[#1A1D1C]' },
   };
 
   const s = styles[variant];

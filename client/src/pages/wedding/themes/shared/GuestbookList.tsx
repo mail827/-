@@ -13,7 +13,7 @@ interface GuestbookListProps {
   guestbooks: GuestbookItem[];
   weddingSlug: string;
   onDelete?: (id: string) => void;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'senior' | 'poetic' | 'glass' | 'spring';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'senior' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2';
 }
 
 export default function GuestbookList({ guestbooks, weddingSlug, onDelete, variant = 'classic' }: GuestbookListProps) {
@@ -34,6 +34,8 @@ export default function GuestbookList({ guestbooks, weddingSlug, onDelete, varia
     senior: { card: 'pb-4 border-b-2 border-amber-50 last:border-0', text: 'text-gray-800 font-medium', subtext: 'text-gray-600', date: 'text-gray-400', btn: 'text-amber-300 hover:text-amber-500', modal: 'bg-white', input: 'border-2 border-amber-100 focus:border-amber-300', confirmBtn: 'bg-amber-500 hover:bg-amber-600' },
     glass: { card: 'bg-white/40 backdrop-blur-md rounded-[16px] p-4 border border-white/50', text: 'text-[#6B5B8C]', subtext: 'text-[#8B7EB0]', date: 'text-[#B8B0D0]', btn: 'text-[#C4B8E8] hover:text-[#9B8EC2]', modal: 'bg-white/80 backdrop-blur-xl', input: 'bg-white/40 border-white/50 focus:border-[#C4B8E8]', confirmBtn: 'bg-gradient-to-r from-[#C4B8E8] to-[#A8D0E8] hover:opacity-90' },
     spring: { card: 'bg-white/75 rounded-[14px] p-4 border border-[#FFE0E8]', text: 'text-[#6B5060]', subtext: 'text-[#8B7080]', date: 'text-[#C8A0B0]', btn: 'text-[#D4A0B0] hover:text-[#C08090]', modal: 'bg-white', input: 'border-[#FFE0E8] focus:border-[#E8B0C0]', confirmBtn: 'bg-gradient-to-r from-[#E8B0C0] to-[#D0A0C8] hover:opacity-90' },
+    mirim1: { card: 'pb-4 border-b border-black/5', text: 'text-[#444]', subtext: 'text-[#888]', date: 'text-[#aaa]', btn: 'text-black/20 hover:text-black/50', modal: 'bg-white', input: 'border-black/10 focus:border-black/30', confirmBtn: 'bg-[#111] hover:bg-black' },
+    mirim2: { card: 'bg-[#1E2220] border border-[#3A4B40] p-4', text: 'text-[#D4E0D8]', subtext: 'text-[#8A9B90]', date: 'text-[#5A6B60]', btn: 'text-[#5A6B60] hover:text-[#A8BFB0]', modal: 'bg-[#1A1D1C]', input: 'bg-[#1E2220] border-[#3A4B40] focus:border-[#5A6B60] text-[#D4E0D8]', confirmBtn: 'bg-[#A8BFB0] hover:bg-[#8AA090] text-[#1A1D1C]' },
     glass_old: { card: 'bg-white/40 backdrop-blur-md rounded-[16px] p-4 border border-white/50', text: 'text-[#6B5B8C]', subtext: 'text-[#8B7EB0]', date: 'text-[#B8B0D0]', btn: 'text-[#C4B8E8] hover:text-[#9B8EC2]', modal: 'bg-white/80 backdrop-blur-xl', input: 'bg-white/40 border-white/50 focus:border-[#C4B8E8]', confirmBtn: 'bg-gradient-to-r from-[#C4B8E8] to-[#A8D0E8] hover:opacity-90' },
   };
 

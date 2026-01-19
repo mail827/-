@@ -5,7 +5,7 @@ interface RsvpFormProps {
   weddingId: string;
   onSubmit: (data: { weddingId: string; name: string; phone: string; side: 'GROOM' | 'BRIDE'; attending: boolean; guestCount: number; message?: string }) => Promise<void>;
   isLoading: boolean;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2';
 }
 
 export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, variant = 'classic' }: RsvpFormProps) {
@@ -43,6 +43,8 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
     ocean: { input: 'bg-white border-[#5B8FA8]/20 focus:border-[#5B8FA8]', button: 'bg-[#5B8FA8] hover:bg-[#4B7F98]', active: 'bg-[#5B8FA8] text-white', inactive: 'bg-white border-[#5B8FA8]/20 text-[#5B6B7B]' },
     glass: { input: 'bg-white/40 backdrop-blur-md border-white/50 focus:border-[#C4B8E8]', button: 'bg-gradient-to-r from-[#C4B8E8] to-[#A8D0E8] hover:opacity-90', active: 'bg-gradient-to-r from-[#C4B8E8] to-[#A8D0E8] text-white', inactive: 'bg-white/40 backdrop-blur-md border-white/50 text-[#7B6B9C]' },
     spring: { input: 'bg-white/75 border-[#FFE0E8] focus:border-[#E8B0C0]', button: 'bg-gradient-to-r from-[#E8B0C0] to-[#D0A0C8] hover:opacity-90', active: 'bg-gradient-to-r from-[#E8B0C0] to-[#D0A0C8] text-white', inactive: 'bg-white/75 border-[#FFE0E8] text-[#8B6B7B]' },
+    mirim1: { input: 'bg-black/[0.01] border-black/10 focus:border-black/30', button: 'bg-[#111] hover:bg-black', active: 'bg-[#111] text-white', inactive: 'bg-white border-black/10 text-[#666]' },
+    mirim2: { input: 'bg-[#1E2220] border-[#3A4B40] focus:border-[#5A6B60] text-[#D4E0D8] placeholder:text-[#5A6B60]', button: 'bg-[#A8BFB0] hover:bg-[#8AA090] text-[#1A1D1C]', active: 'bg-[#A8BFB0] text-[#1A1D1C]', inactive: 'bg-[#1E2220] border-[#3A4B40] text-[#6A7B70]' },
   };
 
   const s = styles[variant];
