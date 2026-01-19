@@ -14,6 +14,8 @@ const THEMES = [
   { id: 'OCEAN_BREEZE', name: '오션 브리즈', desc: '시원한 바다 느낌', color: 'from-cyan-100 to-blue-100' },
   { id: 'GLASS_BUBBLE', name: '글라스 버블', desc: '투명하고 몽환적인 감성', color: 'from-violet-100 to-purple-100' },
   { id: 'SPRING_BREEZE', name: '봄바람', desc: '따뜻하고 포근한 봄 느낌', color: 'from-pink-100 to-rose-100' },
+  { id: 'GALLERY_MIRIM_1', name: 'Gallery 美林-1', desc: '따뜻한 세피아 종이 질감', color: 'from-amber-50 to-yellow-100' },
+  { id: 'GALLERY_MIRIM_2', name: 'Gallery 美林-2', desc: '청량한 다크 필름 톤', color: 'from-slate-200 to-zinc-300' },
 ];
 
 interface Package {
