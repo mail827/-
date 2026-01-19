@@ -1,96 +1,85 @@
 import cron from 'node-cron';
 import { PrismaClient } from '@prisma/client';
-import crypto from 'crypto';
-import { sendReportEmail } from './email.js';
+import { sendReminderNotification } from './solapi';
 
 const prisma = new PrismaClient();
 
-export function startScheduler() {
-  cron.schedule('0 10 * * *', async () => {
-    console.log('[Scheduler] D+1 리포트 발송 체크 시작...');
-    
-    try {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
-      
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const weddings = await prisma.wedding.findMany({
-        where: {
-          weddingDate: {
-            gte: yesterday,
-            lt: today
-          },
-          aiEnabled: true
-        },
-        include: {
-          user: true
-        }
-      });
-
-      console.log(`[Scheduler] ${weddings.length}개 결혼식 발견`);
-
-      for (const wedding of weddings) {
-        const token = crypto.randomBytes(32).toString('hex');
-        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-        await prisma.reportToken.create({
-          data: {
-            weddingId: wedding.id,
-            token,
-            expiresAt
-          }
-        });
-
-        const chats = await prisma.aiChat.findMany({
-          where: { weddingId: wedding.id },
-          orderBy: { createdAt: 'desc' }
-        });
-
-        const userChats = chats.filter(c => c.role === 'USER');
-        const uniqueVisitors = new Set(chats.map(c => c.visitorId)).size;
-
-        const questionCounts: Record<string, number> = {};
-        userChats.forEach(chat => {
-          const q = chat.content.slice(0, 50);
-          questionCounts[q] = (questionCounts[q] || 0) + 1;
-        });
-
-        const topQuestions = Object.entries(questionCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([question, count]) => ({ question, count }));
-
-        const funnyKeywords = ['술', '비밀', '연애', '첫키스', '프로포즈', '몇번', '바람', '전여친', '전남친', '썸', 'ㅋㅋ', '진짜', '실화'];
-        const funnyQuestions = userChats
-          .filter(c => funnyKeywords.some(k => c.content.includes(k)))
-          .slice(0, 5)
-          .map(c => c.content);
-
-        const reportUrl = `${process.env.CLIENT_URL || 'https://weddingshop.cloud'}/report/${token}`;
-
-        if (wedding.user.email) {
-          await sendReportEmail(
-            wedding.user.email,
-            wedding.groomName,
-            wedding.brideName,
-            reportUrl,
-            {
-              totalChats: chats.length,
-              uniqueVisitors,
-              topQuestions,
-              funnyQuestions
-            }
-          );
-          console.log(`[Scheduler] 리포트 발송 완료: ${wedding.groomName} ♥ ${wedding.brideName}`);
-        }
-      }
-    } catch (error) {
-      console.error('[Scheduler] 리포트 발송 에러:', error);
-    }
-  });
-
-  console.log('[Scheduler] D+1 리포트 스케줄러 시작됨 (매일 오전 10시)');
+function getDDay(weddingDate: Date): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const wedding = new Date(weddingDate);
+  wedding.setHours(0, 0, 0, 0);
+  const diff = wedding.getTime() - today.getTime();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+async function sendReminders() {
+  console.log('[Scheduler] 리마인더 체크 시작:', new Date().toISOString());
+  
+  try {
+    const weddings = await prisma.wedding.findMany({
+      where: {
+        isPublished: true,
+        isArchived: false,
+        notificationEnabled: true,
+        weddingDate: { gte: new Date() }
+      }
+    });
+
+    for (const wedding of weddings) {
+      const dDay = getDDay(wedding.weddingDate);
+      const sentDays = wedding.reminderSentDays ? wedding.reminderSentDays.split(',') : [];
+      const dayKey = `d${dDay}`;
+      
+      if (sentDays.includes(dayKey)) continue;
+      
+      let shouldSend = false;
+      if (dDay === 7 && wedding.reminderD7) shouldSend = true;
+      if (dDay === 3 && wedding.reminderD3) shouldSend = true;
+      if (dDay === 1 && wedding.reminderD1) shouldSend = true;
+      
+      if (!shouldSend) continue;
+      
+      const weddingUrl = `https://weddingshop.cloud/w/${wedding.slug}`;
+      const weddingDateStr = formatDate(wedding.weddingDate);
+      
+      const phones = [wedding.groomPhone, wedding.bridePhone].filter(Boolean) as string[];
+      
+      for (const phone of phones) {
+        await sendReminderNotification({
+          to: phone,
+          groomName: wedding.groomName,
+          brideName: wedding.brideName,
+          dDay,
+          weddingDate: weddingDateStr,
+          weddingUrl
+        });
+      }
+      
+      sentDays.push(dayKey);
+      await prisma.wedding.update({
+        where: { id: wedding.id },
+        data: { reminderSentDays: sentDays.join(',') }
+      });
+      
+      console.log(`[Scheduler] D-${dDay} 리마인더 발송 완료: ${wedding.groomName}♥${wedding.brideName}`);
+    }
+    
+    console.log('[Scheduler] 리마인더 체크 완료');
+  } catch (error) {
+    console.error('[Scheduler] 리마인더 발송 에러:', error);
+  }
+}
+
+export function startScheduler() {
+  cron.schedule('0 9 * * *', sendReminders, {
+    timezone: 'Asia/Seoul'
+  });
+  console.log('[Scheduler] D-Day 리마인더 스케줄러 시작 (매일 09:00 KST)');
+}
+
+export { sendReminders };

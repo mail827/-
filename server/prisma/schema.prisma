@@ -96,6 +96,10 @@ model Wedding {
   brideNameEn     String?
   bridePhone      String?
   notificationEnabled Boolean @default(true)
+  reminderD7      Boolean  @default(true)
+  reminderD3      Boolean  @default(true)
+  reminderD1      Boolean  @default(true)
+  reminderSentDays String?
   brideFatherName String?
   brideMotherName String?
   brideFatherPhone String?
