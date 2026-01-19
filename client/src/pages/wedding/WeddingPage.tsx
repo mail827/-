@@ -75,7 +75,7 @@ export default function WeddingPage() {
     queryKey: ['wedding', slug, version],
     queryFn: async () => {
       if (version) {
-        const res = await fetch(`${API_BASE}/api/snapshot/${slug}/${version}`);
+        const res = await fetch(`${API_BASE}/snapshot/${slug}/${version}`);
         if (res.ok) return { wedding: await res.json() as Wedding };
       }
       return publicApi<{ wedding: Wedding }>(`/wedding/${slug}`);

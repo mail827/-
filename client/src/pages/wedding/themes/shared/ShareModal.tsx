@@ -25,7 +25,7 @@ export default function ShareModal({ isOpen, onClose, onShare, variant = 'light'
 
     setIsCreating(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/snapshot/${weddingId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/snapshot/${weddingId}`, {
         method: 'POST'
       });
       const data = await res.json();
