@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { PrismaClient } from '@prisma/client';
-import { sendReminderNotification } from './solapi';
+import { sendReminderNotification } from './solapi.js';
 
 const prisma = new PrismaClient();
 
