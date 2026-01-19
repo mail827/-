@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, MapPin, Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
+import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
 import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+
+const fontStyles = `
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+`;
 
 export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -44,7 +48,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
       window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'dots'), imageUrl: wedding.heroMedia || '', link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') {
       await navigator.clipboard.writeText(url);
-      alert('링크가 복사되었습니다.\n인스타그램 스토리에 공유해보세요!');
+      alert('링크가 복사되었습니다.');
     } else if (type === 'sms') {
       window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${url}`)}`;
     }
@@ -52,231 +56,325 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
   };
 
   const calendarData = getCalendarData(wedding.weddingDate);
+  const galleryImages = wedding.galleries?.filter(g => g.mediaType === 'IMAGE').map(g => g.mediaUrl) || [];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]" style={{ fontFamily: "'Pretendard', sans-serif" }}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "'Pretendard', sans-serif" }}>
+      <style>{fontStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       
       {wedding.bgMusicUrl && (
-        <button onClick={toggleMusic} className="fixed top-4 right-4 z-50 w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center border border-stone-100">
-          {isPlaying ? <Volume2 className="w-4 h-4 text-stone-600" /> : <VolumeX className="w-4 h-4 text-stone-300" />}
+        <button onClick={toggleMusic} className="fixed top-4 right-4 z-50 w-10 h-10 rounded-full bg-white border border-black/10 flex items-center justify-center">
+          {isPlaying ? <Volume2 className="w-4 h-4 text-black" /> : <VolumeX className="w-4 h-4 text-black/30" />}
         </button>
       )}
 
-      <section className="min-h-screen flex flex-col">
-        <p className="text-center text-[10px] tracking-[0.4em] text-stone-400 pt-12 pb-8">THE WEDDING OF</p>
-        
-        {wedding.heroMedia && (
-          <div className="flex-1 flex items-center justify-center px-8">
-            <div className="relative w-full max-w-sm">
-              <div className="aspect-[3/4] overflow-hidden">
+      <section className="min-h-screen flex flex-col justify-center px-8 py-16">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2 }} className="text-center">
+          <p className="text-[10px] tracking-[0.5em] text-black/40 mb-12">WEDDING INVITATION</p>
+          
+          {wedding.heroMedia && (
+            <div className="mb-12">
+              <div className="relative w-full max-w-xs mx-auto aspect-[3/4] overflow-hidden">
                 {wedding.heroMediaType === 'VIDEO' ? (
                   <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" />
                 ) : (
                   <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" />
                 )}
               </div>
-              <div className="absolute bottom-0 left-0 right-0 h-8 bg-white flex items-center justify-center">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-4 bg-[#E8E4DF] rounded-sm" />
-                  <div className="w-3 h-3 bg-white border border-stone-200 rounded-sm rotate-45" />
-                  <div className="w-8 h-4 bg-[#E8E4DF] rounded-sm" />
-                </div>
-              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="text-center py-12 px-6">
-          <h1 className="text-xl tracking-[0.2em] text-[#8B8577] font-light">
-            {wedding.groomName} <span className="mx-3 text-stone-300">·</span> {wedding.brideName}
-          </h1>
-          <div className="mt-6 text-sm text-stone-400 space-y-1">
-            <p>{formatDate(wedding.weddingDate, 'dots')} SAT PM {wedding.weddingTime?.split(':').slice(0,2).join(':')}</p>
-            <p>{wedding.venue}</p>
+          <div className="space-y-6">
+            <div className="flex items-center justify-center gap-6">
+              <span className="text-[28px] font-extralight tracking-wide">{wedding.groomName}</span>
+              <span className="text-[12px] text-black/30">&</span>
+              <span className="text-[28px] font-extralight tracking-wide">{wedding.brideName}</span>
+            </div>
+            
+            <div className="w-8 h-px bg-black/20 mx-auto" />
+            
+            <div className="space-y-1">
+              <p className="text-[13px] font-light text-black/60">{formatDate(wedding.weddingDate, 'korean')}</p>
+              <p className="text-[12px] font-light text-black/40">{formatTime(wedding.weddingTime)}</p>
+            </div>
+
+            {wedding.showDday && (
+              <p className="text-[11px] tracking-[0.2em] text-black/30 pt-4">{getDday(wedding.weddingDate)}</p>
+            )}
           </div>
-          {wedding.showDday && <p className="mt-4 text-xs text-stone-300">{getDday(wedding.weddingDate)}</p>}
-        </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1, duration: 0.8 }} className="absolute bottom-8 left-1/2 -translate-x-1/2">
+          <ChevronDown className="w-5 h-5 text-black/20 animate-bounce" />
+        </motion.div>
       </section>
 
       {wedding.greeting && (
-        <Section>
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center">
-            {wedding.greetingTitle && <p className="text-stone-500 mb-6">{wedding.greetingTitle}</p>}
-            <p className="text-sm text-stone-400 leading-[2.2] whitespace-pre-line">{wedding.greeting}</p>
+        <section className="py-20 px-8">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="max-w-sm mx-auto text-center">
+            {wedding.greetingTitle && (
+              <p className="text-[15px] font-light leading-relaxed text-black/80 mb-8 whitespace-pre-line">{wedding.greetingTitle}</p>
+            )}
+            <p className="text-[13px] font-light leading-[2] text-black/50 whitespace-pre-line">{wedding.greeting}</p>
+
             {wedding.showParents && (
-              <div className="mt-10 pt-6 border-t border-stone-100 grid grid-cols-2 gap-6 text-sm">
-                <div className="text-center">
-                  <p className="text-[10px] tracking-[0.2em] text-stone-300 mb-2">GROOM</p>
-                  <p className="text-stone-400 text-xs">{wedding.groomFatherName} · {wedding.groomMotherName}</p>
-                  <p className="text-stone-600 mt-1">{wedding.groomName}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[10px] tracking-[0.2em] text-stone-300 mb-2">BRIDE</p>
-                  <p className="text-stone-400 text-xs">{wedding.brideFatherName} · {wedding.brideMotherName}</p>
-                  <p className="text-stone-600 mt-1">{wedding.brideName}</p>
+              <div className="mt-12 pt-8 border-t border-black/5">
+                <div className="space-y-4 text-[12px] font-light text-black/50">
+                  <p>
+                    {wedding.groomFatherName && <span>{wedding.groomFatherName}</span>}
+                    {wedding.groomFatherName && wedding.groomMotherName && <span> · </span>}
+                    {wedding.groomMotherName && <span>{wedding.groomMotherName}</span>}
+                    <span className="text-black/30 ml-2">의 아들</span>
+                    <span className="text-black/70 ml-2">{wedding.groomName}</span>
+                  </p>
+                  <p>
+                    {wedding.brideFatherName && <span>{wedding.brideFatherName}</span>}
+                    {wedding.brideFatherName && wedding.brideMotherName && <span> · </span>}
+                    {wedding.brideMotherName && <span>{wedding.brideMotherName}</span>}
+                    <span className="text-black/30 ml-2">의 딸</span>
+                    <span className="text-black/70 ml-2">{wedding.brideName}</span>
+                  </p>
                 </div>
               </div>
             )}
           </motion.div>
-        </Section>
+        </section>
       )}
 
-      <Section className="bg-white">
-        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
-          <p className="text-[10px] tracking-[0.3em] text-stone-300 mb-6">CALENDAR</p>
-          <div className="max-w-xs mx-auto">
-            <p className="text-stone-500 text-lg mb-4">{calendarData.year}. {String(calendarData.month).padStart(2, '0')}</p>
-            <div className="grid grid-cols-7 gap-1 text-xs">
-              {['S','M','T','W','T','F','S'].map((d,i) => <div key={i} className="py-2 text-stone-300">{d}</div>)}
-              {calendarData.weeks.flat().map((day, i) => (
-                <div key={i} className={`py-2 ${day === calendarData.targetDay ? 'bg-stone-800 text-white rounded-full' : day ? 'text-stone-500' : ''}`}>{day}</div>
-              ))}
-            </div>
-            <div className="mt-6 flex justify-center gap-6 text-xs text-stone-400">
-              <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{formatDate(wedding.weddingDate, 'short')}</span>
-              <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{formatTime(wedding.weddingTime)}</span>
-            </div>
-          </div>
-        </motion.div>
-      </Section>
-
-      {wedding.loveStoryVideo && (
-  <section className="py-16 px-6">
-    <div className="max-w-md mx-auto text-center">
-      <p className="text-[10px] tracking-[0.2em] text-stone-300 mb-6">OUR STORY</p>
-      <div className="rounded-xl overflow-hidden bg-stone-100">
-        {wedding.loveStoryVideo.includes("youtube") || wedding.loveStoryVideo.includes("youtu.be") ? (
-          <iframe src={wedding.loveStoryVideo.includes("youtu.be") ? `https://www.youtube.com/embed/${wedding.loveStoryVideo.split("youtu.be/")[1]?.split("?")[0]}` : `https://www.youtube.com/embed/${wedding.loveStoryVideo.split("watch?v=")[1]?.split("&")[0]}`} className="w-full aspect-video" allowFullScreen />
-        ) : (
-          <video src={wedding.loveStoryVideo} controls className="w-full aspect-video" />
-        )}
-      </div>
-    </div>
-  </section>
-)}
-
-      {wedding.galleries && wedding.galleries.length > 0 && (
-        <Section id="gallery-section">
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
-            <p className="text-[10px] tracking-[0.3em] text-stone-300 mb-6">GALLERY</p>
+      {galleryImages.length > 0 && (
+        <section className="py-16">
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="px-4">
+            <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-8">GALLERY</p>
             <div className="grid grid-cols-3 gap-1">
-              {wedding.galleries.slice(0, 9).map((item, index) => (
-                <div key={item.id} onClick={() => setGalleryIndex(index)} className="aspect-square cursor-pointer overflow-hidden bg-stone-100">
-                  {item.mediaType === 'VIDEO' ? <video src={item.mediaUrl} className="w-full h-full object-cover" /> : <img src={item.mediaUrl} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />}
+              {galleryImages.map((img, i) => (
+                <div key={i} onClick={() => setGalleryIndex(i)} className="aspect-square cursor-pointer overflow-hidden">
+                  <img src={img} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                 </div>
               ))}
             </div>
           </motion.div>
-        </Section>
+        </section>
       )}
 
-      <Section id="venue-section" className="bg-white">
-        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center">
-          <p className="text-[10px] tracking-[0.3em] text-stone-300 mb-6">LOCATION</p>
-          <KakaoMap address={wedding.venueAddress} />
-          <div className="mt-6">
-            <p className="text-stone-600 flex items-center justify-center gap-1"><MapPin className="w-4 h-4 text-stone-400" />{wedding.venue}</p>
-            {wedding.venueHall && <p className="text-stone-400 text-sm mt-1">{wedding.venueHall}</p>}
-            <p className="text-stone-400 text-sm mt-1">{wedding.venueAddress}</p>
-            <div className="flex justify-center gap-2 mt-4">
-              {wedding.venueNaverMap && <a href={wedding.venueNaverMap} target="_blank" className="px-4 py-2 border border-stone-200 text-stone-500 text-xs hover:bg-stone-50 transition-colors">네이버</a>}
-              {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" className="px-4 py-2 border border-stone-200 text-stone-500 text-xs hover:bg-stone-50 transition-colors">카카오</a>}
-              {wedding.venueTmap && <a href={wedding.venueTmap} target="_blank" className="px-4 py-2 border border-stone-200 text-stone-500 text-xs hover:bg-stone-50 transition-colors">티맵</a>}
+      <section className="py-20 px-8 bg-black/[0.02]">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-sm mx-auto">
+          <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-12">CALENDAR</p>
+          
+          <div className="bg-white p-6">
+            <p className="text-center text-[13px] font-light text-black/60 mb-6">
+              {calendarData.year}. {String(calendarData.month).padStart(2, '0')}
+            </p>
+            <div className="grid grid-cols-7 text-center text-[11px] mb-2">
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                <span key={i} className={`py-2 font-light ${i === 0 ? 'text-red-400/70' : 'text-black/30'}`}>{d}</span>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 text-center text-[12px]">
+              {calendarData.weeks.flat().map((day, i) => (
+                <span
+                  key={i}
+                  className={`py-2 font-light ${
+                    day === calendarData.targetDay
+                      ? 'bg-black text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto'
+                      : day ? 'text-black/60' : ''
+                  }`}
+                >
+                  {day || ''}
+                </span>
+              ))}
             </div>
           </div>
-        </motion.div>
-      </Section>
 
-      <Section id="rsvp-section">
-        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
-          <p className="text-[10px] tracking-[0.3em] text-stone-300 mb-6">RSVP</p>
-          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="minimal" />
+          <div className="mt-8 text-center space-y-1">
+            <p className="text-[13px] font-light text-black/70">{formatDate(wedding.weddingDate, 'korean')}</p>
+            <p className="text-[12px] font-light text-black/40">{formatTime(wedding.weddingTime)}</p>
+          </div>
         </motion.div>
-      </Section>
+      </section>
+
+      <section className="py-20 px-8">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-sm mx-auto">
+          <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-12">LOCATION</p>
+          
+          <div className="text-center mb-8">
+            <p className="text-[15px] font-light text-black/80 mb-1">{wedding.venue}</p>
+            {wedding.venueHall && <p className="text-[13px] font-light text-black/50">{wedding.venueHall}</p>}
+            {wedding.venueAddress && <p className="text-[12px] font-light text-black/40 mt-3">{wedding.venueAddress}</p>}
+          </div>
+
+          {wedding.venueAddress && (
+            <div className="aspect-[4/3] bg-black/5 mb-6 overflow-hidden">
+              <KakaoMap address={wedding.venueAddress} />
+            </div>
+          )}
+
+          <div className="flex justify-center gap-2">
+            {wedding.venueNaverMap && (
+              <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 text-[11px] font-light border border-black/10 text-black/60 hover:bg-black hover:text-white transition-colors">
+                네이버 지도
+              </a>
+            )}
+            {wedding.venueKakaoMap && (
+              <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 text-[11px] font-light border border-black/10 text-black/60 hover:bg-black hover:text-white transition-colors">
+                카카오 지도
+              </a>
+            )}
+            {wedding.venueTmap && (
+              <a href={wedding.venueTmap} target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 text-[11px] font-light border border-black/10 text-black/60 hover:bg-black hover:text-white transition-colors">
+                티맵
+              </a>
+            )}
+          </div>
+
+          {wedding.venuePhone && (
+            <a href={`tel:${wedding.venuePhone}`} className="flex items-center justify-center gap-2 mt-6 text-[12px] font-light text-black/40">
+              <Phone className="w-3 h-3" /> {wedding.venuePhone}
+            </a>
+          )}
+        </motion.div>
+      </section>
 
       {(wedding.groomAccount || wedding.brideAccount) && (
-        <Section id="account-section" className="bg-white">
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
-            <p className="text-[10px] tracking-[0.3em] text-stone-300 mb-6">GIFT</p>
-            <div className="space-y-2">
-              <AccountRow title="신랑측" accounts={[wedding.groomAccount && { bank: wedding.groomBank, account: wedding.groomAccount, holder: wedding.groomAccountHolder || wedding.groomName }].filter(Boolean) as any[]} isOpen={openAccount === 'groom'} onToggle={() => setOpenAccount(openAccount === 'groom' ? null : 'groom')} copiedAccount={copiedAccount} onCopy={copyToClipboard} />
-              <AccountRow title="신부측" accounts={[wedding.brideAccount && { bank: wedding.brideBank, account: wedding.brideAccount, holder: wedding.brideAccountHolder || wedding.brideName }].filter(Boolean) as any[]} isOpen={openAccount === 'bride'} onToggle={() => setOpenAccount(openAccount === 'bride' ? null : 'bride')} copiedAccount={copiedAccount} onCopy={copyToClipboard} />
+        <section className="py-20 px-8 bg-black/[0.02]">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-sm mx-auto">
+            <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-4">GIFT</p>
+            <p className="text-[13px] font-light text-black/50 text-center mb-10">마음 전하실 곳</p>
+
+            <div className="space-y-4">
+              {wedding.groomAccount && (
+                <div className="bg-white p-5">
+                  <button onClick={() => setOpenAccount(openAccount === 'groom' ? null : 'groom')} className="w-full flex items-center justify-between">
+                    <span className="text-[13px] font-light text-black/70">신랑측 계좌</span>
+                    <ChevronDown className={`w-4 h-4 text-black/30 transition-transform ${openAccount === 'groom' ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {openAccount === 'groom' && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                        <div className="pt-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-[12px] font-light text-black/50">{wedding.groomBank}</p>
+                              <p className="text-[13px] font-light text-black/70">{wedding.groomAccount}</p>
+                              <p className="text-[11px] font-light text-black/40">{wedding.groomAccountHolder}</p>
+                            </div>
+                            <button onClick={() => copyToClipboard(`${wedding.groomBank} ${wedding.groomAccount}`, 'groom')} className="p-2">
+                              {copiedAccount === 'groom' ? <Check className="w-4 h-4 text-black/50" /> : <Copy className="w-4 h-4 text-black/30" />}
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+
+              {wedding.brideAccount && (
+                <div className="bg-white p-5">
+                  <button onClick={() => setOpenAccount(openAccount === 'bride' ? null : 'bride')} className="w-full flex items-center justify-between">
+                    <span className="text-[13px] font-light text-black/70">신부측 계좌</span>
+                    <ChevronDown className={`w-4 h-4 text-black/30 transition-transform ${openAccount === 'bride' ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {openAccount === 'bride' && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                        <div className="pt-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-[12px] font-light text-black/50">{wedding.brideBank}</p>
+                              <p className="text-[13px] font-light text-black/70">{wedding.brideAccount}</p>
+                              <p className="text-[11px] font-light text-black/40">{wedding.brideAccountHolder}</p>
+                            </div>
+                            <button onClick={() => copyToClipboard(`${wedding.brideBank} ${wedding.brideAccount}`, 'bride')} className="p-2">
+                              {copiedAccount === 'bride' ? <Check className="w-4 h-4 text-black/50" /> : <Copy className="w-4 h-4 text-black/30" />}
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
             </div>
+
             {(wedding.tossLink || wedding.kakaoPayLink) && (
-              <div className="flex justify-center gap-2 mt-4">
-                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" className="px-5 py-2.5 bg-[#0064FF] text-white text-sm">토스</a>}
-                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" className="px-5 py-2.5 bg-[#FEE500] text-stone-800 text-sm">카카오페이</a>}
+              <div className="flex justify-center gap-3 mt-8">
+                {wedding.tossLink && (
+                  <a href={wedding.tossLink} target="_blank" className="px-6 py-2.5 text-[11px] font-light bg-[#0064FF] text-white">토스</a>
+                )}
+                {wedding.kakaoPayLink && (
+                  <a href={wedding.kakaoPayLink} target="_blank" className="px-6 py-2.5 text-[11px] font-light bg-[#FEE500] text-black/80">카카오페이</a>
+                )}
               </div>
             )}
           </motion.div>
-        </Section>
+        </section>
       )}
 
-      <Section id="guestbook-section">
-        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
-          <p className="text-[10px] tracking-[0.3em] text-stone-300 mb-6 text-center">GUESTBOOK</p>
-          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="minimal" />
-          <GuestbookList 
-            guestbooks={localGuestbooks} 
-            weddingSlug={wedding.slug} 
-            onDelete={handleGuestbookDelete}
-            variant="minimal"
-          />
+      <section id="rsvp" className="py-20 px-8">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-sm mx-auto">
+          <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-4">RSVP</p>
+          <p className="text-[13px] font-light text-black/50 text-center mb-10">참석 여부를 알려주세요</p>
+          
+          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="minimal" />
         </motion.div>
-      </Section>
+      </section>
 
-      {wedding.closingMessage && (
-        <Section className="bg-white">
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
-            <p className="text-sm text-stone-400 leading-[2] whitespace-pre-line">{wedding.closingMessage}</p>
-          </motion.div>
-        </Section>
-      )}
-
-      <Section>
-        <div className="text-center">
-          <button onClick={() => setShowShareModal(true)} className="px-8 py-3 bg-stone-800 text-white text-sm flex items-center gap-2 mx-auto hover:bg-stone-700 transition-colors">
-            <Share2 className="w-4 h-4" />Share
-          </button>
-          <div className="flex justify-center gap-6 mt-6">
-            {wedding.groomPhone && <a href={`tel:${wedding.groomPhone}`} className="text-center"><div className="w-12 h-12 border border-stone-200 flex items-center justify-center mb-1"><Phone className="w-5 h-5 text-stone-400" /></div><span className="text-xs text-stone-400">신랑</span></a>}
-            {wedding.bridePhone && <a href={`tel:${wedding.bridePhone}`} className="text-center"><div className="w-12 h-12 border border-stone-200 flex items-center justify-center mb-1"><Phone className="w-5 h-5 text-stone-400" /></div><span className="text-xs text-stone-400">신부</span></a>}
-          </div>
-        </div>
-      </Section>
-
-      <footer className="py-8 text-center text-stone-300 text-[10px] tracking-[0.3em]">청첩장 작업실</footer>
-
-      <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} />}</AnimatePresence>
-      <AnimatePresence><ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} variant="light" /></AnimatePresence>
-    </div>
-  );
-}
-
-function Section({ children, className = "", id }: { children: React.ReactNode; className?: string; id?: string }) {
-  return <section id={id} className={`py-16 px-6 ${className}`}><div className="max-w-md mx-auto">{children}</div></section>;
-}
-
-function AccountRow({ title, accounts, isOpen, onToggle, copiedAccount, onCopy }: { title: string; accounts: any[]; isOpen: boolean; onToggle: () => void; copiedAccount: string | null; onCopy: (t: string, id: string) => void }) {
-  if (!accounts.length) return null;
-  return (
-    <div className="bg-stone-50">
-      <button onClick={onToggle} className="w-full px-4 py-3 flex items-center justify-between text-sm text-stone-600"><span>{title}</span><ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} /></button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
-            <div className="px-4 pb-4 space-y-3 border-t border-stone-100">
-              {accounts.map((acc, i) => (
-                <div key={i} className="flex items-center justify-between pt-3">
-                  <div><p className="text-sm text-stone-600">{acc.holder}</p><p className="text-xs text-stone-400">{acc.bank} {acc.account}</p></div>
-                  <button onClick={() => onCopy(`${acc.bank} ${acc.account}`, `${title}-${i}`)} className="px-3 py-1.5 border border-stone-200 text-xs">{copiedAccount === `${title}-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}</button>
-                </div>
-              ))}
+      <section id="guestbook" className="py-20 px-8 bg-black/[0.02]">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-sm mx-auto">
+          <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-4">GUESTBOOK</p>
+          <p className="text-[13px] font-light text-black/50 text-center mb-10">축하 메시지를 남겨주세요</p>
+          
+          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="minimal" />
+          
+          {localGuestbooks.length > 0 && (
+            <div className="mt-10">
+              <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="minimal" />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </motion.div>
+      </section>
+
+      <section className="py-12 px-8">
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="max-w-sm mx-auto">
+          <div className="flex justify-center gap-6 mb-8">
+            {wedding.groomPhone && (
+              <a href={`tel:${wedding.groomPhone}`} className="text-center">
+                <p className="text-[11px] font-light text-black/40 mb-1">신랑</p>
+                <div className="w-10 h-10 border border-black/10 flex items-center justify-center">
+                  <Phone className="w-4 h-4 text-black/40" />
+                </div>
+              </a>
+            )}
+            {wedding.bridePhone && (
+              <a href={`tel:${wedding.bridePhone}`} className="text-center">
+                <p className="text-[11px] font-light text-black/40 mb-1">신부</p>
+                <div className="w-10 h-10 border border-black/10 flex items-center justify-center">
+                  <Phone className="w-4 h-4 text-black/40" />
+                </div>
+              </a>
+            )}
+          </div>
+
+          <button onClick={() => setShowShareModal(true)} className="w-full py-3 border border-black/10 text-[12px] font-light text-black/60 flex items-center justify-center gap-2 hover:bg-black hover:text-white transition-colors">
+            <Share2 className="w-4 h-4" /> 공유하기
+          </button>
+        </motion.div>
+      </section>
+
+      <footer className="py-8 text-center">
+        <p className="text-[10px] tracking-[0.2em] text-black/20">청첩장 작업실</p>
+      </footer>
+
+      {galleryIndex !== null && wedding.galleries && (
+        <GalleryModal 
+          galleries={wedding.galleries} 
+          currentIndex={galleryIndex} 
+          onClose={() => setGalleryIndex(null)} 
+          onNavigate={setGalleryIndex}
+        />
+      )}
+      <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} variant="light" />
     </div>
   );
 }

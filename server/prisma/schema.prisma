@@ -309,6 +309,8 @@ enum Theme {
   OCEAN_BREEZE
   GLASS_BUBBLE
   SPRING_BREEZE
+  GALLERY_MIRIM_1
+  GALLERY_MIRIM_2
 }
 
 enum MediaType {

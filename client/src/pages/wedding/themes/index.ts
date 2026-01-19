@@ -8,3 +8,5 @@ export { default as OceanBreeze } from './OceanBreeze';
 export { default as SeniorSimple } from './SeniorSimple';
 export { default as GlassBubble } from './GlassBubble';
 export { default as SpringBreeze } from './SpringBreeze';
+export { default as GalleryMirim1 } from './GalleryMirim1';
+export { default as GalleryMirim2 } from './GalleryMirim2';

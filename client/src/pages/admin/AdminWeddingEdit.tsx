@@ -17,6 +17,8 @@ const THEMES = [
   { id: 'OCEAN_BREEZE', name: '오션 브리즈' },
   { id: 'GLASS_BUBBLE', name: '글라스 버블' },
   { id: 'SPRING_BREEZE', name: '봄바람' },
+  { id: 'GALLERY_MIRIM_1', name: 'Gallery 美林-1' },
+  { id: 'GALLERY_MIRIM_2', name: 'Gallery 美林-2' },
 ];
 
 const SENIOR_COLORS = [

@@ -14,6 +14,8 @@ import {
   SeniorSimple,
   GlassBubble,
   SpringBreeze,
+  GalleryMirim1,
+  GalleryMirim2,
 } from './themes';
 import AiChat from '../../components/AiChat';
 
@@ -60,6 +62,8 @@ const themeComponents: Record<Theme, React.ComponentType<any>> = {
   OCEAN_BREEZE: OceanBreeze,
   GLASS_BUBBLE: GlassBubble,
   SPRING_BREEZE: SpringBreeze,
+  GALLERY_MIRIM_1: GalleryMirim1,
+  GALLERY_MIRIM_2: GalleryMirim2,
 };
 
 export default function WeddingPage() {

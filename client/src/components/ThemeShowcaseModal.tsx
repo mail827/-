@@ -12,6 +12,8 @@ import {
   SeniorSimple,
   GlassBubble,
   SpringBreeze,
+  GalleryMirim1,
+  GalleryMirim2,
 } from '../pages/wedding/themes';
 
 const themeComponents: Record<string, React.ComponentType<any>> = {
@@ -25,6 +27,10 @@ const themeComponents: Record<string, React.ComponentType<any>> = {
   OCEAN_BREEZE: OceanBreeze,
   GLASS_BUBBLE: GlassBubble,
   SPRING_BREEZE: SpringBreeze,
+  GALLERY_MIRIM_1: GalleryMirim1,
+  GALLERY_MIRIM_2: GalleryMirim2,
+  GalleryMirim1,
+  GalleryMirim2,
 };
 
 interface ThemeShowcase {
