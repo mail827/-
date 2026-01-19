@@ -23,7 +23,7 @@ router.post('/:weddingId', async (req, res) => {
     }
     
     const version = generateVersion();
-    const { id, userId, createdAt, updatedAt, snapshots, ...weddingData } = wedding as any;
+    const { userId, createdAt, updatedAt, snapshots, ...weddingData } = wedding as any;
     
     const snapshot = await prisma.weddingSnapshot.create({
       data: {
