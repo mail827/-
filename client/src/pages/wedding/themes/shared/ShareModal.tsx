@@ -17,6 +17,7 @@ export default function ShareModal({ isOpen, onClose, onShare, variant = 'light'
   const isDark = variant === 'dark';
 
   const handleShareClick = async (type: 'kakao' | 'instagram' | 'sms') => {
+    console.log("ShareModal weddingId:", weddingId);
     if (!weddingId) {
       onShare(type);
       return;
