@@ -453,8 +453,8 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </div>
       </Section>
 
-      <footer className="py-12 text-center">
-        <p className="text-[10px] text-[#C9B7E8] tracking-[0.2em]">청첩장 작업실</p>
+      <footer className="py-12 text-center" style={{ background: "#F0EAF5" }}>
+        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#9A88C0] tracking-[0.2em] hover:text-[#7A68A0] transition-colors">Made by 청첩장 작업실 ›</a>
       </footer>
 
       <AnimatePresence>

@@ -520,7 +520,7 @@ export default function Landing() {
             viewport={{ once: true }}
           >
             <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">THEMES</p>
-            <h2 className="font-serif text-3xl text-stone-800 mb-4">10가지 감성 테마</h2>
+            <h2 className="font-serif text-3xl text-stone-800 mb-4">12가지 감성 테마</h2>
             <p className="text-stone-500 mb-8">실제 청첩장을 미리 체험해보세요</p>
             <button
               onClick={() => setShowThemeShowcase(true)}
@@ -635,7 +635,7 @@ export default function Landing() {
             <div className="max-w-3xl mx-auto text-center">
               <p className="text-sm tracking-[0.2em] text-stone-500 mb-4">CUSTOM SERVICE</p>
               <h3 className="font-serif text-2xl md:text-3xl text-white mb-6">
-                당신이 원하는 청첩장 + 시네마틱 영상
+                당신만의 청첩장
               </h3>
               <p className="text-stone-400 mb-8 leading-relaxed">
                 세상에 단 하나뿐인 청첩장을 만들어 드립니다<br />

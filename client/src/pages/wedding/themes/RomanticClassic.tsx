@@ -410,8 +410,8 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
         </div>
       </Section>
 
-      <footer className="py-10 text-center">
-        <p className="text-[10px] tracking-[0.3em]" style={{ color: '#C4A35A', opacity: 0.6 }}>청첩장 작업실</p>
+      <footer className="py-10 text-center" style={{ background: "#FAF6F0" }}>
+        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.3em] hover:opacity-80 transition-opacity" style={{ color: '#A08540' }}>Made by 청첩장 작업실 ›</a>
       </footer>
 
       <AnimatePresence>

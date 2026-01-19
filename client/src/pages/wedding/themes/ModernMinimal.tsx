@@ -362,8 +362,8 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
         </motion.div>
       </section>
 
-      <footer className="py-8 text-center">
-        <p className="text-[10px] tracking-[0.2em] text-black/20">청첩장 작업실</p>
+      <footer className="py-8 text-center" style={{ background: "#F8F8F8" }}>
+        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.2em] text-black/30 hover:text-black/40 transition-colors">Made by 청첩장 작업실 ›</a>
       </footer>
 
       {galleryIndex !== null && wedding.galleries && (

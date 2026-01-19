@@ -455,8 +455,8 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
         </div>
       </Section>
 
-      <footer className="py-10 text-center relative z-10">
-        <p className="text-[10px] tracking-[0.3em]" style={{ color: '#B8B0D0', fontFamily: 'ChangwonDangamRounded, sans-serif' }}>청첩장 작업실</p>
+      <footer className="py-10 text-center relative z-10" style={{ background: "rgba(180,170,200,0.15)" }}>
+        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.3em] hover:opacity-70 transition-opacity" style={{ color: '#8A80A0', fontFamily: 'ChangwonDangamRounded, sans-serif' }}>Made by 청첩장 작업실 ›</a>
       </footer>
 
       <AnimatePresence>

@@ -296,7 +296,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
         </div>
       </Section>
 
-      <footer className="py-8 text-center text-gray-400">청첩장 작업실</footer>
+      <footer className="py-8 text-center" style={{ background: "#F5F5F5" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-600 transition-colors text-sm">Made by 청첩장 작업실 ›</a></footer>
 
       {galleryIndex !== null && wedding.galleries && (
         <GalleryModal 
