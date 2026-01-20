@@ -38,6 +38,14 @@ export default function GiftRedeem() {
 
       const data = await res.json();
 
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.setItem("pendingGiftCode", giftCode);
+        localStorage.setItem("redirectAfterLogin", "/gift/redeem");
+        window.location.href = `${import.meta.env.VITE_API_URL}/oauth/kakao`;
+        return;
+      }
+
       if (!res.ok) {
         setError(data.error || '선물 사용에 실패했습니다');
       } else {
