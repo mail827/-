@@ -151,3 +151,4 @@ export const SENIOR_COLORS = [
   { name: '퍼플', value: '#7C3AED' },
   { name: '브라운', value: '#78350F' },
 ];
+export * from './themeConfig';

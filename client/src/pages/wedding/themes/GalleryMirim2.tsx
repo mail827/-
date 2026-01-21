@@ -283,7 +283,7 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
 
       <footer className="py-12 text-center" style={{ background: "#0F1210" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.3em] hover:opacity-70 transition-opacity" style={{ ...serifFont, color: "#2A3B30" }}>Made by 청첩장 작업실 ›</a></footer>
 
-      {galleryIndex !== null && galleries.length > 0 && <GalleryModal galleries={galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} />}
+      {galleryIndex !== null && galleries.length > 0 && <GalleryModal galleries={galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="GALLERY_MIRIM_2" />}
       <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="dark" />
     </div>
   );

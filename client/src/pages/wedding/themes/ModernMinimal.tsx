@@ -371,7 +371,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
           galleries={wedding.galleries} 
           currentIndex={galleryIndex} 
           onClose={() => setGalleryIndex(null)} 
-          onNavigate={setGalleryIndex}
+          onNavigate={setGalleryIndex} theme="MODERN_MINIMAL"
         />
       )}
       <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="light" />

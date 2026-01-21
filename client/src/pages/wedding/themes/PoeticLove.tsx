@@ -463,7 +463,7 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
             galleries={wedding.galleries} 
             currentIndex={galleryIndex} 
             onClose={() => setGalleryIndex(null)} 
-            onNavigate={setGalleryIndex} 
+            onNavigate={setGalleryIndex} theme="POETIC_LOVE" 
           />
         )}
       </AnimatePresence>

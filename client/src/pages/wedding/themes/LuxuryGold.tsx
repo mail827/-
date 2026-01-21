@@ -238,7 +238,7 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
 
       <footer className="py-8 text-center text-[10px] tracking-[0.3em]" style={{ background: "#1A1A1A" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[#666] hover:text-[#888] transition-colors">Made by 청첩장 작업실 ›</a></footer>
 
-      <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} />}</AnimatePresence>
+      <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="LUXURY_GOLD" />}</AnimatePresence>
       <AnimatePresence><ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="dark" /></AnimatePresence>
     </div>
   );

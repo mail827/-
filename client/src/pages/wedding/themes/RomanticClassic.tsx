@@ -420,7 +420,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
             galleries={wedding.galleries} 
             currentIndex={galleryIndex} 
             onClose={() => setGalleryIndex(null)} 
-            onNavigate={setGalleryIndex} 
+            onNavigate={setGalleryIndex} theme="ROMANTIC_CLASSIC" 
           />
         )}
       </AnimatePresence>

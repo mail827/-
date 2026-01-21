@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { applyPhotoFilter } from './themeConfig';
 
 interface GalleryItem {
   id: string;
@@ -14,9 +15,10 @@ interface GalleryModalProps {
   currentIndex: number;
   onClose: () => void;
   onNavigate: (index: number) => void;
+  theme?: string;
 }
 
-export default function GalleryModal({ galleries, currentIndex, onClose, onNavigate }: GalleryModalProps) {
+export default function GalleryModal({ galleries, currentIndex, onClose, onNavigate, theme }: GalleryModalProps) {
   const [direction, setDirection] = useState(0);
   const current = galleries[currentIndex];
   if (!current) return null;
@@ -48,6 +50,11 @@ export default function GalleryModal({ galleries, currentIndex, onClose, onNavig
     enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
     center: { x: 0, opacity: 1 },
     exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
+  };
+
+  const getFilteredUrl = (url: string, mediaType: string) => {
+    if (mediaType === 'VIDEO' || !theme) return url;
+    return applyPhotoFilter(url, theme);
   };
 
   return (
@@ -108,7 +115,7 @@ export default function GalleryModal({ galleries, currentIndex, onClose, onNavig
               />
             ) : (
               <img
-                src={current.mediaUrl}
+                src={getFilteredUrl(current.mediaUrl, current.mediaType)}
                 alt=""
                 className="w-full h-full object-contain max-h-[85vh] select-none pointer-events-none"
                 draggable={false}
