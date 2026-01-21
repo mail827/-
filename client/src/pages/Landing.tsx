@@ -429,7 +429,7 @@ export default function Landing() {
               <h2 className="text-3xl sm:text-4xl font-bold text-stone-800 mb-4">이용 방법</h2>
               <p className="text-stone-500">청첩장 작업실, 이렇게 사용하세요</p>
             </motion.div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
               {guides.map((guide, index) => (
                 <motion.div
                   key={guide.id}
@@ -438,7 +438,7 @@ export default function Landing() {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                   onClick={() => setSelectedGuide(guide)}
-                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md transition-shadow cursor-pointer group"
+                  className="flex-shrink-0 w-72 sm:w-80 snap-start bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md transition-shadow cursor-pointer group"
                 >
                   <div className="aspect-video bg-stone-100 relative overflow-hidden">
                     {guide.videoType === 'YOUTUBE' ? (
