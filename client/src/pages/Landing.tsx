@@ -25,8 +25,8 @@ export default function Landing() {
   const [chatOpen, setChatOpen] = useState(false);
   const [reviews, setReviews] = useState<{id: string; rating: number; content: string; source: string; groomName: string; brideName: string; packageName: string | null; createdAt: string}[]>([]);
   const [showThemeShowcase, setShowThemeShowcase] = useState(false);
-  const [guides, setGuides] = useState<{id: string; title: string; description: string | null; videoUrl: string; category: string}[]>([]);
-  const [selectedGuide, setSelectedGuide] = useState<{id: string; title: string; description: string | null; videoUrl: string; category: string} | null>(null);
+  const [guides, setGuides] = useState<{id: string; title: string; description: string | null; videoUrl: string; videoType?: string; category: string}[]>([]);
+  const [selectedGuide, setSelectedGuide] = useState<{id: string; title: string; description: string | null; videoUrl: string; videoType?: string; category: string} | null>(null);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [showEmailLogin, setShowEmailLogin] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -441,12 +441,20 @@ export default function Landing() {
                   className="bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md transition-shadow cursor-pointer group"
                 >
                   <div className="aspect-video bg-stone-100 relative overflow-hidden">
-                    <video
-                      src={guide.videoUrl}
-                      className="w-full h-full object-cover"
-                      preload="metadata"
-                      muted
-                    />
+                    {guide.videoType === 'YOUTUBE' ? (
+                      <img
+                        src={`https://img.youtube.com/vi/${guide.videoUrl.split('/embed/')[1]}/mqdefault.jpg`}
+                        className="w-full h-full object-cover"
+                        alt={guide.title}
+                      />
+                    ) : (
+                      <video
+                        src={guide.videoUrl}
+                        className="w-full h-full object-cover"
+                        preload="metadata"
+                        muted
+                      />
+                    )}
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
                         <svg className="w-8 h-8 text-stone-800 ml-1" fill="currentColor" viewBox="0 0 24 24">
@@ -495,12 +503,21 @@ export default function Landing() {
                 </button>
               </div>
               <div className="flex-1 bg-black flex items-center justify-center">
-                <video
-                  src={selectedGuide.videoUrl}
-                  controls
-                  autoPlay
-                  className="max-w-full max-h-[70vh]"
-                />
+                {selectedGuide.videoType === 'YOUTUBE' ? (
+              <iframe
+                src={selectedGuide.videoUrl}
+                className="w-full aspect-video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                src={selectedGuide.videoUrl}
+                controls
+                autoPlay
+                className="max-w-full max-h-[70vh]"
+              />
+            )}
               </div>
               {selectedGuide.description && (
                 <div className="p-4 border-t border-stone-100">
