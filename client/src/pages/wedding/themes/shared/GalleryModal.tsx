@@ -16,9 +16,10 @@ interface GalleryModalProps {
   onClose: () => void;
   onNavigate: (index: number) => void;
   theme?: string;
+  usePhotoFilter?: boolean;
 }
 
-export default function GalleryModal({ galleries, currentIndex, onClose, onNavigate, theme }: GalleryModalProps) {
+export default function GalleryModal({ galleries, currentIndex, onClose, onNavigate, theme, usePhotoFilter = true }: GalleryModalProps) {
   const [direction, setDirection] = useState(0);
   const current = galleries[currentIndex];
   if (!current) return null;
@@ -53,7 +54,7 @@ export default function GalleryModal({ galleries, currentIndex, onClose, onNavig
   };
 
   const getFilteredUrl = (url: string, mediaType: string) => {
-    if (mediaType === 'VIDEO' || !theme) return url;
+    if (mediaType === 'VIDEO' || !theme || !usePhotoFilter) return url;
     return applyPhotoFilter(url, theme);
   };
 

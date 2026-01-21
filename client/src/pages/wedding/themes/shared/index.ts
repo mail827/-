@@ -54,6 +54,7 @@ export interface WeddingData {
   closingMessage?: string;
   bgMusicUrl?: string;
   loveStoryVideo?: string;
+  usePhotoFilter?: boolean;
   bgMusicAutoPlay?: boolean;
   showDday?: boolean;
   themeColor?: string;

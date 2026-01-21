@@ -696,6 +696,21 @@ export default function EditWedding() {
             
             {uploading && <p className="text-sm text-stone-500 text-center">업로드 중...</p>}
             <p className="text-xs text-stone-400 mt-2">* 이미지와 영상을 함께 업로드할 수 있어요</p>
+            
+            <div className="mt-6 pt-6 border-t border-stone-100">
+              <label className="flex items-center justify-between cursor-pointer">
+                <div>
+                  <p className="font-medium text-stone-700">테마 포토필터 적용</p>
+                  <p className="text-sm text-stone-500">테마 분위기에 맞는 색감을 사진에 자동 적용</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={wedding.usePhotoFilter ?? true}
+                  onChange={e => updateField('usePhotoFilter', e.target.checked)}
+                  className="w-5 h-5 rounded accent-stone-800"
+                />
+              </label>
+            </div>
           </Section>
         )}
 

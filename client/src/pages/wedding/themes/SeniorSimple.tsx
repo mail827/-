@@ -334,7 +334,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
           galleries={wedding.galleries} 
           currentIndex={galleryIndex} 
           onClose={() => setGalleryIndex(null)} 
-          onNavigate={setGalleryIndex} theme="SENIOR_SIMPLE" 
+          onNavigate={setGalleryIndex} theme="SENIOR_SIMPLE" usePhotoFilter={wedding.usePhotoFilter ?? true} 
         />
       )}
     </div>

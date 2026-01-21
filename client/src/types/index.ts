@@ -70,6 +70,7 @@ export interface Wedding {
   closingMessage?: string;
   bgMusicUrl?: string;
   loveStoryVideo?: string;
+  usePhotoFilter?: boolean;
   bgMusicAutoPlay: boolean;
   showDday: boolean;
   heroMedia?: string;

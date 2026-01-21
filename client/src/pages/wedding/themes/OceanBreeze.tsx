@@ -234,7 +234,7 @@ export default function OceanBreeze({ wedding, guestbooks, onRsvpSubmit, onGuest
 
       <footer className="py-8 text-center text-[10px] tracking-widest" style={{ background: "#E5EEF0" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[#6A8890] hover:text-[#4A6870] transition-colors">Made by 청첩장 작업실 ›</a></footer>
 
-      <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="OCEAN_BREEZE" />}</AnimatePresence>
+      <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="OCEAN_BREEZE" usePhotoFilter={wedding.usePhotoFilter ?? true} />}</AnimatePresence>
       <AnimatePresence><ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="light" /></AnimatePresence>
     </div>
   );

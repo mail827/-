@@ -465,7 +465,7 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
             galleries={wedding.galleries} 
             currentIndex={galleryIndex} 
             onClose={() => setGalleryIndex(null)} 
-            onNavigate={setGalleryIndex} theme="GLASS_BUBBLE" 
+            onNavigate={setGalleryIndex} theme="GLASS_BUBBLE" usePhotoFilter={wedding.usePhotoFilter ?? true} 
           />
         )}
       </AnimatePresence>

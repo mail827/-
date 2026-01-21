@@ -466,7 +466,7 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
             galleries={wedding.galleries} 
             currentIndex={galleryIndex} 
             onClose={() => setGalleryIndex(null)} 
-            onNavigate={setGalleryIndex} theme="SPRING_BREEZE" 
+            onNavigate={setGalleryIndex} theme="SPRING_BREEZE" usePhotoFilter={wedding.usePhotoFilter ?? true} 
           />
         )}
       </AnimatePresence>

@@ -102,6 +102,7 @@ model Wedding {
   loveStory                String?
   loveStoryType            StoryType         @default(PHOTO)
   loveStoryVideo           String?
+  usePhotoFilter           Boolean           @default(true)
   venue                    String
   venueHall                String?
   venueAddress             String
