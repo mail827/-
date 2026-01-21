@@ -92,7 +92,7 @@ const DEFAULT_SAMPLE = {
   groomName: '민준',
   brideName: '서연',
   weddingDate: '2026-05-15T12:00:00',
-  weddingTime: '오후 12시',
+  weddingTime: '12:00',
   venueName: '그랜드 웨딩홀',
   venueHall: '루체홀',
   venueAddress: '서울시 강남구 테헤란로 123',
