@@ -22,6 +22,7 @@ interface GiftItem {
   id: string;
   code: string;
   toEmail?: string;
+  toPhone?: string;
   package: { name: string };
   isRedeemed: boolean;
   redeemedAt?: string;
@@ -33,6 +34,7 @@ export default function MyGifts() {
   const [packages, setPackages] = useState<PackageOption[]>([]);
   const [selectedPkg, setSelectedPkg] = useState('');
   const [toEmail, setToEmail] = useState('');
+  const [toPhone, setToPhone] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -55,12 +57,24 @@ export default function MyGifts() {
     document.head.appendChild(script);
   };
 
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/[^\d]/g, '');
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+    return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setToPhone(formatPhone(e.target.value));
+  };
+
   const handlePaymentResult = async () => {
     const paymentKey = searchParams.get('paymentKey');
     const orderId = searchParams.get('orderId');
     const amount = searchParams.get('amount');
     const packageId = searchParams.get('packageId');
     const giftToEmail = searchParams.get('toEmail');
+    const giftToPhone = searchParams.get('toPhone');
     const giftMessage = searchParams.get('message');
 
     if (paymentKey && orderId && amount && packageId) {
@@ -79,6 +93,7 @@ export default function MyGifts() {
             amount: Number(amount),
             packageId,
             toEmail: giftToEmail || undefined,
+            toPhone: giftToPhone || undefined,
             message: giftMessage ? decodeURIComponent(giftMessage) : undefined
           })
         });
@@ -156,6 +171,7 @@ export default function MyGifts() {
         body: JSON.stringify({
           packageId: selectedPkg,
           toEmail: toEmail || undefined,
+          toPhone: toPhone.replace(/-/g, '') || undefined,
           message: message || undefined
         })
       });
@@ -172,6 +188,7 @@ export default function MyGifts() {
       
       let successUrl = `${window.location.origin}/my/gifts?packageId=${selectedPkg}`;
       if (toEmail) successUrl += `&toEmail=${encodeURIComponent(toEmail)}`;
+      if (toPhone) successUrl += `&toPhone=${encodeURIComponent(toPhone.replace(/-/g, ''))}`;
       if (message) successUrl += `&message=${encodeURIComponent(message)}`;
 
       await tossPayments.requestPayment('카드', {
@@ -284,17 +301,35 @@ export default function MyGifts() {
             </div>
 
             <div className="bg-white rounded-xl border border-stone-200 p-5">
-              <label className="block text-sm font-medium text-stone-700 mb-2">
-                받는 분 이메일 (선택)
+              <label className="block text-sm font-medium text-stone-700 mb-3">
+                받는 분 연락처 (선택)
               </label>
-              <input
-                type="email"
-                value={toEmail}
-                onChange={e => setToEmail(e.target.value)}
-                placeholder="email@example.com"
-                className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-500"
-              />
-              <p className="text-xs text-stone-400 mt-2">입력하시면 이메일로도 선물 코드가 전송됩니다</p>
+              <p className="text-xs text-stone-400 mb-4">입력하시면 선물 코드가 자동 발송됩니다</p>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-stone-500 mb-1 block">이메일</label>
+                  <input
+                    type="email"
+                    value={toEmail}
+                    onChange={e => setToEmail(e.target.value)}
+                    placeholder="email@example.com"
+                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-xs text-stone-500 mb-1 block">휴대폰 (카카오 알림톡)</label>
+                  <input
+                    type="tel"
+                    value={toPhone}
+                    onChange={handlePhoneChange}
+                    placeholder="010-0000-0000"
+                    maxLength={13}
+                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-500"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="bg-white rounded-xl border border-stone-200 p-5">
@@ -383,7 +418,7 @@ export default function MyGifts() {
                     </span>
                   </div>
                   <p className="text-sm text-stone-500 mb-1">
-                    {gift.toEmail || '직접 전달'}
+                    {gift.toEmail || gift.toPhone || '직접 전달'}
                   </p>
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-mono text-stone-400">{gift.code}</p>

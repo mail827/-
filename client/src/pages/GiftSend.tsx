@@ -19,6 +19,7 @@ export default function GiftSend() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [selectedPkg, setSelectedPkg] = useState<string | null>(null);
   const [toEmail, setToEmail] = useState('');
+  const [toPhone, setToPhone] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<{ code: string } | null>(null);
@@ -37,6 +38,18 @@ export default function GiftSend() {
     } catch (e) {
       console.error('Failed to fetch packages:', e);
     }
+  };
+
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/[^\d]/g, '');
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+    return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value);
+    setToPhone(formatted);
   };
 
   const handleSend = async () => {
@@ -60,6 +73,7 @@ export default function GiftSend() {
         body: JSON.stringify({
           packageId: selectedPkg,
           toEmail: toEmail || undefined,
+          toPhone: toPhone.replace(/-/g, '') || undefined,
           message: message || undefined
         })
       });
@@ -107,6 +121,8 @@ export default function GiftSend() {
       navigator.clipboard.writeText(success.code);
     }
   };
+
+  const selectedPrice = packages.find(p => p.id === selectedPkg)?.price || 0;
 
   if (success) {
     return (
@@ -190,15 +206,33 @@ export default function GiftSend() {
         </div>
 
         <div className="bg-white rounded-2xl p-6 shadow-xl mb-6">
-          <p className="text-sm font-medium text-stone-700 mb-3">받는 분 이메일 (선택)</p>
-          <input
-            type="email"
-            value={toEmail}
-            onChange={(e) => setToEmail(e.target.value)}
-            placeholder="email@example.com"
-            className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-500"
-          />
-          <p className="text-xs text-stone-400 mt-2">입력하시면 이메일로도 선물 코드가 전송됩니다</p>
+          <p className="text-sm font-medium text-stone-700 mb-3">받는 분 연락처 (선택)</p>
+          <p className="text-xs text-stone-400 mb-4">입력하시면 선물 코드가 자동 발송됩니다</p>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-stone-500 mb-1 block">이메일</label>
+              <input
+                type="email"
+                value={toEmail}
+                onChange={(e) => setToEmail(e.target.value)}
+                placeholder="email@example.com"
+                className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-500"
+              />
+            </div>
+            
+            <div>
+              <label className="text-xs text-stone-500 mb-1 block">휴대폰 (카카오 알림톡)</label>
+              <input
+                type="tel"
+                value={toPhone}
+                onChange={handlePhoneChange}
+                placeholder="010-0000-0000"
+                maxLength={13}
+                className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-500"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl p-6 shadow-xl mb-6">
@@ -214,14 +248,14 @@ export default function GiftSend() {
         <button
           onClick={handleSend}
           disabled={!selectedPkg || loading}
-          className="w-full py-4 bg-stone-500 text-white rounded-xl hover:bg-stone-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+          className="w-full py-4 bg-stone-800 text-white rounded-xl hover:bg-stone-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
         >
           {loading ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
               <Send className="w-5 h-5" />
-              선물하기
+              {selectedPrice > 0 ? `${selectedPrice.toLocaleString()}원 결제하고 선물하기` : '선물하기'}
             </>
           )}
         </button>

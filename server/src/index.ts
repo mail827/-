@@ -23,6 +23,7 @@ import themeShowcaseRouter from "./routes/themeShowcase.js";
 import { startScheduler } from "./utils/scheduler.js";
 import { writingAssistantRouter } from './routes/writingAssistant.js';
 import { snapshotRouter } from './routes/snapshot.js';
+import { analyticsRouter } from './routes/analytics.js';
 
 dotenv.config();
 
@@ -65,6 +66,7 @@ app.use("/api/theme-showcase", themeShowcaseRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/writing-assistant', writingAssistantRouter);
 app.use('/api/snapshot', snapshotRouter);
+app.use('/api/analytics', analyticsRouter);
 
 seedPackages();
 

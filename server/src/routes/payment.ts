@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middleware/auth.js';
+import { sendPaymentNotification } from '../utils/solapi.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -164,6 +165,16 @@ router.post('/confirm', authMiddleware, async (req, res) => {
       },
       include: { package: true, user: true },
     });
+
+    if (updatedOrder.user?.phone) {
+      sendPaymentNotification({
+        to: updatedOrder.user.phone,
+        customerName: updatedOrder.user.name || '고객',
+        productName: updatedOrder.package.name,
+        amount: updatedOrder.amount,
+        link: 'https://weddingshop.cloud/dashboard',
+      }).catch(err => console.error('결제 알림 발송 실패:', err));
+    }
     
     res.json({ success: true, order: updatedOrder });
   } catch (error) {

@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import usePageTracking from './hooks/usePageTracking';
 import Landing from './pages/Landing';
 import OAuthCallback from './pages/OAuthCallback';
 import Dashboard from './pages/Dashboard';
@@ -61,6 +62,8 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  usePageTracking();
+  
   return (
     <Routes>
       <Route path="/" element={<Landing />} />

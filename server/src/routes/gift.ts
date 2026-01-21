@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 import { authMiddleware } from '../middleware/auth.js';
 import { sendGiftEmail } from '../utils/email.js';
+import { sendGiftNotification } from '../utils/solapi.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -13,7 +14,7 @@ function generateGiftCode(): string {
 
 router.post('/create', authMiddleware, async (req: any, res) => {
   try {
-    const { packageId, toEmail, message } = req.body;
+    const { packageId, toEmail, toPhone, message } = req.body;
     const userId = req.user.id;
 
     const pkg = await prisma.package.findUnique({ where: { id: packageId } });
@@ -30,14 +31,29 @@ router.post('/create', authMiddleware, async (req: any, res) => {
         packageId,
         fromUserId: userId,
         toEmail,
+        toPhone,
         message,
         expiresAt
       },
       include: { package: true, fromUser: true }
     });
 
+    const senderName = gift.fromUser?.name || '익명';
+
     if (toEmail) {
-      await sendGiftEmail(toEmail, gift.fromUser?.name || '익명', pkg.name, code, message);
+      await sendGiftEmail(toEmail, senderName, pkg.name, code, message);
+    }
+
+    if (toPhone) {
+      sendGiftNotification({
+        to: toPhone,
+        groomName: senderName,
+        brideName: '',
+        senderName: senderName,
+        giftName: pkg.name,
+        message: message || '',
+        link: `https://weddingshop.cloud/gift?code=${code}`,
+      }).catch(err => console.error('선물 카톡 발송 실패:', err));
     }
 
     res.json({ gift, code });
@@ -114,7 +130,7 @@ router.get('/my', authMiddleware, async (req: any, res) => {
 
 router.post('/payment/request', authMiddleware, async (req: any, res) => {
   try {
-    const { packageId, toEmail, message } = req.body;
+    const { packageId, toEmail, toPhone, message } = req.body;
 
     const pkg = await prisma.package.findUnique({ where: { id: packageId } });
     if (!pkg) {
@@ -130,6 +146,7 @@ router.post('/payment/request', authMiddleware, async (req: any, res) => {
       orderName: `[선물] ${pkg.name}`,
       packageId,
       toEmail,
+      toPhone,
       message
     });
   } catch (error) {
@@ -140,7 +157,7 @@ router.post('/payment/request', authMiddleware, async (req: any, res) => {
 
 router.post('/payment/confirm', authMiddleware, async (req: any, res) => {
   try {
-    const { paymentKey, orderId, amount, packageId, toEmail, message } = req.body;
+    const { paymentKey, orderId, amount, packageId, toEmail, toPhone, message } = req.body;
     const userId = req.user.id;
 
     const pkg = await prisma.package.findUnique({ where: { id: packageId } });
@@ -180,20 +197,76 @@ router.post('/payment/confirm', authMiddleware, async (req: any, res) => {
         packageId,
         fromUserId: userId,
         toEmail,
+        toPhone,
         message,
         expiresAt
       },
       include: { package: true, fromUser: true }
     });
 
+    const senderName = gift.fromUser?.name || '익명';
+
     if (toEmail) {
-      await sendGiftEmail(toEmail, gift.fromUser?.name || '익명', pkg.name, code, message);
+      await sendGiftEmail(toEmail, senderName, pkg.name, code, message);
+    }
+
+    if (toPhone) {
+      sendGiftNotification({
+        to: toPhone,
+        groomName: senderName,
+        brideName: '',
+        senderName: senderName,
+        giftName: pkg.name,
+        message: message || '',
+        link: `https://weddingshop.cloud/gift?code=${code}`,
+      }).catch(err => console.error('선물 카톡 발송 실패:', err));
     }
 
     res.json({ gift, code });
   } catch (error) {
     console.error('Gift payment confirm error:', error);
     res.status(500).json({ error: '결제 승인 실패' });
+  }
+});
+
+router.post('/send-notification', authMiddleware, async (req: any, res) => {
+  try {
+    const { giftId, type } = req.body;
+    const userId = req.user.id;
+
+    const gift = await prisma.gift.findFirst({
+      where: { id: giftId, fromUserId: userId },
+      include: { package: true, fromUser: true }
+    });
+
+    if (!gift) {
+      return res.status(404).json({ error: '선물을 찾을 수 없습니다' });
+    }
+
+    const senderName = gift.fromUser?.name || '익명';
+
+    if (type === 'email' && gift.toEmail) {
+      await sendGiftEmail(gift.toEmail, senderName, gift.package.name, gift.code, gift.message || '');
+      return res.json({ success: true, type: 'email' });
+    }
+
+    if (type === 'kakao' && gift.toPhone) {
+      await sendGiftNotification({
+        to: gift.toPhone,
+        groomName: senderName,
+        brideName: '',
+        senderName: senderName,
+        giftName: gift.package.name,
+        message: gift.message || '',
+        link: `https://weddingshop.cloud/gift?code=${gift.code}`,
+      });
+      return res.json({ success: true, type: 'kakao' });
+    }
+
+    res.status(400).json({ error: '발송할 수 없습니다' });
+  } catch (error) {
+    console.error('Gift notification error:', error);
+    res.status(500).json({ error: '알림 발송 실패' });
   }
 });
 

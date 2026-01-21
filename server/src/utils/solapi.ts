@@ -242,3 +242,123 @@ export async function sendCustomNotification(data: CustomNotificationData) {
     return null;
   }
 }
+
+interface PaymentNotificationData {
+  to: string;
+  customerName: string;
+  productName: string;
+  amount: number;
+  link: string;
+}
+
+export async function sendPaymentNotification(data: PaymentNotificationData) {
+  const toPhone = cleanPhone(data.to);
+  if (toPhone.length < 10) {
+    console.log('유효하지 않은 전화번호:', toPhone);
+    return null;
+  }
+  
+  const fromPhone = cleanPhone(process.env.SOLAPI_SENDER_NUMBER!);
+  console.log('결제완료 알림톡 발송 시도:', { to: toPhone, from: fromPhone });
+  
+  try {
+    const response = await fetch(SOLAPI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: {
+          to: toPhone,
+          from: fromPhone,
+          kakaoOptions: {
+            pfId: process.env.KAKAO_CHANNEL_ID!,
+            templateId: process.env.KAKAO_PAYMENT_TEMPLATE_ID!,
+            variables: {
+              '#{고객명}': data.customerName,
+              '#{상품명}': data.productName,
+              '#{결제금액}': data.amount.toLocaleString(),
+              '#{링크}': data.link,
+            },
+          },
+        }
+      }),
+    });
+    
+    const result = await response.json();
+    console.log('결제완료 알림톡 응답:', JSON.stringify(result, null, 2));
+    
+    if (!response.ok || result.errorCode) {
+      console.error('결제완료 알림톡 발송 실패:', result);
+      return null;
+    }
+    
+    return result;
+  } catch (error: any) {
+    console.error('결제완료 알림톡 발송 에러:', error?.message || error);
+    return null;
+  }
+}
+
+interface GiftNotificationData {
+  to: string;
+  groomName: string;
+  brideName: string;
+  senderName: string;
+  giftName: string;
+  message: string;
+  link: string;
+}
+
+export async function sendGiftNotification(data: GiftNotificationData) {
+  const toPhone = cleanPhone(data.to);
+  if (toPhone.length < 10) {
+    console.log('유효하지 않은 전화번호:', toPhone);
+    return null;
+  }
+  
+  const fromPhone = cleanPhone(process.env.SOLAPI_SENDER_NUMBER!);
+  console.log('선물도착 알림톡 발송 시도:', { to: toPhone, from: fromPhone });
+  
+  try {
+    const response = await fetch(SOLAPI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: {
+          to: toPhone,
+          from: fromPhone,
+          kakaoOptions: {
+            pfId: process.env.KAKAO_CHANNEL_ID!,
+            templateId: process.env.KAKAO_GIFT_TEMPLATE_ID!,
+            variables: {
+              '#{신랑이름}': data.groomName,
+              '#{신부이름}': data.brideName,
+              '#{보낸사람}': data.senderName,
+              '#{선물명}': data.giftName,
+              '#{메시지}': data.message || '(메시지 없음)',
+              '#{링크}': data.link,
+            },
+          },
+        }
+      }),
+    });
+    
+    const result = await response.json();
+    console.log('선물도착 알림톡 응답:', JSON.stringify(result, null, 2));
+    
+    if (!response.ok || result.errorCode) {
+      console.error('선물도착 알림톡 발송 실패:', result);
+      return null;
+    }
+    
+    return result;
+  } catch (error: any) {
+    console.error('선물도착 알림톡 발송 에러:', error?.message || error);
+    return null;
+  }
+}

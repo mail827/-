@@ -280,6 +280,7 @@ model Gift {
   packageId  String
   fromUserId String?
   toEmail    String?
+  toPhone    String?
   toUserId   String?
   message    String?
   isRedeemed Boolean   @default(false)

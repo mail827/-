@@ -2,7 +2,8 @@ import { Router } from 'express';
 import crypto from "crypto";
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middleware/auth.js';
-import { sendInquiryReply } from '../utils/email.js';
+import { sendInquiryReply, sendGiftEmail } from '../utils/email.js';
+import { sendGiftNotification } from '../utils/solapi.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -82,8 +83,6 @@ router.get('/stats', authMiddleware, adminMiddleware, async (req, res) => {
   });
 });
 
-export const adminRouter = router;
-
 router.get('/inquiries', authMiddleware, adminMiddleware, async (req, res) => {
   const inquiries = await prisma.inquiry.findMany({
     orderBy: { createdAt: 'desc' },
@@ -101,7 +100,6 @@ router.put('/inquiries/:id/reply', authMiddleware, adminMiddleware, async (req, 
       data: { reply, status: 'REPLIED', repliedAt: new Date() },
     });
     
-    // 이메일 발송
     await sendInquiryReply(inquiry.email, inquiry.name, inquiry.message, reply);
     
     res.json(inquiry);
@@ -164,9 +162,13 @@ router.put('/contents/:key', authMiddleware, adminMiddleware, async (req, res) =
   res.json(updated);
 });
 
-router.post('/gift/free', async (req: any, res) => {
+router.post('/gift/free', authMiddleware, adminMiddleware, async (req: any, res) => {
   try {
-    const { email, packageId, message } = req.body;
+    const { email, phone, packageId, message } = req.body;
+
+    if (!email && !phone) {
+      return res.status(400).json({ error: '이메일 또는 전화번호를 입력해주세요' });
+    }
 
     const pkg = await prisma.package.findUnique({ where: { id: packageId } });
     if (!pkg) {
@@ -175,28 +177,87 @@ router.post('/gift/free', async (req: any, res) => {
 
     const code = 'GIFT-' + crypto.randomBytes(4).toString('hex').toUpperCase();
     const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+    const giftMessage = message || '청첩장 작업실에서 드리는 선물입니다!';
 
     const gift = await prisma.gift.create({
       data: {
         code,
         packageId,
-        toEmail: email,
-        message: message || '청첩장 작업실에서 드리는 선물입니다!',
+        toEmail: email || null,
+        toPhone: phone || null,
+        message: giftMessage,
         expiresAt
       }
     });
 
-    const { sendGiftEmail } = await import('../utils/email.js');
-    await sendGiftEmail(email, '청첩장 작업실', pkg.name, code, message || '청첩장 작업실에서 드리는 선물입니다!');
+    const results: string[] = [];
 
-    res.json({ gift, code });
+    if (email) {
+      await sendGiftEmail(email, '청첩장 작업실', pkg.name, code, giftMessage);
+      results.push('이메일');
+    }
+
+    if (phone) {
+      await sendGiftNotification({
+        to: phone,
+        groomName: '청첩장 작업실',
+        brideName: '',
+        senderName: '청첩장 작업실',
+        giftName: pkg.name,
+        message: giftMessage,
+        link: `https://weddingshop.cloud/gift?code=${code}`,
+      });
+      results.push('카카오톡');
+    }
+
+    res.json({ gift, code, sentVia: results });
   } catch (error) {
     console.error('Admin gift error:', error);
     res.status(500).json({ error: '선물 생성 실패' });
   }
 });
 
-router.get('/gifts', async (req, res) => {
+router.post('/gift/resend', authMiddleware, adminMiddleware, async (req: any, res) => {
+  try {
+    const { giftId, type } = req.body;
+
+    const gift = await prisma.gift.findUnique({
+      where: { id: giftId },
+      include: { package: true }
+    });
+
+    if (!gift) {
+      return res.status(404).json({ error: '선물을 찾을 수 없습니다' });
+    }
+
+    const giftMessage = gift.message || '청첩장 작업실에서 드리는 선물입니다!';
+
+    if (type === 'email' && gift.toEmail) {
+      await sendGiftEmail(gift.toEmail, '청첩장 작업실', gift.package.name, gift.code, giftMessage);
+      return res.json({ success: true, type: 'email' });
+    }
+
+    if (type === 'kakao' && gift.toPhone) {
+      await sendGiftNotification({
+        to: gift.toPhone,
+        groomName: '청첩장 작업실',
+        brideName: '',
+        senderName: '청첩장 작업실',
+        giftName: gift.package.name,
+        message: giftMessage,
+        link: `https://weddingshop.cloud/gift?code=${gift.code}`,
+      });
+      return res.json({ success: true, type: 'kakao' });
+    }
+
+    res.status(400).json({ error: '발송할 수 없습니다' });
+  } catch (error) {
+    console.error('Gift resend error:', error);
+    res.status(500).json({ error: '재발송 실패' });
+  }
+});
+
+router.get('/gifts', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const gifts = await prisma.gift.findMany({
       where: { fromUserId: null },
@@ -211,7 +272,6 @@ router.get('/gifts', async (req, res) => {
   }
 });
 
-// 리뷰 관리
 router.get('/reviews', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const reviews = await prisma.review.findMany({
@@ -256,7 +316,6 @@ router.delete('/reviews/:id', authMiddleware, adminMiddleware, async (req, res) 
   }
 });
 
-// 패키지 관리 API
 router.put('/packages/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
@@ -273,3 +332,5 @@ router.put('/packages/:id', authMiddleware, adminMiddleware, async (req, res) =>
     res.status(500).json({ error: 'Failed to update package' });
   }
 });
+
+export const adminRouter = router;

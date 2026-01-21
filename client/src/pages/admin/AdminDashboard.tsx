@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FileHeart, Users, CreditCard, TrendingUp, Calendar, ArrowRight, Plus } from 'lucide-react';
+import { FileHeart, Users, CreditCard, TrendingUp, Calendar, ArrowRight, Plus, BarChart3, Eye, Clock, Smartphone, Monitor, RefreshCw } from 'lucide-react';
 
 interface Stats {
   users: number;
@@ -21,13 +21,38 @@ interface RecentWedding {
   _count?: { rsvps: number; guestbooks: number };
 }
 
+interface GA4Overview {
+  totalUsers: number;
+  sessions: number;
+  bounceRate: string;
+  avgSessionDuration: string;
+  pageViews: number;
+  error?: string;
+}
+
+interface GA4Realtime {
+  activeUsers: number;
+}
+
+interface GA4Device {
+  device: string;
+  users: number;
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [weddings, setWeddings] = useState<RecentWedding[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ga4, setGa4] = useState<GA4Overview | null>(null);
+  const [realtime, setRealtime] = useState<GA4Realtime | null>(null);
+  const [devices, setDevices] = useState<GA4Device[]>([]);
+  const [ga4Loading, setGa4Loading] = useState(true);
 
   useEffect(() => {
     fetchData();
+    fetchGA4();
+    const interval = setInterval(fetchRealtime, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchData = async () => {
@@ -42,14 +67,10 @@ export default function AdminDashboard() {
         }),
       ]);
       
-      if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        setStats(statsData);
-      }
-      
+      if (statsRes.ok) setStats(await statsRes.json());
       if (weddingsRes.ok) {
-        const weddingsData = await weddingsRes.json();
-        setWeddings(weddingsData.slice(0, 5));
+        const data = await weddingsRes.json();
+        setWeddings(data.slice(0, 5));
       }
     } catch (e) {
       console.error('Failed to fetch data:', e);
@@ -58,12 +79,63 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchGA4 = async () => {
+    setGa4Loading(true);
+    try {
+      const [overviewRes, realtimeRes, devicesRes] = await Promise.all([
+        fetch(`${import.meta.env.VITE_API_URL}/analytics/overview`),
+        fetch(`${import.meta.env.VITE_API_URL}/analytics/realtime`),
+        fetch(`${import.meta.env.VITE_API_URL}/analytics/devices`),
+      ]);
+      if (overviewRes.ok) setGa4(await overviewRes.json());
+      if (realtimeRes.ok) setRealtime(await realtimeRes.json());
+      if (devicesRes.ok) {
+        const data = await devicesRes.json();
+        setDevices(data.devices || []);
+      }
+    } catch (e) {
+      console.error('Failed to fetch GA4:', e);
+    } finally {
+      setGa4Loading(false);
+    }
+  };
+
+  const fetchRealtime = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/analytics/realtime`);
+      if (res.ok) setRealtime(await res.json());
+    } catch (e) {
+      console.error('Realtime fetch error:', e);
+    }
+  };
+
+  const formatDuration = (seconds: string) => {
+    const sec = parseInt(seconds);
+    if (sec < 60) return `${sec}초`;
+    const min = Math.floor(sec / 60);
+    const remaining = sec % 60;
+    return `${min}분 ${remaining}초`;
+  };
+
   const statCards = [
     { label: '총 회원', value: stats?.users || 0, icon: Users, color: 'bg-blue-500' },
     { label: '청첩장', value: stats?.weddings || 0, icon: FileHeart, color: 'bg-rose-500' },
     { label: '총 주문', value: stats?.orders || 0, icon: CreditCard, color: 'bg-amber-500' },
     { label: '결제 완료', value: stats?.paidOrders || 0, icon: TrendingUp, color: 'bg-green-500' },
   ];
+
+  const getDeviceIcon = (device: string) => {
+    if (device === 'mobile') return Smartphone;
+    if (device === 'desktop') return Monitor;
+    return Monitor;
+  };
+
+  const getDeviceLabel = (device: string) => {
+    if (device === 'mobile') return '모바일';
+    if (device === 'desktop') return '데스크톱';
+    if (device === 'tablet') return '태블릿';
+    return device;
+  };
 
   return (
     <div className="space-y-8">
@@ -105,14 +177,87 @@ export default function AdminDashboard() {
       </div>
 
       <div className="bg-white rounded-2xl border border-stone-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-stone-800">총 매출</h2>
-        </div>
+        <h2 className="text-lg font-bold text-stone-800 mb-4">총 매출</h2>
         <p className="text-4xl font-bold text-stone-800">
           {loading ? '-' : `${(stats?.revenue || 0).toLocaleString()}원`}
         </p>
         <p className="text-sm text-stone-500 mt-2">결제 완료된 주문 기준</p>
       </div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="bg-gradient-to-br from-stone-900 to-stone-800 rounded-2xl p-6 text-white"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+              <BarChart3 className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">Google Analytics</h2>
+              <p className="text-stone-400 text-sm">최근 7일 기준</p>
+            </div>
+          </div>
+          <button
+            onClick={fetchGA4}
+            disabled={ga4Loading}
+            className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all"
+          >
+            <RefreshCw className={`w-5 h-5 ${ga4Loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+          <div className="bg-white/10 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-xs text-stone-400">실시간</span>
+            </div>
+            <p className="text-2xl font-bold">{realtime?.activeUsers || 0}</p>
+            <p className="text-xs text-stone-400">활성 사용자</p>
+          </div>
+          <div className="bg-white/10 rounded-xl p-4">
+            <Eye className="w-4 h-4 text-stone-400 mb-2" />
+            <p className="text-2xl font-bold">{ga4?.totalUsers || 0}</p>
+            <p className="text-xs text-stone-400">총 방문자</p>
+          </div>
+          <div className="bg-white/10 rounded-xl p-4">
+            <BarChart3 className="w-4 h-4 text-stone-400 mb-2" />
+            <p className="text-2xl font-bold">{ga4?.pageViews || 0}</p>
+            <p className="text-xs text-stone-400">페이지뷰</p>
+          </div>
+          <div className="bg-white/10 rounded-xl p-4">
+            <TrendingUp className="w-4 h-4 text-stone-400 mb-2" />
+            <p className="text-2xl font-bold">{ga4?.bounceRate || '0'}%</p>
+            <p className="text-xs text-stone-400">이탈률</p>
+          </div>
+          <div className="bg-white/10 rounded-xl p-4">
+            <Clock className="w-4 h-4 text-stone-400 mb-2" />
+            <p className="text-2xl font-bold">{formatDuration(ga4?.avgSessionDuration || '0')}</p>
+            <p className="text-xs text-stone-400">평균 체류</p>
+          </div>
+        </div>
+
+        {devices.length > 0 && (
+          <div className="border-t border-white/10 pt-4">
+            <p className="text-sm text-stone-400 mb-3">기기별 방문자</p>
+            <div className="flex gap-4">
+              {devices.map((d) => {
+                const Icon = getDeviceIcon(d.device);
+                return (
+                  <div key={d.device} className="flex items-center gap-2">
+                    <Icon className="w-4 h-4 text-stone-400" />
+                    <span className="text-sm">{getDeviceLabel(d.device)}</span>
+                    <span className="text-sm font-bold">{d.users}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </motion.div>
 
       <div className="bg-white rounded-2xl p-6 border border-stone-200">
         <div className="flex items-center justify-between mb-6">
@@ -143,7 +288,7 @@ export default function AdminDashboard() {
             <FileHeart className="w-12 h-12 text-stone-300 mx-auto mb-4" />
             <p className="text-stone-500">아직 청첩장이 없어요</p>
             <Link to="/create" className="text-stone-800 text-sm hover:underline mt-2 inline-block">
-              첫 청첩장을 만들어보세요 →
+              첫 청첩장을 만들어보세요
             </Link>
           </div>
         ) : (
