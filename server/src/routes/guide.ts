@@ -38,7 +38,7 @@ router.get('/admin', authMiddleware, adminOnly, async (req, res) => {
 });
 
 router.post('/', authMiddleware, adminOnly, async (req, res) => {
-  const { title, description, videoUrl, category, order, isPublished } = req.body;
+  const { title, description, videoUrl, videoType, category, order, isPublished } = req.body;
   
   try {
     const guide = await prisma.guide.create({
@@ -46,6 +46,7 @@ router.post('/', authMiddleware, adminOnly, async (req, res) => {
         title,
         description,
         videoUrl,
+        videoType: videoType || 'UPLOAD',
         category: category || 'GENERAL',
         order: order || 0,
         isPublished: isPublished ?? true,
@@ -60,12 +61,12 @@ router.post('/', authMiddleware, adminOnly, async (req, res) => {
 
 router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
   const { id } = req.params;
-  const { title, description, videoUrl, category, order, isPublished } = req.body;
+  const { title, description, videoUrl, videoType, category, order, isPublished } = req.body;
   
   try {
     const guide = await prisma.guide.update({
       where: { id },
-      data: { title, description, videoUrl, category, order, isPublished },
+      data: { title, description, videoUrl, videoType, category, order, isPublished },
     });
     res.json(guide);
   } catch (error) {

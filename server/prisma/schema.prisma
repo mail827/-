@@ -16,287 +16,309 @@ model User {
   providerId    String
   role          Role      @default(CUSTOMER)
   phone         String?
-  password      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  orders        Order[]
-  weddings      Wedding[]
+  password      String?
   chatLogs      ChatLog[]
   giftsSent     Gift[]    @relation("GiftsSent")
   giftsReceived Gift[]    @relation("GiftsReceived")
+  orders        Order[]
   reviews       Review[]
+  weddings      Wedding[]
 
   @@unique([provider, providerId])
 }
 
 model Package {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  price       Int
-  description String
-  features    String[]
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  maxEdits    Int      @default(-1)
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  price        Int
+  description  String
+  features     String[]
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  maxEdits     Int      @default(-1)
   durationDays Int      @default(365)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  orders      Order[]
-  gifts       Gift[]
+  gifts        Gift[]
+  orders       Order[]
 }
 
 model Order {
-  id            String      @id @default(cuid())
-  userId        String
-  user          User        @relation(fields: [userId], references: [id])
-  packageId     String
-  package       Package     @relation(fields: [packageId], references: [id])
-  amount        Int
-  status        OrderStatus @default(PENDING)
-  paymentKey    String?
-  orderId       String      @unique
-  paidAt        DateTime?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  wedding       Wedding?
+  id         String      @id @default(cuid())
+  userId     String
+  packageId  String
+  amount     Int
+  status     OrderStatus @default(PENDING)
+  paymentKey String?
+  orderId    String      @unique
+  paidAt     DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  package    Package     @relation(fields: [packageId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+  wedding    Wedding?
 }
 
 model ChatLog {
   id        String   @id @default(cuid())
   userId    String?
   visitorId String?
-  user      User?    @relation(fields: [userId], references: [id])
   role      ChatRole
   content   String
   createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
 }
 
 model Wedding {
-  id              String   @id @default(cuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id])
-  orderId         String?  @unique
-  order           Order?   @relation(fields: [orderId], references: [id])
-  slug            String   @unique
-  theme           Theme    @default(ROMANTIC_CLASSIC)
-  themeColor      String?  @default("#1E3A5F")
-  isPublished     Boolean  @default(false)
-  isArchived      Boolean  @default(false)
-  expiresAt       DateTime?
-  editCount       Int      @default(0)
-  weddingDate     DateTime
-  weddingTime     String
-  groomName       String
-  groomNameEn     String?
-  groomPhone      String?
-  groomFatherName String?
-  groomMotherName String?
-  groomFatherPhone String?
-  groomMotherPhone String?
-  brideName       String
-  brideNameEn     String?
-  bridePhone      String?
-  notificationEnabled Boolean @default(true)
-  reminderD7      Boolean  @default(true)
-  reminderD3      Boolean  @default(true)
-  reminderD1      Boolean  @default(true)
-  reminderSentDays String?
-  brideFatherName String?
-  brideMotherName String?
-  brideFatherPhone String?
-  brideMotherPhone String?
-  showParents     Boolean  @default(true)
-  greeting        String?
-  greetingTitle   String?
-  loveStory       String?
-  loveStoryType   StoryType @default(PHOTO)
-  loveStoryVideo  String?
-  venue           String
-  venueHall       String?
-  venueAddress    String
-  venuePhone      String?
-  venueMapUrl     String?
-  venueNaverMap   String?
-  venueKakaoMap   String?
-  venueTmap       String?
-  venueLatitude   Float?
-  venueLongitude  Float?
-  groomAccount    String?
-  groomBank       String?
-  groomAccountHolder String?
-  brideAccount    String?
-  brideBank       String?
-  brideAccountHolder String?
-  groomFatherAccount String?
-  groomFatherBank String?
+  id                       String            @id @default(cuid())
+  userId                   String
+  orderId                  String?           @unique
+  slug                     String            @unique
+  theme                    Theme             @default(ROMANTIC_CLASSIC)
+  isPublished              Boolean           @default(false)
+  isArchived               Boolean           @default(false)
+  weddingDate              DateTime
+  weddingTime              String
+  groomName                String
+  groomNameEn              String?
+  groomPhone               String?
+  groomFatherName          String?
+  groomMotherName          String?
+  groomFatherPhone         String?
+  groomMotherPhone         String?
+  brideName                String
+  brideNameEn              String?
+  bridePhone               String?
+  brideFatherName          String?
+  brideMotherName          String?
+  brideFatherPhone         String?
+  brideMotherPhone         String?
+  showParents              Boolean           @default(true)
+  greeting                 String?
+  greetingTitle            String?
+  loveStory                String?
+  loveStoryType            StoryType         @default(PHOTO)
+  loveStoryVideo           String?
+  venue                    String
+  venueHall                String?
+  venueAddress             String
+  venuePhone               String?
+  venueMapUrl              String?
+  venueNaverMap            String?
+  venueKakaoMap            String?
+  venueTmap                String?
+  venueLatitude            Float?
+  venueLongitude           Float?
+  groomAccount             String?
+  groomBank                String?
+  groomAccountHolder       String?
+  brideAccount             String?
+  brideBank                String?
+  brideAccountHolder       String?
+  groomFatherAccount       String?
+  groomFatherBank          String?
   groomFatherAccountHolder String?
-  groomMotherAccount String?
-  groomMotherBank String?
+  groomMotherAccount       String?
+  groomMotherBank          String?
   groomMotherAccountHolder String?
-  brideFatherAccount String?
-  brideFatherBank String?
+  brideFatherAccount       String?
+  brideFatherBank          String?
   brideFatherAccountHolder String?
-  brideMotherAccount String?
-  brideMotherBank String?
+  brideMotherAccount       String?
+  brideMotherBank          String?
   brideMotherAccountHolder String?
-  tossLink        String?
-  kakaoPayLink    String?
-  closingMessage  String?
-  bgMusicUrl      String?
-  bgMusicAutoPlay Boolean  @default(false)
-  showDday        Boolean  @default(true)
-  heroMedia       String?
-  heroMediaType   MediaType @default(IMAGE)
-  mainColor       String?
-  accentColor     String?
-  fontFamily      String?
-  textColor       String?
-  
-  aiEnabled           Boolean @default(false)
-  aiGroomPersonality  String?
-  aiBridePersonality  String?
-  aiSecrets           Json?
-  aiMenuInfo          Json?
-  aiTransportInfo     Json?
-  aiCustomQna         Json?
-  aiName            String?
-  aiMode            String?   @default("classic")
-  aiToneStyle       String?   @default("default")
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  galleries       Gallery[]
-  rsvps           Rsvp[]
-  guestbooks      Guestbook[]
-  aiChats         AiChat[]
-  reportTokens    ReportToken[]
-  reviews         Review[]
-  snapshots       WeddingSnapshot[]
+  tossLink                 String?
+  kakaoPayLink             String?
+  closingMessage           String?
+  bgMusicUrl               String?
+  bgMusicAutoPlay          Boolean           @default(false)
+  showDday                 Boolean           @default(true)
+  heroMedia                String?
+  heroMediaType            MediaType         @default(IMAGE)
+  mainColor                String?
+  accentColor              String?
+  fontFamily               String?
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
+  textColor                String?
+  themeColor               String?           @default("#1E3A5F")
+  aiBridePersonality       String?
+  aiCustomQna              Json?
+  aiEnabled                Boolean           @default(false)
+  aiGroomPersonality       String?
+  aiMenuInfo               Json?
+  aiSecrets                Json?
+  aiTransportInfo          Json?
+  aiName                   String?
+  aiMode                   String?           @default("classic")
+  editCount                Int               @default(0)
+  aiToneStyle              String?           @default("default")
+  notificationEnabled      Boolean           @default(true)
+  reminderD1               Boolean           @default(true)
+  reminderD3               Boolean           @default(true)
+  reminderD7               Boolean           @default(true)
+  reminderSentDays         String?
+  expiresAt                DateTime?
+  aiChats                  AiChat[]
+  galleries                Gallery[]
+  guestbooks               Guestbook[]
+  reportTokens             ReportToken[]
+  reviews                  Review[]
+  rsvps                    Rsvp[]
+  order                    Order?            @relation(fields: [orderId], references: [id])
+  user                     User              @relation(fields: [userId], references: [id])
+  snapshots                WeddingSnapshot[]
 }
 
 model WeddingSnapshot {
-  id          String   @id @default(cuid())
-  weddingId   String
-  wedding     Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  version     String   @unique
-  data        Json
-  sharedAt    DateTime @default(now())
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  weddingId String
+  version   String   @unique
+  data      Json
+  sharedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
-
 model AiChat {
-  id          String   @id @default(cuid())
-  weddingId   String
-  wedding     Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  visitorId   String
-  role        ChatRole
-  content     String
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  weddingId String
+  visitorId String
+  role      ChatRole
+  content   String
+  createdAt DateTime @default(now())
+  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
 model Gallery {
-  id         String    @id @default(cuid())
-  weddingId  String
-  wedding    Wedding   @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  mediaUrl   String
-  mediaType  MediaType @default(IMAGE)
-  order      Int       @default(0)
-  caption    String?
-  createdAt  DateTime  @default(now())
+  id        String    @id @default(cuid())
+  weddingId String
+  mediaUrl  String
+  mediaType MediaType @default(IMAGE)
+  order     Int       @default(0)
+  caption   String?
+  createdAt DateTime  @default(now())
+  wedding   Wedding   @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
 model Rsvp {
-  id          String   @id @default(cuid())
-  weddingId   String
-  wedding     Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  name        String
-  phone       String?
-  side        Side     @default(GROOM)
-  attending   Boolean
-  guestCount  Int      @default(1)
-  mealCount   Int      @default(0)
-  message     String?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  weddingId  String
+  name       String
+  phone      String?
+  side       Side     @default(GROOM)
+  attending  Boolean
+  guestCount Int      @default(1)
+  mealCount  Int      @default(0)
+  message    String?
+  createdAt  DateTime @default(now())
+  wedding    Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
 model Guestbook {
-  id         String   @id @default(cuid())
-  weddingId  String
-  wedding    Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  name       String
-  password   String
-  message    String
-  isHidden   Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  weddingId String
+  name      String
+  password  String
+  message   String
+  isHidden  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
 model Inquiry {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   name      String
   email     String
   phone     String?
-  type      String   @default("general")
+  type      String        @default("general")
   message   String
   status    InquiryStatus @default(PENDING)
   reply     String?
   repliedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }
 
 model SiteContent {
   id        String   @id @default(cuid())
   key       String   @unique
   title     String
-  content   String   @db.Text
+  content   String
   updatedAt DateTime @updatedAt
 }
 
 model ReportToken {
-  id          String   @id @default(cuid())
-  weddingId   String
-  wedding     Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  token       String   @unique
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  weddingId String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
 model Review {
   id        String   @id @default(cuid())
   weddingId String
-  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
   rating    Int
   content   String?
-  source    String   @default("GENERAL")
-  isPublic  Boolean  @default(false)
   createdAt DateTime @default(now())
+  isPublic  Boolean  @default(false)
+  source    String   @default("GENERAL")
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
 model Gift {
-  id          String    @id @default(cuid())
-  code        String    @unique
-  packageId   String
-  package     Package   @relation(fields: [packageId], references: [id])
-  fromUserId  String?
-  fromUser    User?     @relation("GiftsSent", fields: [fromUserId], references: [id])
-  toEmail     String?
-  toUserId    String?
-  toUser      User?     @relation("GiftsReceived", fields: [toUserId], references: [id])
-  message     String?
-  isRedeemed  Boolean   @default(false)
-  redeemedAt  DateTime?
-  expiresAt   DateTime
-  createdAt   DateTime  @default(now())
+  id         String    @id @default(cuid())
+  code       String    @unique
+  packageId  String
+  fromUserId String?
+  toEmail    String?
+  toUserId   String?
+  message    String?
+  isRedeemed Boolean   @default(false)
+  redeemedAt DateTime?
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  fromUser   User?     @relation("GiftsSent", fields: [fromUserId], references: [id])
+  package    Package   @relation(fields: [packageId], references: [id])
+  toUser     User?     @relation("GiftsReceived", fields: [toUserId], references: [id])
+}
+
+model Guide {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  videoUrl    String
+  videoType   String   @default("UPLOAD")
+  category    String   @default("GENERAL")
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ThemeShowcase {
+  id          String   @id @default(cuid())
+  theme       Theme
+  title       String
+  description String?
+  sampleData  Json?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum Provider {
-  EMAIL
   KAKAO
   GOOGLE
+  EMAIL
 }
 
 enum Role {
@@ -350,28 +372,4 @@ enum InquiryStatus {
   PENDING
   REPLIED
   CLOSED
-}
-
-model Guide {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  videoUrl    String
-  category    String   @default("GENERAL")
-  order       Int      @default(0)
-  isPublished Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model ThemeShowcase {
-  id          String   @id @default(cuid())
-  theme       Theme
-  title       String
-  description String?
-  sampleData  Json?
-  order       Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }
