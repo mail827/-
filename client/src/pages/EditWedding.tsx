@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Save, Eye, X, Plus, Music, Film, Image, Sparkles } from 'lucide-react';
+import { ArrowLeft, Save, Eye, X, Plus, Music, Film, Image, Sparkles, Loader2 } from 'lucide-react';
 import AiWritingAssistant from '../components/AiWritingAssistant';
+
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'wedding_guide';
 
 const THEMES = [
   { id: 'ROMANTIC_CLASSIC', name: '로맨틱 클래식', desc: '우아하고 낭만적인 클래식 디자인' },
@@ -34,6 +37,10 @@ interface GalleryItem {
   order: number;
 }
 
+interface UploadProgress {
+  [key: string]: number;
+}
+
 function isYouTubeUrl(url: string): boolean {
   return url?.includes('youtube.com') || url?.includes('youtu.be');
 }
@@ -51,17 +58,97 @@ function getYouTubeEmbedUrl(url: string): string {
   return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
 }
 
+function validateFile(file: File, type: 'image' | 'video' | 'audio'): string | null {
+  const limits = {
+    image: { maxSize: 20 * 1024 * 1024, types: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] },
+    video: { maxSize: 200 * 1024 * 1024, types: ['video/mp4', 'video/quicktime', 'video/webm'] },
+    audio: { maxSize: 20 * 1024 * 1024, types: ['audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/ogg'] },
+  };
+  const limit = limits[type];
+  if (file.size > limit.maxSize) {
+    return `파일 크기가 너무 커요 (최대 ${limit.maxSize / 1024 / 1024}MB)`;
+  }
+  if (!limit.types.some(t => file.type.startsWith(t.split('/')[0]))) {
+    return '지원하지 않는 파일 형식이에요';
+  }
+  return null;
+}
+
 export default function EditWedding() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress>({});
   const [wedding, setWedding] = useState<any>(null);
   const [tab, setTab] = useState('basic');
   const [rsvpList, setRsvpList] = useState<any[]>([]);
   const [rsvpLoading, setRsvpLoading] = useState(false);
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
+
+  const uploadToCloudinary = (
+    file: File,
+    progressKey: string,
+    onSuccess: (url: string) => void,
+    onError: (err: string) => void
+  ) => {
+    const resourceType = file.type.startsWith('video/') ? 'video' : file.type.startsWith('audio/') ? 'video' : 'image';
+    const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('folder', 'wedding');
+
+    const xhr = new XMLHttpRequest();
+    xhrRef.current = xhr;
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percent = Math.round((e.loaded / e.total) * 100);
+        setUploadProgress(prev => ({ ...prev, [progressKey]: percent }));
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        onSuccess(response.secure_url);
+      } else {
+        onError('업로드 실패');
+      }
+      setUploadProgress(prev => {
+        const next = { ...prev };
+        delete next[progressKey];
+        return next;
+      });
+      xhrRef.current = null;
+    };
+
+    xhr.onerror = () => {
+      onError('네트워크 오류');
+      setUploadProgress(prev => {
+        const next = { ...prev };
+        delete next[progressKey];
+        return next;
+      });
+      xhrRef.current = null;
+    };
+
+    xhr.open('POST', url);
+    xhr.send(formData);
+  };
+
+  const cancelUpload = () => {
+    if (xhrRef.current) {
+      xhrRef.current.abort();
+      xhrRef.current = null;
+      setUploadProgress({});
+      setUploading(false);
+    }
+  };
 
   const fetchRsvp = async () => {
     if (!id) return;
@@ -185,29 +272,28 @@ export default function EditWedding() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
+    const error = validateFile(file, type);
+    if (error) {
+      alert(error);
+      return;
+    }
 
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
-      if (res.ok) {
-        const data = await res.json();
-        updateField(field, data.url);
+    setUploading(true);
+    uploadToCloudinary(
+      file,
+      field,
+      (url) => {
+        updateField(field, url);
         if (field === 'heroMedia') {
           updateField('heroMediaType', type === 'video' ? 'VIDEO' : 'IMAGE');
         }
+        setUploading(false);
+      },
+      (err) => {
+        alert(err);
+        setUploading(false);
       }
-    } catch (e) {
-      alert('업로드 실패');
-    } finally {
-      setUploading(false);
-    }
+    );
   };
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -217,42 +303,50 @@ export default function EditWedding() {
     setUploading(true);
     const token = localStorage.getItem('token');
 
-    for (const file of Array.from(files)) {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      try {
-        const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData
-        });
-
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          const isVideo = file.type.startsWith('video/');
-          
-          const galleryRes = await fetch(`${import.meta.env.VITE_API_URL}/weddings/${id}/gallery`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              mediaUrl: uploadData.url,
-              mediaType: isVideo ? 'VIDEO' : 'IMAGE',
-              order: galleries.length
-            })
-          });
-
-          if (galleryRes.ok) {
-            const newItem = await galleryRes.json();
-            setGalleries(prev => [...prev, newItem]);
-          }
-        }
-      } catch (e) {
-        console.error('Gallery upload error:', e);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const isVideo = file.type.startsWith('video/');
+      const type = isVideo ? 'video' : 'image';
+      const error = validateFile(file, type);
+      
+      if (error) {
+        console.error(`${file.name}: ${error}`);
+        continue;
       }
+
+      await new Promise<void>((resolve) => {
+        uploadToCloudinary(
+          file,
+          `gallery-${i}`,
+          async (url) => {
+            try {
+              const galleryRes = await fetch(`${import.meta.env.VITE_API_URL}/weddings/${id}/gallery`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                  mediaUrl: url,
+                  mediaType: isVideo ? 'VIDEO' : 'IMAGE',
+                  order: galleries.length + i
+                })
+              });
+              if (galleryRes.ok) {
+                const newItem = await galleryRes.json();
+                setGalleries(prev => [...prev, newItem]);
+              }
+            } catch (e) {
+              console.error('Gallery save error:', e);
+            }
+            resolve();
+          },
+          (err) => {
+            console.error(err);
+            resolve();
+          }
+        );
+      });
     }
     setUploading(false);
   };
@@ -272,6 +366,35 @@ export default function EditWedding() {
     } catch (e) {
       alert('삭제 실패');
     }
+  };
+
+  const UploadProgressBar = ({ progressKey }: { progressKey: string }) => {
+    const progress = uploadProgress[progressKey];
+    if (progress === undefined) return null;
+    
+    return (
+      <div className="mt-3">
+        <div className="flex items-center justify-between text-sm text-stone-600 mb-1">
+          <span className="flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            업로드 중...
+          </span>
+          <span>{progress}%</span>
+        </div>
+        <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-stone-800 transition-all duration-300 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <button
+          onClick={cancelUpload}
+          className="mt-2 text-sm text-red-500 hover:text-red-600"
+        >
+          업로드 취소
+        </button>
+      </div>
+    );
   };
 
   if (loading) {
@@ -443,47 +566,47 @@ export default function EditWedding() {
         )}
 
         {tab === 'greeting' && (
-  <>
-    <Section title="인사말">
-      <Input label="인사말 제목" value={wedding.greetingTitle} onChange={v => updateField('greetingTitle', v)} />
-      <textarea
-        placeholder="인사말 내용"
-        value={wedding.greeting || ''}
-        onChange={(e) => updateField('greeting', e.target.value)}
-        rows={6}
-        className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none mt-4"
-      />
-      <AiWritingAssistant
-        fieldType="greeting"
-        context={{
-          groomName: wedding.groomName,
-          brideName: wedding.brideName,
-          weddingDate: wedding.weddingDate,
-          venue: wedding.venue,
-        }}
-        onSelect={(value) => updateField('greeting', value)}
-      />
-    </Section>
+          <>
+            <Section title="인사말">
+              <Input label="인사말 제목" value={wedding.greetingTitle} onChange={v => updateField('greetingTitle', v)} />
+              <textarea
+                placeholder="인사말 내용"
+                value={wedding.greeting || ''}
+                onChange={(e) => updateField('greeting', e.target.value)}
+                rows={6}
+                className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none mt-4"
+              />
+              <AiWritingAssistant
+                fieldType="greeting"
+                context={{
+                  groomName: wedding.groomName,
+                  brideName: wedding.brideName,
+                  weddingDate: wedding.weddingDate,
+                  venue: wedding.venue,
+                }}
+                onSelect={(value) => updateField('greeting', value)}
+              />
+            </Section>
 
-    <Section title="마무리 인사">
-      <textarea
-        placeholder="마무리 메시지 (선택)"
-        value={wedding.closingMessage || ''}
-        onChange={(e) => updateField('closingMessage', e.target.value)}
-        rows={3}
-        className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
-      />
-      <AiWritingAssistant
-        fieldType="closingMessage"
-        context={{
-          groomName: wedding.groomName,
-          brideName: wedding.brideName,
-        }}
-        onSelect={(value) => updateField('closingMessage', value)}
-      />
-    </Section>
-  </>
-)}
+            <Section title="마무리 인사">
+              <textarea
+                placeholder="마무리 메시지 (선택)"
+                value={wedding.closingMessage || ''}
+                onChange={(e) => updateField('closingMessage', e.target.value)}
+                rows={3}
+                className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+              />
+              <AiWritingAssistant
+                fieldType="closingMessage"
+                context={{
+                  groomName: wedding.groomName,
+                  brideName: wedding.brideName,
+                }}
+                onSelect={(value) => updateField('closingMessage', value)}
+              />
+            </Section>
+          </>
+        )}
 
         {tab === 'venue' && (
           <>
@@ -621,24 +744,29 @@ export default function EditWedding() {
                   <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400">
                     <Image className="w-8 h-8 text-stone-400 mb-2" />
                     <span className="text-stone-500 text-sm">이미지 업로드</span>
+                    <span className="text-stone-400 text-xs mt-1">최대 20MB</span>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={(e) => handleFileUpload(e, 'heroMedia', 'image')}
                       className="hidden"
+                      disabled={uploading}
                     />
                   </label>
                   <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400">
                     <Film className="w-8 h-8 text-stone-400 mb-2" />
                     <span className="text-stone-500 text-sm">영상 업로드</span>
+                    <span className="text-stone-400 text-xs mt-1">최대 200MB</span>
                     <input
                       type="file"
                       accept="video/*"
                       onChange={(e) => handleFileUpload(e, 'heroMedia', 'video')}
                       className="hidden"
+                      disabled={uploading}
                     />
                   </label>
                 </div>
+                <UploadProgressBar progressKey="heroMedia" />
                 <div className="text-center text-stone-400 text-sm">또는</div>
                 <Input 
                   label="YouTube URL" 
@@ -651,7 +779,6 @@ export default function EditWedding() {
                 />
               </div>
             )}
-            {uploading && <p className="text-sm text-stone-500 text-center mt-4">업로드 중...</p>}
           </Section>
         )}
 
@@ -681,7 +808,7 @@ export default function EditWedding() {
                 </div>
               ))}
               
-              <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400">
+              <label className={`aspect-square flex flex-col items-center justify-center border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                 <Plus className="w-8 h-8 text-stone-400 mb-2" />
                 <span className="text-stone-500 text-sm">추가</span>
                 <input
@@ -690,12 +817,16 @@ export default function EditWedding() {
                   multiple
                   onChange={handleGalleryUpload}
                   className="hidden"
+                  disabled={uploading}
                 />
               </label>
             </div>
             
-            {uploading && <p className="text-sm text-stone-500 text-center">업로드 중...</p>}
-            <p className="text-xs text-stone-400 mt-2">* 이미지와 영상을 함께 업로드할 수 있어요</p>
+            {Object.keys(uploadProgress).filter(k => k.startsWith('gallery')).map(key => (
+              <UploadProgressBar key={key} progressKey={key} />
+            ))}
+            
+            <p className="text-xs text-stone-400 mt-2">* 이미지(최대 20MB), 영상(최대 200MB)</p>
             
             <div className="mt-6 pt-6 border-t border-stone-100">
               <label className="flex items-center justify-between cursor-pointer">
@@ -738,16 +869,19 @@ export default function EditWedding() {
               </div>
             ) : (
               <div className="space-y-4">
-                <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400">
+                <label className={`flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                   <Film className="w-8 h-8 text-stone-400 mb-2" />
                   <span className="text-stone-500 text-sm">영상 파일 업로드</span>
+                  <span className="text-stone-400 text-xs mt-1">최대 200MB</span>
                   <input
                     type="file"
                     accept="video/*"
                     onChange={(e) => handleFileUpload(e, 'loveStoryVideo', 'video')}
                     className="hidden"
+                    disabled={uploading}
                   />
                 </label>
+                <UploadProgressBar progressKey="loveStoryVideo" />
                 <div className="text-center text-stone-400 text-sm">또는</div>
                 <Input 
                   label="YouTube URL" 
@@ -757,7 +891,6 @@ export default function EditWedding() {
                 />
               </div>
             )}
-            {uploading && <p className="text-sm text-stone-500 text-center mt-4">업로드 중...</p>}
           </Section>
         )}
 
@@ -795,17 +928,19 @@ export default function EditWedding() {
               </div>
             ) : (
               <div className="space-y-4">
-                <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400">
+                <label className={`flex flex-col items-center justify-center h-32 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                   <Music className="w-8 h-8 text-stone-400 mb-2" />
                   <span className="text-stone-500 text-sm">음악 파일 업로드</span>
-                  <span className="text-stone-400 text-xs mt-1">MP3, WAV 등</span>
+                  <span className="text-stone-400 text-xs mt-1">MP3, WAV (최대 20MB)</span>
                   <input
                     type="file"
                     accept="audio/*"
                     onChange={(e) => handleFileUpload(e, 'bgMusicUrl', 'audio')}
                     className="hidden"
+                    disabled={uploading}
                   />
                 </label>
+                <UploadProgressBar progressKey="bgMusicUrl" />
                 <div className="text-center text-stone-400 text-sm">또는</div>
                 <Input 
                   label="음악 URL (직접 재생 가능한 URL)" 
@@ -827,8 +962,6 @@ export default function EditWedding() {
               <span className="text-stone-600">자동 재생</span>
             </label>
             <p className="text-xs text-stone-400 mt-2">* 모바일에서는 사용자 상호작용 후 자동재생이 가능해요</p>
-            
-            {uploading && <p className="text-sm text-stone-500 text-center mt-4">업로드 중...</p>}
           </Section>
         )}
 
@@ -909,7 +1042,6 @@ export default function EditWedding() {
                     </label>
                   </div>
 
-                  {/* 세부 스타일 Select */}
                   <div className="mt-4">
                     <label className="block text-sm text-stone-600 mb-2">세부 성격 스타일</label>
                     <select
