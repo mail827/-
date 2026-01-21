@@ -12,6 +12,8 @@ const THEME_OPTIONS = [
   { id: 'OCEAN_BREEZE', name: '오션 브리즈' },
   { id: 'GLASS_BUBBLE', name: '글라스 버블' },
   { id: 'SPRING_BREEZE', name: '봄바람' },
+  { id: 'GALLERY_MIRIM_1', name: 'Gallery 美林-1' },
+  { id: 'GALLERY_MIRIM_2', name: 'Gallery 美林-2' },
 ];
 
 const DEFAULT_SAMPLE_DATA = {
@@ -140,19 +142,20 @@ export default function AdminThemeShowcase() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-stone-800">테마 쇼케이스 관리</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold text-stone-800">테마 쇼케이스</h1>
         <button
           onClick={openNewModal}
-          className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors"
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors text-sm"
         >
           <Plus className="w-4 h-4" />
-          테마 추가
+          <span className="hidden sm:inline">테마 추가</span>
+          <span className="sm:hidden">추가</span>
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+      <div className="hidden md:block bg-white rounded-xl border border-stone-200 overflow-hidden">
         <table className="w-full">
           <thead className="bg-stone-50 border-b border-stone-200">
             <tr>
@@ -177,7 +180,7 @@ export default function AdminThemeShowcase() {
                   {THEME_OPTIONS.find(t => t.id === showcase.theme)?.name || showcase.theme}
                 </td>
                 <td className="px-4 py-3 text-stone-700">{showcase.title}</td>
-                <td className="px-4 py-3 text-stone-500 text-sm">{showcase.description || '-'}</td>
+                <td className="px-4 py-3 text-stone-500 text-sm max-w-[200px] truncate">{showcase.description || '-'}</td>
                 <td className="px-4 py-3 text-center">
                   <button
                     onClick={() => toggleActive(showcase)}
@@ -217,11 +220,66 @@ export default function AdminThemeShowcase() {
         </table>
       </div>
 
+      <div className="md:hidden space-y-3">
+        {showcases.length === 0 ? (
+          <div className="bg-white rounded-xl border border-stone-200 p-8 text-center text-stone-400">
+            등록된 테마 쇼케이스가 없습니다
+          </div>
+        ) : (
+          showcases.map((showcase, idx) => (
+            <div key={showcase.id} className="bg-white rounded-xl border border-stone-200 p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 bg-stone-100 rounded-full flex items-center justify-center text-xs text-stone-500">
+                    {idx + 1}
+                  </span>
+                  <span className="font-medium text-stone-800">
+                    {THEME_OPTIONS.find(t => t.id === showcase.theme)?.name || showcase.theme}
+                  </span>
+                </div>
+                <button
+                  onClick={() => toggleActive(showcase)}
+                  className={`p-1.5 rounded-lg transition-colors ${
+                    showcase.isActive ? 'bg-green-100 text-green-600' : 'bg-stone-100 text-stone-400'
+                  }`}
+                >
+                  {showcase.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                </button>
+              </div>
+              
+              <div className="space-y-1 mb-3">
+                <p className="text-sm text-stone-700">{showcase.title || '(제목 없음)'}</p>
+                {showcase.description && (
+                  <p className="text-xs text-stone-500 line-clamp-2">{showcase.description}</p>
+                )}
+              </div>
+              
+              <div className="flex gap-2 pt-3 border-t border-stone-100">
+                <button
+                  onClick={() => openEditModal(showcase)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 text-stone-600 hover:bg-stone-50 rounded-lg transition-colors text-sm"
+                >
+                  <Pencil className="w-4 h-4" />
+                  수정
+                </button>
+                <button
+                  onClick={() => handleDelete(showcase.id)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors text-sm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  삭제
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
       {editModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setEditModal(null)} />
-          <div className="relative bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 flex items-center justify-between">
+          <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-stone-200 px-4 sm:px-6 py-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-stone-800">
                 {isNew ? '테마 쇼케이스 추가' : '테마 쇼케이스 수정'}
               </h2>
@@ -230,13 +288,13 @@ export default function AdminThemeShowcase() {
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">테마 선택</label>
                 <select
                   value={editModal.theme}
                   onChange={(e) => setEditModal({ ...editModal, theme: e.target.value })}
-                  className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500"
+                  className="w-full px-3 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 bg-white"
                 >
                   {THEME_OPTIONS.map(theme => (
                     <option key={theme.id} value={theme.id}>{theme.name}</option>
@@ -251,7 +309,7 @@ export default function AdminThemeShowcase() {
                   value={editModal.title}
                   onChange={(e) => setEditModal({ ...editModal, title: e.target.value })}
                   placeholder="예: 우아한 클래식 감성"
-                  className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500"
+                  className="w-full px-3 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500"
                 />
               </div>
 
@@ -261,8 +319,8 @@ export default function AdminThemeShowcase() {
                   value={editModal.description || ''}
                   onChange={(e) => setEditModal({ ...editModal, description: e.target.value })}
                   placeholder="테마에 대한 간단한 설명"
-                  rows={2}
-                  className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500"
+                  rows={3}
+                  className="w-full px-3 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 resize-none"
                 />
               </div>
 
@@ -332,7 +390,7 @@ export default function AdminThemeShowcase() {
               </div>
             </div>
 
-            <div className="sticky bottom-0 bg-stone-50 border-t border-stone-200 px-6 py-4 flex justify-end gap-3">
+            <div className="sticky bottom-0 bg-stone-50 border-t border-stone-200 px-4 sm:px-6 py-4 flex justify-end gap-3">
               <button
                 onClick={() => setEditModal(null)}
                 className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
