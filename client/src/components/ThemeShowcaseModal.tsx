@@ -14,6 +14,8 @@ import {
   SpringBreeze,
   GalleryMirim1,
   GalleryMirim2,
+  LunaHalfmoon,
+  PearlDrift,
 } from '../pages/wedding/themes';
 
 const themeComponents: Record<string, React.ComponentType<any>> = {
@@ -29,6 +31,8 @@ const themeComponents: Record<string, React.ComponentType<any>> = {
   SPRING_BREEZE: SpringBreeze,
   GALLERY_MIRIM_1: GalleryMirim1,
   GALLERY_MIRIM_2: GalleryMirim2,
+  LUNA_HALFMOON: LunaHalfmoon,
+  PEARL_DRIFT: PearlDrift,
 };
 
 const themeAccents: Record<string, { accent: string; glow: string }> = {
@@ -44,6 +48,8 @@ const themeAccents: Record<string, { accent: string; glow: string }> = {
   SPRING_BREEZE: { accent: 'rgba(219,182,192,0.15)', glow: 'rgba(219,182,192,0.1)' },
   GALLERY_MIRIM_1: { accent: 'rgba(180,175,170,0.15)', glow: 'rgba(180,175,170,0.1)' },
   GALLERY_MIRIM_2: { accent: 'rgba(175,170,180,0.15)', glow: 'rgba(175,170,180,0.1)' },
+  LUNA_HALFMOON: { accent: 'rgba(144,175,197,0.15)', glow: 'rgba(144,175,197,0.1)' },
+  PEARL_DRIFT: { accent: 'rgba(232,238,242,0.12)', glow: 'rgba(232,238,242,0.08)' },
 };
 
 const IPhoneMockup = ({ children }: { children: React.ReactNode }) => (
@@ -170,6 +176,8 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
       SPRING_BREEZE: '봄바람',
       GALLERY_MIRIM_1: '美林 갤러리 1',
       GALLERY_MIRIM_2: '美林 갤러리 2',
+      LUNA_HALFMOON: '루나 하프문',
+      PEARL_DRIFT: '펄 드리프트',
     };
     return names[theme] || theme;
   };
