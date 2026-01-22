@@ -14,6 +14,8 @@ const THEME_OPTIONS = [
   { id: 'SPRING_BREEZE', name: '봄바람' },
   { id: 'GALLERY_MIRIM_1', name: 'Gallery 美林-1' },
   { id: 'GALLERY_MIRIM_2', name: 'Gallery 美林-2' },
+  { id: 'LUNA_HALFMOON', name: '루나 하프문' },
+  { id: 'PEARL_DRIFT', name: '펄 드리프트' },
 ];
 
 const DEFAULT_SAMPLE_DATA = {
