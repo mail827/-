@@ -102,13 +102,16 @@ const DEFAULT_SAMPLE = {
   venueName: '그랜드 웨딩홀',
   venueHall: '루체홀',
   venueAddress: '서울시 강남구 테헤란로 123',
+  venue: '그랜드 웨딩홀',
   greetingTitle: '저희 두 사람이 사랑으로 만나',
-  greetingContent: '서로 아끼고 사랑하며 예쁘게 살겠습니다.\n귀한 걸음 하시어 축복해 주시면 감사하겠습니다.',
+  greeting: '서로 아끼고 사랑하며 예쁘게 살겠습니다.\n귀한 걸음 하시어 축복해 주시면 감사하겠습니다.',
   groomFatherName: '김철수',
   groomMotherName: '이영희',
   brideFatherName: '박민수',
   brideMotherName: '최수진',
-  galleryImages: [],
+  showParents: true,
+  showDday: true,
+  galleries: [],
   guestbooks: [],
 };
 
@@ -222,12 +225,17 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
   const current = showcases[currentIndex];
   const ThemeComponent = current ? themeComponents[current.theme] : null;
   const accent = current ? themeAccents[current.theme] : null;
+  
   const weddingData = { 
     ...DEFAULT_SAMPLE, 
     ...current?.sampleData,
-    groomName: groomName || '민준',
-    brideName: brideName || '서연',
+    groomName: groomName || DEFAULT_SAMPLE.groomName,
+    brideName: brideName || DEFAULT_SAMPLE.brideName,
     heroMedia: heroImage || null,
+    weddingTime: current?.sampleData?.weddingTime || DEFAULT_SAMPLE.weddingTime,
+    weddingDate: current?.sampleData?.weddingDate || DEFAULT_SAMPLE.weddingDate,
+    venue: current?.sampleData?.venue || current?.sampleData?.venueName || DEFAULT_SAMPLE.venue,
+    greeting: current?.sampleData?.greeting || current?.sampleData?.greetingContent || DEFAULT_SAMPLE.greeting,
   };
 
   return (
