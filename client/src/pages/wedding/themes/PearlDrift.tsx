@@ -186,7 +186,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
           </div>
           <div className="mt-12 text-center">
             <p className="text-[0.8rem]" style={{ ...pearlFont, color: '#E8EEF2' }}>{formatDate(wedding.weddingDate, 'korean')}</p>
-            <p className="text-[0.7rem] mt-2" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.5)' }}>{formatTime(wedding.weddingTime)}</p>
+            {wedding.weddingTime && <p className="text-[0.7rem] mt-2" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.5)' }}>{formatTime(wedding.weddingTime)}</p>}
           </div>
         </motion.div>
       </section>

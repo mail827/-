@@ -193,7 +193,7 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
           </div>
           <div className="mt-14 text-center">
             <p className="text-[0.8rem]" style={{ ...dacapoFont, color: '#5A6A74' }}>{formatDate(wedding.weddingDate, 'korean')}</p>
-            <p className="text-[0.7rem] mt-3" style={{ ...dacapoFont, color: '#9AABB8' }}>{formatTime(wedding.weddingTime)}</p>
+            {wedding.weddingTime && <p className="text-[0.7rem] mt-3" style={{ ...dacapoFont, color: '#9AABB8' }}>{formatTime(wedding.weddingTime)}</p>}
           </div>
         </motion.div>
       </section>
