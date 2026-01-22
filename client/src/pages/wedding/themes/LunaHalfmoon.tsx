@@ -19,15 +19,9 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
     const style = document.createElement('style');
     style.textContent = `
       @font-face {
-        font-family: 'SchoolSafetyWave';
-        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2402_keris@1.0/TTHakgyoansimMulgyeolR.woff2') format('woff2');
-        font-weight: 400;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: 'SchoolSafetyWave';
-        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2402_keris@1.0/TTHakgyoansimMulgyeolB.woff2') format('woff2');
-        font-weight: 700;
+        font-family: 'MapoDacapo';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/MapoDacapoA.woff') format('woff');
+        font-weight: normal;
         font-display: swap;
       }
     `;
@@ -69,69 +63,84 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
 
   const calendarData = getCalendarData(wedding.weddingDate);
   const galleries = wedding.galleries || [];
-  const waveFont = { fontFamily: "'SchoolSafetyWave', serif" };
+  const dacapoFont = { fontFamily: "'MapoDacapo', serif" };
 
   const fadeUp = {
-    hidden: { opacity: 0, y: 40 },
-    visible: { opacity: 1, y: 0, transition: { duration: 1.2, ease: [0.25, 0.1, 0.25, 1] } }
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 1.6, ease: [0.25, 0.1, 0.25, 1] } }
+  };
+
+  const softFade = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 2, ease: 'easeOut' } }
   };
 
   return (
     <div className="min-h-screen relative" style={{ background: '#FFFFFF' }}>
+      <div className="fixed inset-0 pointer-events-none" style={{
+        background: `
+          radial-gradient(ellipse 120% 80% at 50% 0%, rgba(200, 215, 225, 0.08) 0%, transparent 50%),
+          radial-gradient(ellipse 100% 60% at 50% 100%, rgba(200, 215, 225, 0.06) 0%, transparent 40%)
+        `
+      }} />
+      <div className="fixed inset-0 pointer-events-none opacity-[0.015]" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
+      }} />
+
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (
-        <button onClick={toggleMusic} className="fixed top-5 right-5 z-50 w-11 h-11 rounded-full flex items-center justify-center transition-all" style={{ background: 'rgba(255, 255, 255, 0.9)', boxShadow: '0 2px 20px rgba(197, 212, 222, 0.3)', border: '1px solid rgba(197, 212, 222, 0.3)' }}>
+        <button onClick={toggleMusic} className="fixed top-6 right-6 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500" style={{ background: 'rgba(255, 255, 255, 0.85)', boxShadow: '0 2px 20px rgba(180, 195, 205, 0.2)', border: '1px solid rgba(200, 215, 225, 0.3)' }}>
           {isPlaying ? <Volume2 className="w-4 h-4" style={{ color: '#7A8A94' }} /> : <VolumeX className="w-4 h-4" style={{ color: '#A8B8C4' }} />}
         </button>
       )}
 
-      <section className="min-h-screen flex flex-col justify-center items-center px-8 py-24 relative">
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} className="text-center w-full max-w-md">
+      <section className="min-h-screen flex flex-col justify-center items-center px-10 py-32 relative">
+        <motion.div initial="hidden" animate="visible" variants={softFade} className="text-center w-full max-w-sm">
           {wedding.heroMedia && (
-            <div className="relative mb-16">
-              <div className="relative overflow-hidden" style={{ borderRadius: '0' }}>
+            <div className="relative mb-20">
+              <div className="relative overflow-hidden">
                 <div className="aspect-[3/4] overflow-hidden">
                   {wedding.heroMediaType === 'VIDEO' ? (
-                    <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ filter: 'saturate(0.85) brightness(1.02)' }} />
+                    <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ filter: 'saturate(0.8) brightness(1.03) contrast(0.98)' }} />
                   ) : (
-                    <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'saturate(0.85) brightness(1.02)' }} />
+                    <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'saturate(0.8) brightness(1.03) contrast(0.98)' }} />
                   )}
                 </div>
               </div>
             </div>
           )}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 1.5 }}>
-            <div className="flex items-center justify-center gap-8 mb-6">
-              <span className="text-[1.8rem] font-light tracking-wide" style={{ ...waveFont, color: '#5A6A74' }}>{wedding.groomName}</span>
-              <span className="text-[1rem]" style={{ color: '#C5D4DE' }}>&</span>
-              <span className="text-[1.8rem] font-light tracking-wide" style={{ ...waveFont, color: '#5A6A74' }}>{wedding.brideName}</span>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1, duration: 2 }}>
+            <div className="flex items-center justify-center gap-10 mb-8">
+              <span className="text-[1.6rem] tracking-widest" style={{ ...dacapoFont, color: '#5A6A74', fontWeight: 300 }}>{wedding.groomName}</span>
+              <span className="text-[0.9rem]" style={{ color: '#C8D7E0' }}>&</span>
+              <span className="text-[1.6rem] tracking-widest" style={{ ...dacapoFont, color: '#5A6A74', fontWeight: 300 }}>{wedding.brideName}</span>
             </div>
-            <div className="w-16 h-px mx-auto mb-6" style={{ background: 'linear-gradient(90deg, transparent, #C5D4DE, transparent)' }} />
-            <p className="text-[0.8rem] tracking-[0.3em] font-light" style={{ ...waveFont, color: '#8A9AA4' }}>{formatDate(wedding.weddingDate, 'dots')}</p>
-            {wedding.showDday && <p className="mt-4 text-[0.7rem] tracking-widest" style={{ ...waveFont, color: '#A8BDC9' }}>{getDday(wedding.weddingDate)}</p>}
+            <div className="w-12 h-px mx-auto mb-8" style={{ background: 'linear-gradient(90deg, transparent, #D0DFE8, transparent)' }} />
+            <p className="text-[0.75rem] tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>{formatDate(wedding.weddingDate, 'dots')}</p>
+            {wedding.showDday && <p className="mt-6 text-[0.65rem] tracking-[0.3em]" style={{ ...dacapoFont, color: '#B8C8D4' }}>{getDday(wedding.weddingDate)}</p>}
           </motion.div>
         </motion.div>
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }} className="absolute bottom-12">
-          <ChevronDown className="w-5 h-5 animate-bounce" style={{ color: '#C5D4DE' }} />
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5, duration: 1.5 }} className="absolute bottom-16">
+          <ChevronDown className="w-4 h-4 animate-bounce" style={{ color: '#D0DFE8', animationDuration: '2.5s' }} />
         </motion.div>
       </section>
 
       {wedding.greeting && (
-        <section className="py-28 px-8" style={{ background: '#FAFCFD' }}>
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUp} className="max-w-md mx-auto text-center">
-            {wedding.greetingTitle && <p className="text-[1.1rem] mb-10 font-light" style={{ ...waveFont, color: '#5A6A74' }}>{wedding.greetingTitle}</p>}
-            <p className="text-[0.9rem] leading-[2.4] whitespace-pre-line font-light" style={{ ...waveFont, color: '#6A7A84' }}>{wedding.greeting}</p>
+        <section className="py-32 px-10">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={fadeUp} className="max-w-sm mx-auto text-center">
+            {wedding.greetingTitle && <p className="text-[1rem] mb-12 tracking-wide" style={{ ...dacapoFont, color: '#5A6A74', lineHeight: 2 }}>{wedding.greetingTitle}</p>}
+            <p className="text-[0.85rem] leading-[2.8] whitespace-pre-line" style={{ ...dacapoFont, color: '#6A7A84' }}>{wedding.greeting}</p>
             {wedding.showParents && (
-              <div className="mt-14 pt-10" style={{ borderTop: '1px solid rgba(197, 212, 222, 0.4)' }}>
-                <div className="space-y-4" style={waveFont}>
-                  <p className="text-[0.8rem] font-light" style={{ color: '#7A8A94' }}>
-                    <span style={{ color: '#8A9AA4' }}>{wedding.groomFatherName} · {wedding.groomMotherName}</span>
-                    <span className="mx-3" style={{ color: '#C5D4DE' }}>의 아들</span>
+              <div className="mt-20 pt-12" style={{ borderTop: '1px solid rgba(200, 215, 225, 0.4)' }}>
+                <div className="space-y-5" style={dacapoFont}>
+                  <p className="text-[0.75rem]" style={{ color: '#7A8A94' }}>
+                    <span style={{ color: '#9AABB8' }}>{wedding.groomFatherName} · {wedding.groomMotherName}</span>
+                    <span className="mx-4" style={{ color: '#D0DFE8' }}>의 아들</span>
                     <span style={{ color: '#5A6A74' }}>{wedding.groomName}</span>
                   </p>
-                  <p className="text-[0.8rem] font-light" style={{ color: '#7A8A94' }}>
-                    <span style={{ color: '#8A9AA4' }}>{wedding.brideFatherName} · {wedding.brideMotherName}</span>
-                    <span className="mx-3" style={{ color: '#C5D4DE' }}>의 딸</span>
+                  <p className="text-[0.75rem]" style={{ color: '#7A8A94' }}>
+                    <span style={{ color: '#9AABB8' }}>{wedding.brideFatherName} · {wedding.brideMotherName}</span>
+                    <span className="mx-4" style={{ color: '#D0DFE8' }}>의 딸</span>
                     <span style={{ color: '#5A6A74' }}>{wedding.brideName}</span>
                   </p>
                 </div>
@@ -142,17 +151,17 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
       )}
 
       {galleries.length > 0 && (
-        <section className="py-28 px-6">
+        <section className="py-32 px-8">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-            <p className="text-center text-[1rem] mb-16 tracking-widest font-light" style={{ ...waveFont, color: '#7A8A94' }}>GALLERY</p>
-            <div className="max-w-lg mx-auto space-y-6">
+            <p className="text-center text-[0.85rem] mb-20 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>GALLERY</p>
+            <div className="max-w-sm mx-auto space-y-8">
               {galleries.map((item, i) => (
-                <motion.div key={item.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.15, duration: 0.8 }} onClick={() => setGalleryIndex(i)} className="cursor-pointer">
+                <motion.div key={item.id} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.2, duration: 1.2 }} onClick={() => setGalleryIndex(i)} className="cursor-pointer">
                   <div className="overflow-hidden aspect-[4/5]">
                     {item.mediaType === 'VIDEO' ? (
-                      <video src={item.mediaUrl} className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02]" muted style={{ filter: 'saturate(0.85) brightness(1.02)' }} />
+                      <video src={item.mediaUrl} className="w-full h-full object-cover transition-all duration-1000 hover:scale-[1.02]" muted style={{ filter: 'saturate(0.8) brightness(1.03)' }} />
                     ) : (
-                      <img src={item.mediaUrl} alt="" className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02]" style={{ filter: 'saturate(0.85) brightness(1.02)' }} />
+                      <img src={item.mediaUrl} alt="" className="w-full h-full object-cover transition-all duration-1000 hover:scale-[1.02]" style={{ filter: 'saturate(0.8) brightness(1.03)' }} />
                     )}
                   </div>
                 </motion.div>
@@ -162,19 +171,19 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
         </section>
       )}
 
-      <section className="py-28 px-8" style={{ background: '#FAFCFD' }}>
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto">
-          <p className="text-center text-[0.9rem] mb-10 tracking-widest font-light" style={{ ...waveFont, color: '#7A8A94' }}>{calendarData.year}. {String(calendarData.month).padStart(2, '0')}</p>
-          <div className="grid grid-cols-7 text-center text-[0.65rem] mb-4" style={waveFont}>
+      <section className="py-32 px-10">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-xs mx-auto">
+          <p className="text-center text-[0.8rem] mb-12 tracking-[0.3em]" style={{ ...dacapoFont, color: '#9AABB8' }}>{calendarData.year}. {String(calendarData.month).padStart(2, '0')}</p>
+          <div className="grid grid-cols-7 text-center text-[0.6rem] mb-6" style={dacapoFont}>
             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-              <span key={i} className="py-3 tracking-widest" style={{ color: i === 0 ? '#A8BDC9' : '#8A9AA4' }}>{d}</span>
+              <span key={i} className="py-3 tracking-[0.2em]" style={{ color: i === 0 ? '#B8C8D4' : '#9AABB8' }}>{d}</span>
             ))}
           </div>
-          <div className="grid grid-cols-7 text-center text-[0.8rem]" style={waveFont}>
+          <div className="grid grid-cols-7 text-center text-[0.75rem]" style={dacapoFont}>
             {calendarData.weeks.flat().map((day, i) => (
               <span key={i} className="py-3 flex items-center justify-center" style={{
                 color: day === calendarData.targetDay ? '#FFFFFF' : day ? '#6A7A84' : 'transparent',
-                background: day === calendarData.targetDay ? 'linear-gradient(135deg, #A8BDC9 0%, #8AAAB8 100%)' : 'transparent',
+                background: day === calendarData.targetDay ? 'linear-gradient(135deg, #A8C0CC 0%, #8AAAB8 100%)' : 'transparent',
                 borderRadius: '50%',
                 width: day === calendarData.targetDay ? '2rem' : 'auto',
                 height: day === calendarData.targetDay ? '2rem' : 'auto',
@@ -182,57 +191,57 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
               }}>{day || ''}</span>
             ))}
           </div>
-          <div className="mt-10 text-center">
-            <p className="text-[0.85rem] font-light" style={{ ...waveFont, color: '#5A6A74' }}>{formatDate(wedding.weddingDate, 'korean')}</p>
-            <p className="text-[0.75rem] mt-2 font-light" style={{ ...waveFont, color: '#8A9AA4' }}>{formatTime(wedding.weddingTime)}</p>
+          <div className="mt-14 text-center">
+            <p className="text-[0.8rem]" style={{ ...dacapoFont, color: '#5A6A74' }}>{formatDate(wedding.weddingDate, 'korean')}</p>
+            <p className="text-[0.7rem] mt-3" style={{ ...dacapoFont, color: '#9AABB8' }}>{formatTime(wedding.weddingTime)}</p>
           </div>
         </motion.div>
       </section>
 
-      <section className="py-28 px-8">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-md mx-auto text-center">
-          <p className="text-[1rem] mb-12 tracking-widest font-light" style={{ ...waveFont, color: '#7A8A94' }}>LOCATION</p>
-          <div className="mb-8">
-            <p className="text-[0.95rem] font-light" style={{ ...waveFont, color: '#5A6A74' }}>{wedding.venue}</p>
-            {wedding.venueHall && <p className="text-[0.85rem] mt-2 font-light" style={{ ...waveFont, color: '#8A9AA4' }}>{wedding.venueHall}</p>}
-            {wedding.venueAddress && <p className="text-[0.75rem] mt-4 font-light" style={{ ...waveFont, color: '#A8BDC9' }}>{wedding.venueAddress}</p>}
+      <section className="py-32 px-10">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto text-center">
+          <p className="text-[0.85rem] mb-16 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>LOCATION</p>
+          <div className="mb-10">
+            <p className="text-[0.9rem]" style={{ ...dacapoFont, color: '#5A6A74' }}>{wedding.venue}</p>
+            {wedding.venueHall && <p className="text-[0.8rem] mt-3" style={{ ...dacapoFont, color: '#8A9AA4' }}>{wedding.venueHall}</p>}
+            {wedding.venueAddress && <p className="text-[0.7rem] mt-5" style={{ ...dacapoFont, color: '#B8C8D4' }}>{wedding.venueAddress}</p>}
           </div>
           {wedding.venueAddress && (
-            <div className="aspect-[4/3] mb-8 overflow-hidden" style={{ border: '1px solid rgba(197, 212, 222, 0.3)' }}>
+            <div className="aspect-[4/3] mb-10 overflow-hidden" style={{ border: '1px solid rgba(200, 215, 225, 0.4)' }}>
               <KakaoMap address={wedding.venueAddress} className="w-full h-full" />
             </div>
           )}
-          <div className="flex justify-center gap-3">
-            {wedding.venueNaverMap && <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.7rem] tracking-wider transition-all font-light" style={{ ...waveFont, color: '#6A7A84', background: '#FAFCFD', border: '1px solid rgba(197, 212, 222, 0.5)' }}>네이버지도</a>}
-            {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.7rem] tracking-wider transition-all font-light" style={{ ...waveFont, color: '#6A7A84', background: '#FAFCFD', border: '1px solid rgba(197, 212, 222, 0.5)' }}>카카오맵</a>}
+          <div className="flex justify-center gap-4">
+            {wedding.venueNaverMap && <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.65rem] tracking-[0.15em] transition-all duration-500" style={{ ...dacapoFont, color: '#6A7A84', background: 'transparent', border: '1px solid rgba(200, 215, 225, 0.5)' }}>네이버지도</a>}
+            {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.65rem] tracking-[0.15em] transition-all duration-500" style={{ ...dacapoFont, color: '#6A7A84', background: 'transparent', border: '1px solid rgba(200, 215, 225, 0.5)' }}>카카오맵</a>}
           </div>
-          {wedding.venuePhone && <a href={`tel:${wedding.venuePhone}`} className="flex items-center justify-center gap-2 mt-8 text-[0.75rem] font-light" style={{ ...waveFont, color: '#8A9AA4' }}><Phone className="w-3.5 h-3.5" /> {wedding.venuePhone}</a>}
+          {wedding.venuePhone && <a href={`tel:${wedding.venuePhone}`} className="flex items-center justify-center gap-2 mt-10 text-[0.7rem]" style={{ ...dacapoFont, color: '#9AABB8' }}><Phone className="w-3 h-3" /> {wedding.venuePhone}</a>}
         </motion.div>
       </section>
 
       {(wedding.groomAccount || wedding.brideAccount) && (
-        <section className="py-28 px-8" style={{ background: '#FAFCFD' }}>
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-md mx-auto">
-            <p className="text-[1rem] text-center mb-12 tracking-widest font-light" style={{ ...waveFont, color: '#7A8A94' }}>GIFT</p>
-            <div className="space-y-4">
+        <section className="py-32 px-10">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto">
+            <p className="text-[0.85rem] text-center mb-16 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>GIFT</p>
+            <div className="space-y-5">
               {wedding.groomAccount && (
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(197, 212, 222, 0.3)' }}>
+                <div style={{ background: 'transparent', border: '1px solid rgba(200, 215, 225, 0.4)' }}>
                   <button onClick={() => setOpenAccount(openAccount === 'groom' ? null : 'groom')} className="w-full px-6 py-5 flex items-center justify-between">
-                    <span className="text-[0.85rem] font-light tracking-wider" style={{ ...waveFont, color: '#5A6A74' }}>신랑측</span>
-                    <ChevronDown className={`w-4 h-4 transition-transform duration-500 ${openAccount === 'groom' ? 'rotate-180' : ''}`} style={{ color: '#C5D4DE' }} />
+                    <span className="text-[0.8rem] tracking-[0.2em]" style={{ ...dacapoFont, color: '#5A6A74' }}>신랑측</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-700 ${openAccount === 'groom' ? 'rotate-180' : ''}`} style={{ color: '#D0DFE8' }} />
                   </button>
                   <AnimatePresence>
                     {openAccount === 'groom' && (
-                      <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} transition={{ duration: 0.4 }} className="overflow-hidden">
-                        <div className="px-6 pb-5" style={{ borderTop: '1px solid rgba(197, 212, 222, 0.3)' }}>
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.5 }} className="overflow-hidden">
+                        <div className="px-6 pb-6" style={{ borderTop: '1px solid rgba(200, 215, 225, 0.3)' }}>
                           <div className="flex items-center justify-between pt-5">
-                            <div style={waveFont}>
-                              <p className="text-[0.7rem] font-light" style={{ color: '#A8BDC9' }}>{wedding.groomBank}</p>
-                              <p className="text-[0.85rem] font-light mt-1" style={{ color: '#5A6A74' }}>{wedding.groomAccount}</p>
-                              <p className="text-[0.7rem] font-light mt-1" style={{ color: '#8A9AA4' }}>{wedding.groomAccountHolder}</p>
+                            <div style={dacapoFont}>
+                              <p className="text-[0.65rem]" style={{ color: '#B8C8D4' }}>{wedding.groomBank}</p>
+                              <p className="text-[0.8rem] mt-2" style={{ color: '#5A6A74' }}>{wedding.groomAccount}</p>
+                              <p className="text-[0.65rem] mt-2" style={{ color: '#9AABB8' }}>{wedding.groomAccountHolder}</p>
                             </div>
-                            <button onClick={() => copyToClipboard(`${wedding.groomBank} ${wedding.groomAccount}`, 'groom')} className="p-3 transition-all" style={{ background: 'rgba(197, 212, 222, 0.2)' }}>
-                              {copiedAccount === 'groom' ? <Check className="w-4 h-4" style={{ color: '#5A6A74' }} /> : <Copy className="w-4 h-4" style={{ color: '#A8BDC9' }} />}
+                            <button onClick={() => copyToClipboard(`${wedding.groomBank} ${wedding.groomAccount}`, 'groom')} className="p-3 transition-all duration-500" style={{ background: 'rgba(200, 215, 225, 0.15)' }}>
+                              {copiedAccount === 'groom' ? <Check className="w-4 h-4" style={{ color: '#5A6A74' }} /> : <Copy className="w-4 h-4" style={{ color: '#B8C8D4' }} />}
                             </button>
                           </div>
                         </div>
@@ -242,23 +251,23 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
                 </div>
               )}
               {wedding.brideAccount && (
-                <div style={{ background: '#FFFFFF', border: '1px solid rgba(197, 212, 222, 0.3)' }}>
+                <div style={{ background: 'transparent', border: '1px solid rgba(200, 215, 225, 0.4)' }}>
                   <button onClick={() => setOpenAccount(openAccount === 'bride' ? null : 'bride')} className="w-full px-6 py-5 flex items-center justify-between">
-                    <span className="text-[0.85rem] font-light tracking-wider" style={{ ...waveFont, color: '#5A6A74' }}>신부측</span>
-                    <ChevronDown className={`w-4 h-4 transition-transform duration-500 ${openAccount === 'bride' ? 'rotate-180' : ''}`} style={{ color: '#C5D4DE' }} />
+                    <span className="text-[0.8rem] tracking-[0.2em]" style={{ ...dacapoFont, color: '#5A6A74' }}>신부측</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-700 ${openAccount === 'bride' ? 'rotate-180' : ''}`} style={{ color: '#D0DFE8' }} />
                   </button>
                   <AnimatePresence>
                     {openAccount === 'bride' && (
-                      <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} transition={{ duration: 0.4 }} className="overflow-hidden">
-                        <div className="px-6 pb-5" style={{ borderTop: '1px solid rgba(197, 212, 222, 0.3)' }}>
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.5 }} className="overflow-hidden">
+                        <div className="px-6 pb-6" style={{ borderTop: '1px solid rgba(200, 215, 225, 0.3)' }}>
                           <div className="flex items-center justify-between pt-5">
-                            <div style={waveFont}>
-                              <p className="text-[0.7rem] font-light" style={{ color: '#A8BDC9' }}>{wedding.brideBank}</p>
-                              <p className="text-[0.85rem] font-light mt-1" style={{ color: '#5A6A74' }}>{wedding.brideAccount}</p>
-                              <p className="text-[0.7rem] font-light mt-1" style={{ color: '#8A9AA4' }}>{wedding.brideAccountHolder}</p>
+                            <div style={dacapoFont}>
+                              <p className="text-[0.65rem]" style={{ color: '#B8C8D4' }}>{wedding.brideBank}</p>
+                              <p className="text-[0.8rem] mt-2" style={{ color: '#5A6A74' }}>{wedding.brideAccount}</p>
+                              <p className="text-[0.65rem] mt-2" style={{ color: '#9AABB8' }}>{wedding.brideAccountHolder}</p>
                             </div>
-                            <button onClick={() => copyToClipboard(`${wedding.brideBank} ${wedding.brideAccount}`, 'bride')} className="p-3 transition-all" style={{ background: 'rgba(197, 212, 222, 0.2)' }}>
-                              {copiedAccount === 'bride' ? <Check className="w-4 h-4" style={{ color: '#5A6A74' }} /> : <Copy className="w-4 h-4" style={{ color: '#A8BDC9' }} />}
+                            <button onClick={() => copyToClipboard(`${wedding.brideBank} ${wedding.brideAccount}`, 'bride')} className="p-3 transition-all duration-500" style={{ background: 'rgba(200, 215, 225, 0.15)' }}>
+                              {copiedAccount === 'bride' ? <Check className="w-4 h-4" style={{ color: '#5A6A74' }} /> : <Copy className="w-4 h-4" style={{ color: '#B8C8D4' }} />}
                             </button>
                           </div>
                         </div>
@@ -269,58 +278,58 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
               )}
             </div>
             {(wedding.tossLink || wedding.kakaoPayLink) && (
-              <div className="flex justify-center gap-3 mt-8">
-                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.7rem] text-white tracking-wider font-light" style={{ background: '#0064FF' }}>토스</a>}
-                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.7rem] tracking-wider font-light" style={{ background: '#FEE500', color: '#3C1E1E' }}>카카오페이</a>}
+              <div className="flex justify-center gap-4 mt-10">
+                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] text-white tracking-[0.15em]" style={{ background: '#0064FF' }}>토스</a>}
+                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] tracking-[0.15em]" style={{ background: '#FEE500', color: '#3C1E1E' }}>카카오페이</a>}
               </div>
             )}
           </motion.div>
         </section>
       )}
 
-      <section className="py-28 px-8">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-md mx-auto">
-          <p className="text-[1rem] text-center mb-12 tracking-widest font-light" style={{ ...waveFont, color: '#7A8A94' }}>RSVP</p>
+      <section className="py-32 px-10">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto">
+          <p className="text-[0.85rem] text-center mb-16 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>RSVP</p>
           <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="luna" />
         </motion.div>
       </section>
 
-      <section className="py-28 px-8" style={{ background: '#FAFCFD' }}>
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-md mx-auto">
-          <p className="text-[1rem] text-center mb-12 tracking-widest font-light" style={{ ...waveFont, color: '#7A8A94' }}>MESSAGE</p>
+      <section className="py-32 px-10">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto">
+          <p className="text-[0.85rem] text-center mb-16 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>MESSAGE</p>
           <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="luna" />
-          {localGuestbooks.length > 0 && <div className="mt-12"><GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="luna" /></div>}
+          {localGuestbooks.length > 0 && <div className="mt-16"><GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="luna" /></div>}
         </motion.div>
       </section>
 
-      <section className="py-20 px-8">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-md mx-auto">
-          <div className="flex justify-center gap-12 mb-12">
+      <section className="py-24 px-10">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto">
+          <div className="flex justify-center gap-16 mb-16">
             {wedding.groomPhone && (
               <a href={`tel:${wedding.groomPhone}`} className="text-center">
-                <div className="w-14 h-14 flex items-center justify-center mb-3 transition-all hover:scale-105" style={{ background: '#FAFCFD', border: '1px solid rgba(197, 212, 222, 0.5)' }}>
-                  <Phone className="w-5 h-5" style={{ color: '#7A8A94' }} />
+                <div className="w-12 h-12 flex items-center justify-center mb-4 transition-all duration-500 hover:scale-105" style={{ border: '1px solid rgba(200, 215, 225, 0.5)' }}>
+                  <Phone className="w-4 h-4" style={{ color: '#8A9AA4' }} />
                 </div>
-                <p className="text-[0.7rem] font-light tracking-wider" style={{ ...waveFont, color: '#8A9AA4' }}>신랑</p>
+                <p className="text-[0.65rem] tracking-[0.2em]" style={{ ...dacapoFont, color: '#9AABB8' }}>신랑</p>
               </a>
             )}
             {wedding.bridePhone && (
               <a href={`tel:${wedding.bridePhone}`} className="text-center">
-                <div className="w-14 h-14 flex items-center justify-center mb-3 transition-all hover:scale-105" style={{ background: '#FAFCFD', border: '1px solid rgba(197, 212, 222, 0.5)' }}>
-                  <Phone className="w-5 h-5" style={{ color: '#7A8A94' }} />
+                <div className="w-12 h-12 flex items-center justify-center mb-4 transition-all duration-500 hover:scale-105" style={{ border: '1px solid rgba(200, 215, 225, 0.5)' }}>
+                  <Phone className="w-4 h-4" style={{ color: '#8A9AA4' }} />
                 </div>
-                <p className="text-[0.7rem] font-light tracking-wider" style={{ ...waveFont, color: '#8A9AA4' }}>신부</p>
+                <p className="text-[0.65rem] tracking-[0.2em]" style={{ ...dacapoFont, color: '#9AABB8' }}>신부</p>
               </a>
             )}
           </div>
-          <button onClick={() => setShowShareModal(true)} className="w-full py-4 text-[0.8rem] tracking-wider flex items-center justify-center gap-3 transition-all hover:scale-[1.01] font-light" style={{ ...waveFont, color: '#5A6A74', background: '#FAFCFD', border: '1px solid rgba(197, 212, 222, 0.5)' }}>
+          <button onClick={() => setShowShareModal(true)} className="w-full py-4 text-[0.75rem] tracking-[0.2em] flex items-center justify-center gap-3 transition-all duration-500" style={{ ...dacapoFont, color: '#5A6A74', background: 'transparent', border: '1px solid rgba(200, 215, 225, 0.5)' }}>
             <Share2 className="w-4 h-4" /> 공유하기
           </button>
         </motion.div>
       </section>
 
-      <footer className="py-12 text-center" style={{ background: '#FAFCFD' }}>
-        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.55rem] tracking-[0.25em] hover:opacity-70 transition-opacity font-light" style={{ ...waveFont, color: '#A8BDC9' }}>
+      <footer className="py-16 text-center">
+        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.3em] hover:opacity-70 transition-opacity duration-500" style={{ ...dacapoFont, color: '#C8D7E0' }}>
           Made by 청첩장 작업실 ›
         </a>
       </footer>

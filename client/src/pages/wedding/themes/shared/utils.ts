@@ -23,7 +23,9 @@ export function formatDate(dateStr: string, format: 'full' | 'short' | 'korean' 
 }
 
 export function formatTime(timeStr: string) {
+  if (!timeStr || !timeStr.includes(':')) return '';
   const [hours, minutes] = timeStr.split(':').map(Number);
+  if (isNaN(hours)) return '';
   const ampm = hours >= 12 ? '오후' : '오전';
   const h = hours % 12 || 12;
   return `${ampm} ${h}시${minutes > 0 ? ` ${minutes}분` : ''}`;
