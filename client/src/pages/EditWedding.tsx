@@ -19,6 +19,8 @@ const THEMES = [
   { id: 'SPRING_BREEZE', name: '봄바람', desc: '손글씨 감성의 핑크 수채화' },
   { id: 'GALLERY_MIRIM_1', name: 'Gallery 美林-1', desc: '따뜻한 세피아 종이 질감' },
   { id: 'GALLERY_MIRIM_2', name: 'Gallery 美林-2', desc: '청량한 다크 필름 톤' },
+  { id: 'LUNA_HALFMOON', name: 'Luna Halfmoon', desc: '순백의 고요한 물결' },
+  { id: 'PEARL_DRIFT', name: 'Pearl Drift', desc: '심해 속 떠다니는 진주' },
 ];
 
 const SENIOR_COLORS = [

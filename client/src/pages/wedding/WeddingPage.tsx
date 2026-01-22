@@ -16,6 +16,8 @@ import {
   SpringBreeze,
   GalleryMirim1,
   GalleryMirim2,
+  LunaHalfmoon,
+  PearlDrift,
 } from './themes';
 import AiChat from '../../components/AiChat';
 
@@ -64,6 +66,8 @@ const themeComponents: Record<Theme, React.ComponentType<any>> = {
   SPRING_BREEZE: SpringBreeze,
   GALLERY_MIRIM_1: GalleryMirim1,
   GALLERY_MIRIM_2: GalleryMirim2,
+  LUNA_HALFMOON: LunaHalfmoon,
+  PEARL_DRIFT: PearlDrift,
 };
 
 export default function WeddingPage() {

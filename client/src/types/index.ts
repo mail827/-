@@ -1,4 +1,4 @@
-export type Theme = 'ROMANTIC_CLASSIC' | 'MODERN_MINIMAL' | 'BOHEMIAN_DREAM' | 'LUXURY_GOLD' | 'POETIC_LOVE' | 'SENIOR_SIMPLE' | 'FOREST_GARDEN' | 'OCEAN_BREEZE' | 'GLASS_BUBBLE' | 'SPRING_BREEZE' | 'GALLERY_MIRIM_1' | 'GALLERY_MIRIM_2';
+export type Theme = 'ROMANTIC_CLASSIC' | 'MODERN_MINIMAL' | 'BOHEMIAN_DREAM' | 'LUXURY_GOLD' | 'POETIC_LOVE' | 'SENIOR_SIMPLE' | 'FOREST_GARDEN' | 'OCEAN_BREEZE' | 'GLASS_BUBBLE' | 'SPRING_BREEZE' | 'GALLERY_MIRIM_1' | 'GALLERY_MIRIM_2' | 'LUNA_HALFMOON' | 'PEARL_DRIFT';
 export type MediaType = 'IMAGE' | 'VIDEO';
 export type StoryType = 'PHOTO' | 'VIDEO';
 export type Side = 'GROOM' | 'BRIDE';
@@ -181,7 +181,9 @@ export const THEME_NAMES: Record<Theme, string> = {
   GLASS_BUBBLE: '글라스 버블',
   SPRING_BREEZE: '봄바람',
   GALLERY_MIRIM_1: 'Gallery 美林-1',
-  GALLERY_MIRIM_2: 'Gallery 美林-2'
+  GALLERY_MIRIM_2: 'Gallery 美林-2',
+  LUNA_HALFMOON: 'Luna Halfmoon',
+  PEARL_DRIFT: 'Pearl Drift'
 };
 
 export const THEME_COLORS: Record<Theme, { primary: string; secondary: string; accent: string; bg: string }> = {
@@ -196,5 +198,7 @@ export const THEME_COLORS: Record<Theme, { primary: string; secondary: string; a
   GLASS_BUBBLE: { primary: '#9B8EC2', secondary: '#EDE9FF', accent: '#C4B8E8', bg: '#FAFAFF' },
   SPRING_BREEZE: { primary: '#D4A0B0', secondary: '#FFF5F8', accent: '#E8B0C0', bg: '#FFF9F9' },
   GALLERY_MIRIM_1: { primary: '#111111', secondary: '#FFFFFF', accent: '#666666', bg: '#FFFFFF' },
-  GALLERY_MIRIM_2: { primary: '#3f3f3f', secondary: '#FAF8F5', accent: '#C9A96E', bg: '#FAF8F5' }
+  GALLERY_MIRIM_2: { primary: '#3f3f3f', secondary: '#FAF8F5', accent: '#C9A96E', bg: '#FAF8F5' },
+  LUNA_HALFMOON: { primary: '#E8EEF2', secondary: '#FAFCFD', accent: '#C5D4DE', bg: '#FFFFFF' },
+  PEARL_DRIFT: { primary: '#F0F4F8', secondary: '#0A0A0A', accent: '#E3EBF3', bg: '#050505' }
 };

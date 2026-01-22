@@ -5,7 +5,7 @@ interface RsvpFormProps {
   weddingId: string;
   onSubmit: (data: { weddingId: string; name: string; phone: string; side: 'GROOM' | 'BRIDE'; attending: boolean; guestCount: number; message?: string }) => Promise<void>;
   isLoading: boolean;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2' | 'luna' | 'pearl';
 }
 
 export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, variant = 'classic' }: RsvpFormProps) {
@@ -45,6 +45,8 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
     spring: { input: 'bg-white/75 border-[#FFE0E8] focus:border-[#E8B0C0]', button: 'bg-gradient-to-r from-[#E8B0C0] to-[#D0A0C8] hover:opacity-90', active: 'bg-gradient-to-r from-[#E8B0C0] to-[#D0A0C8] text-white', inactive: 'bg-white/75 border-[#FFE0E8] text-[#8B6B7B]' },
     mirim1: { input: 'bg-black/[0.01] border-black/10 focus:border-black/30', button: 'bg-[#111] hover:bg-black', active: 'bg-[#111] text-white', inactive: 'bg-white border-black/10 text-[#666]' },
     mirim2: { input: 'bg-[#1E2220] border-[#3A4B40] focus:border-[#5A6B60] text-[#D4E0D8] placeholder:text-[#5A6B60]', button: 'bg-[#A8BFB0] hover:bg-[#8AA090] text-[#1A1D1C]', active: 'bg-[#A8BFB0] text-[#1A1D1C]', inactive: 'bg-[#1E2220] border-[#3A4B40] text-[#6A7B70]' },
+    luna: { input: 'bg-[#FAFCFD] border-[#E8EEF2] focus:border-[#C5D4DE] text-[#5A6A74] placeholder:text-[#A8B8C4]', button: 'bg-[#A8BDC9] hover:bg-[#8AAAB8] text-white', active: 'bg-[#A8BDC9] text-white', inactive: 'bg-[#FAFCFD] border-[#E8EEF2] text-[#8A9AA4]' },
+    pearl: { input: 'bg-[#0A0A0A] border-[rgba(227,235,243,0.1)] focus:border-[rgba(227,235,243,0.3)] text-[#E8EEF2] placeholder:text-[rgba(227,235,243,0.3)]', button: 'bg-[#E3EBF3] hover:bg-[#C8D8E8] text-[#050505]', active: 'bg-[#E3EBF3] text-[#050505]', inactive: 'bg-[rgba(227,235,243,0.03)] border-[rgba(227,235,243,0.1)] text-[rgba(227,235,243,0.5)]' },
   };
 
   const s = styles[variant];
@@ -66,10 +68,10 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
       
       {attendance && (
         <div className="flex items-center gap-3">
-          <span className="text-sm text-stone-500">동반 인원</span>
+          <span className={`text-sm ${variant === 'pearl' ? 'text-[rgba(227,235,243,0.5)]' : variant === 'luna' ? 'text-[#8A9AA4]' : 'text-stone-500'}`}>동반 인원</span>
           <div className="flex items-center gap-2">
             <button onClick={() => setGuestCount(Math.max(1, guestCount - 1))} className={`w-8 h-8 rounded border ${s.inactive}`}>-</button>
-            <span className="w-8 text-center">{guestCount}</span>
+            <span className={`w-8 text-center ${variant === 'pearl' ? 'text-[#E8EEF2]' : variant === 'luna' ? 'text-[#5A6A74]' : ''}`}>{guestCount}</span>
             <button onClick={() => setGuestCount(guestCount + 1)} className={`w-8 h-8 rounded border ${s.inactive}`}>+</button>
           </div>
         </div>

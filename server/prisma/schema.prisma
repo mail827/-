@@ -353,6 +353,8 @@ enum Theme {
   SPRING_BREEZE
   GALLERY_MIRIM_1
   GALLERY_MIRIM_2
+  LUNA_HALFMOON
+  PEARL_DRIFT
 }
 
 enum MediaType {

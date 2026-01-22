@@ -221,6 +221,40 @@ export const themeConfigs: Record<string, ThemeConfig> = {
       label: '시네마틱',
     },
   },
+  LUNA_HALFMOON: {
+    name: 'Luna Halfmoon',
+    colors: {
+      primary: '#C5D4DE',
+      secondary: '#FAFCFD',
+      accent: '#A8BDC9',
+      text: '#5A6A74',
+      textMuted: '#8A9AA4',
+      background: '#FFFFFF',
+      card: '#FAFCFD',
+      border: '#E8EEF2',
+    },
+    photoFilter: {
+      transformation: 'e_saturation:-25,e_brightness:8,e_contrast:-5,e_blue:5',
+      label: '수면 위 달빛',
+    },
+  },
+  PEARL_DRIFT: {
+    name: 'Pearl Drift',
+    colors: {
+      primary: '#E3EBF3',
+      secondary: '#0A0A0A',
+      accent: '#C8D8E8',
+      text: '#E8EEF2',
+      textMuted: '#8A9AA8',
+      background: '#050505',
+      card: '#0A0A0A',
+      border: '#1A1A1A',
+    },
+    photoFilter: {
+      transformation: 'e_saturation:-30,e_contrast:15,e_brightness:-5,e_blue:8',
+      label: '심해 진주빛',
+    },
+  },
 };
 
 export function applyPhotoFilter(imageUrl: string, theme: string): string {

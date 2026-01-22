@@ -1,3 +1,4 @@
+export * from './shared/themeConfig';
 export { default as RomanticClassic } from './RomanticClassic';
 export { default as ModernMinimal } from './ModernMinimal';
 export { default as BohemianDream } from './BohemianDream';
@@ -10,3 +11,5 @@ export { default as GlassBubble } from './GlassBubble';
 export { default as SpringBreeze } from './SpringBreeze';
 export { default as GalleryMirim1 } from './GalleryMirim1';
 export { default as GalleryMirim2 } from './GalleryMirim2';
+export { default as LunaHalfmoon } from './LunaHalfmoon';
+export { default as PearlDrift } from './PearlDrift';

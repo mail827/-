@@ -16,6 +16,8 @@ const THEMES = [
   { id: 'SPRING_BREEZE', name: '봄바람', desc: '따뜻하고 포근한 봄 느낌', color: 'from-pink-100 to-rose-100' },
   { id: 'GALLERY_MIRIM_1', name: 'Gallery 美林-1', desc: '따뜻한 세피아 종이 질감', color: 'from-amber-50 to-yellow-100' },
   { id: 'GALLERY_MIRIM_2', name: 'Gallery 美林-2', desc: '청량한 다크 필름 톤', color: 'from-slate-200 to-zinc-300' },
+  { id: 'LUNA_HALFMOON', name: 'Luna Halfmoon', desc: '순백의 고요한 물결', color: 'from-slate-50 to-blue-50' },
+  { id: 'PEARL_DRIFT', name: 'Pearl Drift', desc: '심해 속 떠다니는 진주', color: 'from-gray-900 to-slate-800' },
 ];
 
 interface Package {

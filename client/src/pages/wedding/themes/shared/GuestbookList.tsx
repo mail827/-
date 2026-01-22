@@ -13,7 +13,7 @@ interface GuestbookListProps {
   guestbooks: GuestbookItem[];
   weddingSlug: string;
   onDelete?: (id: string) => void;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'senior' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'senior' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2' | 'luna' | 'pearl';
 }
 
 export default function GuestbookList({ guestbooks, weddingSlug, onDelete, variant = 'classic' }: GuestbookListProps) {
@@ -36,12 +36,14 @@ export default function GuestbookList({ guestbooks, weddingSlug, onDelete, varia
     spring: { card: 'bg-white/75 rounded-[14px] p-4 border border-[#FFE0E8]', text: 'text-[#6B5060]', subtext: 'text-[#8B7080]', date: 'text-[#C8A0B0]', btn: 'text-[#D4A0B0] hover:text-[#C08090]', modal: 'bg-white', input: 'border-[#FFE0E8] focus:border-[#E8B0C0]', confirmBtn: 'bg-gradient-to-r from-[#E8B0C0] to-[#D0A0C8] hover:opacity-90' },
     mirim1: { card: 'pb-4 border-b border-black/5', text: 'text-[#444]', subtext: 'text-[#888]', date: 'text-[#aaa]', btn: 'text-black/20 hover:text-black/50', modal: 'bg-white', input: 'border-black/10 focus:border-black/30', confirmBtn: 'bg-[#111] hover:bg-black' },
     mirim2: { card: 'bg-[#1E2220] border border-[#3A4B40] p-4', text: 'text-[#D4E0D8]', subtext: 'text-[#8A9B90]', date: 'text-[#5A6B60]', btn: 'text-[#5A6B60] hover:text-[#A8BFB0]', modal: 'bg-[#1A1D1C]', input: 'bg-[#1E2220] border-[#3A4B40] focus:border-[#5A6B60] text-[#D4E0D8]', confirmBtn: 'bg-[#A8BFB0] hover:bg-[#8AA090] text-[#1A1D1C]' },
-    glass_old: { card: 'bg-white/40 backdrop-blur-md rounded-[16px] p-4 border border-white/50', text: 'text-[#6B5B8C]', subtext: 'text-[#8B7EB0]', date: 'text-[#B8B0D0]', btn: 'text-[#C4B8E8] hover:text-[#9B8EC2]', modal: 'bg-white/80 backdrop-blur-xl', input: 'bg-white/40 border-white/50 focus:border-[#C4B8E8]', confirmBtn: 'bg-gradient-to-r from-[#C4B8E8] to-[#A8D0E8] hover:opacity-90' },
+    luna: { card: 'bg-[#FAFCFD] border border-[#E8EEF2] p-4', text: 'text-[#5A6A74]', subtext: 'text-[#7A8A94]', date: 'text-[#A8B8C4]', btn: 'text-[#C5D4DE] hover:text-[#8AAAB8]', modal: 'bg-white', input: 'border-[#E8EEF2] focus:border-[#C5D4DE]', confirmBtn: 'bg-[#A8BDC9] hover:bg-[#8AAAB8]' },
+    pearl: { card: 'bg-[rgba(227,235,243,0.03)] border border-[rgba(227,235,243,0.08)] p-4', text: 'text-[#E8EEF2]', subtext: 'text-[rgba(227,235,243,0.6)]', date: 'text-[rgba(227,235,243,0.3)]', btn: 'text-[rgba(227,235,243,0.2)] hover:text-[rgba(227,235,243,0.5)]', modal: 'bg-[#0A0A0A]', input: 'bg-[#0A0A0A] border-[rgba(227,235,243,0.1)] focus:border-[rgba(227,235,243,0.3)] text-[#E8EEF2]', confirmBtn: 'bg-[#E3EBF3] hover:bg-[#C8D8E8] text-[#050505]' },
   };
 
   const s = styles[variant];
   const isLuxury = variant === 'luxury';
   const isSenior = variant === 'senior';
+  const isPearl = variant === 'pearl';
 
   const handleDelete = async () => {
     if (!deleteTarget || !password) return;
@@ -93,14 +95,14 @@ export default function GuestbookList({ guestbooks, weddingSlug, onDelete, varia
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={closeModal}>
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} className={`w-full max-w-xs rounded-2xl p-6 ${s.modal}`}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className={`font-medium ${isLuxury ? 'text-white' : isSenior ? 'text-gray-800 text-xl' : 'text-stone-800'}`}>방명록 삭제</h3>
-                <button onClick={closeModal} className={isLuxury ? 'text-[#666]' : 'text-stone-400'}><X className="w-5 h-5" /></button>
+                <h3 className={`font-medium ${isLuxury || isPearl ? 'text-white' : isSenior ? 'text-gray-800 text-xl' : 'text-stone-800'}`}>방명록 삭제</h3>
+                <button onClick={closeModal} className={isLuxury || isPearl ? 'text-[#666]' : 'text-stone-400'}><X className="w-5 h-5" /></button>
               </div>
-              <p className={`mb-4 ${isLuxury ? 'text-[#888] text-sm' : isSenior ? 'text-gray-600 text-lg' : 'text-stone-500 text-sm'}`}>작성 시 입력한 비밀번호를 입력해주세요</p>
+              <p className={`mb-4 ${isLuxury || isPearl ? 'text-[#888] text-sm' : isSenior ? 'text-gray-600 text-lg' : 'text-stone-500 text-sm'}`}>작성 시 입력한 비밀번호를 입력해주세요</p>
               <input type="password" placeholder="비밀번호" value={password} onChange={(e) => setPassword(e.target.value)} className={`w-full px-4 py-3 rounded-lg border outline-none transition-colors mb-3 ${s.input}`} />
               {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
               <div className="flex gap-2">
-                <button onClick={closeModal} className={`flex-1 py-2.5 rounded-lg border ${isLuxury ? 'border-[#333] text-[#888]' : isSenior ? 'border-amber-200 text-gray-500 text-lg' : 'border-stone-200 text-stone-500'} text-sm`}>취소</button>
+                <button onClick={closeModal} className={`flex-1 py-2.5 rounded-lg border ${isLuxury || isPearl ? 'border-[#333] text-[#888]' : isSenior ? 'border-amber-200 text-gray-500 text-lg' : 'border-stone-200 text-stone-500'} text-sm`}>취소</button>
                 <button onClick={handleDelete} disabled={!password || isDeleting} className={`flex-1 py-2.5 rounded-lg text-white disabled:opacity-50 ${isSenior ? 'text-lg' : 'text-sm'} ${s.confirmBtn}`}>{isDeleting ? '삭제 중...' : '삭제'}</button>
               </div>
             </motion.div>
