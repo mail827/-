@@ -144,7 +144,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
       )}
 
       {galleries.length > 0 && (
-        <section className="py-32 px-4">
+        <section id="gallery-section" className="py-32 px-4">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn}>
             <p className="text-center text-[0.8rem] mb-20 tracking-[0.3em]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.4)' }}>GALLERY</p>
             <div className="max-w-2xl mx-auto">
@@ -191,7 +191,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </motion.div>
       </section>
 
-      <section className="py-32 px-8">
+      <section id="venue-section" className="py-32 px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-md mx-auto text-center">
           <p className="text-[0.8rem] mb-14 tracking-[0.3em]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.4)' }}>LOCATION</p>
           <div className="mb-10">
@@ -213,7 +213,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
       </section>
 
       {(wedding.groomAccount || wedding.brideAccount) && (
-        <section className="py-32 px-8" style={{ background: '#0A0A0A' }}>
+        <section id="account-section" className="py-32 px-8" style={{ background: '#0A0A0A' }}>
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-md mx-auto">
             <p className="text-[0.8rem] text-center mb-14 tracking-[0.3em]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.4)' }}>GIFT</p>
             <div className="space-y-4">
@@ -280,14 +280,14 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </section>
       )}
 
-      <section className="py-32 px-8">
+      <section id="rsvp-section" className="py-32 px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-md mx-auto">
           <p className="text-[0.8rem] text-center mb-14 tracking-[0.3em]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.4)' }}>RSVP</p>
           <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="pearl" />
         </motion.div>
       </section>
 
-      <section className="py-32 px-8" style={{ background: '#0A0A0A' }}>
+      <section id="guestbook-section" className="py-32 px-8" style={{ background: '#0A0A0A' }}>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-md mx-auto">
           <p className="text-[0.8rem] text-center mb-14 tracking-[0.3em]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.4)' }}>MESSAGE</p>
           <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="pearl" />

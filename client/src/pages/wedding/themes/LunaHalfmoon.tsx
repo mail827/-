@@ -151,7 +151,7 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
       )}
 
       {galleries.length > 0 && (
-        <section className="py-32 px-8">
+        <section id="gallery-section" className="py-32 px-8">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
             <p className="text-center text-[0.85rem] mb-20 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>GALLERY</p>
             <div className="max-w-sm mx-auto space-y-8">
@@ -202,7 +202,7 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
         </motion.div>
       </section>
 
-      <section className="py-32 px-10">
+      <section id="venue-section" className="py-32 px-10">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto text-center">
           <p className="text-[0.85rem] mb-16 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>LOCATION</p>
           <div className="mb-10">
@@ -224,7 +224,7 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
       </section>
 
       {(wedding.groomAccount || wedding.brideAccount) && (
-        <section className="py-32 px-10">
+        <section id="account-section" className="py-32 px-10">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto">
             <p className="text-[0.85rem] text-center mb-16 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>GIFT</p>
             <div className="space-y-5">
@@ -291,14 +291,14 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
         </section>
       )}
 
-      <section className="py-32 px-10">
+      <section id="rsvp-section" className="py-32 px-10">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto">
           <p className="text-[0.85rem] text-center mb-16 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>RSVP</p>
           <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="luna" />
         </motion.div>
       </section>
 
-      <section className="py-32 px-10">
+      <section id="guestbook-section" className="py-32 px-10">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto">
           <p className="text-[0.85rem] text-center mb-16 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>MESSAGE</p>
           <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="luna" />

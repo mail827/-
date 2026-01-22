@@ -109,6 +109,7 @@ export function formatDate(dateString: string, format: 'korean' | 'dots' | 'shor
 }
 
 export function formatTime(timeString?: string): string {
+  if (timeString && (timeString.includes('오전') || timeString.includes('오후'))) return timeString;
   if (!timeString) return '';
   const [hours, minutes] = timeString.split(':').map(Number);
   const period = hours < 12 ? '오전' : '오후';
