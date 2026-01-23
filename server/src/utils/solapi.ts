@@ -362,3 +362,63 @@ export async function sendGiftNotification(data: GiftNotificationData) {
     return null;
   }
 }
+
+interface ReportNotificationData {
+  to: string;
+  groomName: string;
+  brideName: string;
+  totalChats: number;
+  uniqueVisitors: number;
+  link: string;
+}
+
+export async function sendReportNotification(data: ReportNotificationData) {
+  const toPhone = cleanPhone(data.to);
+  if (toPhone.length < 10) {
+    console.log('유효하지 않은 전화번호:', toPhone);
+    return null;
+  }
+  
+  const fromPhone = cleanPhone(process.env.SOLAPI_SENDER_NUMBER!);
+  console.log('AI리포트 알림톡 발송 시도:', { to: toPhone, from: fromPhone });
+  
+  try {
+    const response = await fetch(SOLAPI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: {
+          to: toPhone,
+          from: fromPhone,
+          kakaoOptions: {
+            pfId: process.env.KAKAO_CHANNEL_ID!,
+            templateId: process.env.KAKAO_REPORT_TEMPLATE_ID!,
+            variables: {
+              '#{신랑이름}': data.groomName,
+              '#{신부이름}': data.brideName,
+              '#{총대화}': String(data.totalChats),
+              '#{방문자}': String(data.uniqueVisitors),
+              '#{링크}': data.link,
+            },
+          },
+        }
+      }),
+    });
+    
+    const result = await response.json();
+    console.log('AI리포트 알림톡 응답:', JSON.stringify(result, null, 2));
+    
+    if (!response.ok || result.errorCode) {
+      console.error('AI리포트 알림톡 발송 실패:', result);
+      return null;
+    }
+    
+    return result;
+  } catch (error: any) {
+    console.error('AI리포트 알림톡 발송 에러:', error?.message || error);
+    return null;
+  }
+}

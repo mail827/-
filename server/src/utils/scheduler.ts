@@ -1,6 +1,7 @@
 import cron from 'node-cron';
+import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
-import { sendReminderNotification } from './solapi.js';
+import { sendReminderNotification, sendReportNotification } from './solapi.js';
 
 const prisma = new PrismaClient();
 
@@ -17,7 +18,7 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-async function sendReminders() {
+export async function sendReminders() {
   console.log('[Scheduler] 리마인더 체크 시작:', new Date().toISOString());
   
   try {
@@ -75,11 +76,92 @@ async function sendReminders() {
   }
 }
 
+export async function sendAiReports() {
+  console.log('[Scheduler] AI 리포트 체크 시작:', new Date().toISOString());
+  
+  try {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    
+    const yesterdayEnd = new Date(yesterday);
+    yesterdayEnd.setHours(23, 59, 59, 999);
+
+    const weddings = await prisma.wedding.findMany({
+      where: {
+        isPublished: true,
+        aiEnabled: true,
+        weddingDate: {
+          gte: yesterday,
+          lte: yesterdayEnd
+        },
+        reportSentAt: null
+      }
+    });
+
+    console.log(`[Scheduler] 어제 결혼식 ${weddings.length}개 발견`);
+
+    for (const wedding of weddings) {
+      const chats = await prisma.aiChat.findMany({
+        where: { weddingId: wedding.id },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      if (chats.length === 0) {
+        console.log(`[Scheduler] ${wedding.groomName}♥${wedding.brideName} - 채팅 없음, 스킵`);
+        continue;
+      }
+
+      const uniqueVisitors = new Set(chats.map(c => c.visitorId)).size;
+
+      const token = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24);
+
+      await prisma.reportToken.create({
+        data: {
+          token,
+          weddingId: wedding.id,
+          expiresAt
+        }
+      });
+
+      const reportUrl = `https://weddingshop.cloud/report/${token}`;
+      const phones = [wedding.groomPhone, wedding.bridePhone].filter(Boolean) as string[];
+
+      for (const phone of phones) {
+        await sendReportNotification({
+          to: phone,
+          groomName: wedding.groomName,
+          brideName: wedding.brideName,
+          totalChats: chats.length,
+          uniqueVisitors,
+          link: reportUrl
+        });
+      }
+
+      await prisma.wedding.update({
+        where: { id: wedding.id },
+        data: { reportSentAt: new Date() }
+      });
+
+      console.log(`[Scheduler] AI 리포트 발송 완료: ${wedding.groomName}♥${wedding.brideName}`);
+    }
+    
+    console.log('[Scheduler] AI 리포트 체크 완료');
+  } catch (error) {
+    console.error('[Scheduler] AI 리포트 발송 에러:', error);
+  }
+}
+
 export function startScheduler() {
   cron.schedule('0 9 * * *', sendReminders, {
     timezone: 'Asia/Seoul'
   });
   console.log('[Scheduler] D-Day 리마인더 스케줄러 시작 (매일 09:00 KST)');
-}
 
-export { sendReminders };
+  cron.schedule('0 10 * * *', sendAiReports, {
+    timezone: 'Asia/Seoul'
+  });
+  console.log('[Scheduler] AI 리포트 스케줄러 시작 (매일 10:00 KST)');
+}

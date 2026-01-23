@@ -164,6 +164,7 @@ model Wedding {
   rsvpNotification         Boolean           @default(true)
   giftNotification         Boolean           @default(true)
   reminderSentDays         String?
+  reportSentAt             DateTime?
   expiresAt                DateTime?
   aiChats                  AiChat[]
   galleries                Gallery[]

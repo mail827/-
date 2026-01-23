@@ -2,9 +2,44 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middleware/auth.js';
 import { sendSummaryNotification, sendReminderNotification, sendCustomNotification } from '../utils/solapi.js';
+import { sendReminders, sendAiReports } from '../utils/scheduler.js';
 
 const router = Router();
 const prisma = new PrismaClient();
+
+router.get('/trigger-reminders', async (req: Request, res: Response) => {
+  const secret = req.query.secret || req.headers['x-cron-secret'];
+  
+  if (secret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    console.log('[Cron Trigger] 외부 트리거로 리마인더 실행');
+    await sendReminders();
+    res.json({ success: true, type: 'reminders', timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error('[Cron Trigger] 에러:', error);
+    res.status(500).json({ error: '리마인더 실행 실패' });
+  }
+});
+
+router.get('/trigger-reports', async (req: Request, res: Response) => {
+  const secret = req.query.secret || req.headers['x-cron-secret'];
+  
+  if (secret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    console.log('[Cron Trigger] 외부 트리거로 AI 리포트 실행');
+    await sendAiReports();
+    res.json({ success: true, type: 'reports', timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error('[Cron Trigger] 에러:', error);
+    res.status(500).json({ error: 'AI 리포트 실행 실패' });
+  }
+});
 
 router.post('/summary/:weddingId', authMiddleware, async (req: Request, res: Response) => {
   const { weddingId } = req.params;
