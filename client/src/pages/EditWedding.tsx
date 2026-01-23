@@ -1488,6 +1488,49 @@ export default function EditWedding() {
               </div>
             </Section>
 
+
+            <Section title="알림 설정">
+              <p className="text-sm text-stone-500 mb-4">카카오 알림톡 수신 설정</p>
+              <div className="space-y-4">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={wedding.rsvpNotification ?? true}
+                    onChange={(e) => updateField('rsvpNotification', e.target.checked)}
+                    className="w-5 h-5 rounded"
+                  />
+                  <div>
+                    <span className="text-stone-600">RSVP 알림</span>
+                    <p className="text-xs text-stone-400">하객이 참석 여부를 등록하면 알림을 받아요</p>
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={wedding.giftNotification ?? true}
+                    onChange={(e) => updateField('giftNotification', e.target.checked)}
+                    className="w-5 h-5 rounded"
+                  />
+                  <div>
+                    <span className="text-stone-600">선물 도착 알림</span>
+                    <p className="text-xs text-stone-400">새로운 선물이 도착하면 알림을 받아요</p>
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={wedding.notificationEnabled ?? true}
+                    onChange={(e) => updateField('notificationEnabled', e.target.checked)}
+                    className="w-5 h-5 rounded"
+                  />
+                  <div>
+                    <span className="text-stone-600">리마인더 알림</span>
+                    <p className="text-xs text-stone-400">결혼식 D-7, D-3, D-1에 하객에게 리마인더를 보내요</p>
+                  </div>
+                </label>
+              </div>
+            </Section>
+
             <Section title="청첩장 주소">
               <div className="space-y-2">
                 <p className="text-stone-500 text-sm break-all">{window.location.origin}/w/</p>

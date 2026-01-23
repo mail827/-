@@ -126,10 +126,11 @@ router.post('/', async (req: Request, res: Response) => {
         bridePhone: true,
         slug: true,
         notificationEnabled: true,
+        rsvpNotification: true,
       },
     });
 
-    if (wedding?.notificationEnabled) {
+    if (wedding?.notificationEnabled && wedding?.rsvpNotification) {
       const weddingUrl = `https://weddingshop.cloud/w/${wedding.slug}/rsvp`;
       
       if (wedding.groomPhone) {

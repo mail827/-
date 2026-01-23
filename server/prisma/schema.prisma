@@ -161,6 +161,8 @@ model Wedding {
   reminderD1               Boolean           @default(true)
   reminderD3               Boolean           @default(true)
   reminderD7               Boolean           @default(true)
+  rsvpNotification         Boolean           @default(true)
+  giftNotification         Boolean           @default(true)
   reminderSentDays         String?
   expiresAt                DateTime?
   aiChats                  AiChat[]

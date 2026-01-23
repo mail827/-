@@ -12,6 +12,64 @@ function generateGiftCode(): string {
   return 'GIFT-' + crypto.randomBytes(4).toString('hex').toUpperCase();
 }
 
+async function findWeddingByPhone(phone: string) {
+  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  return prisma.wedding.findFirst({
+    where: {
+      OR: [
+        { groomPhone: { contains: cleanPhone.slice(-8) } },
+        { bridePhone: { contains: cleanPhone.slice(-8) } },
+      ],
+      isPublished: true,
+    },
+    select: {
+      groomName: true,
+      brideName: true,
+      giftNotification: true,
+      slug: true,
+    },
+  });
+}
+
+async function sendGiftNotificationIfAllowed(
+  toPhone: string,
+  senderName: string,
+  giftName: string,
+  message: string,
+  code: string
+) {
+  const wedding = await findWeddingByPhone(toPhone);
+  
+  if (!wedding) {
+    console.log('선물 알림: 청첩장을 찾을 수 없음, 기본 알림 발송');
+    return sendGiftNotification({
+      to: toPhone,
+      groomName: '',
+      brideName: '',
+      senderName,
+      giftName,
+      message: message || '',
+      link: `https://weddingshop.cloud/gift?code=${code}`,
+    });
+  }
+  
+  if (!wedding.giftNotification) {
+    console.log('선물 알림: 수신 거부 상태 (giftNotification=false)');
+    return null;
+  }
+  
+  console.log('선물 알림: 발송 허용됨', { groomName: wedding.groomName, brideName: wedding.brideName });
+  return sendGiftNotification({
+    to: toPhone,
+    groomName: wedding.groomName,
+    brideName: wedding.brideName,
+    senderName,
+    giftName,
+    message: message || '',
+    link: `https://weddingshop.cloud/gift?code=${code}`,
+  });
+}
+
 router.post('/create', authMiddleware, async (req: any, res) => {
   try {
     const { packageId, toEmail, toPhone, message } = req.body;
@@ -45,15 +103,8 @@ router.post('/create', authMiddleware, async (req: any, res) => {
     }
 
     if (toPhone) {
-      sendGiftNotification({
-        to: toPhone,
-        groomName: senderName,
-        brideName: '',
-        senderName: senderName,
-        giftName: pkg.name,
-        message: message || '',
-        link: `https://weddingshop.cloud/gift?code=${code}`,
-      }).catch(err => console.error('선물 카톡 발송 실패:', err));
+      sendGiftNotificationIfAllowed(toPhone, senderName, pkg.name, message || '', code)
+        .catch(err => console.error('선물 카톡 발송 실패:', err));
     }
 
     res.json({ gift, code });
@@ -211,15 +262,8 @@ router.post('/payment/confirm', authMiddleware, async (req: any, res) => {
     }
 
     if (toPhone) {
-      sendGiftNotification({
-        to: toPhone,
-        groomName: senderName,
-        brideName: '',
-        senderName: senderName,
-        giftName: pkg.name,
-        message: message || '',
-        link: `https://weddingshop.cloud/gift?code=${code}`,
-      }).catch(err => console.error('선물 카톡 발송 실패:', err));
+      sendGiftNotificationIfAllowed(toPhone, senderName, pkg.name, message || '', code)
+        .catch(err => console.error('선물 카톡 발송 실패:', err));
     }
 
     res.json({ gift, code });
@@ -251,15 +295,13 @@ router.post('/send-notification', authMiddleware, async (req: any, res) => {
     }
 
     if (type === 'kakao' && gift.toPhone) {
-      await sendGiftNotification({
-        to: gift.toPhone,
-        groomName: senderName,
-        brideName: '',
-        senderName: senderName,
-        giftName: gift.package.name,
-        message: gift.message || '',
-        link: `https://weddingshop.cloud/gift?code=${gift.code}`,
-      });
+      await sendGiftNotificationIfAllowed(
+        gift.toPhone,
+        senderName,
+        gift.package.name,
+        gift.message || '',
+        gift.code
+      );
       return res.json({ success: true, type: 'kakao' });
     }
 

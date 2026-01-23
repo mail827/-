@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, UserCheck, UserX, Lock, Heart, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, UserCheck, UserX, Lock, Heart, ChevronDown, ChevronUp, Download } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -69,6 +69,35 @@ export default function RsvpCheck() {
     }
   };
 
+  const downloadCsv = () => {
+    if (!data) return;
+
+    const headers = ['구분', '이름', '연락처', '참석여부', '참석인원', '식사인원', '메시지', '등록일시'];
+    const rows = data.rsvps.map(rsvp => [
+      rsvp.side === 'GROOM' ? '신랑측' : '신부측',
+      rsvp.name,
+      rsvp.phone || '',
+      rsvp.attending ? '참석' : '불참',
+      rsvp.guestCount.toString(),
+      rsvp.mealCount.toString(),
+      rsvp.message?.replace(/"/g, '""') || '',
+      new Date(rsvp.createdAt).toLocaleString('ko-KR'),
+    ]);
+
+    const csvContent = '\uFEFF' + [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `참석현황_${data.wedding.groomName}_${data.wedding.brideName}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (!data) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white flex items-center justify-center p-4">
@@ -130,7 +159,7 @@ export default function RsvpCheck() {
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 mb-8">
+          <div className="grid grid-cols-3 gap-3 mb-6">
             <div className="bg-white rounded-xl p-4 text-center shadow-sm">
               <Users className="w-6 h-6 text-stone-400 mx-auto mb-2" />
               <p className="text-2xl font-semibold text-stone-800">{data.stats.total}</p>
@@ -147,6 +176,14 @@ export default function RsvpCheck() {
               <p className="text-xs text-stone-500">불참</p>
             </div>
           </div>
+
+          <button
+            onClick={downloadCsv}
+            className="w-full mb-6 py-3 bg-white border border-stone-200 rounded-xl text-stone-600 font-medium hover:bg-stone-50 transition-colors flex items-center justify-center gap-2 shadow-sm"
+          >
+            <Download className="w-4 h-4" />
+            엑셀 다운로드
+          </button>
 
           <div className="space-y-4">
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -185,10 +222,10 @@ export default function RsvpCheck() {
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               <button
                 onClick={() => setShowBride(!showBride)}
-                className="w-full px-4 py-3 flex items-center justify-between bg-stone-50"
+                className="w-full px-4 py-3 flex items-center justify-between bg-rose-50"
               >
-                <span className="font-medium text-stone-800">신부측 ({brideRsvps.length}명)</span>
-                {showBride ? <ChevronUp className="w-5 h-5 text-stone-400" /> : <ChevronDown className="w-5 h-5 text-stone-400" />}
+                <span className="font-medium text-rose-800">신부측 ({brideRsvps.length}명)</span>
+                {showBride ? <ChevronUp className="w-5 h-5 text-rose-400" /> : <ChevronDown className="w-5 h-5 text-rose-400" />}
               </button>
               {showBride && (
                 <div className="divide-y divide-stone-100">
