@@ -49,7 +49,7 @@ async function sendGiftNotificationIfAllowed(
       senderName,
       giftName,
       message: message || '',
-      link: `https://weddingshop.cloud/gift?code=${code}`,
+      link: `https://weddingshop.cloud/gift/redeem?code=${code}`,
     });
   }
   
@@ -66,7 +66,7 @@ async function sendGiftNotificationIfAllowed(
     senderName,
     giftName,
     message: message || '',
-    link: `https://weddingshop.cloud/gift?code=${code}`,
+    link: `https://weddingshop.cloud/gift/redeem?code=${code}`,
   });
 }
 

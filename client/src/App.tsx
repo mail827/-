@@ -29,6 +29,7 @@ import Terms from './pages/info/Terms';
 import Privacy from "./pages/info/Privacy";
 import PublicReport from "./pages/PublicReport";
 import GiftRedeem from "./pages/GiftRedeem";
+import GiftRedirect from './pages/GiftRedirect';
 import GiftSend from "./pages/GiftSend";
 import MyGifts from "./pages/MyGifts";
 import FAQ from './pages/info/FAQ';
@@ -82,6 +83,7 @@ export default function App() {
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/report/:token" element={<PublicReport />} />
+      <Route path="/gift" element={<GiftRedirect />} />
       <Route path="/gift/redeem" element={<GiftRedeem />} />
       <Route path="/gift/send" element={<ProtectedRoute><GiftSend /></ProtectedRoute>} />
       <Route path="/faq" element={<FAQ />} />
