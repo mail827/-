@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middleware/auth.js';
 import { sendRsvpNotification } from '../utils/solapi.js';
+import ExcelJS from 'exceljs';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -172,9 +173,6 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
-export const rsvpRouter = router;
-
-
 router.get('/download/:slug', async (req: Request, res: Response) => {
   const { slug } = req.params;
   const { password } = req.query;
@@ -199,32 +197,52 @@ router.get('/download/:slug', async (req: Request, res: Response) => {
       orderBy: { createdAt: 'desc' }
     });
 
-    const headers = ['구분', '이름', '연락처', '참석여부', '참석인원', '식사인원', '메시지', '등록일시'];
-    const rows = rsvps.map(rsvp => [
-      rsvp.side === 'GROOM' ? '신랑측' : '신부측',
-      rsvp.name,
-      rsvp.phone || '',
-      rsvp.attending ? '참석' : '불참',
-      rsvp.guestCount.toString(),
-      rsvp.mealCount.toString(),
-      (rsvp.message || '').replace(/"/g, '""'),
-      new Date(rsvp.createdAt).toLocaleString('ko-KR'),
-    ]);
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('참석현황');
 
-    const csvContent = '\uFEFF' + [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
+    sheet.columns = [
+      { header: '구분', key: 'side', width: 10 },
+      { header: '이름', key: 'name', width: 15 },
+      { header: '연락처', key: 'phone', width: 15 },
+      { header: '참석여부', key: 'attending', width: 10 },
+      { header: '참석인원', key: 'guestCount', width: 10 },
+      { header: '식사인원', key: 'mealCount', width: 10 },
+      { header: '메시지', key: 'message', width: 30 },
+      { header: '등록일시', key: 'createdAt', width: 20 },
+    ];
+
+    sheet.getRow(1).font = { bold: true };
+    sheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE2E8F0' }
+    };
+
+    rsvps.forEach(rsvp => {
+      sheet.addRow({
+        side: rsvp.side === 'GROOM' ? '신랑측' : '신부측',
+        name: rsvp.name,
+        phone: rsvp.phone || '',
+        attending: rsvp.attending ? '참석' : '불참',
+        guestCount: rsvp.guestCount,
+        mealCount: rsvp.mealCount,
+        message: rsvp.message || '',
+        createdAt: new Date(rsvp.createdAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
+      });
+    });
 
     const date = new Date().toISOString().split('T')[0];
-    const filenameKorean = `참석현황_${wedding.groomName}_${wedding.brideName}_${date}.csv`;
-    const filenameAscii = `rsvp_${date}.csv`;
-    
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Disposition', `attachment; filename="${filenameAscii}"; filename*=UTF-8''${encodeURIComponent(filenameKorean)}`);
-    res.send(csvContent);
+    const filename = `rsvp_${date}.xlsx`;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+    await workbook.xlsx.write(res);
+    res.end();
   } catch (error) {
-    console.error('CSV Download Error:', error);
+    console.error('Excel Download Error:', error);
     res.status(500).json({ error: '다운로드 실패' });
   }
 });
+
+export const rsvpRouter = router;
