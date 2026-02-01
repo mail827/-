@@ -94,7 +94,9 @@ export default function RsvpCheck() {
     const a = document.createElement('a');
     a.href = url;
     a.download = `참석현황_${data.wedding.groomName}_${data.wedding.brideName}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
