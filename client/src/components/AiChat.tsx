@@ -41,7 +41,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
   const aiName = wedding.aiName || '웨딩 컨시어지';
 
   const placeholders = [
-    `${groomName} 술버릇이 뭐야?`,
+    `${groomName} 비밀 알려줘`,
     `둘이 싸우면 누가 이겨?`,
     `첫만남이 어땠어?`,
     `주차 어디에 해?`,
@@ -288,10 +288,10 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
           const secrets = wedding.aiSecrets || {};
           let secretContent = '';
           if (action.data === 'groom') {
-            if (secrets.groomDrinkingHabit) secretContent = `${groomName}의 술버릇: ${secrets.groomDrinkingHabit}`;
+            if (secrets.groomSecret) secretContent = `${groomName}의 비밀: ${secrets.groomSecret}`;
             else secretContent = '아직 등록된 비밀이 없어요.';
           } else {
-            if (secrets.brideDrinkingHabit) secretContent = `${brideName}의 술버릇: ${secrets.brideDrinkingHabit}`;
+            if (secrets.brideSecret) secretContent = `${brideName}의 비밀: ${secrets.brideSecret}`;
             else secretContent = '아직 등록된 비밀이 없어요.';
           }
           setMessages(prev => [...prev, {

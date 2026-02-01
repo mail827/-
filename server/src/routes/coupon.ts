@@ -1,0 +1,131 @@
+import { Router, Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+import { authMiddleware } from '../middleware/auth.js';
+
+const router = Router();
+const prisma = new PrismaClient();
+
+router.post('/validate', async (req: Request, res: Response) => {
+  const { code } = req.body;
+
+  try {
+    const coupon = await prisma.coupon.findUnique({
+      where: { code: code.toUpperCase() }
+    });
+
+    if (!coupon) {
+      return res.status(404).json({ error: '존재하지 않는 쿠폰입니다' });
+    }
+
+    if (!coupon.isActive) {
+      return res.status(400).json({ error: '비활성화된 쿠폰입니다' });
+    }
+
+    if (coupon.expiresAt && new Date() > coupon.expiresAt) {
+      return res.status(400).json({ error: '만료된 쿠폰입니다' });
+    }
+
+    if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+      return res.status(400).json({ error: '사용 한도를 초과한 쿠폰입니다' });
+    }
+
+    res.json({
+      valid: true,
+      coupon: {
+        code: coupon.code,
+        name: coupon.name,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue
+      }
+    });
+  } catch (error) {
+    console.error('Coupon validate error:', error);
+    res.status(500).json({ error: '쿠폰 확인 실패' });
+  }
+});
+
+router.post('/use', async (req: Request, res: Response) => {
+  const { code } = req.body;
+
+  try {
+    const coupon = await prisma.coupon.findUnique({
+      where: { code: code.toUpperCase() }
+    });
+
+    if (!coupon || !coupon.isActive) {
+      return res.status(400).json({ error: '유효하지 않은 쿠폰입니다' });
+    }
+
+    await prisma.coupon.update({
+      where: { code: code.toUpperCase() },
+      data: { usedCount: { increment: 1 } }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Coupon use error:', error);
+    res.status(500).json({ error: '쿠폰 사용 처리 실패' });
+  }
+});
+
+router.get('/admin', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const coupons = await prisma.coupon.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(coupons);
+  } catch (error) {
+    res.status(500).json({ error: '쿠폰 목록 조회 실패' });
+  }
+});
+
+router.post('/admin', authMiddleware, async (req: Request, res: Response) => {
+  const { code, name, discountType, discountValue, maxUses, expiresAt } = req.body;
+
+  try {
+    const coupon = await prisma.coupon.create({
+      data: {
+        code: code.toUpperCase(),
+        name,
+        discountType: discountType || 'PERCENT',
+        discountValue,
+        maxUses: maxUses || null,
+        expiresAt: expiresAt ? new Date(expiresAt) : null
+      }
+    });
+    res.status(201).json(coupon);
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return res.status(400).json({ error: '이미 존재하는 쿠폰 코드입니다' });
+    }
+    res.status(500).json({ error: '쿠폰 생성 실패' });
+  }
+});
+
+router.delete('/admin/:id', authMiddleware, async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    await prisma.coupon.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: '쿠폰 삭제 실패' });
+  }
+});
+
+router.patch('/admin/:id', authMiddleware, async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { isActive } = req.body;
+
+  try {
+    const coupon = await prisma.coupon.update({
+      where: { id },
+      data: { isActive }
+    });
+    res.json(coupon);
+  } catch (error) {
+    res.status(500).json({ error: '쿠폰 수정 실패' });
+  }
+});
+
+export const couponRouter = router;

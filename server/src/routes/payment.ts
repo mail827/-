@@ -63,12 +63,34 @@ router.get('/available-order', authMiddleware, async (req, res) => {
 });
 
 router.post('/order', authMiddleware, async (req, res) => {
-  const { packageId } = req.body;
+  const { packageId, couponCode } = req.body;
   const userId = (req as any).user.id;
   
   try {
     const pkg = await prisma.package.findUnique({ where: { id: packageId } });
     if (!pkg) return res.status(404).json({ error: '패키지를 찾을 수 없습니다' });
+
+    let finalAmount = pkg.price;
+    let appliedCouponId = null;
+
+    if (couponCode) {
+      const coupon = await prisma.coupon.findUnique({ where: { code: couponCode.toUpperCase() } });
+      if (coupon && coupon.isActive) {
+        if (coupon.expiresAt && new Date() > coupon.expiresAt) {
+          return res.status(400).json({ error: '만료된 쿠폰입니다' });
+        }
+        if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+          return res.status(400).json({ error: '사용 한도 초과' });
+        }
+        if (coupon.discountType === 'PERCENT') {
+          finalAmount = Math.floor(pkg.price * (100 - coupon.discountValue) / 100);
+        } else {
+          finalAmount = Math.max(0, pkg.price - coupon.discountValue);
+        }
+        appliedCouponId = coupon.id;
+        await prisma.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+      }
+    }
     
     const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
@@ -76,7 +98,7 @@ router.post('/order', authMiddleware, async (req, res) => {
       data: {
         userId,
         packageId,
-        amount: pkg.price,
+        amount: finalAmount,
         orderId,
         status: 'PENDING',
       },

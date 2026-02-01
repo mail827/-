@@ -57,6 +57,10 @@ export default function CreateWedding() {
   const [selectedPackageId, setSelectedPackageId] = useState<string>('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'failed'>('idle');
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{code: string; name: string; discountType: string; discountValue: number} | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState('');
   
   const [formData, setFormData] = useState({
     theme: 'ROMANTIC_CLASSIC',
@@ -208,6 +212,40 @@ export default function CreateWedding() {
     await handleCreateWedding();
   };
 
+
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError('');
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/coupon/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponCode.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCouponError(data.error || '쿠폰 확인 실패');
+        setAppliedCoupon(null);
+      } else {
+        setAppliedCoupon(data.coupon);
+        setCouponError('');
+      }
+    } catch (e) {
+      setCouponError('네트워크 오류');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const getDiscountedPrice = () => {
+    if (!currentPackage || !appliedCoupon) return currentPackage?.price || 0;
+    if (appliedCoupon.discountType === 'PERCENT') {
+      return Math.floor(currentPackage.price * (100 - appliedCoupon.discountValue) / 100);
+    }
+    return Math.max(0, currentPackage.price - appliedCoupon.discountValue);
+  };
+
   const handlePayment = async () => {
     setShowPaymentModal(true);
     setPaymentStatus('processing');
@@ -221,7 +259,7 @@ export default function CreateWedding() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ packageId: selectedPackageId }),
+        body: JSON.stringify({ packageId: selectedPackageId, couponCode: appliedCoupon?.code }),
       });
       
       if (!orderRes.ok) {
@@ -507,9 +545,37 @@ export default function CreateWedding() {
                   {!isGiftFlow && (
                     <>
                       <div className="border-t border-stone-200 my-4" />
+                      <div className="mb-4">
+                        <label className="text-sm text-stone-600 mb-2 block">쿠폰 코드</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                            placeholder="쿠폰 코드 입력"
+                            className="flex-1 px-4 py-2 border border-stone-200 rounded-lg text-sm"
+                          />
+                          <button
+                            onClick={validateCoupon}
+                            disabled={couponLoading || !couponCode.trim()}
+                            className="px-4 py-2 bg-stone-800 text-white rounded-lg text-sm disabled:opacity-50"
+                          >
+                            {couponLoading ? "확인중..." : "적용"}
+                          </button>
+                        </div>
+                        {couponError && <p className="text-red-500 text-xs mt-1">{couponError}</p>}
+                        {appliedCoupon && (
+                          <div className="mt-2 p-2 bg-emerald-50 rounded-lg flex justify-between items-center">
+                            <span className="text-sm text-emerald-700">✓ {appliedCoupon.name} ({appliedCoupon.discountValue}% 할인)</span>
+                            <button onClick={() => setAppliedCoupon(null)} className="text-stone-400 hover:text-stone-600">
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
                       <div className="flex justify-between items-center">
                         <span className="text-lg font-medium text-stone-800">결제 금액</span>
-                        <span className="text-2xl font-bold text-stone-800">{currentPackage?.price.toLocaleString()}원</span>
+                        <span className="text-2xl font-bold text-stone-800">{appliedCoupon ? getDiscountedPrice().toLocaleString() : currentPackage?.price.toLocaleString()}원</span>
                       </div>
                     </>
                   )}
@@ -555,7 +621,7 @@ export default function CreateWedding() {
               </button>
             ) : (
               <button onClick={handlePayment} className="flex-1 py-4 bg-stone-800 text-white rounded-xl font-medium flex items-center justify-center gap-2">
-                {currentPackage?.price.toLocaleString()}원 결제하기
+                {appliedCoupon ? getDiscountedPrice().toLocaleString() : currentPackage?.price.toLocaleString()}원 결제하기
               </button>
             )}
           </div>

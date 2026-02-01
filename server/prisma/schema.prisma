@@ -380,3 +380,17 @@ enum InquiryStatus {
   REPLIED
   CLOSED
 }
+
+model Coupon {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  name          String
+  discountType  String    @default("PERCENT")
+  discountValue Int
+  maxUses       Int?
+  usedCount     Int       @default(0)
+  expiresAt     DateTime?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
