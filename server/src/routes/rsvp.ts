@@ -173,3 +173,58 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
 });
 
 export const rsvpRouter = router;
+
+
+router.get('/download/:slug', async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const { password } = req.query;
+
+  try {
+    const wedding = await prisma.wedding.findUnique({
+      where: { slug },
+      select: { id: true, groomName: true, brideName: true, groomPhone: true }
+    });
+
+    if (!wedding) {
+      return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
+    }
+
+    const last4 = wedding.groomPhone?.slice(-4);
+    if (password !== last4) {
+      return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
+    }
+
+    const rsvps = await prisma.rsvp.findMany({
+      where: { weddingId: wedding.id },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const headers = ['구분', '이름', '연락처', '참석여부', '참석인원', '식사인원', '메시지', '등록일시'];
+    const rows = rsvps.map(rsvp => [
+      rsvp.side === 'GROOM' ? '신랑측' : '신부측',
+      rsvp.name,
+      rsvp.phone || '',
+      rsvp.attending ? '참석' : '불참',
+      rsvp.guestCount.toString(),
+      rsvp.mealCount.toString(),
+      (rsvp.message || '').replace(/"/g, '""'),
+      new Date(rsvp.createdAt).toLocaleString('ko-KR'),
+    ]);
+
+    const csvContent = '\uFEFF' + [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const date = new Date().toISOString().split('T')[0];
+    const filenameKorean = `참석현황_${wedding.groomName}_${wedding.brideName}_${date}.csv`;
+    const filenameAscii = `rsvp_${date}.csv`;
+    
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename="${filenameAscii}"; filename*=UTF-8''${encodeURIComponent(filenameKorean)}`);
+    res.send(csvContent);
+  } catch (error) {
+    console.error('CSV Download Error:', error);
+    res.status(500).json({ error: '다운로드 실패' });
+  }
+});

@@ -70,53 +70,8 @@ export default function RsvpCheck() {
   };
 
   const downloadCsv = () => {
-    if (!data) return;
-
-    const headers = ['구분', '이름', '연락처', '참석여부', '참석인원', '식사인원', '메시지', '등록일시'];
-    const rows = data.rsvps.map(rsvp => [
-      rsvp.side === 'GROOM' ? '신랑측' : '신부측',
-      rsvp.name,
-      rsvp.phone || '',
-      rsvp.attending ? '참석' : '불참',
-      rsvp.guestCount.toString(),
-      rsvp.mealCount.toString(),
-      rsvp.message?.replace(/"/g, '""') || '',
-      new Date(rsvp.createdAt).toLocaleString('ko-KR'),
-    ]);
-
-    const csvContent = '\uFEFF' + [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const filename = `참석현황_${data.wedding.groomName}_${data.wedding.brideName}_${new Date().toISOString().split('T')[0]}.csv`;
-
-    // iOS Safari 대응
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    
-    if (isIOS) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      };
-      reader.readAsDataURL(blob);
-    } else {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
+    if (!slug || !password) return;
+    window.location.href = `${API_BASE}/rsvp/download/${slug}?password=${password}`;
   };
 
   if (!data) {
