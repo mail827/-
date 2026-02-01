@@ -14,7 +14,8 @@ import {
   PlayCircle,
   FileText,
   MessageSquare,
-  Star
+  Star,
+  Ticket
 } from 'lucide-react';
 import { useAuthStore } from '../../hooks/useAuth';
 
@@ -33,6 +34,7 @@ export default function AdminLayout() {
     { to: '/admin/users', icon: Users, label: '회원', end: false },
     { to: '/admin/orders', icon: CreditCard, label: '주문', end: false },
     { to: '/admin/packages', icon: Package, label: '패키지', end: false },
+    { to: '/admin/coupons', icon: Ticket, label: '쿠폰', end: false },
     { to: '/admin/gifts', icon: Gift, label: '선물', end: false },
     { to: '/admin/guides', icon: PlayCircle, label: '가이드', end: false },
     { to: '/admin/theme-showcase', icon: Palette, label: '테마', end: false },

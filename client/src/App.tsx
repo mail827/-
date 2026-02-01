@@ -20,6 +20,7 @@ import AdminRsvpList from './pages/admin/AdminRsvpList';
 import AdminGuestbookList from './pages/admin/AdminGuestbookList';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminPackages from './pages/admin/AdminPackages';
+import AdminCoupon from './pages/admin/AdminCoupon';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminInquiries from './pages/admin/AdminInquiries';
 import AdminContents from './pages/admin/AdminContents';
@@ -95,6 +96,7 @@ export default function App() {
         <Route path="users" element={<AdminUsers />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="packages" element={<AdminPackages />} />
+        <Route path="coupons" element={<AdminCoupon />} />
         <Route path="inquiries" element={<AdminInquiries />} />
         <Route path="guides" element={<AdminGuides />} />
         <Route path="theme-showcase" element={<AdminThemeShowcase />} />
