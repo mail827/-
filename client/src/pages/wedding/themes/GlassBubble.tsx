@@ -307,7 +307,7 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-center">
           <SectionTitle>오시는 길</SectionTitle>
           <GlassCard className="overflow-hidden p-0">
-            <KakaoMap address={wedding.venueAddress} />
+            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             <div className="p-6 text-center">
               <p className="flex items-center justify-center gap-2 text-[15px]" style={{ color: '#6B5B8C', fontFamily: 'ChangwonDangamRounded, sans-serif' }}>
                 <MapPin className="w-4 h-4" style={{ color: '#B8B0E8' }} />

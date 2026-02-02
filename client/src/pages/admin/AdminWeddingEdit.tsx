@@ -505,6 +505,11 @@ export default function AdminWeddingEdit() {
                 <label className="block text-sm text-stone-600 mb-2">예식 시간</label>
                 <input type="time" value={wedding.weddingTime || ''} onChange={(e) => updateField('weddingTime', e.target.value)} className="w-full px-4 py-3 border border-stone-200 rounded-xl" />
               </div>
+              <div>
+                <label className="block text-sm text-stone-600 mb-2">청첩장 만료일</label>
+                <input type="date" value={wedding.expiresAt?.split('T')[0] || ''} onChange={(e) => updateField('expiresAt', e.target.value)} className="w-full px-4 py-3 border border-stone-200 rounded-xl" />
+                <p className="text-xs text-stone-400 mt-1">비워두면 기본 1년</p>
+              </div>
             </div>
           </Section>
           <Section title="예식장 정보">

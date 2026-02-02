@@ -205,7 +205,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
 
           {wedding.venueAddress && (
             <div className="aspect-[4/3] bg-black/5 mb-6 overflow-hidden">
-              <KakaoMap address={wedding.venueAddress} />
+              <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             </div>
           )}
 

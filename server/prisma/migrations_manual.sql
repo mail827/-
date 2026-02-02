@@ -1,0 +1,2 @@
+ALTER TABLE "Wedding" ADD COLUMN "venueLatitude" DOUBLE PRECISION;
+ALTER TABLE "Wedding" ADD COLUMN "venueLongitude" DOUBLE PRECISION;

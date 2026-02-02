@@ -48,6 +48,7 @@ export default function WeddingForm({
     theme: wedding?.theme || 'ROMANTIC_CLASSIC',
     themeColor: wedding?.themeColor || '#1E3A5F',
     weddingDate: wedding?.weddingDate?.split('T')[0] || '',
+    expiresAt: wedding?.expiresAt?.split('T')[0] || '',
     weddingTime: wedding?.weddingTime || '',
     groomName: wedding?.groomName || '',
     groomNameEn: wedding?.groomNameEn || '',
@@ -318,6 +319,16 @@ export default function WeddingForm({
                     className={inputClass}
                     required
                   />
+                </div>
+                <div>
+                  <label className={labelClass}>청첩장 만료일</label>
+                  <input
+                    type="date"
+                    value={formData.expiresAt}
+                    onChange={(e) => updateField('expiresAt', e.target.value)}
+                    className={inputClass}
+                  />
+                  <p className="text-xs text-stone-400 mt-1">비워두면 기본 1년</p>
                 </div>
               </div>
 

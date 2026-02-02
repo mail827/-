@@ -165,7 +165,7 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center">
           <GoldDivider /><p className="text-[10px] tracking-[0.4em] text-[#C9A96E]/60 mt-6 mb-6">LOCATION</p>
           <div className="border border-[#C9A96E]/20 overflow-hidden">
-            <KakaoMap address={wedding.venueAddress} />
+            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             <div className="p-6 text-center">
               <p className="text-[#ccc] flex items-center justify-center gap-1"><MapPin className="w-4 h-4 text-[#C9A96E]" />{wedding.venue}</p>
               {wedding.venueHall && <p className="text-[#C9A96E]/80 text-sm mt-1">{wedding.venueHall}</p>}

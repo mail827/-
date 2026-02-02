@@ -310,7 +310,7 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
           <SectionTitle>오시는 길</SectionTitle>
           <Card className="overflow-hidden p-0">
-            <KakaoMap address={wedding.venueAddress} />
+            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             <div className="p-6 text-center">
               <p className="flex items-center justify-center gap-2 text-[15px]" style={{ color: '#7B5B6B', fontFamily: 'HsBombaram, serif' }}>
                 <MapPin className="w-4 h-4" style={{ color: '#D4A0B0' }} />

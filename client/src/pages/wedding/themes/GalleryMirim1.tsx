@@ -190,7 +190,7 @@ export default function GalleryMirim1({ wedding, guestbooks, onRsvpSubmit, onGue
           </div>
           {wedding.venueAddress && (
             <div className="aspect-[4/3] mb-6 p-2" style={{ background: 'linear-gradient(145deg, #FFFEF9 0%, #F8F4EC 100%)', boxShadow: '0 4px 20px rgba(139, 115, 85, 0.1)' }}>
-              <KakaoMap address={wedding.venueAddress} className="w-full h-full" />
+              <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} className="w-full h-full" />
             </div>
           )}
           <div className="flex justify-center gap-2">

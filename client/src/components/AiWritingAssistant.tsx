@@ -42,9 +42,31 @@ const HINT_MESSAGES: Record<FieldType, string> = {
   qnaAnswer: '답변 작성이 어려우신가요?',
 };
 
+const MBTI_REACTIONS: Record<string, string> = {
+  'INTJ': '오 전략가 타입! 완벽한 계획 세우셨겠네요 ㅋㅋ',
+  'INTP': '생각 중독자시구나... 제가 정리해드릴게요. 숨만 쉬세요 ㅋㅋ',
+  'ENTJ': '리더형! 결혼식도 칼같이 진행되겠어요 👀',
+  'ENTP': '아이디어 뱅크! 청첩장도 남다르게 가시죠~',
+  'INFJ': '감성 깊은 분이시네요. 의미 있는 문구 만들어드릴게요!',
+  'INFP': '순수 감성파! 진심 담긴 문구 준비할게요 ㅎㅎ',
+  'ENFJ': '주변을 따뜻하게 하는 타입! 하객들 감동 예정이에요~',
+  'ENFP': '에너지 폭발! 결혼식도 축제 되겠는데요?! ㅋㅋ',
+  'ISTJ': '믿음직한 타입! 안정감 있는 문구로 갈게요~',
+  'ISFJ': '세심하게 챙기시는 분이네요. 정성스럽게 준비할게요!',
+  'ESTJ': '실행력 갑! 바로 핵심으로 갑니다 ㅋㅋ',
+  'ESFJ': '와 주변이 따뜻해지는 타입! 축하 인사 폭주 예정!',
+  'ISTP': '효율 마스터 오셨다... 군더더기 없이 핵심만 드릴게요 ㅋㅋ',
+  'ISFP': '감성 장인이시네요! 감각적인 문구로 준비할게요~',
+  'ESTP': '행동파! 바로 결과물 보여드릴게요. 기다리기 싫으시죠? ㅋㅋ',
+  'ESFP': '파티 피플! 결혼식도 축제로 만드실 분이네요!',
+  '모름': '괜찮아요! MBTI 없어도 멋진 문구 만들 수 있어요~',
+};
+
+const MBTI_LIST = ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP', '모름'];
+
 export default function AiWritingAssistant({ fieldType, context, onSelect, placeholder }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [step, setStep] = useState<'questions' | 'loading' | 'results'>('questions');
+  const [step, setStep] = useState<'questions' | 'loading' | 'results' | 'mbti-reaction'>('questions');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -52,6 +74,8 @@ export default function AiWritingAssistant({ fieldType, context, onSelect, place
   const [isLoading, setIsLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [showHint, setShowHint] = useState(true);
+  const [mbtiReaction, setMbtiReaction] = useState('');
+  const [, setPendingAnswers] = useState<Record<string, string>>({});
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -96,12 +120,37 @@ export default function AiWritingAssistant({ fieldType, context, onSelect, place
     setCurrentQuestionIndex(0);
     setAnswers({});
     setVersions([]);
+    setMbtiReaction('');
     await fetchQuestions();
+  };
+
+  const isMbtiQuestion = (questionId: string) => {
+    return questionId === 'groomMbti' || questionId === 'brideMbti' || questionId === 'mbti';
   };
 
   const handleOptionSelect = (option: string) => {
     const currentQ = questions[currentQuestionIndex];
     const newAnswers = { ...answers, [currentQ.id]: option };
+    
+    if (isMbtiQuestion(currentQ.id) && MBTI_LIST.includes(option)) {
+      const reaction = MBTI_REACTIONS[option] || MBTI_REACTIONS['모름'];
+      setMbtiReaction(reaction);
+      setPendingAnswers(newAnswers);
+      setStep('mbti-reaction');
+      
+      setTimeout(() => {
+        setAnswers(newAnswers);
+        setStep('questions');
+        if (currentQuestionIndex < questions.length - 1) {
+          setCurrentQuestionIndex(prev => prev + 1);
+          setInputValue('');
+        } else {
+          generateContent(newAnswers);
+        }
+      }, 1800);
+      return;
+    }
+
     setAnswers(newAnswers);
 
     if (currentQuestionIndex < questions.length - 1) {
@@ -116,7 +165,32 @@ export default function AiWritingAssistant({ fieldType, context, onSelect, place
     if (!inputValue.trim() && questions[currentQuestionIndex]?.options) return;
     
     const currentQ = questions[currentQuestionIndex];
-    const newAnswers = { ...answers, [currentQ.id]: inputValue.trim() };
+    const value = inputValue.trim();
+    const newAnswers = { ...answers, [currentQ.id]: value };
+    
+    const upperValue = value.toUpperCase();
+    if ((currentQ.id === 'userInput' && (fieldType === 'groomPersonality' || fieldType === 'bridePersonality')) 
+        && MBTI_LIST.slice(0, 16).includes(upperValue)) {
+      const reaction = MBTI_REACTIONS[upperValue] || '';
+      if (reaction) {
+        setMbtiReaction(reaction);
+        setPendingAnswers(newAnswers);
+        setStep('mbti-reaction');
+        
+        setTimeout(() => {
+          setAnswers(newAnswers);
+          setStep('questions');
+          if (currentQuestionIndex < questions.length - 1) {
+            setCurrentQuestionIndex(prev => prev + 1);
+            setInputValue('');
+          } else {
+            generateContent(newAnswers);
+          }
+        }, 1800);
+        return;
+      }
+    }
+
     setAnswers(newAnswers);
 
     if (currentQuestionIndex < questions.length - 1) {
@@ -173,6 +247,7 @@ export default function AiWritingAssistant({ fieldType, context, onSelect, place
     setAnswers({});
     setVersions([]);
     setInputValue('');
+    setMbtiReaction('');
   };
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -217,6 +292,14 @@ export default function AiWritingAssistant({ fieldType, context, onSelect, place
           overflow-y: auto;
           padding: 20px;
         }
+        @keyframes bounceIn {
+          0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+          50% { transform: scale(1.02) translateY(-2px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .mbti-reaction-bubble {
+          animation: bounceIn 0.4s ease-out;
+        }
       `}</style>
       
       <div className="ai-writing-backdrop" onClick={() => setIsOpen(false)} />
@@ -241,6 +324,19 @@ export default function AiWritingAssistant({ fieldType, context, onSelect, place
         </div>
 
         <div className="ai-writing-modal-body">
+          {step === 'mbti-reaction' && (
+            <div className="py-8 flex flex-col items-center justify-center">
+              <div className="mbti-reaction-bubble bg-stone-800 text-white px-5 py-4 rounded-2xl rounded-bl-sm max-w-[90%] shadow-lg">
+                <p className="text-sm leading-relaxed">{mbtiReaction}</p>
+              </div>
+              <div className="mt-4 flex gap-1">
+                <span className="w-2 h-2 bg-stone-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 bg-stone-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 bg-stone-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          )}
+
           {step === 'questions' && currentQuestion && (
             <div className="space-y-4">
               <div className="flex items-start gap-3">
@@ -255,13 +351,17 @@ export default function AiWritingAssistant({ fieldType, context, onSelect, place
               </div>
 
               {currentQuestion.options ? (
-                <div className="grid grid-cols-2 gap-2 mt-4">
+                <div className={`grid gap-2 mt-4 ${
+                  currentQuestion.options.length > 8 ? 'grid-cols-4' : 'grid-cols-2'
+                }`}>
                   {currentQuestion.options.map((option) => (
                     <button
                       key={option}
                       type="button"
                       onClick={() => handleOptionSelect(option)}
-                      className="px-4 py-3 text-sm text-stone-600 bg-stone-50 hover:bg-stone-100 rounded-xl border border-stone-200 hover:border-stone-300 transition-all text-left"
+                      className={`px-3 py-2.5 text-sm text-stone-600 bg-stone-50 hover:bg-stone-100 rounded-xl border border-stone-200 hover:border-stone-300 transition-all text-center ${
+                        currentQuestion.options!.length > 8 ? 'text-xs' : ''
+                      }`}
                     >
                       {option}
                     </button>
@@ -321,7 +421,7 @@ export default function AiWritingAssistant({ fieldType, context, onSelect, place
 
           {step === 'loading' && (
             <div className="py-12 flex flex-col items-center justify-center">
-              <div className="w-12 h-12 rounded-full bg-stone-800 flex items-center justify-center mb-4 animate-spin">
+              <div className="w-12 h-12 rounded-full bg-stone-800 flex items-center justify-center mb-4 animate-pulse">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <p className="text-sm text-stone-600 mb-1">웨딩이가 문구를 만들고 있어요</p>

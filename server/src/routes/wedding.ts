@@ -176,6 +176,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       data: {
         ...updateData,
         weddingDate: updateData.weddingDate ? new Date(updateData.weddingDate) : undefined,
+        expiresAt: updateData.expiresAt ? new Date(updateData.expiresAt) : undefined,
         editCount: user.role !== 'ADMIN' ? { increment: 1 } : undefined,
       },
     });

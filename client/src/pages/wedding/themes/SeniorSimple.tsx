@@ -192,7 +192,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
 
       <Section title="오시는 길" color={C} bgColor={C_light}>
         <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-          <KakaoMap address={wedding.venueAddress} />
+          <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
           <div className="p-6 text-center">
             <p className="flex items-center justify-center gap-2 text-xl text-gray-800 font-medium">
               <MapPin className="w-6 h-6" style={{ color: C }} />

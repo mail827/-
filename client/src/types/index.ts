@@ -18,6 +18,7 @@ export interface Wedding {
   isArchived: boolean;
   weddingDate: string;
   weddingTime: string;
+  expiresAt?: string;
   groomName: string;
   groomNameEn?: string;
   groomPhone?: string;

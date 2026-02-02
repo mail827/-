@@ -20,6 +20,8 @@ export interface WeddingData {
   venueNaverMap?: string;
   venueKakaoMap?: string;
   venueTmap?: string;
+  venueLatitude?: number;
+  venueLongitude?: number;
   heroMedia?: string;
   heroMediaType?: 'IMAGE' | 'VIDEO';
   greeting?: string;

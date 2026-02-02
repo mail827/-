@@ -275,7 +275,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-center">
           <SectionTitle>LOCATION</SectionTitle>
           <div className="mx-2 overflow-hidden" style={{ background: 'rgba(255,253,248,0.7)', border: '1px solid rgba(212,175,55,0.2)' }}>
-            <KakaoMap address={wedding.venueAddress} />
+            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             <div className="p-6 text-center" style={{ fontFamily: "'Nanum Myeongjo', serif" }}>
               <p className="flex items-center justify-center gap-2 text-[15px]" style={{ color: '#5A4D3A' }}>
                 <MapPin className="w-4 h-4" style={{ color: '#C4A35A' }} />

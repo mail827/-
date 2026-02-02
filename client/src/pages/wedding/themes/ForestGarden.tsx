@@ -163,7 +163,7 @@ export default function ForestGarden({ wedding, guestbooks, onRsvpSubmit, onGues
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center">
           <TreeDivider /><p className="text-xs tracking-[0.2em] text-[#3D5A3D]/50 mt-6 mb-6">LOCATION</p>
           <div className="bg-white rounded overflow-hidden shadow-sm">
-            <KakaoMap address={wedding.venueAddress} />
+            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             <div className="p-6 text-center">
               <p className="text-[#555] flex items-center justify-center gap-1"><MapPin className="w-4 h-4 text-[#3D5A3D]" />{wedding.venue}</p>
               {wedding.venueHall && <p className="text-[#3D5A3D] text-sm mt-1">{wedding.venueHall}</p>}

@@ -297,7 +297,7 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
         >
           <p className="text-xs tracking-[0.3em] text-[#C9B7E8] mb-12">오시는 길</p>
           <div className="rounded-sm overflow-hidden shadow-sm bg-white">
-            <KakaoMap address={wedding.venueAddress} />
+            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             <div className="p-8 text-center">
               <p className="text-[#2A2A2A] flex items-center justify-center gap-2 text-lg">
                 <MapPin className="w-4 h-4 text-[#C9B7E8]" />

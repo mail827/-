@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Phone, MapPin, CreditCard, Calendar, Lock } from 'lucide-react';
 
@@ -35,6 +35,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
   const [dismissedToasts, setDismissedToasts] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastTriggerTime = useRef(0);
 
   const aiMode = wedding.aiMode || 'classic';
   const aiToneStyle = wedding.aiToneStyle || 'default';
@@ -48,80 +49,198 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
     `뷔페 뭐가 맛있어?`,
   ];
 
-  const getToastMessages = (): Record<string, { section: string; messages: string[] }> => {
-    // 액티브 모드 스타일별 메시지
+  const getToastMessages = useCallback(() => {
     if (aiToneStyle === 'sheriff') {
       return {
-        gallery: { section: "gallery-section", messages: [
-          `사진 구경 좀 하고 가세요!`,
-          `여기 볼거리가 있어요`,
-        ]},
-        venue: { section: "venue-section", messages: wedding.aiTransportInfo?.parking 
-          ? [`주차장 안내해드릴게요! ${wedding.aiTransportInfo.parking}`]
-          : [`길 잃으면 안 돼요! 지도 확인하세요`]
-        },
-        account: { section: "account-section", messages: [
-          `축의금 계좌는 여기 있어요!`,
-          `부담 갖지 말고 형편대로 하세요`,
-        ]},
-        rsvp: { section: "rsvp-section", messages: [
-          `참석 여부 꼭 알려주세요!`,
-          `밥 준비해야 하니까 미리 알려주세요`,
-        ]},
-        guestbook: { section: "guestbook-section", messages: [
-          `축하 인사 한마디 남기고 가세요!`,
-          `방명록에 이름 좀 적어주세요`,
-        ]},
+        gallery: [
+          `사진 좀 보고 가세요!`,
+          `여기 볼거리 많아요`,
+          `인생샷 구경하세요!`,
+          `사진첩 한번 보실래요?`,
+          `갤러리 안 보면 손해에요`,
+          `여기 사진 진짜 잘 나왔어요`,
+          `잠깐만요, 사진 한 장만 보고 가세요`,
+          `구경 좀 하다 가세요~`,
+          `아 맞다 사진 보셨어요?`,
+          `여기 안 보면 아쉬워요 진짜`,
+        ],
+        venue: [
+          `차 가지고 오시나요?`,
+          `대중교통이요? 저한테 물어보세요!`,
+          `주차 정보 필요하시면 저한테요!`,
+          `오시는 길 헷갈리면 말씀하세요`,
+          `길 잃으시면 안 돼요!`,
+          `여기까지 어떻게 오세요?`,
+          `교통 정보 궁금하시면 저요!`,
+          `주차 걱정되시면 물어보세요`,
+          `네비 찍기 전에 저한테 한번!`,
+          `오시는 방법 안내해드릴까요?`,
+        ],
+        account: [
+          `축의금은 마음대로요!`,
+          `부담 갖지 마세요~`,
+          `계좌 여기 있어요!`,
+          `마음만 받을게요 진심`,
+          `금액은 중요하지 않아요`,
+          `그냥 와주시는 것만으로 감사해요`,
+          `빈손도 괜찮아요 진짜로`,
+          `마음이 제일 중요해요`,
+          `부담 가지실 필요 없어요`,
+          `와주시는 게 최고 선물이에요`,
+        ],
+        rsvp: [
+          `참석 여부 알려주세요!`,
+          `밥 준비해야 해요!`,
+          `꼭 체크해주세요!`,
+          `오실 거죠? 네?`,
+          `인원 파악 중이에요!`,
+          `참석이요 불참이요?`,
+          `밥값이 달려있어요 ㅋㅋ`,
+          `안 오시면 섭섭해요`,
+          `꼭 오셔야 해요 아시죠?`,
+          `참석 버튼 꾹 눌러주세요!`,
+        ],
+        guestbook: [
+          `한마디 남기고 가세요!`,
+          `축하 글 남겨주세요~`,
+          `방명록 부탁해요!`,
+          `짧아도 괜찮아요!`,
+          `글 안 남기면 섭섭해요`,
+          `뭐라도 써주세요 ㅋㅋ`,
+          `평생 간직할게요!`,
+          `축하 한마디면 충분해요`,
+          `여기다 이름 좀 적어주세요`,
+          `안 쓰고 가시면 안 돼요~`,
+        ],
       };
     }
     if (aiToneStyle === 'reporter') {
       return {
-        gallery: { section: "gallery-section", messages: [
-          `속보! 갤러리에서 인생샷 발견됐습니다!`,
-          `현장에서 전해드립니다, 사진이 예술입니다!`,
-        ]},
-        venue: { section: "venue-section", messages: wedding.aiTransportInfo?.parking 
-          ? [`긴급 속보! 주차 정보 입수했습니다! ${wedding.aiTransportInfo.parking}`]
-          : [`실시간 교통 정보! 지도 확인하세요!`]
-        },
-        account: { section: "account-section", messages: [
-          `단독 입수! 축의금 계좌 정보입니다!`,
-          `현장 취재 결과, 마음이 제일 중요하답니다!`,
-        ]},
-        rsvp: { section: "rsvp-section", messages: [
-          `긴급 요청! 참석 여부 알려주세요!`,
-          `속보입니다! 밥 수량 파악 중입니다!`,
-        ]},
-        guestbook: { section: "guestbook-section", messages: [
-          `현장 중계! 축하 메시지 접수 중입니다!`,
-          `독점 공개! 방명록 섹션입니다!`,
-        ]},
+        gallery: [
+          `속보! 인생샷 발견!`,
+          `긴급! 갤러리 확인 요망!`,
+          `단독! 사진 공개!`,
+          `현장에서 전해드립니다, 사진 예술!`,
+          `속보입니다! 갤러리 오픈!`,
+          `긴급 속보! 여기 볼거리 있어요!`,
+          `단독 입수! 사진 최초 공개!`,
+          `속보! 지금 바로 확인하세요!`,
+          `현장 중계! 갤러리 섹션입니다!`,
+          `뉴스속보! 인생샷 대방출!`,
+        ],
+        venue: [
+          `속보! 주차 정보 궁금하시면 질문!`,
+          `긴급! 교통 정보 접수 중!`,
+          `단독! 오시는 길 안내!`,
+          `속보입니다! 차 가져오시나요?`,
+          `현장 취재! 주차 문의 환영!`,
+          `긴급 속보! 길 정보 업데이트!`,
+          `단독 입수! 교통편 문의하세요!`,
+          `속보! 주차 걱정되시면 저한테!`,
+          `현장 중계! 네비 찍기 전에 확인!`,
+          `뉴스속보! 오시는 방법 안내 가능!`,
+        ],
+        account: [
+          `단독! 계좌 공개!`,
+          `속보! 축의금 안내!`,
+          `긴급! 마음만 받을게요!`,
+          `속보입니다! 부담 NO!`,
+          `현장 취재 결과, 마음이 중요!`,
+          `단독 입수! 금액은 자유!`,
+          `속보! 빈손도 환영!`,
+          `긴급 속보! 와주시는 게 선물!`,
+          `현장 중계! 계좌 정보입니다!`,
+          `뉴스속보! 마음 전달 가능!`,
+        ],
+        rsvp: [
+          `긴급! 참석 확인 요청!`,
+          `속보! 인원 파악 중!`,
+          `단독! RSVP 요청드립니다!`,
+          `속보입니다! 밥 수량 체크 중!`,
+          `현장 취재! 오실 거죠?`,
+          `긴급 속보! 참석 여부 알려주세요!`,
+          `단독 입수! 꼭 오셔야 합니다!`,
+          `속보! 불참이시면 슬퍼요!`,
+          `현장 중계! 참석 버튼 눌러주세요!`,
+          `뉴스속보! 인원 접수 마감 임박!`,
+        ],
+        guestbook: [
+          `현장! 축하 메시지 접수 중!`,
+          `속보! 방명록 오픈!`,
+          `긴급! 축하 글 요청!`,
+          `속보입니다! 한마디 남겨주세요!`,
+          `단독 공개! 방명록 섹션!`,
+          `현장 취재! 글 안 쓰시면 안 돼요!`,
+          `긴급 속보! 짧아도 OK!`,
+          `속보! 평생 간직할게요!`,
+          `현장 중계! 축하 인사 대기 중!`,
+          `뉴스속보! 메시지 접수 시작!`,
+        ],
       };
     }
-    // planner (default for active)
     return {
-      gallery: { section: "gallery-section", messages: [
-        `잠시만요! 사진 한번 구경해보실래요?`,
-        `여기 예쁜 사진들 준비해뒀어요!`,
-      ]},
-      venue: { section: "venue-section", messages: wedding.aiTransportInfo?.parking 
-        ? [`잠깐요! 주차 정보 알려드릴게요! ${wedding.aiTransportInfo.parking}`]
-        : [`여기요! 오시는 길 헤매시면 안 돼요!`]
-      },
-      account: { section: "account-section", messages: [
-        `축의금 계좌 안내해드릴게요!`,
-        `마음만 받을게요, 근데 계좌는 여기요!`,
-      ]},
-      rsvp: { section: "rsvp-section", messages: [
-        `잠시만요! 참석 여부 좀 알려주세요!`,
-        `밥 준비해야 해서요, 꼭 체크해주세요!`,
-      ]},
-      guestbook: { section: "guestbook-section", messages: [
-        `여기요! 축하 한마디 남겨주실래요?`,
-        `짧아도 괜찮아요, 평생 간직할게요!`,
-      ]},
+      gallery: [
+        `잠깐! 사진 구경해요!`,
+        `여기 예쁜 사진들 있어요!`,
+        `갤러리 한번 보세요!`,
+        `사진 안 보면 아쉬워요~`,
+        `잠시만요! 여기 볼거리!`,
+        `어머 사진 진짜 잘 나왔어요`,
+        `구경 좀 하다 가세요!`,
+        `아 맞다 사진 보셨어요?`,
+        `여기요! 인생샷 있어요!`,
+        `사진 한 장만 보고 가세요~`,
+      ],
+      venue: [
+        `잠깐요! 차 가져오시나요?`,
+        `오시는 길 궁금하시면 저한테!`,
+        `주차 정보 필요하시면 물어봐요!`,
+        `여기요! 교통편 안내해드려요!`,
+        `길 헤매시면 안 돼요~`,
+        `네비 찍기 전에 저한테 한번!`,
+        `대중교통이요? 알려드릴게요!`,
+        `오시는 방법 궁금하시면요!`,
+        `주차 걱정되시면 질문 주세요!`,
+        `여기까지 어떻게 오세요?`,
+      ],
+      account: [
+        `축의금 안내드려요!`,
+        `계좌 여기 있어요!`,
+        `마음만 받을게요~`,
+        `부담 갖지 마세요!`,
+        `금액은 진짜 상관없어요`,
+        `와주시는 게 최고 선물!`,
+        `빈손도 완전 환영이에요`,
+        `마음이 제일 중요해요~`,
+        `그냥 와주시는 것만으로 감사!`,
+        `부담 가지실 필요 없어요~`,
+      ],
+      rsvp: [
+        `참석 여부 알려주세요!`,
+        `꼭 체크해주세요!`,
+        `밥 준비해야 해요 ㅋㅋ`,
+        `오실 거죠? 네?`,
+        `안 오시면 섭섭해요~`,
+        `꼭 오셔야 해요 아시죠?`,
+        `인원 파악 중이에요!`,
+        `참석 버튼 꾹 눌러주세요!`,
+        `밥값이 달려있어요~`,
+        `참석이요 불참이요?`,
+      ],
+      guestbook: [
+        `축하 한마디 남겨요!`,
+        `방명록 부탁해요!`,
+        `짧아도 괜찮아요~`,
+        `글 안 남기면 섭섭해요!`,
+        `평생 간직할게요!`,
+        `뭐라도 써주세요 ㅋㅋ`,
+        `여기다 이름 좀 적어주세요`,
+        `축하 글 남겨주시면 힘이 돼요`,
+        `한마디면 충분해요!`,
+        `안 쓰고 가시면 안 돼요~`,
+      ],
     };
-  };
+  }, [aiToneStyle]);
 
   const visitorId = useRef(
     localStorage.getItem(`visitor_${slug}`) || 
@@ -144,35 +263,53 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
   }, []);
 
   useEffect(() => {
-    if (aiMode !== "active") return;
+    if (aiMode !== 'active') return;
 
-    const toastMessages = getToastMessages();
+    const sections = [
+      { key: 'gallery', id: 'gallery-section' },
+      { key: 'venue', id: 'venue-section' },
+      { key: 'account', id: 'account-section' },
+      { key: 'rsvp', id: 'rsvp-section' },
+      { key: 'guestbook', id: 'guestbook-section' },
+    ];
+
+    let lastTriggered = '';
 
     const handleScroll = () => {
-      for (const key of Object.keys(toastMessages)) {
+      if (isOpen) return;
+
+      const now = Date.now();
+      if (now - lastTriggerTime.current < 3000) return;
+
+      const toastMsgs = getToastMessages();
+
+      for (const { key, id } of sections) {
         if (dismissedToasts.has(key)) continue;
-        const config = toastMessages[key];
-        if (!config || config.messages.length === 0) continue;
         
-        const el = document.getElementById(config.section);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top < window.innerHeight * (key === "guestbook" ? 0.8 : 0.6) && rect.bottom > window.innerHeight * 0.2) {
-            if (activeToast !== key) {
-              const randomMsg = config.messages[Math.floor(Math.random() * config.messages.length)];
-              setActiveToastMessage(randomMsg);
-              setActiveToast(key);
-            }
-            return;
+        const el = document.getElementById(id);
+        if (!el) continue;
+
+        const rect = el.getBoundingClientRect();
+        const inView = rect.top < window.innerHeight * 0.5 && rect.bottom > 150;
+
+        if (inView && lastTriggered !== key) {
+          lastTriggered = key;
+          lastTriggerTime.current = now;
+          const msgs = toastMsgs[key as keyof typeof toastMsgs];
+          if (msgs && msgs.length > 0) {
+            const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
+            setActiveToastMessage(randomMsg);
+            setActiveToast(key);
           }
+          return;
         }
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [aiMode, dismissedToasts, activeToast, wedding]);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [aiMode, isOpen, dismissedToasts, getToastMessages]);
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
@@ -197,7 +334,6 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
     }]);
     inputRef.current?.focus();
   };
-
 
   const handleAction = (action: Action) => {
     switch (action.type) {
@@ -328,8 +464,6 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
     setInput('');
     setIsLoading(true);
 
-    
-
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/${slug}/chat`, {
         method: 'POST',
@@ -396,7 +530,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
             initial={{ opacity: 0, y: 20, x: 20 }}
             animate={{ opacity: 1, y: 0, x: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="fixed bottom-20 right-6 z-50 max-w-[260px] bg-white rounded-xl shadow-lg border border-stone-200 p-3"
+            className="fixed bottom-20 right-6 z-50 max-w-[240px] bg-white rounded-xl shadow-lg border border-stone-200 p-3"
           >
             <div className="flex items-start gap-2">
               <div className="w-7 h-7 rounded-full bg-stone-100 flex items-center justify-center text-xs flex-shrink-0 text-stone-500">
