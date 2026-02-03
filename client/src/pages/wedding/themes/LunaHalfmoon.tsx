@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
@@ -101,9 +102,9 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
               <div className="relative overflow-hidden">
                 <div className="aspect-[3/4] overflow-hidden">
                   {wedding.heroMediaType === 'VIDEO' ? (
-                    <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ filter: 'saturate(0.8) brightness(1.03) contrast(0.98)' }} />
+                    <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ filter: 'saturate(0.8) brightness(1.03) contrast(0.98)' }} />
                   ) : (
-                    <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'saturate(0.8) brightness(1.03) contrast(0.98)' }} />
+                    <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full h-full object-cover" style={{ filter: 'saturate(0.8) brightness(1.03) contrast(0.98)' }} />
                   )}
                 </div>
               </div>
@@ -161,7 +162,7 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
                     {item.mediaType === 'VIDEO' ? (
                       <video src={item.mediaUrl} className="w-full h-full object-cover transition-all duration-1000 hover:scale-[1.02]" muted style={{ filter: 'saturate(0.8) brightness(1.03)' }} />
                     ) : (
-                      <img src={item.mediaUrl} alt="" className="w-full h-full object-cover transition-all duration-1000 hover:scale-[1.02]" style={{ filter: 'saturate(0.8) brightness(1.03)' }} />
+                      <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full h-full object-cover transition-all duration-1000 hover:scale-[1.02]" style={{ filter: 'saturate(0.8) brightness(1.03)' }} />
                     )}
                   </div>
                 </motion.div>

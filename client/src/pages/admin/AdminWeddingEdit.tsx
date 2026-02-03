@@ -19,6 +19,8 @@ const THEMES = [
   { id: 'SPRING_BREEZE', name: '봄바람', desc: '손글씨 감성의 핑크 수채화' },
   { id: 'GALLERY_MIRIM_1', name: 'Gallery 美林-1', desc: '따뜻한 세피아 종이 질감' },
   { id: 'GALLERY_MIRIM_2', name: 'Gallery 美林-2', desc: '청량한 다크 필름 톤' },
+  { id: 'LUNA_HALFMOON', name: '루나 하프문', desc: '달빛 아래 로맨틱 무드' },
+  { id: 'PEARL_DRIFT', name: '펄 드리프트', desc: '진주빛 우아한 흐름' },
 ];
 
 const SENIOR_COLORS = [
@@ -60,6 +62,7 @@ export default function AdminWeddingEdit() {
   const [tab, setTab] = useState('notification');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [wedding, setWedding] = useState<any>(null);
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
   const [customMessage, setCustomMessage] = useState('');
@@ -173,29 +176,38 @@ export default function AdminWeddingEdit() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setUploadProgress(0);
     const formData = new FormData();
     formData.append('file', file);
+    const token = localStorage.getItem('token');
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const data = JSON.parse(xhr.responseText);
+            updateField(field, data.url);
+            if (field === 'heroMedia') {
+              updateField('heroMediaType', type === 'video' ? 'VIDEO' : 'IMAGE');
+            }
+            resolve();
+          } else reject(new Error('Upload failed'));
+        };
+        xhr.onerror = () => reject(new Error('Upload failed'));
+        xhr.open('POST', `${import.meta.env.VITE_API_URL}/upload`);
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.send(formData);
       });
-      if (res.ok) {
-        const data = await res.json();
-        updateField(field, data.url);
-        if (field === 'heroMedia') {
-          updateField('heroMediaType', type === 'video' ? 'VIDEO' : 'IMAGE');
-        }
-      }
     } catch (e) {
       alert('업로드 실패');
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
-
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -619,7 +631,7 @@ export default function AdminWeddingEdit() {
               <Input label="YouTube URL" value="" onChange={v => { updateField('heroMedia', v); updateField('heroMediaType', 'VIDEO'); }} placeholder="https://youtube.com/watch?v=..." />
             </div>
           )}
-          {uploading && <p className="text-sm text-stone-500 text-center mt-4">업로드 중...</p>}
+          {uploading && (<div className="mt-4"><div className="flex items-center gap-3"><div className="flex-1 h-2 bg-stone-200 rounded-full overflow-hidden"><div className="h-full bg-stone-800 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div><span className="text-xs text-stone-500 w-10 text-right">{uploadProgress}%</span></div></div>)}
         </Section>
       )}
 
@@ -646,7 +658,7 @@ export default function AdminWeddingEdit() {
               <input type="file" accept="image/*,video/*" multiple onChange={handleGalleryUpload} className="hidden" />
             </label>
           </div>
-          {uploading && <p className="text-sm text-stone-500 text-center">업로드 중...</p>}
+          {uploading && (<div className="mt-4"><div className="flex items-center gap-3"><div className="flex-1 h-2 bg-stone-200 rounded-full overflow-hidden"><div className="h-full bg-stone-800 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div><span className="text-xs text-stone-500 w-10 text-right">{uploadProgress}%</span></div></div>)}
           <p className="text-xs text-stone-400 mt-2">* 이미지와 영상을 함께 업로드할 수 있어요</p>
         </Section>
       )}
@@ -676,7 +688,7 @@ export default function AdminWeddingEdit() {
               <Input label="YouTube URL" value={wedding.loveStoryVideo} onChange={v => updateField('loveStoryVideo', v)} placeholder="https://youtube.com/watch?v=..." />
             </div>
           )}
-          {uploading && <p className="text-sm text-stone-500 text-center mt-4">업로드 중...</p>}
+          {uploading && (<div className="mt-4"><div className="flex items-center gap-3"><div className="flex-1 h-2 bg-stone-200 rounded-full overflow-hidden"><div className="h-full bg-stone-800 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div><span className="text-xs text-stone-500 w-10 text-right">{uploadProgress}%</span></div></div>)}
         </Section>
       )}
 
@@ -726,7 +738,7 @@ export default function AdminWeddingEdit() {
             <span className="text-stone-600">자동 재생</span>
           </label>
           <p className="text-xs text-stone-400 mt-2">* 모바일에서는 사용자 상호작용 후 자동재생이 가능해요</p>
-          {uploading && <p className="text-sm text-stone-500 text-center mt-4">업로드 중...</p>}
+          {uploading && (<div className="mt-4"><div className="flex items-center gap-3"><div className="flex-1 h-2 bg-stone-200 rounded-full overflow-hidden"><div className="h-full bg-stone-800 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div><span className="text-xs text-stone-500 w-10 text-right">{uploadProgress}%</span></div></div>)}
         </Section>
       )}
 

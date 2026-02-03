@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
@@ -85,9 +86,9 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
             <div className="relative">
               <div className="aspect-[3/4] overflow-hidden">
                 {wedding.heroMediaType === 'VIDEO' ? (
-                  <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ filter: 'saturate(0.7) contrast(1.1) brightness(0.95)' }} />
+                  <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ filter: 'saturate(0.7) contrast(1.1) brightness(0.95)' }} />
                 ) : (
-                  <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'saturate(0.7) contrast(1.1) brightness(0.95)' }} />
+                  <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full h-full object-cover" style={{ filter: 'saturate(0.7) contrast(1.1) brightness(0.95)' }} />
                 )}
               </div>
               <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 60%, rgba(5, 5, 5, 0.8) 100%)' }} />
@@ -154,7 +155,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
                     {item.mediaType === 'VIDEO' ? (
                       <video src={item.mediaUrl} className="w-full object-cover transition-all duration-1000 hover:scale-[1.01]" muted style={{ filter: 'saturate(0.7) contrast(1.1) brightness(0.95)' }} />
                     ) : (
-                      <img src={item.mediaUrl} alt="" className="w-full object-cover transition-all duration-1000 hover:scale-[1.01]" style={{ filter: 'saturate(0.7) contrast(1.1) brightness(0.95)' }} />
+                      <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full object-cover transition-all duration-1000 hover:scale-[1.01]" style={{ filter: 'saturate(0.7) contrast(1.1) brightness(0.95)' }} />
                     )}
                   </div>
                 </motion.div>
