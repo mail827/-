@@ -557,7 +557,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 right-4 z-50 w-[calc(100vw-2rem)] max-w-[320px] h-[480px] bg-white rounded-xl shadow-xl overflow-hidden flex flex-col border border-stone-200"
+            className="fixed bottom-6 right-4 sm:right-6 z-50 w-[min(320px,calc(100vw-2rem))] h-[480px] bg-white rounded-xl shadow-xl overflow-hidden flex flex-col border border-stone-200"
             style={{ maxHeight: 'calc(100vh - 100px)', maxWidth: 'calc(100vw - 48px)' }}
           >
             <div className="px-4 py-3 border-b border-stone-100 flex items-center justify-between bg-white">
