@@ -557,7 +557,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 right-6 z-50 w-[320px] h-[480px] bg-white rounded-xl shadow-xl overflow-hidden flex flex-col border border-stone-200"
+            className="fixed bottom-6 right-4 z-50 w-[calc(100vw-2rem)] max-w-[320px] h-[480px] bg-white rounded-xl shadow-xl overflow-hidden flex flex-col border border-stone-200"
             style={{ maxHeight: 'calc(100vh - 100px)', maxWidth: 'calc(100vw - 48px)' }}
           >
             <div className="px-4 py-3 border-b border-stone-100 flex items-center justify-between bg-white">
@@ -661,7 +661,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
                   </button>
                 ))}
               </div>
-              <div className="px-3 pb-3 flex gap-2">
+              <div className="px-3 pb-3 flex gap-2 items-center overflow-visible">
                 <input
                   ref={inputRef}
                   type="text"
@@ -674,9 +674,9 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim() || isLoading}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white disabled:opacity-40 transition-opacity bg-stone-800"
+                  className="w-10 h-10 flex-shrink-0 rounded-lg flex items-center justify-center text-white disabled:opacity-40 transition-opacity bg-stone-800"
                 >
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="w-4 h-4" />
                 </button>
               </div>
             </div>
