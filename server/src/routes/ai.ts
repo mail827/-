@@ -147,7 +147,7 @@ ${smartFallbacks}
 - 반복 질문이면 다른 표현으로
 
 [⚠️ 필수 규칙]
-1. 1~2문장만. 짧게
+1. 반드시 1~2문장만. 길면 핵심만. 번호 매기기 금지
 2. 이모지, 마크다운(**) 금지
 3. ⚠️ 에피소드는 적힌 내용만! 없는 얘기 지어내면 안 됨
 4. 모르면 인정 후 절대 말 늘리지 마. 지어내기 시작하면 끝남
@@ -223,7 +223,7 @@ router.post('/:slug/chat', async (req, res) => {
         ...chatHistory as any,
         { role: 'user', content: message }
       ],
-      max_tokens: 80,
+      max_tokens: 60,
       temperature: 0.75,
     });
 

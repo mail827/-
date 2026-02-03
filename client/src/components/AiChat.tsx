@@ -557,8 +557,8 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 right-4 sm:right-6 z-50 w-[min(320px,calc(100vw-2rem))] h-[480px] bg-white rounded-xl shadow-xl overflow-hidden flex flex-col border border-stone-200"
-            style={{ maxHeight: 'calc(100vh - 100px)', maxWidth: 'calc(100vw - 48px)' }}
+            className="fixed bottom-3 left-3 right-3 sm:left-auto sm:bottom-6 sm:right-6 z-50 sm:w-[320px] h-[65vh] sm:h-[480px] bg-white rounded-xl shadow-xl overflow-hidden flex flex-col border border-stone-200"
+            
           >
             <div className="px-4 py-3 border-b border-stone-100 flex items-center justify-between bg-white">
               <div className="flex items-center gap-2">
@@ -661,7 +661,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
                   </button>
                 ))}
               </div>
-              <div className="px-3 pb-3 flex gap-2 items-center overflow-visible">
+              <div className="px-3 pb-4 flex gap-2 items-center">
                 <input
                   ref={inputRef}
                   type="text"
