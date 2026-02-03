@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Volume2, VolumeX, MapPin, Calendar, Clock } from 'lucide-react';
@@ -91,9 +92,9 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
           {wedding.heroMedia && (
             <div className="my-8 rounded-2xl overflow-hidden shadow-lg">
               {wedding.heroMediaType === 'VIDEO' ? (
-                <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full aspect-[4/5] object-cover" />
+                <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full aspect-[4/5] object-cover" />
               ) : (
-                <img src={wedding.heroMedia} alt="" className="w-full aspect-[4/5] object-cover" />
+                <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full aspect-[4/5] object-cover" />
               )}
             </div>
           )}
@@ -182,7 +183,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
                 {item.mediaType === 'VIDEO' ? (
                   <video src={item.mediaUrl} className="w-full h-full object-cover" />
                 ) : (
-                  <img src={item.mediaUrl} alt="" className="w-full h-full object-cover" />
+                  <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full h-full object-cover" />
                 )}
               </div>
             ))}

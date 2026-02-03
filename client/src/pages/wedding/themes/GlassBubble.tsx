@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -139,9 +140,9 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
                 border: '1px solid rgba(255,255,255,0.6)'
               }}>
                 {wedding.heroMediaType === 'VIDEO' ? (
-                  <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full aspect-[3/4] object-cover" />
+                  <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full aspect-[3/4] object-cover" />
                 ) : (
-                  <img src={wedding.heroMedia} alt="" className="w-full aspect-[3/4] object-cover" />
+                  <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full aspect-[3/4] object-cover" />
                 )}
               </div>
             </div>
@@ -294,7 +295,7 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
                   {item.mediaType === 'VIDEO' ? (
                     <video src={item.mediaUrl} className="w-full h-full object-cover" />
                   ) : (
-                    <img src={item.mediaUrl} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                    <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                   )}
                 </motion.div>
               ))}

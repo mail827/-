@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
@@ -76,7 +77,7 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
             <div className="relative mb-10">
               <div className="absolute -inset-2 border border-[#C9A96E]/20" />
               <div className="aspect-[3/4] overflow-hidden">
-                {wedding.heroMediaType === 'VIDEO' ? <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" /> : <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" />}
+                {wedding.heroMediaType === 'VIDEO' ? <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full h-full object-cover" /> : <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full h-full object-cover" />}
               </div>
             </div>
           )}
@@ -152,7 +153,7 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
             <div className="grid grid-cols-3 gap-1">
               {wedding.galleries.slice(0, 9).map((item, index) => (
                 <div key={item.id} onClick={() => setGalleryIndex(index)} className="aspect-square cursor-pointer overflow-hidden bg-[#1a1a1a] relative group">
-                  {item.mediaType === 'VIDEO' ? <video src={item.mediaUrl} className="w-full h-full object-cover" /> : <img src={item.mediaUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />}
+                  {item.mediaType === 'VIDEO' ? <video src={item.mediaUrl} className="w-full h-full object-cover" /> : <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />}
                   <div className="absolute inset-0 border border-[#C9A96E]/0 group-hover:border-[#C9A96E]/30 transition-all" />
                 </div>
               ))}

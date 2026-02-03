@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
@@ -78,7 +79,7 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
             <div className="relative mb-10">
               <div className="absolute -inset-3 border border-[#5C6B54]/10 rounded-lg" />
               <div className="aspect-[4/5] rounded overflow-hidden">
-                {wedding.heroMediaType === 'VIDEO' ? <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" /> : <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" />}
+                {wedding.heroMediaType === 'VIDEO' ? <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full h-full object-cover" /> : <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full h-full object-cover" />}
               </div>
             </div>
           )}
@@ -152,7 +153,7 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
             <div className="grid grid-cols-3 gap-2">
               {wedding.galleries.slice(0, 9).map((item, index) => (
                 <div key={item.id} onClick={() => setGalleryIndex(index)} className="aspect-square rounded overflow-hidden cursor-pointer bg-[#F0EDE8]">
-                  {item.mediaType === 'VIDEO' ? <video src={item.mediaUrl} className="w-full h-full object-cover" /> : <img src={item.mediaUrl} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />}
+                  {item.mediaType === 'VIDEO' ? <video src={item.mediaUrl} className="w-full h-full object-cover" /> : <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />}
                 </div>
               ))}
             </div>

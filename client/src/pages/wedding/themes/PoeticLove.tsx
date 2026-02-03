@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
@@ -91,9 +92,9 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
             >
               <div className="aspect-[3/4] max-w-[280px] mx-auto overflow-hidden rounded-sm shadow-lg">
                 {wedding.heroMediaType === 'VIDEO' ? (
-                  <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                  <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full h-full object-cover" />
                 ) : (
-                  <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" />
+                  <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full h-full object-cover" />
                 )}
               </div>
             </motion.div>
@@ -277,7 +278,7 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
                     {item.mediaType === 'VIDEO' ? (
                       <video src={item.mediaUrl} className="w-full h-full object-cover" />
                     ) : (
-                      <img src={item.mediaUrl} alt="" className="w-full h-full object-cover hover:scale-102 transition-transform duration-700" />
+                      <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full h-full object-cover hover:scale-102 transition-transform duration-700" />
                     )}
                   </motion.div>
                 ))}

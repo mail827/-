@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
@@ -86,9 +87,9 @@ export default function GalleryMirim1({ wedding, guestbooks, onRsvpSubmit, onGue
               <div className="relative p-3" style={{ background: 'linear-gradient(145deg, #FFFEF9 0%, #F8F4EC 100%)', boxShadow: '0 8px 32px rgba(139, 115, 85, 0.12), 0 2px 8px rgba(139, 115, 85, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
                 <div className="aspect-[3/4] overflow-hidden relative">
                   {wedding.heroMediaType === 'VIDEO' ? (
-                    <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ filter: 'sepia(0.08) contrast(0.98) brightness(1.01)' }} />
+                    <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ filter: 'sepia(0.08) contrast(0.98) brightness(1.01)' }} />
                   ) : (
-                    <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'sepia(0.08) contrast(0.98) brightness(1.01)' }} />
+                    <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full h-full object-cover" style={{ filter: 'sepia(0.08) contrast(0.98) brightness(1.01)' }} />
                   )}
                   <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: 'inset 0 0 60px rgba(139, 115, 85, 0.08)' }} />
                 </div>
@@ -149,7 +150,7 @@ export default function GalleryMirim1({ wedding, guestbooks, onRsvpSubmit, onGue
                   <motion.div key={item.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6 }} onClick={() => setGalleryIndex(i)} className="cursor-pointer mx-auto" style={{ maxWidth: isWide ? '100%' : '75%', marginLeft: i % 2 === 0 ? '0' : 'auto', marginRight: i % 2 === 0 ? 'auto' : '0' }}>
                     <div className="relative p-2" style={{ background: 'linear-gradient(145deg, #FFFEF9 0%, #F8F4EC 100%)', boxShadow: '0 6px 20px rgba(139, 115, 85, 0.12), 0 2px 6px rgba(139, 115, 85, 0.08)', transform: `rotate(${rotations[i % 6]}deg)` }}>
                       <div className={`overflow-hidden ${isWide ? 'aspect-[4/3]' : 'aspect-[3/4]'}`}>
-                        {item.mediaType === 'VIDEO' ? <video src={item.mediaUrl} className="w-full h-full object-cover" muted style={{ filter: 'sepia(0.06) contrast(0.97) brightness(1.01)' }} /> : <img src={item.mediaUrl} alt="" className="w-full h-full object-cover" style={{ filter: 'sepia(0.06) contrast(0.97) brightness(1.01)' }} />}
+                        {item.mediaType === 'VIDEO' ? <video src={item.mediaUrl} className="w-full h-full object-cover" muted style={{ filter: 'sepia(0.06) contrast(0.97) brightness(1.01)' }} /> : <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full h-full object-cover" style={{ filter: 'sepia(0.06) contrast(0.97) brightness(1.01)' }} />}
                       </div>
                       <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: 'inset 0 0 40px rgba(139, 115, 85, 0.05)' }} />
                       <div className="mt-2 text-right pr-1"><p className="text-[0.5rem] tracking-[0.1em]" style={{ ...serifFont, color: 'rgba(139, 115, 85, 0.35)' }}>NO. {String(i + 1).padStart(2, '0')}</p></div>

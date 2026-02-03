@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
@@ -77,7 +78,7 @@ export default function ForestGarden({ wedding, guestbooks, onRsvpSubmit, onGues
               <div className="absolute -inset-4 border border-[#3D5A3D]/10 rounded-sm" />
               <div className="absolute -inset-2 border border-[#3D5A3D]/5 rounded-sm" />
               <div className="aspect-[4/5] overflow-hidden rounded-sm shadow-lg">
-                {wedding.heroMediaType === 'VIDEO' ? <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" /> : <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" />}
+                {wedding.heroMediaType === 'VIDEO' ? <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full h-full object-cover" /> : <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full h-full object-cover" />}
               </div>
             </div>
           )}
@@ -151,7 +152,7 @@ export default function ForestGarden({ wedding, guestbooks, onRsvpSubmit, onGues
             <div className="grid grid-cols-3 gap-2">
               {wedding.galleries.slice(0, 9).map((item, index) => (
                 <div key={item.id} onClick={() => setGalleryIndex(index)} className="aspect-square rounded overflow-hidden cursor-pointer bg-[#E8EBE4]">
-                  {item.mediaType === 'VIDEO' ? <video src={item.mediaUrl} className="w-full h-full object-cover" /> : <img src={item.mediaUrl} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />}
+                  {item.mediaType === 'VIDEO' ? <video src={item.mediaUrl} className="w-full h-full object-cover" /> : <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />}
                 </div>
               ))}
             </div>

@@ -1,4 +1,3 @@
-import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
@@ -80,7 +79,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
                 {wedding.heroMediaType === 'VIDEO' ? (
                   <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" />
                 ) : (
-                  <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full h-full object-cover" />
+                  <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" />
                 )}
               </div>
             </div>
@@ -157,7 +156,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
                     <div className="grid grid-cols-3 gap-1">
                       {mainImages.map((img, i) => (
                         <div key={i} onClick={() => setGalleryIndex(i)} className="aspect-square cursor-pointer overflow-hidden">
-                          <img src={galleryThumbUrl(img)} alt="" loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                          <img src={img} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                         </div>
                       ))}
                     </div>
@@ -166,7 +165,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
                     <div className={`grid gap-1 ${mainImages.length > 0 ? 'mt-1' : ''} ${lastRowImages.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                       {lastRowImages.map((img, i) => (
                         <div key={mainImages.length + i} onClick={() => setGalleryIndex(mainImages.length + i)} className="aspect-square cursor-pointer overflow-hidden">
-                          <img src={galleryThumbUrl(img)} alt="" loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                          <img src={img} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                         </div>
                       ))}
                     </div>

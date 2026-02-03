@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
@@ -86,9 +87,9 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
               <div className="relative" style={{ padding: '8px 8px 28px 8px', background: '#0D0F0E', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
                 <div className="aspect-[3/4] overflow-hidden relative">
                   {wedding.heroMediaType === 'VIDEO' ? (
-                    <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ filter: 'contrast(1.05) brightness(0.95) saturate(0.9)' }} />
+                    <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ filter: 'contrast(1.05) brightness(0.95) saturate(0.9)' }} />
                   ) : (
-                    <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'contrast(1.05) brightness(0.95) saturate(0.9)' }} />
+                    <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full h-full object-cover" style={{ filter: 'contrast(1.05) brightness(0.95) saturate(0.9)' }} />
                   )}
                   <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.15) 100%)' }} />
                 </div>
@@ -147,7 +148,7 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
                 <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08, duration: 0.5 }} onClick={() => setGalleryIndex(i)} className={`cursor-pointer ${i === 0 || i === 5 ? 'col-span-2' : ''}`}>
                   <div style={{ padding: '6px 6px 20px 6px', background: '#0D0F0E', boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)' }}>
                     <div className={`overflow-hidden ${i === 0 || i === 5 ? 'aspect-[16/9]' : 'aspect-square'}`}>
-                      {item.mediaType === 'VIDEO' ? <video src={item.mediaUrl} className="w-full h-full object-cover" muted style={{ filter: 'contrast(1.05) brightness(0.95) saturate(0.9)' }} /> : <img src={item.mediaUrl} alt="" className="w-full h-full object-cover" style={{ filter: 'contrast(1.05) brightness(0.95) saturate(0.9)' }} />}
+                      {item.mediaType === 'VIDEO' ? <video src={item.mediaUrl} className="w-full h-full object-cover" muted style={{ filter: 'contrast(1.05) brightness(0.95) saturate(0.9)' }} /> : <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full h-full object-cover" style={{ filter: 'contrast(1.05) brightness(0.95) saturate(0.9)' }} />}
                     </div>
                     <div className="mt-1.5 flex justify-between px-1">
                       <p className="text-[0.4rem]" style={{ color: 'rgba(168, 191, 176, 0.4)' }}>◀ {String(i + 1).padStart(2, '0')} ▶</p>

@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -106,9 +107,9 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
               <div className="absolute -inset-1.5 rounded-sm" style={{ border: '1px solid #D4AF37', opacity: 0.15 }} />
               <div className="relative aspect-[3/4] overflow-hidden" style={{ boxShadow: '0 8px 32px rgba(139,115,70,0.12)' }}>
                 {wedding.heroMediaType === 'VIDEO' ? (
-                  <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                  <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full h-full object-cover" />
                 ) : (
-                  <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" />
+                  <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full h-full object-cover" />
                 )}
               </div>
             </div>
@@ -262,7 +263,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
                   {item.mediaType === 'VIDEO' ? (
                     <video src={item.mediaUrl} className="w-full h-full object-cover" />
                   ) : (
-                    <img src={item.mediaUrl} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                    <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
                   )}
                 </motion.div>
               ))}

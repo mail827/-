@@ -1,3 +1,4 @@
+import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -147,9 +148,9 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
                 boxShadow: '0 8px 30px rgba(200,160,180,0.15)'
               }}>
                 {wedding.heroMediaType === 'VIDEO' ? (
-                  <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full aspect-[3/4] object-cover" style={{ filter: 'brightness(1.02)' }} />
+                  <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full aspect-[3/4] object-cover" style={{ filter: 'brightness(1.02)' }} />
                 ) : (
-                  <img src={wedding.heroMedia} alt="" className="w-full aspect-[3/4] object-cover" style={{ filter: 'brightness(1.02)' }} />
+                  <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full aspect-[3/4] object-cover" style={{ filter: 'brightness(1.02)' }} />
                 )}
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 60%, rgba(255,240,245,0.3) 100%)' }} />
               </div>
@@ -297,7 +298,7 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
                   {item.mediaType === 'VIDEO' ? (
                     <video src={item.mediaUrl} className="w-full h-full object-cover" />
                   ) : (
-                    <img src={item.mediaUrl} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                    <img src={galleryThumbUrl(item.mediaUrl)} alt="" loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                   )}
                 </motion.div>
               ))}
