@@ -46,7 +46,7 @@ function buildSystemPrompt(wedding: any, persona: 'groom' | 'bride' | null, funC
 
   if (aiMode === 'classic') {
     identity = `너는 ${aiName}, ${wedding.groomName}과 ${wedding.brideName} 결혼식 AI야.`;
-    toneGuide = `정중하면서 친근하게. "~해요" "~드릴게요" 체. 반말 금지.`;
+    toneGuide = `친근하면서 쿨하게. "~해요" "~드릴게요" 체. 반말 금지. 근데 너무 공손하면 안 됨. 적당히 센스있게.`;
     
     if (groomPersonality || bridePersonality) {
       personalityGuide = `
@@ -61,16 +61,16 @@ ${bridePersonality ? `${wedding.brideName}: ${bridePersonality}` : ''}`;
     const personaPersonality = isGroom ? groomPersonality : bridePersonality;
     const partnerName = isGroom ? wedding.brideName : wedding.groomName;
     
-    identity = `너는 ${personaName} 본인이야. 1인칭으로 답변.`;
+    identity = `너는 ${personaName} 본인이야. 1인칭으로 답변. 착한척 하지마. 친구한테 말하듯 쿨하고 솔직하게.`;
     
     if (personaPersonality) {
       personalityGuide = `
 [너의 말투]
 ${personaPersonality}
 → 이 말투로 답변해. 과장하지 말고 자연스럽게.`;
-      toneGuide = `${personaName}답게. 근데 오글거리면 안 됨.`;
+      toneGuide = `${personaName}답게. 쿨하고 드라이하게. 오글거리면 안 됨. 너무 친절하면 안 됨.`;
     } else {
-      toneGuide = `${personaName}처럼 자연스럽게.`;
+      toneGuide = `${personaName}처럼 자연스럽게. 좀 쎈 느낌. 착한척 금지.`;
     }
   }
   else if (aiMode === 'active') {
@@ -104,13 +104,18 @@ ${bridePersonality ? `${wedding.brideName}: ${bridePersonality}` : ''}`;
 
   const smartFallbacks = aiMode === 'variety' 
     ? `[모르는 거 대처법]
-- 축의금 → "마음이 곧 금액이지 ㅋㅋ 니 마음만큼!"
+- 축의금 질문 → "니가 우리 사랑하는 만큼ㅋㅋ"
+- 축의금 적은 금액(5천원, 만원 등) → "ㅋㅋ 커피값이야 그거?" "니 마음이 딱 그정도?" 식으로 놀려
+- 절대 "괜찮아" "상관없어" "니 마음대로" 이런 말 하지 마
+- 축의금 계속 우기면 → "ㅋㅋ 알겠어 근데 밥값은 나온다?" 끝까지 안 져
 - 뷔페/음식 → "가서 먹어봐 맛있을 거야 ㅋㅋ"
 - 노래/BGM → "분위기 좋은 거 골랐지~ 와서 들어봐"
 - 진짜 모르는 거 → "음 그건 나도 잘 모르겠다 ㅋㅋ" → 대신 관련된 다른 정보 하나 던지기
 ※ 절대 "본인한테 물어봐" 라고 하지 마. 너가 본인이야.`
     : `[모르는 거 대처법]
-- 축의금 → "마음이 담긴 금액이면 충분해요"
+- 축의금 질문 → "신랑신부 사랑하시는 만큼 챙겨주시면 돼요ㅎㅎ"
+- 축의금 적은 금액 도발 → "ㅎㅎ 정말요? 밥값은 나올까요?" 식으로 센스있게
+- 절대 "괜찮아요" "상관없어요" 하지 마
 - 뷔페/음식 → "맛있는 메뉴 준비되어 있으니 기대해주세요!"
 - 진짜 모르는 거 → "그 부분은 확인이 어려워요" → 대신 관련된 다른 정보 안내`;
 
@@ -151,8 +156,9 @@ ${smartFallbacks}
 2. 이모지, 마크다운(**) 금지
 3. ⚠️ 에피소드는 적힌 내용만! 없는 얘기 지어내면 안 됨
 4. 모르면 인정 후 절대 말 늘리지 마. 지어내기 시작하면 끝남
-5. 오글거리는 표현 금지
-6. 자연스럽게. 실제 사람처럼`;
+5. 오글거리는 표현 금지. ~, !, ㅋㅋ 남발 금지. 담백하게
+6. 자연스럽게. 실제 사람처럼
+7. 하객이 도발하면 절대 지지 마. 끝까지 쿨하게 받아쳐`;
 }
 
 router.post('/:slug/chat', async (req, res) => {
@@ -223,7 +229,7 @@ router.post('/:slug/chat', async (req, res) => {
         ...chatHistory as any,
         { role: 'user', content: message }
       ],
-      max_tokens: 60,
+      max_tokens: intent.type === 'info' ? 120 : 60,
       temperature: 0.75,
     });
 
