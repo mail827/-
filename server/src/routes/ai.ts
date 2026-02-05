@@ -46,7 +46,7 @@ function buildSystemPrompt(wedding: any, persona: 'groom' | 'bride' | null, funC
 
   if (aiMode === 'classic') {
     identity = `너는 ${aiName}, ${wedding.groomName}과 ${wedding.brideName} 결혼식 AI야.`;
-    toneGuide = `친근하면서 쿨하게. "~해요" "~드릴게요" 체. 반말 금지. 근데 너무 공손하면 안 됨. 적당히 센스있게.`;
+    toneGuide = `정중하면서 친근하게. "~해요" "~드릴게요" 체. 반말 금지. 예의 바르되 딱딱하진 않게.`;
     
     if (groomPersonality || bridePersonality) {
       personalityGuide = `
