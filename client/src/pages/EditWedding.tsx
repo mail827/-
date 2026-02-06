@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Eye, X, Plus, Music, Film, Image, Sparkles, Loader2 } from 'lucide-react';
 import AiWritingAssistant from '../components/AiWritingAssistant';
+import PairManager from '../components/admin/PairManager';
 
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'wedding_guide';
@@ -426,6 +427,7 @@ export default function EditWedding() {
     { id: 'music', name: '배경음악' },
     { id: 'ai', name: '🤖 AI', highlight: wedding.aiEnabled },
     { id: 'settings', name: '설정' },
+    { id: 'pair', name: '함께 수정' },
     { id: 'rsvp', name: 'RSVP' },
   ];
 
@@ -1354,6 +1356,18 @@ export default function EditWedding() {
               </>
             )}
           </>
+        )}
+
+        {tab === 'pair' && (
+          <Section title="함께 수정하기">
+            <div className="mb-4">
+              <p className="text-sm text-stone-500 leading-relaxed">
+                예비 배우자를 초대하면 함께 청첩장을 수정할 수 있어요.<br />
+                초대 코드를 생성해서 카톡이나 문자로 공유해주세요.
+              </p>
+            </div>
+            <PairManager weddingId={id!} />
+          </Section>
         )}
 
         {tab === 'rsvp' && (

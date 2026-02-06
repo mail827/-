@@ -12,6 +12,7 @@ export interface Admin {
 export interface Wedding {
   id: string;
   slug: string;
+  pairUserId?: string;
   theme: Theme;
   themeColor?: string;
   isPublished: boolean;
@@ -203,3 +204,24 @@ export const THEME_COLORS: Record<Theme, { primary: string; secondary: string; a
   LUNA_HALFMOON: { primary: '#E8EEF2', secondary: '#FAFCFD', accent: '#C5D4DE', bg: '#FFFFFF' },
   PEARL_DRIFT: { primary: '#F0F4F8', secondary: '#0A0A0A', accent: '#E3EBF3', bg: '#050505' }
 };
+
+
+export interface PairInvite {
+  code: string;
+  expiresAt: string;
+}
+
+export interface PairStatus {
+  paired: boolean;
+  pairUser: { id: string; name: string; email: string; profileImage?: string } | null;
+  isOwner: boolean;
+  pendingInvite: PairInvite | null;
+}
+
+export interface PairInviteInfo {
+  groomName: string;
+  brideName: string;
+  weddingDate: string;
+  venue: string;
+  expiresAt: string;
+}

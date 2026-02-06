@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Save, Eye, X, Plus, Music, Film, Image, Sparkles, Send, Bell, Calendar, MessageSquare, Loader2 } from 'lucide-react';
 import { api } from '../../utils/api';
 import AiWritingAssistant from '../../components/AiWritingAssistant';
+import PairManager from '../../components/admin/PairManager';
 import type { Wedding } from '../../types';
 
 const THEMES = [
@@ -302,6 +303,7 @@ export default function AdminWeddingEdit() {
     { id: 'music', name: '배경음악' },
     { id: 'ai', name: '🤖 AI' },
     { id: 'settings', name: '설정' },
+    { id: 'pair', name: '👫 함께 수정' },
     { id: 'rsvp', name: 'RSVP' },
   ];
 
@@ -1008,6 +1010,30 @@ export default function AdminWeddingEdit() {
             </div>
             <p className="text-xs text-stone-400 mt-2">* 영문, 숫자, 하이픈만 사용 가능해요</p>
           </Section>
+        </div>
+      )}
+
+      
+      {tab === 'pair' && (
+        <div className="space-y-6">
+          <PairManager weddingId={wedding.id} />
+          <div className="bg-white border border-stone-200 rounded-2xl p-6">
+            <h2 className="font-semibold text-lg text-stone-800 mb-4">공동 편집 안내</h2>
+            <div className="space-y-3 text-[14px] text-stone-500 leading-relaxed">
+              <p>초대 코드를 생성하고 예비 배우자에게 공유하면, 같은 청첩장을 함께 수정할 수 있어요.</p>
+              <div className="bg-stone-50 rounded-xl p-4 space-y-2">
+                <p className="text-stone-700 font-medium">공동 편집자 권한</p>
+                <p>• 청첩장 내용 수정, 갤러리 추가/삭제</p>
+                <p>• RSVP, 방명록 확인</p>
+                <p>• AI 설정 변경</p>
+              </div>
+              <div className="bg-amber-50 rounded-xl p-4 space-y-2">
+                <p className="text-amber-700 font-medium">소유자만 가능</p>
+                <p>• 청첩장 삭제</p>
+                <p>• 공동 편집자 연결 해제</p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

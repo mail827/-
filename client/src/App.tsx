@@ -38,6 +38,7 @@ import Notice from './pages/info/Notice';
 import RefundPolicy from './pages/info/RefundPolicy';
 import PaymentSuccess from './pages/PaymentSuccess';
 import AdminLogin from './pages/AdminLogin';
+import PairAccept from './pages/PairAccept';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token');
@@ -90,6 +91,7 @@ export default function App() {
       <Route path="/faq" element={<FAQ />} />
       <Route path="/notice" element={<Notice />} />
       <Route path="/refund-policy" element={<RefundPolicy />} />
+      <Route path="/pair/accept" element={<PairAccept />} />
       
       <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
         <Route index element={<AdminDashboard />} />

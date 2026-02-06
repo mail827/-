@@ -25,6 +25,7 @@ model User {
   orders        Order[]
   reviews       Review[]
   weddings      Wedding[]
+  pairWeddings  Wedding[] @relation("PairWeddings")
 
   @@unique([provider, providerId])
 }
@@ -75,6 +76,7 @@ model ChatLog {
 model Wedding {
   id                       String            @id @default(cuid())
   userId                   String
+  pairUserId               String?
   orderId                  String?           @unique
   slug                     String            @unique
   theme                    Theme             @default(ROMANTIC_CLASSIC)
@@ -174,6 +176,8 @@ model Wedding {
   rsvps                    Rsvp[]
   order                    Order?            @relation(fields: [orderId], references: [id])
   user                     User              @relation(fields: [userId], references: [id])
+  pairUser                 User?             @relation("PairWeddings", fields: [pairUserId], references: [id])
+  pairInvites              PairInvite[]
   snapshots                WeddingSnapshot[]
 }
 
@@ -393,4 +397,23 @@ model Coupon {
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+}
+
+model PairInvite {
+  id         String           @id @default(cuid())
+  weddingId  String
+  code       String           @unique
+  invitedBy  String
+  status     PairInviteStatus @default(PENDING)
+  expiresAt  DateTime
+  acceptedBy String?
+  createdAt  DateTime         @default(now())
+  wedding    Wedding          @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+}
+
+enum PairInviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELLED
 }

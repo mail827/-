@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift } from 'lucide-react';
+import { Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 
 interface User {
@@ -19,6 +19,7 @@ interface Wedding {
   weddingDate: string;
   isPublished: boolean;
   theme: string;
+  pairUserId?: string;
 }
 
 interface Order {
@@ -357,6 +358,12 @@ export default function Dashboard() {
                       }`}>
                         {wedding.isPublished ? '공개' : '비공개'}
                       </span>
+                      {wedding.pairUserId && (
+                        <span className="px-3 py-1 text-xs rounded-full bg-violet-50 text-violet-600 border border-violet-200 flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          함께 수정 중
+                        </span>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       <button

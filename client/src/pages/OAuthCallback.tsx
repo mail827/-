@@ -13,9 +13,13 @@ export default function OAuthCallback() {
       localStorage.setItem('token', token);
       
       const redirectUrl = localStorage.getItem('redirectAfterLogin');
+      const pairCode = sessionStorage.getItem('pairReturnCode');
       const pendingGiftCode = localStorage.getItem('pendingGiftCode');
       
-      if (pendingGiftCode) {
+      if (pairCode) {
+        sessionStorage.removeItem('pairReturnCode');
+        navigate(`/pair/accept?code=${pairCode}`);
+      } else if (pendingGiftCode) {
         navigate('/gift/redeem');
       } else if (redirectUrl) {
         localStorage.removeItem('redirectAfterLogin');

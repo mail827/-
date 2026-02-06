@@ -5,46 +5,57 @@ import { authMiddleware } from '../middleware/auth.js';
 const router = Router();
 const prisma = new PrismaClient();
 
+const canAccess = (user: any, wedding: any) =>
+  user.role === 'ADMIN' || wedding.userId === user.id || wedding.pairUserId === user.id;
+
+const isOwner = (user: any, wedding: any) =>
+  user.role === 'ADMIN' || wedding.userId === user.id;
+
 router.get('/', authMiddleware, async (req, res) => {
   const user = (req as any).user;
-  
-  const where = user.role === 'ADMIN' ? {} : { userId: user.id };
-  
+
+  const where =
+    user.role === 'ADMIN'
+      ? {}
+      : { OR: [{ userId: user.id }, { pairUserId: user.id }] };
+
   const weddings = await prisma.wedding.findMany({
     where,
     include: {
       _count: { select: { rsvps: true, guestbooks: true, galleries: true } },
+      pairUser: { select: { id: true, name: true, email: true } },
+      user: { select: { id: true, name: true, email: true } },
     },
     orderBy: { createdAt: 'desc' },
   });
-  
+
   res.json(weddings);
 });
 
 router.get('/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;
   const user = (req as any).user;
-  
+
   const wedding = await prisma.wedding.findUnique({
     where: { id },
     include: { galleries: { orderBy: { order: 'asc' } } },
   });
-  
+
   if (!wedding) return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
-  if (user.role !== 'ADMIN' && wedding.userId !== user.id) {
+  if (!canAccess(user, wedding)) {
     return res.status(403).json({ error: '접근 권한이 없습니다' });
   }
-  
+
   res.json(wedding);
 });
 
 router.post('/', authMiddleware, async (req, res) => {
   const user = (req as any).user;
   const { orderId: orderIdFromClient, giftId, ...data } = req.body;
-  
+
   try {
     const slug = `${data.groomName}-${data.brideName}-${Date.now().toString(36)}`.toLowerCase();
-    
+
     if (giftId) {
       const gift = await prisma.gift.findFirst({
         where: {
@@ -52,13 +63,13 @@ router.post('/', authMiddleware, async (req, res) => {
           toUserId: user.id,
           isRedeemed: false,
         },
-        include: { package: true }
+        include: { package: true },
       });
-      
+
       if (!gift) {
         return res.status(400).json({ error: '유효한 선물을 찾을 수 없습니다' });
       }
-      
+
       const result = await prisma.$transaction(async (tx) => {
         const order = await tx.order.create({
           data: {
@@ -68,9 +79,9 @@ router.post('/', authMiddleware, async (req, res) => {
             status: 'PAID',
             orderId: `GIFT-${gift.code}-${Date.now()}`,
             paidAt: new Date(),
-          }
+          },
         });
-        
+
         const wedding = await tx.wedding.create({
           data: {
             ...data,
@@ -78,39 +89,38 @@ router.post('/', authMiddleware, async (req, res) => {
             slug,
             weddingDate: new Date(data.weddingDate),
             orderId: order.id,
-          expiresAt: new Date(Date.now() + (gift.package?.durationDays || 365) * 24 * 60 * 60 * 1000),
+            expiresAt: new Date(
+              Date.now() + (gift.package?.durationDays || 365) * 24 * 60 * 60 * 1000
+            ),
           },
         });
-        
+
         await tx.gift.update({
           where: { id: gift.id },
-          data: { isRedeemed: true }
+          data: { isRedeemed: true },
         });
-        
+
         return wedding;
       });
-      
+
       return res.status(201).json(result);
     }
-    
+
     if (orderIdFromClient) {
       const order = await prisma.order.findFirst({
         include: { package: true },
         where: {
-          OR: [
-            { id: orderIdFromClient },
-            { orderId: orderIdFromClient }
-          ],
+          OR: [{ id: orderIdFromClient }, { orderId: orderIdFromClient }],
           userId: user.id,
           status: 'PAID',
           wedding: null,
-        }
+        },
       });
-      
+
       if (!order) {
         return res.status(400).json({ error: '유효한 주문을 찾을 수 없습니다' });
       }
-      
+
       const wedding = await prisma.wedding.create({
         data: {
           ...data,
@@ -118,13 +128,15 @@ router.post('/', authMiddleware, async (req, res) => {
           slug,
           weddingDate: new Date(data.weddingDate),
           orderId: order.id,
-          expiresAt: new Date(Date.now() + (order.package?.durationDays || 365) * 24 * 60 * 60 * 1000),
+          expiresAt: new Date(
+            Date.now() + (order.package?.durationDays || 365) * 24 * 60 * 60 * 1000
+          ),
         },
       });
-      
+
       return res.status(201).json(wedding);
     }
-    
+
     const wedding = await prisma.wedding.create({
       data: {
         ...data,
@@ -134,7 +146,7 @@ router.post('/', authMiddleware, async (req, res) => {
         expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       },
     });
-    
+
     res.status(201).json(wedding);
   } catch (error) {
     console.error('Wedding creation error:', error);
@@ -146,30 +158,40 @@ router.put('/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;
   const user = (req as any).user;
   const data = req.body;
-  
-  const existing = await prisma.wedding.findUnique({ 
+
+  const existing = await prisma.wedding.findUnique({
     where: { id },
-    include: { order: { include: { package: true } } }
+    include: { order: { include: { package: true } } },
   });
   if (!existing) return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
-  if (user.role !== 'ADMIN' && existing.userId !== user.id) {
+  if (!canAccess(user, existing)) {
     return res.status(403).json({ error: '접근 권한이 없습니다' });
   }
-  
-  // 수정 횟수 체크 (관리자는 무제한)
+
   if (user.role !== 'ADMIN' && existing.order?.package) {
     const maxEdits = existing.order.package.maxEdits;
     if (maxEdits !== -1 && existing.editCount >= maxEdits) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: `수정 횟수(${maxEdits}회) 초과. 추가 수정은 문의해주세요.`,
         editCount: existing.editCount,
-        maxEdits
+        maxEdits,
       });
     }
   }
-  
-  const { id: _id, createdAt, updatedAt, galleries, _count, userId, orderId, editCount, ...updateData } = data;
-  
+
+  const {
+    id: _id,
+    createdAt,
+    updatedAt,
+    galleries,
+    _count,
+    userId,
+    orderId,
+    editCount,
+    pairUserId,
+    ...updateData
+  } = data;
+
   try {
     const wedding = await prisma.wedding.update({
       where: { id },
@@ -180,7 +202,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
         editCount: user.role !== 'ADMIN' ? { increment: 1 } : undefined,
       },
     });
-    
+
     res.json(wedding);
   } catch (error) {
     console.error('Wedding update error:', error);
@@ -191,13 +213,13 @@ router.put('/:id', authMiddleware, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;
   const user = (req as any).user;
-  
+
   const existing = await prisma.wedding.findUnique({ where: { id } });
   if (!existing) return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
-  if (user.role !== 'ADMIN' && existing.userId !== user.id) {
-    return res.status(403).json({ error: '접근 권한이 없습니다' });
+  if (!isOwner(user, existing)) {
+    return res.status(403).json({ error: '소유자만 삭제할 수 있습니다' });
   }
-  
+
   await prisma.wedding.delete({ where: { id } });
   res.json({ success: true });
 });
@@ -206,18 +228,18 @@ router.post('/:id/gallery', authMiddleware, async (req, res) => {
   const { id } = req.params;
   const user = (req as any).user;
   const { mediaUrl, mediaType, caption } = req.body;
-  
+
   const wedding = await prisma.wedding.findUnique({ where: { id } });
   if (!wedding) return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
-  if (user.role !== 'ADMIN' && wedding.userId !== user.id) {
+  if (!canAccess(user, wedding)) {
     return res.status(403).json({ error: '접근 권한이 없습니다' });
   }
-  
+
   const lastGallery = await prisma.gallery.findFirst({
     where: { weddingId: id },
     orderBy: { order: 'desc' },
   });
-  
+
   const gallery = await prisma.gallery.create({
     data: {
       weddingId: id,
@@ -227,20 +249,20 @@ router.post('/:id/gallery', authMiddleware, async (req, res) => {
       order: (lastGallery?.order || 0) + 1,
     },
   });
-  
+
   res.status(201).json(gallery);
 });
 
 router.delete('/:id/gallery/:galleryId', authMiddleware, async (req, res) => {
   const { id, galleryId } = req.params;
   const user = (req as any).user;
-  
+
   const wedding = await prisma.wedding.findUnique({ where: { id } });
   if (!wedding) return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
-  if (user.role !== 'ADMIN' && wedding.userId !== user.id) {
+  if (!canAccess(user, wedding)) {
     return res.status(403).json({ error: '접근 권한이 없습니다' });
   }
-  
+
   await prisma.gallery.delete({ where: { id: galleryId } });
   res.json({ success: true });
 });
@@ -250,26 +272,26 @@ export const weddingRouter = router;
 router.get('/:id/rsvp', authMiddleware, async (req, res) => {
   const { id } = req.params;
   const user = (req as any).user;
-  
+
   try {
     const wedding = await prisma.wedding.findUnique({
       where: { id },
-      select: { userId: true },
+      select: { userId: true, pairUserId: true },
     });
-    
-    if (!wedding) {
-  return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
-}
 
-if (wedding.userId !== user.id && user.role !== 'ADMIN') {
-  return res.status(403).json({ error: '권한이 없습니다' });
-}
-    
+    if (!wedding) {
+      return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
+    }
+
+    if (!canAccess(user, wedding)) {
+      return res.status(403).json({ error: '권한이 없습니다' });
+    }
+
     const rsvps = await prisma.rsvp.findMany({
       where: { weddingId: id },
       orderBy: { createdAt: 'desc' },
     });
-    
+
     res.json(rsvps);
   } catch (error) {
     console.error('RSVP fetch error:', error);
@@ -292,7 +314,7 @@ router.delete('/:slug/guestbook/:id', async (req, res) => {
     }
 
     const guestbook = await prisma.guestbook.findFirst({
-      where: { id, weddingId: wedding.id }
+      where: { id, weddingId: wedding.id },
     });
 
     if (!guestbook) {

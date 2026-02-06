@@ -83,7 +83,7 @@ router.get('/user/weddings', authMiddleware, async (req: Request, res: Response)
   
   try {
     const weddings = await prisma.wedding.findMany({
-      where: { userId: user.id },
+      where: { OR: [{ userId: user.id }, { pairUserId: user.id }] },
       include: {
         order: {
           include: {
