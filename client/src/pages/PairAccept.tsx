@@ -76,30 +76,27 @@ export default function PairAccept() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-violet-50 to-white">
-        <div className="animate-pulse text-center">
-          <div className="w-16 h-16 rounded-full bg-violet-100 mx-auto mb-4" />
-          <div className="h-3 bg-violet-100 rounded w-32 mx-auto" />
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-[#fefefe]">
+        <div className="w-10 h-10 border-2 border-stone-800 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-emerald-50 to-white px-5">
+      <div className="min-h-screen flex items-center justify-center bg-[#fefefe] px-5">
         <div className="max-w-sm w-full text-center">
-          <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-100">
-            <Heart className="w-9 h-9 text-emerald-500" fill="currentColor" />
+          <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-6">
+            <Heart className="w-7 h-7 text-stone-600" fill="currentColor" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">연결 완료!</h1>
-          <p className="text-gray-500 text-[15px] mb-8 leading-relaxed">
-            {success.groomName} ♥ {success.brideName}<br />
+          <h1 className="font-serif text-2xl text-stone-800 mb-2">연결 완료</h1>
+          <p className="text-stone-500 text-sm mb-8 leading-relaxed">
+            {success.groomName} & {success.brideName}<br />
             청첩장을 함께 수정할 수 있어요
           </p>
           <button
             onClick={() => navigate('/my')}
-            className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-500 text-white font-semibold rounded-2xl hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-200"
+            className="w-full flex items-center justify-center gap-2 py-3.5 bg-stone-800 text-white text-sm font-semibold rounded-xl hover:bg-stone-900 transition-colors"
           >
             내 청첩장으로 이동
             <ArrowRight className="w-4 h-4" />
@@ -111,16 +108,16 @@ export default function PairAccept() {
 
   if (error && !info) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white px-5">
+      <div className="min-h-screen flex items-center justify-center bg-[#fefefe] px-5">
         <div className="max-w-sm w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-5">
-            <AlertCircle className="w-8 h-8 text-red-300" />
+          <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-5">
+            <AlertCircle className="w-7 h-7 text-stone-400" />
           </div>
-          <h1 className="text-xl font-bold text-gray-800 mb-2">초대를 확인할 수 없어요</h1>
-          <p className="text-gray-500 text-[14px] mb-6">{error}</p>
+          <h1 className="font-serif text-xl text-stone-800 mb-2">초대를 확인할 수 없어요</h1>
+          <p className="text-stone-500 text-sm mb-6">{error}</p>
           <button
             onClick={() => navigate('/')}
-            className="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors text-[14px]"
+            className="px-6 py-2.5 bg-stone-100 text-stone-600 rounded-xl hover:bg-stone-200 transition-colors text-sm"
           >
             홈으로 돌아가기
           </button>
@@ -130,48 +127,48 @@ export default function PairAccept() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-violet-50/80 to-rose-50/30 px-5">
+    <div className="min-h-screen flex items-center justify-center bg-[#fefefe] px-5">
       <div className="max-w-sm w-full">
         <div className="text-center mb-8">
-          <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-violet-100/50">
-            <Mail className="w-9 h-9 text-violet-400" />
+          <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-5">
+            <Mail className="w-7 h-7 text-stone-500" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-1.5">함께 수정하기 초대</h1>
-          <p className="text-gray-400 text-[13px]">청첩장을 같이 꾸밀 수 있어요</p>
+          <h1 className="font-serif text-2xl text-stone-800 mb-1.5">함께 수정하기 초대</h1>
+          <p className="text-stone-400 text-sm">청첩장을 같이 꾸밀 수 있어요</p>
         </div>
 
         {info && (
-          <div className="bg-white rounded-2xl shadow-lg shadow-violet-100/30 overflow-hidden mb-6">
-            <div className="p-6 text-center border-b border-gray-50">
-              <p className="text-xl font-semibold text-gray-800 tracking-wide">
+          <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden mb-6">
+            <div className="p-6 text-center border-b border-stone-100">
+              <p className="font-serif text-xl text-stone-800">
                 {info.groomName}
                 <span className="inline-block mx-2">
-                  <Heart className="w-4 h-4 text-rose-300 inline" fill="currentColor" />
+                  <Heart className="w-4 h-4 text-stone-300 inline" fill="currentColor" />
                 </span>
                 {info.brideName}
               </p>
             </div>
             <div className="px-6 py-4 space-y-2.5">
-              <div className="flex items-center justify-between text-[13px]">
-                <span className="flex items-center gap-1.5 text-gray-400">
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1.5 text-stone-400">
                   <CalendarHeart className="w-3.5 h-3.5" />
                   예식일
                 </span>
-                <span className="text-gray-700 font-medium">{formatDate(info.weddingDate)}</span>
+                <span className="text-stone-700 font-medium">{formatDate(info.weddingDate)}</span>
               </div>
-              <div className="flex items-center justify-between text-[13px]">
-                <span className="flex items-center gap-1.5 text-gray-400">
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1.5 text-stone-400">
                   <MapPin className="w-3.5 h-3.5" />
                   예식장
                 </span>
-                <span className="text-gray-700 font-medium">{info.venue}</span>
+                <span className="text-stone-700 font-medium">{info.venue}</span>
               </div>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="mb-4 px-4 py-3 bg-red-50 text-red-600 text-[13px] rounded-xl text-center">
+          <div className="mb-4 px-4 py-3 bg-red-50 text-red-600 text-sm rounded-xl text-center">
             {error}
           </div>
         )}
@@ -179,7 +176,7 @@ export default function PairAccept() {
         <button
           onClick={handleAccept}
           disabled={accepting}
-          className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-violet-500 to-rose-400 text-white font-semibold text-[15px] rounded-2xl hover:shadow-lg hover:shadow-violet-200/50 transition-all disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 py-3.5 bg-stone-800 text-white text-sm font-semibold rounded-xl hover:bg-stone-900 transition-colors disabled:opacity-50"
         >
           {accepting ? (
             '수락 중...'
@@ -190,7 +187,7 @@ export default function PairAccept() {
           )}
         </button>
 
-        <p className="text-center text-[11px] text-gray-300 mt-4">
+        <p className="text-center text-xs text-stone-300 mt-4">
           수락하면 이 청첩장의 내용을 함께 수정할 수 있습니다
         </p>
       </div>

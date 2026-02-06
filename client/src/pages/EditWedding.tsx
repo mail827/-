@@ -1366,7 +1366,7 @@ export default function EditWedding() {
                 초대 코드를 생성해서 카톡이나 문자로 공유해주세요.
               </p>
             </div>
-            <PairManager weddingId={id!} />
+            <PairManager weddingId={id!} groomName={wedding.groomName} brideName={wedding.brideName} />
           </Section>
         )}
 

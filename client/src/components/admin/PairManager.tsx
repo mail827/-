@@ -1,14 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Heart, Copy, Check, Link2, X, UserPlus, Unlink } from 'lucide-react';
+import { Heart, Copy, Check, Link2, X, UserPlus, Unlink, Send } from 'lucide-react';
 import type { PairStatus } from '../../types';
 
 const API = import.meta.env.VITE_API_URL || '';
 
-interface Props {
-  weddingId: string;
+declare global {
+  interface Window {
+    Kakao?: any;
+  }
 }
 
-export default function PairManager({ weddingId }: Props) {
+interface Props {
+  weddingId: string;
+  groomName?: string;
+  brideName?: string;
+}
+
+export default function PairManager({ weddingId, groomName, brideName }: Props) {
   const [status, setStatus] = useState<PairStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
@@ -33,6 +41,13 @@ export default function PairManager({ weddingId }: Props) {
   useEffect(() => {
     fetchStatus();
   }, [fetchStatus]);
+
+  const getInviteLink = (code: string) => `${window.location.origin}/pair/accept?code=${code}`;
+
+  const getShareText = (code: string) => {
+    const names = groomName && brideName ? `${groomName} & ${brideName}` : '우리';
+    return `[청첩장 작업실] ${names} 청첩장 함께 수정 초대\n\n아래 링크를 눌러 수락하면 청첩장을 같이 수정할 수 있어요.\n\n${getInviteLink(code)}\n\n초대 코드: ${code}`;
+  };
 
   const createInvite = async () => {
     setActing(true);
@@ -82,10 +97,39 @@ export default function PairManager({ weddingId }: Props) {
   };
 
   const copyLink = (code: string) => {
-    const link = `${window.location.origin}/pair/accept?code=${code}`;
-    navigator.clipboard.writeText(link);
+    navigator.clipboard.writeText(getInviteLink(code));
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const shareKakao = (code: string) => {
+    const link = getInviteLink(code);
+    const names = groomName && brideName ? `${groomName} & ${brideName}` : '청첩장';
+
+    if (window.Kakao?.isInitialized?.()) {
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: '함께 청첩장을 꾸며요',
+          description: `${names} 청첩장을 같이 수정할 수 있도록 초대합니다.`,
+          imageUrl: 'https://weddingshop.cloud/og-image.png',
+          link: { mobileWebUrl: link, webUrl: link },
+        },
+        buttons: [
+          { title: '초대 수락하기', link: { mobileWebUrl: link, webUrl: link } },
+        ],
+      });
+    } else {
+      window.open(`https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(link)}`, '_blank', 'width=480,height=640');
+    }
+  };
+
+  const shareSms = (code: string) => {
+    const text = getShareText(code);
+    const smsUrl = /iPhone|iPad/i.test(navigator.userAgent)
+      ? `sms:&body=${encodeURIComponent(text)}`
+      : `sms:?body=${encodeURIComponent(text)}`;
+    window.location.href = smsUrl;
   };
 
   const getTimeLeft = (expiresAt: string) => {
@@ -178,7 +222,7 @@ export default function PairManager({ weddingId }: Props) {
       {!status.paired && status.pendingInvite && (
         <div>
           <div className="text-center mb-5">
-            <p className="text-sm text-stone-500 mb-4">초대 코드를 상대방에게 공유해주세요</p>
+            <p className="text-sm text-stone-500 mb-4">상대방에게 아래 방법으로 공유해주세요</p>
             <div className="inline-flex items-center gap-3 px-6 py-3.5 bg-stone-50 rounded-2xl border border-stone-200">
               <span className="text-2xl font-mono font-bold tracking-[0.25em] text-stone-800">
                 {status.pendingInvite.code}
@@ -186,7 +230,7 @@ export default function PairManager({ weddingId }: Props) {
               <button
                 onClick={() => copyCode(status.pendingInvite!.code)}
                 className="p-1.5 hover:bg-stone-200 rounded-lg transition-colors"
-                title="복사"
+                title="코드 복사"
               >
                 {copied ? (
                   <Check className="w-4 h-4 text-green-600" />
@@ -204,24 +248,45 @@ export default function PairManager({ weddingId }: Props) {
             </p>
           </div>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => copyLink(status.pendingInvite!.code)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-stone-800 text-white text-sm font-medium rounded-xl hover:bg-stone-900 transition-colors"
-            >
-              {linkCopied ? (
-                <><Check className="w-3.5 h-3.5" /> 복사됨</>
-              ) : (
-                <><Link2 className="w-3.5 h-3.5" /> 초대 링크 복사</>
-              )}
-            </button>
-            <button
-              onClick={cancelInvite}
-              disabled={acting}
-              className="px-4 py-2.5 bg-stone-100 text-stone-500 text-sm rounded-xl hover:bg-stone-200 transition-colors disabled:opacity-50"
-            >
-              <X className="w-4 h-4" />
-            </button>
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => shareKakao(status.pendingInvite!.code)}
+                className="flex items-center justify-center gap-2 py-3 bg-[#FEE500] text-[#3C1E1E] text-sm font-medium rounded-xl hover:brightness-95 transition-all"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.726 1.802 5.117 4.512 6.467-.197.735-.715 2.666-.82 3.079-.13.51.187.502.393.365.162-.107 2.575-1.752 3.622-2.467.736.104 1.497.16 2.293.16 5.523 0 10-3.463 10-7.604C22 6.463 17.523 3 12 3z"/>
+                </svg>
+                카카오톡
+              </button>
+              <button
+                onClick={() => shareSms(status.pendingInvite!.code)}
+                className="flex items-center justify-center gap-2 py-3 bg-stone-100 text-stone-700 text-sm font-medium rounded-xl hover:bg-stone-200 transition-colors"
+              >
+                <Send className="w-4 h-4" />
+                문자 보내기
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => copyLink(status.pendingInvite!.code)}
+                className="flex items-center justify-center gap-1.5 py-3 bg-stone-800 text-white text-sm font-medium rounded-xl hover:bg-stone-900 transition-colors"
+              >
+                {linkCopied ? (
+                  <><Check className="w-3.5 h-3.5" /> 복사됨</>
+                ) : (
+                  <><Link2 className="w-3.5 h-3.5" /> 링크 복사</>
+                )}
+              </button>
+              <button
+                onClick={cancelInvite}
+                disabled={acting}
+                className="flex items-center justify-center gap-1.5 py-3 bg-stone-100 text-stone-400 text-sm rounded-xl hover:bg-stone-200 hover:text-red-500 transition-colors disabled:opacity-50"
+              >
+                <X className="w-4 h-4" />
+                초대 취소
+              </button>
+            </div>
           </div>
         </div>
       )}
