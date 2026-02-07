@@ -22,8 +22,9 @@ function NightSeaCanvas() {
 
     const resize = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = window.innerWidth;
-      H = window.innerHeight;
+      const parent = canvas.parentElement;
+      W = parent ? parent.clientWidth : window.innerWidth;
+      H = parent ? parent.clientHeight : window.innerHeight;
       canvas.width = W * dpr;
       canvas.height = H * dpr;
       canvas.style.width = W + 'px';
@@ -135,14 +136,14 @@ function NightSeaCanvas() {
             const tailAlpha = (j / s.tail.length) * alpha * 0.5;
             const tailSize = s.size * (j / s.tail.length) * 0.6;
             ctx.beginPath();
-            ctx.arc(s.tail[j][0], s.tail[j][1], tailSize, 0, Math.PI * 2);
+            ctx.arc(s.tail[j][0], s.tail[j][1], Math.max(0.1, tailSize), 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(200,220,255,' + tailAlpha + ')';
             ctx.fill();
           }
         }
 
         ctx.beginPath();
-        ctx.arc(s.x, s.y, s.size * alpha, 0, Math.PI * 2);
+        ctx.arc(s.x, s.y, Math.max(0.1, s.size * alpha), 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(220,235,255,' + alpha * 0.9 + ')';
         ctx.fill();
         ctx.beginPath();
@@ -596,7 +597,7 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
 
       <footer className="py-12 text-center relative" style={{ zIndex: 1 }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.25em] hover:opacity-70 transition-opacity" style={{ ...f, color: 'rgba(140, 170, 200, 0.2)' }}>
-          Made by Wedding Workshop
+          Made by 청첩장 작업실 ›
         </a>
       </footer>
 

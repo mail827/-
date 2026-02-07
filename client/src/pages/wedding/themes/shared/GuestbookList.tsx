@@ -16,7 +16,7 @@ interface GuestbookListProps {
   variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'senior' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2' | 'luna' | 'pearl';
 }
 
-export default function GuestbookList({ guestbooks, weddingSlug, onDelete, variant = 'classic' }: GuestbookListProps) {
+export default function GuestbookList({ guestbooks, onDelete, variant = 'classic' }: GuestbookListProps) {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -50,7 +50,7 @@ export default function GuestbookList({ guestbooks, weddingSlug, onDelete, varia
     setIsDeleting(true);
     setError('');
     try {
-      const res = await fetch(`/api/weddings/${weddingSlug}/guestbook/${deleteTarget}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/guestbook/${deleteTarget}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })

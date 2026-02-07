@@ -447,7 +447,7 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
                   transition={{ duration: 0.3 }}
                 >
                   <IPhoneMockup>
-                    <div className="w-full h-full overflow-y-auto scrollbar-hide bg-white">
+                    <div className="w-full h-full overflow-y-auto scrollbar-hide bg-white" style={{ transform: "translateZ(0)" }}>
                       {ThemeComponent && (
                         <ThemeComponent
                           wedding={weddingData}
