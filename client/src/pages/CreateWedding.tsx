@@ -18,6 +18,7 @@ const THEMES = [
   { id: 'GALLERY_MIRIM_2', name: 'Gallery 美林-2', desc: '청량한 다크 필름 톤', color: 'from-slate-200 to-zinc-300' },
   { id: 'LUNA_HALFMOON', name: 'Luna Halfmoon', desc: '순백의 고요한 물결', color: 'from-slate-50 to-blue-50' },
   { id: 'PEARL_DRIFT', name: 'Pearl Drift', desc: '심해 속 떠다니는 진주', color: 'from-gray-900 to-slate-800' },
+  { id: 'NIGHT_SEA', name: '밤바다', desc: '별이 쏟아지는 밤, 깊은 바다', color: 'from-slate-950 to-blue-950' },
 ];
 
 interface Package {

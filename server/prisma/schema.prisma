@@ -362,6 +362,7 @@ enum Theme {
   GALLERY_MIRIM_2
   LUNA_HALFMOON
   PEARL_DRIFT
+  NIGHT_SEA
 }
 
 enum MediaType {

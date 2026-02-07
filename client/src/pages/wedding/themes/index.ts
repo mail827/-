@@ -13,3 +13,4 @@ export { default as GalleryMirim1 } from './GalleryMirim1';
 export { default as GalleryMirim2 } from './GalleryMirim2';
 export { default as LunaHalfmoon } from './LunaHalfmoon';
 export { default as PearlDrift } from './PearlDrift';
+export { default as NightSea } from './NightSea';

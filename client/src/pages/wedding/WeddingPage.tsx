@@ -18,6 +18,7 @@ import {
   GalleryMirim2,
   LunaHalfmoon,
   PearlDrift,
+  NightSea,
 } from './themes';
 import AiChat from '../../components/AiChat';
 
@@ -68,6 +69,7 @@ const themeComponents: Record<Theme, React.ComponentType<any>> = {
   GALLERY_MIRIM_2: GalleryMirim2,
   LUNA_HALFMOON: LunaHalfmoon,
   PEARL_DRIFT: PearlDrift,
+  NIGHT_SEA: NightSea,
 };
 
 export default function WeddingPage() {

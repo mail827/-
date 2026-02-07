@@ -16,6 +16,7 @@ const THEME_OPTIONS = [
   { id: 'GALLERY_MIRIM_2', name: 'Gallery 美林-2' },
   { id: 'LUNA_HALFMOON', name: '루나 하프문' },
   { id: 'PEARL_DRIFT', name: '펄 드리프트' },
+  { id: 'NIGHT_SEA', name: '밤바다' },
 ];
 
 const DEFAULT_SAMPLE_DATA = {
