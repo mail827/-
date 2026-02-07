@@ -243,7 +243,7 @@ const themeAccents: Record<string, { accent: string; glow: string }> = {
 };
 
 const IPhoneMockup = ({ children }: { children: React.ReactNode }) => (
-  <div className="relative scale-[0.72] sm:scale-[0.82] md:scale-[0.88] lg:scale-100 origin-center">
+  <div className="relative">
     <div className="absolute -inset-4 bg-gradient-to-b from-white/5 to-transparent rounded-[3.5rem] blur-2xl" />
     
     <div className="relative bg-[#1a1a1a] rounded-[3rem] p-[3px] shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_25px_50px_-12px_rgba(0,0,0,0.8)]">
@@ -261,7 +261,7 @@ const IPhoneMockup = ({ children }: { children: React.ReactNode }) => (
       <div className="relative bg-[#0a0a0a] rounded-[2.8rem] overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-[44px] bg-gradient-to-b from-black/20 to-transparent z-10 pointer-events-none" />
         
-        <div className="w-[280px] h-[600px] sm:w-[320px] sm:h-[680px] overflow-hidden">
+        <div className="w-[280px] h-[500px] sm:w-[300px] sm:h-[560px] overflow-hidden">
           {children}
         </div>
         
@@ -619,7 +619,7 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
               </div>
 
               <div
-                className="flex-1 flex items-center justify-center px-4 pb-4 min-h-0"
+                className="flex-1 flex items-center justify-center px-4 pb-4 min-h-0 overflow-hidden"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
               >
