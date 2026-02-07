@@ -274,8 +274,9 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
     setTimeout(() => setCopiedAccount(null), 2000);
   };
 
-  const handleShare = async (type: 'kakao' | 'instagram' | 'sms') => {
-    const url = window.location.href;
+  const handleShare = async (type: 'kakao' | 'instagram' | 'sms', version?: string) => {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} & ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao?.Share) {
       window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'korean'), imageUrl: wedding.heroMedia || '', link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });

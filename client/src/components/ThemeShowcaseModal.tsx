@@ -132,6 +132,77 @@ function NightSeaBg({ active }: { active: boolean }) {
   return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }} />;
 }
 
+function AquaGlobeBg({ active }: { active: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef(0);
+  const frameRef = useRef(0);
+
+  useEffect(() => {
+    if (!active) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    let W = 0, H = 0;
+    const resize = () => {
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = W * 2; canvas.height = H * 2;
+      canvas.style.width = W + "px"; canvas.style.height = H + "px";
+      ctx.setTransform(2, 0, 0, 2, 0, 0);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+    const bubbles: { x: number; y: number; s: number; sp: number; w: number; ws: number; o: number }[] = [];
+    for (let i = 0; i < 20; i++) bubbles.push({ x: Math.random() * W, y: H + Math.random() * H, s: Math.random() * 6 + 2, sp: Math.random() * 0.3 + 0.1, w: Math.random() * Math.PI * 2, ws: Math.random() * 0.01 + 0.003, o: Math.random() * 0.25 + 0.1 });
+    const dust: { x: number; y: number; s: number; vx: number; vy: number; o: number; p: number }[] = [];
+    for (let i = 0; i < 15; i++) dust.push({ x: Math.random() * W, y: Math.random() * H, s: Math.random() * 1.5 + 0.5, vx: (Math.random() - 0.5) * 0.1, vy: (Math.random() - 0.5) * 0.06, o: Math.random() * 0.2 + 0.05, p: Math.random() * Math.PI * 2 });
+    const draw = () => {
+      frameRef.current++;
+      const t = frameRef.current * 0.012;
+      ctx.clearRect(0, 0, W, H);
+      // light beams only
+      for (let i = 0; i < 3; i++) {
+        const bx = W * (0.2 + i * 0.3) + Math.sin(t * 0.08 + i * 2) * 30;
+        const a = 0.025 + Math.sin(t * 0.1 + i) * 0.01;
+        ctx.save();
+        ctx.translate(bx, 0);
+        ctx.rotate(-0.1 + Math.sin(t * 0.06 + i) * 0.03);
+        const lg = ctx.createLinearGradient(0, 0, 0, H);
+        lg.addColorStop(0, "rgba(180,220,240," + a + ")");
+        lg.addColorStop(0.5, "rgba(180,220,240," + (a * 0.4) + ")");
+        lg.addColorStop(1, "rgba(180,220,240,0)");
+        ctx.fillStyle = lg;
+        ctx.fillRect(-20, 0, 40, H);
+        ctx.restore();
+      }
+      dust.forEach(d => {
+        d.x += d.vx; d.y += d.vy; d.p += 0.01;
+        if (d.x < -5) d.x = W + 5; if (d.x > W + 5) d.x = -5;
+        if (d.y < -5) d.y = H + 5; if (d.y > H + 5) d.y = -5;
+        ctx.beginPath(); ctx.arc(d.x, d.y, d.s, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(200,230,245," + (d.o * (Math.sin(d.p) * 0.5 + 0.5)) + ")";
+        ctx.fill();
+      });
+      bubbles.forEach(b => {
+        b.y -= b.sp; b.w += b.ws;
+        if (b.y < -10) { b.y = H + 10; b.x = Math.random() * W; }
+        const bx = b.x + Math.sin(b.w) * 5;
+        ctx.beginPath(); ctx.arc(bx, b.y, b.s, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(200,230,250," + (b.o + 0.1) + ")"; ctx.lineWidth = 0.5; ctx.stroke();
+        const g = ctx.createRadialGradient(bx - b.s * 0.3, b.y - b.s * 0.3, 0, bx, b.y, b.s);
+        g.addColorStop(0, "rgba(255,255,255," + (b.o * 0.4) + ")");
+        g.addColorStop(1, "rgba(200,230,255,0)");
+        ctx.fillStyle = g; ctx.fill();
+      });
+      rafRef.current = requestAnimationFrame(draw);
+    };
+    rafRef.current = requestAnimationFrame(draw);
+    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener("resize", resize); };
+  }, [active]);
+  if (!active) return null;
+  return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }} />;
+}
+
 const themeComponents: Record<string, React.ComponentType<any>> = {
   ROMANTIC_CLASSIC: RomanticClassic,
   MODERN_MINIMAL: ModernMinimal,
@@ -168,7 +239,7 @@ const themeAccents: Record<string, { accent: string; glow: string }> = {
   LUNA_HALFMOON: { accent: 'rgba(144,175,197,0.15)', glow: 'rgba(144,175,197,0.1)' },
   PEARL_DRIFT: { accent: 'rgba(232,238,242,0.12)', glow: 'rgba(232,238,242,0.08)' },
   NIGHT_SEA: { accent: 'rgba(80,160,240,0.15)', glow: 'rgba(80,160,240,0.1)' },
-  AQUA_GLOBE: { accent: 'rgba(100,200,240,0.12)', glow: 'rgba(255,180,100,0.08)' },
+  AQUA_GLOBE: { accent: 'rgba(120,200,230,0.15)', glow: 'rgba(100,190,220,0.1)' },
 };
 
 const IPhoneMockup = ({ children }: { children: React.ReactNode }) => (
@@ -380,7 +451,8 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
         }} />
 
-        <NightSeaBg active={current?.theme === 'NIGHT_SEA'} />
+        <NightSeaBg active={current?.theme === "NIGHT_SEA"} />
+        <AquaGlobeBg active={current?.theme === "AQUA_GLOBE"} />
 
         <button
           onClick={onClose}
