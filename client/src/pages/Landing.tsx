@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, MessageCircle, X, Send, Sparkles, Mail, Loader2, Gift, Eye } from 'lucide-react';
+
+
 import ThemeShowcaseModal from '../components/ThemeShowcaseModal';
 
 interface Package {
@@ -331,12 +333,12 @@ export default function Landing() {
           
           <div className="grid md:grid-cols-3 gap-12">
             {[
-              { icon: '✨', title: '감각적인 디자인', desc: '트렌디하면서도 클래식한\n14가지 테마' },
-              { icon: '⚡', title: '빠른 제작', desc: 'Lite는 5분 만에\n즉시 발행 가능' },
-              { icon: '👴🏻', title: '어르신 배려', desc: '큰 글씨와 심플한 구성의\n어르신용 테마' },
-              { icon: '💌', title: '간편한 공유', desc: '카카오톡, 문자, 인스타그램\n한 번에 공유' },
-              { icon: '📊', title: 'RSVP 관리', desc: '참석 여부를\n한눈에 확인' },
-              { icon: '🤖', title: 'AI 컨시어지', desc: '하객과 대화하는\n살아있는 청첩장' },
+              { path: 'M12 3l1.5 3.4 3.7.5-2.7 2.6.6 3.7L12 11.5 8.9 13.2l.6-3.7-2.7-2.6 3.7-.5L12 3z M4.5 6.5l1 2.2 2.4.3-1.8 1.7.4 2.4L4.5 12l-2 1.1.4-2.4-1.8-1.7 2.4-.3 1-2.2z M19.5 9l.7 1.6 1.8.2-1.3 1.3.3 1.8-1.5-.8-1.5.8.3-1.8-1.3-1.3 1.8-.2L19.5 9z', title: '감각적인 디자인', desc: '트렌디하면서도 클래식한\n16가지 테마' },
+              { path: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z', title: '빠른 제작', desc: 'Lite는 5분 만에\n즉시 발행 가능' },
+              { path: 'M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z', title: '어르신 배려', desc: '큰 글씨와 심플한 구성의\n어르신용 테마' },
+              { path: 'M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8 M16 6l-4-4-4 4 M12 2v13', title: '간편한 공유', desc: '카카오톡, 문자, 인스타그램\n한 번에 공유' },
+              { path: 'M9 11l3 3L22 4 M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11', title: 'RSVP 관리', desc: '참석 여부를\n한눈에 확인' },
+              { path: 'M12 8V4H8 M2 14h2 M20 14h2 M15 13a3 3 0 11-6 0V9a3 3 0 016 0v4z M12 19v3 M8 22h8', title: 'AI 컨시어지', desc: '하객과 대화하는\n살아있는 청첩장' },
             ].map((item, idx) => (
               <motion.div
                 key={idx}
@@ -346,7 +348,9 @@ export default function Landing() {
                 transition={{ delay: idx * 0.1 }}
                 className="text-center"
               >
-                <div className="text-4xl mb-6">{item.icon}</div>
+                <div className="w-12 h-12 mx-auto mb-6 flex items-center justify-center rounded-2xl bg-stone-100">
+                  <svg className="w-6 h-6 text-stone-500" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d={item.path} /></svg>
+                </div>
                 <h3 className="text-lg text-stone-800 mb-3">{item.title}</h3>
                 <p className="text-stone-500 text-sm whitespace-pre-line leading-relaxed">{item.desc}</p>
               </motion.div>
@@ -537,7 +541,7 @@ export default function Landing() {
             viewport={{ once: true }}
           >
             <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">THEMES</p>
-            <h2 className="font-serif text-3xl text-stone-800 mb-4">14가지 감성 테마</h2>
+            <h2 className="font-serif text-3xl text-stone-800 mb-4">16가지 감성 테마</h2>
             <p className="text-stone-500 mb-8">실제 청첩장을 미리 체험해보세요</p>
             <button
               onClick={() => setShowThemeShowcase(true)}

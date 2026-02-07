@@ -4,6 +4,107 @@ import { Phone, ChevronDown, Share2, Copy, Check, Music, VolumeX } from 'lucide-
 import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, type ThemeProps } from './shared';
 import { applyPhotoFilter } from './shared/themeConfig';
 
+function AquaHeroDustCanvas() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
+    let W = parent.clientWidth;
+    let H = parent.clientHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2;
+
+    const particles: { x: number; y: number; size: number; opacity: number; speed: number; drift: number; phase: number }[] = [];
+    for (let i = 0; i < 25; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.random() * R * 0.85;
+      particles.push({
+        x: cx + Math.cos(angle) * dist,
+        y: cy + Math.sin(angle) * dist,
+        size: Math.random() * 2.5 + 1,
+        opacity: Math.random() * 0.5 + 0.2,
+        speed: Math.random() * 0.2 + 0.08,
+        drift: (Math.random() - 0.5) * 0.15,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    let raf: number;
+    let t = 0;
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H);
+      t++;
+      for (const p of particles) {
+        p.y -= p.speed;
+        p.x += Math.sin(t * 0.008 + p.phase) * p.drift;
+        const dx = p.x - cx, dy = p.y - cy;
+        if (Math.sqrt(dx * dx + dy * dy) > R * 0.9 || p.y < cy - R) {
+          const angle = Math.random() * Math.PI * 2;
+          const dist = Math.random() * R * 0.6;
+          p.x = cx + Math.cos(angle) * dist;
+          p.y = cy + R * 0.8;
+        }
+        const distFromCenter = Math.sqrt((p.x - cx) ** 2 + (p.y - cy) ** 2);
+        const edgeFade = Math.max(0, 1 - distFromCenter / (R * 0.9));
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255,' + (p.opacity * edgeFade) + ')';
+        ctx.fill();
+        if (p.size > 1.5) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(200, 235, 255,' + (p.opacity * edgeFade * 0.15) + ')';
+          ctx.fill();
+        }
+      }
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return <canvas ref={ref} className="absolute inset-0 pointer-events-none rounded-full" style={{ zIndex: 4 }} />;
+}
+
+function AquaGlobePreviewBg() {
+  return (
+    <div className="fixed inset-0" style={{ zIndex: 0 }}>
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, #a8d8eb 0%, #c4e5f5 15%, #d6effa 30%, #e4f4fc 50%, #f0f9fe 70%, #fff 100%)' }} />
+      <div className="absolute" style={{ top: 0, left: 0, right: 0, height: '15%', background: 'linear-gradient(180deg, rgba(168,216,235,0.3) 0%, transparent 100%)' }} />
+      {[...Array(12)].map((_,i) => (
+        <div key={i} className="absolute rounded-full" style={{
+          left: (12 + i * 17 % 76) + '%',
+          top: (10 + i * 13 % 45) + '%',
+          width: 5 + (i % 3) * 3,
+          height: 5 + (i % 3) * 3,
+          background: 'radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(200,230,245,0.2) 60%, transparent 100%)',
+          border: '1px solid rgba(255,255,255,0.35)',
+          animation: 'floatBubble ' + (5 + i % 4) + 's ease-in-out infinite',
+          animationDelay: (i * 0.4) + 's',
+        }} />
+      ))}
+      <svg viewBox="0 0 100 50" className="absolute" style={{ top: '20%', left: '50%', transform: 'translateX(-50%)', width: 70, opacity: 0.85, animation: 'swimFish 8s ease-in-out infinite' }}>
+        <ellipse cx="50" cy="25" rx="20" ry="9" fill="#FF8C3A"/>
+        <ellipse cx="50" cy="25" rx="15" ry="7" fill="#FFA052"/>
+        <ellipse cx="45" cy="22" rx="2.5" ry="2.5" fill="#1a1a1a"/>
+        <path d="M70,25 Q82,15 78,25 Q82,35 70,25Z" fill="#FF8C3A" opacity="0.8"><animate attributeName="d" dur="0.8s" repeatCount="indefinite" values="M70,25 Q82,15 78,25 Q82,35 70,25Z;M70,25 Q82,18 78,25 Q82,32 70,25Z;M70,25 Q82,15 78,25 Q82,35 70,25Z" /></path>
+        <path d="M30,25 Q22,18 25,25 Q22,32 30,25Z" fill="#FF8C3A" opacity="0.6"/>
+        <path d="M43,15 Q50,5 57,15Z" fill="#FF8C3A" opacity="0.5"/>
+      </svg>
+      <style>{`
+        @keyframes floatBubble { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes swimFish { 0%,100% { transform: translateX(-50%) translateY(0); } 25% { transform: translateX(-45%) translateY(-8px); } 75% { transform: translateX(-55%) translateY(5px); } }
+      `}</style>
+    </div>
+  );
+}
+
 function AquaGlobeCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef(0);
@@ -294,7 +395,7 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: 'transparent' }}>
-      {!isPreview && <AquaGlobeCanvas />}
+      {isPreview ? <AquaGlobePreviewBg /> : <AquaGlobeCanvas />}
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (
         <button onClick={toggleMusic} className="fixed top-5 right-5 z-50 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300" style={{ background: c.card, backdropFilter: 'blur(12px)', border: '1px solid ' + c.cardBorder }}>
@@ -304,13 +405,18 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
 
       <section className="min-h-screen flex flex-col justify-center items-center px-6 relative" style={{ zIndex: 1 }}>
         {wedding.heroMedia && (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.5 }} className="mb-10 w-full max-w-md">
-            <div className="relative rounded-3xl overflow-hidden" style={{ border: '2px solid rgba(255,255,255,0.5)', boxShadow: '0 20px 60px rgba(44,95,124,0.15)' }}>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.8, ease: 'easeOut' }} className="mb-10 w-[75vw] max-w-[320px]">
+            <div className="relative rounded-full overflow-hidden aspect-square" style={{ border: '2px solid rgba(255,255,255,0.45)', boxShadow: '0 0 80px rgba(168,216,235,0.25), 0 0 40px rgba(44,95,124,0.15), inset 0 0 60px rgba(168,216,235,0.1)' }}>
               {wedding.heroMediaType === 'VIDEO' ? (
-                <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full aspect-[3/4] object-cover" />
+                <video src={wedding.heroMedia} autoPlay muted loop playsInline className="w-full h-full object-cover" />
               ) : (
-                <img src={applyPhotoFilter(wedding.heroMedia, 'AQUA_GLOBE')} alt="" className="w-full aspect-[3/4] object-cover" />
+                <img src={applyPhotoFilter(wedding.heroMedia, 'AQUA_GLOBE')} alt="" className="w-full h-full object-cover" />
               )}
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 120% 80% at 30% 20%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.08) 30%, transparent 60%)', zIndex: 2 }} />
+              <div className="absolute inset-0 pointer-events-none rounded-full" style={{ border: '1px solid rgba(255,255,255,0.3)', background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 40%, transparent 60%, rgba(168,216,235,0.08) 100%)', zIndex: 2 }} />
+              <div className="absolute pointer-events-none" style={{ top: '12%', left: '18%', width: '25%', height: '12%', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', filter: 'blur(8px)', transform: 'rotate(-20deg)', zIndex: 3 }} />
+              <div className="absolute pointer-events-none" style={{ top: '20%', left: '28%', width: '8%', height: '5%', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', filter: 'blur(4px)', transform: 'rotate(-15deg)', zIndex: 3 }} />
+              <AquaHeroDustCanvas />
             </div>
           </motion.div>
         )}

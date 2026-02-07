@@ -5,6 +5,103 @@ import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucid
 import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
 
 
+function HeroDustCanvas() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
+    let W = parent.clientWidth;
+    let H = parent.clientHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const particles: { x: number; y: number; size: number; opacity: number; speed: number; drift: number; phase: number; twinkleSpeed: number }[] = [];
+    for (let i = 0; i < 35; i++) {
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        size: Math.random() * 1.8 + 0.5,
+        opacity: Math.random() * 0.6 + 0.2,
+        speed: Math.random() * 0.15 + 0.05,
+        drift: (Math.random() - 0.5) * 0.1,
+        phase: Math.random() * Math.PI * 2,
+        twinkleSpeed: Math.random() * 0.015 + 0.005,
+      });
+    }
+
+    let raf: number;
+    let t = 0;
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H);
+      t++;
+      for (const p of particles) {
+        p.y -= p.speed;
+        p.x += Math.sin(t * 0.01 + p.phase) * p.drift;
+        if (p.y < -5) { p.y = H + 5; p.x = Math.random() * W; }
+        if (p.x < 0) p.x = W;
+        if (p.x > W) p.x = 0;
+        const twinkle = 0.4 + Math.sin(t * p.twinkleSpeed + p.phase) * 0.6;
+        const alpha = p.opacity * Math.max(0, twinkle);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(200, 220, 255,' + alpha + ')';
+        ctx.fill();
+        if (p.size > 1.2) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(180, 210, 255,' + (alpha * 0.12) + ')';
+          ctx.fill();
+        }
+      }
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    const onResize = () => {
+      if (!parent) return;
+      W = parent.clientWidth;
+      H = parent.clientHeight;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    window.addEventListener('resize', onResize);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); };
+  }, []);
+  return <canvas ref={ref} className="absolute inset-0 pointer-events-none" style={{ zIndex: 2 }} />;
+}
+
+function NightSeaPreviewBg() {
+  return (
+    <div className="absolute inset-0" style={{ zIndex: 0 }}>
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, #070B14 0%, #0a1e32 15%, #0d2844 40%, #0f3a5e 70%, #1a5276 85%, #2a7da8 100%)' }} />
+      {[...Array(50)].map((_,i) => (
+        <div key={i} className="absolute rounded-full" style={{
+          left: (i * 31 % 100) + '%',
+          top: (i * 17 % 55) + '%',
+          width: i % 5 === 0 ? 2 : 1,
+          height: i % 5 === 0 ? 2 : 1,
+          background: 'rgba(255,255,255,' + (0.15 + ((i * 7) % 50) / 100) + ')',
+          animation: 'twinkle ' + (2 + i % 3) + 's ease-in-out infinite',
+          animationDelay: (i * 0.3) + 's',
+        }} />
+      ))}
+      <div className="absolute" style={{ top: '6%', right: '18%', width: 40, height: 40, borderRadius: '50%', background: 'radial-gradient(circle,rgba(255,255,220,0.12) 0%,transparent 70%)', boxShadow: '0 0 30px rgba(255,255,200,0.06)' }} />
+      <div className="absolute bottom-0 left-0 right-0" style={{ height: '22%' }}>
+        <svg viewBox="0 0 400 80" preserveAspectRatio="none" className="absolute w-full" style={{ bottom: 40, height: 40, opacity: 0.25 }}><path d="M0,40 Q50,20 100,40 T200,40 T300,40 T400,40 V80 H0Z" fill="rgba(42,125,168,0.5)"><animate attributeName="d" dur="6s" repeatCount="indefinite" values="M0,40 Q50,20 100,40 T200,40 T300,40 T400,40 V80 H0Z;M0,42 Q50,25 100,38 T200,42 T300,38 T400,42 V80 H0Z;M0,40 Q50,20 100,40 T200,40 T300,40 T400,40 V80 H0Z" /></path></svg>
+        <svg viewBox="0 0 400 80" preserveAspectRatio="none" className="absolute w-full" style={{ bottom: 15, height: 40, opacity: 0.35 }}><path d="M0,45 Q60,25 120,45 T240,45 T360,40 T400,45 V80 H0Z" fill="rgba(26,82,118,0.6)"><animate attributeName="d" dur="5s" repeatCount="indefinite" values="M0,45 Q60,25 120,45 T240,45 T360,40 T400,45 V80 H0Z;M0,43 Q60,30 120,43 T240,47 T360,42 T400,43 V80 H0Z;M0,45 Q60,25 120,45 T240,45 T360,40 T400,45 V80 H0Z" /></path></svg>
+        <svg viewBox="0 0 400 80" preserveAspectRatio="none" className="absolute w-full" style={{ bottom: 0, height: 30, opacity: 0.5 }}><path d="M0,50 Q40,35 80,50 T160,50 T240,48 T320,50 T400,50 V80 H0Z" fill="rgba(10,30,50,0.8)"><animate attributeName="d" dur="4s" repeatCount="indefinite" values="M0,50 Q40,35 80,50 T160,50 T240,48 T320,50 T400,50 V80 H0Z;M0,48 Q40,38 80,48 T160,52 T240,46 T320,52 T400,48 V80 H0Z;M0,50 Q40,35 80,50 T160,50 T240,48 T320,50 T400,50 V80 H0Z" /></path></svg>
+      </div>
+      <style>{`@keyframes twinkle { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }`}</style>
+    </div>
+  );
+}
+
 function NightSeaCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef(0);
@@ -337,7 +434,7 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
 
   return (
     <div className="min-h-screen relative" style={{ background: c.bg }}>
-      {!isPreview && <NightSeaCanvas />}
+      {isPreview ? <NightSeaPreviewBg /> : <NightSeaCanvas />}
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (
         <button onClick={toggleMusic} className="fixed top-5 right-5 z-50 w-11 h-11 rounded-full flex items-center justify-center transition-all" style={{ background: 'rgba(7, 11, 20, 0.8)', backdropFilter: 'blur(10px)', border: `1px solid ${c.border}` }}>
@@ -347,8 +444,10 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
 
       <section className="min-h-screen flex flex-col justify-center items-center px-6 relative" style={{ zIndex: 1 }}>
         {wedding.heroMedia && (
-          <motion.div initial="hidden" animate="visible" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 2 } } }} className="w-full max-w-lg">
-            <div className="relative" style={{ borderRadius: '8px', overflow: 'hidden', boxShadow: '0 0 60px rgba(80, 140, 200, 0.08)' }}>
+          <motion.div initial="hidden" animate="visible" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 2 } } }} className="w-full max-w-md">
+            <div className="relative" style={{ borderRadius: '12px', overflow: 'hidden', boxShadow: '0 0 80px rgba(42, 125, 168, 0.15), 0 0 40px rgba(15, 58, 94, 0.2)' }}>
+              <div className="absolute inset-0 rounded-[12px] pointer-events-none" style={{ zIndex: 3, border: '1px solid transparent', background: 'linear-gradient(180deg, rgba(160,210,255,0.15) 0%, rgba(42,125,168,0.25) 60%, rgba(26,82,118,0.4) 85%, rgba(10,30,50,0.6) 100%) border-box', WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)', WebkitMaskComposite: 'xor', maskComposite: 'exclude' }} />
+              <div className="absolute bottom-0 left-0 right-0 h-[25%] pointer-events-none" style={{ zIndex: 3, background: 'linear-gradient(0deg, rgba(10,30,50,0.5) 0%, rgba(13,40,68,0.2) 40%, transparent 100%)' }} />
               <div className="aspect-[3/4] overflow-hidden">
                 {wedding.heroMediaType === 'VIDEO' ? (
                   <video src={heroUrl(wedding.heroMedia)} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ filter: 'saturate(0.8) brightness(0.9) contrast(1.05)' }} />
@@ -357,6 +456,7 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
                 )}
               </div>
               <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(7, 11, 20, 0.1) 0%, transparent 30%, transparent 55%, rgba(7, 11, 20, 0.85) 100%)' }} />
+              <HeroDustCanvas />
               <div className="absolute bottom-8 left-0 right-0 text-center">
                 <div className="flex items-center justify-center gap-6 mb-4">
                   <span className="text-[1.5rem]" style={{ ...f, color: '#E0EAF4' }}>{wedding.groomName}</span>

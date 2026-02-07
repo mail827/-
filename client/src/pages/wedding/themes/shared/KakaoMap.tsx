@@ -95,7 +95,7 @@ export default function KakaoMap({ address, venue, latitude, longitude, classNam
   return (
     <div 
       ref={mapRef} 
-      className={`w-full h-48 sm:h-64 bg-stone-100 flex items-center justify-center ${className}`}
+      className={`w-full bg-stone-100 flex items-center justify-center ${className || "h-48 sm:h-64"}`}
     >
       {!mapLoaded && (
         <span className="text-stone-400 text-sm">지도를 불러오는 중...</span>
