@@ -17,6 +17,7 @@ import {
   LunaHalfmoon,
   PearlDrift,
   NightSea,
+  AquaGlobe,
 } from '../pages/wedding/themes';
 
 function NightSeaBg({ active }: { active: boolean }) {
@@ -147,6 +148,7 @@ const themeComponents: Record<string, React.ComponentType<any>> = {
   LUNA_HALFMOON: LunaHalfmoon,
   PEARL_DRIFT: PearlDrift,
   NIGHT_SEA: NightSea,
+  AQUA_GLOBE: AquaGlobe,
   NightSea,
 };
 
@@ -166,6 +168,7 @@ const themeAccents: Record<string, { accent: string; glow: string }> = {
   LUNA_HALFMOON: { accent: 'rgba(144,175,197,0.15)', glow: 'rgba(144,175,197,0.1)' },
   PEARL_DRIFT: { accent: 'rgba(232,238,242,0.12)', glow: 'rgba(232,238,242,0.08)' },
   NIGHT_SEA: { accent: 'rgba(80,160,240,0.15)', glow: 'rgba(80,160,240,0.1)' },
+  AQUA_GLOBE: { accent: 'rgba(100,200,240,0.12)', glow: 'rgba(255,180,100,0.08)' },
 };
 
 const IPhoneMockup = ({ children }: { children: React.ReactNode }) => (
@@ -298,6 +301,7 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
       LUNA_HALFMOON: '루나 하프문',
       PEARL_DRIFT: '펄 드리프트',
       NIGHT_SEA: '밤바다',
+      AQUA_GLOBE: '아쿠아 글로브',
     };
     return names[theme] || theme;
   };

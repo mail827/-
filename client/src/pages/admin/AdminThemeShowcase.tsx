@@ -17,6 +17,7 @@ const THEME_OPTIONS = [
   { id: 'LUNA_HALFMOON', name: '루나 하프문' },
   { id: 'PEARL_DRIFT', name: '펄 드리프트' },
   { id: 'NIGHT_SEA', name: '밤바다' },
+  { id: 'AQUA_GLOBE', name: '아쿠아 글로브' },
 ];
 
 const DEFAULT_SAMPLE_DATA = {

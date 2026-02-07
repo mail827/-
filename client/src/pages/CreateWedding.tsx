@@ -19,6 +19,7 @@ const THEMES = [
   { id: 'LUNA_HALFMOON', name: 'Luna Halfmoon', desc: '순백의 고요한 물결', color: 'from-slate-50 to-blue-50' },
   { id: 'PEARL_DRIFT', name: 'Pearl Drift', desc: '심해 속 떠다니는 진주', color: 'from-gray-900 to-slate-800' },
   { id: 'NIGHT_SEA', name: '밤바다', desc: '별이 쏟아지는 밤, 깊은 바다', color: 'from-slate-950 to-blue-950' },
+  { id: 'AQUA_GLOBE', name: '아쿠아 글로브', desc: '청량한 수중 금붕어 세계', color: 'from-sky-200 to-cyan-300' },
 ];
 
 interface Package {

@@ -23,6 +23,7 @@ const THEMES = [
   { id: 'LUNA_HALFMOON', name: '루나 하프문', desc: '달빛 아래 로맨틱 무드' },
   { id: 'PEARL_DRIFT', name: '펄 드리프트', desc: '진주빛 우아한 흐름' },
   { id: 'NIGHT_SEA', name: '밤바다', desc: '별이 쏟아지는 밤바다' },
+  { id: 'AQUA_GLOBE', name: '아쿠아 글로브', desc: '청량한 수중 금붕어' },
 ];
 
 const SENIOR_COLORS = [

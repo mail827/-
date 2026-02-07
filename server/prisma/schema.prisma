@@ -363,6 +363,7 @@ enum Theme {
   LUNA_HALFMOON
   PEARL_DRIFT
   NIGHT_SEA
+  AQUA_GLOBE
 }
 
 enum MediaType {

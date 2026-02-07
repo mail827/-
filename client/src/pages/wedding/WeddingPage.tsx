@@ -19,6 +19,7 @@ import {
   LunaHalfmoon,
   PearlDrift,
   NightSea,
+  AquaGlobe,
 } from './themes';
 import AiChat from '../../components/AiChat';
 
@@ -70,6 +71,7 @@ const themeComponents: Record<Theme, React.ComponentType<any>> = {
   LUNA_HALFMOON: LunaHalfmoon,
   PEARL_DRIFT: PearlDrift,
   NIGHT_SEA: NightSea,
+  AQUA_GLOBE: AquaGlobe,
 };
 
 export default function WeddingPage() {
