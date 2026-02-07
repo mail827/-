@@ -3,24 +3,24 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import type { Wedding, Theme, Guestbook } from '../../types';
-import {
-  RomanticClassic,
-  ModernMinimal,
-  BohemianDream,
-  LuxuryGold,
-  PoeticLove,
-  ForestGarden,
-  OceanBreeze,
-  SeniorSimple,
-  GlassBubble,
-  SpringBreeze,
-  GalleryMirim1,
-  GalleryMirim2,
-  LunaHalfmoon,
-  PearlDrift,
-  NightSea,
-  AquaGlobe,
-} from './themes';
+import { lazy, Suspense } from 'react';
+
+const RomanticClassic = lazy(() => import('./themes/RomanticClassic'));
+const ModernMinimal = lazy(() => import('./themes/ModernMinimal'));
+const BohemianDream = lazy(() => import('./themes/BohemianDream'));
+const LuxuryGold = lazy(() => import('./themes/LuxuryGold'));
+const PoeticLove = lazy(() => import('./themes/PoeticLove'));
+const ForestGarden = lazy(() => import('./themes/ForestGarden'));
+const OceanBreeze = lazy(() => import('./themes/OceanBreeze'));
+const SeniorSimple = lazy(() => import('./themes/SeniorSimple'));
+const GlassBubble = lazy(() => import('./themes/GlassBubble'));
+const SpringBreeze = lazy(() => import('./themes/SpringBreeze'));
+const GalleryMirim1 = lazy(() => import('./themes/GalleryMirim1'));
+const GalleryMirim2 = lazy(() => import('./themes/GalleryMirim2'));
+const LunaHalfmoon = lazy(() => import('./themes/LunaHalfmoon'));
+const PearlDrift = lazy(() => import('./themes/PearlDrift'));
+const NightSea = lazy(() => import('./themes/NightSea'));
+const AquaGlobe = lazy(() => import('./themes/AquaGlobe'));
 import AiChat from '../../components/AiChat';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -154,15 +154,17 @@ export default function WeddingPage() {
 
   return (
     <>
-      <ThemeComponent
-        wedding={wedding}
-        guestbooks={guestbookData?.guestbooks || []}
-        onRsvpSubmit={(data: any) => rsvpMutation.mutate(data)}
-        onGuestbookSubmit={(data: any) => guestbookMutation.mutate(data)}
-        isRsvpLoading={rsvpMutation.isPending}
-        isGuestbookLoading={guestbookMutation.isPending}
-        refetchGuestbook={refetchGuestbook}
-      />
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Heart className="w-6 h-6 animate-pulse text-stone-300" /></div>}>
+        <ThemeComponent
+          wedding={wedding}
+          guestbooks={guestbookData?.guestbooks || []}
+          onRsvpSubmit={(data: any) => rsvpMutation.mutate(data)}
+          onGuestbookSubmit={(data: any) => guestbookMutation.mutate(data)}
+          isRsvpLoading={rsvpMutation.isPending}
+          isGuestbookLoading={guestbookMutation.isPending}
+          refetchGuestbook={refetchGuestbook}
+        />
+      </Suspense>
       
       {wedding.aiEnabled && (
         <AiChat

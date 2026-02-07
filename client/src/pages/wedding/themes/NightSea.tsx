@@ -237,7 +237,7 @@ function NightSeaCanvas() {
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} />;
 }
 
-export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, isPreview }: ThemeProps & { isPreview?: boolean }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -337,7 +337,7 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
 
   return (
     <div className="min-h-screen relative" style={{ background: c.bg }}>
-      <NightSeaCanvas />
+      {!isPreview && <NightSeaCanvas />}
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (
         <button onClick={toggleMusic} className="fixed top-5 right-5 z-50 w-11 h-11 rounded-full flex items-center justify-center transition-all" style={{ background: 'rgba(7, 11, 20, 0.8)', backdropFilter: 'blur(10px)', border: `1px solid ${c.border}` }}>

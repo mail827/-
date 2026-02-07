@@ -236,7 +236,7 @@ function AccordionSection({ title, children, isOpen, onToggle }: { title: string
   );
 }
 
-export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, isPreview }: ThemeProps & { isPreview?: boolean }) {
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
@@ -294,7 +294,7 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: 'transparent' }}>
-      <AquaGlobeCanvas />
+      {!isPreview && <AquaGlobeCanvas />}
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (
         <button onClick={toggleMusic} className="fixed top-5 right-5 z-50 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300" style={{ background: c.card, backdropFilter: 'blur(12px)', border: '1px solid ' + c.cardBorder }}>

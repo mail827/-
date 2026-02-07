@@ -1,24 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Camera, User, ChevronUp, ChevronDown } from 'lucide-react';
-import {
-  RomanticClassic,
-  ModernMinimal,
-  BohemianDream,
-  LuxuryGold,
-  PoeticLove,
-  ForestGarden,
-  OceanBreeze,
-  SeniorSimple,
-  GlassBubble,
-  SpringBreeze,
-  GalleryMirim1,
-  GalleryMirim2,
-  LunaHalfmoon,
-  PearlDrift,
-  NightSea,
-  AquaGlobe,
-} from '../pages/wedding/themes';
+import { lazy, Suspense } from 'react';
+
+const RomanticClassic = lazy(() => import('../pages/wedding/themes/RomanticClassic'));
+const ModernMinimal = lazy(() => import('../pages/wedding/themes/ModernMinimal'));
+const BohemianDream = lazy(() => import('../pages/wedding/themes/BohemianDream'));
+const LuxuryGold = lazy(() => import('../pages/wedding/themes/LuxuryGold'));
+const PoeticLove = lazy(() => import('../pages/wedding/themes/PoeticLove'));
+const ForestGarden = lazy(() => import('../pages/wedding/themes/ForestGarden'));
+const OceanBreeze = lazy(() => import('../pages/wedding/themes/OceanBreeze'));
+const SeniorSimple = lazy(() => import('../pages/wedding/themes/SeniorSimple'));
+const GlassBubble = lazy(() => import('../pages/wedding/themes/GlassBubble'));
+const SpringBreeze = lazy(() => import('../pages/wedding/themes/SpringBreeze'));
+const GalleryMirim1 = lazy(() => import('../pages/wedding/themes/GalleryMirim1'));
+const GalleryMirim2 = lazy(() => import('../pages/wedding/themes/GalleryMirim2'));
+const LunaHalfmoon = lazy(() => import('../pages/wedding/themes/LunaHalfmoon'));
+const PearlDrift = lazy(() => import('../pages/wedding/themes/PearlDrift'));
+const NightSea = lazy(() => import('../pages/wedding/themes/NightSea'));
+const AquaGlobe = lazy(() => import('../pages/wedding/themes/AquaGlobe'));
 
 function NightSeaBg({ active }: { active: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -203,6 +203,7 @@ function AquaGlobeBg({ active }: { active: boolean }) {
   return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }} />;
 }
 
+
 const themeComponents: Record<string, React.ComponentType<any>> = {
   ROMANTIC_CLASSIC: RomanticClassic,
   MODERN_MINIMAL: ModernMinimal,
@@ -220,7 +221,6 @@ const themeComponents: Record<string, React.ComponentType<any>> = {
   PEARL_DRIFT: PearlDrift,
   NIGHT_SEA: NightSea,
   AQUA_GLOBE: AquaGlobe,
-  NightSea,
 };
 
 const themeAccents: Record<string, { accent: string; glow: string }> = {
@@ -637,8 +637,9 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
                   transition={{ duration: 0.3 }}
                 >
                   <IPhoneMockup>
-                    <div className="w-full h-full overflow-y-auto scrollbar-hide bg-white" style={{ transform: "translateZ(0)" }}>
+                    <div className="w-full h-full overflow-y-auto scrollbar-hide" style={{ transform: "translateZ(0)", background: current?.theme === 'NIGHT_SEA' ? '#0a1e32' : current?.theme === 'AQUA_GLOBE' ? '#d6effa' : '#fff' }}>
                       {ThemeComponent && (
+                        <Suspense fallback={<div className="flex items-center justify-center h-full"><div className="w-5 h-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" /></div>}>
                         <ThemeComponent
                           wedding={weddingData}
                           guestbooks={[]}
@@ -646,7 +647,9 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
                           onGuestbookSubmit={() => {}}
                           isRsvpLoading={false}
                           isGuestbookLoading={false}
+                          isPreview={true}
                         />
+                        </Suspense>
                       )}
                     </div>
                   </IPhoneMockup>
