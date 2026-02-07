@@ -19,6 +19,118 @@ import {
   NightSea,
 } from '../pages/wedding/themes';
 
+function NightSeaBg({ active }: { active: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const frameRef = useRef(0);
+  const rafRef = useRef(0);
+
+  useEffect(() => {
+    if (!active) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let W = 0, H = 0;
+    const resize = () => {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W * 2;
+      canvas.height = H * 2;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(2, 0, 0, 2, 0, 0);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const stars: { x: number; y: number; s: number; o: number; p: number; sp: number; vy: number }[] = [];
+    for (let i = 0; i < 60; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H * 0.7,
+        s: Math.random() * 1.2 + 0.2,
+        o: Math.random() * 0.4 + 0.1,
+        p: Math.random() * Math.PI * 2,
+        sp: Math.random() * 0.006 + 0.002,
+        vy: Math.random() * 0.08 + 0.02,
+      });
+    }
+
+    const shootings: { x: number; y: number; vx: number; vy: number; life: number; max: number; size: number }[] = [];
+
+    const draw = () => {
+      frameRef.current++;
+      const t = frameRef.current * 0.01;
+      ctx.clearRect(0, 0, W, H);
+
+      stars.forEach((s) => {
+        s.p += s.sp;
+        s.y += s.vy;
+        if (s.y > H * 0.75) { s.y = -5; s.x = Math.random() * W; }
+        const tw = Math.sin(s.p) * 0.5 + 0.5;
+        const a = s.o * tw;
+        if (a < 0.03) return;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.s, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(160,190,220,' + a + ')';
+        ctx.fill();
+      });
+
+      if (Math.random() < 0.004) {
+        shootings.push({
+          x: Math.random() * W * 0.7 + W * 0.1,
+          y: Math.random() * H * 0.2,
+          vx: Math.cos(2.2) * (1 + Math.random()),
+          vy: Math.sin(2.2) * (1 + Math.random()),
+          life: 0, max: 60 + Math.random() * 40,
+          size: 0.8 + Math.random() * 0.6,
+        });
+      }
+
+      for (let i = shootings.length - 1; i >= 0; i--) {
+        const s = shootings[i];
+        s.x += s.vx; s.y += s.vy; s.life++;
+        const fade = s.life < 8 ? s.life / 8 : s.life > s.max * 0.7 ? 1 - (s.life - s.max * 0.7) / (s.max * 0.3) : 1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, Math.max(0.1, s.size * fade), 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(200,220,255,' + (fade * 0.7) + ')';
+        ctx.fill();
+        if (s.life >= s.max) shootings.splice(i, 1);
+      }
+
+      const waveBase = H * 0.88;
+      for (let layer = 0; layer < 3; layer++) {
+        ctx.beginPath();
+        const yOff = layer * 12;
+        const speed = 0.2 + layer * 0.15;
+        const amp = 8 - layer * 2;
+        const alpha = 0.06 - layer * 0.015;
+        for (let x = 0; x <= W; x += 3) {
+          const y = waveBase + yOff + Math.sin(x * 0.004 + t * speed) * amp + Math.sin(x * 0.007 - t * speed * 0.6) * amp * 0.5;
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.lineTo(W, H);
+        ctx.lineTo(0, H);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(40,100,160,' + alpha + ')';
+        ctx.fill();
+      }
+
+      rafRef.current = requestAnimationFrame(draw);
+    };
+    rafRef.current = requestAnimationFrame(draw);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('resize', resize);
+    };
+  }, [active]);
+
+  if (!active) return null;
+  return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }} />;
+}
+
 const themeComponents: Record<string, React.ComponentType<any>> = {
   ROMANTIC_CLASSIC: RomanticClassic,
   MODERN_MINIMAL: ModernMinimal,
@@ -263,6 +375,8 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
         <div className="absolute inset-0 opacity-[0.015]" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
         }} />
+
+        <NightSeaBg active={current?.theme === 'NIGHT_SEA'} />
 
         <button
           onClick={onClose}
