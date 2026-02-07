@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Save, Eye, X, Plus, Music, Film, Image, Sparkles, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Eye, X, Plus, Music, Film, Image, Sparkles, Loader2, QrCode } from 'lucide-react';
 import AiWritingAssistant from '../components/AiWritingAssistant';
 import PairManager from '../components/admin/PairManager';
+import QRCardModal from '../components/QRCardModal';
 
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'wedding_guide';
@@ -84,6 +85,7 @@ export default function EditWedding() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({});
   const [wedding, setWedding] = useState<any>(null);
@@ -448,6 +450,13 @@ export default function EditWedding() {
               className="p-2 text-stone-600 hover:bg-stone-100 rounded-lg"
             >
               <Eye className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setShowQR(true)}
+              className="p-2 text-stone-600 hover:bg-stone-100 rounded-lg"
+              title="인쇄용 QR 카드"
+            >
+              <QrCode className="w-5 h-5" />
             </button>
             <button
               onClick={handleSave}
@@ -1562,6 +1571,13 @@ export default function EditWedding() {
           </>
         )}
       </main>
+      {showQR && wedding && (
+        <QRCardModal
+          isOpen={showQR}
+          onClose={() => setShowQR(false)}
+          wedding={wedding}
+        />
+      )}
     </div>
   );
 }

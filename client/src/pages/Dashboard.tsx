@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users } from 'lucide-react';
+import { Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
+import QRCardModal from '../components/QRCardModal';
 
 interface User {
   id: string;
@@ -58,6 +59,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [weddings, setWeddings] = useState<Wedding[]>([]);
+  const [qrWedding, setQrWedding] = useState<Wedding | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [inquiries, setInquiries] = useState<any[]>([]);
@@ -387,6 +389,13 @@ export default function Dashboard() {
                       >
                         <Share2 className="w-4 h-4" />
                       </button>
+                      <button
+                        onClick={() => setQrWedding(wedding)}
+                        className="py-2.5 px-3 border border-stone-200 text-stone-600 rounded-lg hover:bg-stone-50 transition-colors"
+                        title="인쇄용 QR"
+                      >
+                        <QrCode className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </motion.div>
@@ -570,6 +579,13 @@ export default function Dashboard() {
         </div>
       )}
 
+      {qrWedding && (
+        <QRCardModal
+          isOpen={!!qrWedding}
+          onClose={() => setQrWedding(null)}
+          wedding={qrWedding as any}
+        />
+      )}
       <ChatWidget isLoggedIn={true} userEmail={user?.email || ""} userName={user?.name || ""} />
     </div>
   );
