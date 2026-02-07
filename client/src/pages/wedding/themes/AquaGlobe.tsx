@@ -89,13 +89,11 @@ function AquaGlobePreviewBg() {
           animationDelay: (i * 0.4) + 's',
         }} />
       ))}
-      <svg viewBox="0 0 100 50" className="absolute" style={{ top: '20%', left: '50%', transform: 'translateX(-50%)', width: 70, opacity: 0.85, animation: 'swimFish 8s ease-in-out infinite' }}>
-        <ellipse cx="50" cy="25" rx="20" ry="9" fill="#FF8C3A"/>
-        <ellipse cx="50" cy="25" rx="15" ry="7" fill="#FFA052"/>
-        <ellipse cx="45" cy="22" rx="2.5" ry="2.5" fill="#1a1a1a"/>
-        <path d="M70,25 Q82,15 78,25 Q82,35 70,25Z" fill="#FF8C3A" opacity="0.8"><animate attributeName="d" dur="0.8s" repeatCount="indefinite" values="M70,25 Q82,15 78,25 Q82,35 70,25Z;M70,25 Q82,18 78,25 Q82,32 70,25Z;M70,25 Q82,15 78,25 Q82,35 70,25Z" /></path>
-        <path d="M30,25 Q22,18 25,25 Q22,32 30,25Z" fill="#FF8C3A" opacity="0.6"/>
-        <path d="M43,15 Q50,5 57,15Z" fill="#FF8C3A" opacity="0.5"/>
+      <svg viewBox="0 0 512 512" className="absolute" style={{ top: '20%', left: '50%', transform: 'translateX(-50%)', width: 60, opacity: 0.85, animation: 'swimFish 8s ease-in-out infinite' }}>
+        <g><path style={{fill:'#FFD77D'}} d="M0,239.563h64c70.82-42.841,136.393-54.907,136.393-54.907C121.705,185.705,53.508,202.842,0,239.563z"/><path style={{fill:'#FFD77D'}} d="M360.918,147.235c-4.546-4.546-33.574-41.967-83.934-41.967c0,0-11.192,16.787,8.393,33.574L360.918,147.235z"/></g>
+        <path style={{fill:'#FFB455'}} d="M360.918,130.448c-58.754,0-142.689,50.361-142.689,50.361c-83.934,0-175.562,57.354-210.885,93.377c0,0,50.01-17.836,84.984-17.836c34.098,0,57.303,10.93,67.148,25.18c19.934,28.852,17.535,90.358-0.7,125.202c0,0,58.754-29.726,58.754-100.022c0-35.818,5.676-88.424,20.517-98.776c25.112,29.832,73.259,73.596,139.658,73.596C478.426,281.53,512,214.383,512,214.383S453.246,130.448,360.918,130.448z"/>
+        <circle style={{fill:'#464655'}} cx="453.246" cy="197.593" r="12.59"/>
+        <path style={{fill:'#FF9646'}} d="M320.773,270.346c-34.697-13.296-9.167-65.055-43.79-81.144c-17.021-7.909-33.574,8.393-38.937,18.732C254.488,228.805,278.975,254.328,320.773,270.346z"/>
       </svg>
       <style>{`
         @keyframes floatBubble { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
@@ -108,7 +106,10 @@ function AquaGlobePreviewBg() {
 function AquaGlobeCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef(0);
-  const fishRef = useRef<{ x: number; y: number; vx: number; vy: number; size: number; phase: number; tailPhase: number; color: [number, number, number]; turnTimer: number }[]>([]);
+  const fishRef = useRef<{ x: number; y: number; vx: number; vy: number; size: number; phase: number; tailPhase: number; color: [number, number, number]; turnTimer: number; trail: { x: number; y: number; life: number; size: number; opacity: number; vx: number; vy: number }[] }[]>([]);
+  const fishImgRef = useRef<HTMLImageElement | null>(null);
+  const fishImgFlipRef = useRef<HTMLImageElement | null>(null);
+  const fishImgLoaded = useRef(false);
   const bubblesRef = useRef<{ x: number; y: number; size: number; speed: number; wobble: number; wobbleSpeed: number; opacity: number }[]>([]);
   const dustRef = useRef<{ x: number; y: number; size: number; vx: number; vy: number; opacity: number; phase: number }[]>([]);
 
@@ -132,10 +133,35 @@ function AquaGlobeCanvas() {
     resize();
     window.addEventListener('resize', resize);
 
+    if (!fishImgRef.current) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        fishImgRef.current = img;
+        const flipCanvas = document.createElement('canvas');
+        flipCanvas.width = 512;
+        flipCanvas.height = 512;
+        const flipCtx = flipCanvas.getContext('2d');
+        if (flipCtx) {
+          flipCtx.translate(512, 0);
+          flipCtx.scale(-1, 1);
+          flipCtx.drawImage(img, 0, 0, 512, 512);
+        }
+        const flipImg = new Image();
+        flipImg.onload = () => {
+          fishImgFlipRef.current = flipImg;
+          fishImgLoaded.current = true;
+        };
+        flipImg.src = flipCanvas.toDataURL();
+      };
+      img.src = '/goldfish.svg';
+      fishImgRef.current = img;
+    }
+
     if (fishRef.current.length === 0) {
       const cols: [number, number, number][] = [[255, 130, 50], [255, 160, 75], [240, 110, 40], [255, 145, 85]];
       for (let i = 0; i < 4; i++) {
-        fishRef.current.push({ x: Math.random() * W * 0.6 + W * 0.2, y: Math.random() * H * 0.5 + H * 0.2, vx: (Math.random() - 0.5) * 1.0, vy: (Math.random() - 0.5) * 0.3, size: 36 + Math.random() * 20, phase: Math.random() * Math.PI * 2, tailPhase: Math.random() * Math.PI * 2, color: cols[i % 4], turnTimer: 200 + Math.random() * 300 });
+        fishRef.current.push({ x: Math.random() * W * 0.6 + W * 0.2, y: Math.random() * H * 0.5 + H * 0.2, vx: (Math.random() - 0.5) * 1.0, vy: (Math.random() - 0.5) * 0.3, size: 36 + Math.random() * 20, phase: Math.random() * Math.PI * 2, tailPhase: Math.random() * Math.PI * 2, color: cols[i % 4], turnTimer: 200 + Math.random() * 300, trail: [] });
       }
     }
     if (bubblesRef.current.length === 0) {
@@ -148,58 +174,54 @@ function AquaGlobeCanvas() {
     let raf: number;
 
     const drawFish = (fish: typeof fishRef.current[0], t: number) => {
-      const { x, y, size, color, tailPhase } = fish;
+      const { x, y, size } = fish;
       const dir = fish.vx >= 0 ? 1 : -1;
       const bodyWave = Math.sin(t * 2 + fish.phase) * 2;
+      if (!fishImgLoaded.current) return;
+      const img = dir === 1 ? fishImgRef.current : fishImgFlipRef.current;
+      if (!img) return;
+
+      if (frameRef.current % 3 === 0) {
+        const tailX = x + (dir === 1 ? -size * 0.6 : size * 0.6);
+        const tailY = y + bodyWave + Math.sin(t * 3 + fish.tailPhase) * size * 0.15;
+        for (let i = 0; i < 2; i++) {
+          fish.trail.push({
+            x: tailX + (Math.random() - 0.5) * size * 0.4,
+            y: tailY + (Math.random() - 0.5) * size * 0.3,
+            life: 1,
+            size: Math.random() * 2.5 + 1,
+            opacity: Math.random() * 0.4 + 0.2,
+            vx: -dir * (Math.random() * 0.3 + 0.1),
+            vy: (Math.random() - 0.5) * 0.15,
+          });
+        }
+      }
+
+      fish.trail = fish.trail.filter(p => {
+        p.life -= 0.015;
+        p.x += p.vx;
+        p.y += p.vy + Math.sin(t * 2 + p.x * 0.05) * 0.05;
+        p.size *= 0.995;
+        if (p.life <= 0) return false;
+        const a = p.opacity * p.life;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 200, 150, ' + a + ')';
+        ctx.fill();
+        if (p.size > 1.5) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 180, 120, ' + (a * 0.15) + ')';
+          ctx.fill();
+        }
+        return true;
+      });
+
+      const tilt = Math.sin(t * 1.5 + fish.phase) * 0.08;
       ctx.save();
       ctx.translate(x, y + bodyWave);
-      ctx.scale(dir, 1);
-      const tailSwing = Math.sin(t * 3 + tailPhase) * 0.4;
-      ctx.beginPath();
-      ctx.moveTo(size * 0.9, 0);
-      ctx.bezierCurveTo(size * 0.6, -size * 0.35, size * 0.1, -size * 0.4, -size * 0.3, -size * 0.15);
-      ctx.bezierCurveTo(-size * 0.5, -size * 0.05, -size * 0.5, size * 0.05, -size * 0.3, size * 0.15);
-      ctx.bezierCurveTo(size * 0.1, size * 0.4, size * 0.6, size * 0.35, size * 0.9, 0);
-      ctx.closePath();
-      const bodyGrad = ctx.createLinearGradient(-size * 0.3, -size * 0.3, size * 0.5, size * 0.3);
-      bodyGrad.addColorStop(0, 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',0.9)');
-      bodyGrad.addColorStop(0.5, 'rgba(' + Math.min(255, color[0] + 30) + ',' + Math.min(255, color[1] + 40) + ',' + Math.min(255, color[2] + 20) + ',0.85)');
-      bodyGrad.addColorStop(1, 'rgba(' + color[0] + ',' + (color[1] - 20) + ',' + (color[2] - 20) + ',0.8)');
-      ctx.fillStyle = bodyGrad;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(size * 0.3, -size * 0.15);
-      ctx.bezierCurveTo(size * 0.5, -size * 0.25, size * 0.6, -size * 0.15, size * 0.5, -size * 0.05);
-      ctx.fillStyle = 'rgba(255,255,255,0.2)';
-      ctx.fill();
-      ctx.save();
-      ctx.translate(-size * 0.35, 0);
-      ctx.rotate(tailSwing);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.bezierCurveTo(-size * 0.2, -size * 0.25, -size * 0.5, -size * 0.35, -size * 0.55, -size * 0.2);
-      ctx.bezierCurveTo(-size * 0.35, -size * 0.05, -size * 0.35, size * 0.05, -size * 0.55, size * 0.2);
-      ctx.bezierCurveTo(-size * 0.5, size * 0.35, -size * 0.2, size * 0.25, 0, 0);
-      ctx.closePath();
-      const tailGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.5);
-      tailGrad.addColorStop(0, 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',0.7)');
-      tailGrad.addColorStop(1, 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',0.15)');
-      ctx.fillStyle = tailGrad;
-      ctx.fill();
-      ctx.restore();
-      ctx.beginPath();
-      ctx.arc(size * 0.45, -size * 0.08, size * 0.06, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(20,40,60,0.7)';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(size * 0.46, -size * 0.09, size * 0.02, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(size * 0.15, -size * 0.3);
-      ctx.bezierCurveTo(size * 0.1, -size * 0.55, size * 0.25, -size * 0.6, size * 0.3, -size * 0.4);
-      ctx.fillStyle = 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',' + ((Math.sin(t * 2.5 + fish.phase) * 0.5 + 0.5) * 0.3 + 0.1) + ')';
-      ctx.fill();
+      ctx.rotate(tilt + fish.vy * 0.3);
+      ctx.drawImage(img, -size * 1.1, -size * 0.8, size * 2.2, size * 1.6);
       ctx.restore();
     };
 
