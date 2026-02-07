@@ -22,9 +22,8 @@ function NightSeaCanvas() {
 
     const resize = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const parent = canvas.parentElement;
-      W = parent ? parent.clientWidth : window.innerWidth;
-      H = parent ? parent.clientHeight : window.innerHeight;
+      W = window.innerWidth;
+      H = window.innerHeight;
       canvas.width = W * dpr;
       canvas.height = H * dpr;
       canvas.style.width = W + 'px';
