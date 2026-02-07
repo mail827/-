@@ -208,11 +208,11 @@ function AquaGlobeCanvas() {
 }
 
 const c = {
-  text: '#2C5F7C',
-  textSoft: 'rgba(44, 95, 124, 0.6)',
+  text: '#1E4D6B',
+  textSoft: 'rgba(30, 77, 107, 0.65)',
   textFaint: 'rgba(44, 95, 124, 0.35)',
-  card: 'rgba(255, 255, 255, 0.45)',
-  cardBorder: 'rgba(255, 255, 255, 0.6)',
+  card: 'rgba(255, 255, 255, 0.55)',
+  cardBorder: 'rgba(255, 255, 255, 0.65)',
   warm: '#FF8C42',
 };
 const f = { fontFamily: "'TaebaekMilkyWay', sans-serif" };
@@ -315,7 +315,7 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
           </motion.div>
         )}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 1 }} className="text-center">
-          <h1 className="text-3xl mb-3" style={{ ...f, color: c.text, letterSpacing: '0.15em' }}>
+          <h1 className="text-3xl mb-3 font-medium" style={{ ...f, color: c.text, letterSpacing: '0.15em' }}>
             {wedding.groomName} <span className="text-lg mx-3" style={{ color: c.textSoft }}>&</span> {wedding.brideName}
           </h1>
           <p className="text-sm tracking-widest" style={{ ...f, color: c.textSoft }}>{formatDate(wedding.weddingDate)}</p>
@@ -329,15 +329,17 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
       {wedding.greeting && (
         <section className="py-28 px-8 relative" style={{ zIndex: 1 }}>
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-lg mx-auto text-center">
-            <p className="text-[0.75rem] tracking-[0.3em] mb-12" style={{ ...f, color: c.textFaint }}>INVITATION</p>
-            {wedding.greetingTitle && <p className="text-base mb-10" style={{ ...f, color: c.text }}>{wedding.greetingTitle}</p>}
-            <p className="text-sm leading-[2.4] whitespace-pre-line" style={{ ...f, color: c.text }}>{wedding.greeting}</p>
+            <div className="py-10 px-8 rounded-3xl" style={{ background: 'rgba(255,255,255,0.4)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.5)' }}>
+              <p className="text-[0.75rem] tracking-[0.3em] mb-12" style={{ ...f, color: c.textFaint }}>INVITATION</p>
+              {wedding.greetingTitle && <p className="text-base mb-10 font-medium" style={{ ...f, color: c.text }}>{wedding.greetingTitle}</p>}
+              <p className="text-sm leading-[2.4] whitespace-pre-line" style={{ ...f, color: c.text }}>{wedding.greeting}</p>
             {wedding.showParents && (
               <div className="mt-12 text-xs leading-loose" style={{ ...f, color: c.textSoft }}>
                 <p><span style={{ color: c.textFaint }}>{wedding.groomFatherName} · {wedding.groomMotherName}</span>의 아들 <span style={{ color: c.text }}>{wedding.groomName}</span></p>
                 <p><span style={{ color: c.textFaint }}>{wedding.brideFatherName} · {wedding.brideMotherName}</span>의 딸 <span style={{ color: c.text }}>{wedding.brideName}</span></p>
               </div>
             )}
+            </div>
           </motion.div>
         </section>
       )}
@@ -468,7 +470,7 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
                   <div className="w-14 h-14 rounded-full flex items-center justify-center transition-all group-hover:scale-105" style={{ background: c.card, backdropFilter: 'blur(12px)', border: '1px solid ' + c.cardBorder }}>
                     <Phone size={18} style={{ color: c.text }} />
                   </div>
-                  <span className="text-xs" style={{ ...f, color: c.textSoft }}>신랑</span>
+                  <span className="text-xs font-medium" style={{ ...f, color: c.textSoft }}>신랑</span>
                 </a>
               )}
               {wedding.bridePhone && (
@@ -476,7 +478,7 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
                   <div className="w-14 h-14 rounded-full flex items-center justify-center transition-all group-hover:scale-105" style={{ background: c.card, backdropFilter: 'blur(12px)', border: '1px solid ' + c.cardBorder }}>
                     <Phone size={18} style={{ color: c.text }} />
                   </div>
-                  <span className="text-xs" style={{ ...f, color: c.textSoft }}>신부</span>
+                  <span className="text-xs font-medium" style={{ ...f, color: c.textSoft }}>신부</span>
                 </a>
               )}
             </div>
@@ -486,7 +488,7 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
 
       <section className="py-16 px-8 relative" style={{ zIndex: 1 }}>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-lg mx-auto">
-          {wedding.closingMessage && <p className="text-center text-sm leading-[2.2] mb-12 whitespace-pre-line" style={{ ...f, color: c.textSoft }}>{wedding.closingMessage}</p>}
+          {wedding.closingMessage && <div className="py-8 px-6 rounded-3xl mb-12" style={{ background: 'rgba(255,255,255,0.35)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.4)' }}><p className="text-center text-sm leading-[2.2] whitespace-pre-line" style={{ ...f, color: c.textSoft }}>{wedding.closingMessage}</p></div>}
           <button onClick={() => setShowShareModal(true)} className="w-full py-4 rounded-2xl text-sm flex items-center justify-center gap-2 transition-all hover:opacity-80" style={{ ...f, color: c.text, background: c.card, backdropFilter: 'blur(16px)', border: '1px solid ' + c.cardBorder }}>
             <Share2 size={16} /> 공유하기
           </button>

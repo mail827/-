@@ -243,7 +243,7 @@ const themeAccents: Record<string, { accent: string; glow: string }> = {
 };
 
 const IPhoneMockup = ({ children }: { children: React.ReactNode }) => (
-  <div className="relative">
+  <div className="relative scale-[0.72] sm:scale-[0.82] md:scale-[0.88] lg:scale-100 origin-center">
     <div className="absolute -inset-4 bg-gradient-to-b from-white/5 to-transparent rounded-[3.5rem] blur-2xl" />
     
     <div className="relative bg-[#1a1a1a] rounded-[3rem] p-[3px] shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_25px_50px_-12px_rgba(0,0,0,0.8)]">
