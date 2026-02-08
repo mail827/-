@@ -364,13 +364,26 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
   y2 += 28;
 
   if (w.greeting) {
-    ctx.font = `300 15px ${serif}`;
     ctx.fillStyle = '#6A5A4A';
-    const lines = wrapText(ctx, w.greeting, panel - 120);
-    const maxLines = Math.min(lines.length, 10);
+    const remainH = 870 - y2;
+    ctx.font = `300 15px ${serif}`;
+    let lines = wrapText(ctx, w.greeting, panel - 120);
+    let lineH = 26;
+    let fontSize = 15;
+    if (lines.length * lineH > remainH) {
+      fontSize = 13; lineH = 22;
+      ctx.font = `300 ${fontSize}px ${serif}`;
+      lines = wrapText(ctx, w.greeting, panel - 100);
+    }
+    if (lines.length * lineH > remainH) {
+      fontSize = 12; lineH = 20;
+      ctx.font = `300 ${fontSize}px ${serif}`;
+      lines = wrapText(ctx, w.greeting, panel - 90);
+    }
+    const maxLines = Math.min(lines.length, Math.floor(remainH / lineH));
     for (let i = 0; i < maxLines; i++) {
       ctx.fillText(lines[i], p2x, y2);
-      y2 += 26;
+      y2 += lineH;
     }
     y2 += 12;
   }
@@ -607,13 +620,26 @@ async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], ph
   y2 += 30;
 
   if (w.greeting) {
-    ctx.font = `400 14px ${sans}`;
     ctx.fillStyle = '#666666';
-    const lines = wrapText(ctx, w.greeting, panel - 120);
-    const maxLines = Math.min(lines.length, 10);
+    const remainH = 870 - y2;
+    ctx.font = `400 14px ${sans}`;
+    let lines = wrapText(ctx, w.greeting, panel - 120);
+    let lineH = 26;
+    let fontSize = 14;
+    if (lines.length * lineH > remainH) {
+      fontSize = 12; lineH = 22;
+      ctx.font = `400 ${fontSize}px ${sans}`;
+      lines = wrapText(ctx, w.greeting, panel - 100);
+    }
+    if (lines.length * lineH > remainH) {
+      fontSize = 11; lineH = 19;
+      ctx.font = `400 ${fontSize}px ${sans}`;
+      lines = wrapText(ctx, w.greeting, panel - 90);
+    }
+    const maxLines = Math.min(lines.length, Math.floor(remainH / lineH));
     for (let i = 0; i < maxLines; i++) {
       ctx.fillText(lines[i], p2x, y2);
-      y2 += 26;
+      y2 += lineH;
     }
     y2 += 15;
   }
