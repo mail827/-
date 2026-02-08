@@ -27,6 +27,7 @@ import { analyticsRouter } from './routes/analytics.js';
 import { couponRouter } from "./routes/coupon.js";
 import { pairRouter } from './routes/pair.js';
 import { mapRouter } from './routes/map.js';
+import ogRouter from './routes/og.js';
 
 dotenv.config();
 
@@ -73,6 +74,7 @@ app.use('/api/analytics', analyticsRouter);
 app.use('/api/coupon', couponRouter);
 app.use('/api/pair', pairRouter);
 app.use('/api/map', mapRouter);
+app.use('/api/og', ogRouter);
 
 seedPackages();
 

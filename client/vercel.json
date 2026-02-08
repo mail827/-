@@ -2,7 +2,7 @@
   "rewrites": [
     { "source": "/w/:slug", "has": [
       { "type": "header", "key": "user-agent", "value": "(?i).*(kakaotalk|facebookexternalhit|facebot|twitterbot|slackbot|linkedinbot|discordbot|telegrambot|whatsapp|line|googlebot|bingbot|yandexbot|naverbot|daumoa|pinterestbot|embedly).*" }
-    ], "destination": "/api/og/:slug" },
+    ], "destination": "https://wedding-api-bitter-butterfly-7766.fly.dev/api/og/:slug" },
     { "source": "/(.*)", "destination": "/" }
   ],
   "headers": [
