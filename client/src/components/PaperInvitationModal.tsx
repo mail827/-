@@ -31,7 +31,7 @@ interface Props {
 }
 
 const PW = 2400;
-const PH = 1200;
+const PH = 900;
 
 async function ensureFonts() {
   if (!document.getElementById('paper-inv-fonts')) {
@@ -253,8 +253,8 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
   ctx.fillStyle = '#7A6A5A';
   ctx.fillText(`${d.year}. ${String(d.month).padStart(2,'0')}. ${String(d.day).padStart(2,'0')}  ${d.dayNameEn}`, p1x, 105);
 
-  const imgW = 460, imgH = 560;
-  const imgX = p1x - imgW / 2, imgY = 130;
+  const imgW = 440, imgH = 480;
+  const imgX = p1x - imgW / 2, imgY = 125;
 
   ctx.strokeStyle = 'rgba(180,150,110,0.25)'; ctx.lineWidth = 1;
   ctx.strokeRect(imgX - 8, imgY - 8, imgW + 16, imgH + 16);
@@ -273,7 +273,7 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
   ctx.fillText([w.venueHall, w.weddingTime].filter(Boolean).join(' '), 0, 0); ctx.restore();
 
   ctx.textAlign = 'center';
-  const btm1 = imgY + imgH + 35;
+  const btm1 = imgY + imgH + 40;
   ctx.font = `italic 600 48px ${eng}`;
   ctx.fillStyle = '#4A3A28';
   ctx.fillText('Wedding', p1x, btm1);
@@ -282,17 +282,17 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
   ctx.fillText('S A V E  T H E  D A T E', p1x, btm1 + 38);
 
   if (invQr) {
-    const iqS = 70;
+    const iqS = 55;
     ctx.globalAlpha = 0.8;
-    ctx.drawImage(invQr, p1x - iqS / 2, btm1 + 60, iqS, iqS);
+    ctx.drawImage(invQr, p1x - iqS / 2, btm1 + 65, iqS, iqS);
     ctx.globalAlpha = 1.0;
     ctx.font = `300 8px ${serif}`;
     ctx.fillStyle = '#B4966E';
-    ctx.fillText('모바일 청첩장', p1x, btm1 + 60 + iqS + 10);
+    ctx.fillText('모바일 청첩장', p1x, btm1 + 65 + iqS + 10);
   }
 
   const p2x = panel + panel / 2;
-  const m2 = 90;
+  const m2 = 70;
 
   ctx.font = `500 20px ${eng}`;
   ctx.fillStyle = '#4A3A28';
@@ -309,10 +309,10 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
   ctx.fillStyle = '#9A8A7A';
   ctx.fillText([w.venue, w.venueHall, w.weddingTime].filter(Boolean).join('  '), p2x, y2);
 
-  y2 += 60;
+  y2 += 40;
   ctx.strokeStyle = 'rgba(180,150,110,0.15)'; ctx.lineWidth = 0.5;
   ctx.beginPath(); ctx.moveTo(p2x - 80, y2); ctx.lineTo(p2x + 80, y2); ctx.stroke();
-  y2 += 50;
+  y2 += 35;
 
   if (w.groomFatherName || w.groomMotherName) {
     ctx.font = `300 14px ${serif}`;
@@ -326,12 +326,12 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
   if (gEn) { ctx.fillText(gEn, p2x - 50, y2); }
   ctx.font = `700 24px ${serif}`;
   ctx.fillText(w.groomName, p2x + (gEn ? 50 : 0), y2);
-  y2 += 50;
+  y2 += 38;
 
   ctx.font = `italic 300 14px ${eng}`;
   ctx.fillStyle = 'rgba(180,150,110,0.5)';
   ctx.fillText('and', p2x, y2);
-  y2 += 45;
+  y2 += 32;
 
   if (w.brideFatherName || w.brideMotherName) {
     ctx.font = `300 14px ${serif}`;
@@ -345,11 +345,11 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
   if (bEn) { ctx.fillText(bEn, p2x - 50, y2); }
   ctx.font = `700 24px ${serif}`;
   ctx.fillText(w.brideName, p2x + (bEn ? 50 : 0), y2);
-  y2 += 55;
+  y2 += 40;
 
   ctx.strokeStyle = 'rgba(180,150,110,0.12)'; ctx.lineWidth = 0.5;
   ctx.beginPath(); ctx.moveTo(p2x - 60, y2); ctx.lineTo(p2x + 60, y2); ctx.stroke();
-  y2 += 40;
+  y2 += 28;
 
   if (w.greeting) {
     ctx.font = `300 15px ${serif}`;
@@ -358,9 +358,9 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
     const maxLines = Math.min(lines.length, 10);
     for (let i = 0; i < maxLines; i++) {
       ctx.fillText(lines[i], p2x, y2);
-      y2 += 32;
+      y2 += 26;
     }
-    y2 += 20;
+    y2 += 12;
   }
 
   ctx.strokeStyle = 'rgba(180,150,110,0.12)'; ctx.lineWidth = 0.5;
@@ -375,7 +375,7 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
 
   const p3x = panel * 2 + panel / 2;
 
-  const m3 = 75;
+  const m3 = 55;
   ctx.font = `500 18px ${eng}`;
   ctx.fillStyle = '#4A3A28';
   ctx.fillText('L O C A T I O N', p3x, m3);
@@ -385,7 +385,7 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
   let y3 = m3 + 50;
 
   if (staticMap) {
-    const mapW = 540, mapH = 280;
+    const mapW = 520, mapH = 240;
     const mapX = p3x - mapW / 2;
     ctx.save();
     ctx.strokeStyle = 'rgba(180,150,110,0.2)'; ctx.lineWidth = 1;
@@ -489,8 +489,8 @@ async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], ph
   ctx.fillStyle = '#999999';
   ctx.fillText(`${d.year}    ${String(d.month).padStart(2,'0')}/${String(d.day).padStart(2,'0')}    ${d.dayNameEn}.`, p1x, m1 + 38);
 
-  const imgW = 480, imgH = 580;
-  const imgX = p1x - imgW / 2, imgY = m1 + 60;
+  const imgW = 460, imgH = 460;
+  const imgX = p1x - imgW / 2, imgY = m1 + 55;
 
   ctx.save();
   ctx.shadowColor = 'rgba(0,0,0,0.06)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6;
@@ -511,7 +511,7 @@ async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], ph
   ctx.fillText([w.venueHall, w.weddingTime].filter(Boolean).join(' '), 0, 0); ctx.restore();
 
   ctx.textAlign = 'center';
-  const btm1 = imgY + imgH + 30;
+  const btm1 = imgY + imgH + 35;
   ctx.font = `italic 700 44px ${eng}`;
   ctx.fillStyle = '#1A1A1A';
   ctx.fillText('Wedding', p1x, btm1);
@@ -519,24 +519,25 @@ async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], ph
   ctx.fillText('S A V E  T H E  D A T E', p1x, btm1 + 35);
 
   if (invQr) {
-    const iqS = 65;
+    const iqS = 50;
     ctx.globalAlpha = 0.7;
-    ctx.drawImage(invQr, p1x - iqS / 2, btm1 + 55, iqS, iqS);
+    ctx.drawImage(invQr, p1x - iqS / 2, btm1 + 58, iqS, iqS);
     ctx.globalAlpha = 1.0;
     ctx.font = `400 8px ${sans}`;
     ctx.fillStyle = '#CCCCCC';
-    ctx.fillText('모바일 청첩장', p1x, btm1 + 55 + iqS + 10);
+    ctx.fillText('모바일 청첩장', p1x, btm1 + 58 + iqS + 10);
   }
 
   const p2x = panel + panel / 2;
-  const m2 = 60;
+  
 
+  const m2s = 55;
   ctx.font = `700 18px ${eng}`;
   ctx.fillStyle = '#1A1A1A';
-  ctx.fillText('O U R  M A R R I A G E', p2x, m2);
-  ctx.fillStyle = '#1A1A1A'; ctx.fillRect(p2x - 110, m2 + 15, 220, 1);
+  ctx.fillText('O U R  M A R R I A G E', p2x, m2s);
+  ctx.fillStyle = '#1A1A1A'; ctx.fillRect(p2x - 110, m2s + 15, 220, 1);
 
-  let y2 = m2 + 48;
+  let y2 = m2s + 42;
   ctx.font = `400 14px ${eng}`;
   ctx.fillStyle = '#888888';
   ctx.fillText(`${d.year}  ·  ${d.month}/${d.day}  ·  ${d.dayNameEn}`, p2x, y2);
@@ -545,9 +546,9 @@ async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], ph
   ctx.fillStyle = '#AAAAAA';
   ctx.fillText([w.venue, w.venueHall, w.weddingTime].filter(Boolean).join('  '), p2x, y2);
 
-  y2 += 45;
+  y2 += 30;
   ctx.fillStyle = '#E8E8E8'; ctx.fillRect(p2x - 60, y2, 120, 0.5);
-  y2 += 35;
+  y2 += 28;
 
   if (w.groomFatherName || w.groomMotherName) {
     ctx.font = `400 13px ${sans}`;
@@ -618,7 +619,7 @@ async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], ph
     ctx.globalAlpha = 1.0; ctx.restore();
   }
 
-  const m3m = 70;
+  const m3m = 50;
   ctx.font = `600 16px ${eng}`;
   ctx.fillStyle = '#1A1A1A';
   ctx.fillText('L O C A T I O N', p3x, m3m);
@@ -627,7 +628,7 @@ async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], ph
   let y3 = m3m + 45;
 
   if (staticMap) {
-    const mapW = 540, mapH = 280;
+    const mapW = 520, mapH = 240;
     const mapX = p3x - mapW / 2;
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.06)'; ctx.shadowBlur = 10;
@@ -833,8 +834,8 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
             <div className="bg-stone-50 rounded-xl p-4 space-y-2">
               <p className="text-sm font-medium text-stone-700">인쇄 안내</p>
               <ul className="text-xs text-stone-500 space-y-1.5 leading-relaxed">
-                <li>· 3단 접지 규격 (펼침 381×178mm / 접힘 127×178mm)</li>
-                <li>· 300dpi 고해상도 (2400×1600px)</li>
+                <li>· 3단 접지 규격 (펼침 381×143mm / 접힘 127×143mm)</li>
+                <li>· 300dpi 고해상도 (2400×900px)</li>
                 <li>· 추천 용지: 랑데부지 250g, 스노우화이트, 코튼지</li>
                 <li>· 인쇄소에 파일 전달 후 3단 접지 재단 요청</li>
                 <li>· 지도 QR코드를 스캔하면 카카오맵이 열립니다</li>
