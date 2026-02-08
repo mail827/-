@@ -994,8 +994,8 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
   ctx.font = 'italic 400 14px ' + s.en; ctx.fillStyle = s.muted;
   ctx.fillText(d.monthEn + ' ' + d.year, rx, ry);
   ry += 18;
-  drawCalendar(ctx, rx - 160, ry, 320, d, 'cool');
-  ry += 155 + gap;
+  const calEnd = drawCalendar(ctx, rx - 160, ry, 320, d, 'cool');
+  ry = calEnd + gap;
 
   if (w.greeting) {
     ctx.save();
