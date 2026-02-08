@@ -1,0 +1,853 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { X, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import QRCode from 'qrcode';
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  wedding: {
+    slug: string;
+    groomName: string;
+    brideName: string;
+    groomNameEn?: string;
+    brideNameEn?: string;
+    groomFatherName?: string;
+    groomMotherName?: string;
+    brideFatherName?: string;
+    brideMotherName?: string;
+    weddingDate: string;
+    weddingTime: string;
+    venue: string;
+    venueHall?: string;
+    venueAddress: string;
+    venueKakaoMap?: string;
+    groomPhone?: string;
+    bridePhone?: string;
+    greeting?: string;
+    greetingTitle?: string;
+  };
+  photoUrl?: string;
+}
+
+const PW = 2400;
+const PH = 1200;
+
+async function ensureFonts() {
+  if (!document.getElementById('paper-inv-fonts')) {
+    const link = document.createElement('link');
+    link.id = 'paper-inv-fonts';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;600;700&family=Nanum+Myeongjo:wght@400;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap';
+    document.head.appendChild(link);
+  }
+  if (!document.getElementById('paper-inv-extra')) {
+    const s = document.createElement('style');
+    s.id = 'paper-inv-extra';
+    s.textContent = "@font-face{font-family:'MaruBuri';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10-21@1.0/MaruBuri-Regular.woff') format('woff');font-weight:400;font-display:swap;}";
+    document.head.appendChild(s);
+  }
+  await Promise.all([
+    document.fonts.load('700 48px "Noto Serif KR"'),
+    document.fonts.load('800 48px "Nanum Myeongjo"'),
+    document.fonts.load('600 48px "Cormorant Garamond"'),
+    document.fonts.load('700 48px "Playfair Display"'),
+    document.fonts.load('400 48px "MaruBuri"'),
+  ].map(p => Promise.race([p, new Promise(r => setTimeout(r, 2500))])));
+  await document.fonts.ready;
+}
+
+
+function lngLatToTile(lat: number, lng: number, zoom: number) {
+  const n = Math.pow(2, zoom);
+  const x = ((lng + 180) / 360) * n;
+  const y = (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * n;
+  return { x, y };
+}
+
+function renderOsmTiles(lat: number, lng: number, zoom: number, w: number, h: number): Promise<HTMLCanvasElement> {
+  return new Promise((resolve, _reject) => {
+    const { x: cx, y: cy } = lngLatToTile(lat, lng, zoom);
+    const tileSize = 256;
+    const tilesX = Math.ceil(w / tileSize) + 1;
+    const tilesY = Math.ceil(h / tileSize) + 1;
+    const startTileX = Math.floor(cx - tilesX / 2);
+    const startTileY = Math.floor(cy - tilesY / 2);
+    const offsetX = (cx - startTileX) * tileSize - w / 2;
+    const offsetY = (cy - startTileY) * tileSize - h / 2;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d')!;
+    ctx.fillStyle = '#F2F0EB'; ctx.fillRect(0, 0, w, h);
+
+    let loaded = 0;
+    const total = tilesX * tilesY;
+    const tryResolve = () => { loaded++; if (loaded >= total) drawMarkerAndResolve(); };
+
+    const drawMarkerAndResolve = () => {
+      const markerX = (cx - startTileX) * tileSize - offsetX;
+      const markerY = (cy - startTileY) * tileSize - offsetY;
+      ctx.fillStyle = '#E74C3C';
+      ctx.beginPath();
+      ctx.moveTo(markerX, markerY - 28);
+      ctx.bezierCurveTo(markerX - 14, markerY - 28, markerX - 14, markerY - 8, markerX, markerY);
+      ctx.bezierCurveTo(markerX + 14, markerY - 8, markerX + 14, markerY - 28, markerX, markerY - 28);
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.arc(markerX, markerY - 18, 5, 0, Math.PI * 2); ctx.fill();
+      resolve(canvas);
+    };
+
+    for (let tx = 0; tx < tilesX; tx++) {
+      for (let ty = 0; ty < tilesY; ty++) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        const tileX2 = startTileX + tx;
+        const tileY2 = startTileY + ty;
+        const drawX = tx * tileSize - offsetX;
+        const drawY = ty * tileSize - offsetY;
+        img.onload = () => { ctx.drawImage(img, drawX, drawY, tileSize, tileSize); tryResolve(); };
+        img.onerror = () => tryResolve();
+        img.src = `https://tile.openstreetmap.org/${zoom}/${tileX2}/${tileY2}.png`;
+      }
+    }
+
+    setTimeout(() => resolve(canvas), 5000);
+  });
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, _reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = _reject;
+    img.src = src;
+  });
+}
+
+function parseDate(dateStr: string) {
+  const d = new Date(dateStr);
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  const daysEn = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return {
+    year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate(),
+    dayName: days[d.getDay()], dayNameEn: daysEn[d.getDay()],
+    monthEn: months[d.getMonth()],
+    daysInMonth: new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(),
+    firstDayOfMonth: new Date(d.getFullYear(), d.getMonth(), 1).getDay(),
+  };
+}
+
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
+  const result: string[] = [];
+  for (const paragraph of text.split('\n')) {
+    if (!paragraph.trim()) { result.push(''); continue; }
+    let line = '';
+    for (const char of paragraph) {
+      const test = line + char;
+      if (ctx.measureText(test).width > maxW && line) {
+        result.push(line); line = char;
+      } else { line = test; }
+    }
+    if (line) result.push(line);
+  }
+  return result;
+}
+
+function drawCalendar(ctx: CanvasRenderingContext2D, cx: number, cy: number, calW: number, d: ReturnType<typeof parseDate>, style: 'warm' | 'cool') {
+  const eng = '"Cormorant Garamond", serif';
+  const cellW = calW / 7;
+  const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = `500 15px ${eng}`;
+  ctx.fillStyle = style === 'warm' ? '#B4966E' : '#AAAAAA';
+  for (let i = 0; i < 7; i++) {
+    ctx.fillText(dayLabels[i], cx + cellW * i + cellW / 2, cy);
+  }
+
+  ctx.strokeStyle = style === 'warm' ? 'rgba(180,150,110,0.12)' : 'rgba(0,0,0,0.06)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(cx, cy + 12); ctx.lineTo(cx + calW, cy + 12); ctx.stroke();
+
+  ctx.font = `400 17px ${eng}`;
+  let dayNum = 1;
+  for (let i = 0; i < 42 && dayNum <= d.daysInMonth; i++) {
+    if (i < d.firstDayOfMonth) continue;
+    const col = i % 7;
+    const row = Math.floor(i / 7);
+    const dx = cx + cellW * col + cellW / 2;
+    const dy = cy + 30 + row * 32;
+
+    if (dayNum === d.day) {
+      ctx.fillStyle = style === 'warm' ? '#4A3A28' : '#1A1A1A';
+      ctx.beginPath(); ctx.arc(dx, dy, 16, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = style === 'warm' ? '#FDF8F0' : '#FFFFFF';
+      ctx.font = `600 17px ${eng}`;
+      ctx.fillText(String(dayNum), dx, dy);
+      ctx.font = `400 17px ${eng}`;
+    } else {
+      ctx.fillStyle = col === 0
+        ? (style === 'warm' ? 'rgba(180,100,100,0.5)' : '#CCAAAA')
+        : (style === 'warm' ? '#9A8A7A' : '#AAAAAA');
+      ctx.fillText(String(dayNum), dx, dy);
+    }
+    dayNum++;
+  }
+  const rows = Math.ceil((d.firstDayOfMonth + d.daysInMonth) / 7);
+  return cy + 30 + rows * 32 + 10;
+}
+
+function drawPhoto(ctx: CanvasRenderingContext2D, photo: HTMLImageElement | null, x: number, y: number, w: number, h: number, placeholder: string) {
+  if (photo) {
+    const sRatio = photo.width / photo.height;
+    const dRatio = w / h;
+    let sx = 0, sy = 0, sw = photo.width, sh = photo.height;
+    if (sRatio > dRatio) { sw = photo.height * dRatio; sx = (photo.width - sw) / 2; }
+    else { sh = photo.width / dRatio; sy = (photo.height - sh) / 2; }
+    ctx.drawImage(photo, sx, sy, sw, sh, x, y, w, h);
+  } else {
+    ctx.fillStyle = 'rgba(0,0,0,0.03)';
+    ctx.fillRect(x, y, w, h);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '300 16px "Noto Serif KR", serif';
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.fillText(placeholder, x + w / 2, y + h / 2);
+  }
+}
+
+async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], photo: HTMLImageElement | null, mapQr: HTMLImageElement | null, staticMap: HTMLImageElement | null, invQr: HTMLImageElement | null) {
+  const d = parseDate(w.weddingDate);
+  const serif = '"Noto Serif KR", serif';
+  const eng = '"Cormorant Garamond", serif';
+  const panel = PW / 3;
+
+  const bg = ctx.createLinearGradient(0, 0, PW, PH);
+  bg.addColorStop(0, '#FBF6EE'); bg.addColorStop(0.33, '#FDFAF4'); bg.addColorStop(0.66, '#FBF6EE'); bg.addColorStop(1, '#F8F2E8');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, PW, PH);
+  ctx.fillStyle = 'rgba(180,150,110,0.012)';
+  for (let i = 0; i < PW; i += 4) for (let j = 0; j < PH; j += 4) {
+    if ((i * 3 + j * 7) % 31 < 2) ctx.fillRect(i, j, 2, 2);
+  }
+
+  ctx.strokeStyle = 'rgba(180,150,110,0.06)'; ctx.lineWidth = 0.5;
+  ctx.setLineDash([3, 8]);
+  ctx.beginPath(); ctx.moveTo(panel, 50); ctx.lineTo(panel, PH - 50); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(panel * 2, 50); ctx.lineTo(panel * 2, PH - 50); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const p1x = panel / 2;
+
+  ctx.font = `italic 300 18px ${eng}`;
+  ctx.fillStyle = 'rgba(180,150,110,0.6)';
+  ctx.fillText('Wedding Invitation', p1x, 65);
+
+  ctx.strokeStyle = 'rgba(180,150,110,0.2)'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(p1x - 70, 82); ctx.lineTo(p1x + 70, 82); ctx.stroke();
+
+  ctx.font = `400 15px ${eng}`;
+  ctx.fillStyle = '#7A6A5A';
+  ctx.fillText(`${d.year}. ${String(d.month).padStart(2,'0')}. ${String(d.day).padStart(2,'0')}  ${d.dayNameEn}`, p1x, 105);
+
+  const imgW = 460, imgH = 560;
+  const imgX = p1x - imgW / 2, imgY = 130;
+
+  ctx.strokeStyle = 'rgba(180,150,110,0.25)'; ctx.lineWidth = 1;
+  ctx.strokeRect(imgX - 8, imgY - 8, imgW + 16, imgH + 16);
+  ctx.strokeStyle = 'rgba(180,150,110,0.08)'; ctx.lineWidth = 0.5;
+  ctx.strokeRect(imgX - 14, imgY - 14, imgW + 28, imgH + 28);
+
+  drawPhoto(ctx, photo, imgX, imgY, imgW, imgH, '대표 사진');
+
+  ctx.textAlign = 'left';
+  ctx.save(); ctx.translate(imgX - 22, imgY + imgH / 2 + 80); ctx.rotate(-Math.PI / 2);
+  ctx.font = `300 12px ${serif}`; ctx.fillStyle = 'rgba(120,100,80,0.4)';
+  ctx.fillText(w.venue, 0, 0); ctx.restore();
+
+  ctx.save(); ctx.translate(imgX + imgW + 22, imgY + imgH / 2 - 80); ctx.rotate(Math.PI / 2);
+  ctx.font = `300 12px ${serif}`; ctx.fillStyle = 'rgba(120,100,80,0.4)';
+  ctx.fillText([w.venueHall, w.weddingTime].filter(Boolean).join(' '), 0, 0); ctx.restore();
+
+  ctx.textAlign = 'center';
+  const btm1 = imgY + imgH + 35;
+  ctx.font = `italic 600 48px ${eng}`;
+  ctx.fillStyle = '#4A3A28';
+  ctx.fillText('Wedding', p1x, btm1);
+  ctx.font = `500 18px ${eng}`;
+  ctx.fillStyle = '#7A6A5A';
+  ctx.fillText('S A V E  T H E  D A T E', p1x, btm1 + 38);
+
+  if (invQr) {
+    const iqS = 70;
+    ctx.globalAlpha = 0.8;
+    ctx.drawImage(invQr, p1x - iqS / 2, btm1 + 60, iqS, iqS);
+    ctx.globalAlpha = 1.0;
+    ctx.font = `300 8px ${serif}`;
+    ctx.fillStyle = '#B4966E';
+    ctx.fillText('모바일 청첩장', p1x, btm1 + 60 + iqS + 10);
+  }
+
+  const p2x = panel + panel / 2;
+  const m2 = 90;
+
+  ctx.font = `500 20px ${eng}`;
+  ctx.fillStyle = '#4A3A28';
+  ctx.fillText('O U R  M A R R I A G E', p2x, m2);
+  ctx.strokeStyle = 'rgba(180,150,110,0.2)'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(p2x - 130, m2 + 16); ctx.lineTo(p2x + 130, m2 + 16); ctx.stroke();
+
+  let y2 = m2 + 50;
+  ctx.font = `400 15px ${eng}`;
+  ctx.fillStyle = '#7A6A5A';
+  ctx.fillText(`${d.year}  ·  ${d.month}/${d.day}  ·  ${d.dayNameEn}`, p2x, y2);
+  y2 += 24;
+  ctx.font = `300 14px ${serif}`;
+  ctx.fillStyle = '#9A8A7A';
+  ctx.fillText([w.venue, w.venueHall, w.weddingTime].filter(Boolean).join('  '), p2x, y2);
+
+  y2 += 60;
+  ctx.strokeStyle = 'rgba(180,150,110,0.15)'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(p2x - 80, y2); ctx.lineTo(p2x + 80, y2); ctx.stroke();
+  y2 += 50;
+
+  if (w.groomFatherName || w.groomMotherName) {
+    ctx.font = `300 14px ${serif}`;
+    ctx.fillStyle = '#9A8A7A';
+    ctx.fillText([w.groomFatherName, w.groomMotherName].filter(Boolean).join(' · ') + ' 의 아들', p2x, y2);
+    y2 += 30;
+  }
+  ctx.font = `600 17px ${eng}`;
+  ctx.fillStyle = '#4A3A28';
+  const gEn = w.groomNameEn || '';
+  if (gEn) { ctx.fillText(gEn, p2x - 50, y2); }
+  ctx.font = `700 24px ${serif}`;
+  ctx.fillText(w.groomName, p2x + (gEn ? 50 : 0), y2);
+  y2 += 50;
+
+  ctx.font = `italic 300 14px ${eng}`;
+  ctx.fillStyle = 'rgba(180,150,110,0.5)';
+  ctx.fillText('and', p2x, y2);
+  y2 += 45;
+
+  if (w.brideFatherName || w.brideMotherName) {
+    ctx.font = `300 14px ${serif}`;
+    ctx.fillStyle = '#9A8A7A';
+    ctx.fillText([w.brideFatherName, w.brideMotherName].filter(Boolean).join(' · ') + ' 의 딸', p2x, y2);
+    y2 += 30;
+  }
+  ctx.font = `600 17px ${eng}`;
+  ctx.fillStyle = '#4A3A28';
+  const bEn = w.brideNameEn || '';
+  if (bEn) { ctx.fillText(bEn, p2x - 50, y2); }
+  ctx.font = `700 24px ${serif}`;
+  ctx.fillText(w.brideName, p2x + (bEn ? 50 : 0), y2);
+  y2 += 55;
+
+  ctx.strokeStyle = 'rgba(180,150,110,0.12)'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(p2x - 60, y2); ctx.lineTo(p2x + 60, y2); ctx.stroke();
+  y2 += 40;
+
+  if (w.greeting) {
+    ctx.font = `300 15px ${serif}`;
+    ctx.fillStyle = '#6A5A4A';
+    const lines = wrapText(ctx, w.greeting, panel - 120);
+    const maxLines = Math.min(lines.length, 10);
+    for (let i = 0; i < maxLines; i++) {
+      ctx.fillText(lines[i], p2x, y2);
+      y2 += 32;
+    }
+    y2 += 20;
+  }
+
+  ctx.strokeStyle = 'rgba(180,150,110,0.12)'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(p2x - 40, y2); ctx.lineTo(p2x + 40, y2); ctx.stroke();
+  y2 += 30;
+
+  ctx.font = `300 14px ${serif}`;
+  ctx.fillStyle = '#7A6A5A';
+  ctx.fillText(`${d.year}년 ${d.month}월 ${d.day}일 ${d.dayName}요일 ${w.weddingTime || ''}`, p2x, y2);
+  y2 += 24;
+  ctx.fillText(`${w.venue} ${w.venueHall || ''}`, p2x, y2);
+
+  const p3x = panel * 2 + panel / 2;
+
+  const m3 = 75;
+  ctx.font = `500 18px ${eng}`;
+  ctx.fillStyle = '#4A3A28';
+  ctx.fillText('L O C A T I O N', p3x, m3);
+  ctx.strokeStyle = 'rgba(180,150,110,0.2)'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(p3x - 90, m3 + 16); ctx.lineTo(p3x + 90, m3 + 16); ctx.stroke();
+
+  let y3 = m3 + 50;
+
+  if (staticMap) {
+    const mapW = 540, mapH = 280;
+    const mapX = p3x - mapW / 2;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(180,150,110,0.2)'; ctx.lineWidth = 1;
+    ctx.strokeRect(mapX - 2, y3 - 2, mapW + 4, mapH + 4);
+    const sR = staticMap.width / staticMap.height, dR = mapW / mapH;
+    let sx2 = 0, sy2 = 0, sw2 = staticMap.width, sh2 = staticMap.height;
+    if (sR > dR) { sw2 = staticMap.height * dR; sx2 = (staticMap.width - sw2) / 2; }
+    else { sh2 = staticMap.width / dR; sy2 = (staticMap.height - sh2) / 2; }
+    ctx.drawImage(staticMap, sx2, sy2, sw2, sh2, mapX, y3, mapW, mapH);
+    ctx.restore();
+    y3 += mapH + 25;
+  } else {
+    y3 += 10;
+  }
+
+  ctx.font = `400 20px ${serif}`;
+  ctx.fillStyle = '#4A3A28';
+  ctx.fillText(w.venue, p3x, y3);
+  y3 += 28;
+  if (w.venueHall) {
+    ctx.font = `300 15px ${serif}`;
+    ctx.fillStyle = '#7A6A5A';
+    ctx.fillText(w.venueHall, p3x, y3);
+    y3 += 24;
+  }
+  ctx.font = `300 12px ${serif}`;
+  ctx.fillStyle = '#9A8A7A';
+  const addrLines = wrapText(ctx, w.venueAddress, panel - 100);
+  for (const line of addrLines) {
+    ctx.fillText(line, p3x, y3);
+    y3 += 20;
+  }
+
+  y3 += 20;
+  if (mapQr) {
+    const qrS = 90;
+    ctx.drawImage(mapQr, p3x - qrS / 2, y3, qrS, qrS);
+    ctx.font = `300 9px ${serif}`;
+    ctx.fillStyle = '#B4966E';
+    ctx.fillText('지도 보기', p3x, y3 + qrS + 12);
+    y3 += qrS + 25;
+  }
+
+  y3 += 15;
+  ctx.font = `italic 400 15px ${eng}`;
+  ctx.fillStyle = '#B4966E';
+  ctx.fillText(`${d.monthEn} ${d.year}`, p3x, y3);
+  y3 += 22;
+  drawCalendar(ctx, p3x - 180, y3, 360, d, 'warm');
+
+  if (w.groomPhone || w.bridePhone) {
+    const cpY = PH - 55;
+    ctx.font = `300 11px ${serif}`;
+    ctx.fillStyle = '#B4966E';
+    const parts = [];
+    if (w.groomPhone) parts.push(`신랑 ${w.groomName}  ${w.groomPhone}`);
+    if (w.bridePhone) parts.push(`신부 ${w.brideName}  ${w.bridePhone}`);
+    ctx.fillText(parts.join('    '), p3x, cpY);
+  }
+
+  ctx.fillStyle = 'rgba(180,150,110,0.08)';
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath(); ctx.arc(p3x - 10 + i * 10, PH - 30, 1.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  ctx.textAlign = 'right';
+  ctx.font = '300 9px "Noto Serif KR", serif';
+  ctx.fillStyle = 'rgba(180,150,110,0.3)';
+  ctx.fillText('Made by 청첩장 작업실', PW - 30, PH - 15);
+}
+
+async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], photo: HTMLImageElement | null, mapQr: HTMLImageElement | null, staticMap: HTMLImageElement | null, invQr: HTMLImageElement | null) {
+  const d = parseDate(w.weddingDate);
+  const serif = '"Nanum Myeongjo", serif';
+  const eng = '"Playfair Display", serif';
+  const sans = '"MaruBuri", sans-serif';
+  const panel = PW / 3;
+
+  ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, PW, PH);
+  ctx.fillStyle = 'rgba(0,0,0,0.006)';
+  for (let y = 0; y < PH; y += 2) ctx.fillRect(0, y, PW, 1);
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(0, 0, PW, 4); ctx.fillRect(0, PH - 4, PW, 4);
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.03)'; ctx.lineWidth = 0.5;
+  ctx.setLineDash([2, 6]);
+  ctx.beginPath(); ctx.moveTo(panel, 30); ctx.lineTo(panel, PH - 30); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(panel * 2, 30); ctx.lineTo(panel * 2, PH - 30); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const p1x = panel / 2;
+  const m1 = 60;
+
+  ctx.font = `600 13px ${eng}`;
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillText('A N  I N V I T A T I O N', p1x, m1);
+  ctx.fillStyle = '#1A1A1A'; ctx.fillRect(p1x - 25, m1 + 14, 50, 1);
+
+  ctx.font = `400 14px ${eng}`;
+  ctx.fillStyle = '#999999';
+  ctx.fillText(`${d.year}    ${String(d.month).padStart(2,'0')}/${String(d.day).padStart(2,'0')}    ${d.dayNameEn}.`, p1x, m1 + 38);
+
+  const imgW = 480, imgH = 580;
+  const imgX = p1x - imgW / 2, imgY = m1 + 60;
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.06)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(imgX - 4, imgY - 4, imgW + 8, imgH + 8);
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(0,0,0,0.04)'; ctx.lineWidth = 0.5;
+  ctx.strokeRect(imgX - 4, imgY - 4, imgW + 8, imgH + 8);
+
+  drawPhoto(ctx, photo, imgX, imgY, imgW, imgH, '대표 사진');
+
+  ctx.textAlign = 'left';
+  ctx.save(); ctx.translate(imgX - 18, imgY + imgH / 2 + 80); ctx.rotate(-Math.PI / 2);
+  ctx.font = `400 11px ${sans}`; ctx.fillStyle = '#CCCCCC';
+  ctx.fillText(w.venue, 0, 0); ctx.restore();
+  ctx.save(); ctx.translate(imgX + imgW + 18, imgY + imgH / 2 - 80); ctx.rotate(Math.PI / 2);
+  ctx.font = `400 11px ${sans}`; ctx.fillStyle = '#CCCCCC';
+  ctx.fillText([w.venueHall, w.weddingTime].filter(Boolean).join(' '), 0, 0); ctx.restore();
+
+  ctx.textAlign = 'center';
+  const btm1 = imgY + imgH + 30;
+  ctx.font = `italic 700 44px ${eng}`;
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillText('Wedding', p1x, btm1);
+  ctx.font = `700 16px ${eng}`;
+  ctx.fillText('S A V E  T H E  D A T E', p1x, btm1 + 35);
+
+  if (invQr) {
+    const iqS = 65;
+    ctx.globalAlpha = 0.7;
+    ctx.drawImage(invQr, p1x - iqS / 2, btm1 + 55, iqS, iqS);
+    ctx.globalAlpha = 1.0;
+    ctx.font = `400 8px ${sans}`;
+    ctx.fillStyle = '#CCCCCC';
+    ctx.fillText('모바일 청첩장', p1x, btm1 + 55 + iqS + 10);
+  }
+
+  const p2x = panel + panel / 2;
+  const m2 = 60;
+
+  ctx.font = `700 18px ${eng}`;
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillText('O U R  M A R R I A G E', p2x, m2);
+  ctx.fillStyle = '#1A1A1A'; ctx.fillRect(p2x - 110, m2 + 15, 220, 1);
+
+  let y2 = m2 + 48;
+  ctx.font = `400 14px ${eng}`;
+  ctx.fillStyle = '#888888';
+  ctx.fillText(`${d.year}  ·  ${d.month}/${d.day}  ·  ${d.dayNameEn}`, p2x, y2);
+  y2 += 22;
+  ctx.font = `400 13px ${sans}`;
+  ctx.fillStyle = '#AAAAAA';
+  ctx.fillText([w.venue, w.venueHall, w.weddingTime].filter(Boolean).join('  '), p2x, y2);
+
+  y2 += 45;
+  ctx.fillStyle = '#E8E8E8'; ctx.fillRect(p2x - 60, y2, 120, 0.5);
+  y2 += 35;
+
+  if (w.groomFatherName || w.groomMotherName) {
+    ctx.font = `400 13px ${sans}`;
+    ctx.fillStyle = '#AAAAAA';
+    ctx.fillText([w.groomFatherName, w.groomMotherName].filter(Boolean).join(' · ') + ' 의 아들', p2x, y2);
+    y2 += 28;
+  }
+  ctx.font = `600 18px ${eng}`;
+  ctx.fillStyle = '#1A1A1A';
+  const gEn = w.groomNameEn || '';
+  if (gEn) ctx.fillText(gEn, p2x - 45, y2);
+  ctx.font = `700 24px ${serif}`;
+  ctx.fillText(w.groomName, p2x + (gEn ? 50 : 0), y2);
+  y2 += 40;
+
+  ctx.font = `italic 400 16px ${eng}`;
+  ctx.fillStyle = '#DDDDDD';
+  ctx.fillText('and', p2x, y2);
+  y2 += 45;
+
+  if (w.brideFatherName || w.brideMotherName) {
+    ctx.font = `400 13px ${sans}`;
+    ctx.fillStyle = '#AAAAAA';
+    ctx.fillText([w.brideFatherName, w.brideMotherName].filter(Boolean).join(' · ') + ' 의 딸', p2x, y2);
+    y2 += 28;
+  }
+  ctx.font = `600 18px ${eng}`;
+  ctx.fillStyle = '#1A1A1A';
+  const bEn = w.brideNameEn || '';
+  if (bEn) ctx.fillText(bEn, p2x - 45, y2);
+  ctx.font = `700 24px ${serif}`;
+  ctx.fillText(w.brideName, p2x + (bEn ? 50 : 0), y2);
+  y2 += 48;
+
+  ctx.fillStyle = '#E8E8E8'; ctx.fillRect(p2x - 40, y2, 80, 0.5);
+  y2 += 30;
+
+  if (w.greeting) {
+    ctx.font = `400 14px ${sans}`;
+    ctx.fillStyle = '#666666';
+    const lines = wrapText(ctx, w.greeting, panel - 120);
+    const maxLines = Math.min(lines.length, 10);
+    for (let i = 0; i < maxLines; i++) {
+      ctx.fillText(lines[i], p2x, y2);
+      y2 += 26;
+    }
+    y2 += 15;
+  }
+
+  ctx.fillStyle = '#E8E8E8'; ctx.fillRect(p2x - 30, y2, 60, 0.5);
+  y2 += 28;
+  ctx.font = `400 13px ${sans}`;
+  ctx.fillStyle = '#888888';
+  ctx.fillText(`${d.year}. ${d.month}. ${d.day}. ${d.dayName}요일 ${w.weddingTime || ''}`, p2x, y2);
+  y2 += 22;
+  ctx.fillText(`${w.venue} ${w.venueHall || ''}`, p2x, y2);
+
+  const p3x = panel * 2 + panel / 2;
+
+  if (photo) {
+    ctx.save(); ctx.globalAlpha = 0.04;
+    const bgW = panel, bgH = PH;
+    const sR = photo.width / photo.height, dR = bgW / bgH;
+    let sx = 0, sy = 0, sw = photo.width, sh = photo.height;
+    if (sR > dR) { sw = photo.height * dR; sx = (photo.width - sw) / 2; }
+    else { sh = photo.width / dR; sy = (photo.height - sh) / 2; }
+    ctx.drawImage(photo, sx, sy, sw, sh, panel * 2, 0, bgW, bgH);
+    ctx.globalAlpha = 1.0; ctx.restore();
+  }
+
+  const m3m = 70;
+  ctx.font = `600 16px ${eng}`;
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillText('L O C A T I O N', p3x, m3m);
+  ctx.fillStyle = '#1A1A1A'; ctx.fillRect(p3x - 80, m3m + 14, 160, 1);
+
+  let y3 = m3m + 45;
+
+  if (staticMap) {
+    const mapW = 540, mapH = 280;
+    const mapX = p3x - mapW / 2;
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.06)'; ctx.shadowBlur = 10;
+    ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.lineWidth = 0.5;
+    ctx.strokeRect(mapX, y3, mapW, mapH);
+    const sR = staticMap.width / staticMap.height, dR = mapW / mapH;
+    let sx2 = 0, sy2 = 0, sw2 = staticMap.width, sh2 = staticMap.height;
+    if (sR > dR) { sw2 = staticMap.height * dR; sx2 = (staticMap.width - sw2) / 2; }
+    else { sh2 = staticMap.width / dR; sy2 = (staticMap.height - sh2) / 2; }
+    ctx.drawImage(staticMap, sx2, sy2, sw2, sh2, mapX, y3, mapW, mapH);
+    ctx.restore();
+    y3 += mapH + 18;
+  } else {
+    y3 += 10;
+  }
+
+  ctx.font = `700 19px ${serif}`;
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillText(w.venue, p3x, y3);
+  y3 += 24;
+  if (w.venueHall) {
+    ctx.font = `400 14px ${sans}`;
+    ctx.fillStyle = '#888888';
+    ctx.fillText(w.venueHall, p3x, y3);
+    y3 += 22;
+  }
+  ctx.font = `400 11px ${sans}`;
+  ctx.fillStyle = '#AAAAAA';
+  const addrLines = wrapText(ctx, w.venueAddress, panel - 100);
+  for (const line of addrLines) {
+    ctx.fillText(line, p3x, y3);
+    y3 += 18;
+  }
+
+  y3 += 18;
+  if (mapQr) {
+    const qrS = 85;
+    ctx.drawImage(mapQr, p3x - qrS / 2, y3, qrS, qrS);
+    ctx.font = `400 9px ${sans}`;
+    ctx.fillStyle = '#BBBBBB';
+    ctx.fillText('지도 보기', p3x, y3 + qrS + 12);
+    y3 += qrS + 26;
+  }
+
+  y3 += 5;
+  ctx.font = `italic 400 14px ${eng}`;
+  ctx.fillStyle = '#CCCCCC';
+  ctx.fillText(`${d.monthEn} ${d.year}`, p3x, y3);
+  y3 += 20;
+  drawCalendar(ctx, p3x - 180, y3, 360, d, 'cool');
+
+  if (w.groomPhone || w.bridePhone) {
+    const cpY = PH - 60;
+    ctx.font = `400 10px ${sans}`;
+    ctx.fillStyle = '#BBBBBB';
+    const parts = [];
+    if (w.groomPhone) parts.push(`신랑 ${w.groomName}  ${w.groomPhone}`);
+    if (w.bridePhone) parts.push(`신부 ${w.brideName}  ${w.bridePhone}`);
+    ctx.fillText(parts.join('    '), p3x, cpY);
+  }
+
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(p3x - 1, PH - 30, 2, 14);
+
+  ctx.textAlign = 'right';
+  ctx.font = '400 9px "MaruBuri", sans-serif';
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
+  ctx.fillText('Made by 청첩장 작업실', PW - 30, PH - 10);
+}
+
+const DESIGNS = [
+  { id: 'classic', label: '클래식', desc: '따뜻한 아이보리 3단 접지', draw: drawClassic as any },
+  { id: 'modern', label: '모던', desc: '미니멀 화이트 3단 접지', draw: drawModern as any },
+];
+
+export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUrl }: Props) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [designIdx, setDesignIdx] = useState(0);
+  const [fontsReady, setFontsReady] = useState(false);
+  const [rendering, setRendering] = useState(false);
+  const [photo, setPhoto] = useState<HTMLImageElement | null>(null);
+  const [mapQr, setMapQr] = useState<HTMLImageElement | null>(null);
+  const [staticMap, setStaticMap] = useState<HTMLCanvasElement | null>(null);
+  const [invQr, setInvQr] = useState<HTMLImageElement | null>(null);
+
+  const current = DESIGNS[designIdx];
+
+  useEffect(() => {
+    if (isOpen && !fontsReady) {
+      ensureFonts().then(() => setFontsReady(true));
+    }
+  }, [isOpen, fontsReady]);
+
+  useEffect(() => {
+    if (isOpen && photoUrl && !photo) {
+      loadImage(photoUrl).then(setPhoto).catch(() => setPhoto(null));
+    }
+  }, [isOpen, photoUrl, photo]);
+
+  useEffect(() => {
+    if (!isOpen || mapQr) return;
+    const mapUrl = wedding.venueKakaoMap || `https://map.kakao.com/?q=${encodeURIComponent(wedding.venueAddress)}`;
+    QRCode.toDataURL(mapUrl, {
+      width: 400, margin: 2, errorCorrectionLevel: 'H',
+      color: { dark: '#333333', light: '#FFFFFF' },
+    }).then(url => loadImage(url)).then(setMapQr).catch(() => setMapQr(null));
+  }, [isOpen, wedding.venueKakaoMap, wedding.venueAddress, mapQr]);
+
+  useEffect(() => {
+    if (!isOpen || staticMap) return;
+    const apiBase = import.meta.env.VITE_API_URL || '';
+    const addr = wedding.venue + ' ' + (wedding.venueHall || '');
+    fetch(`${apiBase}/map/geocode?address=${encodeURIComponent(addr)}`)
+      .then(r => r.json())
+      .then(({ lng, lat }) => renderOsmTiles(Number(lat), Number(lng), 16, 560, 350))
+      .then(setStaticMap)
+      .catch(() => setStaticMap(null));
+  }, [isOpen, wedding.venue, wedding.venueHall, staticMap]);
+
+  useEffect(() => {
+    if (!isOpen || invQr) return;
+    const invUrl = `${window.location.origin}/w/${wedding.slug}`;
+    QRCode.toDataURL(invUrl, {
+      width: 200, margin: 1, errorCorrectionLevel: 'M',
+      color: { dark: '#555555', light: '#FFFFFF' },
+    }).then(url => loadImage(url)).then(setInvQr).catch(() => setInvQr(null));
+  }, [isOpen, wedding.slug, invQr]);
+
+  const render = useCallback(async () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !fontsReady) return;
+    setRendering(true);
+    canvas.width = PW; canvas.height = PH;
+    const ctx = canvas.getContext('2d')!;
+    ctx.clearRect(0, 0, PW, PH);
+    await current.draw(ctx, wedding, photo, mapQr, staticMap, invQr);
+    setRendering(false);
+  }, [current, wedding, fontsReady, photo, mapQr]);
+
+  useEffect(() => {
+    if (isOpen && fontsReady) render();
+  }, [isOpen, render, fontsReady]);
+
+  const handleDownload = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = `${wedding.groomName}_${wedding.brideName}_종이청첩장_${current.id}.png`;
+    link.href = canvas.toDataURL('image/png', 1.0);
+    link.click();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+          onClick={(e) => e.stopPropagation()}
+          className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] overflow-y-auto"
+        >
+          <div className="sticky top-0 bg-white/90 backdrop-blur-sm border-b border-stone-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+            <div>
+              <h3 className="text-lg font-medium text-stone-800">종이 청첩장</h3>
+              <p className="text-sm text-stone-400 mt-0.5">3단 접지 · 인쇄용 고해상도</p>
+            </div>
+            <button onClick={onClose} className="p-2 hover:bg-stone-100 rounded-lg transition-colors">
+              <X className="w-5 h-5 text-stone-500" />
+            </button>
+          </div>
+          <div className="p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <button onClick={() => setDesignIdx(i => (i - 1 + DESIGNS.length) % DESIGNS.length)} className="p-2 hover:bg-stone-100 rounded-lg transition-colors">
+                <ChevronLeft className="w-5 h-5 text-stone-400" />
+              </button>
+              <div className="text-center">
+                <p className="text-base font-medium text-stone-800">{current.label}</p>
+                <p className="text-xs text-stone-400 mt-0.5">{current.desc}</p>
+              </div>
+              <button onClick={() => setDesignIdx(i => (i + 1) % DESIGNS.length)} className="p-2 hover:bg-stone-100 rounded-lg transition-colors">
+                <ChevronRight className="w-5 h-5 text-stone-400" />
+              </button>
+            </div>
+            <div className="flex justify-center gap-2">
+              {DESIGNS.map((_, idx) => (
+                <button key={idx} onClick={() => setDesignIdx(idx)}
+                  className={`h-2 rounded-full transition-all ${designIdx === idx ? 'bg-stone-800 w-5' : 'bg-stone-300 w-2'}`} />
+              ))}
+            </div>
+            <div className="flex justify-center bg-stone-50 rounded-xl p-4 overflow-x-auto">
+              {!fontsReady ? (
+                <div className="h-48 flex items-center justify-center text-sm text-stone-400">폰트 로딩 중...</div>
+              ) : (
+                <canvas ref={canvasRef} className="shadow-xl rounded-lg" style={{ maxWidth: '100%', maxHeight: '50vh', objectFit: 'contain' }} />
+              )}
+            </div>
+            <div className="bg-stone-50 rounded-xl p-4 space-y-2">
+              <p className="text-sm font-medium text-stone-700">인쇄 안내</p>
+              <ul className="text-xs text-stone-500 space-y-1.5 leading-relaxed">
+                <li>· 3단 접지 규격 (펼침 381×178mm / 접힘 127×178mm)</li>
+                <li>· 300dpi 고해상도 (2400×1600px)</li>
+                <li>· 추천 용지: 랑데부지 250g, 스노우화이트, 코튼지</li>
+                <li>· 인쇄소에 파일 전달 후 3단 접지 재단 요청</li>
+                <li>· 지도 QR코드를 스캔하면 카카오맵이 열립니다</li>
+              </ul>
+            </div>
+            <button onClick={handleDownload} disabled={rendering || !fontsReady}
+              className="w-full py-3.5 bg-stone-800 text-white rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-stone-900 transition-colors disabled:opacity-50">
+              <Download className="w-4 h-4" />
+              {rendering ? '생성 중...' : '고해상도 PNG 다운로드'}
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}

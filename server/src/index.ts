@@ -26,6 +26,7 @@ import { snapshotRouter } from './routes/snapshot.js';
 import { analyticsRouter } from './routes/analytics.js';
 import { couponRouter } from "./routes/coupon.js";
 import { pairRouter } from './routes/pair.js';
+import { mapRouter } from './routes/map.js';
 
 dotenv.config();
 
@@ -71,6 +72,7 @@ app.use('/api/snapshot', snapshotRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/coupon', couponRouter);
 app.use('/api/pair', pairRouter);
+app.use('/api/map', mapRouter);
 
 seedPackages();
 
