@@ -324,16 +324,20 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
     ctx.fillText([w.groomFatherName, w.groomMotherName].filter(Boolean).join(' · ') + ' 의 아들', p2x, y2);
     y2 += 30;
   }
-  ctx.font = `600 17px ${eng}`;
-  ctx.fillStyle = '#4A3A28';
   const gEn = w.groomNameEn || '';
-  if (gEn) { ctx.fillText(gEn, p2x - 50, y2); }
-  ctx.font = `700 24px ${serif}`;
-  ctx.fillText(w.groomName, p2x + (gEn ? 50 : 0), y2);
+  if (gEn) {
+    ctx.font = `500 14px ${eng}`;
+    ctx.fillStyle = '#9A8A7A';
+    ctx.fillText(gEn.toUpperCase(), p2x, y2);
+    y2 += 24;
+  }
+  ctx.font = `700 26px ${serif}`;
+  ctx.fillStyle = '#4A3A28';
+  ctx.fillText(w.groomName, p2x, y2);
   y2 += 38;
 
-  ctx.font = `italic 300 14px ${eng}`;
-  ctx.fillStyle = 'rgba(180,150,110,0.5)';
+  ctx.font = `italic 300 15px ${eng}`;
+  ctx.fillStyle = 'rgba(180,150,110,0.6)';
   ctx.fillText('and', p2x, y2);
   y2 += 32;
 
@@ -343,12 +347,16 @@ async function drawClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], p
     ctx.fillText([w.brideFatherName, w.brideMotherName].filter(Boolean).join(' · ') + ' 의 딸', p2x, y2);
     y2 += 30;
   }
-  ctx.font = `600 17px ${eng}`;
-  ctx.fillStyle = '#4A3A28';
   const bEn = w.brideNameEn || '';
-  if (bEn) { ctx.fillText(bEn, p2x - 50, y2); }
-  ctx.font = `700 24px ${serif}`;
-  ctx.fillText(w.brideName, p2x + (bEn ? 50 : 0), y2);
+  if (bEn) {
+    ctx.font = `500 14px ${eng}`;
+    ctx.fillStyle = '#9A8A7A';
+    ctx.fillText(bEn.toUpperCase(), p2x, y2);
+    y2 += 24;
+  }
+  ctx.font = `700 26px ${serif}`;
+  ctx.fillStyle = '#4A3A28';
+  ctx.fillText(w.brideName, p2x, y2);
   y2 += 40;
 
   ctx.strokeStyle = 'rgba(180,150,110,0.12)'; ctx.lineWidth = 0.5;
@@ -560,12 +568,16 @@ async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], ph
     ctx.fillText([w.groomFatherName, w.groomMotherName].filter(Boolean).join(' · ') + ' 의 아들', p2x, y2);
     y2 += 28;
   }
-  ctx.font = `600 18px ${eng}`;
-  ctx.fillStyle = '#1A1A1A';
   const gEn = w.groomNameEn || '';
-  if (gEn) ctx.fillText(gEn, p2x - 45, y2);
-  ctx.font = `700 24px ${serif}`;
-  ctx.fillText(w.groomName, p2x + (gEn ? 50 : 0), y2);
+  if (gEn) {
+    ctx.font = `500 15px ${eng}`;
+    ctx.fillStyle = '#AAAAAA';
+    ctx.fillText(gEn.toUpperCase(), p2x, y2);
+    y2 += 24;
+  }
+  ctx.font = `700 26px ${serif}`;
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillText(w.groomName, p2x, y2);
   y2 += 40;
 
   ctx.font = `italic 400 16px ${eng}`;
@@ -579,12 +591,16 @@ async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], ph
     ctx.fillText([w.brideFatherName, w.brideMotherName].filter(Boolean).join(' · ') + ' 의 딸', p2x, y2);
     y2 += 28;
   }
-  ctx.font = `600 18px ${eng}`;
-  ctx.fillStyle = '#1A1A1A';
   const bEn = w.brideNameEn || '';
-  if (bEn) ctx.fillText(bEn, p2x - 45, y2);
-  ctx.font = `700 24px ${serif}`;
-  ctx.fillText(w.brideName, p2x + (bEn ? 50 : 0), y2);
+  if (bEn) {
+    ctx.font = `500 15px ${eng}`;
+    ctx.fillStyle = '#AAAAAA';
+    ctx.fillText(bEn.toUpperCase(), p2x, y2);
+    y2 += 24;
+  }
+  ctx.font = `700 26px ${serif}`;
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillText(w.brideName, p2x, y2);
   y2 += 48;
 
   ctx.fillStyle = '#E8E8E8'; ctx.fillRect(p2x - 40, y2, 80, 0.5);
@@ -867,7 +883,7 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
   if (hasParking) { infoH += 24 + (w.parkingInfo || '').split('\n').filter((l: string) => l.trim()).length * 18; }
   const qrH = mapQr ? 66 : 0;
   const calH = 175;
-  const greetH = w.greeting ? 80 : 40;
+  const greetLines = w.greeting ? wrapText((() => { const m = document.createElement('canvas').getContext('2d')!; m.font = '400 15px ' + s.kr; return m; })(), w.greeting, half - 140) : []; const greetH = w.greeting ? Math.min(greetLines.length, 6) * 22 + 10 : 40;
   const phoneH = 20;
   const titleH = 30;
 
@@ -956,10 +972,12 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
   if (w.greeting) {
     ctx.save();
     ctx.globalAlpha = styleName === 'pearl' ? 0.35 : 0.3;
-    ctx.font = '400 15px ' + s.kr; ctx.fillStyle = s.text;
     const gLines = wrapText(ctx, w.greeting, half - 140);
-    const maxG = Math.min(gLines.length, 4);
-    for (let i = 0; i < maxG; i++) { ctx.fillText(gLines[i], rx, ry); ry += 22; }
+    const maxG = Math.min(gLines.length, 8);
+    const gFontSize = maxG > 5 ? 13 : 15;
+    const gLineH = maxG > 5 ? 19 : 22;
+    ctx.font = '400 ' + gFontSize + 'px ' + s.kr; ctx.fillStyle = s.text;
+    for (let i = 0; i < maxG; i++) { ctx.fillText(gLines[i], rx, ry); ry += gLineH; }
     ctx.globalAlpha = 1;
     ctx.restore();
   } else {
