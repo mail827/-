@@ -1,5 +1,18 @@
 {
   "rewrites": [
+    { "source": "/w/:slug", "has": [
+      { "type": "header", "key": "user-agent", "value": "(?i).*(kakaotalk|facebookexternalhit|facebot|twitterbot|slackbot|linkedinbot|discordbot|telegrambot|whatsapp|line|googlebot|bingbot|yandexbot|naverbot|daumoa|pinterestbot|embedly).*" }
+    ], "destination": "/api/og/:slug" },
     { "source": "/(.*)", "destination": "/" }
+  ],
+  "headers": [
+    {
+      "source": "/llms.txt",
+      "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }]
+    }
   ]
 }
