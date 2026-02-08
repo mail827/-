@@ -673,6 +673,32 @@ export default function EditWedding() {
                 <Input label="티맵" value={wedding.venueTmap} onChange={v => updateField('venueTmap', v)} placeholder="https://..." />
               </div>
             </Section>
+
+            <Section title="교통·주차 안내">
+              <p className="text-xs text-stone-400 mb-3">종이청첩장에 인쇄됩니다</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-stone-600 mb-2">교통 안내</label>
+                  <textarea
+                    value={wedding.transportInfo || ''}
+                    onChange={(e) => updateField('transportInfo', e.target.value)}
+                    placeholder={"지하철 2호선 강남역 3번 출구 도보 5분\n버스: 356, 479, 3111"}
+                    className="w-full px-4 py-3 text-sm border border-stone-200 rounded-xl focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-stone-600 mb-2">주차 안내</label>
+                  <textarea
+                    value={wedding.parkingInfo || ''}
+                    onChange={(e) => updateField('parkingInfo', e.target.value)}
+                    placeholder="건물 내 지하 주차장 무료 이용 가능 (3시간)"
+                    className="w-full px-4 py-3 text-sm border border-stone-200 rounded-xl focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </Section>
           </>
         )}
 

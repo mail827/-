@@ -46,6 +46,8 @@ export interface Wedding {
   venueMapUrl?: string;
   venueNaverMap?: string;
   venueKakaoMap?: string;
+  transportInfo?: string;
+  parkingInfo?: string;
   venueTmap?: string;
   venueLatitude?: number;
   venueLongitude?: number;

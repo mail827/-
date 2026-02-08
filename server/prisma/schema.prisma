@@ -112,6 +112,8 @@ model Wedding {
   venueMapUrl              String?
   venueNaverMap            String?
   venueKakaoMap            String?
+  transportInfo            String?
+  parkingInfo              String?
   venueTmap                String?
   venueLatitude            Float?
   venueLongitude           Float?
