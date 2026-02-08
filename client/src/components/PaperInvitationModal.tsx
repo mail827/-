@@ -714,6 +714,7 @@ async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], ph
 
 
 
+
 function drawLeafOrnament(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string, scale: number = 1) {
   ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 0.8 * scale; ctx.globalAlpha = 0.4;
   ctx.beginPath();
@@ -859,7 +860,21 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
   const hasParking = w.parkingInfo && w.parkingInfo.trim();
   const hasInfo = hasTransport || hasParking;
 
-  let ry = 48;
+  const mapH = hasInfo ? 200 : 260;
+  const venueH = 22 + (w.venueHall ? 20 : 0) + Math.ceil(w.venueAddress.length / 30) * 16;
+  let infoH = 0;
+  if (hasTransport) { infoH += 24 + (w.transportInfo || '').split('\n').filter((l: string) => l.trim()).length * 18 + 10; }
+  if (hasParking) { infoH += 24 + (w.parkingInfo || '').split('\n').filter((l: string) => l.trim()).length * 18; }
+  const qrH = mapQr ? 66 : 0;
+  const calH = 175;
+  const greetH = w.greeting ? 80 : 40;
+  const phoneH = 20;
+  const titleH = 30;
+
+  const totalContent = titleH + mapH + venueH + infoH + qrH + calH + greetH + phoneH;
+  const sections = 7 + (hasInfo ? 1 : 0) + (mapQr ? 1 : 0);
+  const gap = Math.max(14, Math.min(28, (H - 40 - totalContent) / sections));
+  let ry = Math.max(30, (H - totalContent - gap * (sections - 1)) / 2);
 
   ctx.textAlign = 'center';
   ctx.font = '300 16px ' + s.en; ctx.fillStyle = s.muted;
@@ -867,11 +882,10 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
   ry += 12;
   ctx.strokeStyle = s.lineSolid; ctx.lineWidth = 0.5;
   ctx.beginPath(); ctx.moveTo(rx - 70, ry); ctx.lineTo(rx + 70, ry); ctx.stroke();
-  ry += 18;
+  ry += gap;
 
   if (staticMap) {
     const mapW = half - 110;
-    const mapH = hasInfo ? 200 : 260;
     const mapX = rx - mapW / 2;
     ctx.save();
     ctx.strokeStyle = s.lineSolid; ctx.lineWidth = 1;
@@ -882,7 +896,7 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
     else { sh2 = staticMap.width / dR; sy2 = (staticMap.height - sh2) / 2; }
     ctx.drawImage(staticMap, sx2, sy2, sw2, sh2, mapX, ry, mapW, mapH);
     ctx.restore();
-    ry += mapH + 18;
+    ry += mapH + gap;
   }
 
   ctx.textAlign = 'center';
@@ -895,7 +909,7 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
   ctx.font = '400 13px ' + s.kr; ctx.fillStyle = s.muted;
   const aL = wrapText(ctx, w.venueAddress, half - 120);
   for (const l of aL) { ctx.fillText(l, rx, ry); ry += 16; }
-  ry += 14;
+  ry += gap;
 
   if (hasInfo) {
     ctx.textAlign = 'left';
@@ -921,7 +935,7 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
       }
     }
     ctx.textAlign = 'center';
-    ry += 14;
+    ry += gap;
   }
 
   if (mapQr) {
@@ -930,17 +944,16 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
     ctx.drawImage(mapQr, rx - qS/2, ry, qS, qS);
     ctx.font = '400 9px ' + s.kr; ctx.fillStyle = s.muted;
     ctx.fillText('\uC9C0\uB3C4 \uBCF4\uAE30', rx, ry + qS + 11);
-    ry += qS + 22;
+    ry += qS + 14 + gap;
   }
 
   ctx.font = 'italic 400 14px ' + s.en; ctx.fillStyle = s.muted;
   ctx.fillText(d.monthEn + ' ' + d.year, rx, ry);
   ry += 18;
   drawCalendar(ctx, rx - 160, ry, 320, d, 'cool');
-  ry += 160;
+  ry += 155 + gap;
 
   if (w.greeting) {
-    ry += 10;
     ctx.save();
     ctx.globalAlpha = styleName === 'pearl' ? 0.35 : 0.3;
     ctx.font = '400 15px ' + s.kr; ctx.fillStyle = s.text;
@@ -950,13 +963,12 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
     ctx.globalAlpha = 1;
     ctx.restore();
   } else {
-    ry += 10;
     ctx.save();
     ctx.globalAlpha = styleName === 'pearl' ? 0.18 : 0.13;
     ctx.font = 'italic 400 18px ' + s.en; ctx.fillStyle = s.text;
-    ctx.fillText('"The best thing to hold onto in life is each other"', rx, ry + 8);
-    drawLeafOrnament(ctx, rx - 250, ry + 8, s.orn, 0.7);
-    drawLeafOrnament(ctx, rx + 250, ry + 8, s.orn, 0.7);
+    ctx.fillText('"The best thing to hold onto in life is each other"', rx, ry);
+    drawLeafOrnament(ctx, rx - 250, ry, s.orn, 0.7);
+    drawLeafOrnament(ctx, rx + 250, ry, s.orn, 0.7);
     ctx.globalAlpha = 1;
     ctx.restore();
   }
