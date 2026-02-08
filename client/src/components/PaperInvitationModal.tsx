@@ -863,6 +863,16 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
   const hasGP = w.groomFatherName || w.groomMotherName;
   const hasBP = w.brideFatherName || w.brideMotherName;
 
+  if (hasGP || hasBP) {
+    ctx.font = '400 12px ' + s.kr;
+    ctx.fillStyle = styleName === 'pearl' ? 'rgba(232,238,242,0.55)' : 'rgba(58,74,84,0.5)';
+    const gpText = hasGP ? [w.groomFatherName, w.groomMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uC544\uB4E4' : '';
+    const bpText = hasBP ? [w.brideFatherName, w.brideMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uB538' : '';
+    const parentLine = [gpText, bpText].filter(Boolean).join('\u3000\u3000');
+    ctx.fillText(parentLine, lx, by + 8);
+    by -= 26;
+  }
+
   ctx.font = '700 42px ' + s.kr;
   ctx.fillStyle = styleName === 'pearl' ? '#FFFFFF' : s.text;
   ctx.fillText(w.groomName, lx - 70, by);
@@ -872,17 +882,7 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
   ctx.font = '700 42px ' + s.kr;
   ctx.fillStyle = styleName === 'pearl' ? '#FFFFFF' : s.text;
   ctx.fillText(w.brideName, lx + 70, by);
-  by -= 40;
-
-  if (hasGP || hasBP) {
-    ctx.font = '400 12px ' + s.kr;
-    ctx.fillStyle = styleName === 'pearl' ? 'rgba(232,238,242,0.55)' : 'rgba(58,74,84,0.5)';
-    const gpText = hasGP ? [w.groomFatherName, w.groomMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uC544\uB4E4' : '';
-    const bpText = hasBP ? [w.brideFatherName, w.brideMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uB538' : '';
-    const parentLine = [gpText, bpText].filter(Boolean).join('\u3000\u3000');
-    ctx.fillText(parentLine, lx, by);
-    by -= 28;
-  }
+  by -= 50;
 
   ctx.font = 'italic 700 60px ' + s.en;
   ctx.fillStyle = styleName === 'pearl' ? '#FFFFFF' : s.text;
