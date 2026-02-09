@@ -40,7 +40,7 @@ async function ensureFonts() {
     const link = document.createElement('link');
     link.id = 'paper-inv-fonts';
     link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;600;700&family=Nanum+Myeongjo:wght@400;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;600;700&family=Nanum+Myeongjo:wght@400;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Diphylleia&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap';
     document.head.appendChild(link);
   }
   if (!document.getElementById('paper-inv-extra')) {
@@ -53,6 +53,7 @@ async function ensureFonts() {
     document.fonts.load('700 48px "Noto Serif KR"'),
     document.fonts.load('800 48px "Nanum Myeongjo"'),
     document.fonts.load('600 48px "Cormorant Garamond"'),
+    document.fonts.load('400 48px "Diphylleia"'),
     document.fonts.load('700 48px "Playfair Display"'),
     document.fonts.load('400 48px "MaruBuri"'),
     document.fonts.load('400 48px "MapoDacapo"'),
@@ -161,19 +162,19 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxW: number): st
   return result;
 }
 
-function drawCalendar(ctx: CanvasRenderingContext2D, cx: number, cy: number, calW: number, d: ReturnType<typeof parseDate>, style: 'warm' | 'cool') {
+function drawCalendar(ctx: CanvasRenderingContext2D, cx: number, cy: number, calW: number, d: ReturnType<typeof parseDate>, style: 'warm' | 'cool' | 'green') {
   const eng = '"Cormorant Garamond", serif';
   const cellW = calW / 7;
   const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.font = `500 15px ${eng}`;
-  ctx.fillStyle = style === 'warm' ? '#B4966E' : '#AAAAAA';
+  ctx.fillStyle = style === 'warm' ? '#B4966E' : style === 'green' ? '#7A9A6A' : '#AAAAAA';
   for (let i = 0; i < 7; i++) {
     ctx.fillText(dayLabels[i], cx + cellW * i + cellW / 2, cy);
   }
 
-  ctx.strokeStyle = style === 'warm' ? 'rgba(180,150,110,0.12)' : 'rgba(0,0,0,0.06)';
+  ctx.strokeStyle = style === 'warm' ? 'rgba(180,150,110,0.12)' : style === 'green' ? 'rgba(107,143,91,0.12)' : 'rgba(0,0,0,0.06)';
   ctx.lineWidth = 0.5;
   ctx.beginPath(); ctx.moveTo(cx, cy + 12); ctx.lineTo(cx + calW, cy + 12); ctx.stroke();
 
@@ -187,16 +188,16 @@ function drawCalendar(ctx: CanvasRenderingContext2D, cx: number, cy: number, cal
     const dy = cy + 30 + row * 32;
 
     if (dayNum === d.day) {
-      ctx.fillStyle = style === 'warm' ? '#4A3A28' : '#1A1A1A';
+      ctx.fillStyle = style === 'warm' ? '#4A3A28' : style === 'green' ? '#4A6741' : '#1A1A1A';
       ctx.beginPath(); ctx.arc(dx, dy, 16, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = style === 'warm' ? '#FDF8F0' : '#FFFFFF';
+      ctx.fillStyle = style === 'warm' ? '#FDF8F0' : style === 'green' ? '#F5F0E6' : '#FFFFFF';
       ctx.font = `600 17px ${eng}`;
       ctx.fillText(String(dayNum), dx, dy);
       ctx.font = `400 17px ${eng}`;
     } else {
       ctx.fillStyle = col === 0
-        ? (style === 'warm' ? 'rgba(180,100,100,0.5)' : '#CCAAAA')
-        : (style === 'warm' ? '#9A8A7A' : '#AAAAAA');
+        ? (style === 'warm' ? 'rgba(180,100,100,0.5)' : style === 'green' ? 'rgba(140,90,90,0.45)' : '#CCAAAA')
+        : (style === 'warm' ? '#9A8A7A' : style === 'green' ? '#7A9A6A' : '#AAAAAA');
       ctx.fillText(String(dayNum), dx, dy);
     }
     dayNum++;
@@ -747,16 +748,288 @@ async function drawModern(ctx: CanvasRenderingContext2D, w: Props['wedding'], ph
 
 
 
+async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], photo: HTMLImageElement | null, mapQr: HTMLImageElement | null, staticMap: HTMLCanvasElement | null, invQr: HTMLImageElement | null) {
+  const W = 1572, H = 1100;
+  const half = W / 2;
+  const d = parseDate(w.weddingDate);
+  const greenDark = '#3D5A32';
+  const greenMid = '#6B8B5A';
+  const greenLight = '#8BA87A';
+  const greenPale = 'rgba(92,122,75,0.3)';
+  const bg = '#F4F3E1';
+  const kr = '"Diphylleia", serif';
+  const en = '"Diphylleia", serif';
 
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
 
+  let frameX = 0, frameY = 0, frameW = half, frameH = H;
 
+  try {
+    const frameImg = await loadImage('https://res.cloudinary.com/duzlquvxj/image/upload/v1770628547/Botanical_illustrated_frame_wedding_invitation_1_kqmdsi.png');
+    const ratio = frameImg.naturalWidth / frameImg.naturalHeight;
+    const margin = 12;
+    const maxH = H - margin * 2;
+    const maxW = half - margin * 2;
+    if (maxH * ratio > maxW) {
+      frameW = maxW;
+      frameH = maxW / ratio;
+    } else {
+      frameH = maxH;
+      frameW = maxH * ratio;
+    }
+    frameX = (half - frameW) / 2;
+    frameY = (H - frameH) / 2;
+    ctx.drawImage(frameImg, frameX, frameY, frameW, frameH);
+  } catch (e) {}
 
+  const lx = frameX + frameW / 2;
+  const innerTop = frameY + frameH * 0.18;
+  const innerBot = frameY + frameH * 0.92;
 
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = `400 16px ${en}`;
+  ctx.fillStyle = greenMid;
+  ctx.fillText('Wedding Invitation', lx, innerTop + 10);
 
+  const photoRX = Math.min(frameW * 0.28, 200);
+  const photoRY = Math.min((innerBot - innerTop) * 0.30, 230);
+  const photoCY = innerTop + 22 + photoRY + 10;
 
+  ctx.save();
+  ctx.beginPath();
+  ctx.ellipse(lx, photoCY, photoRX, photoRY, 0, 0, Math.PI * 2);
+  ctx.closePath();
+  if (photo) {
+    ctx.save();
+    ctx.clip();
+    const pw = photoRX * 2, ph = photoRY * 2;
+    const sR = photo.width / photo.height;
+    const dR = pw / ph;
+    let sx = 0, sy = 0, sw = photo.width, sh = photo.height;
+    if (sR > dR) { sw = photo.height * dR; sx = (photo.width - sw) / 2; }
+    else { sh = photo.width / dR; sy = (photo.height - sh) / 2; }
+    ctx.drawImage(photo, sx, sy, sw, sh, lx - photoRX, photoCY - photoRY, pw, ph);
+    ctx.restore();
 
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(lx, photoCY, photoRX, photoRY, 0, 0, Math.PI * 2);
+    ctx.clip();
+    const grad = ctx.createRadialGradient(lx, photoCY, Math.min(photoRX, photoRY) * 0.55, lx, photoCY, Math.max(photoRX, photoRY) * 1.05);
+    grad.addColorStop(0, 'rgba(244,243,225,0)');
+    grad.addColorStop(0.7, 'rgba(244,243,225,0)');
+    grad.addColorStop(1, 'rgba(244,243,225,0.55)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(lx - photoRX - 5, photoCY - photoRY - 5, photoRX * 2 + 10, photoRY * 2 + 10);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = 'rgba(92,122,75,0.04)';
+    ctx.fill();
+    ctx.font = `400 16px ${kr}`;
+    ctx.fillStyle = 'rgba(92,122,75,0.18)';
+    ctx.fillText('\uB300\uD45C \uC0AC\uC9C4', lx, photoCY);
+  }
+  ctx.restore();
 
+  let ny = photoCY + photoRY + 28;
 
+  const gEn = w.groomNameEn || '';
+  const bEn = w.brideNameEn || '';
+  if (gEn || bEn) {
+    ctx.textAlign = 'center';
+    ctx.font = `400 14px ${en}`;
+    ctx.fillStyle = greenMid;
+    ctx.fillText([gEn, bEn].filter(Boolean).join('  &  '), lx, ny);
+    ny += 22;
+  }
+
+  ctx.textAlign = 'center';
+  ctx.font = `400 34px ${kr}`;
+  ctx.fillStyle = greenDark;
+  ctx.fillText(w.groomName, lx - 55, ny);
+  ctx.font = `400 20px ${en}`;
+  ctx.fillStyle = greenLight;
+  ctx.fillText('&', lx, ny - 2);
+  ctx.font = `400 34px ${kr}`;
+  ctx.fillStyle = greenDark;
+  ctx.fillText(w.brideName, lx + 55, ny);
+  ny += 34;
+
+  const hasGP = w.groomFatherName || w.groomMotherName;
+  const hasBP = w.brideFatherName || w.brideMotherName;
+  if (hasGP || hasBP) {
+    ctx.font = `400 12px ${kr}`;
+    ctx.fillStyle = greenMid;
+    const gpT = hasGP ? [w.groomFatherName, w.groomMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uC544\uB4E4' : '';
+    const bpT = hasBP ? [w.brideFatherName, w.brideMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uB538' : '';
+    ctx.fillText([gpT, bpT].filter(Boolean).join('\u3000\u3000'), lx, ny);
+    ny += 22;
+  }
+
+  ctx.strokeStyle = greenPale; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(lx - 40, ny); ctx.lineTo(lx + 40, ny); ctx.stroke();
+  ny += 16;
+
+  ctx.font = `400 15px ${en}`;
+  ctx.fillStyle = greenDark;
+  ctx.fillText(`${d.year}. ${String(d.month).padStart(2,'0')}. ${String(d.day).padStart(2,'0')}  ${d.dayNameEn}`, lx, ny);
+  ny += 18;
+
+  ctx.font = `400 13px ${kr}`;
+  ctx.fillStyle = greenMid;
+  ctx.fillText([w.venue, w.venueHall, w.weddingTime].filter(Boolean).join('  '), lx, ny);
+
+  if (invQr) {
+    const iqS = 40;
+    const iqY = innerBot - iqS - 8;
+    ctx.globalAlpha = 0.55;
+    ctx.drawImage(invQr, lx - iqS / 2, iqY, iqS, iqS);
+    ctx.globalAlpha = 1.0;
+    ctx.font = `400 7px ${kr}`;
+    ctx.fillStyle = greenLight;
+    ctx.fillText('\uBAA8\uBC14\uC77C \uCCAD\uCCA9\uC7A5', lx, iqY + iqS + 8);
+  }
+
+  ctx.strokeStyle = 'rgba(92,122,75,0.06)'; ctx.lineWidth = 0.5; ctx.setLineDash([4, 10]);
+  ctx.beginPath(); ctx.moveTo(half, 30); ctx.lineTo(half, H - 30); ctx.stroke();
+  ctx.setLineDash([]);
+
+  const rx = half + half / 2;
+  const txL = half + 40;
+  const txR = W - 40;
+  const contentW = txR - txL;
+  const hasTransport = w.transportInfo && w.transportInfo.trim();
+  const hasParking = w.parkingInfo && w.parkingInfo.trim();
+  const hasInfo = hasTransport || hasParking;
+
+  const mapH = hasInfo ? 180 : 240;
+  const venueH = 22 + (w.venueHall ? 20 : 0) + Math.ceil(w.venueAddress.length / 28) * 16;
+  let infoH = 0;
+  if (hasTransport) { infoH += 24 + (w.transportInfo || '').split('\n').filter((l: string) => l.trim()).length * 18 + 10; }
+  if (hasParking) { infoH += 24 + (w.parkingInfo || '').split('\n').filter((l: string) => l.trim()).length * 18; }
+  const qrH = mapQr ? 66 : 0;
+  const calH = 175;
+  const greetLines = w.greeting ? wrapText((() => { const m = document.createElement('canvas').getContext('2d')!; m.font = '400 14px ' + kr; return m; })(), w.greeting, half - 100) : [];
+  const greetH = w.greeting ? Math.min(greetLines.length, 6) * 22 + 10 : 35;
+  const phoneH = 20;
+  const titleH = 30;
+
+  const totalContent = titleH + mapH + venueH + infoH + qrH + calH + greetH + phoneH;
+  const sections = 7 + (hasInfo ? 1 : 0) + (mapQr ? 1 : 0);
+  const gap = Math.max(12, Math.min(24, (H - 40 - totalContent) / sections));
+  let ry = Math.max(28, (H - totalContent - gap * (sections - 1)) / 2);
+
+  ctx.textAlign = 'center';
+  ctx.font = `400 15px ${en}`; ctx.fillStyle = greenMid;
+  ctx.fillText('L O C A T I O N', rx, ry);
+  ry += 12;
+  ctx.strokeStyle = 'rgba(92,122,75,0.2)'; ctx.lineWidth = 0.6;
+  ctx.beginPath(); ctx.moveTo(rx - 60, ry); ctx.lineTo(rx + 60, ry); ctx.stroke();
+  ry += gap;
+
+  if (staticMap) {
+    const mapW = half - 80;
+    const mapX = rx - mapW / 2;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(92,122,75,0.2)'; ctx.lineWidth = 1;
+    ctx.strokeRect(mapX - 1, ry - 1, mapW + 2, mapH + 2);
+    const sR = staticMap.width / staticMap.height, dR = mapW / mapH;
+    let sx2 = 0, sy2 = 0, sw2 = staticMap.width, sh2 = staticMap.height;
+    if (sR > dR) { sw2 = staticMap.height * dR; sx2 = (staticMap.width - sw2) / 2; }
+    else { sh2 = staticMap.width / dR; sy2 = (staticMap.height - sh2) / 2; }
+    ctx.drawImage(staticMap, sx2, sy2, sw2, sh2, mapX, ry, mapW, mapH);
+    ctx.restore();
+    ry += mapH + gap;
+  }
+
+  ctx.textAlign = 'center';
+  ctx.font = `400 20px ${kr}`; ctx.fillStyle = greenDark;
+  ctx.fillText(w.venue, rx, ry); ry += 24;
+  if (w.venueHall) {
+    ctx.font = `400 15px ${kr}`; ctx.fillStyle = greenMid;
+    ctx.fillText(w.venueHall, rx, ry); ry += 20;
+  }
+  ctx.font = `400 12px ${kr}`; ctx.fillStyle = greenLight;
+  const aL = wrapText(ctx, w.venueAddress, half - 80);
+  for (const l of aL) { ctx.fillText(l, rx, ry); ry += 16; }
+  ry += gap;
+
+  if (hasInfo) {
+    ctx.textAlign = 'left';
+    if (hasTransport) {
+      ctx.font = `400 14px ${kr}`; ctx.fillStyle = greenDark;
+      ctx.fillText('\uAD50\uD1B5 \uC548\uB0B4', txL, ry); ry += 22;
+      ctx.font = `400 12px ${kr}`; ctx.fillStyle = greenMid;
+      for (const para of w.transportInfo!.split('\n')) {
+        if (!para.trim()) { ry += 5; continue; }
+        const wl = wrapText(ctx, para, contentW);
+        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 16; }
+      }
+      ry += 8;
+    }
+    if (hasParking) {
+      ctx.font = `400 14px ${kr}`; ctx.fillStyle = greenDark;
+      ctx.fillText('\uC8FC\uCC28 \uC548\uB0B4', txL, ry); ry += 22;
+      ctx.font = `400 12px ${kr}`; ctx.fillStyle = greenMid;
+      for (const para of w.parkingInfo!.split('\n')) {
+        if (!para.trim()) { ry += 5; continue; }
+        const wl = wrapText(ctx, para, contentW);
+        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 16; }
+      }
+    }
+    ctx.textAlign = 'center';
+    ry += gap;
+  }
+
+  if (mapQr) {
+    const qS = 50;
+    ctx.fillStyle = bg; ctx.fillRect(rx - qS / 2 - 3, ry - 3, qS + 6, qS + 6);
+    ctx.drawImage(mapQr, rx - qS / 2, ry, qS, qS);
+    ctx.font = `400 8px ${kr}`; ctx.fillStyle = greenLight;
+    ctx.fillText('\uC9C0\uB3C4 \uBCF4\uAE30', rx, ry + qS + 10);
+    ry += qS + 12 + gap;
+  }
+
+  ctx.font = `400 13px ${en}`; ctx.fillStyle = greenMid;
+  ctx.fillText(`${d.monthEn} ${d.year}`, rx, ry);
+  ry += 16;
+  const calEnd = drawCalendar(ctx, rx - 140, ry, 280, d, 'green');
+  ry = calEnd + gap;
+
+  if (w.greeting) {
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    const gLines = wrapText(ctx, w.greeting, half - 100);
+    const maxG = Math.min(gLines.length, 8);
+    const gFontSize = maxG > 5 ? 12 : 14;
+    const gLineH = maxG > 5 ? 18 : 20;
+    ctx.font = `400 ${gFontSize}px ${kr}`; ctx.fillStyle = greenDark;
+    for (let i = 0; i < maxG; i++) { ctx.fillText(gLines[i], rx, ry); ry += gLineH; }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  } else {
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.font = `400 16px ${en}`; ctx.fillStyle = greenDark;
+    ctx.fillText('"The best thing to hold onto in life is each other"', rx, ry);
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  if (w.groomPhone || w.bridePhone) {
+    const cpY = H - 24;
+    ctx.font = `400 11px ${kr}`; ctx.fillStyle = greenLight;
+    const parts: string[] = [];
+    if (w.groomPhone) parts.push('\uC2E0\uB791 ' + w.groomName + '  ' + w.groomPhone);
+    if (w.bridePhone) parts.push('\uC2E0\uBD80 ' + w.brideName + '  ' + w.bridePhone);
+    ctx.fillText(parts.join('    '), rx, cpY);
+  }
+
+  ctx.textAlign = 'right';
+  ctx.font = `400 9px ${kr}`; ctx.fillStyle = 'rgba(92,122,75,0.18)';
+  ctx.fillText('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4', W - 20, H - 10);
+}
 function drawLeafOrnament(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string, scale: number = 1) {
   ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 0.8 * scale; ctx.globalAlpha = 0.4;
   ctx.beginPath();
@@ -1038,6 +1311,7 @@ const DESIGNS = [
   { id: 'modern', label: '모던', desc: '미니멀 화이트 · 3단 접지', draw: drawModern as any, w: 2400, h: 900 },
   { id: 'pearl-drift', label: 'Pearl Drift', desc: '다크 감성 · 2단 접지', draw: ((ctx: any, w: any, p: any, m: any, s: any, i: any) => draw2Fold(ctx, w, p, m, s, i, 'pearl')) as any, w: 2480, h: 1100 },
   { id: 'luna-halfmoon', label: 'Luna Halfmoon', desc: '순백 물결 · 2단 접지', draw: ((ctx: any, w: any, p: any, m: any, s: any, i: any) => draw2Fold(ctx, w, p, m, s, i, 'luna')) as any, w: 2480, h: 1100 },
+  { id: 'botanical-classic', label: 'Botanical Classic', desc: '올리브그린 보태니컬 · 2단 접지', draw: drawBotanicalClassic as any, w: 1572, h: 1100 },
 ];
 
 export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUrl }: Props) {

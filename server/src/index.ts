@@ -67,6 +67,7 @@ app.use("/api/report", reportRouter);
 app.use("/api/gift", giftRouter);
 app.use("/api/guide", guideRouter);
 app.use("/api/theme-showcase", themeShowcaseRouter);
+app.use("/api/map", mapRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/writing-assistant', writingAssistantRouter);
 app.use('/api/snapshot', snapshotRouter);

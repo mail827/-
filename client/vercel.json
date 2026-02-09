@@ -1,7 +1,7 @@
 {
   "rewrites": [
     { "source": "/w/:slug", "has": [
-      { "type": "header", "key": "user-agent", "value": "(?i).*(kakaotalk|facebookexternalhit|facebot|twitterbot|slackbot|linkedinbot|discordbot|telegrambot|whatsapp|line|googlebot|bingbot|yandexbot|naverbot|daumoa|pinterestbot|embedly).*" }
+      { "type": "header", "key": "user-agent", "value": "(?i).*(kakaotalk-scrap|facebookexternalhit|facebot|twitterbot|slackbot|linkedinbot|discordbot|telegrambot|whatsapp|line|googlebot|bingbot|yandexbot|naverbot|daumoa|pinterestbot|embedly).*" }
     ], "destination": "https://wedding-api-bitter-butterfly-7766.fly.dev/api/og/:slug" },
     { "source": "/(.*)", "destination": "/" }
   ],
