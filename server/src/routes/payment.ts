@@ -101,6 +101,7 @@ router.post('/order', authMiddleware, async (req, res) => {
         amount: finalAmount,
         orderId,
         status: 'PENDING',
+        couponCode: couponCode || null,
       },
       include: { package: true },
     });

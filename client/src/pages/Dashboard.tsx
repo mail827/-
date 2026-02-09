@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode } from 'lucide-react';
+import { Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import QRCardModal from '../components/QRCardModal';
 
@@ -20,6 +20,7 @@ interface Wedding {
   weddingDate: string;
   isPublished: boolean;
   theme: string;
+  heroMedia?: string;
   pairUserId?: string;
 }
 
@@ -335,8 +336,8 @@ export default function Dashboard() {
                   transition={{ delay: idx * 0.1 }}
                   className="bg-white rounded-2xl overflow-hidden border border-stone-200 hover:shadow-lg transition-all"
                 >
-                  <div className="h-36 bg-gradient-to-br from-stone-100 to-stone-50 flex items-center justify-center relative">
-                    <span className="text-4xl">💒</span>
+                  <div className="h-36 bg-gradient-to-br from-stone-100 to-stone-50 flex items-center justify-center relative overflow-hidden">
+                    {wedding.heroMedia ? <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" /> : <Heart className="w-8 h-8 text-stone-300" />}
                     <button
                       onClick={() => handleDelete(wedding.id, wedding.groomName, wedding.brideName)}
                       className="absolute top-3 right-3 p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"

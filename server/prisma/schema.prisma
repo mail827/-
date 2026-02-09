@@ -54,6 +54,7 @@ model Order {
   amount     Int
   status     OrderStatus @default(PENDING)
   paymentKey String?
+  couponCode String?
   orderId    String      @unique
   paidAt     DateTime?
   createdAt  DateTime    @default(now())

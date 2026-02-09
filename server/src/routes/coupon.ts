@@ -128,4 +128,70 @@ router.patch('/admin/:id', authMiddleware, async (req: Request, res: Response) =
   }
 });
 
+
 export const couponRouter = router;
+router.get('/admin/settlement', authMiddleware, async (req: Request, res: Response) => {
+  const { startDate, endDate, couponCode } = req.query;
+
+  try {
+    const where: any = {
+      status: 'PAID',
+      couponCode: { not: null },
+    };
+
+    if (couponCode) {
+      where.couponCode = couponCode as string;
+    }
+
+    if (startDate || endDate) {
+      where.paidAt = {};
+      if (startDate) where.paidAt.gte = new Date(startDate as string);
+      if (endDate) {
+        const end = new Date(endDate as string);
+        end.setHours(23, 59, 59, 999);
+        where.paidAt.lte = end;
+      }
+    }
+
+    const orders = await prisma.order.findMany({
+      where,
+      include: { package: true, user: true },
+      orderBy: { paidAt: 'desc' },
+    });
+
+    const summary: Record<string, { code: string; count: number; totalPaid: number; commission: number; net: number; orders: any[] }> = {};
+
+    for (const o of orders) {
+      const code = o.couponCode!;
+      if (!summary[code]) {
+        summary[code] = { code, count: 0, totalPaid: 0, commission: 0, net: 0, orders: [] };
+      }
+      summary[code].count++;
+      summary[code].totalPaid += o.amount;
+      const comm = Math.floor(o.amount * 0.1);
+      summary[code].commission += comm;
+      summary[code].net += o.amount - comm;
+      summary[code].orders.push({
+        id: o.id,
+        orderId: o.orderId,
+        amount: o.amount,
+        packageName: o.package.name,
+        userName: o.user.name,
+        userEmail: o.user.email,
+        paidAt: o.paidAt,
+      });
+    }
+
+    const totals = {
+      totalOrders: orders.length,
+      totalPaid: orders.reduce((s, o) => s + o.amount, 0),
+      totalCommission: orders.reduce((s, o) => s + Math.floor(o.amount * 0.1), 0),
+      totalNet: orders.reduce((s, o) => s + (o.amount - Math.floor(o.amount * 0.1)), 0),
+    };
+
+    res.json({ summary: Object.values(summary), totals });
+  } catch (error) {
+    console.error('Settlement error:', error);
+    res.status(500).json({ error: '정산 데이터 조회 실패' });
+  }
+});
