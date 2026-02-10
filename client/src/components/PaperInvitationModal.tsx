@@ -1317,52 +1317,71 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
 }
 
 async function drawHeartMinimal(ctx: CanvasRenderingContext2D, w: Props['wedding'], photo: HTMLImageElement | null, mapQr: HTMLImageElement | null, staticMap: HTMLImageElement | null, invQr: HTMLImageElement | null) {
-  const W = 1572, H = 1100;
+  const W = 1572, H = 900;
   const half = W / 2;
   const d = parseDate(w.weddingDate);
   const bg = '#F3E0BC';
-  const s = {
-    bg, textDark: '#2A1F14', textMid: '#5C4A3A', textLight: '#8B7A6A',
-    accent: '#C8856A', line: 'rgba(42,31,20,0.06)', lineSolid: 'rgba(42,31,20,0.12)',
-    kr: '"Noto Serif KR", serif', en: '"Playfair Display", serif',
-    watermark: 'rgba(42,31,20,0.1)', qrBg: '#FFFFFF',
-  };
+  const textDark = '#2A1F14';
+  const textMid = '#5C4A3A';
+  const textLight = '#8B7A6A';
+  const accent = '#C8856A';
+  const lineSolid = 'rgba(42,31,20,0.12)';
+  const kr = '"Noto Serif KR", serif';
+  const en = '"Playfair Display", serif';
 
-  ctx.fillStyle = s.bg; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = 'rgba(42,31,20,0.008)';
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(42,31,20,0.006)';
   for (let y = 0; y < H; y += 4) ctx.fillRect(0, y, W, 1);
 
   const lx = half / 2;
   const rx = half + half / 2;
-
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
-  ctx.font = '300 13px ' + s.en; ctx.fillStyle = s.textLight;
-  ctx.fillText('W E D D I N G', lx, 52);
+  const heartW = 240, heartH = 300;
+  const hasGP = w.groomFatherName || w.groomMotherName;
+  const hasBP = w.brideFatherName || w.brideMotherName;
+  const hasParents = hasGP || hasBP;
+  const greetCtx = document.createElement('canvas').getContext('2d')!;
+  greetCtx.font = '400 12px ' + kr;
+  const greetLines = w.greeting ? wrapText(greetCtx, w.greeting, half - 100) : [];
+  const greetCount = Math.min(greetLines.length, 5);
+
+  let y = 55;
+
+  ctx.font = '300 11px ' + en; ctx.fillStyle = textLight;
+  ctx.fillText('W E D D I N G', lx, y);
+  y += 30;
 
   const gEN = (w.groomNameEn || w.groomName).toUpperCase();
   const bEN = (w.brideNameEn || w.brideName).toUpperCase();
-  ctx.font = 'italic 600 38px ' + s.en; ctx.fillStyle = s.textDark;
-  ctx.fillText(gEN + '  &  ' + bEN, lx, 92);
+  const fullNameEn = gEN + '  &  ' + bEN;
+  ctx.font = 'italic 600 36px ' + en;
+  const nameW = ctx.measureText(fullNameEn).width;
+  const maxNameW = half - 50;
+  const nameSize = nameW > maxNameW * 1.15 ? 26 : nameW > maxNameW ? 30 : 36;
+  ctx.font = 'italic 600 ' + nameSize + 'px ' + en; ctx.fillStyle = textDark;
+  ctx.fillText(fullNameEn, lx, y);
+  y += nameSize + 6;
 
-  ctx.font = '300 11px ' + s.en; ctx.fillStyle = s.textLight;
-  ctx.fillText('I N V I T A T I O N', lx, 128);
+  ctx.font = '300 10px ' + en; ctx.fillStyle = textLight;
+  ctx.fillText('I N V I T A T I O N', lx, y);
+  y += 18;
 
-  ctx.strokeStyle = s.lineSolid; ctx.lineWidth = 0.5;
-  ctx.beginPath(); ctx.moveTo(lx - 60, 148); ctx.lineTo(lx + 60, 148); ctx.stroke();
+  ctx.strokeStyle = lineSolid; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(lx - 45, y); ctx.lineTo(lx + 45, y); ctx.stroke();
+  y += 20;
 
-  const heartW = 270, heartH = 340;
-  const heartTopY = 175;
+  const heartTopY = y;
   const heartCx = lx;
 
   const traceHeart = () => {
-    const x = heartCx, y = heartTopY, hw = heartW, hh = heartH;
+    const x = heartCx, ht = heartTopY, hw = heartW, hh = heartH;
     ctx.beginPath();
-    ctx.moveTo(x, y + hh / 4);
-    ctx.bezierCurveTo(x, y, x - hw / 2, y, x - hw / 2, y + hh / 4);
-    ctx.bezierCurveTo(x - hw / 2, y + hh / 2, x, y + hh * 3 / 4, x, y + hh);
-    ctx.bezierCurveTo(x, y + hh * 3 / 4, x + hw / 2, y + hh / 2, x + hw / 2, y + hh / 4);
-    ctx.bezierCurveTo(x + hw / 2, y, x, y, x, y + hh / 4);
+    ctx.moveTo(x, ht + hh / 4);
+    ctx.bezierCurveTo(x, ht, x - hw / 2, ht, x - hw / 2, ht + hh / 4);
+    ctx.bezierCurveTo(x - hw / 2, ht + hh / 2, x, ht + hh * 3 / 4, x, ht + hh);
+    ctx.bezierCurveTo(x, ht + hh * 3 / 4, x + hw / 2, ht + hh / 2, x + hw / 2, ht + hh / 4);
+    ctx.bezierCurveTo(x + hw / 2, ht, x, ht, x, ht + hh / 4);
     ctx.closePath();
   };
 
@@ -1376,197 +1395,171 @@ async function drawHeartMinimal(ctx: CanvasRenderingContext2D, w: Props['wedding
     if (sR > dR) { sw = photo.height * dR; sx = (photo.width - sw) / 2; }
     else { sh = photo.width / dR; sy = (photo.height - sh) / 2; }
     ctx.drawImage(photo, sx, sy, sw, sh, heartCx - heartW / 2, heartTopY, heartW, heartH);
-    const grad = ctx.createRadialGradient(heartCx, heartTopY + heartH * 0.5, heartW * 0.2, heartCx, heartTopY + heartH * 0.5, heartW * 0.7);
+    const grad = ctx.createRadialGradient(heartCx, heartTopY + heartH * 0.5, heartW * 0.18, heartCx, heartTopY + heartH * 0.5, heartW * 0.65);
     grad.addColorStop(0, 'rgba(243,224,188,0)');
-    grad.addColorStop(0.7, 'rgba(243,224,188,0)');
-    grad.addColorStop(1, 'rgba(243,224,188,0.35)');
+    grad.addColorStop(0.75, 'rgba(243,224,188,0)');
+    grad.addColorStop(1, 'rgba(243,224,188,0.3)');
     ctx.fillStyle = grad; ctx.fillRect(heartCx - heartW, heartTopY - 20, heartW * 2, heartH + 40);
     ctx.restore();
   } else {
     ctx.save(); traceHeart();
     ctx.fillStyle = 'rgba(42,31,20,0.03)'; ctx.fill();
     ctx.restore();
-    ctx.font = '400 16px ' + s.kr; ctx.fillStyle = s.textLight;
+    ctx.font = '400 14px ' + kr; ctx.fillStyle = 'rgba(42,31,20,0.18)';
     ctx.fillText('\uB300\uD45C \uC0AC\uC9C4', heartCx, heartTopY + heartH / 2);
   }
 
   ctx.save(); traceHeart();
-  ctx.strokeStyle = s.accent; ctx.lineWidth = 2.5; ctx.stroke();
+  ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.stroke();
   ctx.restore();
 
-  let by = heartTopY + heartH + 30;
+  y = heartTopY + heartH + 26;
 
-  ctx.font = '400 15px ' + s.en; ctx.fillStyle = s.textMid;
-  ctx.fillText(d.year + '. ' + String(d.month).padStart(2, '0') + '. ' + String(d.day).padStart(2, '0') + '  ' + d.dayNameEn.toUpperCase(), lx, by);
-  by += 24;
+  ctx.font = '400 14px ' + en; ctx.fillStyle = textMid;
+  ctx.fillText(d.year + '. ' + String(d.month).padStart(2, '0') + '. ' + String(d.day).padStart(2, '0') + '  ' + d.dayNameEn.toUpperCase(), lx, y);
+  y += 19;
 
-  ctx.font = '400 13px ' + s.kr; ctx.fillStyle = s.textLight;
-  ctx.fillText(d.year + '\uB144 ' + d.month + '\uC6D4 ' + d.day + '\uC77C ' + d.dayName + '\uC694\uC77C ' + (w.weddingTime || ''), lx, by);
-  by += 20;
+  ctx.font = '400 12px ' + kr; ctx.fillStyle = textLight;
+  ctx.fillText(d.year + '\uB144 ' + d.month + '\uC6D4 ' + d.day + '\uC77C ' + d.dayName + '\uC694\uC77C ' + (w.weddingTime || ''), lx, y);
+  y += 17;
 
-  ctx.font = '400 12px ' + s.kr; ctx.fillStyle = s.textLight;
-  ctx.fillText(w.venue + (w.venueHall ? ' ' + w.venueHall : ''), lx, by);
-  by += 34;
+  ctx.font = '400 11px ' + kr; ctx.fillStyle = textLight;
+  ctx.fillText(w.venue + (w.venueHall ? ' ' + w.venueHall : ''), lx, y);
+  y += 28;
 
-  ctx.strokeStyle = s.lineSolid; ctx.lineWidth = 0.5;
-  ctx.beginPath(); ctx.moveTo(lx - 40, by); ctx.lineTo(lx + 40, by); ctx.stroke();
-  by += 30;
+  ctx.font = '700 34px ' + kr; ctx.fillStyle = textDark;
+  ctx.fillText(w.groomName, lx - 50, y);
+  ctx.font = '300 14px ' + en; ctx.fillStyle = accent;
+  ctx.fillText('\u00B7', lx, y - 2);
+  ctx.font = '700 34px ' + kr; ctx.fillStyle = textDark;
+  ctx.fillText(w.brideName, lx + 50, y);
+  y += 28;
 
-  ctx.font = '700 36px ' + s.kr; ctx.fillStyle = s.textDark;
-  ctx.fillText(w.groomName, lx - 55, by);
-  ctx.font = '300 16px ' + s.en; ctx.fillStyle = s.accent;
-  ctx.fillText('\u00B7', lx, by - 2);
-  ctx.font = '700 36px ' + s.kr; ctx.fillStyle = s.textDark;
-  ctx.fillText(w.brideName, lx + 55, by);
-  by += 34;
-
-  const hasGP = w.groomFatherName || w.groomMotherName;
-  const hasBP = w.brideFatherName || w.brideMotherName;
-  if (hasGP || hasBP) {
-    ctx.font = '400 11px ' + s.kr; ctx.fillStyle = s.textLight;
+  if (hasParents) {
+    ctx.font = '400 11px ' + kr; ctx.fillStyle = textLight;
     const gpText = hasGP ? [w.groomFatherName, w.groomMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uC544\uB4E4' : '';
     const bpText = hasBP ? [w.brideFatherName, w.brideMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uB538' : '';
-    ctx.fillText([gpText, bpText].filter(Boolean).join('\u3000\u3000'), lx, by);
+    ctx.fillText([gpText, bpText].filter(Boolean).join('\u3000\u3000'), lx, y);
+    y += 22;
+  }
+
+  if (greetCount > 0) {
+    y += 14;
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.font = '400 11px ' + kr; ctx.fillStyle = textDark;
+    for (let i = 0; i < greetCount; i++) { ctx.fillText(greetLines[i], lx, y); y += 16; }
+    ctx.globalAlpha = 1;
+    ctx.restore();
   }
 
   if (invQr) {
-    const iqS = 48;
-    const iqY = H - 80;
-    ctx.fillStyle = s.qrBg;
-    ctx.fillRect(lx - iqS / 2 - 3, iqY - 3, iqS + 6, iqS + 6);
-    ctx.globalAlpha = 0.85;
-    ctx.drawImage(invQr, lx - iqS / 2, iqY, iqS, iqS);
+    const iqS = 40;
+    y += 18;
+    ctx.globalAlpha = 0.5;
+    ctx.drawImage(invQr, lx - iqS / 2, y, iqS, iqS);
     ctx.globalAlpha = 1;
-    ctx.font = '400 8px ' + s.kr; ctx.fillStyle = s.textLight;
-    ctx.fillText('\uBAA8\uBC14\uC77C \uCCAD\uCCA9\uC7A5', lx, iqY + iqS + 12);
+    ctx.font = '400 7px ' + kr; ctx.fillStyle = textLight;
+    ctx.fillText('\uBAA8\uBC14\uC77C \uCCAD\uCCA9\uC7A5', lx, y + iqS + 9);
   }
 
-  ctx.strokeStyle = s.line; ctx.lineWidth = 0.5; ctx.setLineDash([4, 10]);
+  ctx.strokeStyle = 'rgba(42,31,20,0.05)'; ctx.lineWidth = 0.5; ctx.setLineDash([4, 10]);
   ctx.beginPath(); ctx.moveTo(half, 30); ctx.lineTo(half, H - 30); ctx.stroke();
   ctx.setLineDash([]);
 
-  const txL = half + 50;
-  const txR = W - 50;
+  const pad = 55;
+  const txL = half + pad;
+  const txR = W - pad;
   const contentW = txR - txL;
   const hasTransport = w.transportInfo && w.transportInfo.trim();
   const hasParking = w.parkingInfo && w.parkingInfo.trim();
   const hasInfo = hasTransport || hasParking;
 
-  const mapH = hasInfo ? 180 : 230;
-  const venueH = 22 + (w.venueHall ? 18 : 0) + Math.ceil(w.venueAddress.length / 28) * 15;
-  let infoH = 0;
-  if (hasTransport) { infoH += 22 + (w.transportInfo || '').split('\n').filter((l: string) => l.trim()).length * 16 + 8; }
-  if (hasParking) { infoH += 22 + (w.parkingInfo || '').split('\n').filter((l: string) => l.trim()).length * 16; }
-  const qrH = mapQr ? 62 : 0;
-  const calH = 170;
-  const greetLines = w.greeting ? wrapText((() => { const m = document.createElement('canvas').getContext('2d')!; m.font = '400 14px ' + s.kr; return m; })(), w.greeting, half - 130) : [];
-  const greetH = w.greeting ? Math.min(greetLines.length, 6) * 20 + 8 : 36;
-  const phoneH = 18;
-  const titleH = 28;
+  const mapH = hasInfo ? 160 : 200;
 
-  const totalContent = titleH + mapH + venueH + infoH + qrH + calH + greetH + phoneH;
-  const sections = 7 + (hasInfo ? 1 : 0) + (mapQr ? 1 : 0);
-  const gap = Math.max(12, Math.min(24, (H - 36 - totalContent) / sections));
-  let ry = Math.max(28, (H - totalContent - gap * (sections - 1)) / 2);
+  let ry = 50;
 
   ctx.textAlign = 'center';
-  ctx.font = '300 14px ' + s.en; ctx.fillStyle = s.textLight;
+  ctx.font = '300 13px ' + en; ctx.fillStyle = textLight;
   ctx.fillText('L O C A T I O N', rx, ry);
   ry += 10;
-  ctx.strokeStyle = s.lineSolid; ctx.lineWidth = 0.5;
-  ctx.beginPath(); ctx.moveTo(rx - 60, ry); ctx.lineTo(rx + 60, ry); ctx.stroke();
-  ry += gap;
+  ctx.strokeStyle = lineSolid; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(rx - 55, ry); ctx.lineTo(rx + 55, ry); ctx.stroke();
+  ry += 24;
 
   if (staticMap) {
-    const mapW = half - 100;
+    const mapW = half - 2 * pad;
     const mapX = rx - mapW / 2;
     ctx.save();
-    ctx.strokeStyle = s.lineSolid; ctx.lineWidth = 1;
+    ctx.strokeStyle = lineSolid; ctx.lineWidth = 0.8;
     ctx.strokeRect(mapX - 1, ry - 1, mapW + 2, mapH + 2);
-    const sR = staticMap.width / staticMap.height, dR = mapW / mapH;
+    const sR2 = staticMap.width / staticMap.height, dR2 = mapW / mapH;
     let sx2 = 0, sy2 = 0, sw2 = staticMap.width, sh2 = staticMap.height;
-    if (sR > dR) { sw2 = staticMap.height * dR; sx2 = (staticMap.width - sw2) / 2; }
-    else { sh2 = staticMap.width / dR; sy2 = (staticMap.height - sh2) / 2; }
+    if (sR2 > dR2) { sw2 = staticMap.height * dR2; sx2 = (staticMap.width - sw2) / 2; }
+    else { sh2 = staticMap.width / dR2; sy2 = (staticMap.height - sh2) / 2; }
     ctx.drawImage(staticMap, sx2, sy2, sw2, sh2, mapX, ry, mapW, mapH);
     ctx.restore();
-    ry += mapH + gap;
+    ry += mapH + 28;
   }
 
   ctx.textAlign = 'center';
-  ctx.font = '700 20px ' + s.kr; ctx.fillStyle = s.textDark;
+  ctx.font = '700 18px ' + kr; ctx.fillStyle = textDark;
   ctx.fillText(w.venue, rx, ry); ry += 22;
   if (w.venueHall) {
-    ctx.font = '400 15px ' + s.kr; ctx.fillStyle = s.textMid;
-    ctx.fillText(w.venueHall, rx, ry); ry += 18;
+    ctx.font = '400 13px ' + kr; ctx.fillStyle = textMid;
+    ctx.fillText(w.venueHall, rx, ry); ry += 26;
   }
-  ctx.font = '400 12px ' + s.kr; ctx.fillStyle = s.textLight;
-  const aL = wrapText(ctx, w.venueAddress, half - 110);
+  ctx.font = '400 11px ' + kr; ctx.fillStyle = textLight;
+  const aL = wrapText(ctx, w.venueAddress, half - 2 * pad);
   for (const l of aL) { ctx.fillText(l, rx, ry); ry += 15; }
-  ry += gap;
+  ry += 26;
 
   if (hasInfo) {
     ctx.textAlign = 'left';
     if (hasTransport) {
-      ctx.font = '700 14px ' + s.kr; ctx.fillStyle = s.textDark;
-      ctx.fillText('\uAD50\uD1B5 \uC548\uB0B4', txL, ry); ry += 22;
-      ctx.font = '400 12px ' + s.kr; ctx.fillStyle = s.textMid;
+      ctx.font = '700 12px ' + kr; ctx.fillStyle = textDark;
+      ctx.fillText('\uAD50\uD1B5 \uC548\uB0B4', txL, ry); ry += 26;
+      ctx.font = '400 11px ' + kr; ctx.fillStyle = textMid;
       for (const para of w.transportInfo!.split('\n')) {
         if (!para.trim()) { ry += 4; continue; }
         const wl = wrapText(ctx, para, contentW);
-        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 16; }
+        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 15; }
       }
       ry += 8;
     }
     if (hasParking) {
-      ctx.font = '700 14px ' + s.kr; ctx.fillStyle = s.textDark;
-      ctx.fillText('\uC8FC\uCC28 \uC548\uB0B4', txL, ry); ry += 22;
-      ctx.font = '400 12px ' + s.kr; ctx.fillStyle = s.textMid;
+      ctx.font = '700 12px ' + kr; ctx.fillStyle = textDark;
+      ctx.fillText('\uC8FC\uCC28 \uC548\uB0B4', txL, ry); ry += 26;
+      ctx.font = '400 11px ' + kr; ctx.fillStyle = textMid;
       for (const para of w.parkingInfo!.split('\n')) {
         if (!para.trim()) { ry += 4; continue; }
         const wl = wrapText(ctx, para, contentW);
-        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 16; }
+        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 15; }
       }
     }
     ctx.textAlign = 'center';
-    ry += gap;
+    ry += 26;
   }
 
   if (mapQr) {
-    const qS = 50;
-    ctx.fillStyle = s.qrBg; ctx.fillRect(rx - qS / 2 - 3, ry - 3, qS + 6, qS + 6);
+    const qS = 44;
+    ctx.globalAlpha = 0.55;
     ctx.drawImage(mapQr, rx - qS / 2, ry, qS, qS);
-    ctx.font = '400 8px ' + s.kr; ctx.fillStyle = s.textLight;
-    ctx.fillText('\uC9C0\uB3C4 \uBCF4\uAE30', rx, ry + qS + 10);
-    ry += qS + 12 + gap;
-  }
-
-  ctx.font = 'italic 400 13px ' + s.en; ctx.fillStyle = s.textLight;
-  ctx.fillText(d.monthEn + ' ' + d.year, rx, ry);
-  ry += 16;
-  const calEnd = drawCalendar(ctx, rx - 150, ry, 300, d, 'warm');
-  ry = calEnd + gap;
-
-  if (w.greeting) {
-    ctx.save();
-    ctx.globalAlpha = 0.4;
-    const gLines = wrapText(ctx, w.greeting, half - 130);
-    const maxG = Math.min(gLines.length, 7);
-    const gFontSize = maxG > 5 ? 12 : 14;
-    const gLineH = maxG > 5 ? 17 : 20;
-    ctx.font = '400 ' + gFontSize + 'px ' + s.kr; ctx.fillStyle = s.textDark;
-    for (let i = 0; i < maxG; i++) { ctx.fillText(gLines[i], rx, ry); ry += gLineH; }
     ctx.globalAlpha = 1;
-    ctx.restore();
-  } else {
-    ctx.save(); ctx.globalAlpha = 0.2;
-    ctx.font = 'italic 400 16px ' + s.en; ctx.fillStyle = s.textDark;
-    ctx.fillText('"The best thing to hold onto in life is each other"', rx, ry);
-    ctx.globalAlpha = 1; ctx.restore();
+    ctx.font = '400 7px ' + kr; ctx.fillStyle = textLight;
+    ctx.fillText('\uC9C0\uB3C4 \uBCF4\uAE30', rx, ry + qS + 9);
+    ry += qS + 36;
   }
+
+  ctx.font = 'italic 400 12px ' + en; ctx.fillStyle = textLight;
+  ctx.fillText(d.monthEn + ' ' + d.year, rx, ry);
+  ry += 14;
+  drawCalendar(ctx, rx - 140, ry, 280, d, 'warm');
 
   if (w.groomPhone || w.bridePhone) {
-    const cpY = H - 24;
-    ctx.font = '400 11px ' + s.kr; ctx.fillStyle = s.textLight;
+    const cpY = H - 22;
+    ctx.font = '400 10px ' + kr; ctx.fillStyle = textLight;
+    ctx.textAlign = 'center';
     const parts: string[] = [];
     if (w.groomPhone) parts.push('\uC2E0\uB791 ' + w.groomName + '  ' + w.groomPhone);
     if (w.bridePhone) parts.push('\uC2E0\uBD80 ' + w.brideName + '  ' + w.bridePhone);
@@ -1574,9 +1567,11 @@ async function drawHeartMinimal(ctx: CanvasRenderingContext2D, w: Props['wedding
   }
 
   ctx.textAlign = 'right';
-  ctx.font = '400 9px ' + s.kr; ctx.fillStyle = s.watermark;
-  ctx.fillText('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4', W - 25, H - 10);
+  ctx.font = '400 8px ' + kr; ctx.fillStyle = 'rgba(42,31,20,0.1)';
+  ctx.fillText('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4', W - 22, H - 10);
 }
+
+
 
 const DESIGNS = [
   { id: 'classic', label: '클래식', desc: '따뜻한 아이보리 · 3단 접지', draw: drawClassic as any, w: 2400, h: 900 },
@@ -1584,7 +1579,7 @@ const DESIGNS = [
   { id: 'pearl-drift', label: 'Pearl Drift', desc: '다크 감성 · 2단 접지', draw: ((ctx: any, w: any, p: any, m: any, s: any, i: any) => draw2Fold(ctx, w, p, m, s, i, 'pearl')) as any, w: 2480, h: 1100 },
   { id: 'luna-halfmoon', label: 'Luna Halfmoon', desc: '순백 물결 · 2단 접지', draw: ((ctx: any, w: any, p: any, m: any, s: any, i: any) => draw2Fold(ctx, w, p, m, s, i, 'luna')) as any, w: 2480, h: 1100 },
   { id: 'botanical-classic', label: 'Botanical Classic', desc: '올리브그린 보태니컬 · 2단 접지', draw: drawBotanicalClassic as any, w: 1572, h: 1100 },
-  { id: 'heart-minimal', label: 'Heart Minimal', desc: '워피치 하트 · 2단 접지', draw: drawHeartMinimal as any, w: 1572, h: 1100 },
+  { id: 'heart-minimal', label: 'Heart Minimal', desc: '워피치 하트 · 2단 접지', draw: drawHeartMinimal as any, w: 1572, h: 900 },
 ];
 
 export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUrl }: Props) {
