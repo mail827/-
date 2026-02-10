@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Download, ChevronLeft, ChevronRight, ImagePlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QRCode from 'qrcode';
 
@@ -30,6 +30,7 @@ interface Props {
     greetingTitle?: string;
   };
   photoUrl?: string;
+  galleries?: { mediaUrl: string; mediaType: string }[];
 }
 
 const PW = 2400;
@@ -1582,7 +1583,7 @@ const DESIGNS = [
   { id: 'heart-minimal', label: 'Heart Minimal', desc: '워피치 하트 · 2단 접지', draw: drawHeartMinimal as any, w: 1572, h: 900 },
 ];
 
-export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUrl }: Props) {
+export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUrl, galleries = [] }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [designIdx, setDesignIdx] = useState(0);
   const [fontsReady, setFontsReady] = useState(false);
@@ -1591,6 +1592,8 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
   const [mapQr, setMapQr] = useState<HTMLImageElement | null>(null);
   const [staticMap, setStaticMap] = useState<HTMLCanvasElement | null>(null);
   const [invQr, setInvQr] = useState<HTMLImageElement | null>(null);
+  const [selectedPhotoUrl, setSelectedPhotoUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const current = DESIGNS[designIdx];
 
@@ -1601,10 +1604,13 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
   }, [isOpen, fontsReady]);
 
   useEffect(() => {
-    if (isOpen && photoUrl && !photo) {
-      loadImage(photoUrl).then(setPhoto).catch(() => setPhoto(null));
+    const url = selectedPhotoUrl || photoUrl;
+    if (isOpen && url) {
+      loadImage(url).then(setPhoto).catch(() => setPhoto(null));
+    } else if (isOpen && !url) {
+      setPhoto(null);
     }
-  }, [isOpen, photoUrl, photo]);
+  }, [isOpen, photoUrl, selectedPhotoUrl]);
 
   useEffect(() => {
     if (!isOpen || mapQr) return;
@@ -1728,6 +1734,42 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
                 <button key={idx} onClick={() => setDesignIdx(idx)}
                   className={`h-2 rounded-full transition-all ${designIdx === idx ? 'bg-stone-800 w-5' : 'bg-stone-300 w-2'}`} />
               ))}
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-stone-500">사진 선택</p>
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {photoUrl && (
+                  <button onClick={() => { setSelectedPhotoUrl(null); setPhoto(null); }}
+                    className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                      !selectedPhotoUrl ? "border-stone-800 ring-1 ring-stone-800" : "border-stone-200 hover:border-stone-400"
+                    }`}>
+                    <img src={photoUrl} alt="" className="w-full h-full object-cover" />
+                    {!selectedPhotoUrl && <div className="absolute inset-0 bg-stone-800/10" />}
+                  </button>
+                )}
+                {galleries.filter(g => g.mediaType === "IMAGE").map((g, i) => (
+                  <button key={i} onClick={() => { setSelectedPhotoUrl(g.mediaUrl); setPhoto(null); }}
+                    className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                      selectedPhotoUrl === g.mediaUrl ? "border-stone-800 ring-1 ring-stone-800" : "border-stone-200 hover:border-stone-400"
+                    }`}>
+                    <img src={g.mediaUrl} alt="" className="w-full h-full object-cover" />
+                    {selectedPhotoUrl === g.mediaUrl && <div className="absolute inset-0 bg-stone-800/10" />}
+                  </button>
+                ))}
+                <button onClick={() => fileInputRef.current?.click()}
+                  className="shrink-0 w-16 h-16 rounded-lg border-2 border-dashed border-stone-300 flex items-center justify-center hover:border-stone-400 transition-colors">
+                  <ImagePlus className="w-5 h-5 text-stone-400" />
+                </button>
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const url = URL.createObjectURL(file);
+                    setSelectedPhotoUrl(url);
+                    setPhoto(null);
+                  }
+                  e.target.value = "";
+                }} />
+              </div>
             </div>
             <div className="flex justify-center bg-stone-50 rounded-xl p-4 overflow-x-auto">
               {!fontsReady ? (

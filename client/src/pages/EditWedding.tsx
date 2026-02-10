@@ -1611,7 +1611,8 @@ export default function EditWedding() {
           isOpen={showPaper}
           onClose={() => setShowPaper(false)}
           wedding={wedding}
-          photoUrl={galleries[0]?.mediaUrl}
+          photoUrl={wedding.heroMedia || galleries[0]?.mediaUrl}
+          galleries={galleries}
         />
       )}
       {showQR && wedding && (
