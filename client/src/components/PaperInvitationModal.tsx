@@ -1,7 +1,24 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Download, ChevronLeft, ChevronRight, ImagePlus } from 'lucide-react';
+import { X, Download, ChevronLeft, ChevronRight, ImagePlus, ZoomIn, ZoomOut, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QRCode from 'qrcode';
+import Cropper from 'react-easy-crop';
+
+function getCroppedImg(src: string, pixelCrop: { x: number; y: number; width: number; height: number }): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = pixelCrop.width;
+      canvas.height = pixelCrop.height;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, pixelCrop.width, pixelCrop.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.95));
+    };
+    img.src = src;
+  });
+}
 
 interface Props {
   isOpen: boolean;
@@ -30,7 +47,7 @@ interface Props {
     greetingTitle?: string;
   };
   photoUrl?: string;
-  galleries?: { mediaUrl: string; mediaType: string }[];
+  galleries?: any[];
 }
 
 const PW = 2400;
@@ -1035,7 +1052,7 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
 }
 
 async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wedding'], photo: HTMLImageElement | null, mapQr: HTMLImageElement | null, staticMap: HTMLCanvasElement | null, invQr: HTMLImageElement | null) {
-  const W = 1572, H = 1100;
+  const W = 1572, H = 900;
   const half = W / 2;
   const d = parseDate(w.weddingDate);
   const greenDark = '#3D5A32';
@@ -1500,7 +1517,7 @@ async function drawHeartMinimal(ctx: CanvasRenderingContext2D, w: Props['wedding
     else { sh2 = staticMap.width / dR2; sy2 = (staticMap.height - sh2) / 2; }
     ctx.drawImage(staticMap, sx2, sy2, sw2, sh2, mapX, ry, mapW, mapH);
     ctx.restore();
-    ry += mapH + 28;
+    ry += mapH + 22;
   }
 
   ctx.textAlign = 'center';
@@ -1508,18 +1525,18 @@ async function drawHeartMinimal(ctx: CanvasRenderingContext2D, w: Props['wedding
   ctx.fillText(w.venue, rx, ry); ry += 22;
   if (w.venueHall) {
     ctx.font = '400 13px ' + kr; ctx.fillStyle = textMid;
-    ctx.fillText(w.venueHall, rx, ry); ry += 26;
+    ctx.fillText(w.venueHall, rx, ry); ry += 18;
   }
   ctx.font = '400 11px ' + kr; ctx.fillStyle = textLight;
   const aL = wrapText(ctx, w.venueAddress, half - 2 * pad);
   for (const l of aL) { ctx.fillText(l, rx, ry); ry += 15; }
-  ry += 26;
+  ry += 18;
 
   if (hasInfo) {
     ctx.textAlign = 'left';
     if (hasTransport) {
       ctx.font = '700 12px ' + kr; ctx.fillStyle = textDark;
-      ctx.fillText('\uAD50\uD1B5 \uC548\uB0B4', txL, ry); ry += 26;
+      ctx.fillText('\uAD50\uD1B5 \uC548\uB0B4', txL, ry); ry += 18;
       ctx.font = '400 11px ' + kr; ctx.fillStyle = textMid;
       for (const para of w.transportInfo!.split('\n')) {
         if (!para.trim()) { ry += 4; continue; }
@@ -1530,7 +1547,7 @@ async function drawHeartMinimal(ctx: CanvasRenderingContext2D, w: Props['wedding
     }
     if (hasParking) {
       ctx.font = '700 12px ' + kr; ctx.fillStyle = textDark;
-      ctx.fillText('\uC8FC\uCC28 \uC548\uB0B4', txL, ry); ry += 26;
+      ctx.fillText('\uC8FC\uCC28 \uC548\uB0B4', txL, ry); ry += 18;
       ctx.font = '400 11px ' + kr; ctx.fillStyle = textMid;
       for (const para of w.parkingInfo!.split('\n')) {
         if (!para.trim()) { ry += 4; continue; }
@@ -1539,7 +1556,7 @@ async function drawHeartMinimal(ctx: CanvasRenderingContext2D, w: Props['wedding
       }
     }
     ctx.textAlign = 'center';
-    ry += 26;
+    ry += 18;
   }
 
   if (mapQr) {
@@ -1549,7 +1566,7 @@ async function drawHeartMinimal(ctx: CanvasRenderingContext2D, w: Props['wedding
     ctx.globalAlpha = 1;
     ctx.font = '400 7px ' + kr; ctx.fillStyle = textLight;
     ctx.fillText('\uC9C0\uB3C4 \uBCF4\uAE30', rx, ry + qS + 9);
-    ry += qS + 36;
+    ry += qS + 24;
   }
 
   ctx.font = 'italic 400 12px ' + en; ctx.fillStyle = textLight;
@@ -1574,13 +1591,474 @@ async function drawHeartMinimal(ctx: CanvasRenderingContext2D, w: Props['wedding
 
 
 
+function traceWavyRect(ctx: CanvasRenderingContext2D, cx: number, cy: number, w: number, h: number, amp: number, freq: number) {
+  ctx.beginPath();
+  const hw = w / 2, hh = h / 2;
+  const l = cx - hw, r = cx + hw, t = cy - hh, b = cy + hh;
+  const cornerR = 20;
+  const segments = 200;
+
+  function waveSin(ratio: number) {
+    return amp * Math.sin(ratio * freq * Math.PI * 2);
+  }
+
+  ctx.moveTo(l + cornerR, t);
+  for (let i = 0; i <= segments; i++) {
+    const ratio = i / segments;
+    const x = l + cornerR + ratio * (w - 2 * cornerR);
+    const offset = waveSin(ratio);
+    ctx.lineTo(x, t + offset);
+  }
+
+  ctx.quadraticCurveTo(r, t, r, t + cornerR);
+
+  for (let i = 0; i <= segments; i++) {
+    const ratio = i / segments;
+    const y = t + cornerR + ratio * (h - 2 * cornerR);
+    const offset = waveSin(ratio);
+    ctx.lineTo(r + offset, y);
+  }
+
+  ctx.quadraticCurveTo(r, b, r - cornerR, b);
+
+  for (let i = 0; i <= segments; i++) {
+    const ratio = i / segments;
+    const x = r - cornerR - ratio * (w - 2 * cornerR);
+    const offset = waveSin(ratio);
+    ctx.lineTo(x, b + offset);
+  }
+
+  ctx.quadraticCurveTo(l, b, l, b - cornerR);
+
+  for (let i = 0; i <= segments; i++) {
+    const ratio = i / segments;
+    const y = b - cornerR - ratio * (h - 2 * cornerR);
+    const offset = waveSin(ratio);
+    ctx.lineTo(l + offset, y);
+  }
+
+  ctx.quadraticCurveTo(l, t, l + cornerR, t);
+  ctx.closePath();
+}
+
+async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding'], photo: HTMLImageElement | null, mapQr: HTMLImageElement | null, staticMap: HTMLImageElement | null, invQr: HTMLImageElement | null) {
+  const W = 1572, H = 900;
+  const half = W / 2;
+  const d = parseDate(w.weddingDate);
+  const outerBg = '#EDE6DC';
+  const cardBg = '#FDFBF8';
+  const borderColor = '#C4B5A4';
+  const textDark = '#2C2420';
+  const textMid = '#5C4E42';
+  const textLight = '#9B8E80';
+  const accentBrown = '#8B7355';
+  const kr = '"Noto Serif KR", serif';
+  const en = '"Playfair Display", serif';
+
+  ctx.fillStyle = outerBg;
+  ctx.fillRect(0, 0, W, H);
+
+  const cardW = half - 56;
+  const cardH = H - 56;
+  const amp = 8;
+  const freq = 4.5;
+
+  const lx = half / 2;
+  const rx = half + half / 2;
+
+  ctx.save();
+  traceWavyRect(ctx, lx, H / 2, cardW, cardH, amp, freq);
+  ctx.fillStyle = cardBg;
+  ctx.fill();
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.save();
+  traceWavyRect(ctx, rx, H / 2, cardW, cardH, amp, freq);
+  ctx.fillStyle = cardBg;
+  ctx.fill();
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+  ctx.restore();
+
+  const [floral1, floral2] = await Promise.all(['/line-floral-1.png', '/line-floral-2.png'].map(src => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = src;
+    return new Promise<HTMLImageElement>(r => { img.onload = () => r(img); img.onerror = () => r(img); });
+  }));
+
+  if (floral1.naturalWidth > 0) {
+    ctx.save();
+    traceWavyRect(ctx, lx, H / 2, cardW, cardH, amp, freq);
+    ctx.clip();
+    ctx.globalAlpha = 0.18;
+    const fw = 420, fh = fw * (floral1.naturalHeight / floral1.naturalWidth);
+    ctx.drawImage(floral1, lx - cardW / 2 - 20, H - fh * 0.75, fw, fh);
+    ctx.restore();
+  }
+
+  if (floral2.naturalWidth > 0) {
+    ctx.save();
+    traceWavyRect(ctx, rx, H / 2, cardW, cardH, amp, freq);
+    ctx.clip();
+    ctx.globalAlpha = 0.12;
+    const fw2 = 300, fh2 = fw2 * (floral2.naturalHeight / floral2.naturalWidth);
+    ctx.drawImage(floral2, rx + cardW / 2 - fw2 + 30, 10, fw2, fh2);
+    ctx.restore();
+  }
+
+  ctx.strokeStyle = 'rgba(44,36,32,0.035)';
+  ctx.lineWidth = 0.5;
+  ctx.setLineDash([4, 10]);
+  ctx.beginPath();
+  ctx.moveTo(half, 40);
+  ctx.lineTo(half, H - 40);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const leftTop = 55;
+  const leftBottom = H - 45;
+  const usableLeft = leftBottom - leftTop;
+
+  const headerH = 46;
+  const photoH = 360;
+  const photoW = cardW - 80;
+  const dateBlockH = 38;
+  const enNameH = 22;
+  const nameH = 32;
+  const parentH = (w.groomFatherName || w.groomMotherName || w.brideFatherName || w.brideMotherName) ? 18 : 0;
+  const greetH = w.greeting ? 70 : 0;
+  const qrH = invQr ? 46 : 0;
+
+  const totalContentH = headerH + photoH + dateBlockH + enNameH + nameH + parentH + greetH + qrH;
+  const leftGap = Math.max(8, (usableLeft - totalContentH) / 8);
+
+  let y = leftTop;
+
+  ctx.font = '300 10px ' + en;
+  ctx.fillStyle = accentBrown;
+  ctx.fillText('W E D D I N G', lx, y + 6);
+  y += 20;
+
+  ctx.font = '300 8px ' + en;
+  ctx.fillStyle = textLight;
+  ctx.fillText('I N V I T A T I O N', lx, y + 3);
+  y += 16;
+
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 0.3;
+  ctx.beginPath();
+  ctx.moveTo(lx - 30, y);
+  ctx.lineTo(lx + 30, y);
+  ctx.stroke();
+  y += leftGap;
+
+  if (photo) {
+    const photoX = lx - photoW / 2;
+    const photoY = y;
+    const r = 12;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(photoX + r, photoY);
+    ctx.lineTo(photoX + photoW - r, photoY);
+    ctx.quadraticCurveTo(photoX + photoW, photoY, photoX + photoW, photoY + r);
+    ctx.lineTo(photoX + photoW, photoY + photoH - r);
+    ctx.quadraticCurveTo(photoX + photoW, photoY + photoH, photoX + photoW - r, photoY + photoH);
+    ctx.lineTo(photoX + r, photoY + photoH);
+    ctx.quadraticCurveTo(photoX, photoY + photoH, photoX, photoY + photoH - r);
+    ctx.lineTo(photoX, photoY + r);
+    ctx.quadraticCurveTo(photoX, photoY, photoX + r, photoY);
+    ctx.closePath();
+    ctx.clip();
+    const sR = photo.width / photo.height, dR = photoW / photoH;
+    let sx = 0, sy = 0, sw = photo.width, sh = photo.height;
+    if (sR > dR) { sw = photo.height * dR; sx = (photo.width - sw) / 2; }
+    else { sh = photo.width / dR; sy = (photo.height - sh) / 2; }
+    ctx.drawImage(photo, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
+    ctx.restore();
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(photoX + r, photoY);
+    ctx.lineTo(photoX + photoW - r, photoY);
+    ctx.quadraticCurveTo(photoX + photoW, photoY, photoX + photoW, photoY + r);
+    ctx.lineTo(photoX + photoW, photoY + photoH - r);
+    ctx.quadraticCurveTo(photoX + photoW, photoY + photoH, photoX + photoW - r, photoY + photoH);
+    ctx.lineTo(photoX + r, photoY + photoH);
+    ctx.quadraticCurveTo(photoX, photoY + photoH, photoX, photoY + photoH - r);
+    ctx.lineTo(photoX, photoY + r);
+    ctx.quadraticCurveTo(photoX, photoY, photoX + r, photoY);
+    ctx.closePath();
+    ctx.stroke();
+    y += photoH + leftGap;
+  } else {
+    const phW = photoW, phH = photoH;
+    ctx.save();
+    ctx.fillStyle = 'rgba(44,36,32,0.02)';
+    const r = 12;
+    ctx.beginPath();
+    ctx.moveTo(lx - phW / 2 + r, y);
+    ctx.lineTo(lx + phW / 2 - r, y);
+    ctx.quadraticCurveTo(lx + phW / 2, y, lx + phW / 2, y + r);
+    ctx.lineTo(lx + phW / 2, y + phH - r);
+    ctx.quadraticCurveTo(lx + phW / 2, y + phH, lx + phW / 2 - r, y + phH);
+    ctx.lineTo(lx - phW / 2 + r, y + phH);
+    ctx.quadraticCurveTo(lx - phW / 2, y + phH, lx - phW / 2, y + phH - r);
+    ctx.lineTo(lx - phW / 2, y + r);
+    ctx.quadraticCurveTo(lx - phW / 2, y, lx - phW / 2 + r, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    ctx.font = '400 12px ' + kr;
+    ctx.fillStyle = 'rgba(44,36,32,0.1)';
+    ctx.fillText('\uB300\uD45C \uC0AC\uC9C4', lx, y + phH / 2);
+    y += phH + leftGap;
+  }
+
+  ctx.font = '400 12px ' + en;
+  ctx.fillStyle = textMid;
+  ctx.fillText(d.year + '. ' + String(d.month).padStart(2, '0') + '. ' + String(d.day).padStart(2, '0') + '  ' + d.dayNameEn.toUpperCase(), lx, y);
+  y += 16;
+
+  ctx.font = '400 10px ' + kr;
+  ctx.fillStyle = textLight;
+  ctx.fillText(d.year + '\uB144 ' + d.month + '\uC6D4 ' + d.day + '\uC77C ' + d.dayName + '\uC694\uC77C ' + (w.weddingTime || ''), lx, y);
+  y += leftGap;
+
+  const groomEn = w.groomNameEn || '';
+  const brideEn = w.brideNameEn || '';
+  if (groomEn || brideEn) {
+    ctx.font = 'italic 300 14px ' + en;
+    ctx.fillStyle = textLight;
+    const enText = [groomEn, brideEn].filter(Boolean).join('  &  ');
+    ctx.fillText(enText, lx, y);
+    y += 22;
+  }
+
+  ctx.font = '700 26px ' + kr;
+  ctx.fillStyle = textDark;
+  const groomW = ctx.measureText(w.groomName).width;
+  const brideW = ctx.measureText(w.brideName).width;
+  const ampW = 30;
+  const totalNameW = groomW + ampW + brideW;
+  const nameStartX = lx - totalNameW / 2;
+  ctx.fillText(w.groomName, nameStartX + groomW / 2, y);
+  ctx.font = '300 14px ' + en;
+  ctx.fillStyle = accentBrown;
+  ctx.fillText('&', nameStartX + groomW + ampW / 2, y - 1);
+  ctx.font = '700 26px ' + kr;
+  ctx.fillStyle = textDark;
+  ctx.fillText(w.brideName, nameStartX + groomW + ampW + brideW / 2, y);
+  y += 22;
+
+  const hasGP = w.groomFatherName || w.groomMotherName;
+  const hasBP = w.brideFatherName || w.brideMotherName;
+  if (hasGP || hasBP) {
+    ctx.font = '400 9px ' + kr;
+    ctx.fillStyle = textLight;
+    const gpText = hasGP ? [w.groomFatherName, w.groomMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uC544\uB4E4' : '';
+    const bpText = hasBP ? [w.brideFatherName, w.brideMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uB538' : '';
+    ctx.fillText([gpText, bpText].filter(Boolean).join('\u3000\u3000'), lx, y);
+    y += leftGap * 0.7;
+  }
+
+  if (w.greeting) {
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    ctx.font = '400 9px ' + kr;
+    ctx.fillStyle = textDark;
+    const gLines = wrapText(ctx, w.greeting, cardW - 80);
+    const maxG = Math.min(gLines.length, 5);
+    for (let i = 0; i < maxG; i++) {
+      ctx.fillText(gLines[i], lx, y);
+      y += 14;
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    y += leftGap * 0.3;
+  }
+
+  if (invQr) {
+    const iqS = 32;
+    ctx.globalAlpha = 0.35;
+    ctx.drawImage(invQr, lx - iqS / 2, y, iqS, iqS);
+    ctx.globalAlpha = 1;
+    ctx.font = '400 6px ' + kr;
+    ctx.fillStyle = textLight;
+    ctx.fillText('\uBAA8\uBC14\uC77C \uCCAD\uCCA9\uC7A5', lx, y + iqS + 7);
+  }
+
+  const rightTop = 65;
+  const rightBottom = H - 50;
+  const usableRight = rightBottom - rightTop;
+
+  const mapH = staticMap ? 180 : 0;
+  const venueH = 50;
+  const transportH = (w.transportInfo?.trim() || w.parkingInfo?.trim()) ? 80 : 0;
+  const mapQrH = mapQr ? 56 : 0;
+  const calH = 180;
+  const contactH = (w.groomPhone || w.bridePhone) ? 20 : 0;
+  const totalRightH = 30 + mapH + venueH + transportH + mapQrH + calH + contactH;
+  const rightGap = Math.max(8, (usableRight - totalRightH) / 8);
+
+  let ry = rightTop + rightGap * 0.3;
+
+  ctx.textAlign = 'center';
+  ctx.font = '300 11px ' + en;
+  ctx.fillStyle = accentBrown;
+  ctx.fillText('L O C A T I O N', rx, ry);
+  ry += 10;
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 0.4;
+  ctx.beginPath();
+  ctx.moveTo(rx - 46, ry);
+  ctx.lineTo(rx + 46, ry);
+  ctx.stroke();
+  ry += rightGap;
+
+  if (staticMap) {
+    const mW = cardW - 80;
+    const mH = mapH;
+    const mX = rx - mW / 2;
+    ctx.save();
+    const r = 8;
+    ctx.beginPath();
+    ctx.moveTo(mX + r, ry);
+    ctx.lineTo(mX + mW - r, ry);
+    ctx.quadraticCurveTo(mX + mW, ry, mX + mW, ry + r);
+    ctx.lineTo(mX + mW, ry + mH - r);
+    ctx.quadraticCurveTo(mX + mW, ry + mH, mX + mW - r, ry + mH);
+    ctx.lineTo(mX + r, ry + mH);
+    ctx.quadraticCurveTo(mX, ry + mH, mX, ry + mH - r);
+    ctx.lineTo(mX, ry + r);
+    ctx.quadraticCurveTo(mX, ry, mX + r, ry);
+    ctx.closePath();
+    ctx.clip();
+    const sR2 = staticMap.width / staticMap.height, dR2 = mW / mH;
+    let sx2 = 0, sy2 = 0, sw2 = staticMap.width, sh2 = staticMap.height;
+    if (sR2 > dR2) { sw2 = staticMap.height * dR2; sx2 = (staticMap.width - sw2) / 2; }
+    else { sh2 = staticMap.width / dR2; sy2 = (staticMap.height - sh2) / 2; }
+    ctx.drawImage(staticMap, sx2, sy2, sw2, sh2, mX, ry, mW, mH);
+    ctx.restore();
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(mX + r, ry);
+    ctx.lineTo(mX + mW - r, ry);
+    ctx.quadraticCurveTo(mX + mW, ry, mX + mW, ry + r);
+    ctx.lineTo(mX + mW, ry + mH - r);
+    ctx.quadraticCurveTo(mX + mW, ry + mH, mX + mW - r, ry + mH);
+    ctx.lineTo(mX + r, ry + mH);
+    ctx.quadraticCurveTo(mX, ry + mH, mX, ry + mH - r);
+    ctx.lineTo(mX, ry + r);
+    ctx.quadraticCurveTo(mX, ry, mX + r, ry);
+    ctx.closePath();
+    ctx.stroke();
+    ry += mH + rightGap;
+  }
+
+  ctx.textAlign = 'center';
+  ctx.font = '700 16px ' + kr;
+  ctx.fillStyle = textDark;
+  ctx.fillText(w.venue, rx, ry);
+  ry += 20;
+  if (w.venueHall) {
+    ctx.font = '400 12px ' + kr;
+    ctx.fillStyle = textMid;
+    ctx.fillText(w.venueHall, rx, ry);
+    ry += 16;
+  }
+  ctx.font = '400 10px ' + kr;
+  ctx.fillStyle = textLight;
+  const aL = wrapText(ctx, w.venueAddress, cardW - 100);
+  for (const l of aL) { ctx.fillText(l, rx, ry); ry += 14; }
+  ry += rightGap * 0.6;
+
+  const hasTransport = w.transportInfo && w.transportInfo.trim();
+  const hasParking = w.parkingInfo && w.parkingInfo.trim();
+  if (hasTransport || hasParking) {
+    const txL = half + 55;
+    ctx.textAlign = 'left';
+    if (hasTransport) {
+      ctx.font = '700 10px ' + kr;
+      ctx.fillStyle = textDark;
+      ctx.fillText('\uAD50\uD1B5 \uC548\uB0B4', txL, ry);
+      ry += 15;
+      ctx.font = '400 9px ' + kr;
+      ctx.fillStyle = textMid;
+      for (const para of w.transportInfo!.split('\n')) {
+        if (!para.trim()) { ry += 3; continue; }
+        const wl = wrapText(ctx, para, cardW - 100);
+        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 13; }
+      }
+      ry += 4;
+    }
+    if (hasParking) {
+      ctx.font = '700 10px ' + kr;
+      ctx.fillStyle = textDark;
+      ctx.fillText('\uC8FC\uCC28 \uC548\uB0B4', txL, ry);
+      ry += 15;
+      ctx.font = '400 9px ' + kr;
+      ctx.fillStyle = textMid;
+      for (const para of w.parkingInfo!.split('\n')) {
+        if (!para.trim()) { ry += 3; continue; }
+        const wl = wrapText(ctx, para, cardW - 100);
+        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 13; }
+      }
+    }
+    ctx.textAlign = 'center';
+    ry += rightGap * 0.5;
+  }
+
+  if (mapQr) {
+    const qS = 38;
+    ctx.globalAlpha = 0.45;
+    ctx.drawImage(mapQr, rx - qS / 2, ry, qS, qS);
+    ctx.globalAlpha = 1;
+    ctx.font = '400 7px ' + kr;
+    ctx.fillStyle = textLight;
+    ctx.fillText('\uC9C0\uB3C4 \uBCF4\uAE30', rx, ry + qS + 8);
+    ry += qS + 20;
+  }
+
+  ry += rightGap * 0.3;
+  ctx.font = 'italic 400 11px ' + en;
+  ctx.fillStyle = textLight;
+  ctx.fillText(d.monthEn + ' ' + d.year, rx, ry);
+  ry += 12;
+  const calReturn = drawCalendar(ctx, rx - 130, ry, 260, d, 'warm');
+  ry += typeof calReturn === 'number' ? calReturn : 160;
+
+  if (w.groomPhone || w.bridePhone) {
+    ctx.textAlign = 'center';
+    ctx.font = '400 9px ' + kr;
+    ctx.fillStyle = textLight;
+    const parts: string[] = [];
+    if (w.groomPhone) parts.push('\uC2E0\uB791 ' + w.groomName + '  ' + w.groomPhone);
+    if (w.bridePhone) parts.push('\uC2E0\uBD80 ' + w.brideName + '  ' + w.bridePhone);
+    ctx.fillText(parts.join('    '), rx, rightBottom - 6);
+  }
+
+  ctx.textAlign = 'right';
+  ctx.font = '400 7px ' + kr;
+  ctx.fillStyle = 'rgba(44,36,32,0.06)';
+  ctx.fillText('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4', W - 24, H - 10);
+}
 const DESIGNS = [
   { id: 'classic', label: '클래식', desc: '따뜻한 아이보리 · 3단 접지', draw: drawClassic as any, w: 2400, h: 900 },
   { id: 'modern', label: '모던', desc: '미니멀 화이트 · 3단 접지', draw: drawModern as any, w: 2400, h: 900 },
   { id: 'pearl-drift', label: 'Pearl Drift', desc: '다크 감성 · 2단 접지', draw: ((ctx: any, w: any, p: any, m: any, s: any, i: any) => draw2Fold(ctx, w, p, m, s, i, 'pearl')) as any, w: 2480, h: 1100 },
   { id: 'luna-halfmoon', label: 'Luna Halfmoon', desc: '순백 물결 · 2단 접지', draw: ((ctx: any, w: any, p: any, m: any, s: any, i: any) => draw2Fold(ctx, w, p, m, s, i, 'luna')) as any, w: 2480, h: 1100 },
-  { id: 'botanical-classic', label: 'Botanical Classic', desc: '올리브그린 보태니컬 · 2단 접지', draw: drawBotanicalClassic as any, w: 1572, h: 1100 },
+  { id: 'botanical-classic', label: 'Botanical Classic', desc: '올리브그린 보태니컬 · 2단 접지', draw: drawBotanicalClassic as any, w: 1572, h: 900 },
   { id: 'heart-minimal', label: 'Heart Minimal', desc: '워피치 하트 · 2단 접지', draw: drawHeartMinimal as any, w: 1572, h: 900 },
+  { id: 'wave-border', label: 'Wave Border', desc: '웜 브라운 물결 · 2단 접지', draw: drawWaveBorder as any, w: 1572, h: 900 },
 ];
 
 export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUrl, galleries = [] }: Props) {
@@ -1594,6 +2072,11 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
   const [invQr, setInvQr] = useState<HTMLImageElement | null>(null);
   const [selectedPhotoUrl, setSelectedPhotoUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showCrop, setShowCrop] = useState(false);
+  const [cropUrl, setCropUrl] = useState<string>('');
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedArea, setCroppedArea] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 
   const current = DESIGNS[designIdx];
 
@@ -1710,7 +2193,7 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
           <div className="sticky top-0 bg-white/90 backdrop-blur-sm border-b border-stone-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
             <div>
               <h3 className="text-lg font-medium text-stone-800">종이 청첩장</h3>
-              <p className="text-sm text-stone-400 mt-0.5">{(current as any).h > 1000 ? '2단 접지' : '3단 접지'} · 인쇄용 고해상도</p>
+              <p className="text-sm text-stone-400 mt-0.5">{(current as any).w <= 1600 ? '2단 접지' : (current as any).h > 1000 ? '2단 접지' : '3단 접지'} · 인쇄용 고해상도</p>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-stone-100 rounded-lg transition-colors">
               <X className="w-5 h-5 text-stone-500" />
@@ -1739,23 +2222,26 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
               <p className="text-xs font-medium text-stone-500">사진 선택</p>
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {photoUrl && (
-                  <button onClick={() => { setSelectedPhotoUrl(null); setPhoto(null); }}
+                  <button onClick={() => { setCropUrl(photoUrl!); setShowCrop(true); setCrop({ x: 0, y: 0 }); setZoom(1); }}
                     className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                      !selectedPhotoUrl ? "border-stone-800 ring-1 ring-stone-800" : "border-stone-200 hover:border-stone-400"
+                      !selectedPhotoUrl ? 'border-stone-800 ring-1 ring-stone-800' : 'border-stone-200 hover:border-stone-400'
                     }`}>
                     <img src={photoUrl} alt="" className="w-full h-full object-cover" />
                     {!selectedPhotoUrl && <div className="absolute inset-0 bg-stone-800/10" />}
                   </button>
                 )}
-                {galleries.filter(g => g.mediaType === "IMAGE").map((g, i) => (
-                  <button key={i} onClick={() => { setSelectedPhotoUrl(g.mediaUrl); setPhoto(null); }}
-                    className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedPhotoUrl === g.mediaUrl ? "border-stone-800 ring-1 ring-stone-800" : "border-stone-200 hover:border-stone-400"
-                    }`}>
-                    <img src={g.mediaUrl} alt="" className="w-full h-full object-cover" />
-                    {selectedPhotoUrl === g.mediaUrl && <div className="absolute inset-0 bg-stone-800/10" />}
-                  </button>
-                ))}
+                {galleries.filter((g: any) => (g.mediaType === 'IMAGE' || g.imageUrl)).map((g: any, i: number) => {
+                  const url = g.mediaUrl || g.imageUrl;
+                  return (
+                    <button key={i} onClick={() => { setCropUrl(url); setShowCrop(true); setCrop({ x: 0, y: 0 }); setZoom(1); }}
+                      className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                        selectedPhotoUrl === url ? 'border-stone-800 ring-1 ring-stone-800' : 'border-stone-200 hover:border-stone-400'
+                      }`}>
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                      {selectedPhotoUrl === url && <div className="absolute inset-0 bg-stone-800/10" />}
+                    </button>
+                  );
+                })}
                 <button onClick={() => fileInputRef.current?.click()}
                   className="shrink-0 w-16 h-16 rounded-lg border-2 border-dashed border-stone-300 flex items-center justify-center hover:border-stone-400 transition-colors">
                   <ImagePlus className="w-5 h-5 text-stone-400" />
@@ -1764,10 +2250,12 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
                   const file = e.target.files?.[0];
                   if (file) {
                     const url = URL.createObjectURL(file);
-                    setSelectedPhotoUrl(url);
-                    setPhoto(null);
+                    setCropUrl(url);
+                    setShowCrop(true);
+                    setCrop({ x: 0, y: 0 });
+                    setZoom(1);
                   }
-                  e.target.value = "";
+                  e.target.value = '';
                 }} />
               </div>
             </div>
@@ -1781,13 +2269,45 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
             <div className="bg-stone-50 rounded-xl p-4 space-y-2">
               <p className="text-sm font-medium text-stone-700">인쇄 안내</p>
               <ul className="text-xs text-stone-500 space-y-1.5 leading-relaxed">
-                <li>{(current as any).h > 1000 ? '2단 접지 A5 규격 (펼침 297×210mm / 접힘 148.5×210mm)' : '3단 접지 규격 (펼침 381×143mm / 접힘 127×143mm)'}</li>
+                <li>{((current as any).w <= 1600 || (current as any).h > 1000) ? '2단 접지 A5 규격 (펼침 297×210mm / 접힘 148.5×210mm)' : '3단 접지 규격 (펼침 381×143mm / 접힘 127×143mm)'}</li>
                 <li>300dpi 고해상도 ({(current as any).w}×{(current as any).h}px)</li>
                 <li>추천 용지: 랑데부지 250g, 스노우화이트, 코튼지</li>
-                <li>{(current as any).h > 1000 ? '인쇄소에 파일 전달 후 반접기 재단 요청' : '인쇄소에 파일 전달 후 3단 접지 재단 요청'}</li>
+                <li>{((current as any).w <= 1600 || (current as any).h > 1000) ? '인쇄소에 파일 전달 후 반접기 재단 요청' : '인쇄소에 파일 전달 후 3단 접지 재단 요청'}</li>
                 <li>· 지도 QR코드를 스캔하면 카카오맵이 열립니다</li>
               </ul>
             </div>
+            {showCrop && (
+              <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowCrop(false)}>
+                <div className="bg-white rounded-2xl w-full max-w-md mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
+                  <div className="px-5 py-3 border-b border-stone-100 flex items-center justify-between">
+                    <p className="text-sm font-medium text-stone-800">사진 편집</p>
+                    <button onClick={() => setShowCrop(false)} className="p-1 hover:bg-stone-100 rounded-lg"><X className="w-4 h-4 text-stone-400" /></button>
+                  </div>
+                  <div className="relative h-72 bg-stone-900">
+                    <Cropper image={cropUrl} crop={crop} zoom={zoom} aspect={3 / 4} onCropChange={setCrop} onZoomChange={setZoom}
+                      onCropComplete={(_, area) => setCroppedArea(area)} />
+                  </div>
+                  <div className="px-5 py-3 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <ZoomOut className="w-4 h-4 text-stone-400 shrink-0" />
+                      <input type="range" min={1} max={3} step={0.05} value={zoom} onChange={e => setZoom(Number(e.target.value))}
+                        className="w-full h-1.5 bg-stone-200 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-stone-800 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer" />
+                      <ZoomIn className="w-4 h-4 text-stone-400 shrink-0" />
+                    </div>
+                    <button onClick={async () => {
+                      if (croppedArea) {
+                        const cropped = await getCroppedImg(cropUrl, croppedArea);
+                        setSelectedPhotoUrl(cropped);
+                        setPhoto(null);
+                        setShowCrop(false);
+                      }
+                    }} className="w-full py-2.5 bg-stone-800 text-white rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-stone-900 transition-colors">
+                      <Check className="w-4 h-4" /> 적용
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             <button onClick={handleDownload} disabled={rendering || !fontsReady}
               className="w-full py-3.5 bg-stone-800 text-white rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-stone-900 transition-colors disabled:opacity-50">
               <Download className="w-4 h-4" />
