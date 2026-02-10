@@ -77,7 +77,7 @@ app.use('/api/pair', pairRouter);
 app.use('/api/map', mapRouter);
 app.use('/api/og', ogRouter);
 
-seedPackages();
+seedPackages().catch(e => console.error("Seed error (ignored):", e.message));
 
 app.listen(Number(PORT), '0.0.0.0', () => {
   console.log('🎊 Wedding Server running on port ' + PORT);

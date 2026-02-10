@@ -784,8 +784,8 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
   } catch (e) {}
 
   const lx = frameX + frameW / 2;
-  const innerTop = frameY + frameH * 0.18;
-  const innerBot = frameY + frameH * 0.92;
+  const innerTop = frameY + frameH * 0.14;
+  const innerBot = frameY + frameH * 0.90;
 
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.font = `400 16px ${en}`;
@@ -794,7 +794,7 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
 
   const photoRX = Math.min(frameW * 0.28, 200);
   const photoRY = Math.min((innerBot - innerTop) * 0.30, 230);
-  const photoCY = innerTop + 22 + photoRY + 10;
+  const photoCY = innerTop + 40 + photoRY;
 
   ctx.save();
   ctx.beginPath();
@@ -832,7 +832,7 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
   }
   ctx.restore();
 
-  let ny = photoCY + photoRY + 28;
+  let ny = photoCY + photoRY + 36;
 
   const gEn = w.groomNameEn || '';
   const bEn = w.brideNameEn || '';
@@ -840,21 +840,21 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
     ctx.textAlign = 'center';
     ctx.font = `400 14px ${en}`;
     ctx.fillStyle = greenMid;
-    ctx.fillText([gEn, bEn].filter(Boolean).join('  &  '), lx, ny);
+    ctx.fillText([gEn, bEn].filter(Boolean).join("  &  "), lx, ny);
     ny += 22;
   }
 
   ctx.textAlign = 'center';
-  ctx.font = `400 34px ${kr}`;
+  ctx.font = `400 30px ${kr}`;
   ctx.fillStyle = greenDark;
   ctx.fillText(w.groomName, lx - 55, ny);
   ctx.font = `400 20px ${en}`;
   ctx.fillStyle = greenLight;
   ctx.fillText('&', lx, ny - 2);
-  ctx.font = `400 34px ${kr}`;
+  ctx.font = `400 30px ${kr}`;
   ctx.fillStyle = greenDark;
   ctx.fillText(w.brideName, lx + 55, ny);
-  ny += 34;
+  ny += 32;
 
   const hasGP = w.groomFatherName || w.groomMotherName;
   const hasBP = w.brideFatherName || w.brideMotherName;
@@ -882,7 +882,7 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
 
   if (invQr) {
     const iqS = 40;
-    const iqY = innerBot - iqS - 8;
+    const iqY = innerBot - iqS - 20;
     ctx.globalAlpha = 0.55;
     ctx.drawImage(invQr, lx - iqS / 2, iqY, iqS, iqS);
     ctx.globalAlpha = 1.0;
@@ -1347,13 +1347,14 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
     }).then(url => loadImage(url)).then(setMapQr).catch(() => setMapQr(null));
   }, [isOpen, wedding.venueKakaoMap, wedding.venueAddress, mapQr]);
 
+
   useEffect(() => {
     if (!isOpen || staticMap) return;
-    const apiBase = import.meta.env.VITE_API_URL || '';
-    const addr = wedding.venue + ' ' + (wedding.venueHall || '');
-    fetch(`${apiBase}/map/geocode?address=${encodeURIComponent(addr)}`)
-      .then(r => r.json())
-      .then(({ lng, lat }) => renderOsmTiles(Number(lat), Number(lng), 16, 800, 600))
+    const ab = import.meta.env.VITE_API_URL || "";
+    const tryGeo = (q: string) => fetch(ab + "/map/geocode?address=" + encodeURIComponent(q)).then(r => { if (!r.ok) throw new Error(); return r.json(); });
+    tryGeo(wedding.venue + " " + (wedding.venueHall || ""))
+      .catch(() => tryGeo(wedding.venueAddress || wedding.venue))
+      .then(({ lng, lat }: any) => renderOsmTiles(Number(lat), Number(lng), 16, 800, 600))
       .then(setStaticMap)
       .catch(() => setStaticMap(null));
   }, [isOpen, wedding.venue, wedding.venueHall, staticMap]);
