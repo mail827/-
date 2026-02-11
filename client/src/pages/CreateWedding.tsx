@@ -20,6 +20,9 @@ const THEMES = [
   { id: 'PEARL_DRIFT', name: 'Pearl Drift', desc: '심해 속 떠다니는 진주', color: 'from-gray-900 to-slate-800' },
   { id: 'NIGHT_SEA', name: '밤바다', desc: '별이 쏟아지는 밤, 깊은 바다', color: 'from-slate-950 to-blue-950' },
   { id: 'AQUA_GLOBE', name: '아쿠아 글로브', desc: '청량한 수중 금붕어 세계', color: 'from-sky-200 to-cyan-300' },
+  { id: 'BOTANICAL_CLASSIC', name: '보태니컬 클래식', desc: '올리브그린 보태니컬 라인아트', color: 'from-green-200 to-emerald-300' },
+  { id: 'HEART_MINIMAL', name: '하트 미니멀', desc: '워피치 하트 미니멀', color: 'from-orange-200 to-rose-300' },
+  { id: 'WAVE_BORDER', name: '웨이브 보더', desc: '웜브라운 물결 보더', color: 'from-amber-200 to-yellow-300' },
 ];
 
 interface Package {

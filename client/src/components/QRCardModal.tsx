@@ -517,6 +517,27 @@ const THEME_DESIGNS: Record<string, ThemeDesign> = {
       drawFish(w * 0.5, h * 0.15, 18, false);
     },
   },
+  BOTANICAL_CLASSIC: {
+    fontSerif: "'Diphylleia', serif",
+    bg: (ctx: any, w: number, h: number) => { const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#F4F1E8'); g.addColorStop(1,'#EAE5D8'); ctx.fillStyle = g; ctx.fillRect(0,0,w,h); },
+    accent: '#6B8F5B', text: '#3A3A32', textSub: '#7A7A6A', qrFg: '#3D5A32', qrBg: '#F4F1E8',
+    label: '보태니컬 클래식',
+    ornament: (ctx: any, w: number, h: number) => { ctx.strokeStyle = 'rgba(107,143,91,0.15)'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(15,0); ctx.lineTo(15,h); ctx.stroke(); ctx.beginPath(); ctx.moveTo(w-15,0); ctx.lineTo(w-15,h); ctx.stroke(); for(let i=0;i<5;i++){const y=40+i*Math.floor(h/5); ctx.beginPath(); ctx.ellipse(15,y,8,12,0,0,Math.PI*2); ctx.stroke(); ctx.beginPath(); ctx.ellipse(w-15,y,8,12,0,0,Math.PI*2); ctx.stroke();} },
+  },
+  HEART_MINIMAL: {
+    fontSerif: "'GowunBatang', serif",
+    bg: (ctx: any, w: number, h: number) => { const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#FDF5ED'); g.addColorStop(1,'#F8EDE0'); ctx.fillStyle = g; ctx.fillRect(0,0,w,h); },
+    accent: '#D4956A', text: '#4A3828', textSub: '#8A7A6A', qrFg: '#4A3828', qrBg: '#FDF5ED',
+    label: '하트 미니멀',
+    ornament: (ctx: any, w: number, h: number) => { const drawHeart = (cx: number, cy: number, s: number) => { ctx.save(); ctx.translate(cx,cy); ctx.beginPath(); ctx.moveTo(0,s*0.3); ctx.bezierCurveTo(-s*0.5,-s*0.3,-s,-s*0.1,0,-s*0.5); ctx.moveTo(0,s*0.3); ctx.bezierCurveTo(s*0.5,-s*0.3,s,-s*0.1,0,-s*0.5); ctx.strokeStyle='rgba(212,149,106,0.15)'; ctx.lineWidth=0.8; ctx.stroke(); ctx.restore(); }; drawHeart(w*0.15,h*0.2,14); drawHeart(w*0.85,h*0.3,10); drawHeart(w*0.5,h*0.85,12); },
+  },
+  WAVE_BORDER: {
+    fontSerif: "'KoPubWorld', serif",
+    bg: (ctx: any, w: number, h: number) => { const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#F5F0E8'); g.addColorStop(1,'#EDE6DA'); ctx.fillStyle = g; ctx.fillRect(0,0,w,h); },
+    accent: '#8B7355', text: '#3C3428', textSub: '#7A6F60', qrFg: '#3C3428', qrBg: '#F5F0E8',
+    label: '웨이브 보더',
+    ornament: (ctx: any, w: number, h: number) => { ctx.strokeStyle = 'rgba(160,145,122,0.2)'; ctx.lineWidth = 0.8; for(let y=0;y<h;y+=20){ ctx.beginPath(); ctx.moveTo(8,y); ctx.quadraticCurveTo(0,y+10,8,y+20); ctx.stroke(); ctx.beginPath(); ctx.moveTo(w-8,y); ctx.quadraticCurveTo(w,y+10,w-8,y+20); ctx.stroke(); } },
+  },
 };
 
 function formatKoreanDate(dateStr: string) {

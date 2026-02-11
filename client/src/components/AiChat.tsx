@@ -282,26 +282,25 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
       if (now - lastTriggerTime.current < 3000) return;
 
       const toastMsgs = getToastMessages();
+      const triggerLine = window.innerHeight * 0.45;
+      let best: string | null = null;
 
       for (const { key, id } of sections) {
         if (dismissedToasts.has(key)) continue;
-        
         const el = document.getElementById(id);
         if (!el) continue;
-
         const rect = el.getBoundingClientRect();
-        const inView = rect.top < window.innerHeight * 0.5 && rect.bottom > 150;
+        if (rect.top < triggerLine && rect.bottom > 0) best = key;
+      }
 
-        if (inView && lastTriggered !== key) {
-          lastTriggered = key;
-          lastTriggerTime.current = now;
-          const msgs = toastMsgs[key as keyof typeof toastMsgs];
-          if (msgs && msgs.length > 0) {
-            const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
-            setActiveToastMessage(randomMsg);
-            setActiveToast(key);
-          }
-          return;
+      if (best && best !== lastTriggered) {
+        lastTriggered = best;
+        lastTriggerTime.current = now;
+        const msgs = toastMsgs[best as keyof typeof toastMsgs];
+        if (msgs && msgs.length > 0) {
+          const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
+          setActiveToastMessage(randomMsg);
+          setActiveToast(best);
         }
       }
     };

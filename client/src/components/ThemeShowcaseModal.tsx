@@ -240,6 +240,9 @@ const themeAccents: Record<string, { accent: string; glow: string }> = {
   PEARL_DRIFT: { accent: 'rgba(232,238,242,0.12)', glow: 'rgba(232,238,242,0.08)' },
   NIGHT_SEA: { accent: 'rgba(80,160,240,0.15)', glow: 'rgba(80,160,240,0.1)' },
   AQUA_GLOBE: { accent: 'rgba(120,200,230,0.15)', glow: 'rgba(100,190,220,0.1)' },
+  WAVE_BORDER: { accent: 'rgba(139,115,85,0.12)', glow: 'rgba(139,115,85,0.06)' },
+  HEART_MINIMAL: { accent: 'rgba(212,149,106,0.12)', glow: 'rgba(212,149,106,0.06)' },
+  BOTANICAL_CLASSIC: { accent: 'rgba(107,143,91,0.12)', glow: 'rgba(107,143,91,0.06)' },
 };
 
 const IPhoneMockup = ({ children }: { children: React.ReactNode }) => (
@@ -373,6 +376,9 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
       PEARL_DRIFT: '펄 드리프트',
       NIGHT_SEA: '밤바다',
       AQUA_GLOBE: '아쿠아 글로브',
+      BOTANICAL_CLASSIC: '보태니컬 클래식',
+      HEART_MINIMAL: '하트 미니멀',
+      WAVE_BORDER: '웨이브 보더',
     };
     return names[theme] || theme;
   };

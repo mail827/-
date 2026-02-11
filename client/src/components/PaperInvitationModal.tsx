@@ -193,7 +193,7 @@ function drawCalendar(ctx: CanvasRenderingContext2D, cx: number, cy: number, cal
 
   ctx.strokeStyle = style === 'warm' ? 'rgba(180,150,110,0.12)' : style === 'green' ? 'rgba(92,122,75,0.12)' : 'rgba(0,0,0,0.06)';
   ctx.lineWidth = 0.5;
-  ctx.beginPath(); ctx.moveTo(cx, cy + 12); ctx.lineTo(cx + calW, cy + 12); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, cy + 14); ctx.lineTo(cx + calW, cy + 14); ctx.stroke();
 
   ctx.font = `400 17px ${eng}`;
   let dayNum = 1;
@@ -202,7 +202,7 @@ function drawCalendar(ctx: CanvasRenderingContext2D, cx: number, cy: number, cal
     const col = i % 7;
     const row = Math.floor(i / 7);
     const dx = cx + cellW * col + cellW / 2;
-    const dy = cy + 30 + row * 32;
+    const dy = cy + 38 + row * 38;
 
     if (dayNum === d.day) {
       ctx.fillStyle = style === 'warm' ? '#4A3A28' : style === 'green' ? '#3D5A32' : '#1A1A1A';
@@ -220,7 +220,7 @@ function drawCalendar(ctx: CanvasRenderingContext2D, cx: number, cy: number, cal
     dayNum++;
   }
   const rows = Math.ceil((d.firstDayOfMonth + d.daysInMonth) / 7);
-  return cy + 30 + rows * 32 + 10;
+  return cy + 38 + rows * 38 + 12;
 }
 
 function drawPhoto(ctx: CanvasRenderingContext2D, photo: HTMLImageElement | null, x: number, y: number, w: number, h: number, placeholder: string) {
@@ -1728,8 +1728,8 @@ async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding']
   const usableLeft = leftBottom - leftTop;
 
   const headerH = 46;
-  const photoH = 360;
-  const photoW = cardW - 80;
+  const photoH = 420;
+  const photoW = cardW - 70;
   const dateBlockH = 38;
   const enNameH = 22;
   const nameH = 32;
@@ -1763,19 +1763,10 @@ async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding']
   if (photo) {
     const photoX = lx - photoW / 2;
     const photoY = y;
-    const r = 12;
+    const photoCx = lx;
+    const photoCy = y + photoH / 2;
     ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(photoX + r, photoY);
-    ctx.lineTo(photoX + photoW - r, photoY);
-    ctx.quadraticCurveTo(photoX + photoW, photoY, photoX + photoW, photoY + r);
-    ctx.lineTo(photoX + photoW, photoY + photoH - r);
-    ctx.quadraticCurveTo(photoX + photoW, photoY + photoH, photoX + photoW - r, photoY + photoH);
-    ctx.lineTo(photoX + r, photoY + photoH);
-    ctx.quadraticCurveTo(photoX, photoY + photoH, photoX, photoY + photoH - r);
-    ctx.lineTo(photoX, photoY + r);
-    ctx.quadraticCurveTo(photoX, photoY, photoX + r, photoY);
-    ctx.closePath();
+    traceWavyRect(ctx, photoCx, photoCy, photoW, photoH, 3, 3);
     ctx.clip();
     const sR = photo.width / photo.height, dR = photoW / photoH;
     let sx = 0, sy = 0, sw = photo.width, sh = photo.height;
@@ -1783,38 +1774,25 @@ async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding']
     else { sh = photo.width / dR; sy = (photo.height - sh) / 2; }
     ctx.drawImage(photo, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
     ctx.restore();
+    ctx.save();
+    traceWavyRect(ctx, photoCx, photoCy, photoW, photoH, 3, 3);
     ctx.strokeStyle = borderColor;
-    ctx.lineWidth = 0.6;
-    ctx.beginPath();
-    ctx.moveTo(photoX + r, photoY);
-    ctx.lineTo(photoX + photoW - r, photoY);
-    ctx.quadraticCurveTo(photoX + photoW, photoY, photoX + photoW, photoY + r);
-    ctx.lineTo(photoX + photoW, photoY + photoH - r);
-    ctx.quadraticCurveTo(photoX + photoW, photoY + photoH, photoX + photoW - r, photoY + photoH);
-    ctx.lineTo(photoX + r, photoY + photoH);
-    ctx.quadraticCurveTo(photoX, photoY + photoH, photoX, photoY + photoH - r);
-    ctx.lineTo(photoX, photoY + r);
-    ctx.quadraticCurveTo(photoX, photoY, photoX + r, photoY);
-    ctx.closePath();
+    ctx.lineWidth = 0.8;
     ctx.stroke();
+    ctx.restore();
     y += photoH + leftGap;
   } else {
     const phW = photoW, phH = photoH;
     ctx.save();
+    traceWavyRect(ctx, lx, y + phH / 2, phW, phH, 3, 3);
     ctx.fillStyle = 'rgba(44,36,32,0.02)';
-    const r = 12;
-    ctx.beginPath();
-    ctx.moveTo(lx - phW / 2 + r, y);
-    ctx.lineTo(lx + phW / 2 - r, y);
-    ctx.quadraticCurveTo(lx + phW / 2, y, lx + phW / 2, y + r);
-    ctx.lineTo(lx + phW / 2, y + phH - r);
-    ctx.quadraticCurveTo(lx + phW / 2, y + phH, lx + phW / 2 - r, y + phH);
-    ctx.lineTo(lx - phW / 2 + r, y + phH);
-    ctx.quadraticCurveTo(lx - phW / 2, y + phH, lx - phW / 2, y + phH - r);
-    ctx.lineTo(lx - phW / 2, y + r);
-    ctx.quadraticCurveTo(lx - phW / 2, y, lx - phW / 2 + r, y);
-    ctx.closePath();
     ctx.fill();
+    ctx.restore();
+    ctx.save();
+    traceWavyRect(ctx, lx, y + phH / 2, phW, phH, 3, 3);
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
     ctx.restore();
     ctx.font = '400 12px ' + kr;
     ctx.fillStyle = 'rgba(44,36,32,0.1)';
@@ -1823,23 +1801,23 @@ async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding']
   }
 
   ctx.font = '400 12px ' + en;
-  ctx.fillStyle = textMid;
+  ctx.fillStyle = textDark;
   ctx.fillText(d.year + '. ' + String(d.month).padStart(2, '0') + '. ' + String(d.day).padStart(2, '0') + '  ' + d.dayNameEn.toUpperCase(), lx, y);
-  y += 16;
+  y += 22;
 
   ctx.font = '400 10px ' + kr;
-  ctx.fillStyle = textLight;
+  ctx.fillStyle = textMid;
   ctx.fillText(d.year + '\uB144 ' + d.month + '\uC6D4 ' + d.day + '\uC77C ' + d.dayName + '\uC694\uC77C ' + (w.weddingTime || ''), lx, y);
-  y += leftGap;
+  y += leftGap * 1.4;
 
   const groomEn = w.groomNameEn || '';
   const brideEn = w.brideNameEn || '';
   if (groomEn || brideEn) {
     ctx.font = 'italic 300 14px ' + en;
-    ctx.fillStyle = textLight;
+    ctx.fillStyle = textMid;
     const enText = [groomEn, brideEn].filter(Boolean).join('  &  ');
     ctx.fillText(enText, lx, y);
-    y += 22;
+    y += 28;
   }
 
   ctx.font = '700 26px ' + kr;
@@ -1856,29 +1834,29 @@ async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding']
   ctx.font = '700 26px ' + kr;
   ctx.fillStyle = textDark;
   ctx.fillText(w.brideName, nameStartX + groomW + ampW + brideW / 2, y);
-  y += 22;
+  y += 28;
 
   const hasGP = w.groomFatherName || w.groomMotherName;
   const hasBP = w.brideFatherName || w.brideMotherName;
   if (hasGP || hasBP) {
     ctx.font = '400 9px ' + kr;
-    ctx.fillStyle = textLight;
+    ctx.fillStyle = textMid;
     const gpText = hasGP ? [w.groomFatherName, w.groomMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uC544\uB4E4' : '';
     const bpText = hasBP ? [w.brideFatherName, w.brideMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uB538' : '';
     ctx.fillText([gpText, bpText].filter(Boolean).join('\u3000\u3000'), lx, y);
-    y += leftGap * 0.7;
+    y += leftGap * 1.2;
   }
 
   if (w.greeting) {
     ctx.save();
-    ctx.globalAlpha = 0.3;
+    ctx.globalAlpha = 0.75;
     ctx.font = '400 9px ' + kr;
     ctx.fillStyle = textDark;
     const gLines = wrapText(ctx, w.greeting, cardW - 80);
     const maxG = Math.min(gLines.length, 5);
     for (let i = 0; i < maxG; i++) {
       ctx.fillText(gLines[i], lx, y);
-      y += 14;
+      y += 16;
     }
     ctx.globalAlpha = 1;
     ctx.restore();
@@ -1887,7 +1865,7 @@ async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding']
 
   if (invQr) {
     const iqS = 32;
-    ctx.globalAlpha = 0.35;
+    ctx.globalAlpha = 0.55;
     ctx.drawImage(invQr, lx - iqS / 2, y, iqS, iqS);
     ctx.globalAlpha = 1;
     ctx.font = '400 6px ' + kr;
@@ -1899,7 +1877,7 @@ async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding']
   const rightBottom = H - 50;
   const usableRight = rightBottom - rightTop;
 
-  const mapH = staticMap ? 180 : 0;
+  const mapH = staticMap ? 240 : 0;
   const venueH = 50;
   const transportH = (w.transportInfo?.trim() || w.parkingInfo?.trim()) ? 80 : 0;
   const mapQrH = mapQr ? 56 : 0;
@@ -1924,22 +1902,13 @@ async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding']
   ry += rightGap;
 
   if (staticMap) {
-    const mW = cardW - 80;
+    const mW = cardW - 70;
     const mH = mapH;
     const mX = rx - mW / 2;
+    const mapCx = rx;
+    const mapCy = ry + mH / 2;
     ctx.save();
-    const r = 8;
-    ctx.beginPath();
-    ctx.moveTo(mX + r, ry);
-    ctx.lineTo(mX + mW - r, ry);
-    ctx.quadraticCurveTo(mX + mW, ry, mX + mW, ry + r);
-    ctx.lineTo(mX + mW, ry + mH - r);
-    ctx.quadraticCurveTo(mX + mW, ry + mH, mX + mW - r, ry + mH);
-    ctx.lineTo(mX + r, ry + mH);
-    ctx.quadraticCurveTo(mX, ry + mH, mX, ry + mH - r);
-    ctx.lineTo(mX, ry + r);
-    ctx.quadraticCurveTo(mX, ry, mX + r, ry);
-    ctx.closePath();
+    traceWavyRect(ctx, mapCx, mapCy, mW, mH, 3, 3);
     ctx.clip();
     const sR2 = staticMap.width / staticMap.height, dR2 = mW / mH;
     let sx2 = 0, sy2 = 0, sw2 = staticMap.width, sh2 = staticMap.height;
@@ -1947,20 +1916,12 @@ async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding']
     else { sh2 = staticMap.width / dR2; sy2 = (staticMap.height - sh2) / 2; }
     ctx.drawImage(staticMap, sx2, sy2, sw2, sh2, mX, ry, mW, mH);
     ctx.restore();
+    ctx.save();
+    traceWavyRect(ctx, mapCx, mapCy, mW, mH, 3, 3);
     ctx.strokeStyle = borderColor;
     ctx.lineWidth = 0.6;
-    ctx.beginPath();
-    ctx.moveTo(mX + r, ry);
-    ctx.lineTo(mX + mW - r, ry);
-    ctx.quadraticCurveTo(mX + mW, ry, mX + mW, ry + r);
-    ctx.lineTo(mX + mW, ry + mH - r);
-    ctx.quadraticCurveTo(mX + mW, ry + mH, mX + mW - r, ry + mH);
-    ctx.lineTo(mX + r, ry + mH);
-    ctx.quadraticCurveTo(mX, ry + mH, mX, ry + mH - r);
-    ctx.lineTo(mX, ry + r);
-    ctx.quadraticCurveTo(mX, ry, mX + r, ry);
-    ctx.closePath();
     ctx.stroke();
+    ctx.restore();
     ry += mH + rightGap;
   }
 

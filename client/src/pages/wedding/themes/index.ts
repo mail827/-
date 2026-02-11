@@ -15,3 +15,7 @@ export { default as LunaHalfmoon } from './LunaHalfmoon';
 export { default as PearlDrift } from './PearlDrift';
 export { default as NightSea } from "./NightSea";
 export { default as AquaGlobe } from './AquaGlobe';
+
+export { default as BotanicalClassic } from './BotanicalClassic';
+export { default as HeartMinimal } from './HeartMinimal';
+export { default as WaveBorder } from './WaveBorder';

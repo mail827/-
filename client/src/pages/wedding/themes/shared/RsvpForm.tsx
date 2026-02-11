@@ -5,7 +5,7 @@ interface RsvpFormProps {
   weddingId: string;
   onSubmit: (data: { weddingId: string; name: string; phone: string; side: 'GROOM' | 'BRIDE'; attending: boolean; guestCount: number; message?: string }) => Promise<void>;
   isLoading: boolean;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2' | 'luna' | 'pearl';
+  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2' | 'luna' | 'pearl' | 'botanical' | 'heart' | 'wave';
 }
 
 export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, variant = 'classic' }: RsvpFormProps) {
@@ -46,6 +46,9 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
     mirim1: { input: 'bg-black/[0.01] border-black/10 focus:border-black/30', button: 'bg-[#111] hover:bg-black', active: 'bg-[#111] text-white', inactive: 'bg-white border-black/10 text-[#666]' },
     mirim2: { input: 'bg-[#1E2220] border-[#3A4B40] focus:border-[#5A6B60] text-[#D4E0D8] placeholder:text-[#5A6B60]', button: 'bg-[#A8BFB0] hover:bg-[#8AA090] text-[#1A1D1C]', active: 'bg-[#A8BFB0] text-[#1A1D1C]', inactive: 'bg-[#1E2220] border-[#3A4B40] text-[#6A7B70]' },
     luna: { input: 'bg-[#FAFCFD] border-[#E8EEF2] focus:border-[#C5D4DE] text-[#5A6A74] placeholder:text-[#A8B8C4]', button: 'bg-[#A8BDC9] hover:bg-[#8AAAB8] text-white', active: 'bg-[#A8BDC9] text-white', inactive: 'bg-[#FAFCFD] border-[#E8EEF2] text-[#8A9AA4]' },
+    botanical: { input: 'bg-[#F6F5EE] border-[#CED0C4] focus:border-[#5A7E4E] text-[#2E3228]', button: 'bg-[#3D5E35] hover:bg-[#2E4A28]', active: 'bg-[#3D5E35] text-white', inactive: 'bg-[#F6F5EE] border-[#CED0C4] text-[#525A4A]' },
+    heart: { input: 'bg-[#FFFCF2] border-[#FFE8C8] focus:border-[#E07B38] text-[#3A2E22]', button: 'bg-[#E07B38] hover:bg-[#C86A2E]', active: 'bg-[#E07B38] text-white', inactive: 'bg-[#FFFCF2] border-[#FFE8C8] text-[#7A6850]' },
+    wave: { input: 'bg-[#FFFAF2] border-[#DDD0BE] focus:border-[#A08060] text-[#3C3020]', button: 'bg-[#A08060] hover:bg-[#7A5E42]', active: 'bg-[#A08060] text-white', inactive: 'bg-[#FFFAF2] border-[#DDD0BE] text-[#6A5840]' },
     pearl: { input: 'bg-[#0A0A0A] border-[rgba(227,235,243,0.1)] focus:border-[rgba(227,235,243,0.3)] text-[#E8EEF2] placeholder:text-[rgba(227,235,243,0.3)]', button: 'bg-[#E3EBF3] hover:bg-[#C8D8E8] text-[#050505]', active: 'bg-[#E3EBF3] text-[#050505]', inactive: 'bg-[rgba(227,235,243,0.03)] border-[rgba(227,235,243,0.1)] text-[rgba(227,235,243,0.5)]' },
   };
 

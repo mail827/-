@@ -26,6 +26,9 @@ const THEMES = [
   { id: 'PEARL_DRIFT', name: 'Pearl Drift', desc: '심해 속 떠다니는 진주' },
   { id: 'NIGHT_SEA', name: '밤바다', desc: '별이 쏟아지는 밤, 깊은 바다' },
   { id: 'AQUA_GLOBE', name: '아쿠아 글로브', desc: '청량한 수중 금붕어 세계' },
+  { id: 'BOTANICAL_CLASSIC', name: '보태니컬 클래식', desc: '올리브그린 보태니컬 라인아트' },
+  { id: 'HEART_MINIMAL', name: '하트 미니멀', desc: '워피치 하트 미니멀' },
+  { id: 'WAVE_BORDER', name: '웨이브 보더', desc: '웜브라운 물결 보더' },
 ];
 
 const SENIOR_COLORS = [

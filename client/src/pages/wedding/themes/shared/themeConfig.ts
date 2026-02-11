@@ -255,6 +255,57 @@ export const themeConfigs: Record<string, ThemeConfig> = {
       label: '심해 진주빛',
     },
   },
+  BOTANICAL_CLASSIC: {
+    name: '보태니컬 클래식',
+    colors: {
+          "primary": "#6B8F5B",
+          "secondary": "#F4F1E8",
+          "accent": "#3D5A32",
+          "text": "#3A3A32",
+          "textMuted": "#7A7A6A",
+          "background": "#F4F1E8",
+          "card": "#FAFAF2",
+          "border": "#D8D4C4"
+    },
+    photoFilter: {
+      transformation: 'e_saturation:5,e_warmth:15,e_vibrance:10,co_rgb:6B8F5B,e_colorize:3',
+      label: '보태니컬 그린',
+    },
+  },
+  HEART_MINIMAL: {
+    name: '하트 미니멀',
+    colors: {
+          "primary": "#D4956A",
+          "secondary": "#FDF5ED",
+          "accent": "#C07B52",
+          "text": "#4A3828",
+          "textMuted": "#8A7A6A",
+          "background": "#FDF5ED",
+          "card": "#FFFAF5",
+          "border": "#E8DDD0"
+    },
+    photoFilter: {
+      transformation: 'e_saturation:8,e_warmth:25,e_vibrance:12',
+      label: '워피치 웜',
+    },
+  },
+  WAVE_BORDER: {
+    name: '웨이브 보더',
+    colors: {
+          "primary": "#8B7355",
+          "secondary": "#F5F0E8",
+          "accent": "#6B5A42",
+          "text": "#3C3428",
+          "textMuted": "#7A6F60",
+          "background": "#F5F0E8",
+          "card": "#FAF8F2",
+          "border": "#DDD5C8"
+    },
+    photoFilter: {
+      transformation: 'e_saturation:-5,e_warmth:20,e_sepia:8,e_vibrance:8',
+      label: '빈티지 웜브라운',
+    },
+  },
 };
 
 export function applyPhotoFilter(imageUrl: string, theme: string): string {

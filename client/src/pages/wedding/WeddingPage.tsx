@@ -21,6 +21,9 @@ const LunaHalfmoon = lazy(() => import('./themes/LunaHalfmoon'));
 const PearlDrift = lazy(() => import('./themes/PearlDrift'));
 const NightSea = lazy(() => import('./themes/NightSea'));
 const AquaGlobe = lazy(() => import('./themes/AquaGlobe'));
+const BotanicalClassic = lazy(() => import("./themes/BotanicalClassic"));
+const HeartMinimal = lazy(() => import("./themes/HeartMinimal"));
+const WaveBorder = lazy(() => import("./themes/WaveBorder"));
 import AiChat from '../../components/AiChat';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -72,6 +75,9 @@ const themeComponents: Record<Theme, React.ComponentType<any>> = {
   PEARL_DRIFT: PearlDrift,
   NIGHT_SEA: NightSea,
   AQUA_GLOBE: AquaGlobe,
+  WAVE_BORDER: WaveBorder,
+  HEART_MINIMAL: HeartMinimal,
+  BOTANICAL_CLASSIC: BotanicalClassic,
 };
 
 export default function WeddingPage() {

@@ -18,6 +18,12 @@ const THEME_OPTIONS = [
   { id: 'PEARL_DRIFT', name: '펄 드리프트' },
   { id: 'NIGHT_SEA', name: '밤바다' },
   { id: 'AQUA_GLOBE', name: '아쿠아 글로브' },
+  { id: 'BOTANICAL_CLASSIC', name: '보태니컬 클래식' },
+  { id: 'HEART_MINIMAL', name: '하트 미니멀' },
+  { id: 'WAVE_BORDER', name: '웨이브 보더' },
+  { id: 'WAVE_BORDER', name: '웨이브 보더' },
+  { id: 'HEART_MINIMAL', name: '하트 미니멀' },
+  { id: 'BOTANICAL_CLASSIC', name: '보태니컬 클래식' },
 ];
 
 const DEFAULT_SAMPLE_DATA = {
