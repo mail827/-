@@ -21,9 +21,6 @@ const THEME_OPTIONS = [
   { id: 'BOTANICAL_CLASSIC', name: '보태니컬 클래식' },
   { id: 'HEART_MINIMAL', name: '하트 미니멀' },
   { id: 'WAVE_BORDER', name: '웨이브 보더' },
-  { id: 'WAVE_BORDER', name: '웨이브 보더' },
-  { id: 'HEART_MINIMAL', name: '하트 미니멀' },
-  { id: 'BOTANICAL_CLASSIC', name: '보태니컬 클래식' },
 ];
 
 const DEFAULT_SAMPLE_DATA = {
