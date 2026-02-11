@@ -66,6 +66,18 @@ const THEME_FONTS: Record<string, { name: string; css: string }> = {
     name: 'TaebaekMilkyWay',
     css: "@font-face{font-family:'TaebaekMilkyWay';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2310@1.0/TAEBAEKmilkyway.woff2') format('woff2');font-weight:normal;font-display:swap;}"
   },
+  BOTANICAL_CLASSIC: {
+    name: 'MaruBuri,Cormorant Garamond',
+    css: "@font-face{font-family:'MaruBuri';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10-21@1.0/MaruBuri-Regular.woff') format('woff');font-weight:normal;font-display:swap;}"
+  },
+  HEART_MINIMAL: {
+    name: 'GowunBatang,Playfair Display',
+    css: "@font-face{font-family:'GowunBatang';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunBatang-Regular.woff') format('woff');font-weight:normal;font-display:swap;}"
+  },
+  WAVE_BORDER: {
+    name: 'Libre Baskerville',
+    css: ''
+  },
 };
 
 async function loadFonts(theme: string) {
@@ -73,7 +85,7 @@ async function loadFonts(theme: string) {
     const link = document.createElement('link');
     link.id = 'qr-card-fonts';
     link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;600&family=Nanum+Myeongjo:wght@400;700&family=Playfair+Display:wght@400;600&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;600&family=Nanum+Myeongjo:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap';
     document.head.appendChild(link);
   }
   const themeFont = THEME_FONTS[theme];
@@ -84,7 +96,7 @@ async function loadFonts(theme: string) {
     document.head.appendChild(s);
   }
   const targets: string[] = ['Noto Serif KR'];
-  if (themeFont) targets.push(themeFont.name);
+  if (themeFont) themeFont.name.split(',').forEach(n => targets.push(n.trim()));
   const checks = targets.map(name =>
     Promise.race([
       document.fonts.load('600 40px "' + name + '"'),
@@ -93,6 +105,22 @@ async function loadFonts(theme: string) {
   );
   await Promise.all(checks);
   await document.fonts.ready;
+}
+
+const _imgCache: Record<string, HTMLImageElement> = {};
+
+async function preloadImages(theme: string) {
+  if (theme !== 'BOTANICAL_CLASSIC') return;
+  const urls = ['/line-floral-1.png', '/line-floral-2.png'];
+  await Promise.all(urls.map(url => {
+    if (_imgCache[url]) return Promise.resolve();
+    return new Promise<void>(resolve => {
+      const img = new Image();
+      img.onload = () => { _imgCache[url] = img; resolve(); };
+      img.onerror = () => resolve();
+      img.src = url;
+    });
+  }));
 }
 
 type ThemeDesign = {
@@ -518,25 +546,259 @@ const THEME_DESIGNS: Record<string, ThemeDesign> = {
     },
   },
   BOTANICAL_CLASSIC: {
-    fontSerif: "'Diphylleia', serif",
-    bg: (ctx: any, w: number, h: number) => { const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#F4F1E8'); g.addColorStop(1,'#EAE5D8'); ctx.fillStyle = g; ctx.fillRect(0,0,w,h); },
-    accent: '#6B8F5B', text: '#3A3A32', textSub: '#7A7A6A', qrFg: '#3D5A32', qrBg: '#F4F1E8',
-    label: '보태니컬 클래식',
-    ornament: (ctx: any, w: number, h: number) => { ctx.strokeStyle = 'rgba(107,143,91,0.15)'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(15,0); ctx.lineTo(15,h); ctx.stroke(); ctx.beginPath(); ctx.moveTo(w-15,0); ctx.lineTo(w-15,h); ctx.stroke(); for(let i=0;i<5;i++){const y=40+i*Math.floor(h/5); ctx.beginPath(); ctx.ellipse(15,y,8,12,0,0,Math.PI*2); ctx.stroke(); ctx.beginPath(); ctx.ellipse(w-15,y,8,12,0,0,Math.PI*2); ctx.stroke();} },
+    fontSerif: "'MaruBuri', 'Cormorant Garamond', serif",
+    bg: (ctx: any, w: number, h: number) => {
+      const g = ctx.createLinearGradient(0, 0, w * 0.4, h);
+      g.addColorStop(0, '#E4E8DC'); g.addColorStop(0.4, '#EAF0E4'); g.addColorStop(0.7, '#DDE4D6'); g.addColorStop(1, '#E8EDDF');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(61,94,53,0.04)';
+      for (let y = 0; y < h; y += 6) for (let x = 0; x < w; x += 6) {
+        if (Math.sin(x * 0.3 + y * 0.2) > 0.5) ctx.fillRect(x, y, 2, 2);
+      }
+    },
+    accent: '#3D5E35', text: '#2E3228', textSub: '#525A4A', qrFg: '#3D5E35', qrBg: '#EAF0E4',
+    label: '\uBCF4\uD0DC\uB2C8\uCEEC \uD074\uB798\uC2DD',
+    ornament: (ctx: any, w: number, h: number) => {
+      ctx.strokeStyle = '#8AAA78';
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(14, 14, w - 28, h - 28);
+      ctx.strokeStyle = '#8AAA7840';
+      ctx.lineWidth = 0.4;
+      ctx.strokeRect(18, 18, w - 36, h - 36);
+      const f1 = _imgCache['/line-floral-1.png'];
+      const f2 = _imgCache['/line-floral-2.png'];
+      const drawFloral = (img: any, cx: number, cy: number, imgW: number, alpha: number, flipX: boolean, rotation: number) => {
+        if (!img) return;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        const ratio = img.height / img.width;
+        const imgH = imgW * ratio;
+        ctx.translate(cx, cy);
+        if (rotation) ctx.rotate(rotation);
+        if (flipX) ctx.scale(-1, 1);
+        ctx.drawImage(img, -imgW / 2, -imgH / 2, imgW, imgH);
+        ctx.restore();
+      };
+      const s1 = w * 0.22;
+      const r1 = f1 ? f1.height / f1.width : 1;
+      const s2 = w * 0.19;
+      const r2 = f2 ? f2.height / f2.width : 1;
+      drawFloral(f1, s1 * 0.45, s1 * r1 * 0.4, s1, 0.28, false, 0);
+      drawFloral(f2, w - s2 * 0.45, s2 * r2 * 0.4, s2, 0.24, true, 0);
+      drawFloral(f1, w - s1 * 0.45, h - s1 * r1 * 0.4, s1, 0.22, false, Math.PI);
+      drawFloral(f2, s2 * 0.45, h - s2 * r2 * 0.4, s2, 0.2, true, Math.PI);
+      const sm1 = w * 0.12;
+      const sm2 = w * 0.13;
+      drawFloral(f2, sm1 * 0.4, h * 0.35, sm1, 0.12, false, 0.26);
+      drawFloral(f1, w - sm2 * 0.4, h * 0.6, sm2, 0.12, true, -0.17);
+      const drawLeaf = (lx: number, ly: number, angle: number, size: number, alpha: number) => {
+        ctx.save();
+        ctx.translate(lx, ly);
+        ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(size * 0.2, -size * 0.55, size * 0.75, -size * 0.45, size, 0);
+        ctx.bezierCurveTo(size * 0.75, size * 0.45, size * 0.2, size * 0.55, 0, 0);
+        ctx.fillStyle = 'rgba(90,126,78,' + alpha + ')';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(61,94,53,' + (alpha * 0.8) + ')';
+        ctx.lineWidth = 0.4;
+        ctx.beginPath();
+        ctx.moveTo(size * 0.1, 0);
+        ctx.lineTo(size * 0.8, 0);
+        ctx.stroke();
+        ctx.restore();
+      };
+      ctx.strokeStyle = 'rgba(90,126,78,0.15)';
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(70, h * 0.5);
+      ctx.bezierCurveTo(w * 0.3, h * 0.5 - 4, w * 0.7, h * 0.5 + 4, w - 70, h * 0.5);
+      ctx.stroke();
+      [w * 0.32, w * 0.42, w * 0.5, w * 0.58, w * 0.68].forEach((x, i) => {
+        drawLeaf(x, h * 0.5 + (i % 2 === 0 ? -1 : 1), -0.3 * (i % 2 === 0 ? -1 : 1), 7, 0.18);
+      });
+    },
   },
   HEART_MINIMAL: {
-    fontSerif: "'GowunBatang', serif",
-    bg: (ctx: any, w: number, h: number) => { const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#FDF5ED'); g.addColorStop(1,'#F8EDE0'); ctx.fillStyle = g; ctx.fillRect(0,0,w,h); },
-    accent: '#D4956A', text: '#4A3828', textSub: '#8A7A6A', qrFg: '#4A3828', qrBg: '#FDF5ED',
-    label: '하트 미니멀',
-    ornament: (ctx: any, w: number, h: number) => { const drawHeart = (cx: number, cy: number, s: number) => { ctx.save(); ctx.translate(cx,cy); ctx.beginPath(); ctx.moveTo(0,s*0.3); ctx.bezierCurveTo(-s*0.5,-s*0.3,-s,-s*0.1,0,-s*0.5); ctx.moveTo(0,s*0.3); ctx.bezierCurveTo(s*0.5,-s*0.3,s,-s*0.1,0,-s*0.5); ctx.strokeStyle='rgba(212,149,106,0.15)'; ctx.lineWidth=0.8; ctx.stroke(); ctx.restore(); }; drawHeart(w*0.15,h*0.2,14); drawHeart(w*0.85,h*0.3,10); drawHeart(w*0.5,h*0.85,12); },
+    fontSerif: "'GowunBatang', 'Playfair Display', serif",
+    bg: (ctx: any, w: number, h: number) => {
+      const g = ctx.createRadialGradient(w * 0.5, h * 0.3, 0, w * 0.5, h * 0.5, Math.max(w, h));
+      g.addColorStop(0, '#FFF5E8'); g.addColorStop(0.3, '#FFE8D0'); g.addColorStop(0.6, '#FFDFC0'); g.addColorStop(1, '#FFD4AA');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(224,123,56,0.03)';
+      for (let y = 0; y < h; y += 8) for (let x = 0; x < w; x += 8) {
+        if ((x * 7 + y * 11) % 31 < 3) {
+          ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    },
+    accent: '#E07B38', text: '#3A2E22', textSub: '#7A6850', qrFg: '#C86A2E', qrBg: '#FFF5E8',
+    label: '\uD558\uD2B8 \uBBF8\uB2C8\uBA40',
+    ornament: (ctx: any, w: number, h: number) => {
+      const hp = (cx: number, cy: number, size: number, color: string, alpha: number, rot: number, filled: boolean) => {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rot);
+        const s = size / 24;
+        ctx.beginPath();
+        ctx.moveTo(0, 3 * s);
+        ctx.bezierCurveTo(-0.5 * s, 2 * s, -5 * s, -0.5 * s, -6 * s, -4 * s);
+        ctx.bezierCurveTo(-7 * s, -7 * s, -4 * s, -10 * s, 0, -7 * s);
+        ctx.bezierCurveTo(4 * s, -10 * s, 7 * s, -7 * s, 6 * s, -4 * s);
+        ctx.bezierCurveTo(5 * s, -0.5 * s, 0.5 * s, 2 * s, 0, 3 * s);
+        if (filled) {
+          const hg = ctx.createRadialGradient(0, -3 * s, 0, 0, -1 * s, size * 0.55);
+          hg.addColorStop(0, color.replace('1)', alpha * 1.8 + ')'));
+          hg.addColorStop(1, color.replace('1)', alpha * 0.3 + ')'));
+          ctx.fillStyle = hg;
+          ctx.fill();
+        } else {
+          ctx.strokeStyle = color.replace('1)', alpha + ')');
+          ctx.lineWidth = size > 14 ? 1 : 0.6;
+          ctx.stroke();
+        }
+        ctx.restore();
+      };
+      const peach = 'rgba(224,123,56,1)';
+      const warm = 'rgba(240,148,62,1)';
+      const rose = 'rgba(200,106,46,1)';
+      hp(w * 0.5, 14, 28, peach, 0.4, 0, true);
+      hp(w * 0.24, 10, 16, warm, 0.25, -0.15, true);
+      hp(w * 0.76, 10, 16, warm, 0.25, 0.15, true);
+      hp(w * 0.1, 16, 11, rose, 0.18, -0.3, true);
+      hp(w * 0.9, 16, 11, rose, 0.18, 0.3, true);
+      hp(w * 0.05, h * 0.22, 12, warm, 0.12, -0.1, false);
+      hp(w * 0.95, h * 0.22, 12, warm, 0.12, 0.1, false);
+      hp(w * 0.03, h * 0.42, 10, peach, 0.15, 0.2, true);
+      hp(w * 0.97, h * 0.42, 10, peach, 0.15, -0.2, true);
+      hp(w * 0.06, h * 0.6, 9, rose, 0.1, -0.15, false);
+      hp(w * 0.94, h * 0.6, 9, rose, 0.1, 0.15, false);
+      hp(w * 0.04, h * 0.78, 11, warm, 0.14, 0.1, true);
+      hp(w * 0.96, h * 0.78, 11, warm, 0.14, -0.1, true);
+      hp(w * 0.25, h - 10, 14, peach, 0.2, 0.08, true);
+      hp(w * 0.5, h - 12, 22, warm, 0.35, 0, true);
+      hp(w * 0.75, h - 10, 14, peach, 0.2, -0.08, true);
+      hp(w * 0.12, h - 8, 9, rose, 0.15, 0.25, true);
+      hp(w * 0.88, h - 8, 9, rose, 0.15, -0.25, true);
+      ctx.strokeStyle = 'rgba(224,123,56,0.2)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(14, h * 0.5);
+      for (let x = 14; x < w - 14; x += 1) {
+        const t = (x - 14) / (w - 28);
+        const b1 = Math.sin(t * Math.PI * 6) * Math.exp(-Math.pow((t - 0.25) * 5, 2)) * 5;
+        const b2 = Math.sin(t * Math.PI * 6) * Math.exp(-Math.pow((t - 0.75) * 5, 2)) * 4;
+        ctx.lineTo(x, h * 0.5 + b1 + b2);
+      }
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,220,180,0.5)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(w * 0.5 - 45, h * 0.5); ctx.lineTo(w * 0.5 - 8, h * 0.5); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w * 0.5 + 8, h * 0.5); ctx.lineTo(w * 0.5 + 45, h * 0.5); ctx.stroke();
+      hp(w * 0.5, h * 0.5 - 1, 8, peach, 0.25, 0, true);
+      const drawGlow = (gx: number, gy: number, gr: number, ga: number) => {
+        const gg = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
+        gg.addColorStop(0, 'rgba(240,148,62,' + ga + ')');
+        gg.addColorStop(1, 'rgba(240,148,62,0)');
+        ctx.fillStyle = gg;
+        ctx.fillRect(gx - gr, gy - gr, gr * 2, gr * 2);
+      };
+      drawGlow(w * 0.5, 16, 35, 0.08);
+      drawGlow(w * 0.5, h - 12, 30, 0.06);
+      drawGlow(w * 0.15, h * 0.5, 15, 0.03);
+      drawGlow(w * 0.85, h * 0.5, 15, 0.03);
+    },
   },
   WAVE_BORDER: {
-    fontSerif: "'KoPubWorld', serif",
-    bg: (ctx: any, w: number, h: number) => { const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#F5F0E8'); g.addColorStop(1,'#EDE6DA'); ctx.fillStyle = g; ctx.fillRect(0,0,w,h); },
-    accent: '#8B7355', text: '#3C3428', textSub: '#7A6F60', qrFg: '#3C3428', qrBg: '#F5F0E8',
-    label: '웨이브 보더',
-    ornament: (ctx: any, w: number, h: number) => { ctx.strokeStyle = 'rgba(160,145,122,0.2)'; ctx.lineWidth = 0.8; for(let y=0;y<h;y+=20){ ctx.beginPath(); ctx.moveTo(8,y); ctx.quadraticCurveTo(0,y+10,8,y+20); ctx.stroke(); ctx.beginPath(); ctx.moveTo(w-8,y); ctx.quadraticCurveTo(w,y+10,w-8,y+20); ctx.stroke(); } },
+    fontSerif: "'Libre Baskerville', 'Noto Serif KR', serif",
+    bg: (ctx: any, w: number, h: number) => {
+      const g = ctx.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, '#F0E4D0'); g.addColorStop(0.2, '#E8D8C0'); g.addColorStop(0.5, '#F2E8D8'); g.addColorStop(0.8, '#E8D8C0'); g.addColorStop(1, '#F0E4D0');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(160,128,96,0.02)';
+      for (let y = 0; y < h; y += 3) {
+        const shift = Math.sin(y * 0.04) * 25;
+        for (let x = 0; x < w; x += 4) {
+          if (Math.sin((x + shift) * 0.25) > 0.5) ctx.fillRect(x, y, 2, 1);
+        }
+      }
+    },
+    accent: '#8A6840', text: '#3C3020', textSub: '#6A5840', qrFg: '#6A4E30', qrBg: '#F2E8D8',
+    label: '\uC6E8\uC774\uBE0C \uBCF4\uB354',
+    ornament: (ctx: any, w: number, h: number) => {
+      const drawWave = (baseY: number, amp: number, freq: number, alpha: number, lw: number, phase: number) => {
+        ctx.strokeStyle = 'rgba(160,128,96,' + alpha + ')';
+        ctx.lineWidth = lw;
+        ctx.beginPath();
+        for (let x = 0; x <= w; x += 1) {
+          const t = x / w;
+          const y = baseY + Math.sin((t * freq + phase) * Math.PI * 2) * amp
+            + Math.sin((t * freq * 1.6 + phase * 0.7) * Math.PI * 2) * amp * 0.3;
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      };
+      const fillWave = (baseY: number, amp: number, freq: number, phase: number, toEdge: string, color: string) => {
+        ctx.beginPath();
+        for (let x = 0; x <= w; x += 1) {
+          const t = x / w;
+          const y = baseY + Math.sin((t * freq + phase) * Math.PI * 2) * amp;
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.lineTo(w, toEdge === 'top' ? 0 : h);
+        ctx.lineTo(0, toEdge === 'top' ? 0 : h);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+      };
+      fillWave(14, 5, 2, 0, 'top', 'rgba(200,180,150,0.25)');
+      fillWave(10, 4, 2.5, 0.3, 'top', 'rgba(200,180,150,0.15)');
+      drawWave(8, 4.5, 2, 0.4, 1.5, 0);
+      drawWave(13, 3.5, 2.8, 0.25, 1, 0.4);
+      drawWave(18, 2.5, 3.5, 0.15, 0.6, 0.8);
+      fillWave(h - 14, 5, 2, 0.5, 'bottom', 'rgba(200,180,150,0.25)');
+      fillWave(h - 10, 4, 2.5, 0.8, 'bottom', 'rgba(200,180,150,0.15)');
+      drawWave(h - 8, 4.5, 2, 0.4, 1.5, 0.5);
+      drawWave(h - 13, 3.5, 2.8, 0.25, 1, 0.9);
+      drawWave(h - 18, 2.5, 3.5, 0.15, 0.6, 1.2);
+      const drawSideWave = (baseX: number, dir: number, amp: number, freq: number, alpha: number, lw: number) => {
+        ctx.strokeStyle = 'rgba(160,128,96,' + alpha + ')';
+        ctx.lineWidth = lw;
+        ctx.beginPath();
+        for (let y = 22; y <= h - 22; y += 1) {
+          const t = (y - 22) / (h - 44);
+          const x = baseX + dir * (Math.sin(t * Math.PI * freq) * amp + Math.sin(t * Math.PI * freq * 1.5) * amp * 0.25);
+          if (y === 22) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      };
+      drawSideWave(8, 1, 4.5, 4, 0.3, 1.2);
+      drawSideWave(14, 1, 3, 5, 0.18, 0.7);
+      drawSideWave(w - 8, -1, 4.5, 4, 0.3, 1.2);
+      drawSideWave(w - 14, -1, 3, 5, 0.18, 0.7);
+      ctx.strokeStyle = 'rgba(160,128,96,0.12)';
+      ctx.lineWidth = 0.5;
+      ctx.setLineDash([3, 5]);
+      ctx.beginPath();
+      for (let x = 28; x < w - 28; x += 1) {
+        const t = (x - 28) / (w - 56);
+        const y = h * 0.5 + Math.sin(t * Math.PI * 2.5) * 3;
+        if (x === 28) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(160,128,96,0.06)';
+      for (let i = 0; i < 50; i++) {
+        const x = 20 + ((i * 37 + 13) % (w - 40)) | 0;
+        const y = 24 + ((i * 53 + 7) % (h - 48)) | 0;
+        if (x > 22 && x < w - 22 && y > 24 && y < h - 24) {
+          ctx.beginPath();
+          ctx.arc(x, y, 0.7 + (i % 3) * 0.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    },
   },
 };
 
@@ -558,7 +820,7 @@ export default function QRCardModal({ isOpen, onClose, wedding }: QRCardModalPro
 
   useEffect(() => {
     if (isOpen && !fontsReady) {
-      loadFonts(wedding.theme).then(() => setFontsReady(true));
+      Promise.all([loadFonts(wedding.theme), preloadImages(wedding.theme)]).then(() => setFontsReady(true));
     }
   }, [isOpen, fontsReady]);
 

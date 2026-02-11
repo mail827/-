@@ -90,111 +90,145 @@ function AccordionGift({ title, children }: { title: string; children: React.Rea
 }
 
 function CopyBtn({ bank, account, holder }: { bank?: string; account?: string; holder?: string }) {
-  const [ok, setOk] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    if (!account) return;
+    await navigator.clipboard.writeText(account);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   if (!account) return null;
   return (
-    <div className="flex items-center justify-between py-2.5 px-3 rounded-xl" style={{ background: H.bg }}>
-      <span className="text-sm" style={{ color: H.text, fontFamily: "'GowunBatang', serif" }}><span style={{ color: H.textM }}>{bank}</span> {account}{holder && <span className="ml-1 text-xs" style={{ color: H.textL }}>({holder})</span>}</span>
-      <button onClick={() => { navigator.clipboard.writeText(account); setOk(true); setTimeout(() => setOk(false), 2000); }} className="p-1.5">{ok ? <Check size={14} style={{ color: H.peach }} /> : <Copy size={14} style={{ color: H.textM }} />}</button>
+    <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: H.cream }}>
+      <div>
+        <p className="text-xs mb-0.5" style={{ color: H.textL, fontFamily: "'GowunBatang', serif" }}>{bank}</p>
+        <p className="text-sm" style={{ color: H.text, fontFamily: "'GowunBatang', serif" }}>{account}</p>
+        {holder && <p className="text-xs mt-0.5" style={{ color: H.textM, fontFamily: "'GowunBatang', serif" }}>{holder}</p>}
+      </div>
+      <motion.button whileTap={{ scale: 0.9 }} onClick={handleCopy} className="p-2 rounded-lg" style={{ background: copied ? H.warm : H.card }}>
+        {copied ? <Check size={16} style={{ color: '#fff' }} /> : <Copy size={16} style={{ color: H.peach }} />}
+      </motion.button>
     </div>
   );
 }
 
-export default function HeartMinimal({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
-  const w = wedding;
-  const galleries = (w.galleries || []).filter((g: any) => g.mediaUrl);
+export default function HeartMinimal({ wedding: initialWedding }: ThemeProps) {
+  const w = initialWedding;
+  const [music, setMusic] = useState(true);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
   const [showShare, setShowShare] = useState(false);
-  const handleShare = async (type: 'kakao' | 'instagram' | 'sms', version?: string) => {
-    const baseUrl = window.location.origin + window.location.pathname;
-    const url = version ? `${baseUrl}?v=${version}` : baseUrl;
-    const title = w.groomName + ' ♥ ' + w.brideName;
-    if (type === 'kakao' && window.Kakao) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(w.weddingDate) + ' ' + formatTime(w.weddingTime), imageUrl: w.heroMedia || '', link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
-    } else if (type === 'instagram') {
-      await navigator.clipboard.writeText(url);
-      alert('링크가 복사되었습니다.\n인스타그램 스토리에 공유해보세요!');
-    } else if (type === 'sms') {
-      window.location.href = 'sms:?&body=' + encodeURIComponent(title + '\n' + formatDate(w.weddingDate) + '\n' + url);
+  const [isRsvpLoading, setIsRsvpLoading] = useState(false);
+  const [isGuestbookLoading, setIsGuestbookLoading] = useState(false);
+  const [localGuestbooks, setLocalGuestbooks] = useState(w.guestbooks || []);
+
+  useEffect(() => {
+    if (w.musicUrl && audioRef.current && music) audioRef.current.play().catch(() => {});
+  }, [w.musicUrl, music]);
+
+  const fp = { fontFamily: "'Playfair Display', serif" };
+  const fg = { fontFamily: "'GowunBatang', serif" };
+  const galleries = w.galleries || [];
+
+  const onRsvpSubmit = async (data: any) => {
+    setIsRsvpLoading(true);
+    try {
+      const res = await fetch(import.meta.env.VITE_API_URL + '/rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, weddingId: w.id }),
+      });
+      if (!res.ok) throw new Error();
+      alert('참석 여부가 등록되었습니다');
+    } catch (e) {
+      alert('오류가 발생했습니다');
+    } finally {
+      setIsRsvpLoading(false);
     }
-    setShowShare(false);
   };
-  const [localGuestbooks, setLocalGuestbooks] = useState(guestbooks || []);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [playing, setPlaying] = useState(false);
-  useEffect(() => { setLocalGuestbooks(guestbooks || []); }, [guestbooks]);
-  useEffect(() => { const s = document.createElement('style'); s.textContent = fontCss; document.head.appendChild(s); return () => { document.head.removeChild(s); }; }, []);
-  useEffect(() => { if (w.bgMusicAutoPlay && audioRef.current) audioRef.current.play().then(() => setPlaying(true)).catch(() => {}); }, [w.bgMusicAutoPlay]);
-  const toggleMusic = () => { if (!audioRef.current) return; playing ? (audioRef.current.pause(), setPlaying(false)) : audioRef.current.play().then(() => setPlaying(true)).catch(() => {}); };
-  const handleGuestbookDelete = (id: string) => { setLocalGuestbooks(prev => prev.filter(g => g.id !== id)); };
-  const fg: React.CSSProperties = { fontFamily: "'GowunBatang', serif" };
-  const fp: React.CSSProperties = { fontFamily: "'Playfair Display', serif" };
-  const dday = getDday(w.weddingDate);
+
+  const onGuestbookSubmit = async (data: any) => {
+    setIsGuestbookLoading(true);
+    try {
+      const res = await fetch(import.meta.env.VITE_API_URL + '/guestbook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, weddingId: w.id }),
+      });
+      if (!res.ok) throw new Error();
+      const newEntry = await res.json();
+      setLocalGuestbooks([newEntry, ...(localGuestbooks || [])]);
+    } catch (e) {
+      alert('오류가 발생했습니다');
+    } finally {
+      setIsGuestbookLoading(false);
+    }
+  };
+
+  const handleGuestbookDelete = async (id: number) => {
+    try {
+      const res = await fetch(import.meta.env.VITE_API_URL + '/guestbook/' + id, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      setLocalGuestbooks((localGuestbooks || []).filter((g: any) => g.id !== id));
+    } catch (e) {
+      alert('삭제에 실패했습니다');
+    }
+  };
+
+  const handleShare = async (type: 'kakao' | 'instagram' | 'sms' | 'link', version?: number) => {
+    const baseUrl = window.location.origin + '/' + w.slug + (version ? '?v=' + version : '');
+    if (type === 'kakao' && (window as any).Kakao) {
+      (window as any).Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: w.groomName + ' ♥ ' + w.brideName + '의 결혼식에 초대합니다',
+          description: formatDate(w.weddingDate) + ' ' + formatTime(w.weddingTime) + '\n' + w.venue,
+          imageUrl: w.heroUrl,
+          link: { mobileWebUrl: baseUrl, webUrl: baseUrl },
+        },
+        buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: baseUrl, webUrl: baseUrl } }],
+      });
+    } else if (type === 'instagram' || type === 'link') {
+      await navigator.clipboard.writeText(baseUrl);
+      alert('링크가 복사되었습니다');
+    } else if (type === 'sms') {
+      const msg = encodeURIComponent(w.groomName + ' ♥ ' + w.brideName + '의 결혼식에 초대합니다\n' + formatDate(w.weddingDate) + ' ' + formatTime(w.weddingTime) + '\n' + w.venue + '\n\n' + baseUrl);
+      window.location.href = 'sms:?&body=' + msg;
+    }
+  };
 
   return (
-    <div className="min-h-screen relative heart-theme" style={{ background: H.bg }}>
-      <style>{`
-        .heart-theme button[type="submit"] { background: ${H.peach}; color: #fff; border-radius: 9999px; border: none; }
-        .heart-theme button[type="submit"]:hover { background: ${H.rose}; }
-        .heart-theme input:focus, .heart-theme textarea:focus, .heart-theme select:focus { border-color: ${H.warm}; outline-color: ${H.warm}; --tw-ring-color: ${H.warm}; }
-      `}</style>
-      {w.bgMusicUrl && <audio ref={audioRef} src={w.bgMusicUrl} loop />}
-      {w.bgMusicUrl && (
-        <button onClick={toggleMusic} className="fixed top-4 right-4 z-50 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: H.cream + 'EE', backdropFilter: 'blur(8px)', boxShadow: '0 2px 12px ' + H.peach + '15' }}>
-          {playing ? <Volume2 size={15} style={{ color: H.peach }} /> : <VolumeX size={15} style={{ color: H.textM }} />}
-        </button>
-      )}
+    <div className="relative min-h-screen overflow-x-hidden" style={{ background: H.bg }}>
+      <style>{fontCss}</style>
+      {w.musicUrl && <audio ref={audioRef} src={w.musicUrl} loop />}
       <FloatingHearts />
 
-      <div className="relative z-10 max-w-lg mx-auto">
-
-        <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5 }} className="min-h-screen flex flex-col items-center justify-center px-8 text-center">
-          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="text-[10px] tracking-[0.6em] mb-14" style={{ color: H.peach, ...fp, fontStyle: 'italic' }}>We're Getting Married</motion.p>
-
-          {w.heroMedia && (
-            <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4, duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-              className="w-[300px] h-[340px] relative mx-auto mb-14">
-              <div className="w-full h-full overflow-hidden" style={{ clipPath: 'url(#heartClip)' }}>
-                {w.heroMediaType === 'VIDEO' ? <video src={heroUrl(w.heroMedia)} autoPlay muted loop playsInline className="w-full h-full object-cover" /> : <img src={heroUrl(w.heroMedia)} alt="" className="w-full h-full object-cover" />}
+      <div className="relative">
+        <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5 }} className="relative min-h-screen flex items-center justify-center px-8" style={{ background: 'linear-gradient(to bottom, ' + H.alt + ' 0%, ' + H.bg + ' 100%)' }}>
+          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle, ' + H.peach + ' 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+          <div className="relative z-10 text-center">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.3, duration: 1 }} className="mb-8">
+              <div className="relative inline-block">
+                <div className="absolute inset-[-15px] opacity-20 blur-2xl rounded-full" style={{ background: H.glow }} />
+                <motion.div animate={{ scale: [1, 1.02, 1] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }} className="relative w-[300px] h-[340px] mx-auto rounded-[50%] overflow-hidden" style={{ clipPath: 'path("' + hp.replace('M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z', 'M160 360 l-24 -22 C68 250 32 206 32 142 32 91 74 50 125 50 c29 0 57 14 75 35 C218 64 246 50 275 50 c51 0 93 41 93 92 c0 64 -57 116 -143 193 l-25 25 z') + '")', boxShadow: '0 0 60px ' + H.glow + '40, inset 0 0 40px ' + H.peach + '15' }}>
+                  <img src={heroUrl(w.heroUrl)} alt="" className="w-full h-full object-cover" />
+                </motion.div>
               </div>
-              <svg width="0" height="0" className="absolute">
-                <defs><clipPath id="heartClip" clipPathUnits="objectBoundingBox">
-                  <path d="M0.5,0.92 C0.12,0.72,0,0.52,0,0.35 C0,0.15,0.15,0,0.3,0 C0.38,0,0.45,0.04,0.5,0.12 C0.55,0.04,0.62,0,0.7,0 C0.85,0,1,0.15,1,0.35 C1,0.52,0.88,0.72,0.5,0.92z" />
-                </clipPath></defs>
-              </svg>
-              <motion.div className="absolute -inset-4 pointer-events-none rounded-full"
-                animate={{ opacity: [0.3, 0.6, 0.3] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                style={{ background: 'radial-gradient(circle, ' + H.glow + '18 0%, ' + H.warm + '08 40%, transparent 70%)' }} />
             </motion.div>
+            <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6 }} className="text-[10px] tracking-[0.4em] mb-4" style={{ color: H.peach, ...fp, fontStyle: 'italic' }}>Wedding Invitation</motion.p>
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.8 }} className="flex items-center justify-center gap-2 mb-3">
+              <p className="text-2xl" style={{ color: H.text, ...fg }}>{w.groomName}</p>
+              <HeartBeat />
+              <p className="text-2xl" style={{ color: H.text, ...fg }}>{w.brideName}</p>
+            </motion.div>
+            <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1 }} className="text-sm mb-8" style={{ color: H.textM, ...fg }}>{formatDate(w.weddingDate)} {formatTime(w.weddingTime)}</motion.p>
+            {w.dday && <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.2 }} className="text-xs" style={{ color: H.textL, ...fg }}>{getDday(w.weddingDate)}</motion.p>}
+          </div>
+          {w.musicUrl && (
+            <button onClick={() => setMusic(!music)} className="absolute top-6 right-6 p-2.5 rounded-full z-20" style={{ background: H.card }}>
+              {music ? <Volume2 size={16} style={{ color: H.peach }} /> : <VolumeX size={16} style={{ color: H.textL }} />}
+            </button>
           )}
-
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}>
-            {(((w as any).groomNameEn) || (w as any).brideNameEn) && (
-              <p className="text-sm tracking-[0.15em] mb-2" style={{ color: H.textL, ...fp, fontStyle: 'italic' }}>
-                {(((w as any).groomNameEn) as string) || ''} & {(((w as any).brideNameEn) as string) || ''}
-              </p>
-            )}
-            <h1 className="text-[34px] mb-4" style={{ color: H.text, ...fg, letterSpacing: '0.12em' }}>
-              {w.groomName}<HeartBeat />{w.brideName}
-            </h1>
-            <p className="text-sm tracking-wide" style={{ color: H.textM, ...fp, fontStyle: 'italic' }}>{formatDate(w.weddingDate)}</p>
-            {w.showDday && <p className="text-xs mt-5 tracking-[0.2em]" style={{ color: H.peach, ...fp }}>{dday}</p>}
-          </motion.div>
-        </motion.section>
-
-        <HeartDivider />
-
-        <motion.section initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="px-10 py-14 text-center" style={{ background: 'linear-gradient(180deg, ' + H.bg + ' 0%, ' + H.alt + ' 100%)' }}>
-          <p className="text-[10px] tracking-[0.5em] mb-8" style={{ color: H.peach, ...fp, fontStyle: 'italic' }}>Invitation</p>
-          {w.showParents && (w.groomFatherName || w.groomMotherName || w.brideFatherName || w.brideMotherName) && (
-            <div className="text-[13px] mb-8 space-y-1.5" style={{ color: H.textM, ...fg }}>
-              {(w.groomFatherName || w.groomMotherName) && <p>{[w.groomFatherName, w.groomMotherName].filter(Boolean).join(' · ')}의 아들 <span style={{ color: H.text }}>{w.groomName}</span></p>}
-              {(w.brideFatherName || w.brideMotherName) && <p>{[w.brideFatherName, w.brideMotherName].filter(Boolean).join(' · ')}의 딸 <span style={{ color: H.text }}>{w.brideName}</span></p>}
-            </div>
-          )}
-          {w.greeting && <p className="text-[13px] leading-[2.4] whitespace-pre-line" style={{ color: H.text, ...fg }}>{w.greeting}</p>}
         </motion.section>
 
         <HeartDivider />

@@ -333,7 +333,7 @@ export default function Landing() {
           
           <div className="grid md:grid-cols-3 gap-12">
             {[
-              { path: 'M12 3l1.5 3.4 3.7.5-2.7 2.6.6 3.7L12 11.5 8.9 13.2l.6-3.7-2.7-2.6 3.7-.5L12 3z M4.5 6.5l1 2.2 2.4.3-1.8 1.7.4 2.4L4.5 12l-2 1.1.4-2.4-1.8-1.7 2.4-.3 1-2.2z M19.5 9l.7 1.6 1.8.2-1.3 1.3.3 1.8-1.5-.8-1.5.8.3-1.8-1.3-1.3 1.8-.2L19.5 9z', title: '감각적인 디자인', desc: '트렌디하면서도 클래식한\n16가지 테마' },
+              { path: 'M12 3l1.5 3.4 3.7.5-2.7 2.6.6 3.7L12 11.5 8.9 13.2l.6-3.7-2.7-2.6 3.7-.5L12 3z M4.5 6.5l1 2.2 2.4.3-1.8 1.7.4 2.4L4.5 12l-2 1.1.4-2.4-1.8-1.7 2.4-.3 1-2.2z M19.5 9l.7 1.6 1.8.2-1.3 1.3.3 1.8-1.5-.8-1.5.8.3-1.8-1.3-1.3 1.8-.2L19.5 9z', title: '감각적인 디자인', desc: '트렌디하면서도 클래식한\n19가지 테마' },
               { path: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z', title: '빠른 제작', desc: 'Lite는 5분 만에\n즉시 발행 가능' },
               { path: 'M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z', title: '어르신 배려', desc: '큰 글씨와 심플한 구성의\n어르신용 테마' },
               { path: 'M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8 M16 6l-4-4-4 4 M12 2v13', title: '간편한 공유', desc: '카카오톡, 문자, 인스타그램\n한 번에 공유' },
@@ -541,7 +541,7 @@ export default function Landing() {
             viewport={{ once: true }}
           >
             <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">THEMES</p>
-            <h2 className="font-serif text-3xl text-stone-800 mb-4">16가지 감성 테마</h2>
+            <h2 className="font-serif text-3xl text-stone-800 mb-4">19가지 감성 테마</h2>
             <p className="text-stone-500 mb-8">실제 청첩장을 미리 체험해보세요</p>
             <button
               onClick={() => setShowThemeShowcase(true)}

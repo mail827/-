@@ -19,6 +19,9 @@ const LunaHalfmoon = lazy(() => import('../pages/wedding/themes/LunaHalfmoon'));
 const PearlDrift = lazy(() => import('../pages/wedding/themes/PearlDrift'));
 const NightSea = lazy(() => import('../pages/wedding/themes/NightSea'));
 const AquaGlobe = lazy(() => import('../pages/wedding/themes/AquaGlobe'));
+const BotanicalClassic = lazy(() => import('../pages/wedding/themes/BotanicalClassic'));
+const HeartMinimal = lazy(() => import('../pages/wedding/themes/HeartMinimal'));
+const WaveBorder = lazy(() => import('../pages/wedding/themes/WaveBorder'));
 
 function NightSeaBg({ active }: { active: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -221,6 +224,9 @@ const themeComponents: Record<string, React.ComponentType<any>> = {
   PEARL_DRIFT: PearlDrift,
   NIGHT_SEA: NightSea,
   AQUA_GLOBE: AquaGlobe,
+  BOTANICAL_CLASSIC: BotanicalClassic,
+  HEART_MINIMAL: HeartMinimal,
+  WAVE_BORDER: WaveBorder,
 };
 
 const themeAccents: Record<string, { accent: string; glow: string }> = {
