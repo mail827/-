@@ -176,7 +176,7 @@ export default function BotanicalClassic({ wedding, guestbooks, onRsvpSubmit, on
               </motion.div>
             )}
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}>
-              <p className="text-lg tracking-[0.3em] mb-2" style={{ color: P.green1, ...fe, fontStyle: 'italic' }}>
+              <p className="text-sm tracking-[0.08em] mb-2 whitespace-nowrap" style={{ color: P.green1, ...fe, fontStyle: 'italic', fontSize: 'clamp(9px, 2.5vw, 14px)' }}>
                 {(w as any).groomNameEn || w.groomName} & {(w as any).brideNameEn || w.brideName}
               </p>
               <h1 className="text-[28px] mb-4" style={{ color: P.text, ...fm, letterSpacing: '0.15em' }}>{w.groomName} · {w.brideName}</h1>

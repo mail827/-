@@ -138,6 +138,24 @@ export default function GalleryMirim1({ wedding, guestbooks, onRsvpSubmit, onGue
         </section>
       )}
 
+      {wedding.loveStoryVideo && (
+        <section className="py-16 px-4">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-md mx-auto">
+            <p className="text-center text-[1rem] mb-8" style={{ ...titleFont, color: '#6B5A48' }}>Our Story</p>
+            <div className="relative p-2" style={{ background: 'linear-gradient(145deg, #FFFEF9 0%, #F8F4EC 100%)', boxShadow: '0 6px 20px rgba(139, 115, 85, 0.12)' }}>
+              {wedding.loveStoryVideo.includes('youtube') || wedding.loveStoryVideo.includes('youtu.be') ? (
+                <iframe
+                  src={wedding.loveStoryVideo.includes('youtu.be') ? `https://www.youtube.com/embed/${wedding.loveStoryVideo.split('youtu.be/')[1]?.split('?')[0]}` : `https://www.youtube.com/embed/${wedding.loveStoryVideo.split('watch?v=')[1]?.split('&')[0]}`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope" allowFullScreen className="w-full aspect-video" style={{ border: 'none' }}
+                />
+              ) : (
+                <video src={wedding.loveStoryVideo} controls playsInline className="w-full aspect-video object-cover" style={{ filter: 'sepia(0.06) contrast(0.97) brightness(1.01)' }} />
+              )}
+            </div>
+          </motion.div>
+        </section>
+      )}
+
       {galleries.length > 0 && (
         <section id="gallery-section" className="py-20 px-4">
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>

@@ -925,10 +925,10 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
   const mapH = hasInfo ? 200 : 260;
   const venueH = 22 + (w.venueHall ? 20 : 0) + Math.ceil(w.venueAddress.length / 30) * 16;
   let infoH = 0;
-  if (hasTransport) { infoH += 24 + (w.transportInfo || '').split('\n').filter((l: string) => l.trim()).length * 18 + 10; }
-  if (hasParking) { infoH += 24 + (w.parkingInfo || '').split('\n').filter((l: string) => l.trim()).length * 18; }
+  if (hasTransport) { infoH += 20 + Math.min((w.transportInfo || '').split('\n').filter((l: string) => l.trim()).length, 4) * 16 + 8; }
+  if (hasParking) { infoH += 20 + Math.min((w.parkingInfo || '').split('\n').filter((l: string) => l.trim()).length, 4) * 16; }
   const qrH = mapQr ? 66 : 0;
-  const calH = 175;
+  const calH = 155;
   const greetLines = w.greeting ? wrapText((() => { const m = document.createElement('canvas').getContext('2d')!; m.font = '400 15px ' + s.kr; return m; })(), w.greeting, half - 140) : []; const greetH = w.greeting ? Math.min(greetLines.length, 6) * 22 + 10 : 40;
   const phoneH = 20;
   const titleH = 30;
@@ -958,7 +958,7 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
     else { sh2 = staticMap.width / dR; sy2 = (staticMap.height - sh2) / 2; }
     ctx.drawImage(staticMap, sx2, sy2, sw2, sh2, mapX, ry, mapW, mapH);
     ctx.restore();
-    ry += mapH + gap;
+    ry += mapH + 32;
   }
 
   ctx.textAlign = 'center';
@@ -974,29 +974,30 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
   ry += gap;
 
   if (hasInfo) {
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'center';
     if (hasTransport) {
-      ctx.font = '700 16px ' + s.kr; ctx.fillStyle = s.text;
-      ctx.fillText('\uAD50\uD1B5 \uC548\uB0B4', txL, ry); ry += 24;
-      ctx.font = '400 13px ' + s.kr; ctx.fillStyle = s.sub;
+      ctx.font = '700 14px ' + s.kr; ctx.fillStyle = s.text;
+      ctx.fillText('교통 안내', rx, ry); ry += 22;
+      ctx.font = '400 12px ' + s.kr; ctx.fillStyle = s.sub;
+      let tLines = 0;
       for (const para of w.transportInfo!.split('\n')) {
-        if (!para.trim()) { ry += 5; continue; }
+        if (!para.trim()) { ry += 4; continue; }
         const wl = wrapText(ctx, para, contentW);
-        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 18; }
+        for (const l of wl) { if (tLines >= 5) break; ctx.fillText(l, rx, ry); ry += 16; tLines++; }
       }
-      ry += 10;
+      ry += 8;
     }
     if (hasParking) {
-      ctx.font = '700 16px ' + s.kr; ctx.fillStyle = s.text;
-      ctx.fillText('\uC8FC\uCC28 \uC548\uB0B4', txL, ry); ry += 24;
-      ctx.font = '400 13px ' + s.kr; ctx.fillStyle = s.sub;
+      ctx.font = '700 14px ' + s.kr; ctx.fillStyle = s.text;
+      ctx.fillText('주차 안내', rx, ry); ry += 22;
+      ctx.font = '400 12px ' + s.kr; ctx.fillStyle = s.sub;
+      let pLines = 0;
       for (const para of w.parkingInfo!.split('\n')) {
-        if (!para.trim()) { ry += 5; continue; }
+        if (!para.trim()) { ry += 4; continue; }
         const wl = wrapText(ctx, para, contentW);
-        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 18; }
+        for (const l of wl) { if (pLines >= 5) break; ctx.fillText(l, rx, ry); ry += 16; pLines++; }
       }
     }
-    ctx.textAlign = 'center';
     ry += gap;
   }
 
@@ -1041,8 +1042,8 @@ async function draw2Fold(ctx: CanvasRenderingContext2D, w: Props['wedding'], pho
     const cpY = H - 26;
     ctx.font = '400 12px ' + s.kr; ctx.fillStyle = s.muted;
     const parts: string[] = [];
-    if (w.groomPhone) parts.push('\uC2E0\uB791 ' + w.groomName + '  ' + w.groomPhone);
-    if (w.bridePhone) parts.push('\uC2E0\uBD80 ' + w.brideName + '  ' + w.bridePhone);
+    if (w.groomPhone) parts.push('신랑 ' + w.groomName + '  ' + w.groomPhone);
+    if (w.bridePhone) parts.push('신부 ' + w.brideName + '  ' + w.bridePhone);
     ctx.fillText(parts.join('    '), rx, cpY);
   }
 
@@ -1131,7 +1132,7 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
     ctx.fill();
     ctx.font = '400 16px ' + kr;
     ctx.fillStyle = 'rgba(92,122,75,0.18)';
-    ctx.fillText('\uB300\uD45C \uC0AC\uC9C4', lx, photoCY);
+    ctx.fillText('대표 사진', lx, photoCY);
   }
   ctx.restore();
 
@@ -1162,12 +1163,13 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
   const hasGP = w.groomFatherName || w.groomMotherName;
   const hasBP = w.brideFatherName || w.brideMotherName;
   if (hasGP || hasBP) {
-    ctx.font = '400 12px ' + kr;
+    ctx.font = '400 11px ' + kr;
     ctx.fillStyle = greenMid;
-    const gpT = hasGP ? [w.groomFatherName, w.groomMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uC544\uB4E4' : '';
-    const bpT = hasBP ? [w.brideFatherName, w.brideMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uB538' : '';
-    ctx.fillText([gpT, bpT].filter(Boolean).join('\u3000\u3000'), lx, ny);
-    ny += 22;
+    const gpT = hasGP ? [w.groomFatherName, w.groomMotherName].filter(Boolean).join(' · ') + '의 아들' : '';
+    const bpT = hasBP ? [w.brideFatherName, w.brideMotherName].filter(Boolean).join(' · ') + '의 딸' : '';
+    if (gpT) { ctx.fillText(gpT, lx, ny); ny += 16; }
+    if (bpT) { ctx.fillText(bpT, lx, ny); ny += 16; }
+    ny += 4;
   }
 
   ctx.strokeStyle = greenPale; ctx.lineWidth = 0.5;
@@ -1191,7 +1193,7 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
     ctx.globalAlpha = 1.0;
     ctx.font = '400 7px ' + kr;
     ctx.fillStyle = greenLight;
-    ctx.fillText('\uBAA8\uBC14\uC77C \uCCAD\uCCA9\uC7A5', lx, iqY + iqS + 8);
+    ctx.fillText('모바일 청첩장', lx, iqY + iqS + 8);
   }
 
   ctx.strokeStyle = 'rgba(92,122,75,0.06)'; ctx.lineWidth = 0.5; ctx.setLineDash([4, 10]);
@@ -1206,7 +1208,7 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
   const hasParking = w.parkingInfo && w.parkingInfo.trim();
   const hasInfo = hasTransport || hasParking;
 
-  const mapH = hasInfo ? 180 : 240;
+  const mapH = hasInfo ? 140 : 200;
   const venueH = 22 + (w.venueHall ? 20 : 0) + Math.ceil(w.venueAddress.length / 28) * 16;
   let infoH = 0;
   if (hasTransport) { infoH += 24 + (w.transportInfo || '').split('\n').filter((l: string) => l.trim()).length * 18 + 10; }
@@ -1220,8 +1222,11 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
 
   const totalContent = titleH + mapH + venueH + infoH + qrH + calH + greetH + phoneH;
   const sections = 7 + (hasInfo ? 1 : 0) + (mapQr ? 1 : 0);
-  const gap = Math.max(12, Math.min(24, (H - 40 - totalContent) / sections));
-  let ry = Math.max(28, (H - totalContent - gap * (sections - 1)) / 2);
+  const available = H - 50;
+  const rawGap = (available - totalContent) / sections;
+  const gap = Math.max(6, Math.min(20, rawGap));
+  const totalUsed = totalContent + gap * (sections - 1);
+  let ry = Math.max(20, (H - totalUsed) / 2);
 
   ctx.textAlign = 'center';
   ctx.font = '400 15px ' + en; ctx.fillStyle = greenMid;
@@ -1247,8 +1252,8 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
   }
 
   ctx.textAlign = 'center';
-  ctx.font = '400 20px ' + kr; ctx.fillStyle = greenDark;
-  ctx.fillText(w.venue, rx, ry); ry += 24;
+  ctx.font = '400 18px ' + kr; ctx.fillStyle = greenDark;
+  ctx.fillText(w.venue, rx, ry); ry += 22;
   if (w.venueHall) {
     ctx.font = '400 15px ' + kr; ctx.fillStyle = greenMid;
     ctx.fillText(w.venueHall, rx, ry); ry += 20;
@@ -1259,29 +1264,30 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
   ry += gap;
 
   if (hasInfo) {
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'center';
     if (hasTransport) {
-      ctx.font = '400 14px ' + kr; ctx.fillStyle = greenDark;
-      ctx.fillText('\uAD50\uD1B5 \uC548\uB0B4', txL, ry); ry += 22;
-      ctx.font = '400 12px ' + kr; ctx.fillStyle = greenMid;
+      ctx.font = '600 12px ' + kr; ctx.fillStyle = greenDark;
+      ctx.fillText('교통 안내', rx, ry); ry += 18;
+      ctx.font = '400 11px ' + kr; ctx.fillStyle = greenMid;
+      let tLines = 0;
       for (const para of w.transportInfo!.split('\n')) {
-        if (!para.trim()) { ry += 5; continue; }
+        if (!para.trim()) { ry += 3; continue; }
         const wl = wrapText(ctx, para, contentW);
-        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 16; }
+        for (const l of wl) { if (tLines >= 4) break; ctx.fillText(l, rx, ry); ry += 14; tLines++; }
       }
-      ry += 8;
+      ry += 6;
     }
     if (hasParking) {
-      ctx.font = '400 14px ' + kr; ctx.fillStyle = greenDark;
-      ctx.fillText('\uC8FC\uCC28 \uC548\uB0B4', txL, ry); ry += 22;
-      ctx.font = '400 12px ' + kr; ctx.fillStyle = greenMid;
+      ctx.font = '600 12px ' + kr; ctx.fillStyle = greenDark;
+      ctx.fillText('주차 안내', rx, ry); ry += 18;
+      ctx.font = '400 11px ' + kr; ctx.fillStyle = greenMid;
+      let pLines = 0;
       for (const para of w.parkingInfo!.split('\n')) {
-        if (!para.trim()) { ry += 5; continue; }
+        if (!para.trim()) { ry += 3; continue; }
         const wl = wrapText(ctx, para, contentW);
-        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 16; }
+        for (const l of wl) { if (pLines >= 4) break; ctx.fillText(l, rx, ry); ry += 14; pLines++; }
       }
     }
-    ctx.textAlign = 'center';
     ry += gap;
   }
 
@@ -1290,14 +1296,14 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
     ctx.fillStyle = bg; ctx.fillRect(rx - qS / 2 - 3, ry - 3, qS + 6, qS + 6);
     ctx.drawImage(mapQr, rx - qS / 2, ry, qS, qS);
     ctx.font = '400 8px ' + kr; ctx.fillStyle = greenLight;
-    ctx.fillText('\uC9C0\uB3C4 \uBCF4\uAE30', rx, ry + qS + 10);
+    ctx.fillText('지도 보기', rx, ry + qS + 10);
     ry += qS + 12 + gap;
   }
 
   ctx.font = '400 13px ' + en; ctx.fillStyle = greenMid;
   ctx.fillText(d.monthEn + ' ' + d.year, rx, ry);
   ry += 16;
-  const calEnd = drawCalendar(ctx, rx - 140, ry, 280, d, 'green');
+  const calEnd = drawCalendar(ctx, rx - 120, ry, 240, d, 'green');
   ry = calEnd + gap;
 
   if (w.greeting) {
@@ -1305,8 +1311,8 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
     ctx.globalAlpha = 0.5;
     const gLines = wrapText(ctx, w.greeting, half - 100);
     const maxG = Math.min(gLines.length, 8);
-    const gFontSize = maxG > 5 ? 12 : 14;
-    const gLineH = maxG > 5 ? 18 : 20;
+    const gFontSize = maxG > 4 ? 11 : 13;
+    const gLineH = maxG > 4 ? 16 : 18;
     ctx.font = '400 ' + gFontSize + 'px ' + kr; ctx.fillStyle = greenDark;
     for (let i = 0; i < maxG; i++) { ctx.fillText(gLines[i], rx, ry); ry += gLineH; }
     ctx.globalAlpha = 1;
@@ -1331,7 +1337,7 @@ async function drawBotanicalClassic(ctx: CanvasRenderingContext2D, w: Props['wed
 
   ctx.textAlign = 'right';
   ctx.font = '400 9px ' + kr; ctx.fillStyle = 'rgba(92,122,75,0.18)';
-  ctx.fillText('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4', W - 20, H - 10);
+  ctx.fillText('Made by 청첩장 작업실', W - 20, H - 10);
 }
 
 async function drawHeartMinimal(ctx: CanvasRenderingContext2D, w: Props['wedding'], photo: HTMLImageElement | null, mapQr: HTMLImageElement | null, staticMap: HTMLImageElement | null, invQr: HTMLImageElement | null) {
@@ -1533,29 +1539,28 @@ async function drawHeartMinimal(ctx: CanvasRenderingContext2D, w: Props['wedding
   ry += 18;
 
   if (hasInfo) {
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'center';
     if (hasTransport) {
       ctx.font = '700 12px ' + kr; ctx.fillStyle = textDark;
-      ctx.fillText('\uAD50\uD1B5 \uC548\uB0B4', txL, ry); ry += 18;
+      ctx.fillText('교통 안내', rx, ry); ry += 18;
       ctx.font = '400 11px ' + kr; ctx.fillStyle = textMid;
       for (const para of w.transportInfo!.split('\n')) {
         if (!para.trim()) { ry += 4; continue; }
         const wl = wrapText(ctx, para, contentW);
-        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 15; }
+        for (const l of wl) { ctx.fillText(l, rx, ry); ry += 15; }
       }
       ry += 8;
     }
     if (hasParking) {
       ctx.font = '700 12px ' + kr; ctx.fillStyle = textDark;
-      ctx.fillText('\uC8FC\uCC28 \uC548\uB0B4', txL, ry); ry += 18;
+      ctx.fillText('주차 안내', rx, ry); ry += 18;
       ctx.font = '400 11px ' + kr; ctx.fillStyle = textMid;
       for (const para of w.parkingInfo!.split('\n')) {
         if (!para.trim()) { ry += 4; continue; }
         const wl = wrapText(ctx, para, contentW);
-        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 15; }
+        for (const l of wl) { ctx.fillText(l, rx, ry); ry += 15; }
       }
     }
-    ctx.textAlign = 'center';
     ry += 18;
   }
 
@@ -1945,36 +1950,34 @@ async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding']
   const hasTransport = w.transportInfo && w.transportInfo.trim();
   const hasParking = w.parkingInfo && w.parkingInfo.trim();
   if (hasTransport || hasParking) {
-    const txL = half + 55;
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'center';
     if (hasTransport) {
       ctx.font = '700 10px ' + kr;
       ctx.fillStyle = textDark;
-      ctx.fillText('\uAD50\uD1B5 \uC548\uB0B4', txL, ry);
+      ctx.fillText('교통 안내', rx, ry);
       ry += 15;
       ctx.font = '400 9px ' + kr;
       ctx.fillStyle = textMid;
       for (const para of w.transportInfo!.split('\n')) {
         if (!para.trim()) { ry += 3; continue; }
         const wl = wrapText(ctx, para, cardW - 100);
-        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 13; }
+        for (const l of wl) { ctx.fillText(l, rx, ry); ry += 13; }
       }
       ry += 4;
     }
     if (hasParking) {
       ctx.font = '700 10px ' + kr;
       ctx.fillStyle = textDark;
-      ctx.fillText('\uC8FC\uCC28 \uC548\uB0B4', txL, ry);
+      ctx.fillText('주차 안내', rx, ry);
       ry += 15;
       ctx.font = '400 9px ' + kr;
       ctx.fillStyle = textMid;
       for (const para of w.parkingInfo!.split('\n')) {
         if (!para.trim()) { ry += 3; continue; }
         const wl = wrapText(ctx, para, cardW - 100);
-        for (const l of wl) { ctx.fillText(l, txL, ry); ry += 13; }
+        for (const l of wl) { ctx.fillText(l, rx, ry); ry += 13; }
       }
     }
-    ctx.textAlign = 'center';
     ry += rightGap * 0.5;
   }
 
