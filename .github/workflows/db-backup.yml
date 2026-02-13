@@ -30,3 +30,4 @@ jobs:
           name: db-backup-${{ github.run_number }}
           path: ${{ env.BACKUP_FILE }}
           retention-days: 30
+
