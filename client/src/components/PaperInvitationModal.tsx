@@ -2494,6 +2494,7 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedArea, setCroppedArea] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [cropTarget, setCropTarget] = useState<'photo1' | 'photo2'>('photo1');
 
   const current = DESIGNS[designIdx];
 
@@ -2648,7 +2649,7 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
               <p className="text-xs font-medium text-stone-500">사진 선택</p>
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {photoUrl && (
-                  <button onClick={() => { setCropUrl(photoUrl!); setShowCrop(true); setCrop({ x: 0, y: 0 }); setZoom(1); }}
+                  <button onClick={() => { setCropTarget('photo1'); setCropUrl(photoUrl!); setShowCrop(true); setCrop({ x: 0, y: 0 }); setZoom(1); }}
                     className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                       !selectedPhotoUrl ? 'border-stone-800 ring-1 ring-stone-800' : 'border-stone-200 hover:border-stone-400'
                     }`}>
@@ -2659,7 +2660,7 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
                 {galleries.filter((g: any) => (g.mediaType === 'IMAGE' || g.imageUrl)).map((g: any, i: number) => {
                   const url = g.mediaUrl || g.imageUrl;
                   return (
-                    <button key={i} onClick={() => { setCropUrl(url); setShowCrop(true); setCrop({ x: 0, y: 0 }); setZoom(1); }}
+                    <button key={i} onClick={() => { setCropTarget('photo1'); setCropUrl(url); setShowCrop(true); setCrop({ x: 0, y: 0 }); setZoom(1); }}
                       className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                         selectedPhotoUrl === url ? 'border-stone-800 ring-1 ring-stone-800' : 'border-stone-200 hover:border-stone-400'
                       }`}>
@@ -2690,7 +2691,7 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
                 <p className="text-xs font-medium text-stone-500">사진 2 선택 <span className="text-stone-400 font-normal">(오른쪽)</span></p>
                 <div className="flex gap-2 overflow-x-auto pb-1">
                   {photoUrl && (
-                    <button onClick={() => setSelectedPhoto2Url(photoUrl!)}
+                    <button onClick={() => { setCropTarget('photo2'); setCropUrl(photoUrl!); setShowCrop(true); setCrop({ x: 0, y: 0 }); setZoom(1); }}
                       className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                         selectedPhoto2Url === photoUrl ? 'border-stone-800 ring-1 ring-stone-800' : 'border-stone-200 hover:border-stone-400'
                       }`}>
@@ -2701,7 +2702,7 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
                   {galleries.filter((g: any) => (g.mediaType === 'IMAGE' || g.imageUrl)).map((g: any, i: number) => {
                     const url = g.mediaUrl || g.imageUrl;
                     return (
-                      <button key={i} onClick={() => setSelectedPhoto2Url(url)}
+                      <button key={i} onClick={() => { setCropTarget('photo2'); setCropUrl(url); setShowCrop(true); setCrop({ x: 0, y: 0 }); setZoom(1); }}
                         className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                           (selectedPhoto2Url === url || (!selectedPhoto2Url && i === 0)) ? 'border-stone-800 ring-1 ring-stone-800' : 'border-stone-200 hover:border-stone-400'
                         }`}>
@@ -2751,7 +2752,7 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
                     <button onClick={async () => {
                       if (croppedArea) {
                         const cropped = await getCroppedImg(cropUrl, croppedArea);
-                        setSelectedPhotoUrl(cropped);
+                        if (cropTarget === 'photo2') { setSelectedPhoto2Url(cropped); } else { setSelectedPhotoUrl(cropped); }
                         setPhoto(null);
                         setShowCrop(false);
                       }
