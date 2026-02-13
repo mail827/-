@@ -58,7 +58,7 @@ async function ensureFonts() {
     const link = document.createElement('link');
     link.id = 'paper-inv-fonts';
     link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;600;700&family=Nanum+Myeongjo:wght@400;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Diphylleia&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Serif+KR:wght@200;300;400;600;700&family=Nanum+Myeongjo:wght@400;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Diphylleia&display=swap';
     document.head.appendChild(link);
   }
   if (!document.getElementById('paper-inv-extra')) {
@@ -75,6 +75,7 @@ async function ensureFonts() {
     document.fonts.load('400 48px "MaruBuri"'),
     document.fonts.load('400 48px "MapoDacapo"'),
     document.fonts.load('200 48px "Noto Serif KR"'),
+    document.fonts.load('400 48px "Great Vibes"'),
   ].map(p => Promise.race([p, new Promise(r => setTimeout(r, 2500))])));
   await document.fonts.ready;
 }
@@ -2015,6 +2016,453 @@ async function drawWaveBorder(ctx: CanvasRenderingContext2D, w: Props['wedding']
   ctx.fillStyle = 'rgba(44,36,32,0.06)';
   ctx.fillText('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4', W - 24, H - 10);
 }
+
+async function drawSingleLettering(ctx: CanvasRenderingContext2D, w: Props['wedding'], photo: HTMLImageElement | null, _mapQr: HTMLImageElement | null, _staticMap: HTMLImageElement | null, invQr: HTMLImageElement | null) {
+  const W = 1200, H = 1700;
+  const d = parseDate(w.weddingDate);
+  const script = '"Great Vibes", cursive';
+  const serif = '"Cormorant Garamond", serif';
+  const kr = '"Noto Serif KR", serif';
+
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, W, H);
+
+  const photoH = H * 0.72;
+  if (photo) {
+    const sR = photo.width / photo.height;
+    const dR = W / photoH;
+    let sx = 0, sy = 0, sw = photo.width, sh = photo.height;
+    if (sR > dR) { sw = photo.height * dR; sx = (photo.width - sw) / 2; }
+    else { sh = photo.width / dR; sy = (photo.height - sh) / 2; }
+    ctx.drawImage(photo, sx, sy, sw, sh, 0, 0, W, photoH);
+
+    const grad = ctx.createLinearGradient(0, photoH * 0.3, 0, photoH);
+    grad.addColorStop(0, 'rgba(17,17,17,0)');
+    grad.addColorStop(0.6, 'rgba(17,17,17,0.3)');
+    grad.addColorStop(1, 'rgba(17,17,17,0.85)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, photoH);
+
+    const topG = ctx.createLinearGradient(0, 0, 0, 150);
+    topG.addColorStop(0, 'rgba(17,17,17,0.4)');
+    topG.addColorStop(1, 'rgba(17,17,17,0)');
+    ctx.fillStyle = topG;
+    ctx.fillRect(0, 0, W, 150);
+  } else {
+    ctx.fillStyle = '#222';
+    ctx.fillRect(0, 0, W, photoH);
+    ctx.font = '400 18px ' + kr; ctx.fillStyle = '#555';
+    ctx.textAlign = 'center'; ctx.fillText('\uB300\uD45C \uC0AC\uC9C4', W / 2, photoH / 2);
+  }
+
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+  ctx.font = '300 13px ' + serif;
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillText(d.dayNameEn.toUpperCase() + ',  ' + d.monthEn.toUpperCase() + '  ' + d.day + ',  ' + d.year, W / 2, 40);
+
+  const oY = photoH - 140;
+  ctx.save();
+  ctx.font = '400 78px ' + script;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 20; ctx.shadowOffsetY = 4;
+  ctx.fillText("We're Getting", W / 2, oY);
+  ctx.fillText('Married!', W / 2, oY + 80);
+  ctx.restore();
+
+  let y = photoH + 35;
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(W * 0.2, y); ctx.lineTo(W * 0.8, y); ctx.stroke();
+  y += 32;
+
+  ctx.font = '600 26px ' + kr;
+  ctx.fillStyle = '#F0EAE0';
+  ctx.fillText(w.groomName + '  \u00B7  ' + w.brideName, W / 2, y);
+  y += 28;
+
+  ctx.font = 'italic 300 14px ' + serif;
+  ctx.fillStyle = 'rgba(240,234,224,0.5)';
+  ctx.fillText((w.groomNameEn || '') + '  &  ' + (w.brideNameEn || ''), W / 2, y);
+  y += 36;
+
+  ctx.font = '300 15px ' + kr;
+  ctx.fillStyle = 'rgba(240,234,224,0.7)';
+  ctx.fillText(d.year + '\uB144 ' + d.month + '\uC6D4 ' + d.day + '\uC77C ' + d.dayName + '\uC694\uC77C ' + (w.weddingTime || ''), W / 2, y);
+  y += 22;
+  ctx.font = '300 13px ' + kr;
+  ctx.fillStyle = 'rgba(240,234,224,0.5)';
+  ctx.fillText(w.venue + ' ' + (w.venueHall || ''), W / 2, y);
+  y += 28;
+
+  const hasGP = w.groomFatherName || w.groomMotherName;
+  const hasBP = w.brideFatherName || w.brideMotherName;
+  if (hasGP || hasBP) {
+    ctx.font = '300 11px ' + kr;
+    ctx.fillStyle = 'rgba(240,234,224,0.35)';
+    const gp = hasGP ? [w.groomFatherName, w.groomMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uC544\uB4E4' : '';
+    const bp = hasBP ? [w.brideFatherName, w.brideMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uB538' : '';
+    ctx.fillText([gp, bp].filter(Boolean).join('\u3000\u3000'), W / 2, y);
+  }
+
+  if (invQr) {
+    const qs = 50;
+    ctx.fillStyle = '#222'; ctx.fillRect(W / 2 - qs / 2 - 4, H - 80 - qs - 4, qs + 8, qs + 8);
+    ctx.globalAlpha = 0.8;
+    ctx.drawImage(invQr, W / 2 - qs / 2, H - 80 - qs, qs, qs);
+    ctx.globalAlpha = 1;
+    ctx.font = '300 8px ' + kr;
+    ctx.fillStyle = 'rgba(240,234,224,0.4)';
+    ctx.fillText('\uBAA8\uBC14\uC77C \uCCAD\uCCA9\uC7A5', W / 2, H - 68);
+  }
+
+  ctx.font = '300 7px ' + kr;
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillText('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4', W / 2, H - 10);
+}
+
+async function drawSingleEditorial(ctx: CanvasRenderingContext2D, w: Props['wedding'], photo: HTMLImageElement | null, _mapQr: HTMLImageElement | null, _staticMap: HTMLImageElement | null, invQr: HTMLImageElement | null) {
+  const W = 1200, H = 1700;
+  const d = parseDate(w.weddingDate);
+  const script = '"Great Vibes", cursive';
+  const serif = '"Cormorant Garamond", serif';
+  const kr = '"Noto Serif KR", serif';
+
+  ctx.fillStyle = '#FAF8F4';
+  ctx.fillRect(0, 0, W, H);
+
+  const bdr = 32;
+  ctx.strokeStyle = 'rgba(170,155,130,0.18)'; ctx.lineWidth = 0.5;
+  ctx.strokeRect(bdr, bdr, W - bdr * 2, H - bdr * 2);
+  ctx.strokeRect(bdr + 10, bdr + 10, W - bdr * 2 - 20, H - bdr * 2 - 20);
+
+  const drawFlourish = (cx: number, cy: number, size: number, alpha: number) => {
+    ctx.save();
+    ctx.strokeStyle = `rgba(170,155,130,${alpha})`; ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(cx - size, cy);
+    ctx.bezierCurveTo(cx - size * 0.6, cy - size * 0.4, cx - size * 0.2, cy - size * 0.5, cx, cy - size * 0.1);
+    ctx.bezierCurveTo(cx + size * 0.2, cy - size * 0.5, cx + size * 0.6, cy - size * 0.4, cx + size, cy);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx - size, cy);
+    ctx.bezierCurveTo(cx - size * 0.6, cy + size * 0.4, cx - size * 0.2, cy + size * 0.5, cx, cy + size * 0.1);
+    ctx.bezierCurveTo(cx + size * 0.2, cy + size * 0.5, cx + size * 0.6, cy + size * 0.4, cx + size, cy);
+    ctx.stroke();
+    ctx.restore();
+  };
+
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+  let y = 72;
+
+  drawFlourish(W / 2, y, 60, 0.2);
+  y += 22;
+
+  ctx.font = '400 42px ' + script;
+  ctx.fillStyle = '#5A4A38';
+  ctx.fillText('Wedding Invitation', W / 2, y);
+  y += 30;
+
+  ctx.strokeStyle = 'rgba(170,155,130,0.25)'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(W * 0.2, y); ctx.lineTo(W * 0.8, y); ctx.stroke();
+  y += 16;
+
+  const pad = 80;
+  const photoX = pad, photoY = y;
+  const photoW = W - pad * 2, photoH = H * 0.42;
+
+  if (photo) {
+    const sR = photo.width / photo.height;
+    const dR = photoW / photoH;
+    let sx = 0, sy = 0, sw = photo.width, sh = photo.height;
+    if (sR > dR) { sw = photo.height * dR; sx = (photo.width - sw) / 2; }
+    else { sh = photo.width / dR; sy = (photo.height - sh) / 2; }
+    ctx.drawImage(photo, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
+    ctx.strokeStyle = 'rgba(170,155,130,0.12)'; ctx.lineWidth = 0.5;
+    ctx.strokeRect(photoX, photoY, photoW, photoH);
+  } else {
+    ctx.fillStyle = '#F0ECE4';
+    ctx.fillRect(photoX, photoY, photoW, photoH);
+    ctx.font = '400 18px ' + kr; ctx.fillStyle = '#BBB';
+    ctx.fillText('\uB300\uD45C \uC0AC\uC9C4', W / 2, photoY + photoH / 2);
+  }
+
+  y = photoY + photoH + 22;
+
+  ctx.strokeStyle = 'rgba(170,155,130,0.25)'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(W * 0.2, y); ctx.lineTo(W * 0.8, y); ctx.stroke();
+  y += 28;
+
+  ctx.font = '500 26px ' + kr;
+  ctx.fillStyle = '#3A3028';
+  ctx.fillText(w.groomName, W / 2 - 55, y);
+  ctx.font = '400 22px ' + script;
+  ctx.fillStyle = '#B4A494';
+  ctx.fillText('and', W / 2, y - 2);
+  ctx.font = '500 26px ' + kr;
+  ctx.fillStyle = '#3A3028';
+  ctx.fillText(w.brideName, W / 2 + 55, y);
+  y += 22;
+
+  if (w.groomNameEn || w.brideNameEn) {
+    ctx.font = 'italic 300 12px ' + serif;
+    ctx.fillStyle = '#B4A494';
+    ctx.fillText((w.groomNameEn || '') + '  &  ' + (w.brideNameEn || ''), W / 2, y);
+    y += 22;
+  } else {
+    y += 8;
+  }
+
+  drawFlourish(W / 2, y, 40, 0.15);
+  y += 28;
+
+  ctx.font = '300 30px ' + serif;
+  ctx.fillStyle = '#3A3028';
+  ctx.fillText(String(d.day).padStart(2, '0') + '  .  ' + String(d.month).padStart(2, '0') + '  .  ' + d.year, W / 2, y);
+  y += 28;
+
+  ctx.font = '300 14px ' + kr;
+  ctx.fillStyle = '#8A7A6A';
+  ctx.fillText(d.dayName + '\uC694\uC77C ' + (w.weddingTime || ''), W / 2, y);
+  y += 28;
+
+  ctx.font = '300 14px ' + kr;
+  ctx.fillStyle = '#7A6A5A';
+  ctx.fillText(w.venue + (w.venueHall ? ' ' + w.venueHall : ''), W / 2, y);
+  y += 18;
+  ctx.font = '300 12px ' + kr;
+  ctx.fillStyle = '#A49A8A';
+  ctx.fillText(w.venueAddress, W / 2, y);
+  y += 26;
+
+  const hasGP = w.groomFatherName || w.groomMotherName;
+  const hasBP = w.brideFatherName || w.brideMotherName;
+  if (hasGP || hasBP) {
+    ctx.strokeStyle = 'rgba(170,155,130,0.15)'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(W * 0.3, y); ctx.lineTo(W * 0.7, y); ctx.stroke();
+    y += 18;
+    ctx.font = '300 11px ' + kr;
+    ctx.fillStyle = '#B4A898';
+    if (hasGP) {
+      ctx.fillText([w.groomFatherName, w.groomMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uC544\uB4E4 ' + w.groomName, W / 2, y);
+      y += 16;
+    }
+    if (hasBP) {
+      ctx.fillText([w.brideFatherName, w.brideMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uB538 ' + w.brideName, W / 2, y);
+      y += 16;
+    }
+    y += 6;
+  }
+
+  if (w.greeting) {
+    y += 6;
+    ctx.strokeStyle = 'rgba(170,155,130,0.12)'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(W * 0.25, y); ctx.lineTo(W * 0.75, y); ctx.stroke();
+    y += 20;
+    ctx.font = '300 12px ' + kr;
+    ctx.fillStyle = 'rgba(120,105,85,0.5)';
+    const gLines = wrapText(ctx, w.greeting, W - 200);
+    const maxG = Math.min(gLines.length, 5);
+    for (let i = 0; i < maxG; i++) { ctx.fillText(gLines[i], W / 2, y); y += 17; }
+    y += 4;
+  }
+
+  drawFlourish(W / 2, y + 8, 50, 0.12);
+
+  if (invQr) {
+    const qs = 48;
+    ctx.globalAlpha = 0.55;
+    ctx.drawImage(invQr, W / 2 - qs / 2, H - 70 - qs, qs, qs);
+    ctx.globalAlpha = 1;
+    ctx.font = '300 8px ' + kr;
+    ctx.fillStyle = '#C4B8A8';
+    ctx.fillText('\uBAA8\uBC14\uC77C \uCCAD\uCCA9\uC7A5', W / 2, H - 58);
+  }
+
+  ctx.font = '300 7px ' + kr;
+  ctx.fillStyle = 'rgba(58,48,40,0.08)';
+  ctx.fillText('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4', W / 2, H - 14);
+}
+
+async function drawSingleSaveTheDate(ctx: CanvasRenderingContext2D, w: Props['wedding'], photo: HTMLImageElement | null, _mapQr: HTMLImageElement | null, _staticMap: HTMLImageElement | null, invQr: HTMLImageElement | null) {
+  const W = 1200, H = 1700;
+  const d = parseDate(w.weddingDate);
+  const script = '"Great Vibes", cursive';
+  const serif = '"Cormorant Garamond", serif';
+  const kr = '"Noto Serif KR", serif';
+
+  ctx.fillStyle = '#F4F0EA';
+  ctx.fillRect(0, 0, W, H);
+
+  const imgData = ctx.getImageData(0, 0, W, H);
+  const px = imgData.data;
+  for (let i = 0; i < px.length; i += 16) {
+    const n = (Math.random() - 0.5) * 10;
+    px[i] = Math.min(255, Math.max(0, px[i] + n));
+    px[i + 1] = Math.min(255, Math.max(0, px[i + 1] + n));
+    px[i + 2] = Math.min(255, Math.max(0, px[i + 2] + n));
+  }
+  ctx.putImageData(imgData, 0, 0);
+
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+  const padSide = 50;
+  let y = 58;
+
+  ctx.font = '400 42px ' + script;
+  ctx.fillStyle = '#4A3C30';
+  ctx.fillText('Together with their families', W / 2, y);
+  y += 30;
+
+  ctx.font = '300 11px ' + serif;
+  ctx.fillStyle = '#A09080';
+  ctx.fillText((w.groomNameEn || w.groomName).toUpperCase() + '   &   ' + (w.brideNameEn || w.brideName).toUpperCase(), W / 2, y);
+  y += 22;
+
+  const gapX = 12;
+  const pW = (W - padSide * 2 - gapX) / 2;
+  const pH = H * 0.35;
+  const p1x = padSide, p2x = padSide + pW + gapX;
+  const pY = y;
+
+  const photos: (HTMLImageElement | null)[] = [photo, (w as any).photo2 || null]
+  for (let pi = 0; pi < 2; pi++) {
+    const ppx = pi === 0 ? p1x : p2x;
+    const img = photos[pi];
+    if (img) {
+      const sR = img.width / img.height;
+      const dR = pW / pH;
+      let sx = 0, sy2 = 0, sw = img.width, sh = img.height;
+      if (sR > dR) { sw = img.height * dR; sx = (img.width - sw) / 2; }
+      else { sh = img.width / dR; sy2 = (img.height - sh) / 2; }
+      ctx.drawImage(img, sx, sy2, sw, sh, ppx, pY, pW, pH);
+    } else {
+      ctx.fillStyle = '#E6DED4';
+      ctx.fillRect(ppx, pY, pW, pH);
+      ctx.font = '400 14px ' + kr; ctx.fillStyle = '#BBB';
+      ctx.fillText(pi === 0 ? '\uB300\uD45C \uC0AC\uC9C4' : '\uC0AC\uC9C4 2', ppx + pW / 2, pY + pH / 2);
+    }
+  }
+
+  y = pY + pH + 24;
+
+  ctx.font = '600 18px ' + serif;
+  ctx.fillStyle = '#3A3228';
+  ctx.fillText('O U R', W / 2, y);
+  y += 24;
+  ctx.font = '400 46px ' + script;
+  ctx.fillStyle = '#3A3228';
+  ctx.fillText('Wedding Day', W / 2, y);
+  y += 32;
+
+  ctx.strokeStyle = 'rgba(120,100,70,0.15)'; ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(W / 2 - 35, y); ctx.lineTo(W / 2 + 35, y); ctx.stroke();
+  y += 18;
+
+  ctx.font = '600 22px ' + kr;
+  ctx.fillStyle = '#3A3228';
+  ctx.fillText(w.groomName + '  \u00B7  ' + w.brideName, W / 2, y);
+  y += 22;
+
+  ctx.font = '300 13px ' + kr;
+  ctx.fillStyle = '#7A6A5A';
+  ctx.fillText(d.year + '\uB144 ' + d.month + '\uC6D4 ' + d.day + '\uC77C ' + d.dayName + '\uC694\uC77C ' + (w.weddingTime || ''), W / 2, y);
+  y += 16;
+  ctx.font = '300 12px ' + kr;
+  ctx.fillStyle = '#9A8A7A';
+  ctx.fillText(w.venue + ' ' + (w.venueHall || ''), W / 2, y);
+  y += 14;
+  ctx.font = '300 11px ' + kr;
+  ctx.fillStyle = '#AAA09A';
+  ctx.fillText(w.venueAddress, W / 2, y);
+  y += 18;
+
+  const hasGP = w.groomFatherName || w.groomMotherName;
+  const hasBP = w.brideFatherName || w.brideMotherName;
+  if (hasGP || hasBP) {
+    ctx.font = '300 11px ' + kr;
+    ctx.fillStyle = '#B4A898';
+    if (hasGP) {
+      ctx.fillText([w.groomFatherName, w.groomMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uC544\uB4E4 ' + w.groomName, W / 2, y);
+      y += 14;
+    }
+    if (hasBP) {
+      ctx.fillText([w.brideFatherName, w.brideMotherName].filter(Boolean).join(' \u00B7 ') + '\uC758 \uB538 ' + w.brideName, W / 2, y);
+      y += 14;
+    }
+    y += 4;
+  }
+
+  if (w.greeting) {
+    ctx.strokeStyle = 'rgba(120,100,70,0.06)'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(W * 0.28, y); ctx.lineTo(W * 0.72, y); ctx.stroke();
+    y += 14;
+    ctx.font = '300 11px ' + kr;
+    ctx.fillStyle = 'rgba(100,85,65,0.4)';
+    const gLines = wrapText(ctx, w.greeting, W - 160);
+    const maxG = Math.min(gLines.length, 5);
+    for (let i = 0; i < maxG; i++) { ctx.fillText(gLines[i], W / 2, y); y += 14; }
+    y += 6;
+  }
+
+  const bandTop = Math.max(y + 20, H * 0.72);
+  const bandH = H - bandTop;
+
+  const bandGrad = ctx.createLinearGradient(0, bandTop, 0, H);
+  bandGrad.addColorStop(0, 'rgba(82,72,58,0)');
+  bandGrad.addColorStop(0.15, 'rgba(82,72,58,0.03)');
+  bandGrad.addColorStop(1, 'rgba(82,72,58,0.08)');
+  ctx.fillStyle = bandGrad;
+  ctx.fillRect(0, bandTop, W, bandH);
+
+  ctx.font = '400 ' + Math.min(bandH * 0.5, 140) + 'px ' + script;
+  ctx.fillStyle = 'rgba(82,72,58,0.05)';
+  ctx.fillText('Forever', W / 2, bandTop + bandH * 0.35);
+
+  ctx.font = '400 ' + Math.min(bandH * 0.22, 60) + 'px ' + script;
+  ctx.fillStyle = 'rgba(82,72,58,0.04)';
+  ctx.fillText('together, always', W / 2, bandTop + bandH * 0.62);
+
+  ctx.strokeStyle = 'rgba(140,125,105,0.08)'; ctx.lineWidth = 0.5;
+  const drawStemLeaf = (sx2: number, sy2: number, ang: number, stemLen: number) => {
+    const segs = Math.floor(stemLen / 14);
+    const ddx = Math.cos(ang), ddy = Math.sin(ang);
+    let vx2 = sx2, vy2 = sy2;
+    ctx.beginPath(); ctx.moveTo(vx2, vy2);
+    for (let j = 0; j < segs; j++) { vx2 += ddx * 14; vy2 += ddy * 14; ctx.lineTo(vx2, vy2); }
+    ctx.stroke();
+    vx2 = sx2; vy2 = sy2;
+    for (let j = 1; j < segs; j += 2) {
+      vx2 += ddx * 28; vy2 += ddy * 28;
+      const side2 = j % 4 < 2 ? 1 : -1;
+      const pX = -ddy * side2, pY2 = ddx * side2;
+      ctx.beginPath();
+      ctx.ellipse(vx2 + pX * 10, vy2 + pY2 * 10, 6, 3, ang + side2 * 0.4, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  };
+  drawStemLeaf(20, H, -1.0, 140);
+  drawStemLeaf(60, H + 10, -0.7, 110);
+  drawStemLeaf(W - 20, H, Math.PI + 1.0, 140);
+  drawStemLeaf(W - 60, H + 10, Math.PI + 0.7, 110);
+
+  if (invQr) {
+    const qs = 44;
+    const qrY = bandTop + bandH * 0.4 - qs / 2;
+    ctx.globalAlpha = 0.45;
+    ctx.drawImage(invQr, W / 2 - qs / 2, qrY, qs, qs);
+    ctx.globalAlpha = 1;
+    ctx.font = '300 8px ' + kr;
+    ctx.fillStyle = '#B4A494';
+    ctx.fillText('\uBAA8\uBC14\uC77C \uCCAD\uCCA9\uC7A5', W / 2, qrY + qs + 10);
+  }
+
+  ctx.font = '300 7px ' + kr;
+  ctx.fillStyle = 'rgba(58,50,40,0.06)';
+  ctx.fillText('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4', W / 2, H - 8);
+}
+
 const DESIGNS = [
   { id: 'classic', label: '클래식', desc: '따뜻한 아이보리 · 3단 접지', draw: drawClassic as any, w: 2400, h: 900 },
   { id: 'modern', label: '모던', desc: '미니멀 화이트 · 3단 접지', draw: drawModern as any, w: 2400, h: 900 },
@@ -2023,6 +2471,9 @@ const DESIGNS = [
   { id: 'botanical-classic', label: 'Botanical Classic', desc: '올리브그린 보태니컬 · 2단 접지', draw: drawBotanicalClassic as any, w: 1572, h: 900 },
   { id: 'heart-minimal', label: 'Heart Minimal', desc: '워피치 하트 · 2단 접지', draw: drawHeartMinimal as any, w: 1572, h: 900 },
   { id: 'wave-border', label: 'Wave Border', desc: '웜 브라운 물결 · 2단 접지', draw: drawWaveBorder as any, w: 1572, h: 900 },
+  { id: 'single-lettering', label: 'Lettering', desc: '라인아트 레터링 · 단일', draw: drawSingleLettering as any, w: 1200, h: 1700 },
+  { id: 'single-editorial', label: 'Editorial', desc: '에디토리얼 감성 · 단일', draw: drawSingleEditorial as any, w: 1200, h: 1700 },
+  { id: 'single-savethedate', label: 'Save the Date', desc: '세이브더데이트 · 단일', draw: drawSingleSaveTheDate as any, w: 1200, h: 1700 },
 ];
 
 export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUrl, galleries = [] }: Props) {
@@ -2035,6 +2486,8 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
   const [staticMap, setStaticMap] = useState<HTMLCanvasElement | null>(null);
   const [invQr, setInvQr] = useState<HTMLImageElement | null>(null);
   const [selectedPhotoUrl, setSelectedPhotoUrl] = useState<string | null>(null);
+  const [selectedPhoto2Url, setSelectedPhoto2Url] = useState<string | null>(null);
+  const [photo2, setPhoto2] = useState<HTMLImageElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showCrop, setShowCrop] = useState(false);
   const [cropUrl, setCropUrl] = useState<string>('');
@@ -2058,6 +2511,15 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
       setPhoto(null);
     }
   }, [isOpen, photoUrl, selectedPhotoUrl]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const p2url = selectedPhoto2Url || (galleries.length > 1 ? (galleries[1]?.mediaUrl || galleries[1]?.imageUrl) : null);
+    if (p2url) {
+      const opt = p2url.includes('cloudinary.com') ? p2url.replace('/upload/', '/upload/f_auto,q_auto,w_600,c_limit/') : p2url;
+      loadImage(opt).then(setPhoto2).catch(() => setPhoto2(null));
+    } else { setPhoto2(null); }
+  }, [isOpen, selectedPhoto2Url, galleries]);
 
   useEffect(() => {
     if (!isOpen || mapQr) return;
@@ -2122,7 +2584,7 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
     canvas.width = (current as any).w || 2400; canvas.height = (current as any).h || 900;
     const ctx = canvas.getContext('2d')!;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    await current.draw(ctx, wedding, photo, mapQr, staticMap, invQr);
+    await current.draw(ctx, Object.assign({}, wedding, { galleries, photo2 }), photo, mapQr, staticMap, invQr);
     setRendering(false);
   }, [current, wedding, fontsReady, photo, mapQr, staticMap, invQr]);
 
@@ -2157,7 +2619,7 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
           <div className="sticky top-0 bg-white/90 backdrop-blur-sm border-b border-stone-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
             <div>
               <h3 className="text-lg font-medium text-stone-800">종이 청첩장</h3>
-              <p className="text-sm text-stone-400 mt-0.5">{(current as any).w <= 1600 ? '2단 접지' : (current as any).h > 1000 ? '2단 접지' : '3단 접지'} · 인쇄용 고해상도</p>
+              <p className="text-sm text-stone-400 mt-0.5">{current.id.startsWith('single') ? '단일 카드' : (current as any).w <= 1600 || (current as any).h > 1000 ? '2단 접지' : '3단 접지'} · 인쇄용 고해상도</p>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-stone-100 rounded-lg transition-colors">
               <X className="w-5 h-5 text-stone-500" />
@@ -2223,6 +2685,34 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
                 }} />
               </div>
             </div>
+            {current.id === 'single-savethedate' && galleries.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-stone-500">사진 2 선택 <span className="text-stone-400 font-normal">(오른쪽)</span></p>
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {photoUrl && (
+                    <button onClick={() => setSelectedPhoto2Url(photoUrl!)}
+                      className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                        selectedPhoto2Url === photoUrl ? 'border-stone-800 ring-1 ring-stone-800' : 'border-stone-200 hover:border-stone-400'
+                      }`}>
+                      <img src={photoUrl} alt="" className="w-full h-full object-cover" />
+                      {selectedPhoto2Url === photoUrl && <div className="absolute inset-0 bg-stone-800/10" />}
+                    </button>
+                  )}
+                  {galleries.filter((g: any) => (g.mediaType === 'IMAGE' || g.imageUrl)).map((g: any, i: number) => {
+                    const url = g.mediaUrl || g.imageUrl;
+                    return (
+                      <button key={i} onClick={() => setSelectedPhoto2Url(url)}
+                        className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                          (selectedPhoto2Url === url || (!selectedPhoto2Url && i === 0)) ? 'border-stone-800 ring-1 ring-stone-800' : 'border-stone-200 hover:border-stone-400'
+                        }`}>
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        {(selectedPhoto2Url === url || (!selectedPhoto2Url && i === 0)) && <div className="absolute inset-0 bg-stone-800/10" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <div className="flex justify-center bg-stone-50 rounded-xl p-4 overflow-x-auto">
               {!fontsReady ? (
                 <div className="h-48 flex items-center justify-center text-sm text-stone-400">폰트 로딩 중...</div>
@@ -2233,10 +2723,10 @@ export default function PaperInvitationModal({ isOpen, onClose, wedding, photoUr
             <div className="bg-stone-50 rounded-xl p-4 space-y-2">
               <p className="text-sm font-medium text-stone-700">인쇄 안내</p>
               <ul className="text-xs text-stone-500 space-y-1.5 leading-relaxed">
-                <li>{((current as any).w <= 1600 || (current as any).h > 1000) ? '2단 접지 A5 규격 (펼침 297×210mm / 접힘 148.5×210mm)' : '3단 접지 규격 (펼침 381×143mm / 접힘 127×143mm)'}</li>
+                <li>{current.id.startsWith('single') ? '단일 카드 (102×145mm / 약 4×5.7인치)' : ((current as any).w <= 1600 || (current as any).h > 1000) ? '2단 접지 A5 규격 (펼침 297×210mm / 접힘 148.5×210mm)' : '3단 접지 규격 (펼침 381×143mm / 접힘 127×143mm)'}</li>
                 <li>300dpi 고해상도 ({(current as any).w}×{(current as any).h}px)</li>
-                <li>추천 용지: 랑데부지 250g, 스노우화이트, 코튼지</li>
-                <li>{((current as any).w <= 1600 || (current as any).h > 1000) ? '인쇄소에 파일 전달 후 반접기 재단 요청' : '인쇄소에 파일 전달 후 3단 접지 재단 요청'}</li>
+                <li>추천 용지: {current.id.startsWith('single') ? '랑데부지 300g, 코튼지, 모조지' : '랑데부지 250g, 스노우화이트, 코튼지'}</li>
+                <li>{current.id.startsWith('single') ? '인쇄소에 파일 전달 후 재단 요청 (접지 없음)' : ((current as any).w <= 1600 || (current as any).h > 1000) ? '인쇄소에 파일 전달 후 반접기 재단 요청' : '인쇄소에 파일 전달 후 3단 접지 재단 요청'}</li>
                 <li>· 지도 QR코드를 스캔하면 카카오맵이 열립니다</li>
               </ul>
             </div>
