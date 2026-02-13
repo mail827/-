@@ -11,6 +11,7 @@ import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminWeddingList from './pages/admin/AdminWeddingList';
 import AdminGuides from "./pages/admin/AdminGuides";
+import AdminHighlightVideos from "./pages/admin/AdminHighlightVideos";
 import AdminThemeShowcase from "./pages/admin/AdminThemeShowcase";
 import AdminWeddingCreate from './pages/admin/AdminWeddingCreate';
 import AdminWeddingEdit from './pages/admin/AdminWeddingEdit';
@@ -103,6 +104,7 @@ export default function App() {
         <Route path="settlement" element={<AdminSettlement />} />
         <Route path="inquiries" element={<AdminInquiries />} />
         <Route path="guides" element={<AdminGuides />} />
+            <Route path="highlight-videos" element={<AdminHighlightVideos />} />
         <Route path="theme-showcase" element={<AdminThemeShowcase />} />
         <Route path="weddings" element={<AdminWeddingList />} />
         <Route path="weddings/create" element={<AdminWeddingCreate />} />

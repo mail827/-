@@ -4,6 +4,7 @@ import { Check, MessageCircle, X, Send, Sparkles, Mail, Loader2, Gift, Eye } fro
 
 
 import ThemeShowcaseModal from '../components/ThemeShowcaseModal';
+import HighlightVideoSection from '../components/HighlightVideoSection';
 
 interface Package {
   id: string;
@@ -359,65 +360,122 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="reviews" className="py-32 px-4 bg-gradient-to-b from-white to-stone-50">
+      <section id="themes" className="py-20 px-4 bg-stone-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">THEMES</p>
+            <h2 className="font-serif text-3xl text-stone-800 mb-4">19가지 감성 테마</h2>
+            <p className="text-stone-500 mb-8">실제 청첩장을 미리 체험해보세요</p>
+            <button
+              onClick={() => setShowThemeShowcase(true)}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-stone-800 text-white rounded-full hover:bg-stone-900 transition-all hover:scale-105"
+            >
+              <Eye className="w-5 h-5" />
+              테마 미리보기
+            </button>
+          </motion.div>
+        </div>
+      </section>
+
+      <HighlightVideoSection />
+
+      <section id="pricing" className="py-32 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
-            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">REVIEWS</p>
-            <h2 className="font-serif text-3xl text-stone-800 mb-4">고객님들의 후기</h2>
-            <p className="text-stone-500">실제 사용하신 분들의 생생한 이야기</p>
+            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">PRICING</p>
+            <h2 className="font-serif text-3xl text-stone-800">요금 안내</h2>
           </motion.div>
           
-{reviews.length > 0 ? (
-  <div className="relative">
-    <div 
-      className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4"
-      style={{ scrollBehavior: 'smooth' }}
-    >
-      {reviews.map((review, i) => (
-        <motion.div
-          key={review.id}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: i * 0.1 }}
-          className="min-w-[240px] max-w-[240px] bg-white p-4 rounded-xl shadow-sm border border-stone-100 flex-shrink-0 snap-start"
-        >
-          <div className="flex gap-0.5 mb-2">
-            {[...Array(5)].map((_, j) => (
-              <svg key={j} className={`w-3 h-3 ${j < review.rating ? "text-yellow-400 fill-yellow-400" : "text-stone-200"}`} viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex justify-center mb-8"
+          >
+            <a
+              href="/gift/redeem"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-100 hover:bg-stone-200 rounded-full text-sm text-stone-600 transition-colors"
+            >
+              <Gift className="w-4 h-4" />
+              선물 코드가 있으신가요?
+            </a>
+          </motion.div>
+
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
+            {packages.map((pkg, idx) => (
+              <motion.div
+                key={pkg.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className={`relative bg-white rounded-2xl p-5 border transition-all hover:shadow-xl ${
+                  pkg.slug === 'ai-reception' 
+                    ? 'border-stone-800 shadow-lg' 
+                    : pkg.slug === 'basic-video' 
+                      ? 'border-stone-800 shadow-lg' 
+                      : 'border-stone-200'
+                }`}
+              >
+                {pkg.slug === 'ai-reception' && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-stone-800 text-white text-xs rounded-full flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> NEW
+                  </div>
+                )}
+                {pkg.slug === 'basic-video' && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-stone-800 text-white text-xs rounded-full flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> 추천
+                  </div>
+                )}
+                
+                <h3 className="text-lg font-medium text-stone-800 mb-1">{pkg.name}</h3>
+                <p className="text-xs text-stone-500 mb-4 h-8">{pkg.description}</p>
+                
+                <div className="mb-4">
+                  <span className="text-2xl font-light text-stone-800">
+                    {pkg.price.toLocaleString()}
+                  </span>
+                  <span className="text-stone-400 text-xs">원</span>
+                </div>
+                
+                <ul className="space-y-2 mb-6">
+                  {pkg.features.slice(0, 6).map((feature, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-stone-600">
+                      <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                  {pkg.features.length > 6 && (
+                    <li className="text-xs text-stone-400 pl-5">+{pkg.features.length - 6}개 더</li>
+                  )}
+                </ul>
+                
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className={`w-full py-2.5 rounded-full text-sm transition-all ${
+                    pkg.slug === 'ai-reception'
+                      ? 'bg-stone-800 text-white hover:bg-stone-900'
+                      : pkg.slug === 'basic-video'
+                        ? 'bg-stone-800 text-white hover:bg-stone-900'
+                        : 'border border-stone-300 text-stone-600 hover:bg-stone-50'
+                  }`}
+                >
+                  시작하기
+                </button>
+              </motion.div>
             ))}
           </div>
-          <div className="flex flex-wrap gap-1 mb-2">
-  {review.packageName && (
-    <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-emerald-50 text-emerald-600">
-      {review.packageName}
-    </span>
-  )}
-  {review.source === 'AI_REPORT' && (
-    <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-violet-50 text-violet-600">
-      AI 리포트
-    </span>
-  )}
-</div>
-          <p className="text-stone-700 text-xs leading-relaxed mb-3 line-clamp-3">{review.content || "정말 만족스러웠어요!"}</p>
-          <div className="flex items-center justify-between text-[10px] text-stone-400">
-            <span>{review.groomName} & {review.brideName}</span>
-            <span>{new Date(review.createdAt).toLocaleDateString("ko-KR")}</span>
-          </div>
-        </motion.div>
-      ))}
-    </div>
-  </div>
-) : (
-  <div className="text-center py-12">
-    <p className="text-stone-400">아직 등록된 후기가 없습니다</p>
-  </div>
-)}
+
         </div>
       </section>
 
@@ -533,158 +591,70 @@ export default function Landing() {
         )}
       </AnimatePresence>
 
-      <section id="themes" className="py-20 px-4 bg-stone-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">THEMES</p>
-            <h2 className="font-serif text-3xl text-stone-800 mb-4">19가지 감성 테마</h2>
-            <p className="text-stone-500 mb-8">실제 청첩장을 미리 체험해보세요</p>
-            <button
-              onClick={() => setShowThemeShowcase(true)}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-stone-800 text-white rounded-full hover:bg-stone-900 transition-all hover:scale-105"
-            >
-              <Eye className="w-5 h-5" />
-              테마 미리보기
-            </button>
-          </motion.div>
-        </div>
-      </section>
-
-      <section id="pricing" className="py-32 px-4">
+      {reviews.length > 0 && (
+      <section id="reviews" className="py-32 px-4 bg-gradient-to-b from-white to-stone-50">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-20"
+            className="text-center mb-16"
           >
-            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">PRICING</p>
-            <h2 className="font-serif text-3xl text-stone-800">요금 안내</h2>
+            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">REVIEWS</p>
+            <h2 className="font-serif text-3xl text-stone-800 mb-4">고객님들의 후기</h2>
+            <p className="text-stone-500">실제 사용하신 분들의 생생한 이야기</p>
           </motion.div>
           
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex justify-center mb-8"
-          >
-            <a
-              href="/gift/redeem"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-100 hover:bg-stone-200 rounded-full text-sm text-stone-600 transition-colors"
-            >
-              <Gift className="w-4 h-4" />
-              선물 코드가 있으신가요?
-            </a>
-          </motion.div>
-
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
-            {packages.map((pkg, idx) => (
-              <motion.div
-                key={pkg.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className={`relative bg-white rounded-2xl p-5 border transition-all hover:shadow-xl ${
-                  pkg.slug === 'ai-reception' 
-                    ? 'border-stone-800 shadow-lg' 
-                    : pkg.slug === 'basic-video' 
-                      ? 'border-stone-800 shadow-lg' 
-                      : 'border-stone-200'
-                }`}
-              >
-                {pkg.slug === 'ai-reception' && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-stone-800 text-white text-xs rounded-full flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> NEW
-                  </div>
-                )}
-                {pkg.slug === 'basic-video' && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-stone-800 text-white text-xs rounded-full flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> 추천
-                  </div>
-                )}
-                
-                <h3 className="text-lg font-medium text-stone-800 mb-1">{pkg.name}</h3>
-                <p className="text-xs text-stone-500 mb-4 h-8">{pkg.description}</p>
-                
-                <div className="mb-4">
-                  <span className="text-2xl font-light text-stone-800">
-                    {pkg.price.toLocaleString()}
-                  </span>
-                  <span className="text-stone-400 text-xs">원</span>
-                </div>
-                
-                <ul className="space-y-2 mb-6">
-                  {pkg.features.slice(0, 6).map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-stone-600">
-                      <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                  {pkg.features.length > 6 && (
-                    <li className="text-xs text-stone-400 pl-5">+{pkg.features.length - 6}개 더</li>
-                  )}
-                </ul>
-                
-                <button
-                  onClick={() => setShowLoginModal(true)}
-                  className={`w-full py-2.5 rounded-full text-sm transition-all ${
-                    pkg.slug === 'ai-reception'
-                      ? 'bg-stone-800 text-white hover:bg-stone-900'
-                      : pkg.slug === 'basic-video'
-                        ? 'bg-stone-800 text-white hover:bg-stone-900'
-                        : 'border border-stone-300 text-stone-600 hover:bg-stone-50'
-                  }`}
-                >
-                  시작하기
-                </button>
-              </motion.div>
+{reviews.length > 0 ? (
+  <div className="relative">
+    <div 
+      className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4"
+      style={{ scrollBehavior: 'smooth' }}
+    >
+      {reviews.map((review, i) => (
+        <motion.div
+          key={review.id}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: i * 0.1 }}
+          className="min-w-[240px] max-w-[240px] bg-white p-4 rounded-xl shadow-sm border border-stone-100 flex-shrink-0 snap-start"
+        >
+          <div className="flex gap-0.5 mb-2">
+            {[...Array(5)].map((_, j) => (
+              <svg key={j} className={`w-3 h-3 ${j < review.rating ? "text-yellow-400 fill-yellow-400" : "text-stone-200"}`} viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
             ))}
           </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-gradient-to-br from-stone-900 to-stone-800 rounded-3xl p-8 md:p-12"
-          >
-            <div className="max-w-3xl mx-auto text-center">
-              <p className="text-sm tracking-[0.2em] text-stone-500 mb-4">CUSTOM SERVICE</p>
-              <h3 className="font-serif text-2xl md:text-3xl text-white mb-6">
-                당신만의 청첩장
-              </h3>
-              <p className="text-stone-400 mb-8 leading-relaxed">
-                세상에 단 하나뿐인 청첩장을 만들어 드립니다<br />
-                전담 매니저가 1:1로 함께합니다
-              </p>
-              
-              <div className="flex flex-col items-center gap-6">
-                
-                <a
-                  href="https://www.instagram.com/weddingstudiolab/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-10 py-4 bg-white text-stone-800 hover:bg-stone-100 rounded-full text-sm hover:opacity-90 transition-all inline-flex items-center justify-center gap-3 font-medium"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                  </svg>
-                  문의하기 @weddingstudiolab
-                </a>
-                <div className="bg-white rounded-2xl p-4 inline-block">
-                  <img src="/qr-instagram.png" alt="Instagram QR" className="w-32 h-32" />
-                </div>
-                <p className="text-stone-500 text-sm">QR 코드를 스캔하여 인스타그램으로 문의하세요</p>
-              </div>
-            </div>
-          </motion.div>
+          <div className="flex flex-wrap gap-1 mb-2">
+  {review.packageName && (
+    <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-emerald-50 text-emerald-600">
+      {review.packageName}
+    </span>
+  )}
+  {review.source === 'AI_REPORT' && (
+    <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-violet-50 text-violet-600">
+      AI 리포트
+    </span>
+  )}
+</div>
+          <p className="text-stone-700 text-xs leading-relaxed mb-3 line-clamp-3">{review.content || "정말 만족스러웠어요!"}</p>
+          <div className="flex items-center justify-between text-[10px] text-stone-400">
+            <span>{review.groomName} & {review.brideName}</span>
+            <span>{new Date(review.createdAt).toLocaleDateString("ko-KR")}</span>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+) : (
+  <div className="text-center py-12">
+    <p className="text-stone-400">아직 등록된 후기가 없습니다</p>
+  </div>
+)}
         </div>
       </section>
+
+      )}
 
       <footer className="py-12 px-4 border-t border-stone-100 relative bg-stone-50">
         <div className="max-w-6xl mx-auto">
