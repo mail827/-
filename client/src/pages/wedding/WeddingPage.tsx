@@ -108,6 +108,7 @@ export default function WeddingPage() {
     onSuccess: () => alert('참석 여부가 전달되었습니다 💕')
   });
 
+  
   const sectionRef = useSectionOrder(data?.wedding?.sectionOrder as string[] | undefined);
 
   const guestbookMutation = useMutation({
@@ -161,9 +162,17 @@ export default function WeddingPage() {
   const theme = urlTheme || wedding.theme || 'ROMANTIC_CLASSIC';
   const ThemeComponent = themeComponents[theme] || RomanticClassic;
 
+  const galleryAspectStyle = (() => {
+    const ratio = wedding.galleryRatio || '1:1';
+    if (ratio === '1:1') return '';
+    const cssRatio = ratio === '3:4' ? '3/4' : ratio === '4:3' ? '4/3' : 'auto';
+    return '#gallery-section .grid > div { aspect-ratio: ' + cssRatio + ' !important; }';
+  })();
+
   return (
     <>
       <div ref={sectionRef}>
+      {galleryAspectStyle && <style>{galleryAspectStyle}</style>}
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Heart className="w-6 h-6 animate-pulse text-stone-300" /></div>}>
         <ThemeComponent
           wedding={wedding}
