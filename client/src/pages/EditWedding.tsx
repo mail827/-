@@ -8,6 +8,7 @@ import PaperInvitationModal from '../components/PaperInvitationModal';
 import ThemePreviewModal from '../components/ThemePreviewModal';
 import SectionOrderEditor from '../components/SectionOrderEditor';
 import ImageCropModal from '../components/ImageCropModal';
+import AiSnapStudio from '../components/AiSnapStudio';
 import { Play, Pause } from 'lucide-react';
 import KakaoAddressInput from '../components/KakaoAddressInput';
 
@@ -507,6 +508,7 @@ export default function EditWedding() {
     { id: 'video', name: '영상' },
     { id: 'music', name: '배경음악' },
     { id: 'ai', name: '🤖 AI', highlight: wedding.aiEnabled },
+    { id: 'ai-snap', name: 'AI 웨딩스냅' },
     { id: 'sections', name: '섹션 순서' },
     { id: 'settings', name: '설정' },
     { id: 'pair', name: '함께 수정' },
@@ -1667,6 +1669,12 @@ export default function EditWedding() {
           </div>
         )}
 
+
+        {tab === 'ai-snap' && (
+          <Section title="AI 웨딩스냅 스튜디오">
+            <AiSnapStudio weddingId={id || ''} />
+          </Section>
+        )}
 
         {tab === 'sections' && (
           <Section title="섹션 배치 순서">
