@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, X, Gift } from 'lucide-react';
-import KakaoAddressInput from '../components/KakaoAddressInput';
 
 const THEMES = [
   { id: 'ROMANTIC_CLASSIC', name: '로맨틱 클래식', desc: '우아하고 클래식한 분위기', color: 'from-stone-100 to-stone-200' },
@@ -548,11 +547,7 @@ export default function CreateWedding() {
                 <Section title="예식장 정보">
                   <Input label="예식장명 *" value={formData.venue} onChange={v => updateForm('venue', v)} />
                   <Input label="홀 이름" value={formData.venueHall} onChange={v => updateForm('venueHall', v)} />
-                  <KakaoAddressInput
-                    value={formData.venueAddress}
-                    onChange={v => updateForm('venueAddress', v)}
-                    label="주소 *"
-                  />
+                  <Input label="주소 *" value={formData.venueAddress} onChange={v => updateForm('venueAddress', v)} />
                   <Input label="연락처" value={formData.venuePhone} onChange={v => updateForm('venuePhone', v)} />
                 </Section>
               </div>

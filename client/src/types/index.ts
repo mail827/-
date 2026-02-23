@@ -93,6 +93,7 @@ export interface Wedding {
   aiMenuInfo?: AiMenuInfo;
   aiTransportInfo?: AiTransportInfo;
   aiCustomQna?: AiQna[];
+  sectionOrder?: string[];
   createdAt: string;
   updatedAt: string;
   galleries?: Gallery[];

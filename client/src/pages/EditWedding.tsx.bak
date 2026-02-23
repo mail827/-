@@ -5,9 +5,6 @@ import AiWritingAssistant from '../components/AiWritingAssistant';
 import PairManager from '../components/admin/PairManager';
 import QRCardModal from '../components/QRCardModal';
 import PaperInvitationModal from '../components/PaperInvitationModal';
-import ThemePreviewModal from '../components/ThemePreviewModal';
-import SectionOrderEditor from '../components/SectionOrderEditor';
-import KakaoAddressInput from '../components/KakaoAddressInput';
 
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'wedding_guide';
@@ -94,7 +91,6 @@ export default function EditWedding() {
   const [saving, setSaving] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showPaper, setShowPaper] = useState(false);
-  const [showThemePreview, setShowThemePreview] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({});
   const [wedding, setWedding] = useState<any>(null);
@@ -439,7 +435,6 @@ export default function EditWedding() {
     { id: 'video', name: '영상' },
     { id: 'music', name: '배경음악' },
     { id: 'ai', name: '🤖 AI', highlight: wedding.aiEnabled },
-    { id: 'sections', name: '섹션 순서' },
     { id: 'settings', name: '설정' },
     { id: 'pair', name: '함께 수정' },
     { id: 'rsvp', name: 'RSVP' },
@@ -524,15 +519,6 @@ export default function EditWedding() {
                   </button>
                 ))}
               </div>
-
-              <button
-                type="button"
-                onClick={() => setShowThemePreview(true)}
-                className="mt-4 w-full py-3 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-stone-400 hover:text-stone-700 flex items-center justify-center gap-2 text-sm transition-colors"
-              >
-                <Eye className="w-4 h-4" />
-                선택한 테마로 미리보기
-              </button>
 
               {wedding.theme === 'SENIOR_SIMPLE' && (
                 <div className="mt-6 pt-6 border-t border-stone-200">
@@ -678,11 +664,7 @@ export default function EditWedding() {
               <div className="space-y-4">
                 <Input label="예식장명" value={wedding.venue} onChange={v => updateField('venue', v)} />
                 <Input label="홀 이름" value={wedding.venueHall} onChange={v => updateField('venueHall', v)} />
-                <KakaoAddressInput
-                  value={wedding.venueAddress}
-                  onChange={v => updateField('venueAddress', v)}
-                  label="주소"
-                />
+                <Input label="주소" value={wedding.venueAddress} onChange={v => updateField('venueAddress', v)} />
                 <Input label="예식장 연락처" value={wedding.venuePhone} onChange={v => updateField('venuePhone', v)} />
               </div>
             </Section>
@@ -1502,16 +1484,6 @@ export default function EditWedding() {
           </div>
         )}
 
-
-        {tab === 'sections' && (
-          <Section title="섹션 배치 순서">
-            <SectionOrderEditor
-              value={wedding.sectionOrder}
-              onChange={(order) => updateField('sectionOrder', order)}
-            />
-          </Section>
-        )}
-
         {tab === 'settings' && (
           <>
             <Section title="공개 설정">
@@ -1637,14 +1609,6 @@ export default function EditWedding() {
           </>
         )}
       </main>
-      {showThemePreview && wedding && (
-        <ThemePreviewModal
-          isOpen={showThemePreview}
-          onClose={() => setShowThemePreview(false)}
-          wedding={wedding}
-          onApply={(themeId) => updateField('theme', themeId)}
-        />
-      )}
       {showPaper && wedding && (
         <PaperInvitationModal
           isOpen={showPaper}

@@ -171,6 +171,7 @@ model Wedding {
   reminderSentDays         String?
   reportSentAt             DateTime?
   expiresAt                DateTime?
+  sectionOrder             Json?
   aiChats                  AiChat[]
   galleries                Gallery[]
   guestbooks               Guestbook[]

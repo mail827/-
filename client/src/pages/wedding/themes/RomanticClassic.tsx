@@ -78,6 +78,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
 
   const calendarData = getCalendarData(wedding.weddingDate);
 
+
   return (
     <div className="min-h-screen" style={{ 
       background: 'linear-gradient(180deg, #FFFEF9 0%, #FDF9F3 50%, #FAF6EE 100%)',

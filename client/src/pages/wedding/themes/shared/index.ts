@@ -61,7 +61,8 @@ export interface WeddingData {
   showDday?: boolean;
   themeColor?: string;
   galleries?: { id: string;
-  theme: string; mediaUrl: string; mediaType: 'IMAGE' | 'VIDEO'; order: number }[];
+  theme: string; mediaUrl: string; mediaType: 'IMAGE' | 'VIDEO'; order: number; }[];
+  sectionOrder?: string[];
 }
 
 export interface GuestbookData {

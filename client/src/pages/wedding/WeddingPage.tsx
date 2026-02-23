@@ -25,6 +25,7 @@ const BotanicalClassic = lazy(() => import("./themes/BotanicalClassic"));
 const HeartMinimal = lazy(() => import("./themes/HeartMinimal"));
 const WaveBorder = lazy(() => import("./themes/WaveBorder"));
 import AiChat from '../../components/AiChat';
+import { useSectionOrder } from '../../hooks/useSectionOrder';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -107,6 +108,8 @@ export default function WeddingPage() {
     onSuccess: () => alert('참석 여부가 전달되었습니다 💕')
   });
 
+  const sectionRef = useSectionOrder(data?.wedding?.sectionOrder as string[] | undefined);
+
   const guestbookMutation = useMutation({
     mutationFn: submitGuestbook,
     onSuccess: () => {
@@ -160,6 +163,7 @@ export default function WeddingPage() {
 
   return (
     <>
+      <div ref={sectionRef}>
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Heart className="w-6 h-6 animate-pulse text-stone-300" /></div>}>
         <ThemeComponent
           wedding={wedding}
@@ -171,6 +175,7 @@ export default function WeddingPage() {
           refetchGuestbook={refetchGuestbook}
         />
       </Suspense>
+      </div>
       
       {wedding.aiEnabled && (
         <AiChat
