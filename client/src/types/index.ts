@@ -94,6 +94,7 @@ export interface Wedding {
   aiTransportInfo?: AiTransportInfo;
   aiCustomQna?: AiQna[];
   sectionOrder?: string[];
+  galleryRatio?: string;
   createdAt: string;
   updatedAt: string;
   galleries?: Gallery[];

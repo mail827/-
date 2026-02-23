@@ -172,6 +172,7 @@ model Wedding {
   reportSentAt             DateTime?
   expiresAt                DateTime?
   sectionOrder             Json?
+  galleryRatio             String?          @default("1:1")
   aiChats                  AiChat[]
   galleries                Gallery[]
   guestbooks               Guestbook[]

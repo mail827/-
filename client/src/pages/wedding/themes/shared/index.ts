@@ -63,6 +63,7 @@ export interface WeddingData {
   galleries?: { id: string;
   theme: string; mediaUrl: string; mediaType: 'IMAGE' | 'VIDEO'; order: number; }[];
   sectionOrder?: string[];
+  galleryRatio?: string;
 }
 
 export interface GuestbookData {

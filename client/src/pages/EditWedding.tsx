@@ -7,6 +7,7 @@ import QRCardModal from '../components/QRCardModal';
 import PaperInvitationModal from '../components/PaperInvitationModal';
 import ThemePreviewModal from '../components/ThemePreviewModal';
 import SectionOrderEditor from '../components/SectionOrderEditor';
+import ImageCropModal from '../components/ImageCropModal';
 import KakaoAddressInput from '../components/KakaoAddressInput';
 
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -102,6 +103,8 @@ export default function EditWedding() {
   const [rsvpList, setRsvpList] = useState<any[]>([]);
   const [rsvpLoading, setRsvpLoading] = useState(false);
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
+  const [cropQueue, setCropQueue] = useState<File[]>([]);
+  const [currentCropFile, setCurrentCropFile] = useState<File | null>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
 
   const uploadToCloudinary = (
@@ -312,59 +315,113 @@ export default function EditWedding() {
     );
   };
 
+  const uploadSingleGallery = async (fileOrBlob: File | Blob, index: number) => {
+    const token = localStorage.getItem('token');
+    const actualFile = fileOrBlob instanceof File ? fileOrBlob : new File([fileOrBlob], 'cropped.jpg', { type: 'image/jpeg' });
+    return new Promise<void>((resolve) => {
+      uploadToCloudinary(
+        actualFile,
+        `gallery-${index}`,
+        async (url) => {
+          try {
+            const galleryRes = await fetch(`${import.meta.env.VITE_API_URL}/weddings/${id}/gallery`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                mediaUrl: url,
+                mediaType: 'IMAGE',
+                order: galleries.length + index
+              })
+            });
+            if (galleryRes.ok) {
+              const newItem = await galleryRes.json();
+              setGalleries(prev => [...prev, newItem]);
+            }
+          } catch (e) {
+            console.error('Gallery save error:', e);
+          }
+          resolve();
+        },
+        (err) => { console.error(err); resolve(); }
+      );
+    });
+  };
+
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    setUploading(true);
-    const token = localStorage.getItem('token');
+    const imageFiles: File[] = [];
+    const videoFiles: File[] = [];
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const isVideo = file.type.startsWith('video/');
       const type = isVideo ? 'video' : 'image';
       const error = validateFile(file, type);
-      
-      if (error) {
-        console.error(`${file.name}: ${error}`);
-        continue;
-      }
-
-      await new Promise<void>((resolve) => {
-        uploadToCloudinary(
-          file,
-          `gallery-${i}`,
-          async (url) => {
-            try {
-              const galleryRes = await fetch(`${import.meta.env.VITE_API_URL}/weddings/${id}/gallery`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                  mediaUrl: url,
-                  mediaType: isVideo ? 'VIDEO' : 'IMAGE',
-                  order: galleries.length + i
-                })
-              });
-              if (galleryRes.ok) {
-                const newItem = await galleryRes.json();
-                setGalleries(prev => [...prev, newItem]);
-              }
-            } catch (e) {
-              console.error('Gallery save error:', e);
-            }
-            resolve();
-          },
-          (err) => {
-            console.error(err);
-            resolve();
-          }
-        );
-      });
+      if (error) { console.error(`${file.name}: ${error}`); continue; }
+      if (isVideo) videoFiles.push(file);
+      else imageFiles.push(file);
     }
+
+    if (videoFiles.length > 0) {
+      setUploading(true);
+      const token = localStorage.getItem('token');
+      for (let i = 0; i < videoFiles.length; i++) {
+        await new Promise<void>((resolve) => {
+          uploadToCloudinary(
+            videoFiles[i],
+            `gallery-v${i}`,
+            async (url) => {
+              try {
+                const galleryRes = await fetch(`${import.meta.env.VITE_API_URL}/weddings/${id}/gallery`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                  body: JSON.stringify({ mediaUrl: url, mediaType: 'VIDEO', order: galleries.length + i })
+                });
+                if (galleryRes.ok) {
+                  const newItem = await galleryRes.json();
+                  setGalleries(prev => [...prev, newItem]);
+                }
+              } catch (e) { console.error('Gallery save error:', e); }
+              resolve();
+            },
+            (err) => { console.error(err); resolve(); }
+          );
+        });
+      }
+      setUploading(false);
+    }
+
+    if (imageFiles.length > 0) {
+      setCropQueue(imageFiles.slice(1));
+      setCurrentCropFile(imageFiles[0]);
+    }
+  };
+
+  const handleCropComplete = async (blob: Blob) => {
+    setUploading(true);
+    await uploadSingleGallery(blob, galleries.length);
     setUploading(false);
+    
+    if (cropQueue.length > 0) {
+      setCurrentCropFile(cropQueue[0]);
+      setCropQueue(prev => prev.slice(1));
+    } else {
+      setCurrentCropFile(null);
+    }
+  };
+
+  const handleCropCancel = () => {
+    if (cropQueue.length > 0) {
+      setCurrentCropFile(cropQueue[0]);
+      setCropQueue(prev => prev.slice(1));
+    } else {
+      setCurrentCropFile(null);
+    }
   };
 
   const handleDeleteGallery = async (galleryId: string) => {
@@ -857,9 +914,31 @@ export default function EditWedding() {
           <Section title="갤러리">
             <p className="text-sm text-stone-500 mb-4">웨딩 사진이나 영상을 여러 장 추가할 수 있어요</p>
             
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-xs text-stone-500">갤러리 비율</span>
+              {['1:1', '3:4', '4:3', 'original'].map((ratio) => (
+                <button
+                  key={ratio}
+                  onClick={() => updateField('galleryRatio', ratio)}
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
+                    (wedding.galleryRatio || '1:1') === ratio
+                      ? 'bg-stone-800 text-white'
+                      : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                  }`}
+                >
+                  {ratio === 'original' ? '원본' : ratio}
+                </button>
+              ))}
+            </div>
+            
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
               {galleries.map((item) => (
-                <div key={item.id} className="relative aspect-square">
+                <div key={item.id} className={`relative ${
+                  (wedding.galleryRatio || '1:1') === '3:4' ? 'aspect-[3/4]' :
+                  (wedding.galleryRatio || '1:1') === '4:3' ? 'aspect-[4/3]' :
+                  (wedding.galleryRatio || '1:1') === 'original' ? 'aspect-auto' :
+                  'aspect-square'
+                }`}>
                   {item.mediaType === 'VIDEO' ? (
                     <video src={item.mediaUrl} className="w-full h-full object-cover rounded-xl" />
                   ) : (
@@ -879,7 +958,12 @@ export default function EditWedding() {
                 </div>
               ))}
               
-              <label className={`aspect-square flex flex-col items-center justify-center border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+              <label className={`${
+                  (wedding.galleryRatio || '1:1') === '3:4' ? 'aspect-[3/4]' :
+                  (wedding.galleryRatio || '1:1') === '4:3' ? 'aspect-[4/3]' :
+                  (wedding.galleryRatio || '1:1') === 'original' ? 'aspect-square' :
+                  'aspect-square'
+                } flex flex-col items-center justify-center border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                 <Plus className="w-8 h-8 text-stone-400 mb-2" />
                 <span className="text-stone-500 text-sm">추가</span>
                 <input
@@ -898,6 +982,20 @@ export default function EditWedding() {
             ))}
             
             <p className="text-xs text-stone-400 mt-2">* 이미지(최대 20MB), 영상(최대 200MB)</p>
+            
+            {currentCropFile && (
+              <ImageCropModal
+                file={currentCropFile}
+                onComplete={handleCropComplete}
+                onCancel={handleCropCancel}
+                aspectRatio={
+                  (wedding.galleryRatio || '1:1') === '3:4' ? 3/4 :
+                  (wedding.galleryRatio || '1:1') === '4:3' ? 4/3 :
+                  (wedding.galleryRatio || '1:1') === 'original' ? undefined :
+                  1
+                }
+              />
+            )}
             
             <div className="mt-6 pt-6 border-t border-stone-100">
               <label className="flex items-center justify-between cursor-pointer">
