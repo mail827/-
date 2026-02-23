@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, Crown, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Heart, Film } from 'lucide-react';
+import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, Crown, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Heart, Film , Music } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminLayout() {
@@ -28,6 +28,7 @@ export default function AdminLayout() {
     { path: '/admin/coupons', icon: Ticket, label: '쿠폰 관리' },
     { path: '/admin/settlement', icon: TrendingUp, label: '제휴 정산' },
     { path: '/admin/theme-showcase', icon: Palette, label: '테마 쇼케이스' },
+    { path: '/admin/bg-music', icon: Music, label: '배경음악' },
   ];
 
   return (

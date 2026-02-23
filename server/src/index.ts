@@ -20,6 +20,7 @@ import { seedPackages } from './utils/seed.js';
 import giftRouter from "./routes/gift.js";
 import { guideRouter } from "./routes/guide.js";
 import { highlightVideoRouter } from "./routes/highlightVideo.js";
+import bgMusicRouter from './routes/bgMusic.js';
 import themeShowcaseRouter from "./routes/themeShowcase.js";
 import { startScheduler } from "./utils/scheduler.js";
 import { writingAssistantRouter } from './routes/writingAssistant.js';
@@ -78,6 +79,7 @@ app.use('/api/coupon', couponRouter);
 app.use('/api/pair', pairRouter);
 app.use('/api/map', mapRouter);
 app.use('/api/og', ogRouter);
+app.use('/api/bg-music', bgMusicRouter);
 
 seedPackages().catch(e => console.error("Seed error (ignored):", e.message));
 

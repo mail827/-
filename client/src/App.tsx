@@ -27,6 +27,7 @@ import AdminOrders from './pages/admin/AdminOrders';
 import AdminInquiries from './pages/admin/AdminInquiries';
 import AdminContents from './pages/admin/AdminContents';
 import ReviewManagement from "./pages/admin/ReviewManagement";
+import AdminBgMusic from "./pages/admin/AdminBgMusic";
 import MyPage from './pages/MyPage';
 import Terms from './pages/info/Terms';
 import Privacy from "./pages/info/Privacy";
@@ -106,6 +107,7 @@ export default function App() {
         <Route path="guides" element={<AdminGuides />} />
             <Route path="highlight-videos" element={<AdminHighlightVideos />} />
         <Route path="theme-showcase" element={<AdminThemeShowcase />} />
+              <Route path="bg-music" element={<AdminBgMusic />} />
         <Route path="weddings" element={<AdminWeddingList />} />
         <Route path="weddings/create" element={<AdminWeddingCreate />} />
         <Route path="weddings/new" element={<AdminWeddingCreate />} />

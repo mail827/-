@@ -440,3 +440,17 @@ model HighlightVideo {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+
+model BgMusic {
+  id        String   @id @default(cuid())
+  title     String
+  artist    String   @default("")
+  category  String   @default("romantic")
+  url       String
+  duration  Int      @default(0)
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

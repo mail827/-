@@ -8,6 +8,7 @@ import PaperInvitationModal from '../components/PaperInvitationModal';
 import ThemePreviewModal from '../components/ThemePreviewModal';
 import SectionOrderEditor from '../components/SectionOrderEditor';
 import ImageCropModal from '../components/ImageCropModal';
+import { Play, Pause } from 'lucide-react';
 import KakaoAddressInput from '../components/KakaoAddressInput';
 
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -104,6 +105,16 @@ export default function EditWedding() {
   const [rsvpLoading, setRsvpLoading] = useState(false);
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
   const [cropQueue, setCropQueue] = useState<File[]>([]);
+  const [bgMusics, setBgMusics] = useState<any[]>([]);
+  const [previewMusicId, setPreviewMusicId] = useState<string | null>(null);
+  const previewAudioRef = useRef<HTMLAudioElement>(null);
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/bg-music/public`)
+      .then(r => r.json())
+      .then(d => { if (Array.isArray(d)) setBgMusics(d); })
+      .catch(() => {});
+  }, []);
+
   const [currentCropFile, setCurrentCropFile] = useState<File | null>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
 
@@ -1066,6 +1077,62 @@ export default function EditWedding() {
         {tab === 'music' && (
           <Section title="배경음악">
             <p className="text-sm text-stone-500 mb-4">청첩장에 배경음악을 설정할 수 있어요</p>
+
+            <div className="mb-6">
+              <p className="text-sm font-medium text-stone-700 mb-3">기본 제공 음원</p>
+              <audio ref={previewAudioRef} onEnded={() => setPreviewMusicId(null)} />
+              {bgMusics.length > 0 ? (
+                <div className="space-y-1.5 max-h-64 overflow-y-auto">
+                  {bgMusics.map(m => (
+                    <div
+                      key={m.id}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border cursor-pointer transition-all ${
+                        wedding.bgMusicUrl === m.url
+                          ? 'bg-stone-100 border-stone-400'
+                          : 'bg-white border-stone-200 hover:border-stone-300'
+                      }`}
+                      onClick={() => {
+                        updateField('bgMusicUrl', m.url);
+                        if (previewAudioRef.current) { previewAudioRef.current.pause(); }
+                        setPreviewMusicId(null);
+                      }}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (previewMusicId === m.id) {
+                            previewAudioRef.current?.pause();
+                            setPreviewMusicId(null);
+                          } else {
+                            if (previewAudioRef.current) {
+                              previewAudioRef.current.src = m.url;
+                              previewAudioRef.current.play();
+                            }
+                            setPreviewMusicId(m.id);
+                          }
+                        }}
+                        className="p-1.5 rounded-full bg-stone-100 hover:bg-stone-200 transition-colors flex-shrink-0"
+                      >
+                        {previewMusicId === m.id ? <Pause className="w-3.5 h-3.5 text-stone-700" /> : <Play className="w-3.5 h-3.5 text-stone-700" />}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-stone-800 truncate">{m.title}</p>
+                        <p className="text-xs text-stone-400">{m.artist}{m.duration > 0 ? ` · ${Math.floor(m.duration / 60)}:${String(m.duration % 60).padStart(2, '0')}` : ''}</p>
+                      </div>
+                      {wedding.bgMusicUrl === m.url && (
+                        <span className="text-xs text-stone-500 bg-stone-200 px-2 py-0.5 rounded-full flex-shrink-0">선택됨</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-stone-400 py-4 text-center">기본 제공 음원이 없어요</p>
+              )}
+            </div>
+
+            <div className="border-t border-stone-100 pt-5">
+              <p className="text-sm font-medium text-stone-700 mb-3">직접 업로드</p>
+            </div>
             
             {wedding.bgMusicUrl ? (
               <div className="space-y-4">
