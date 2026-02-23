@@ -175,6 +175,7 @@ model Wedding {
   galleryRatio             String?          @default("1:1")
   aiChats                  AiChat[]
   galleries                Gallery[]
+  aiSnaps                  AiSnap[]
   guestbooks               Guestbook[]
   reportTokens             ReportToken[]
   reviews                  Review[]
@@ -453,4 +454,19 @@ model BgMusic {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+
+model AiSnap {
+  id          String   @id @default(cuid())
+  weddingId   String
+  wedding     Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  concept     String
+  engine      String   @default("nano-banana")
+  prompt      String
+  inputUrls   Json
+  resultUrl   String?
+  status      String   @default("pending")
+  errorMsg    String?
+  createdAt   DateTime @default(now())
 }
