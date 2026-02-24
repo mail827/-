@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import QRCardModal from '../components/QRCardModal';
 
@@ -34,6 +34,26 @@ interface Order {
   wedding?: Wedding;
 }
 
+interface Snap {
+  id: string;
+  status: string;
+  resultUrl?: string;
+  concept: string;
+  mode?: string;
+}
+
+interface Pack {
+  id: string;
+  tier: string;
+  totalSnaps: number;
+  usedSnaps: number;
+  concept: string;
+  category: string;
+  mode: string;
+  status: string;
+  snaps: Snap[];
+}
+
 declare global {
   interface Window {
     TossPayments?: any;
@@ -61,6 +81,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [weddings, setWeddings] = useState<Wedding[]>([]);
   const [mySnaps, setMySnaps] = useState<any[]>([]);
+  const [myPacks, setMyPacks] = useState<Pack[]>([]);
   const [qrWedding, setQrWedding] = useState<Wedding | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,6 +134,11 @@ export default function Dashboard() {
       try {
         const snapRes = await fetch(`${import.meta.env.VITE_API_URL}/ai-snap/free/my-snaps`, { headers: { Authorization: `Bearer ${token}` } });
         if (snapRes.ok) { const snapData = await snapRes.json(); setMySnaps(snapData); }
+      } catch {}
+
+      try {
+        const packRes = await fetch(`${import.meta.env.VITE_API_URL}/snap-pack/my-packs`, { headers: { Authorization: `Bearer ${token}` } });
+        if (packRes.ok) { const packData = await packRes.json(); setMyPacks(Array.isArray(packData) ? packData : []); }
       } catch {}
 
       if (ordersRes.ok) {
@@ -222,6 +248,10 @@ export default function Dashboard() {
     }
   };
 
+  const readyPacks = myPacks.filter(p => p.concept && p.concept !== '');
+  const hasStudioContent = readyPacks.length > 0;
+  const hasFreeSnaps = mySnaps.length > 0;
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fefefe]">
@@ -242,7 +272,6 @@ export default function Dashboard() {
                 {user?.name?.[0] || '?'}
               </div>
               <span className="text-sm text-stone-700 font-medium hidden sm:block">{user?.name}</span>
-              <Gift className="w-4 h-4 text-rose-400" />
               {user?.role === 'ADMIN' && (
                 <span className="px-2 py-1 bg-stone-800 text-white text-xs rounded-full">Admin</span>
               )}
@@ -266,7 +295,7 @@ export default function Dashboard() {
           </h1>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -279,6 +308,22 @@ export default function Dashboard() {
             <div>
               <p className="font-medium">청첩장 만들기</p>
               <p className="text-sm text-stone-400">새 청첩장을 만들어보세요</p>
+            </div>
+          </motion.button>
+
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            onClick={() => navigate('/ai-snap/gift')}
+            className="p-6 bg-white rounded-2xl flex items-center gap-4 hover:shadow-lg transition-all text-left border border-stone-200"
+          >
+            <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+              <Gift className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="font-medium text-stone-800">화보 선물하기</p>
+              <p className="text-sm text-stone-500">소중한 분에게 선물</p>
             </div>
           </motion.button>
 
@@ -302,7 +347,7 @@ export default function Dashboard() {
             <motion.button
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.15 }}
               onClick={() => navigate('/admin')}
               className="p-6 bg-stone-800 text-white rounded-2xl flex items-center gap-4 hover:bg-stone-900 transition-all text-left"
             >
@@ -318,11 +363,71 @@ export default function Dashboard() {
         </div>
 
         <section className="mb-12">
-          <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">AI WEDDING SNAP</p>
-          <h2 className="font-serif text-2xl text-stone-800 mb-6">내 AI 웨딩스냅</h2>
-          {mySnaps.length > 0 ? (
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">AI WEDDING SNAP</p>
+              <h2 className="font-serif text-2xl text-stone-800">내 AI 웨딩스냅</h2>
+            </div>
+            <div className="flex gap-2">
+              <a href="/ai-snap/studio" className="px-4 py-2 bg-stone-800 text-white rounded-xl text-xs font-medium hover:bg-stone-900 transition-all flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" /> 화보 스튜디오
+              </a>
+            </div>
+          </div>
+
+          {hasStudioContent && (
+            <div className="space-y-6 mb-8">
+              {readyPacks.map(pack => {
+                const done = pack.snaps.filter(s => s.status === 'done' && s.resultUrl);
+                if (done.length === 0) return null;
+                return (
+                  <div key={pack.id} className="bg-white rounded-2xl border border-stone-200 p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <p className="text-sm font-semibold text-stone-800">{pack.concept}</p>
+                        <p className="text-xs text-stone-400">{pack.category === 'studio' ? '스튜디오' : '시네마틱'} · {pack.usedSnaps}/{pack.totalSnaps}장</p>
+                      </div>
+                      <a href={`/ai-snap/studio?packId=${pack.id}`}
+                        className="text-xs text-stone-500 hover:text-stone-800 transition-colors flex items-center gap-1">
+                        스튜디오에서 보기 <Eye className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                      {done.map((snap, i) => (
+                        <div key={snap.id} className="rounded-xl overflow-hidden border border-stone-100 group relative">
+                          <img src={snap.resultUrl} alt={`Snap ${i + 1}`} className="w-full aspect-square object-cover" />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                            <a href={snap.resultUrl} download target="_blank"
+                              className="opacity-0 group-hover:opacity-100 p-1.5 bg-white rounded-full transition-all">
+                              <Download className="w-3.5 h-3.5 text-stone-800" />
+                            </a>
+                          </div>
+                          {snap.mode && (
+                            <div className="absolute bottom-1 left-1">
+                              <span className="px-1.5 py-0.5 bg-black/50 rounded-full text-[9px] text-white">
+                                {snap.mode === 'couple' ? '커플' : snap.mode === 'groom' ? '신랑' : '신부'}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {pack.usedSnaps < pack.totalSnaps && (
+                        <a href={`/ai-snap/studio?packId=${pack.id}`}
+                          className="rounded-xl border-2 border-dashed border-stone-200 aspect-square flex flex-col items-center justify-center hover:border-stone-400 transition-all">
+                          <Plus className="w-5 h-5 text-stone-400 mb-1" />
+                          <span className="text-[10px] text-stone-400">{pack.totalSnaps - pack.usedSnaps}장 남음</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {hasFreeSnaps && (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
                 {mySnaps.map((snap: any) => (
                   <div key={snap.id} className="rounded-2xl overflow-hidden border border-stone-200 group relative">
                     {snap.resultUrl ? (
@@ -341,7 +446,7 @@ export default function Dashboard() {
                 ))}
               </div>
               {mySnaps.some((s: any) => s.isFree) && (
-                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-stone-800">워터마크 없는 원본이 필요하세요?</p>
                     <p className="text-xs text-stone-500 mt-0.5">패키지 구매 시 워터마크 제거 + 다양한 컨셉 이용 가능</p>
@@ -352,7 +457,9 @@ export default function Dashboard() {
                 </div>
               )}
             </>
-          ) : (
+          )}
+
+          {!hasStudioContent && !hasFreeSnaps && (
             <div className="bg-stone-50 rounded-2xl border border-stone-200 p-8 text-center">
               <Sparkles className="w-8 h-8 text-stone-300 mx-auto mb-3" />
               <p className="text-sm text-stone-500 mb-1">아직 만든 웨딩스냅이 없어요</p>
@@ -375,7 +482,7 @@ export default function Dashboard() {
           
           {weddings.length === 0 ? (
             <div className="bg-stone-50 rounded-2xl p-16 text-center">
-              <div className="text-5xl mb-6">💌</div>
+              <Heart className="w-10 h-10 text-stone-300 mx-auto mb-4" />
               <p className="text-stone-500 mb-6">아직 만든 청첩장이 없어요</p>
               <button
                 onClick={() => navigate('/create')}
@@ -592,7 +699,7 @@ export default function Dashboard() {
                             }}
                             className="mt-3 w-full py-2 bg-stone-800 text-white text-sm rounded-lg hover:bg-stone-900 transition-colors"
                           >
-                            청첩장 만들기 →
+                            청첩장 만들기
                           </button>
                         )}
                       </div>

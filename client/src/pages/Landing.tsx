@@ -619,6 +619,15 @@ export default function Landing() {
                 </motion.div>
               ))}
             </div>
+            <div className="flex justify-center mt-6">
+              <a
+                href="/ai-snap/gift"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-100 hover:bg-stone-200 rounded-full text-sm text-stone-600 transition-colors"
+              >
+                <Gift className="w-4 h-4" />
+                소중한 분에게 선물하기
+              </a>
+            </div>
           </motion.div>
 
         </div>
