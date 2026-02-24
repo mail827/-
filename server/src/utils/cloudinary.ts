@@ -37,3 +37,38 @@ export const deleteFromCloudinary = async (publicId: string, resourceType: 'imag
 };
 
 export { cloudinary };
+
+
+export const uploadFromUrl = async (
+  imageUrl: string,
+  folder: string
+): Promise<{ url: string; publicId: string }> => {
+  const result = await cloudinary.uploader.upload(imageUrl, {
+    folder: `wedding/${folder}`,
+    resource_type: 'image',
+    transformation: [{ quality: 'auto:good', fetch_format: 'auto' }],
+  });
+  return { url: result.secure_url, publicId: result.public_id };
+};
+
+export const getWatermarkedUrl = (publicId: string): string => {
+  return cloudinary.url(publicId, {
+    transformation: [
+      { quality: 'auto:good', fetch_format: 'auto' },
+      {
+        overlay: { font_family: 'Arial', font_size: 50, font_weight: 'bold', text: encodeURIComponent('청첩장 작업실') },
+        color: '#ffffff',
+        opacity: 35,
+        gravity: 'center',
+      },
+      {
+        overlay: { font_family: 'Arial', font_size: 30, text: encodeURIComponent('WEDDING STUDIO LAB') },
+        color: '#ffffff',
+        opacity: 25,
+        gravity: 'center',
+        y: 60,
+      },
+    ],
+    secure: true,
+  });
+};

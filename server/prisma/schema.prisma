@@ -16,6 +16,7 @@ model User {
   providerId    String
   role          Role      @default(CUSTOMER)
   freeSnapUsed  Boolean   @default(false)
+  snapPacks     SnapPack[]
   phone         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -458,16 +459,39 @@ model BgMusic {
 }
 
 
-model AiSnap {
-  id          String   @id @default(cuid())
-  weddingId   String
-  wedding     Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+model SnapPack {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  tier        String
+  totalSnaps  Int
+  usedSnaps   Int       @default(0)
   concept     String
-  engine      String   @default("nano-banana")
+  category    String    @default("studio")
+  mode        String    @default("groom")
+  inputUrls   Json      @default("[]")
+  amount      Int
+  status      String    @default("PENDING")
+  paymentKey  String?
+  orderId     String    @unique
+  paidAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  snaps       AiSnap[]
+}
+
+model AiSnap {
+  id          String    @id @default(cuid())
+  weddingId   String?
+  wedding     Wedding?  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  snapPackId  String?
+  snapPack    SnapPack? @relation(fields: [snapPackId], references: [id], onDelete: Cascade)
+  concept     String
+  engine      String    @default("nano-banana")
   prompt      String
   inputUrls   Json
   resultUrl   String?
-  status      String   @default("pending")
+  status      String    @default("pending")
   errorMsg    String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 }

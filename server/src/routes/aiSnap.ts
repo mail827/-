@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { uploadFromUrl, getWatermarkedUrl } from '../utils/cloudinary.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -214,7 +215,9 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
     });
 
     if (submit.images) {
-      return res.json({ status: 'done', resultUrl: submit.images[0]?.url });
+      const uploaded = await uploadFromUrl(submit.images[0]?.url, 'ai-snap/free');
+      const watermarked = getWatermarkedUrl(uploaded.publicId);
+      return res.json({ status: 'done', resultUrl: watermarked, originalPublicId: uploaded.publicId });
     }
     if (!submit.status_url) throw new Error('No status_url');
     res.json({ status: 'generating', statusUrl: submit.status_url, responseUrl: submit.response_url });
@@ -237,7 +240,9 @@ router.get('/free/poll', async (req, res) => {
     const status = await falFetch(statusUrl as string);
     if (status.status === 'COMPLETED') {
       const result = await falFetch(responseUrl as string);
-      return res.json({ status: 'done', resultUrl: result.images?.[0]?.url });
+      const uploaded = await uploadFromUrl(result.images?.[0]?.url, 'ai-snap/free');
+      const watermarked = getWatermarkedUrl(uploaded.publicId);
+      return res.json({ status: 'done', resultUrl: watermarked, originalPublicId: uploaded.publicId });
     }
     if (status.status === 'FAILED') return res.json({ status: 'failed', error: status.error });
     res.json({ status: 'generating' });

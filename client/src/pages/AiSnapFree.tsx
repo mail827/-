@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Camera, X, Download, Loader2, User, Users, ArrowRight } from 'lucide-react';
+import { Sparkles, Camera, X, Loader2, User, Users, ArrowRight } from 'lucide-react';
 
 const CONCEPTS = [
   { id: 'studio_classic', label: '스튜디오 클래식', sub: '정석 웨딩 화보' },
@@ -299,10 +299,10 @@ export default function AiSnapFree() {
                   <div className="rounded-2xl overflow-hidden border border-stone-200 mb-6">
                     <img src={resultUrl} alt="AI Wedding Snap" className="w-full" />
                   </div>
-                  <a href={resultUrl} download target="_blank"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-stone-800 text-white rounded-xl text-sm font-medium hover:bg-stone-900 transition-all mb-8">
-                    <Download className="w-4 h-4" /> 이미지 저장
-                  </a>
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 mb-6">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    무료 체험 이미지에는 워터마크가 포함돼요
+                  </div>
                   <UpgradeCard />
                 </div>
               ) : (
@@ -335,8 +335,8 @@ export default function AiSnapFree() {
 function UpgradeCard() {
   return (
     <div className="bg-stone-50 rounded-2xl border border-stone-200 p-6 text-center">
-      <p className="text-sm font-semibold text-stone-800 mb-2">더 많은 컨셉으로 만들어보세요</p>
-      <p className="text-xs text-stone-400 mb-5">청첩장 패키지에 가입하면 최대 10장의 AI 웨딩스냅을 만들 수 있어요</p>
+      <p className="text-sm font-semibold text-stone-800 mb-2">워터마크 없는 고화질 화보</p>
+      <p className="text-xs text-stone-400 mb-5">패키지 구매 시 워터마크 없는 원본 + 다양한 컨셉을 이용할 수 있어요</p>
       <div className="flex flex-col sm:flex-row gap-2 justify-center">
         <a href="/#pricing" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-xl text-xs font-medium hover:bg-stone-900">
           요금제 보기 <ArrowRight className="w-3.5 h-3.5" />

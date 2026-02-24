@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import usePageTracking from './hooks/usePageTracking';
 import Landing from './pages/Landing';
 import AiSnapFree from './pages/AiSnapFree';
+import AiSnapStudioPage from './pages/AiSnapStudio';
+import AiSnapCallback from './pages/AiSnapCallback';
 import OAuthCallback from './pages/OAuthCallback';
 import Dashboard from './pages/Dashboard';
 import CreateWedding from './pages/CreateWedding';
@@ -76,6 +78,8 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/ai-snap" element={<AiSnapFree />} />
+      <Route path="/ai-snap/studio" element={<AiSnapStudioPage />} />
+      <Route path="/ai-snap/studio/callback" element={<AiSnapCallback />} />
       <Route path="/oauth/callback" element={<OAuthCallback />} />
       <Route path="/w/:slug" element={<WeddingPage />} />
         <Route path="/w/:slug/rsvp" element={<RsvpCheck />} />

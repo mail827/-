@@ -400,27 +400,37 @@ export default function Landing() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-12"
+            className="mb-12"
           >
-            {[
-              { label: '스튜디오', sub: '정석 화보' },
-              { label: '벚꽃', sub: '봄날 감성' },
-              { label: '한복', sub: '전통 궁궐' },
-              { label: '성당', sub: '유럽풍' },
-              { label: '숲속', sub: '빛내림' },
-            ].map((c, i) => (
-              <motion.div
-                key={c.label}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="bg-white rounded-2xl border border-stone-200 p-4 text-center hover:border-stone-400 hover:shadow-md transition-all"
-              >
-                <p className="text-sm font-medium text-stone-800">{c.label}</p>
-                <p className="text-[11px] text-stone-400 mt-0.5">{c.sub}</p>
-              </motion.div>
-            ))}
+            <div className="flex gap-3 overflow-x-auto pb-4 px-1 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {[
+                { label: '스튜디오', sub: '정석 화보', cat: 'studio' },
+                { label: '야외 가든', sub: '꽃과 자연빛', cat: 'studio' },
+                { label: '해변 선셋', sub: '노을빛 해변', cat: 'studio' },
+                { label: '한복 전통', sub: '전통 궁궐', cat: 'studio' },
+                { label: '벚꽃', sub: '봄날 감성', cat: 'studio' },
+                { label: '시티 나이트', sub: '도시 야경', cat: 'cinematic' },
+                { label: '숲속 웨딩', sub: '숲속 빛내림', cat: 'cinematic' },
+                { label: '캐슬 가든', sub: '유럽 고성', cat: 'cinematic' },
+                { label: '성당 웨딩', sub: '스테인드글라스', cat: 'cinematic' },
+                { label: '수채화', sub: '파스텔 수채화', cat: 'cinematic' },
+              ].map((c, i) => (
+                <motion.a
+                  href="/ai-snap"
+                  key={c.label}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className="flex-shrink-0 snap-start w-32 bg-white rounded-2xl border border-stone-200 p-4 text-center hover:border-stone-800 hover:shadow-lg transition-all group cursor-pointer"
+                >
+                  <p className="text-xs text-stone-400 mb-1">{c.cat === 'studio' ? 'STUDIO' : 'CINEMATIC'}</p>
+                  <p className="text-sm font-medium text-stone-800 group-hover:text-stone-900">{c.label}</p>
+                  <p className="text-[11px] text-stone-400 mt-0.5">{c.sub}</p>
+                </motion.a>
+              ))}
+            </div>
+            <p className="text-[11px] text-stone-400 text-center mt-2">옆으로 스와이프하여 더 보기</p>
           </motion.div>
 
           <motion.div
