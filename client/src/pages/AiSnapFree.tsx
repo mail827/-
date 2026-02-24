@@ -1,0 +1,373 @@
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Camera, X, Download, Loader2, User, Users, ArrowRight } from 'lucide-react';
+
+const CONCEPTS = [
+  { id: 'studio_classic', label: '스튜디오 클래식', sub: '정석 웨딩 화보' },
+  { id: 'outdoor_garden', label: '야외 가든', sub: '꽃과 자연빛' },
+  { id: 'beach_sunset', label: '해변 선셋', sub: '노을빛 해변' },
+  { id: 'hanbok_traditional', label: '한복 전통', sub: '전통 궁궐' },
+  { id: 'city_night', label: '시티 나이트', sub: '도시 야경' },
+  { id: 'cherry_blossom', label: '벚꽃', sub: '벚꽃잎 흩날림' },
+  { id: 'forest_wedding', label: '숲속 웨딩', sub: '숲속 빛내림' },
+  { id: 'castle_garden', label: '캐슬 가든', sub: '유럽 고성' },
+  { id: 'cathedral', label: '성당 웨딩', sub: '스테인드글라스' },
+  { id: 'watercolor', label: '수채화', sub: '파스텔 수채화' },
+];
+
+type Mode = 'groom' | 'bride' | 'couple';
+
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+const API = import.meta.env.VITE_API_URL;
+
+export default function AiSnapFree() {
+  const [step, setStep] = useState(0);
+  const [mode, setMode] = useState<Mode>('groom');
+  const [groomPhoto, setGroomPhoto] = useState('');
+  const [bridePhoto, setBridePhoto] = useState('');
+  const [concept, setConcept] = useState('studio_classic');
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const progressRef = useRef<ReturnType<typeof setInterval>>();
+  const [resultUrl, setResultUrl] = useState('');
+  const [, setAlreadyUsed] = useState(false);
+  const [, setIsLoggedIn] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const pollRef = useRef<ReturnType<typeof setInterval>>();
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    if (!token) {
+      setChecking(false);
+      setStep(0);
+      return;
+    }
+    setIsLoggedIn(true);
+    fetch(`${API}/ai-snap/free/check`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.used && !d.isAdmin) {
+          setAlreadyUsed(true);
+          setStep(5);
+        } else {
+          setStep(1);
+        }
+      })
+      .catch(() => setStep(1))
+      .finally(() => setChecking(false));
+  }, [token]);
+
+  const uploadPhoto = async (file: File, type: 'groom' | 'bride') => {
+    setUploading(type);
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', UPLOAD_PRESET);
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
+      const data = await res.json();
+      if (type === 'groom') setGroomPhoto(data.secure_url);
+      else setBridePhoto(data.secure_url);
+    } catch {}
+    setUploading(null);
+  };
+
+  const canProceed = () => {
+    if (mode === 'couple') return !!groomPhoto && !!bridePhoto;
+    if (mode === 'groom') return !!groomPhoto;
+    return !!bridePhoto;
+  };
+
+  const getUrls = () => {
+    if (mode === 'couple') return [groomPhoto, bridePhoto];
+    if (mode === 'groom') return [groomPhoto];
+    return [bridePhoto];
+  };
+
+  const generate = async () => {
+    if (!canProceed()) return;
+    setGenerating(true);
+    setStep(4);
+    setProgress(0);
+    progressRef.current = setInterval(() => setProgress(p => p >= 92 ? 92 : p + Math.random() * 8), 800);
+    try {
+      const res = await fetch(`${API}/ai-snap/free/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ concept, imageUrls: getUrls(), mode }),
+      });
+      const data = await res.json();
+      if (data.used) {
+        setAlreadyUsed(true);
+        setStep(5);
+        setGenerating(false);
+        return;
+      }
+      if (data.status === 'done' && data.resultUrl) {
+        clearInterval(progressRef.current);
+        setProgress(100);
+        setResultUrl(data.resultUrl);
+        setGenerating(false);
+      } else if (data.statusUrl) {
+        pollRef.current = setInterval(async () => {
+          try {
+            const pRes = await fetch(`${API}/ai-snap/free/poll?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}`);
+            const pData = await pRes.json();
+            if (pData.status === 'done') {
+              clearInterval(pollRef.current);
+              clearInterval(progressRef.current);
+              setProgress(100);
+              setResultUrl(pData.resultUrl);
+              setGenerating(false);
+            } else if (pData.status === 'failed') {
+              clearInterval(pollRef.current);
+              clearInterval(progressRef.current);
+              setProgress(0);
+              setGenerating(false);
+              setStep(3);
+            }
+          } catch {}
+        }, 3000);
+      } else {
+        setGenerating(false);
+        setStep(3);
+      }
+    } catch {
+      setGenerating(false);
+      setStep(3);
+    }
+  };
+
+  const handleLogin = (provider: 'google' | 'kakao') => {
+    localStorage.setItem('redirectAfterLogin', '/ai-snap');
+    window.location.href = `${API}/oauth/${provider}`;
+  };
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="w-6 h-6 text-stone-400 animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      <header className="border-b border-stone-200 sticky top-0 z-40 bg-white/80 backdrop-blur-sm">
+        <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
+          <a href="/" className="font-serif text-xl text-stone-800">청첩장 작업실</a>
+          {step >= 1 && step <= 4 && (
+            <div className="flex items-center gap-1.5">
+              {[1, 2, 3, 4].map(s => (
+                <div key={s} className={`h-1 rounded-full transition-all ${s <= step ? 'w-6 bg-stone-800' : 'w-3 bg-stone-200'}`} />
+              ))}
+            </div>
+          )}
+        </div>
+      </header>
+
+      <main className="max-w-lg mx-auto px-4 py-8">
+        <AnimatePresence mode="wait">
+          {step === 0 && (
+            <motion.div key="login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center py-12 space-y-8">
+              <div>
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-stone-800 to-stone-600 flex items-center justify-center mx-auto mb-6">
+                  <Sparkles className="w-7 h-7 text-amber-300" />
+                </div>
+                <h1 className="font-serif text-2xl text-stone-800 mb-2">AI 웨딩 화보</h1>
+                <p className="text-sm text-stone-500 mb-1">사진 한 장으로 다양한 컨셉의 웨딩 화보를 만들어보세요</p>
+                <p className="text-xs text-stone-400">무료 체험 1장 제공</p>
+              </div>
+              <div className="space-y-3 w-full max-w-xs mx-auto">
+                <button onClick={() => handleLogin('kakao')}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-2xl transition-all hover:opacity-90"
+                  style={{ background: '#FEE500' }}>
+                  <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.722 1.755 5.108 4.396 6.462-.148.536-.954 3.442-.984 3.66 0 0-.02.163.086.226.105.063.23.03.23.03.303-.042 3.514-2.313 4.07-2.707.717.1 1.457.153 2.202.153 5.523 0 10-3.463 10-7.824C22 6.463 17.523 3 12 3" fill="#3C1E1E"/></svg>
+                  <span className="text-sm font-medium" style={{ color: '#3C1E1E' }}>카카오로 시작하기</span>
+                </button>
+                <button onClick={() => handleLogin('google')}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white border-2 border-stone-200 rounded-2xl hover:border-stone-400 transition-all">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                  <span className="text-sm font-medium text-stone-700">Google로 시작하기</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-stone-400">3초면 가입 완료, 별도 결제 없어요</p>
+            </motion.div>
+          )}
+
+          {step === 1 && (
+            <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-stone-100 rounded-full text-xs text-stone-500 mb-6">
+                  <Sparkles className="w-3 h-3" /> 무료 체험 1장
+                </div>
+                <h1 className="font-serif text-2xl text-stone-800 mb-2">AI 웨딩 화보</h1>
+                <p className="text-sm text-stone-500">촬영 모드를 선택해주세요</p>
+              </div>
+              <div className="space-y-3">
+                {([
+                  { m: 'groom' as Mode, icon: User, label: '신랑 단독', desc: '신랑 사진 1장으로 화보 생성' },
+                  { m: 'bride' as Mode, icon: User, label: '신부 단독', desc: '신부 사진 1장으로 화보 생성' },
+                  { m: 'couple' as Mode, icon: Users, label: '커플 화보', desc: '신랑 + 신부 사진으로 커플 화보' },
+                ]).map(item => (
+                  <button key={item.m} onClick={() => { setMode(item.m); setStep(2); }}
+                    className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-stone-200 hover:border-stone-800 transition-all text-left group">
+                    <div className="w-12 h-12 rounded-xl bg-stone-100 group-hover:bg-stone-800 flex items-center justify-center transition-colors">
+                      <item.icon className="w-5 h-5 text-stone-500 group-hover:text-white transition-colors" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-stone-800">{item.label}</p>
+                      <p className="text-xs text-stone-400">{item.desc}</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-stone-300 group-hover:text-stone-800 transition-colors" />
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
+              <div className="text-center">
+                <h2 className="font-serif text-2xl text-stone-800 mb-2">사진 업로드</h2>
+                <p className="text-sm text-stone-500">정면 얼굴이 잘 보이는 사진이 좋아요</p>
+              </div>
+              <div className={`grid gap-4 ${mode === 'couple' ? 'grid-cols-2' : 'grid-cols-1 max-w-[200px] mx-auto'}`}>
+                {(mode === 'couple' || mode === 'groom') && (
+                  <UploadCard label="신랑" photo={groomPhoto} uploading={uploading === 'groom'}
+                    onUpload={f => uploadPhoto(f, 'groom')} onClear={() => setGroomPhoto('')} />
+                )}
+                {(mode === 'couple' || mode === 'bride') && (
+                  <UploadCard label="신부" photo={bridePhoto} uploading={uploading === 'bride'}
+                    onUpload={f => uploadPhoto(f, 'bride')} onClear={() => setBridePhoto('')} />
+                )}
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setStep(1)} className="px-6 py-3 rounded-xl border border-stone-200 text-sm text-stone-500 hover:bg-stone-50">이전</button>
+                <button onClick={() => canProceed() && setStep(3)} disabled={!canProceed()}
+                  className="flex-1 py-3 rounded-xl bg-stone-800 text-white text-sm font-medium disabled:opacity-30 hover:bg-stone-900 transition-all">다음</button>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 3 && (
+            <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
+              <div className="text-center">
+                <h2 className="font-serif text-2xl text-stone-800 mb-2">컨셉 선택</h2>
+                <p className="text-sm text-stone-500">원하는 촬영 분위기를 골라주세요</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {CONCEPTS.map(c => (
+                  <button key={c.id} onClick={() => setConcept(c.id)}
+                    className={`rounded-2xl py-3.5 px-4 text-left transition-all border-2 ${concept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
+                    <p className={`text-sm font-semibold ${concept === c.id ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
+                    <p className={`text-[11px] ${concept === c.id ? 'text-white/60' : 'text-stone-400'}`}>{c.sub}</p>
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setStep(2)} className="px-6 py-3 rounded-xl border border-stone-200 text-sm text-stone-500 hover:bg-stone-50">이전</button>
+                <button onClick={generate}
+                  className="flex-1 py-3 rounded-xl bg-stone-800 text-white text-sm font-medium flex items-center justify-center gap-2 hover:bg-stone-900 transition-all">
+                  <Sparkles className="w-4 h-4" /> 웨딩 화보 생성하기
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 4 && (
+            <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
+              {generating ? (
+                <div className="text-center py-20">
+                  <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-6">
+                    <Loader2 className="w-7 h-7 text-stone-600 animate-spin" />
+                  </div>
+                  <h2 className="font-serif text-xl text-stone-800 mb-2">AI가 화보를 만들고 있어요</h2>
+                  <p className="text-sm text-stone-400 mb-6">30초~1분 정도 소요돼요</p>
+                  <div className="max-w-xs mx-auto">
+                    <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-stone-800 rounded-full transition-all duration-700 ease-out" style={{ width: `${progress}%` }} />
+                    </div>
+                    <p className="text-xs text-stone-400 mt-2">{Math.round(progress)}%</p>
+                  </div>
+                </div>
+              ) : resultUrl ? (
+                <div className="text-center">
+                  <div className="rounded-2xl overflow-hidden border border-stone-200 mb-6">
+                    <img src={resultUrl} alt="AI Wedding Snap" className="w-full" />
+                  </div>
+                  <a href={resultUrl} download target="_blank"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-stone-800 text-white rounded-xl text-sm font-medium hover:bg-stone-900 transition-all mb-8">
+                    <Download className="w-4 h-4" /> 이미지 저장
+                  </a>
+                  <UpgradeCard />
+                </div>
+              ) : (
+                <div className="text-center py-20">
+                  <p className="text-stone-500 text-sm">생성에 실패했어요. 다시 시도해주세요.</p>
+                  <button onClick={() => setStep(3)} className="mt-4 px-6 py-2 bg-stone-800 text-white rounded-xl text-sm">다시 시도</button>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {step === 5 && (
+            <motion.div key="step5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-12 space-y-6">
+              <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto">
+                <Sparkles className="w-7 h-7 text-stone-400" />
+              </div>
+              <div>
+                <h2 className="font-serif text-xl text-stone-800 mb-2">무료 체험을 이미 사용했어요</h2>
+                <p className="text-sm text-stone-400">더 많은 화보를 만들려면 패키지를 이용해주세요</p>
+              </div>
+              <UpgradeCard />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+    </div>
+  );
+}
+
+function UpgradeCard() {
+  return (
+    <div className="bg-stone-50 rounded-2xl border border-stone-200 p-6 text-center">
+      <p className="text-sm font-semibold text-stone-800 mb-2">더 많은 컨셉으로 만들어보세요</p>
+      <p className="text-xs text-stone-400 mb-5">청첩장 패키지에 가입하면 최대 10장의 AI 웨딩스냅을 만들 수 있어요</p>
+      <div className="flex flex-col sm:flex-row gap-2 justify-center">
+        <a href="/#pricing" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-xl text-xs font-medium hover:bg-stone-900">
+          요금제 보기 <ArrowRight className="w-3.5 h-3.5" />
+        </a>
+        <a href="/" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-stone-200 text-stone-600 rounded-xl text-xs hover:bg-stone-50">
+          홈으로
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function UploadCard({ label, photo, uploading, onUpload, onClear }: {
+  label: string; photo: string; uploading: boolean; onUpload: (f: File) => void; onClear: () => void;
+}) {
+  return photo ? (
+    <div className="relative aspect-square rounded-2xl overflow-hidden border border-stone-200">
+      <img src={photo} alt={label} className="w-full h-full object-cover" />
+      <button onClick={onClear} className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70"><X className="w-4 h-4" /></button>
+      <div className="absolute bottom-0 inset-x-0 py-2 bg-gradient-to-t from-black/50 text-center"><span className="text-xs text-white font-medium">{label}</span></div>
+    </div>
+  ) : (
+    <label className={`aspect-square rounded-2xl border-2 border-dashed border-stone-300 flex flex-col items-center justify-center cursor-pointer hover:border-stone-400 transition-all ${uploading ? 'opacity-50' : ''}`}>
+      {uploading ? <Loader2 className="w-8 h-8 text-stone-400 animate-spin" /> : (
+        <>
+          <Camera className="w-8 h-8 text-stone-400 mb-2" />
+          <span className="text-sm font-medium text-stone-500">{label} 사진</span>
+          <span className="text-[11px] text-stone-400 mt-1">얼굴이 잘 보이게</span>
+        </>
+      )}
+      <input type="file" accept="image/*" onChange={e => e.target.files?.[0] && onUpload(e.target.files[0])} className="hidden" disabled={uploading} />
+    </label>
+  );
+}

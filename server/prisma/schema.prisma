@@ -15,6 +15,7 @@ model User {
   provider      Provider
   providerId    String
   role          Role      @default(CUSTOMER)
+  freeSnapUsed  Boolean   @default(false)
   phone         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

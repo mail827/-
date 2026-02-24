@@ -383,6 +383,73 @@ export default function Landing() {
 
       <HighlightVideoSection />
 
+      <section id="ai-snap" className="py-32 px-4">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">AI WEDDING SNAP</p>
+            <h2 className="font-serif text-3xl text-stone-800 mb-4">AI 웨딩 화보</h2>
+            <p className="text-stone-500">사진 한 장으로 10가지 컨셉의 웨딩 화보를 만들어보세요</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-12"
+          >
+            {[
+              { label: '스튜디오', sub: '정석 화보' },
+              { label: '벚꽃', sub: '봄날 감성' },
+              { label: '한복', sub: '전통 궁궐' },
+              { label: '성당', sub: '유럽풍' },
+              { label: '숲속', sub: '빛내림' },
+            ].map((c, i) => (
+              <motion.div
+                key={c.label}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="bg-white rounded-2xl border border-stone-200 p-4 text-center hover:border-stone-400 hover:shadow-md transition-all"
+              >
+                <p className="text-sm font-medium text-stone-800">{c.label}</p>
+                <p className="text-[11px] text-stone-400 mt-0.5">{c.sub}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-stone-50 rounded-3xl border border-stone-200 p-8 sm:p-12 text-center"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-stone-800 text-white text-xs rounded-full mb-6">
+              <Sparkles className="w-3 h-3" />
+              무료 체험 1장
+            </div>
+            <h3 className="font-serif text-2xl text-stone-800 mb-3">지금 바로 만들어보세요</h3>
+            <p className="text-sm text-stone-500 mb-8 max-w-md mx-auto">
+              회원가입 후 무료로 1장 체험할 수 있어요.<br/>
+              내 사진이 웨딩 화보로 변하는 마법을 경험하세요.
+            </p>
+            
+              <a
+              href="/ai-snap"
+              className="inline-flex items-center gap-2.5 px-8 py-4 bg-stone-800 text-white rounded-full hover:bg-stone-900 transition-all hover:scale-105 text-sm font-medium"
+            >
+              <Sparkles className="w-5 h-5" />
+              무료로 웨딩 화보 만들기
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
       <section id="pricing" className="py-32 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.div

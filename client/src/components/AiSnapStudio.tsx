@@ -57,6 +57,8 @@ export default function AiSnapStudio({ weddingId }: Props) {
   const [pollingId, setPollingId] = useState<string | null>(null);
   const [snaps, setSnaps] = useState<AiSnap[]>([]);
   const [viewSnap, setViewSnap] = useState<AiSnap | null>(null);
+  const [progress, setProgress] = useState(0);
+  const progressRef = useRef<ReturnType<typeof setInterval>>();
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryItem[]>([]);
   const [pickFor, setPickFor] = useState<'groom' | 'bride' | null>(null);
   const [quota, setQuota] = useState<Quota | null>(null);
@@ -133,6 +135,8 @@ export default function AiSnapStudio({ weddingId }: Props) {
   const handleGenerate = async () => {
     if (!canGenerate() || isQuotaExhausted) return;
     setGenerating(true);
+    setProgress(0);
+    progressRef.current = setInterval(() => setProgress(p => p >= 92 ? 92 : p + Math.random() * 8), 800);
     try {
       const res = await api('/generate', {
         method: 'POST',
@@ -256,14 +260,20 @@ export default function AiSnapStudio({ weddingId }: Props) {
           <p className="text-xs text-red-400 mt-1">패키지를 업그레이드하면 더 많은 웨딩스냅을 만들 수 있어요</p>
         </div>
       ) : generating ? (
-        <div className="rounded-2xl bg-stone-50 border border-stone-200 p-6 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center flex-shrink-0">
-            <Loader2 className="w-5 h-5 text-white animate-spin" />
+        <div className="rounded-2xl bg-stone-50 border border-stone-200 p-6">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center flex-shrink-0">
+              <Loader2 className="w-5 h-5 text-white animate-spin" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-stone-800">AI가 웨딩스냅을 만들고 있어요</p>
+              <p className="text-xs text-stone-400 mt-0.5">보통 30초~1분 정도 소요돼요</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-semibold text-stone-800">AI가 웨딩스냅을 만들고 있어요</p>
-            <p className="text-xs text-stone-400 mt-0.5">보통 30초~1분 정도 소요돼요</p>
+          <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden">
+            <div className="h-full bg-stone-800 rounded-full transition-all duration-700 ease-out" style={{ width: `${progress}%` }} />
           </div>
+          <p className="text-xs text-stone-400 mt-2 text-right">{Math.round(progress)}%</p>
         </div>
       ) : (
         <button onClick={handleGenerate} disabled={!canGenerate()}
