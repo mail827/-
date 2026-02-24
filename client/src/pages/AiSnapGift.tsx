@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Gift, ArrowRight, ArrowLeft, Phone, Mail, MessageSquare, CreditCard, Loader2 } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL;
-const TOSS_CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY;
 
 function loadTossV1(): Promise<any> {
   return new Promise((resolve) => {
@@ -66,8 +65,10 @@ export default function AiSnapGift() {
         ...(message ? { message } : {}),
       });
 
+      const keyRes = await fetch(`${API}/snap-pack/toss-client-key`);
+      const { clientKey } = await keyRes.json();
       const TossPayments = await loadTossV1();
-      const tp = TossPayments(TOSS_CLIENT_KEY);
+      const tp = TossPayments(clientKey);
       await tp.requestPayment('카드', {
         amount: selectedTier.price,
         orderId,

@@ -18,6 +18,13 @@ const TIERS: Record<string, { snaps: number; price: number; label: string }> = {
 
 const EXTRA_PER_SNAP = 1500;
 
+const ADD_SNAP_TIERS: Record<string, { snaps: number; price: number; label: string }> = {
+  'add-1': { snaps: 1, price: 1900, label: '1장 추가' },
+  'add-3': { snaps: 3, price: 4900, label: '3장 추가' },
+  'add-5': { snaps: 5, price: 7900, label: '5장 추가' },
+  'add-10': { snaps: 10, price: 12900, label: '10장 추가' },
+};
+
 const STUDIO_CONCEPTS: Record<string, { label: string; base: string }> = {
   studio_classic: {
     label: '스튜디오 클래식',
@@ -172,6 +179,10 @@ const falFetch = async (url: string, opts?: RequestInit) => {
   try { return JSON.parse(text); } catch { throw new Error(`fal error (${res.status}): ${text.slice(0, 300)}`); }
 };
 
+router.get('/toss-client-key', (_req, res) => {
+  res.json({ clientKey: process.env.TOSS_CLIENT_KEY });
+});
+
 router.get('/tiers', (_req, res) => {
   res.json(Object.entries(TIERS).map(([id, t]) => ({ id, ...t })));
 });
@@ -263,6 +274,40 @@ router.post('/extra-payment', authMiddleware, async (req: AuthRequest, res) => {
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
+});
+
+router.post('/add-snaps/order', authMiddleware, async (req: any, res) => {
+  const { packId, addTier } = req.body;
+  const userId = req.user.id;
+  const tierInfo = ADD_SNAP_TIERS[addTier];
+  if (!tierInfo) return res.status(400).json({ error: '잘못된 추가 티어' });
+  const pack = await prisma.snapPack.findFirst({ where: { id: packId, userId } });
+  if (!pack) return res.status(404).json({ error: '팩 없음' });
+  const orderId = `SNAPADD_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  res.json({ orderId, amount: tierInfo.price, packId, addTier, clientKey: process.env.TOSS_CLIENT_KEY });
+});
+
+router.post('/add-snaps/confirm', authMiddleware, async (req: any, res) => {
+  const { paymentKey, orderId, amount, packId, addTier } = req.body;
+  const userId = req.user.id;
+  const tierInfo = ADD_SNAP_TIERS[addTier];
+  if (!tierInfo || tierInfo.price !== amount) return res.status(400).json({ error: '금액 불일치' });
+  const pack = await prisma.snapPack.findFirst({ where: { id: packId, userId } });
+  if (!pack) return res.status(404).json({ error: '팩 없음' });
+  const encoded = Buffer.from(`${process.env.TOSS_SECRET_KEY}:`).toString('base64');
+  const tossRes = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
+    method: 'POST',
+    headers: { Authorization: `Basic ${encoded}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paymentKey, orderId, amount }),
+  });
+  const tossData = await tossRes.json();
+  if (!tossRes.ok) return res.status(400).json({ error: tossData.message || '결제 실패' });
+  const updated = await prisma.snapPack.update({
+    where: { id: packId },
+    data: { totalSnaps: pack.totalSnaps + tierInfo.snaps },
+    include: { snaps: true },
+  });
+  res.json(updated);
 });
 
 router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {

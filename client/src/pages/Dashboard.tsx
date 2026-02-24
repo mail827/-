@@ -295,7 +295,7 @@ export default function Dashboard() {
           </h1>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

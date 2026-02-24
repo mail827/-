@@ -6,7 +6,13 @@ import { Sparkles, Camera, X, Download, Loader2, User, Users, ArrowRight, ArrowL
 const API = import.meta.env.VITE_API_URL;
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-const TOSS_CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY;
+
+const ADD_TIERS = [
+  { id: 'add-1', snaps: 1, price: 1900, label: '1장' },
+  { id: 'add-3', snaps: 3, price: 4900, label: '3장' },
+  { id: 'add-5', snaps: 5, price: 7900, label: '5장' },
+  { id: 'add-10', snaps: 10, price: 12900, label: '10장' },
+];
 
 function loadTossV1(): Promise<any> {
   return new Promise((resolve) => {
@@ -53,6 +59,9 @@ export default function AiSnapStudioPage() {
   const [setupPackId, setSetupPackId] = useState<string | null>(null);
   const [setupLoading, setSetupLoading] = useState(false);
   const [shotMode, setShotMode] = useState<ShotMode | null>(null);
+  const [showAddSnaps, setShowAddSnaps] = useState(false);
+  const [addTier, setAddTier] = useState('add-3');
+  const [addPaying, setAddPaying] = useState(false);
 
   useEffect(() => {
     if (!token) { setChecking(false); return; }
@@ -147,8 +156,10 @@ export default function AiSnapStudioPage() {
       const order = await orderRes.json();
       if (!order.orderId) return;
 
+      const keyRes = await fetch(`${API}/snap-pack/toss-client-key`);
+      const { clientKey } = await keyRes.json();
       const TossPayments = await loadTossV1();
-      const tp = TossPayments(TOSS_CLIENT_KEY);
+      const tp = TossPayments(clientKey);
       await tp.requestPayment('카드', {
         amount: order.amount,
         orderId: order.orderId,
@@ -157,6 +168,30 @@ export default function AiSnapStudioPage() {
         failUrl: `${window.location.origin}/ai-snap/studio?error=payment_failed`,
       });
     } catch {}
+  };
+
+  const handleAddSnaps = async () => {
+    if (!activePack || addPaying) return;
+    setAddPaying(true);
+    try {
+      const orderRes = await fetch(`${API}/snap-pack/add-snaps/order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ packId: activePack.id, addTier }),
+      });
+      const order = await orderRes.json();
+      if (!order.orderId) { setAddPaying(false); return; }
+      const TossPayments = await loadTossV1();
+      const tp = TossPayments(order.clientKey);
+      await tp.requestPayment('카드', {
+        amount: order.amount,
+        orderId: order.orderId,
+        orderName: `AI 웨딩스냅 추가 생성`,
+        successUrl: `${window.location.origin}/ai-snap/studio/add-callback?packId=${activePack.id}&addTier=${addTier}`,
+        failUrl: `${window.location.origin}/ai-snap/studio?packId=${activePack.id}&error=add_failed`,
+      });
+    } catch {}
+    setAddPaying(false);
   };
 
   const loadPack = async (packId: string) => {
@@ -513,10 +548,34 @@ export default function AiSnapStudioPage() {
               {activePack.usedSnaps >= activePack.totalSnaps && !generating && (
                 <div className="bg-stone-50 rounded-2xl border border-stone-200 p-6 text-center">
                   <p className="text-sm font-semibold text-stone-800 mb-2">모든 생성이 완료됐어요!</p>
-                  <p className="text-xs text-stone-400 mb-4">추가 생성이 필요하다면 장당 1,500원에 추가할 수 있어요</p>
-                  <button className="px-6 py-2.5 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 transition-all">
-                    추가 생성하기
-                  </button>
+                  {!showAddSnaps ? (
+                    <>
+                      <p className="text-xs text-stone-400 mb-4">추가 생성이 필요하다면 장당 구매할 수 있어요</p>
+                      <button onClick={() => setShowAddSnaps(true)} className="px-6 py-2.5 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 transition-all">
+                        추가 생성하기
+                      </button>
+                    </>
+                  ) : (
+                    <div className="space-y-4 mt-4">
+                      <div className="grid grid-cols-4 gap-2">
+                        {ADD_TIERS.map(t => (
+                          <button key={t.id} onClick={() => setAddTier(t.id)}
+                            className={`p-3 rounded-xl border-2 transition-all ${addTier === t.id ? 'border-stone-800 bg-stone-800 text-white' : 'border-stone-200 hover:border-stone-300'}`}>
+                            <p className={`text-sm font-semibold ${addTier === t.id ? 'text-white' : 'text-stone-800'}`}>{t.label}</p>
+                            <p className={`text-xs ${addTier === t.id ? 'text-white/60' : 'text-stone-400'}`}>{t.price.toLocaleString()}원</p>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => setShowAddSnaps(false)} className="flex-1 py-2.5 border border-stone-200 text-stone-500 rounded-xl text-sm hover:bg-stone-50">취소</button>
+                        <button onClick={handleAddSnaps} disabled={addPaying}
+                          className="flex-1 py-2.5 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-1.5">
+                          {addPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                          결제하기
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

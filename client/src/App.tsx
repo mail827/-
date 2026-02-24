@@ -1,4 +1,4 @@
-import { lazy } from 'react';
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import usePageTracking from './hooks/usePageTracking';
 import Landing from './pages/Landing';
@@ -8,6 +8,7 @@ import AiSnapCallback from './pages/AiSnapCallback';
 import AiSnapRedeem from './pages/AiSnapRedeem';
 const AiSnapGift = lazy(() => import('./pages/AiSnapGift'));
 const AiSnapGiftCallback = lazy(() => import('./pages/AiSnapGiftCallback'));
+const AiSnapAddCallback = lazy(() => import('./pages/AiSnapAddCallback'));
 import AdminSnapGift from './pages/admin/AdminSnapGift';
 import OAuthCallback from './pages/OAuthCallback';
 import Dashboard from './pages/Dashboard';
@@ -80,11 +81,13 @@ export default function App() {
   usePageTracking();
   
   return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 border-2 border-stone-800 border-t-transparent rounded-full animate-spin" /></div>}>
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/ai-snap" element={<AiSnapFree />} />
       <Route path="/ai-snap/studio" element={<AiSnapStudioPage />} />
       <Route path="/ai-snap/studio/callback" element={<AiSnapCallback />} />
+      <Route path="/ai-snap/studio/add-callback" element={<Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 border-2 border-stone-800 border-t-transparent rounded-full animate-spin" /></div>}><AiSnapAddCallback /></Suspense>} />
       <Route path="/ai-snap/redeem" element={<AiSnapRedeem />} />
       <Route path="/ai-snap/gift" element={<AiSnapGift />} />
       <Route path="/ai-snap/gift/callback" element={<AiSnapGiftCallback />} />
@@ -137,5 +140,6 @@ export default function App() {
         <Route path="reviews" element={<ReviewManagement />} />
       </Route>
     </Routes>
+    </Suspense>
   );
 }
