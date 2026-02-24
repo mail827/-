@@ -178,6 +178,7 @@ model Wedding {
   expiresAt                DateTime?
   sectionOrder             Json?
   galleryRatio             String?          @default("1:1")
+  guestPhotoEnabled        Boolean          @default(true)
   aiChats                  AiChat[]
   galleries                Gallery[]
   aiSnaps                  AiSnap[]
@@ -190,6 +191,7 @@ model Wedding {
   pairUser                 User?             @relation("PairWeddings", fields: [pairUserId], references: [id])
   pairInvites              PairInvite[]
   snapshots                WeddingSnapshot[]
+  guestPhotos              GuestPhoto[]
 }
 
 model WeddingSnapshot {
@@ -221,6 +223,18 @@ model Gallery {
   caption   String?
   createdAt DateTime  @default(now())
   wedding   Wedding   @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+}
+
+model GuestPhoto {
+  id         String   @id @default(cuid())
+  weddingId  String
+  wedding    Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  guestName  String   @default("익명")
+  imageUrl   String
+  publicId   String?
+  message    String?
+  approved   Boolean  @default(true)
+  createdAt  DateTime @default(now())
 }
 
 model Rsvp {

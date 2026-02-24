@@ -33,6 +33,7 @@ import ogRouter from "./routes/og.js";
 import aiSnapRouter from "./routes/aiSnap.js";
 import snapPackRouter from "./routes/snapPack.js";
 import snapGiftRouter from "./routes/snapGift.js";
+import guestPhotoRouter from './routes/guestPhoto.js';
 
 dotenv.config();
 
@@ -64,6 +65,7 @@ app.use("/api/rsvp", rsvpRouter);
 app.use("/api/ai-snap", aiSnapRouter);
 app.use("/api/snap-pack", snapPackRouter);
 app.use("/api/snap-gift", snapGiftRouter);
+app.use('/api/guest-photo', guestPhotoRouter);
 app.use('/api/notification', notificationRouter);
 app.use('/api/guestbook', guestbookRouter);
 app.use('/api/public', publicRouter);

@@ -25,6 +25,7 @@ const BotanicalClassic = lazy(() => import("./themes/BotanicalClassic"));
 const HeartMinimal = lazy(() => import("./themes/HeartMinimal"));
 const WaveBorder = lazy(() => import("./themes/WaveBorder"));
 import AiChat from '../../components/AiChat';
+import GuestPhotoGallery from './themes/shared/GuestPhotoGallery';
 import { useSectionOrder } from '../../hooks/useSectionOrder';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -184,6 +185,9 @@ export default function WeddingPage() {
           refetchGuestbook={refetchGuestbook}
         />
       </Suspense>
+      {wedding.guestPhotoEnabled !== false && (
+        <GuestPhotoGallery slug={wedding.slug} enabled={true} />
+      )}
       </div>
       
       {wedding.aiEnabled && (

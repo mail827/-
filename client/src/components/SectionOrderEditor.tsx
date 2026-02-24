@@ -26,10 +26,11 @@ const SECTION_META: Record<string, { label: string; desc: string }> = {
   rsvp: { label: '참석 여부', desc: 'RSVP 응답 폼' },
   account: { label: '축의금', desc: '계좌 정보와 간편 송금' },
   guestbook: { label: '방명록', desc: '하객 메시지' },
+  guestGallery: { label: '하객 갤러리', desc: '하객이 직접 사진을 올리는 공간' },
   closing: { label: '마무리 인사', desc: '감사 문구와 연락처' },
 };
 
-const DEFAULT_ORDER = ['greeting', 'calendar', 'loveStory', 'gallery', 'location', 'rsvp', 'account', 'guestbook', 'closing'];
+const DEFAULT_ORDER = ['greeting', 'calendar', 'loveStory', 'gallery', 'location', 'rsvp', 'account', 'guestbook', 'guestGallery', 'closing'];
 
 interface Props {
   value: string[] | null | undefined;
