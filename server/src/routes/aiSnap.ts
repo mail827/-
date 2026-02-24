@@ -240,13 +240,23 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 router.get('/free/my-snaps', authMiddleware, async (req: AuthRequest, res) => {
-  const userId = (req as AuthRequest).user?.id;
+  const userId = req.user?.id;
   if (!userId) return res.status(401).json({ error: '로그인 필요' });
+
+  const hasPaidPack = await prisma.snapPack.findFirst({ where: { userId, status: 'PAID' } });
+
   const snaps = await prisma.aiSnap.findMany({
     where: { userId, isFree: true },
     orderBy: { createdAt: 'desc' },
   });
-  res.json(snaps);
+
+  const result = snaps.map(s => ({
+    ...s,
+    resultUrl: hasPaidPack && s.resultOriginalUrl ? s.resultOriginalUrl : s.resultUrl,
+    unlocked: !!(hasPaidPack && s.resultOriginalUrl),
+  }));
+
+  res.json(result);
 });
 
 router.get('/free/check', authMiddleware, async (req: AuthRequest, res) => {
@@ -351,7 +361,10 @@ router.get('/admin/list', authMiddleware, async (req: AuthRequest, res) => {
   if ((req as AuthRequest).user?.role !== 'ADMIN') return res.status(403).json({ error: '관리자만 접근 가능' });
   try {
     const snaps = await prisma.aiSnap.findMany({
-      include: { wedding: { select: { id: true, slug: true, groomName: true, brideName: true } } },
+      include: {
+        wedding: { select: { id: true, slug: true, groomName: true, brideName: true } },
+        user: { select: { id: true, name: true, email: true } },
+      },
       orderBy: { createdAt: 'desc' },
       take: 200,
     });

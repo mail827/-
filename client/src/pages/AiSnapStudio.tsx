@@ -8,10 +8,10 @@ const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 const ADD_TIERS = [
-  { id: 'add-1', snaps: 1, price: 1900, label: '1장' },
-  { id: 'add-3', snaps: 3, price: 4900, label: '3장' },
-  { id: 'add-5', snaps: 5, price: 7900, label: '5장' },
-  { id: 'add-10', snaps: 10, price: 12900, label: '10장' },
+  { id: 'add-1', snaps: 1, price: 2900, label: '1장' },
+  { id: 'add-3', snaps: 3, price: 6900, label: '3장' },
+  { id: 'add-5', snaps: 5, price: 9900, label: '5장' },
+  { id: 'add-10', snaps: 10, price: 16900, label: '10장' },
 ];
 
 function loadTossV1(): Promise<any> {

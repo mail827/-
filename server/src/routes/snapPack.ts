@@ -19,10 +19,10 @@ const TIERS: Record<string, { snaps: number; price: number; label: string }> = {
 const EXTRA_PER_SNAP = 1500;
 
 const ADD_SNAP_TIERS: Record<string, { snaps: number; price: number; label: string }> = {
-  'add-1': { snaps: 1, price: 1900, label: '1장 추가' },
-  'add-3': { snaps: 3, price: 4900, label: '3장 추가' },
-  'add-5': { snaps: 5, price: 7900, label: '5장 추가' },
-  'add-10': { snaps: 10, price: 12900, label: '10장 추가' },
+  'add-1': { snaps: 1, price: 2900, label: '1장 추가' },
+  'add-3': { snaps: 3, price: 6900, label: '3장 추가' },
+  'add-5': { snaps: 5, price: 9900, label: '5장 추가' },
+  'add-10': { snaps: 10, price: 16900, label: '10장 추가' },
 };
 
 const STUDIO_CONCEPTS: Record<string, { label: string; base: string }> = {
@@ -327,7 +327,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     const snap = await prisma.aiSnap.create({
       data: {
-        snapPackId: pack.id, concept: pack.concept, mode: effectiveMode,
+        snapPackId: pack.id, userId: pack.userId, concept: pack.concept, mode: effectiveMode,
         engine: 'nano-banana-pro', prompt, inputUrls: pack.inputUrls as any, status: 'processing',
       },
     });

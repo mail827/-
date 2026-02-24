@@ -427,6 +427,7 @@ export default function Dashboard() {
 
           {hasFreeSnaps && (
             <>
+              <p className="text-sm font-medium text-stone-500 mb-4">무료 체험 스냅</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
                 {mySnaps.map((snap: any) => (
                   <div key={snap.id} className="rounded-2xl overflow-hidden border border-stone-200 group relative">
@@ -434,8 +435,16 @@ export default function Dashboard() {
                       <>
                         <img src={snap.resultUrl} alt="AI Snap" className="w-full aspect-square object-cover" />
                         {snap.isFree && (
-                          <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/50 rounded-full text-[10px] text-white">무료체험</div>
+                          <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/50 rounded-full text-[10px] text-white">
+                            {snap.unlocked ? '원본 해제' : '무료체험'}
+                          </div>
                         )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                          <a href={snap.resultUrl} download target="_blank"
+                            className="opacity-0 group-hover:opacity-100 p-1.5 bg-white rounded-full transition-all">
+                            <Download className="w-3.5 h-3.5 text-stone-800" />
+                          </a>
+                        </div>
                       </>
                     ) : (
                       <div className="aspect-square bg-stone-50 flex items-center justify-center">
@@ -445,7 +454,7 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-              {mySnaps.some((s: any) => s.isFree) && (
+              {mySnaps.some((s: any) => s.isFree && !s.unlocked) && (
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-stone-800">워터마크 없는 원본이 필요하세요?</p>
