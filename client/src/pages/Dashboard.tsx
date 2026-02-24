@@ -108,11 +108,12 @@ export default function Dashboard() {
       if (weddingsRes.ok) {
         const weddingsData = await weddingsRes.json();
         setWeddings(weddingsData);
+      }
+
       try {
         const snapRes = await fetch(`${import.meta.env.VITE_API_URL}/ai-snap/free/my-snaps`, { headers: { Authorization: `Bearer ${token}` } });
         if (snapRes.ok) { const snapData = await snapRes.json(); setMySnaps(snapData); }
       } catch {}
-      }
 
       if (ordersRes.ok) {
         const ordersData = await ordersRes.json();

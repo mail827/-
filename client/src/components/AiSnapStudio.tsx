@@ -414,19 +414,25 @@ function PhotoUpload({ label, photo, uploading, onUpload, onClear, onGalleryPick
             <Loader2 className="w-7 h-7 text-stone-400 animate-spin" />
           ) : (
             <>
-              <Camera className="w-7 h-7 text-stone-400 mb-1.5" />
+              <Camera className="w-7 h-7 text-stone-400 mb-2" />
               <span className="text-xs font-medium text-stone-500">{label} 사진</span>
-              <span className="text-[10px] text-stone-400 mt-0.5">얼굴이 잘 보이게</span>
-              {hasGallery && onGalleryPick && (
-                <button type="button" onClick={e => { e.preventDefault(); e.stopPropagation(); onGalleryPick(); }}
-                  className="mt-2 flex items-center gap-1 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors">
-                  <ImagePlus className="w-3 h-3 text-stone-500" />
-                  <span className="text-[10px] font-medium text-stone-500">갤러리에서 선택</span>
-                </button>
-              )}
+              <span className="text-[10px] text-stone-400 mt-0.5 mb-3">얼굴이 잘 보이게</span>
+              <div className="flex flex-col gap-1.5 w-full px-2" onClick={e => e.stopPropagation()}>
+                <label className="flex items-center justify-center gap-1 px-3 py-2 bg-stone-800 hover:bg-stone-900 text-white rounded-lg transition-colors cursor-pointer">
+                  <Camera className="w-3 h-3" />
+                  <span className="text-[10px] font-medium">사진 업로드</span>
+                  <input type="file" accept="image/*" onChange={e => e.target.files?.[0] && onUpload(e.target.files[0])} className="hidden" disabled={uploading} />
+                </label>
+                {hasGallery && onGalleryPick && (
+                  <button type="button" onClick={onGalleryPick}
+                    className="flex items-center justify-center gap-1 px-3 py-2 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors">
+                    <ImagePlus className="w-3 h-3 text-stone-500" />
+                    <span className="text-[10px] font-medium text-stone-500">갤러리에서 선택</span>
+                  </button>
+                )}
+              </div>
             </>
           )}
-          <input type="file" accept="image/*" onChange={e => e.target.files?.[0] && onUpload(e.target.files[0])} className="hidden" disabled={uploading} />
         </label>
       )}
     </div>
