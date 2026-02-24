@@ -553,6 +553,74 @@ export default function Landing() {
             ))}
           </div>
 
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-20"
+          >
+            <div className="text-center mb-10">
+              <p className="text-sm tracking-[0.2em] text-stone-400 mb-3">AI WEDDING SNAP</p>
+              <h3 className="font-serif text-2xl text-stone-800 mb-2">AI 웨딩 화보 단독 패키지</h3>
+              <p className="text-sm text-stone-500">청첩장 없이 AI 웨딩 화보만 이용할 수 있어요</p>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { snaps: 3, price: 5900, per: 1967 },
+                { snaps: 5, price: 9900, per: 1980 },
+                { snaps: 10, price: 14900, per: 1490, popular: true },
+                { snaps: 20, price: 24900, per: 1245 },
+              ].map((t, idx) => (
+                <motion.div
+                  key={t.snaps}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.08 }}
+                  className={`relative bg-white rounded-2xl p-5 border transition-all hover:shadow-xl ${t.popular ? 'border-stone-800 shadow-lg' : 'border-stone-200'}`}
+                >
+                  {t.popular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-stone-800 text-white text-xs rounded-full">
+                      인기
+                    </div>
+                  )}
+                  <p className="text-lg font-medium text-stone-800 mb-1">{t.snaps}장 세트</p>
+                  <p className="text-xs text-stone-400 mb-4">장당 {t.per.toLocaleString()}원</p>
+                  <div className="mb-4">
+                    <span className="text-2xl font-light text-stone-800">{t.price.toLocaleString()}</span>
+                    <span className="text-stone-400 text-xs">원</span>
+                  </div>
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-start gap-2 text-xs text-stone-600">
+                      <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
+                      <span>스튜디오 / 시네마틱 선택</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-xs text-stone-600">
+                      <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
+                      <span>10가지 컨셉</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-xs text-stone-600">
+                      <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
+                      <span>고화질 원본 다운로드</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-xs text-stone-600">
+                      <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
+                      <span>추가 촬영 장당 1,500원</span>
+                    </li>
+                  </ul>
+                  
+                  <a
+                    href="/ai-snap/studio"
+                    className={`block w-full py-2.5 rounded-full text-sm text-center transition-all ${t.popular ? 'bg-stone-800 text-white hover:bg-stone-900' : 'border border-stone-300 text-stone-600 hover:bg-stone-50'}`}
+                  >
+                    시작하기
+                  </a>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
         </div>
       </section>
 
@@ -730,7 +798,6 @@ export default function Landing() {
 )}
         </div>
       </section>
-
       )}
 
       <footer className="py-12 px-4 border-t border-stone-100 relative bg-stone-50">
