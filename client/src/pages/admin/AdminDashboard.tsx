@@ -305,11 +305,11 @@ export default function AdminDashboard() {
                   className="flex items-center gap-4 p-4 bg-stone-50 hover:bg-stone-100 rounded-xl transition-all group"
                 >
                   <div className="w-12 h-12 rounded-xl bg-stone-800 flex items-center justify-center text-white font-bold">
-                    {wedding.groomName?.charAt(0)}{wedding.brideName?.charAt(0)}
+                    {(wedding.groomName || '')[0] || '?'}{(wedding.brideName || '')[0] || '?'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-stone-800 truncate">
-                      {wedding.groomName} ♥ {wedding.brideName}
+                      {wedding.groomName || ""} ♥ {wedding.brideName || ""}
                     </p>
                     <div className="flex items-center gap-3 text-sm text-stone-500 mt-1">
                       <span className="flex items-center gap-1">

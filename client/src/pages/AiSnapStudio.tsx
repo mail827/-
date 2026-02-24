@@ -1,21 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Camera, X, Download, Loader2, User, Users, ArrowRight, ArrowLeft, Package, Image, CreditCard } from 'lucide-react';
+import { Sparkles, Camera, X, Download, Loader2, User, Users, ArrowRight, ArrowLeft, Package, Image, CreditCard, Gift } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL;
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 const TOSS_CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY;
 
-type Mode = 'groom' | 'bride' | 'couple';
+type ShotMode = 'groom' | 'bride' | 'couple';
 type Category = 'studio' | 'cinematic';
 
 interface Tier { id: string; snaps: number; price: number; label: string }
 interface Concept { id: string; label: string; category: string }
-interface Snap { id: string; status: string; resultUrl?: string; concept: string; createdAt: string }
-interface Pack { id: string; tier: string; totalSnaps: number; usedSnaps: number; concept: string; category: string; mode: string; status: string; snaps: Snap[] }
+interface Snap { id: string; status: string; resultUrl?: string; concept: string; mode?: string; createdAt: string }
+interface Pack { id: string; tier: string; totalSnaps: number; usedSnaps: number; concept: string; category: string; mode: string; status: string; inputUrls: string[]; snaps: Snap[] }
 
 export default function AiSnapStudioPage() {
+  const [params] = useSearchParams();
   const token = localStorage.getItem('token');
   const [step, setStep] = useState(0);
   const [checking, setChecking] = useState(true);
@@ -26,7 +28,6 @@ export default function AiSnapStudioPage() {
   const [selectedTier, setSelectedTier] = useState('');
   const [category, setCategory] = useState<Category>('studio');
   const [selectedConcept, setSelectedConcept] = useState('');
-  const [mode, setMode] = useState<Mode>('groom');
   const [groomPhoto, setGroomPhoto] = useState('');
   const [bridePhoto, setBridePhoto] = useState('');
   const [uploading, setUploading] = useState<string | null>(null);
@@ -39,6 +40,10 @@ export default function AiSnapStudioPage() {
   const progressRef = useRef<ReturnType<typeof setInterval>>();
   const pollRef = useRef<ReturnType<typeof setInterval>>();
 
+  const [setupPackId, setSetupPackId] = useState<string | null>(null);
+  const [setupLoading, setSetupLoading] = useState(false);
+  const [shotMode, setShotMode] = useState<ShotMode | null>(null);
+
   useEffect(() => {
     if (!token) { setChecking(false); return; }
     Promise.all([
@@ -48,11 +53,25 @@ export default function AiSnapStudioPage() {
     ]).then(([t, c, p]) => {
       setTiers(t);
       setConcepts(c);
-      if (Array.isArray(p) && p.length > 0) {
-        setMyPacks(p);
-        setStep(10);
-      } else {
+      if (!Array.isArray(p) || p.length === 0) {
         setStep(1);
+        return;
+      }
+      setMyPacks(p);
+
+      const targetPackId = params.get('packId');
+      const emptyPack = targetPackId
+        ? p.find((pk: Pack) => pk.id === targetPackId && (!pk.concept || pk.concept === ''))
+        : p.find((pk: Pack) => !pk.concept || pk.concept === '');
+
+      if (emptyPack) {
+        setSetupPackId(emptyPack.id);
+        setSelectedTier(emptyPack.tier);
+        setStep(1);
+      } else {
+        const targetPack = targetPackId ? p.find((pk: Pack) => pk.id === targetPackId) : null;
+        if (targetPack) setActivePack(targetPack);
+        setStep(10);
       }
     }).catch(() => setStep(1)).finally(() => setChecking(false));
   }, [token]);
@@ -75,30 +94,45 @@ export default function AiSnapStudioPage() {
     setUploading(null);
   };
 
-  const getUrls = () => {
-    if (mode === 'couple') return [groomPhoto, bridePhoto];
-    if (mode === 'groom') return [groomPhoto];
-    return [bridePhoto];
-  };
-
-  const canPhoto = () => {
-    if (mode === 'couple') return !!groomPhoto && !!bridePhoto;
-    if (mode === 'groom') return !!groomPhoto;
-    return !!bridePhoto;
-  };
-
   const handleLogin = (provider: 'google' | 'kakao') => {
     localStorage.setItem('redirectAfterLogin', '/ai-snap/studio');
     window.location.href = `${API}/oauth/${provider}`;
   };
 
+  const handleSetup = async () => {
+    if (!setupPackId || !selectedConcept || !groomPhoto || !bridePhoto) return;
+    setSetupLoading(true);
+    try {
+      const res = await fetch(`${API}/snap-pack/pack/${setupPackId}/setup`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ concept: selectedConcept, category, mode: 'mix', imageUrls: [groomPhoto, bridePhoto] }),
+      });
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        window.location.reload();
+        return;
+      }
+      const data = await res.json();
+      if (data.error) {
+        setSetupLoading(false);
+        return;
+      }
+      setActivePack(data);
+      setMyPacks(prev => prev.map(p => p.id === data.id ? data : p));
+      setSetupPackId(null);
+      setStep(10);
+    } catch {}
+    setSetupLoading(false);
+  };
+
   const handlePayment = async () => {
-    if (!selectedTier || !selectedConcept) return;
+    if (!selectedTier || !selectedConcept || !groomPhoto || !bridePhoto) return;
     try {
       const orderRes = await fetch(`${API}/snap-pack/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ tier: selectedTier, concept: selectedConcept, category, mode, imageUrls: getUrls() }),
+        body: JSON.stringify({ tier: selectedTier, concept: selectedConcept, category, mode: 'mix', imageUrls: [groomPhoto, bridePhoto] }),
       });
       const order = await orderRes.json();
       if (!order.orderId) return;
@@ -125,8 +159,9 @@ export default function AiSnapStudioPage() {
     return data;
   };
 
-  const generateSnap = async () => {
+  const generateSnap = async (chosenMode: ShotMode) => {
     if (!activePack || generating) return;
+    setShotMode(chosenMode);
     setGenerating(true);
     setProgress(0);
     progressRef.current = setInterval(() => setProgress(p => p >= 92 ? 92 : p + Math.random() * 8), 800);
@@ -135,12 +170,13 @@ export default function AiSnapStudioPage() {
       const res = await fetch(`${API}/snap-pack/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ packId: activePack.id }),
+        body: JSON.stringify({ packId: activePack.id, mode: chosenMode }),
       });
       const data = await res.json();
       if (data.error) {
         clearInterval(progressRef.current);
         setGenerating(false);
+        setShotMode(null);
         return;
       }
       setPollingId(data.snapId);
@@ -153,12 +189,14 @@ export default function AiSnapStudioPage() {
           setProgress(snap.status === 'done' ? 100 : 0);
           setPollingId(null);
           setGenerating(false);
+          setShotMode(null);
           await loadPack(activePack.id);
         }
       }, 3000);
     } catch {
       clearInterval(progressRef.current);
       setGenerating(false);
+      setShotMode(null);
     }
   };
 
@@ -166,15 +204,23 @@ export default function AiSnapStudioPage() {
     return <div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="w-6 h-6 text-stone-400 animate-spin" /></div>;
   }
 
+  const isSetupMode = !!setupPackId;
+  const setupTier = isSetupMode ? tiers.find(t => t.id === selectedTier) : null;
+  const totalSteps = isSetupMode ? 4 : 5;
+
+  const stepMap = isSetupMode
+    ? [1, 2, 3, 4]
+    : [1, 2, 3, 4, 5];
+
   return (
     <div className="min-h-screen bg-white">
       <header className="border-b border-stone-200 sticky top-0 z-40 bg-white/80 backdrop-blur-sm">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="font-serif text-xl text-stone-800">청첩장 작업실</a>
-          {step >= 1 && step <= 6 && (
+          {step >= 1 && step <= 7 && (
             <div className="flex items-center gap-1.5">
-              {[1, 2, 3, 4, 5, 6].map(s => (
-                <div key={s} className={`h-1 rounded-full transition-all ${s <= step ? 'w-5 bg-stone-800' : 'w-2 bg-stone-200'}`} />
+              {stepMap.map((_, i) => (
+                <div key={i} className={`h-1 rounded-full transition-all ${i < (isSetupMode ? [1,2,3,7].indexOf(step) + 1 : [1,2,3,4,5].indexOf(step) + 1) ? 'w-5 bg-stone-800' : 'w-2 bg-stone-200'}`} />
               ))}
             </div>
           )}
@@ -207,51 +253,35 @@ export default function AiSnapStudioPage() {
           )}
 
           {step === 1 && (
-            <Step title="모드 선택" sub="누구의 화보를 만들까요?" onBack={() => {}}>
-              <div className="space-y-3">
-                {([
-                  { m: 'groom' as Mode, icon: User, label: '신랑 단독', desc: '신랑 사진 1장으로 화보 세트' },
-                  { m: 'bride' as Mode, icon: User, label: '신부 단독', desc: '신부 사진 1장으로 화보 세트' },
-                  { m: 'couple' as Mode, icon: Users, label: '커플 화보', desc: '신랑 + 신부 사진으로 커플 화보 세트' },
-                ]).map(item => (
-                  <button key={item.m} onClick={() => { setMode(item.m); setStep(2); }}
-                    className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-stone-200 hover:border-stone-800 transition-all text-left group">
-                    <div className="w-12 h-12 rounded-xl bg-stone-100 group-hover:bg-stone-800 flex items-center justify-center transition-colors">
-                      <item.icon className="w-5 h-5 text-stone-500 group-hover:text-white transition-colors" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-stone-800">{item.label}</p>
-                      <p className="text-xs text-stone-400">{item.desc}</p>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-stone-300 group-hover:text-stone-800 transition-colors" />
-                  </button>
-                ))}
+            <Step title="사진 업로드" sub="신랑과 신부의 정면 사진을 올려주세요">
+              {isSetupMode && (
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200 mb-4">
+                  <Gift className="w-5 h-5 text-amber-600 shrink-0" />
+                  <p className="text-sm text-amber-800">선물받은 <span className="font-semibold">{setupTier?.label}</span> 패키지를 설정하고 있어요</p>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <UploadCard label="신랑" photo={groomPhoto} uploading={uploading === 'groom'} onUpload={f => uploadPhoto(f, 'groom')} onClear={() => setGroomPhoto('')} />
+                <UploadCard label="신부" photo={bridePhoto} uploading={uploading === 'bride'} onUpload={f => uploadPhoto(f, 'bride')} onClear={() => setBridePhoto('')} />
+              </div>
+              <p className="text-center text-[11px] text-stone-400 pt-2">얼굴이 잘 보이는 사진으로 올려주세요. 매 컷 생성 시 신랑/신부/커플을 선택할 수 있어요.</p>
+              <div className="flex justify-end pt-4">
+                <button onClick={() => setStep(2)} disabled={!groomPhoto || !bridePhoto}
+                  className="px-8 py-3 rounded-xl bg-stone-800 text-white text-sm font-medium disabled:opacity-30 hover:bg-stone-900 transition-all flex items-center gap-1">
+                  다음 <ArrowRight className="w-4 h-4" />
+                </button>
               </div>
             </Step>
           )}
 
           {step === 2 && (
-            <Step title="사진 업로드" sub="정면 얼굴이 잘 보이는 사진이 좋아요" onBack={() => setStep(1)}>
-              <div className={`grid gap-4 ${mode === 'couple' ? 'grid-cols-2' : 'grid-cols-1 max-w-[200px] mx-auto'}`}>
-                {(mode === 'couple' || mode === 'groom') && (
-                  <UploadCard label="신랑" photo={groomPhoto} uploading={uploading === 'groom'} onUpload={f => uploadPhoto(f, 'groom')} onClear={() => setGroomPhoto('')} />
-                )}
-                {(mode === 'couple' || mode === 'bride') && (
-                  <UploadCard label="신부" photo={bridePhoto} uploading={uploading === 'bride'} onUpload={f => uploadPhoto(f, 'bride')} onClear={() => setBridePhoto('')} />
-                )}
-              </div>
-              <NavButtons onBack={() => setStep(1)} onNext={() => setStep(3)} disabled={!canPhoto()} />
-            </Step>
-          )}
-
-          {step === 3 && (
-            <Step title="카테고리 선택" sub="원하는 스타일을 골라주세요" onBack={() => setStep(2)}>
+            <Step title="카테고리 선택" sub="원하는 스타일을 골라주세요">
               <div className="grid grid-cols-2 gap-4">
                 {([
                   { c: 'studio' as Category, label: '스튜디오', desc: '깨끗하고 정적인 웨딩 화보', icon: Image },
                   { c: 'cinematic' as Category, label: '시네마틱', desc: '영화 같은 드라마틱 화보', icon: Sparkles },
                 ]).map(item => (
-                  <button key={item.c} onClick={() => { setCategory(item.c); setStep(4); }}
+                  <button key={item.c} onClick={() => { setCategory(item.c); setStep(3); }}
                     className={`p-6 rounded-2xl border-2 text-center transition-all hover:shadow-lg ${category === item.c ? 'border-stone-800 bg-stone-800' : 'border-stone-200 hover:border-stone-400'}`}>
                     <item.icon className={`w-8 h-8 mx-auto mb-3 ${category === item.c ? 'text-amber-300' : 'text-stone-400'}`} />
                     <p className={`font-semibold mb-1 ${category === item.c ? 'text-white' : 'text-stone-800'}`}>{item.label}</p>
@@ -259,11 +289,16 @@ export default function AiSnapStudioPage() {
                   </button>
                 ))}
               </div>
+              <div className="flex pt-4">
+                <button onClick={() => setStep(1)} className="px-6 py-3 rounded-xl border border-stone-200 text-sm text-stone-500 hover:bg-stone-50 flex items-center gap-1">
+                  <ArrowLeft className="w-4 h-4" /> 이전
+                </button>
+              </div>
             </Step>
           )}
 
-          {step === 4 && (
-            <Step title="컨셉 선택" sub="세트 내 모든 사진이 이 컨셉으로 생성돼요" onBack={() => setStep(3)}>
+          {step === 3 && (
+            <Step title="컨셉 선택" sub="세트 내 모든 사진이 이 컨셉의 장소와 의상으로 통일돼요">
               <div className="grid grid-cols-2 gap-2">
                 {(category === 'studio' ? concepts.studio : concepts.cinematic).map(c => (
                   <button key={c.id} onClick={() => setSelectedConcept(c.id)}
@@ -272,12 +307,17 @@ export default function AiSnapStudioPage() {
                   </button>
                 ))}
               </div>
-              <NavButtons onBack={() => setStep(3)} onNext={() => setStep(5)} disabled={!selectedConcept} />
+              <NavButtons
+                onBack={() => setStep(2)}
+                onNext={() => setStep(isSetupMode ? 7 : 4)}
+                disabled={!selectedConcept}
+                nextLabel={isSetupMode ? '설정 확인' : '다음'}
+              />
             </Step>
           )}
 
-          {step === 5 && (
-            <Step title="패키지 선택" sub="장수가 많을수록 장당 가격이 저렴해요" onBack={() => setStep(4)}>
+          {step === 4 && !isSetupMode && (
+            <Step title="패키지 선택" sub="장수가 많을수록 장당 가격이 저렴해요">
               <div className="space-y-3">
                 {tiers.map(t => {
                   const perSnap = Math.round(t.price / t.snaps);
@@ -300,12 +340,12 @@ export default function AiSnapStudioPage() {
                   );
                 })}
               </div>
-              <NavButtons onBack={() => setStep(4)} onNext={() => setStep(6)} disabled={!selectedTier} nextLabel="결제 확인" />
+              <NavButtons onBack={() => setStep(3)} onNext={() => setStep(5)} disabled={!selectedTier} nextLabel="결제 확인" />
             </Step>
           )}
 
-          {step === 6 && (
-            <Step title="주문 확인" sub="결제 후 바로 화보 생성이 시작돼요" onBack={() => setStep(5)}>
+          {step === 5 && !isSetupMode && (
+            <Step title="주문 확인" sub="결제 후 바로 화보 생성이 시작돼요">
               {(() => {
                 const t = tiers.find(t => t.id === selectedTier);
                 const allC = [...concepts.studio, ...concepts.cinematic];
@@ -313,10 +353,10 @@ export default function AiSnapStudioPage() {
                 return (
                   <div className="space-y-6">
                     <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5 space-y-3">
-                      <Row label="모드" value={mode === 'couple' ? '커플' : mode === 'groom' ? '신랑' : '신부'} />
                       <Row label="카테고리" value={category === 'studio' ? '스튜디오' : '시네마틱'} />
                       <Row label="컨셉" value={c?.label || ''} />
                       <Row label="장수" value={`${t?.snaps}장`} />
+                      <Row label="모드" value="매 컷 선택 (신랑/신부/커플)" />
                       <div className="border-t border-stone-200 pt-3 flex justify-between">
                         <span className="font-semibold text-stone-800">결제 금액</span>
                         <span className="text-xl font-light text-stone-800">{t?.price.toLocaleString()}<span className="text-xs text-stone-400">원</span></span>
@@ -332,6 +372,38 @@ export default function AiSnapStudioPage() {
             </Step>
           )}
 
+          {step === 7 && isSetupMode && (
+            <Step title="설정 확인" sub="선물받은 패키지로 화보를 시작해요">
+              {(() => {
+                const allC = [...concepts.studio, ...concepts.cinematic];
+                const c = allC.find(c => c.id === selectedConcept);
+                return (
+                  <div className="space-y-6">
+                    <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5 space-y-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Gift className="w-4 h-4 text-amber-600" />
+                        <span className="text-xs text-amber-600 font-semibold">선물 패키지</span>
+                      </div>
+                      <Row label="카테고리" value={category === 'studio' ? '스튜디오' : '시네마틱'} />
+                      <Row label="컨셉" value={c?.label || ''} />
+                      <Row label="장수" value={`${setupTier?.snaps || ''}장`} />
+                      <Row label="모드" value="매 컷 선택 (신랑/신부/커플)" />
+                      <div className="border-t border-stone-200 pt-3 flex justify-between">
+                        <span className="font-semibold text-stone-800">결제 금액</span>
+                        <span className="text-xl font-light text-green-600">0<span className="text-xs text-stone-400">원 (선물)</span></span>
+                      </div>
+                    </div>
+                    <button onClick={handleSetup} disabled={setupLoading}
+                      className="w-full py-4 rounded-2xl bg-stone-800 text-white font-medium flex items-center justify-center gap-2 hover:bg-stone-900 transition-all disabled:opacity-50">
+                      {setupLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                      화보 시작하기
+                    </button>
+                  </div>
+                );
+              })()}
+            </Step>
+          )}
+
           {step === 10 && activePack && (
             <motion.div key="studio" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
               <div className="flex items-center justify-between">
@@ -339,10 +411,8 @@ export default function AiSnapStudioPage() {
                   <h2 className="font-serif text-xl text-stone-800">내 웨딩 화보</h2>
                   <p className="text-xs text-stone-400 mt-1">{activePack.concept} · {activePack.usedSnaps}/{activePack.totalSnaps}장</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="px-3 py-1.5 bg-stone-100 rounded-full text-xs text-stone-600">
-                    {activePack.totalSnaps - activePack.usedSnaps}장 남음
-                  </div>
+                <div className="px-3 py-1.5 bg-stone-100 rounded-full text-xs text-stone-600">
+                  {activePack.totalSnaps - activePack.usedSnaps}장 남음
                 </div>
               </div>
 
@@ -357,7 +427,9 @@ export default function AiSnapStudioPage() {
                       <Loader2 className="w-5 h-5 text-white animate-spin" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-stone-800">화보를 생성하고 있어요</p>
+                      <p className="text-sm font-semibold text-stone-800">
+                        {shotMode === 'couple' ? '커플' : shotMode === 'groom' ? '신랑' : '신부'} 화보를 생성하고 있어요
+                      </p>
                       <p className="text-xs text-stone-400">30초~1분 소요</p>
                     </div>
                   </div>
@@ -380,7 +452,14 @@ export default function AiSnapStudioPage() {
                             <Download className="w-5 h-5 text-stone-800" />
                           </a>
                         </div>
-                        <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/50 rounded-full text-[10px] text-white">#{i + 1}</div>
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
+                          <span className="px-2 py-0.5 bg-black/50 rounded-full text-[10px] text-white">#{i + 1}</span>
+                          {snap.mode && (
+                            <span className="px-2 py-0.5 bg-black/50 rounded-full text-[10px] text-white">
+                              {snap.mode === 'couple' ? '커플' : snap.mode === 'groom' ? '신랑' : '신부'}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     ) : snap.status === 'processing' ? (
                       <div className="aspect-square bg-stone-50 flex items-center justify-center">
@@ -396,10 +475,33 @@ export default function AiSnapStudioPage() {
               </div>
 
               {activePack.usedSnaps < activePack.totalSnaps && !generating && (
-                <button onClick={generateSnap}
-                  className="w-full py-4 rounded-2xl bg-stone-800 text-white font-medium flex items-center justify-center gap-2 hover:bg-stone-900 transition-all">
-                  <Sparkles className="w-5 h-5" /> 다음 컷 생성하기 ({activePack.totalSnaps - activePack.usedSnaps}장 남음)
-                </button>
+                <div className="space-y-3">
+                  <p className="text-sm text-stone-500 text-center">다음 컷의 모드를 선택하세요</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button onClick={() => generateSnap('groom')}
+                      className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-stone-200 hover:border-stone-800 hover:bg-stone-50 transition-all group">
+                      <div className="w-10 h-10 rounded-xl bg-stone-100 group-hover:bg-stone-800 flex items-center justify-center transition-colors">
+                        <User className="w-5 h-5 text-stone-500 group-hover:text-white transition-colors" />
+                      </div>
+                      <span className="text-xs font-semibold text-stone-700">신랑</span>
+                    </button>
+                    <button onClick={() => generateSnap('bride')}
+                      className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-stone-200 hover:border-stone-800 hover:bg-stone-50 transition-all group">
+                      <div className="w-10 h-10 rounded-xl bg-stone-100 group-hover:bg-stone-800 flex items-center justify-center transition-colors">
+                        <User className="w-5 h-5 text-stone-500 group-hover:text-white transition-colors" />
+                      </div>
+                      <span className="text-xs font-semibold text-stone-700">신부</span>
+                    </button>
+                    <button onClick={() => generateSnap('couple')}
+                      className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-stone-200 hover:border-stone-800 hover:bg-stone-50 transition-all group">
+                      <div className="w-10 h-10 rounded-xl bg-stone-100 group-hover:bg-stone-800 flex items-center justify-center transition-colors">
+                        <Users className="w-5 h-5 text-stone-500 group-hover:text-white transition-colors" />
+                      </div>
+                      <span className="text-xs font-semibold text-stone-700">커플</span>
+                    </button>
+                  </div>
+                  <p className="text-center text-[11px] text-stone-400">{activePack.totalSnaps - activePack.usedSnaps}장 남음</p>
+                </div>
               )}
 
               {activePack.usedSnaps >= activePack.totalSnaps && !generating && (
@@ -416,8 +518,8 @@ export default function AiSnapStudioPage() {
                 <div className="pt-4 border-t border-stone-100">
                   <p className="text-xs text-stone-400 mb-3">내 화보 팩</p>
                   <div className="flex gap-2 overflow-x-auto pb-2">
-                    {myPacks.map(p => (
-                      <button key={p.id} onClick={() => { setActivePack(p); }}
+                    {myPacks.filter(p => p.concept && p.concept !== '').map(p => (
+                      <button key={p.id} onClick={() => setActivePack(p)}
                         className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs transition-all ${p.id === activePack?.id ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
                         {p.concept} · {p.usedSnaps}/{p.totalSnaps}
                       </button>
@@ -428,14 +530,18 @@ export default function AiSnapStudioPage() {
             </motion.div>
           )}
 
-          {step === 10 && !activePack && myPacks.length > 0 && (() => { setActivePack(myPacks[0]); return null; })()}
+          {step === 10 && !activePack && myPacks.length > 0 && (() => {
+            const readyPack = myPacks.find(p => p.concept && p.concept !== '');
+            if (readyPack) { setActivePack(readyPack); }
+            return null;
+          })()}
         </AnimatePresence>
       </main>
     </div>
   );
 }
 
-function Step({ title, sub, children }: { title: string; sub: string; onBack?: () => void; children: React.ReactNode }) {
+function Step({ title, sub, children }: { title: string; sub: string; children: React.ReactNode }) {
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
       <div className="text-center">

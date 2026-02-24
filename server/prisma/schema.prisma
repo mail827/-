@@ -510,6 +510,7 @@ model AiSnap {
   snapPackId  String?
   snapPack    SnapPack? @relation(fields: [snapPackId], references: [id], onDelete: Cascade)
   concept     String
+  mode        String?
   engine      String    @default("nano-banana")
   prompt      String
   inputUrls   Json

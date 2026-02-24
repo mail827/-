@@ -266,20 +266,24 @@ router.post('/extra-payment', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
-  const { packId } = req.body;
+  const { packId, mode } = req.body;
 
   try {
     const pack = await prisma.snapPack.findUnique({ where: { id: packId }, include: { snaps: true } });
     if (!pack || pack.status !== 'PAID') return res.status(400).json({ error: '결제된 팩이 아닙니다' });
     if (pack.usedSnaps >= pack.totalSnaps) return res.status(403).json({ error: '생성 가능 횟수 초과', needExtra: true });
 
+    const effectiveMode = mode || pack.mode;
     const shotIdx = pack.usedSnaps;
-    const prompt = buildPrompt(pack.concept, pack.category, pack.mode, shotIdx);
+    const prompt = buildPrompt(pack.concept, pack.category, effectiveMode, shotIdx);
+
+    const inputUrlsArr = pack.inputUrls as string[];
+    const imageUrls = effectiveMode === 'groom' ? [inputUrlsArr[0]] : effectiveMode === 'bride' ? [inputUrlsArr[1]] : effectiveMode === 'couple' ? inputUrlsArr : inputUrlsArr;
 
     const snap = await prisma.aiSnap.create({
       data: {
-        snapPackId: pack.id, concept: pack.concept, engine: 'nano-banana-pro',
-        prompt, inputUrls: pack.inputUrls as any, status: 'processing',
+        snapPackId: pack.id, concept: pack.concept, mode: effectiveMode,
+        engine: 'nano-banana-pro', prompt, inputUrls: pack.inputUrls as any, status: 'processing',
       },
     });
 
@@ -289,7 +293,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
       try {
         const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
           method: 'POST',
-          body: JSON.stringify({ prompt, image_urls: pack.inputUrls }),
+          body: JSON.stringify({ prompt, image_urls: imageUrls }),
         });
 
         if (submit.images) {
@@ -345,6 +349,26 @@ router.get('/my-packs', authMiddleware, async (req: AuthRequest, res) => {
     res.json(packs);
   } catch (e) {
     res.status(500).json({ error: 'Failed' });
+  }
+});
+
+router.patch('/pack/:id/setup', authMiddleware, async (req: AuthRequest, res) => {
+  const userId = (req as AuthRequest).user?.id;
+  const { concept, category, mode, imageUrls } = req.body;
+  try {
+    const pack = await prisma.snapPack.findUnique({ where: { id: req.params.id } });
+    if (!pack) return res.status(404).json({ error: '팩을 찾을 수 없습니다' });
+    if (pack.userId !== userId) return res.status(403).json({ error: '권한 없음' });
+    if (pack.concept && pack.concept !== '') return res.status(400).json({ error: '이미 설정된 팩입니다' });
+    if (!concept || !imageUrls || imageUrls.length < 1) return res.status(400).json({ error: 'concept, imageUrls 필수' });
+    const updated = await prisma.snapPack.update({
+      where: { id: req.params.id },
+      data: { concept, category: category || 'studio', mode: mode || 'groom', inputUrls: imageUrls },
+      include: { snaps: { orderBy: { createdAt: 'asc' } } },
+    });
+    res.json(updated);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
   }
 });
 

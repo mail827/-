@@ -7,7 +7,7 @@ const API = import.meta.env.VITE_API_URL;
 export default function AiSnapRedeem() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const [token, setToken] = useState(localStorage.getItem('token'));
   const [code, setCode] = useState(params.get('code') || '');
   const [checking, setChecking] = useState(false);
   const [info, setInfo] = useState<any>(null);
@@ -22,37 +22,54 @@ export default function AiSnapRedeem() {
   const checkCode = async (c: string) => {
     setChecking(true);
     setInfo(null);
+    setErrorMsg('');
     try {
       const res = await fetch(`${API}/snap-gift/check/${c}`);
       const data = await res.json();
       if (res.ok) setInfo(data);
-      else setErrorMsg(data.error);
+      else setErrorMsg(data.error || '코드 확인 실패');
     } catch { setErrorMsg('코드 확인 실패'); }
     setChecking(false);
   };
 
+  const clearAuth = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+  };
+
   const handleRedeem = async () => {
-    if (!token) {
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) {
       localStorage.setItem('redirectAfterLogin', `/ai-snap/redeem?code=${code}`);
       navigate('/');
       return;
     }
     setRedeeming(true);
+    setErrorMsg('');
     try {
       const res = await fetch(`${API}/snap-gift/redeem`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentToken}` },
         body: JSON.stringify({ code }),
       });
+      if (res.status === 401) {
+        clearAuth();
+        setErrorMsg('로그인이 만료됐어요. 다시 로그인해주세요.');
+        setRedeeming(false);
+        return;
+      }
       const data = await res.json();
       if (data.success) {
         setResult('success');
-        setTimeout(() => navigate('/ai-snap/studio'), 2000);
+        setTimeout(() => navigate(`/ai-snap/studio?packId=${data.packId}`), 2000);
       } else {
-        setErrorMsg(data.error);
+        setErrorMsg(data.error || '사용 실패');
         setResult('error');
       }
-    } catch { setResult('error'); setErrorMsg('사용 실패'); }
+    } catch {
+      setResult('error');
+      setErrorMsg('네트워크 오류가 발생했어요');
+    }
     setRedeeming(false);
   };
 
@@ -92,7 +109,7 @@ export default function AiSnapRedeem() {
               <div className="flex gap-2">
                 <input
                   value={code}
-                  onChange={e => setCode(e.target.value.toUpperCase())}
+                  onChange={e => { setCode(e.target.value.toUpperCase()); setErrorMsg(''); setInfo(null); }}
                   placeholder="SNAP-XXXXXXXX"
                   className="flex-1 px-4 py-3.5 border-2 border-stone-200 rounded-xl text-center text-lg tracking-wider font-mono focus:outline-none focus:border-stone-800 transition-all"
                 />
@@ -135,7 +152,7 @@ export default function AiSnapRedeem() {
               </div>
             )}
 
-            {errorMsg && !info && (
+            {errorMsg && (
               <p className="text-sm text-red-500 text-center">{errorMsg}</p>
             )}
 
