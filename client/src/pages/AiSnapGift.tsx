@@ -4,6 +4,16 @@ import { Gift, ArrowRight, ArrowLeft, Phone, Mail, MessageSquare, CreditCard, Lo
 const API = import.meta.env.VITE_API_URL;
 const TOSS_CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY;
 
+function loadTossV1(): Promise<any> {
+  return new Promise((resolve) => {
+    if ((window as any).TossPayments) { resolve((window as any).TossPayments); return; }
+    const s = document.createElement('script');
+    s.src = 'https://js.tosspayments.com/v1/payment';
+    s.onload = () => resolve((window as any).TossPayments);
+    document.body.appendChild(s);
+  });
+}
+
 interface Tier { id: string; snaps: number; price: number; label: string }
 
 const TIERS: Tier[] = [
@@ -50,19 +60,16 @@ export default function AiSnapGift() {
     try {
       const orderId = `SNAPGIFT_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-      const { loadTossPayments } = await import('@tosspayments/tosspayments-sdk');
-      const tp = await loadTossPayments(TOSS_CLIENT_KEY);
-      const payment = tp.payment({ customerKey: `user_${Date.now()}` });
-
       const params = new URLSearchParams({
         tier: selectedTier.id,
         ...(sendMethod === 'phone' ? { toPhone: phone.replace(/\D/g, '') } : { toEmail: email }),
         ...(message ? { message } : {}),
       });
 
-      await payment.requestPayment({
-        method: 'CARD',
-        amount: { currency: 'KRW', value: selectedTier.price },
+      const TossPayments = await loadTossV1();
+      const tp = TossPayments(TOSS_CLIENT_KEY);
+      await tp.requestPayment('카드', {
+        amount: selectedTier.price,
         orderId,
         orderName: `AI 웨딩스냅 선물 (${selectedTier.label})`,
         successUrl: `${window.location.origin}/ai-snap/gift/callback?${params.toString()}`,

@@ -8,6 +8,16 @@ const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 const TOSS_CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY;
 
+function loadTossV1(): Promise<any> {
+  return new Promise((resolve) => {
+    if ((window as any).TossPayments) { resolve((window as any).TossPayments); return; }
+    const s = document.createElement('script');
+    s.src = 'https://js.tosspayments.com/v1/payment';
+    s.onload = () => resolve((window as any).TossPayments);
+    document.body.appendChild(s);
+  });
+}
+
 type ShotMode = 'groom' | 'bride' | 'couple';
 type Category = 'studio' | 'cinematic';
 
@@ -137,13 +147,10 @@ export default function AiSnapStudioPage() {
       const order = await orderRes.json();
       if (!order.orderId) return;
 
-      const { loadTossPayments } = await import('@tosspayments/tosspayments-sdk');
-      const tp = await loadTossPayments(TOSS_CLIENT_KEY);
-      const payment = tp.payment({ customerKey: `user_${Date.now()}` });
-
-      await payment.requestPayment({
-        method: 'CARD',
-        amount: { currency: 'KRW', value: order.amount },
+      const TossPayments = await loadTossV1();
+      const tp = TossPayments(TOSS_CLIENT_KEY);
+      await tp.requestPayment('카드', {
+        amount: order.amount,
         orderId: order.orderId,
         orderName: `AI 웨딩스냅 ${tiers.find(t => t.id === selectedTier)?.label}`,
         successUrl: `${window.location.origin}/ai-snap/studio/callback?packId=${order.packId}`,
