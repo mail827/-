@@ -496,7 +496,7 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className={`relative bg-white rounded-2xl p-5 border transition-all hover:shadow-xl ${
+                className={`relative bg-white rounded-2xl p-5 border transition-all hover:shadow-xl min-w-[75vw] sm:min-w-[45vw] lg:min-w-0 snap-center ${
                   pkg.slug === 'ai-reception' 
                     ? 'border-stone-800 shadow-lg' 
                     : pkg.slug === 'basic-video' 
@@ -565,7 +565,7 @@ export default function Landing() {
               <p className="text-sm text-stone-500">청첩장 없이 AI 웨딩 화보만 이용할 수 있어요</p>
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex gap-4 overflow-x-auto pb-4 pt-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 lg:grid lg:grid-cols-4 lg:overflow-visible lg:mx-0 lg:px-0">
               {[
                 { snaps: 3, price: 5900, per: 1967 },
                 { snaps: 5, price: 9900, per: 1980 },
@@ -578,7 +578,7 @@ export default function Landing() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.08 }}
-                  className={`relative bg-white rounded-2xl p-5 border transition-all hover:shadow-xl ${t.popular ? 'border-stone-800 shadow-lg' : 'border-stone-200'}`}
+                  className={`relative bg-white rounded-2xl p-5 border transition-all hover:shadow-xl min-w-[75vw] sm:min-w-[45vw] lg:min-w-0 snap-center ${t.popular ? 'border-stone-800 shadow-lg' : 'border-stone-200'}`}
                 >
                   {t.popular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-stone-800 text-white text-xs rounded-full">
@@ -645,7 +645,7 @@ export default function Landing() {
               <h2 className="text-3xl sm:text-4xl font-bold text-stone-800 mb-4">이용 방법</h2>
               <p className="text-stone-500">청첩장 작업실, 이렇게 사용하세요</p>
             </motion.div>
-            <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
+            <div className="flex gap-4 overflow-x-auto pb-4 pt-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
               {guides.map((guide, index) => (
                 <motion.div
                   key={guide.id}

@@ -150,7 +150,7 @@ export default function AdminAiSnap() {
   const filtered = snaps.filter(s => {
     if (!search) return true;
     const q = search.toLowerCase();
-    return s.wedding.groomName.toLowerCase().includes(q) || s.wedding.brideName.toLowerCase().includes(q) || s.wedding.slug.toLowerCase().includes(q);
+    return (s.wedding?.groomName || "").toLowerCase().includes(q) || (s.wedding?.brideName || "").toLowerCase().includes(q) || (s.wedding?.slug || "").toLowerCase().includes(q);
   });
 
   return (
@@ -271,7 +271,7 @@ export default function AdminAiSnap() {
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-semibold text-stone-800 truncate">{snap.wedding.groomName} & {snap.wedding.brideName}</p>
+                    <p className="text-sm font-semibold text-stone-800 truncate">{snap.wedding?.groomName || "AI스냅"} & {snap.wedding?.brideName || "단독"}</p>
                     <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium flex-shrink-0 ${st.cls}`}>{st.label}</span>
                   </div>
                   <p className="text-xs text-stone-500">{CONCEPT_MAP[snap.concept] || snap.concept}</p>

@@ -61,7 +61,7 @@ export default function AdminSnapGift() {
           <p className="text-sm text-stone-400 mt-1">무료 선물 코드를 발급하고 관리합니다</p>
         </div>
         <button onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 transition-all">
+          className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 transition-all whitespace-nowrap">
           <Plus className="w-4 h-4" /> 무료 발급
         </button>
       </div>
@@ -109,8 +109,37 @@ export default function AdminSnapGift() {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="space-y-3 lg:hidden">
+        {gifts.length === 0 && <div className="py-12 text-center text-stone-400 text-sm">아직 발급된 선물이 없습니다</div>}
+        {gifts.map(g => {
+          const tier = TIERS.find(t => t.id === g.tier);
+          return (
+            <div key={g.id} className="bg-stone-50 rounded-xl p-4 flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-xs font-mono text-stone-600">{g.code}</p>
+                <p className="text-sm font-medium text-stone-800">{tier?.label || g.tier}</p>
+                <p className="text-xs text-stone-400">{g.toEmail || g.toPhone || g.toUser?.name || '-'}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex flex-col items-end gap-1">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] ${g.isFree ? 'bg-amber-100 text-amber-700' : 'bg-stone-100 text-stone-600'}`}>
+                    {g.isFree ? '무료' : '유료'}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] ${g.isRedeemed ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-600'}`}>
+                    {g.isRedeemed ? '사용됨' : '미사용'}
+                  </span>
+                </div>
+                <button onClick={() => copyCode(g.code)} className="p-2 hover:bg-stone-200 rounded-lg">
+                  {copied === g.code ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-stone-400" />}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden hidden lg:block">
+        <table className="w-full text-sm hidden lg:table">
           <thead className="bg-stone-50 border-b border-stone-200">
             <tr>
               <th className="text-left px-4 py-3 text-stone-500 font-medium">코드</th>
