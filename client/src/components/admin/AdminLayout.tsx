@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, Crown, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Heart, Film , Music } from 'lucide-react';
+import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, Crown, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Heart, Film, Music, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminLayout() {
@@ -29,6 +29,7 @@ export default function AdminLayout() {
     { path: '/admin/settlement', icon: TrendingUp, label: '제휴 정산' },
     { path: '/admin/theme-showcase', icon: Palette, label: '테마 쇼케이스' },
     { path: '/admin/bg-music', icon: Music, label: '배경음악' },
+    { path: '/admin/ai-snap', icon: Sparkles, label: 'AI 웨딩스냅' },
   ];
 
   return (
@@ -92,7 +93,7 @@ export default function AdminLayout() {
                   <X className="w-5 h-5 text-stone-600" />
                 </button>
               </div>
-              <nav className="p-4 space-y-1">
+              <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)] pb-16">
                 {menuItems.map((item) => {
                   const isActive = item.exact 
                     ? location.pathname === item.path

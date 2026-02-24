@@ -29,7 +29,8 @@ import { analyticsRouter } from './routes/analytics.js';
 import { couponRouter } from "./routes/coupon.js";
 import { pairRouter } from './routes/pair.js';
 import { mapRouter } from './routes/map.js';
-import ogRouter from './routes/og.js';
+import ogRouter from "./routes/og.js";
+import aiSnapRouter from "./routes/aiSnap.js";
 
 dotenv.config();
 
@@ -57,7 +58,8 @@ app.use('/api/email-auth', emailAuthRouter);
 app.use('/api/oauth', oauthRouter);
 app.use('/api/weddings', weddingRouter);
 app.use('/api/upload', uploadRouter);
-app.use('/api/rsvp', rsvpRouter);
+app.use("/api/rsvp", rsvpRouter);
+app.use("/api/ai-snap", aiSnapRouter);
 app.use('/api/notification', notificationRouter);
 app.use('/api/guestbook', guestbookRouter);
 app.use('/api/public', publicRouter);

@@ -129,7 +129,7 @@ export default function ThemePreviewModal({ isOpen, onClose, wedding, onApply }:
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="flex-1 overflow-y-auto overscroll-contain" style={{ transform: "translateZ(0)" }}>
           <Suspense
             fallback={
               <div className="flex items-center justify-center h-full min-h-[60vh]">
