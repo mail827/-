@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import usePageTracking from './hooks/usePageTracking';
 import Landing from './pages/Landing';
@@ -5,6 +6,8 @@ import AiSnapFree from './pages/AiSnapFree';
 import AiSnapStudioPage from './pages/AiSnapStudio';
 import AiSnapCallback from './pages/AiSnapCallback';
 import AiSnapRedeem from './pages/AiSnapRedeem';
+const AiSnapGift = lazy(() => import('./pages/AiSnapGift'));
+const AiSnapGiftCallback = lazy(() => import('./pages/AiSnapGiftCallback'));
 import AdminSnapGift from './pages/admin/AdminSnapGift';
 import OAuthCallback from './pages/OAuthCallback';
 import Dashboard from './pages/Dashboard';
@@ -83,6 +86,8 @@ export default function App() {
       <Route path="/ai-snap/studio" element={<AiSnapStudioPage />} />
       <Route path="/ai-snap/studio/callback" element={<AiSnapCallback />} />
       <Route path="/ai-snap/redeem" element={<AiSnapRedeem />} />
+      <Route path="/ai-snap/gift" element={<AiSnapGift />} />
+      <Route path="/ai-snap/gift/callback" element={<AiSnapGiftCallback />} />
       <Route path="/oauth/callback" element={<OAuthCallback />} />
       <Route path="/w/:slug" element={<WeddingPage />} />
         <Route path="/w/:slug/rsvp" element={<RsvpCheck />} />

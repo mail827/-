@@ -206,7 +206,6 @@ export default function AiSnapStudioPage() {
 
   const isSetupMode = !!setupPackId;
   const setupTier = isSetupMode ? tiers.find(t => t.id === selectedTier) : null;
-  const totalSteps = isSetupMode ? 4 : 5;
 
   const stepMap = isSetupMode
     ? [1, 2, 3, 4]
