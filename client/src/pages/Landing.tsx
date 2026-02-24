@@ -606,7 +606,7 @@ export default function Landing() {
                     </li>
                     <li className="flex items-start gap-2 text-xs text-stone-600">
                       <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
-                      <span>추가 촬영 장당 1,500원</span>
+                      <span>추가 생성 장당 1,500원</span>
                     </li>
                   </ul>
                   

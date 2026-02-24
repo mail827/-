@@ -207,7 +207,7 @@ export default function AiSnapStudioPage() {
           )}
 
           {step === 1 && (
-            <Step title="촬영 모드 선택" sub="누구의 화보를 만들까요?" onBack={() => {}}>
+            <Step title="모드 선택" sub="누구의 화보를 만들까요?" onBack={() => {}}>
               <div className="space-y-3">
                 {([
                   { m: 'groom' as Mode, icon: User, label: '신랑 단독', desc: '신랑 사진 1장으로 화보 세트' },
@@ -245,7 +245,7 @@ export default function AiSnapStudioPage() {
           )}
 
           {step === 3 && (
-            <Step title="카테고리 선택" sub="원하는 촬영 스타일을 골라주세요" onBack={() => setStep(2)}>
+            <Step title="카테고리 선택" sub="원하는 스타일을 골라주세요" onBack={() => setStep(2)}>
               <div className="grid grid-cols-2 gap-4">
                 {([
                   { c: 'studio' as Category, label: '스튜디오', desc: '깨끗하고 정적인 웨딩 화보', icon: Image },
@@ -263,7 +263,7 @@ export default function AiSnapStudioPage() {
           )}
 
           {step === 4 && (
-            <Step title="컨셉 선택" sub="세트 내 모든 사진이 이 컨셉으로 촬영돼요" onBack={() => setStep(3)}>
+            <Step title="컨셉 선택" sub="세트 내 모든 사진이 이 컨셉으로 생성돼요" onBack={() => setStep(3)}>
               <div className="grid grid-cols-2 gap-2">
                 {(category === 'studio' ? concepts.studio : concepts.cinematic).map(c => (
                   <button key={c.id} onClick={() => setSelectedConcept(c.id)}
@@ -357,7 +357,7 @@ export default function AiSnapStudioPage() {
                       <Loader2 className="w-5 h-5 text-white animate-spin" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-stone-800">화보를 촬영하고 있어요</p>
+                      <p className="text-sm font-semibold text-stone-800">화보를 생성하고 있어요</p>
                       <p className="text-xs text-stone-400">30초~1분 소요</p>
                     </div>
                   </div>
@@ -398,16 +398,16 @@ export default function AiSnapStudioPage() {
               {activePack.usedSnaps < activePack.totalSnaps && !generating && (
                 <button onClick={generateSnap}
                   className="w-full py-4 rounded-2xl bg-stone-800 text-white font-medium flex items-center justify-center gap-2 hover:bg-stone-900 transition-all">
-                  <Sparkles className="w-5 h-5" /> 다음 컷 촬영하기 ({activePack.totalSnaps - activePack.usedSnaps}장 남음)
+                  <Sparkles className="w-5 h-5" /> 다음 컷 생성하기 ({activePack.totalSnaps - activePack.usedSnaps}장 남음)
                 </button>
               )}
 
               {activePack.usedSnaps >= activePack.totalSnaps && !generating && (
                 <div className="bg-stone-50 rounded-2xl border border-stone-200 p-6 text-center">
-                  <p className="text-sm font-semibold text-stone-800 mb-2">모든 촬영이 완료됐어요!</p>
-                  <p className="text-xs text-stone-400 mb-4">추가 촬영이 필요하다면 장당 1,500원에 추가할 수 있어요</p>
+                  <p className="text-sm font-semibold text-stone-800 mb-2">모든 생성이 완료됐어요!</p>
+                  <p className="text-xs text-stone-400 mb-4">추가 생성이 필요하다면 장당 1,500원에 추가할 수 있어요</p>
                   <button className="px-6 py-2.5 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 transition-all">
-                    추가 촬영하기
+                    추가 생성하기
                   </button>
                 </div>
               )}

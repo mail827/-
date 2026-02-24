@@ -116,7 +116,7 @@ export default function AiSnapRedeem() {
                       <span className="text-stone-800 font-medium">{info.label}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-stone-500">촬영 장수</span>
+                      <span className="text-stone-500">생성 장수</span>
                       <span className="text-stone-800 font-medium">{info.snaps}장</span>
                     </div>
                     {info.isFree && (

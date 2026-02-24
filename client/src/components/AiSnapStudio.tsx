@@ -204,7 +204,7 @@ export default function AiSnapStudio({ weddingId }: Props) {
       )}
 
       <div>
-        <StepLabel num={1} text="촬영 모드" sub="커플 또는 단독 촬영을 선택하세요" />
+        <StepLabel num={1} text="모드 선택" sub="커플 또는 단독을 선택하세요" />
         <div className="grid grid-cols-3 gap-2 mt-3">
           {(Object.keys(MODE_CONFIG) as Mode[]).map(m => {
             const cfg = MODE_CONFIG[m];
@@ -231,7 +231,7 @@ export default function AiSnapStudio({ weddingId }: Props) {
       </div>
 
       <div>
-        <StepLabel num={3} text="웨딩 컨셉" sub="원하는 촬영 분위기를 골라주세요" />
+        <StepLabel num={3} text="웨딩 컨셉" sub="원하는 분위기를 골라주세요" />
         <div className="grid grid-cols-2 gap-2 mt-3">
           {concepts.map(c => {
             const meta = CONCEPT_META[c.id] || { emoji: '?', sub: '' };

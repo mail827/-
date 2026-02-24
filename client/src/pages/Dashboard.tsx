@@ -317,38 +317,57 @@ export default function Dashboard() {
           )}
         </div>
 
-        {mySnaps.length > 0 && (
-          <section className="mb-12">
-            <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">AI WEDDING SNAP</p>
-            <h2 className="font-serif text-2xl text-stone-800 mb-6">내 AI 웨딩스냅</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {mySnaps.map((snap: any) => (
-                <div key={snap.id} className="rounded-2xl overflow-hidden border border-stone-200 group relative">
-                  {snap.resultUrl ? (
-                    <>
-                      <img src={snap.resultUrl} alt="AI Snap" className="w-full aspect-square object-cover" />
-                      {snap.isFree && (
-                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/50 rounded-full text-[10px] text-white">무료체험</div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="aspect-square bg-stone-50 flex items-center justify-center">
-                      <div className="w-8 h-8 border-2 border-stone-300 border-t-stone-600 rounded-full animate-spin" />
-                    </div>
-                  )}
+        <section className="mb-12">
+          <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">AI WEDDING SNAP</p>
+          <h2 className="font-serif text-2xl text-stone-800 mb-6">내 AI 웨딩스냅</h2>
+          {mySnaps.length > 0 ? (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {mySnaps.map((snap: any) => (
+                  <div key={snap.id} className="rounded-2xl overflow-hidden border border-stone-200 group relative">
+                    {snap.resultUrl ? (
+                      <>
+                        <img src={snap.resultUrl} alt="AI Snap" className="w-full aspect-square object-cover" />
+                        {snap.isFree && (
+                          <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/50 rounded-full text-[10px] text-white">무료체험</div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="aspect-square bg-stone-50 flex items-center justify-center">
+                        <div className="w-8 h-8 border-2 border-stone-300 border-t-stone-600 rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {mySnaps.some((s: any) => s.isFree) && (
+                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-stone-800">워터마크 없는 원본이 필요하세요?</p>
+                    <p className="text-xs text-stone-500 mt-0.5">패키지 구매 시 워터마크 제거 + 다양한 컨셉 이용 가능</p>
+                  </div>
+                  <a href="/ai-snap/studio" className="flex-shrink-0 px-4 py-2 bg-stone-800 text-white rounded-xl text-xs font-medium hover:bg-stone-900 transition-all">
+                    패키지 보기
+                  </a>
                 </div>
-              ))}
+              )}
+            </>
+          ) : (
+            <div className="bg-stone-50 rounded-2xl border border-stone-200 p-8 text-center">
+              <Sparkles className="w-8 h-8 text-stone-300 mx-auto mb-3" />
+              <p className="text-sm text-stone-500 mb-1">아직 만든 웨딩스냅이 없어요</p>
+              <p className="text-xs text-stone-400 mb-5">AI가 사진 한 장으로 웨딩 화보를 만들어드려요</p>
+              <div className="flex gap-3 justify-center">
+                <a href="/ai-snap" className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 transition-all">
+                  <Sparkles className="w-4 h-4" /> 무료 체험하기
+                </a>
+                <a href="/ai-snap/studio" className="inline-flex items-center gap-2 px-5 py-2.5 border border-stone-200 text-stone-600 rounded-xl text-sm hover:bg-stone-50 transition-all">
+                  <ImageIcon className="w-4 h-4" /> 화보 스튜디오
+                </a>
+              </div>
             </div>
-            <div className="mt-4 flex gap-3">
-              <a href="/ai-snap" className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 transition-all">
-                <Sparkles className="w-4 h-4" /> 더 만들기
-              </a>
-              <a href="/ai-snap/studio" className="inline-flex items-center gap-2 px-5 py-2.5 border border-stone-200 text-stone-600 rounded-xl text-sm hover:bg-stone-50 transition-all">
-                <ImageIcon className="w-4 h-4" /> 화보 스튜디오
-              </a>
-            </div>
-          </section>
-        )}
+          )}
+        </section>
 
         <section>
           <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">MY INVITATIONS</p>

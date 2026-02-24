@@ -208,7 +208,7 @@ export default function AiSnapFree() {
                   <Sparkles className="w-3 h-3" /> 무료 체험 1장
                 </div>
                 <h1 className="font-serif text-2xl text-stone-800 mb-2">AI 웨딩 화보</h1>
-                <p className="text-sm text-stone-500">촬영 모드를 선택해주세요</p>
+                <p className="text-sm text-stone-500">모드를 선택해주세요</p>
               </div>
               <div className="space-y-3">
                 {([
@@ -260,7 +260,7 @@ export default function AiSnapFree() {
             <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
               <div className="text-center">
                 <h2 className="font-serif text-2xl text-stone-800 mb-2">컨셉 선택</h2>
-                <p className="text-sm text-stone-500">원하는 촬영 분위기를 골라주세요</p>
+                <p className="text-sm text-stone-500">원하는 분위기를 골라주세요</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {CONCEPTS.map(c => (
