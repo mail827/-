@@ -4,6 +4,8 @@ import Landing from './pages/Landing';
 import AiSnapFree from './pages/AiSnapFree';
 import AiSnapStudioPage from './pages/AiSnapStudio';
 import AiSnapCallback from './pages/AiSnapCallback';
+import AiSnapRedeem from './pages/AiSnapRedeem';
+import AdminSnapGift from './pages/admin/AdminSnapGift';
 import OAuthCallback from './pages/OAuthCallback';
 import Dashboard from './pages/Dashboard';
 import CreateWedding from './pages/CreateWedding';
@@ -80,6 +82,7 @@ export default function App() {
       <Route path="/ai-snap" element={<AiSnapFree />} />
       <Route path="/ai-snap/studio" element={<AiSnapStudioPage />} />
       <Route path="/ai-snap/studio/callback" element={<AiSnapCallback />} />
+      <Route path="/ai-snap/redeem" element={<AiSnapRedeem />} />
       <Route path="/oauth/callback" element={<OAuthCallback />} />
       <Route path="/w/:slug" element={<WeddingPage />} />
         <Route path="/w/:slug/rsvp" element={<RsvpCheck />} />
@@ -116,6 +119,7 @@ export default function App() {
         <Route path="theme-showcase" element={<AdminThemeShowcase />} />
               <Route path="bg-music" element={<AdminBgMusic />} />
         <Route path="ai-snap" element={<AdminAiSnap />} />
+            <Route path="snap-gift" element={<AdminSnapGift />} />
         <Route path="weddings" element={<AdminWeddingList />} />
         <Route path="weddings/create" element={<AdminWeddingCreate />} />
         <Route path="weddings/new" element={<AdminWeddingCreate />} />

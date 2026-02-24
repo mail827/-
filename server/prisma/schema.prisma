@@ -18,6 +18,8 @@ model User {
   freeSnapUsed  Boolean   @default(false)
   snapPacks     SnapPack[]
   aiSnaps       AiSnap[]
+  snapGiftsSent     SnapGift[] @relation("SnapGiftsSent")
+  snapGiftsReceived SnapGift[] @relation("SnapGiftsReceived")
   phone         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -459,6 +461,24 @@ model BgMusic {
   updatedAt DateTime @updatedAt
 }
 
+
+model SnapGift {
+  id         String    @id @default(cuid())
+  code       String    @unique
+  tier       String
+  fromUserId String?
+  fromUser   User?     @relation("SnapGiftsSent", fields: [fromUserId], references: [id])
+  toEmail    String?
+  toPhone    String?
+  toUserId   String?
+  toUser     User?     @relation("SnapGiftsReceived", fields: [toUserId], references: [id])
+  message    String?
+  isFree     Boolean   @default(false)
+  isRedeemed Boolean   @default(false)
+  redeemedAt DateTime?
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+}
 
 model SnapPack {
   id          String    @id @default(cuid())

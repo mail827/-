@@ -30,6 +30,7 @@ export default function AdminLayout() {
     { path: '/admin/theme-showcase', icon: Palette, label: '테마 쇼케이스' },
     { path: '/admin/bg-music', icon: Music, label: '배경음악' },
     { path: '/admin/ai-snap', icon: Sparkles, label: 'AI 웨딩스냅' },
+    { path: '/admin/snap-gift', icon: Gift, label: 'AI스냅 선물' },
   ];
 
   return (

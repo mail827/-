@@ -137,6 +137,27 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(201).json(wedding);
     }
 
+    const giftCode = req.body.giftCode;
+    if (giftCode) {
+      const gift = await prisma.gift.findFirst({
+        where: { code: giftCode, isRedeemed: true, toUserId: user.id },
+        include: { package: true },
+      });
+      if (!gift) return res.status(400).json({ error: '유효하지 않은 선물 코드입니다' });
+      const wedding = await prisma.wedding.create({
+        data: {
+          ...data, userId: user.id, slug,
+          weddingDate: new Date(data.weddingDate),
+          expiresAt: new Date(Date.now() + (gift.package?.durationDays || 90) * 24 * 60 * 60 * 1000),
+        },
+      });
+      return res.status(201).json(wedding);
+    }
+
+    if (user.role !== 'ADMIN') {
+      return res.status(400).json({ error: '유효한 주문 또는 선물 코드가 필요합니다' });
+    }
+
     const wedding = await prisma.wedding.create({
       data: {
         ...data,

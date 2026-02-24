@@ -32,6 +32,7 @@ import { mapRouter } from './routes/map.js';
 import ogRouter from "./routes/og.js";
 import aiSnapRouter from "./routes/aiSnap.js";
 import snapPackRouter from "./routes/snapPack.js";
+import snapGiftRouter from "./routes/snapGift.js";
 
 dotenv.config();
 
@@ -62,6 +63,7 @@ app.use('/api/upload', uploadRouter);
 app.use("/api/rsvp", rsvpRouter);
 app.use("/api/ai-snap", aiSnapRouter);
 app.use("/api/snap-pack", snapPackRouter);
+app.use("/api/snap-gift", snapGiftRouter);
 app.use('/api/notification', notificationRouter);
 app.use('/api/guestbook', guestbookRouter);
 app.use('/api/public', publicRouter);
