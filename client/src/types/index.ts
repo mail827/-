@@ -95,6 +95,7 @@ export interface Wedding {
   aiCustomQna?: AiQna[];
   sectionOrder?: string[];
   galleryRatio?: string;
+  guestPhotoEnabled?: boolean;
   createdAt: string;
   updatedAt: string;
   galleries?: Gallery[];

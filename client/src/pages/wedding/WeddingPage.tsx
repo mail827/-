@@ -26,6 +26,7 @@ const HeartMinimal = lazy(() => import("./themes/HeartMinimal"));
 const WaveBorder = lazy(() => import("./themes/WaveBorder"));
 import AiChat from '../../components/AiChat';
 import GuestPhotoGallery from './themes/shared/GuestPhotoGallery';
+import { themeConfigs } from './themes/shared/themeConfig';
 import { useSectionOrder } from '../../hooks/useSectionOrder';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -183,11 +184,11 @@ export default function WeddingPage() {
           isRsvpLoading={rsvpMutation.isPending}
           isGuestbookLoading={guestbookMutation.isPending}
           refetchGuestbook={refetchGuestbook}
+          guestPhotoSlot={wedding.guestPhotoEnabled !== false ? (
+            <GuestPhotoGallery slug={wedding.slug} enabled={true} accentColor={themeConfigs[theme]?.colors?.accent} textColor={themeConfigs[theme]?.colors?.text} bgColor={themeConfigs[theme]?.colors?.background} />
+          ) : null}
         />
       </Suspense>
-      {wedding.guestPhotoEnabled !== false && (
-        <GuestPhotoGallery slug={wedding.slug} enabled={true} />
-      )}
       </div>
       
       {wedding.aiEnabled && (

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Phone, Volume2, VolumeX, MapPin, Calendar, Clock } from 'lucide-react';
 import { KakaoMap, GuestbookList, GalleryModal, ShareModal, formatDate, formatTime, getDday, type ThemeProps } from './shared';
 
-export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [rsvpData, setRsvpData] = useState({ name: '', contact: '', attendance: true, guestCount: 1 });
   const [rsvpSubmitted, setRsvpSubmitted] = useState(false);
@@ -292,6 +292,12 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
         </div>
       </Section>
 
+      {guestPhotoSlot && (
+        <Section id="guest-gallery-section">
+          {guestPhotoSlot}
+        </Section>
+      )}
+
       {wedding.closingMessage && (
         <Section color={C}>
           <div className="text-center">
@@ -342,9 +348,9 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
   );
 }
 
-function Section({ children, title, color, bgColor, className = '' }: { children: React.ReactNode; title?: string; color?: string; bgColor?: string; className?: string }) {
+function Section({ children, title, color, bgColor, className = '', id }: { children: React.ReactNode; title?: string; color?: string; bgColor?: string; className?: string; id?: string }) {
   return (
-    <section className={`py-10 px-6 ${className}`} style={{ backgroundColor: bgColor }}>
+    <section id={id} className={`py-10 px-6 ${className}`} style={{ backgroundColor: bgColor }}>
       <div className="max-w-md mx-auto">
         {title && <h2 className="text-2xl font-medium text-center mb-6" style={{ color: color || '#1f2937' }}>{title}</h2>}
         {children}

@@ -2,7 +2,7 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown, MapPin, Calendar, Clock } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, Section, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
 
 const H = {
   bg: '#FFF9EE', alt: '#FFF5E6', blush: '#FFE8C8', peach: '#E07B38', rose: '#C86A2E',
@@ -100,7 +100,7 @@ function CopyBtn({ bank, account, holder }: { bank?: string; account?: string; h
   );
 }
 
-export default function HeartMinimal({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function HeartMinimal({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const w = wedding;
   const galleries = (w.galleries || []).filter((g: any) => g.mediaUrl);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -270,6 +270,12 @@ export default function HeartMinimal({ wedding, guestbooks, onRsvpSubmit, onGues
             {(localGuestbooks || []).length > 0 && <GuestbookList guestbooks={localGuestbooks || []} weddingSlug={w.slug} onDelete={handleGuestbookDelete} />}
           </div>
         </motion.section>
+
+        {guestPhotoSlot && (
+          <Section id="guest-gallery-section">
+            {guestPhotoSlot}
+          </Section>
+        )}
 
         <HeartDivider />
         <section className="px-8 py-14 text-center" style={{ background: H.bg }}>

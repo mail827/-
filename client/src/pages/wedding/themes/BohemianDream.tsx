@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
 import { RsvpForm, GuestbookForm, GalleryModal, KakaoMap, ShareModal, GuestbookList, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
 
-export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -218,6 +218,12 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
           />
         </motion.div>
       </Section>
+
+      {guestPhotoSlot && (
+        <Section id="guest-gallery-section">
+          {guestPhotoSlot}
+        </Section>
+      )}
 
       {wedding.closingMessage && (
         <Section className="bg-[#F5F3EF]">

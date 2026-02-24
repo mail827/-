@@ -17,7 +17,7 @@ const fontStyles = `
   }
 `;
 
-export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -400,6 +400,12 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
           />
         </motion.div>
       </Section>
+
+      {guestPhotoSlot && (
+        <Section id="guest-gallery-section">
+          {guestPhotoSlot}
+        </Section>
+      )}
 
       {wedding.closingMessage && (
         <Section>

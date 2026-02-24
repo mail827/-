@@ -80,7 +80,7 @@ export default function GuestPhotoGallery({ slug, enabled = true, accentColor = 
   ));
 
   return (
-    <div className="py-12 px-4" style={{ background: bgColor }}>
+    <div className="py-12 px-4" style={{ background: bgColor, fontFamily: "inherit" }}>
       <div className="text-center mb-8">
         <Title>GUEST GALLERY</Title>
         <p className="text-sm mt-2" style={{ color: textColor, opacity: 0.6 }}>우리의 순간을 함께 채워주세요</p>

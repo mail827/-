@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, ChevronDown, Share2, Copy, Check, Music, VolumeX } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, Section, formatDate, formatTime, getDday, type ThemeProps } from './shared';
 import { applyPhotoFilter } from './shared/themeConfig';
 
 function AquaHeroDustCanvas() {
@@ -359,7 +359,7 @@ function AccordionSection({ title, children, isOpen, onToggle }: { title: string
   );
 }
 
-export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, isPreview }: ThemeProps & { isPreview?: boolean }) {
+export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot, isPreview }: ThemeProps & { isPreview?: boolean }) {
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
@@ -587,6 +587,12 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
           )}
         </motion.div>
       </section>
+
+      {guestPhotoSlot && (
+        <Section id="guest-gallery-section">
+          {guestPhotoSlot}
+        </Section>
+      )}
 
       {(wedding.groomPhone || wedding.bridePhone) && (
         <section className="py-20 px-8 relative" style={{ zIndex: 1 }}>
