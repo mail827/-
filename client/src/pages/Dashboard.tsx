@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import QRCardModal from '../components/QRCardModal';
 
@@ -60,6 +60,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [weddings, setWeddings] = useState<Wedding[]>([]);
+  const [mySnaps, setMySnaps] = useState<any[]>([]);
   const [qrWedding, setQrWedding] = useState<Wedding | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,6 +108,10 @@ export default function Dashboard() {
       if (weddingsRes.ok) {
         const weddingsData = await weddingsRes.json();
         setWeddings(weddingsData);
+      try {
+        const snapRes = await fetch(`${import.meta.env.VITE_API_URL}/ai-snap/free/my-snaps`, { headers: { Authorization: `Bearer ${token}` } });
+        if (snapRes.ok) { const snapData = await snapRes.json(); setMySnaps(snapData); }
+      } catch {}
       }
 
       if (ordersRes.ok) {
@@ -310,6 +315,39 @@ export default function Dashboard() {
             </motion.button>
           )}
         </div>
+
+        {mySnaps.length > 0 && (
+          <section className="mb-12">
+            <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">AI WEDDING SNAP</p>
+            <h2 className="font-serif text-2xl text-stone-800 mb-6">내 AI 웨딩스냅</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {mySnaps.map((snap: any) => (
+                <div key={snap.id} className="rounded-2xl overflow-hidden border border-stone-200 group relative">
+                  {snap.resultUrl ? (
+                    <>
+                      <img src={snap.resultUrl} alt="AI Snap" className="w-full aspect-square object-cover" />
+                      {snap.isFree && (
+                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/50 rounded-full text-[10px] text-white">무료체험</div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="aspect-square bg-stone-50 flex items-center justify-center">
+                      <div className="w-8 h-8 border-2 border-stone-300 border-t-stone-600 rounded-full animate-spin" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex gap-3">
+              <a href="/ai-snap" className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 transition-all">
+                <Sparkles className="w-4 h-4" /> 더 만들기
+              </a>
+              <a href="/ai-snap/studio" className="inline-flex items-center gap-2 px-5 py-2.5 border border-stone-200 text-stone-600 rounded-xl text-sm hover:bg-stone-50 transition-all">
+                <ImageIcon className="w-4 h-4" /> 화보 스튜디오
+              </a>
+            </div>
+          </section>
+        )}
 
         <section>
           <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">MY INVITATIONS</p>

@@ -17,6 +17,7 @@ model User {
   role          Role      @default(CUSTOMER)
   freeSnapUsed  Boolean   @default(false)
   snapPacks     SnapPack[]
+  aiSnaps       AiSnap[]
   phone         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -482,6 +483,8 @@ model SnapPack {
 
 model AiSnap {
   id          String    @id @default(cuid())
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
   weddingId   String?
   wedding     Wedding?  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
   snapPackId  String?
@@ -491,7 +494,9 @@ model AiSnap {
   prompt      String
   inputUrls   Json
   resultUrl   String?
+  resultOriginalUrl String?
   status      String    @default("pending")
+  isFree      Boolean   @default(false)
   errorMsg    String?
   createdAt   DateTime  @default(now())
 }

@@ -33,6 +33,7 @@ export default function AiSnapFree() {
   const progressRef = useRef<ReturnType<typeof setInterval>>();
   const [resultUrl, setResultUrl] = useState('');
   const [, setAlreadyUsed] = useState(false);
+  const [, setSnapId] = useState('');
   const [, setIsLoggedIn] = useState(false);
   const [checking, setChecking] = useState(true);
   const pollRef = useRef<ReturnType<typeof setInterval>>();
@@ -112,9 +113,11 @@ export default function AiSnapFree() {
         setResultUrl(data.resultUrl);
         setGenerating(false);
       } else if (data.statusUrl) {
+        if (data.snapId) setSnapId(data.snapId);
         pollRef.current = setInterval(async () => {
           try {
-            const pRes = await fetch(`${API}/ai-snap/free/poll?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}`);
+            const sid = data.snapId || '';
+            const pRes = await fetch(`${API}/ai-snap/free/poll?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}&snapId=${sid}`);
             const pData = await pRes.json();
             if (pData.status === 'done') {
               clearInterval(pollRef.current);

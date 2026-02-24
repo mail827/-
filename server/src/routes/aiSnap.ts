@@ -217,13 +217,36 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
     if (submit.images) {
       const uploaded = await uploadFromUrl(submit.images[0]?.url, 'ai-snap/free');
       const watermarked = getWatermarkedUrl(uploaded.publicId);
-      return res.json({ status: 'done', resultUrl: watermarked, originalPublicId: uploaded.publicId });
+      await prisma.aiSnap.create({
+        data: {
+          userId, concept, engine: 'nano-banana-pro', prompt,
+          inputUrls: imageUrls, resultUrl: watermarked,
+          resultOriginalUrl: uploaded.url, status: 'done', isFree: true,
+        },
+      });
+      return res.json({ status: 'done', resultUrl: watermarked });
     }
     if (!submit.status_url) throw new Error('No status_url');
-    res.json({ status: 'generating', statusUrl: submit.status_url, responseUrl: submit.response_url });
+    const snap = await prisma.aiSnap.create({
+      data: {
+        userId, concept, engine: 'nano-banana-pro', prompt,
+        inputUrls: imageUrls, status: 'processing', isFree: true,
+      },
+    });
+    res.json({ status: 'generating', snapId: snap.id, statusUrl: submit.status_url, responseUrl: submit.response_url });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
+});
+
+router.get('/free/my-snaps', authMiddleware, async (req: AuthRequest, res) => {
+  const userId = (req as AuthRequest).user?.id;
+  if (!userId) return res.status(401).json({ error: '로그인 필요' });
+  const snaps = await prisma.aiSnap.findMany({
+    where: { userId, isFree: true },
+    orderBy: { createdAt: 'desc' },
+  });
+  res.json(snaps);
 });
 
 router.get('/free/check', authMiddleware, async (req: AuthRequest, res) => {
@@ -242,7 +265,14 @@ router.get('/free/poll', async (req, res) => {
       const result = await falFetch(responseUrl as string);
       const uploaded = await uploadFromUrl(result.images?.[0]?.url, 'ai-snap/free');
       const watermarked = getWatermarkedUrl(uploaded.publicId);
-      return res.json({ status: 'done', resultUrl: watermarked, originalPublicId: uploaded.publicId });
+      const snapId = req.query.snapId as string;
+      if (snapId) {
+        await prisma.aiSnap.update({
+          where: { id: snapId },
+          data: { resultUrl: watermarked, resultOriginalUrl: uploaded.url, status: 'done' },
+        });
+      }
+      return res.json({ status: 'done', resultUrl: watermarked });
     }
     if (status.status === 'FAILED') return res.json({ status: 'failed', error: status.error });
     res.json({ status: 'generating' });
