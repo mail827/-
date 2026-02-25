@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import JSZip from 'jszip';
+import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import QRCardModal from '../components/QRCardModal';
 
@@ -54,6 +55,14 @@ interface Pack {
   snaps: Snap[];
 }
 
+interface GuestPhoto {
+  id: string;
+  guestName: string;
+  imageUrl: string;
+  message?: string;
+  createdAt: string;
+}
+
 declare global {
   interface Window {
     TossPayments?: any;
@@ -88,6 +97,11 @@ export default function Dashboard() {
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [showModal, setShowModal] = useState<'inquiries' | 'orders' | null>(null);
   const [retryingOrderId, setRetryingOrderId] = useState<string | null>(null);
+  const [guestPhotos, setGuestPhotos] = useState<GuestPhoto[]>([]);
+  const [guestPhotoSlug, setGuestPhotoSlug] = useState<string | null>(null);
+  const [guestPhotoViewIndex, setGuestPhotoViewIndex] = useState<number | null>(null);
+  const [deleteConfirmPhoto, setDeleteConfirmPhoto] = useState<GuestPhoto | null>(null);
+  const [zipLoading, setZipLoading] = useState(false);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -114,6 +128,26 @@ export default function Dashboard() {
     setUser(payload);
     fetchData(token);
   }, [navigate]);
+
+  useEffect(() => {
+    if (weddings.length > 0 && !guestPhotoSlug) setGuestPhotoSlug(weddings[0].slug);
+  }, [weddings]);
+
+  const loadGuestPhotos = () => {
+    if (!guestPhotoSlug) return;
+    fetch(`${import.meta.env.VITE_API_URL}/guest-photo/${guestPhotoSlug}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(setGuestPhotos)
+      .catch(() => setGuestPhotos([]));
+  };
+
+  useEffect(() => {
+    if (!guestPhotoSlug) {
+      setGuestPhotos([]);
+      return;
+    }
+    loadGuestPhotos();
+  }, [guestPhotoSlug]);
 
   const fetchData = async (token: string) => {
     try {
@@ -224,6 +258,51 @@ export default function Dashboard() {
     } finally {
       setRetryingOrderId(null);
     }
+  };
+
+  const handleDeleteGuestPhoto = async () => {
+    if (!deleteConfirmPhoto) return;
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/guest-photo/${deleteConfirmPhoto.id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      setGuestPhotos(prev => prev.filter(p => p.id !== deleteConfirmPhoto.id));
+      setDeleteConfirmPhoto(null);
+      setGuestPhotoViewIndex(null);
+    }
+  };
+
+  const handleDownloadGuestPhoto = (photo: GuestPhoto) => {
+    fetch(photo.imageUrl).then(r => r.blob()).then(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `guest-${photo.guestName}-${photo.id.slice(0, 8)}.jpg`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+  };
+
+  const handleDownloadAllZip = async () => {
+    if (guestPhotos.length === 0) return;
+    setZipLoading(true);
+    try {
+      const zip = new JSZip();
+      for (let i = 0; i < guestPhotos.length; i++) {
+        const res = await fetch(guestPhotos[i].imageUrl);
+        const blob = await res.blob();
+        const ext = guestPhotos[i].imageUrl.includes('.png') ? 'png' : 'jpg';
+        zip.file(`guest-${i + 1}-${guestPhotos[i].guestName}.${ext}`, blob);
+      }
+      const out = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(out);
+      a.download = `guest-photos-${guestPhotoSlug || 'gallery'}.zip`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch {}
+    setZipLoading(false);
   };
 
   const handleDelete = async (weddingId: string, groomName: string, brideName: string) => {
@@ -579,6 +658,78 @@ export default function Dashboard() {
           )}
         </section>
 
+        {weddings.length > 0 && (
+          <section className="mt-12">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div>
+                  <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">GUEST GALLERY</p>
+                  <h2 className="font-serif text-2xl text-stone-800">하객 갤러리</h2>
+                </div>
+                <span className="px-3 py-1 bg-stone-100 text-stone-600 text-sm rounded-full self-start mt-1">{guestPhotos.length}장</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {weddings.length > 1 && (
+                  <select
+                    value={guestPhotoSlug || ''}
+                    onChange={e => setGuestPhotoSlug(e.target.value)}
+                    className="px-3 py-2 border border-stone-200 rounded-xl text-sm text-stone-700 bg-white"
+                  >
+                    {weddings.map(w => (
+                      <option key={w.id} value={w.slug}>{w.groomName} & {w.brideName}</option>
+                    ))}
+                  </select>
+                )}
+                <button
+                  onClick={handleDownloadAllZip}
+                  disabled={guestPhotos.length === 0 || zipLoading}
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-stone-200 text-stone-600 rounded-xl text-sm hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {zipLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                  전체 다운로드
+                </button>
+              </div>
+            </div>
+
+            {guestPhotos.length === 0 ? (
+              <div className="bg-stone-50 rounded-2xl border border-stone-200 p-12 text-center">
+                <ImageIcon className="w-10 h-10 text-stone-300 mx-auto mb-3" />
+                <p className="text-sm text-stone-500">아직 하객이 올린 사진이 없어요</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-3">
+                {guestPhotos.map((photo, i) => (
+                  <div
+                    key={photo.id}
+                    className="group relative rounded-xl overflow-hidden border border-stone-200 aspect-square bg-stone-50"
+                  >
+                    <img
+                      src={photo.imageUrl}
+                      alt={photo.guestName}
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={() => setGuestPhotoViewIndex(i)}
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                      <button
+                        onClick={e => { e.stopPropagation(); handleDownloadGuestPhoto(photo); }}
+                        className="p-2 bg-white rounded-full hover:bg-stone-100 transition-colors"
+                      >
+                        <Download className="w-4 h-4 text-stone-700" />
+                      </button>
+                      <button
+                        onClick={e => { e.stopPropagation(); setDeleteConfirmPhoto(photo); }}
+                        className="p-2 bg-white rounded-full hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
         <section className="mt-12">
           <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">MY PAGE</p>
           <h2 className="font-serif text-2xl text-stone-800 mb-8">내 정보</h2>
@@ -753,6 +904,55 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <AnimatePresence>
+        {guestPhotoViewIndex !== null && guestPhotos[guestPhotoViewIndex] && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center" onClick={() => setGuestPhotoViewIndex(null)}>
+            <button onClick={e => { e.stopPropagation(); setGuestPhotoViewIndex(Math.max(0, guestPhotoViewIndex - 1)); }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-white/60 hover:text-white z-10">
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <div className="max-w-4xl w-full px-4" onClick={e => e.stopPropagation()}>
+              <img src={guestPhotos[guestPhotoViewIndex].imageUrl} alt="" className="w-full rounded-lg" />
+              <div className="text-center mt-3">
+                <p className="text-white/80 text-sm">{guestPhotos[guestPhotoViewIndex].guestName}</p>
+                {guestPhotos[guestPhotoViewIndex].message && <p className="text-white/50 text-xs mt-1">{guestPhotos[guestPhotoViewIndex].message}</p>}
+              </div>
+            </div>
+            <button onClick={e => { e.stopPropagation(); setGuestPhotoViewIndex(Math.min(guestPhotos.length - 1, guestPhotoViewIndex + 1)); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white/60 hover:text-white z-10">
+              <ChevronRight className="w-6 h-6" />
+            </button>
+            <button onClick={() => setGuestPhotoViewIndex(null)} className="absolute top-4 right-4 p-2 text-white/60 hover:text-white">
+              <X className="w-6 h-6" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {deleteConfirmPhoto && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setDeleteConfirmPhoto(null)}>
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+              <p className="text-stone-800 font-medium mb-2">이 사진을 삭제하시겠습니까?</p>
+              <p className="text-sm text-stone-500 mb-6">{deleteConfirmPhoto.guestName}님이 올린 사진입니다.</p>
+              <div className="flex gap-2">
+                <button onClick={() => setDeleteConfirmPhoto(null)}
+                  className="flex-1 py-2.5 border border-stone-200 text-stone-600 rounded-xl text-sm hover:bg-stone-50">
+                  취소
+                </button>
+                <button onClick={handleDeleteGuestPhoto}
+                  className="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-sm hover:bg-red-600">
+                  삭제
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {qrWedding && (
         <QRCardModal
