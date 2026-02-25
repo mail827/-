@@ -154,7 +154,12 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
 
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
       method: 'POST',
-      body: JSON.stringify({ prompt, image_urls: imageUrls }),
+      body: JSON.stringify({
+        prompt,
+        image_urls: imageUrls,
+        strength: 0.45,
+        num_images: 1,
+      }),
     });
 
     if (submit.images) {
@@ -372,7 +377,12 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
     }
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
       method: 'POST',
-      body: JSON.stringify({ prompt, image_urls: imageUrls }),
+      body: JSON.stringify({
+        prompt,
+        image_urls: imageUrls,
+        strength: 0.45,
+        num_images: 1,
+      }),
     });
     if (submit.images) {
       return res.json({ status: 'done', resultUrl: submit.images[0]?.url });
