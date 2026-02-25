@@ -30,6 +30,8 @@ const CONCEPT_META: Record<string, { emoji: string; sub: string }> = {
   autumn_leaves: { emoji: 'A', sub: '단풍길 로맨스' },
   winter_snow: { emoji: 'I', sub: '눈 내리는 날' },
   vintage_film: { emoji: 'V', sub: '필름 감성' },
+  cruise_sunset: { emoji: 'S', sub: '선셋 요트' },
+  cruise_bluesky: { emoji: 'B', sub: '청명한 바다' },
 };
 
 type Mode = 'couple' | 'groom' | 'bride';

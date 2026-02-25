@@ -34,6 +34,8 @@ const CONCEPTS = [
   { id: 'autumn_leaves', label: '가을 단풍' },
   { id: 'winter_snow', label: '겨울 눈' },
   { id: 'vintage_film', label: '빈티지 필름' },
+  { id: 'cruise_sunset', label: '크루즈 선셋' },
+  { id: 'cruise_bluesky', label: '크루즈 블루스카이' },
 ];
 
 const CONCEPT_MAP = Object.fromEntries(CONCEPTS.map(c => [c.id, c.label]));

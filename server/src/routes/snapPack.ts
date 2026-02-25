@@ -89,6 +89,14 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '빈티지 필름',
     base: 'warm Kodak Portra 400 film grain texture, slightly faded nostalgic color palette, soft natural window light, 1970s vintage wedding aesthetic',
   },
+  cruise_sunset: {
+    label: '크루즈 선셋',
+    base: 'luxury yacht deck at golden hour sunset, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, romantic warm cinematic lighting',
+  },
+  cruise_bluesky: {
+    label: '크루즈 블루스카이',
+    base: 'luxury cruise ship deck under vivid blue sky, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere',
+  },
 };
 
 const SHOT_VARIANTS = [
@@ -153,6 +161,8 @@ const OUTFIT_GROOM: Record<string, string> = {
   autumn_leaves: 'wearing warm brown tweed suit with earth tones',
   winter_snow: 'wearing charcoal wool coat suit, winter layers',
   vintage_film: 'wearing retro brown suit with wide lapels, 1970s style',
+  cruise_sunset: 'wearing light linen suit, nautical elegance',
+  cruise_bluesky: 'wearing white or navy blazer, crisp shirt, nautical style',
 };
 
 const OUTFIT_BRIDE: Record<string, string> = {
@@ -171,6 +181,8 @@ const OUTFIT_BRIDE: Record<string, string> = {
   autumn_leaves: 'wearing ivory dress, warm autumn tones',
   winter_snow: 'wearing white fur-trimmed gown, winter wonderland style',
   vintage_film: 'wearing classic A-line lace dress, 1970s vintage bridal aesthetic',
+  cruise_sunset: 'wearing flowing white dress, windswept hair, golden hour elegance',
+  cruise_bluesky: 'wearing white summer dress, clean nautical bridal style',
 };
 
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {
