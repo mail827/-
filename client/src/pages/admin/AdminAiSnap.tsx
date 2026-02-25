@@ -128,17 +128,17 @@ export default function AdminAiSnap() {
       });
       const data = await res.json();
       if (data.status === 'done' && data.resultUrl) {
-        const newResult = { id: data.resultUrl, url: data.resultUrl, concept, mode };
-        setResults(prev => [...prev.filter(r => r.id !== newResult.id), newResult]);
+        setResults(prev => [{ id: Date.now().toString(), url: data.resultUrl, concept, mode }, ...prev]);
         setGenerating(false);
-      } else if (data.statusUrl) {
+        return;
+      }
+      if (data.statusUrl) {
         pollRef.current = setInterval(async () => {
           const pRes = await api(`/poll?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}`);
           const pData = await pRes.json();
           if (pData.status === 'done') {
             clearInterval(pollRef.current);
-            const newResult = { id: pData.resultUrl, url: pData.resultUrl, concept, mode };
-            setResults(prev => [...prev.filter(r => r.id !== newResult.id), newResult]);
+            setResults(prev => [{ id: Date.now().toString(), url: pData.resultUrl, concept, mode }, ...prev]);
             setGenerating(false);
           } else if (pData.status === 'failed') {
             clearInterval(pollRef.current);
