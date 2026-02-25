@@ -26,7 +26,6 @@ const HeartMinimal = lazy(() => import("./themes/HeartMinimal"));
 const WaveBorder = lazy(() => import("./themes/WaveBorder"));
 import AiChat from '../../components/AiChat';
 import GuestPhotoGallery from './themes/shared/GuestPhotoGallery';
-import { themeConfigs } from './themes/shared/themeConfig';
 import { useSectionOrder } from '../../hooks/useSectionOrder';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -83,27 +82,6 @@ const themeComponents: Record<Theme, React.ComponentType<any>> = {
   BOTANICAL_CLASSIC: BotanicalClassic,
 };
 
-const THEME_FONTS: Record<string, string> = {
-  ROMANTIC_CLASSIC: "'Nanum Myeongjo', serif",
-  MODERN_MINIMAL: "'Pretendard', sans-serif",
-  FOREST_GARDEN: "'Nanum Myeongjo', serif",
-  NIGHT_SEA: "'Nanum Myeongjo', serif",
-  POETIC_LOVE: "'Nanum Myeongjo', serif",
-  LUXURY_GOLD: "'Cormorant Garamond', serif",
-  SPRING_BREEZE: "'Nanum Myeongjo', serif",
-  BOHEMIAN_DREAM: "'Nanum Myeongjo', serif",
-  OCEAN_BREEZE: "'Nanum Myeongjo', serif",
-  AQUA_GLOBE: "'Nanum Myeongjo', serif",
-  GLASS_BUBBLE: "'Pretendard', sans-serif",
-  PEARL_DRIFT: "'Nanum Myeongjo', serif",
-  LUNA_HALFMOON: "'Nanum Myeongjo', serif",
-  SENIOR_SIMPLE: "'Pretendard', sans-serif",
-  BOTANICAL_CLASSIC: "'MaruBuri', serif",
-  HEART_MINIMAL: "'GowunBatang', serif",
-  WAVE_BORDER: "'Libre Baskerville', serif",
-  GALLERY_MIRIM_1: "'Nanum Myeongjo', serif",
-  GALLERY_MIRIM_2: "'Nanum Myeongjo', serif",
-};
 
 export default function WeddingPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -206,14 +184,10 @@ export default function WeddingPage() {
           isRsvpLoading={rsvpMutation.isPending}
           isGuestbookLoading={guestbookMutation.isPending}
           refetchGuestbook={refetchGuestbook}
+          guestPhotoSlot={wedding.guestPhotoEnabled !== false ? <GuestPhotoGallery slug={wedding.slug} enabled={true} /> : undefined}
         />
       </Suspense>
       </div>
-      {wedding.guestPhotoEnabled !== false && (
-        <div style={{ fontFamily: THEME_FONTS[theme] || "'Nanum Myeongjo', serif", color: themeConfigs[theme]?.colors?.text, background: themeConfigs[theme]?.colors?.background }}>
-          <GuestPhotoGallery slug={wedding.slug} enabled={true} />
-        </div>
-      )}
       {wedding.aiEnabled && (
         <AiChat
           slug={wedding.slug}

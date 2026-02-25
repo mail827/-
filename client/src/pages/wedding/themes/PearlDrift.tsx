@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
 import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
 
-export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -322,6 +322,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </motion.div>
       </section>
 
+      {guestPhotoSlot}
       <footer className="py-14 text-center" style={{ background: '#0A0A0A' }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.25em] hover:opacity-70 transition-opacity" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.25)' }}>
           Made by 청첩장 작업실 ›

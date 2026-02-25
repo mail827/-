@@ -17,7 +17,7 @@ const fontStyles = `
   }
 `;
 
-export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -456,6 +456,7 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
         </div>
       </Section>
 
+      {guestPhotoSlot}
       <footer className="py-10 text-center relative z-10" style={{ background: "rgba(180,170,200,0.15)" }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.3em] hover:opacity-70 transition-opacity" style={{ color: '#8A80A0', fontFamily: 'ChangwonDangamRounded, sans-serif' }}>Made by 청첩장 작업실 ›</a>
       </footer>

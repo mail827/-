@@ -8,7 +8,7 @@ const fontStyles = `
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 `;
 
-export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -383,6 +383,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
         </motion.div>
       </section>
 
+      {guestPhotoSlot}
       <footer className="py-8 text-center" style={{ background: "#F8F8F8" }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.2em] text-black/30 hover:text-black/40 transition-colors">Made by 청첩장 작업실 ›</a>
       </footer>

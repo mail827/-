@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
 import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
 
-export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -454,6 +454,7 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </div>
       </Section>
 
+      {guestPhotoSlot}
       <footer className="py-12 text-center" style={{ background: "#F0EAF5" }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#9A88C0] tracking-[0.2em] hover:text-[#7A68A0] transition-colors">Made by 청첩장 작업실 ›</a>
       </footer>

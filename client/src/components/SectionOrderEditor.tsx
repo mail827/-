@@ -120,7 +120,7 @@ export default function SectionOrderEditor({ value, onChange }: Props) {
       </DndContext>
 
       <div className="bg-stone-50 rounded-xl px-3 py-2 text-center">
-        <span className="text-xs text-stone-400 tracking-wide">공유 · 푸터 (고정)</span>
+        <span className="text-xs text-stone-400 tracking-wide">하객 갤러리 · 공유 · 푸터 (고정)</span>
       </div>
     </div>
   );

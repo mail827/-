@@ -17,7 +17,7 @@ const fontStyles = `
   }
 `;
 
-export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -412,6 +412,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
         </div>
       </Section>
 
+      {guestPhotoSlot}
       <footer className="py-10 text-center" style={{ background: "#FAF6F0" }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.3em] hover:opacity-80 transition-opacity" style={{ color: '#A08540' }}>Made by 청첩장 작업실 ›</a>
       </footer>

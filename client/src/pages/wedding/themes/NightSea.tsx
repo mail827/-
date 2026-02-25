@@ -334,7 +334,7 @@ function NightSeaCanvas() {
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} />;
 }
 
-export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, isPreview }: ThemeProps & { isPreview?: boolean }) {
+export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot, isPreview }: ThemeProps & { isPreview?: boolean }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -694,6 +694,7 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
         </motion.div>
       </section>
 
+      {guestPhotoSlot}
       <footer className="py-12 text-center relative" style={{ zIndex: 1 }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.25em] hover:opacity-70 transition-opacity" style={{ ...f, color: 'rgba(140, 170, 200, 0.2)' }}>
           Made by 청첩장 작업실 ›

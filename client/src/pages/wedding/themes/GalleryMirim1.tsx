@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
 import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
 
-export default function GalleryMirim1({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function GalleryMirim1({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -301,6 +301,7 @@ export default function GalleryMirim1({ wedding, guestbooks, onRsvpSubmit, onGue
         </motion.div>
       </section>
 
+      {guestPhotoSlot}
       <footer className="py-12 text-center" style={{ background: "#F5EEE6" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.55rem] tracking-[0.2em] hover:opacity-70 transition-opacity" style={{ ...serifFont, color: "#9A8B75" }}>Made by 청첩장 작업실 ›</a></footer>
 
       {galleryIndex !== null && galleries.length > 0 && <GalleryModal galleries={galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="GALLERY_MIRIM_1" usePhotoFilter={wedding.usePhotoFilter ?? true} />}

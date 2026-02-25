@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
 import { RsvpForm, GuestbookForm, GuestbookList, GalleryModal, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
 
-export default function ForestGarden({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function ForestGarden({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -237,6 +237,7 @@ export default function ForestGarden({ wedding, guestbooks, onRsvpSubmit, onGues
         </div>
       </Section>
 
+      {guestPhotoSlot}
       <footer className="py-8 text-center text-[10px] tracking-widest" style={{ background: "#E8EDE8" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[#5A6B5A] hover:text-[#3A4B3A] transition-colors">Made by 청첩장 작업실 ›</a></footer>
 
       <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="FOREST_GARDEN" usePhotoFilter={wedding.usePhotoFilter ?? true} />}</AnimatePresence>

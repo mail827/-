@@ -359,7 +359,7 @@ function AccordionSection({ title, children, isOpen, onToggle }: { title: string
   );
 }
 
-export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, isPreview }: ThemeProps & { isPreview?: boolean }) {
+export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot, isPreview }: ThemeProps & { isPreview?: boolean }) {
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
@@ -623,6 +623,7 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
         </motion.div>
       </section>
 
+      {guestPhotoSlot}
       <footer className="py-10 text-center relative" style={{ zIndex: 1 }}>
         <p className="text-[0.65rem] tracking-wider" style={{ ...f, color: c.textFaint }}>Made by 청첩장 작업실 ›</p>
       </footer>

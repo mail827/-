@@ -17,7 +17,7 @@ const fontStyles = `
   }
 `;
 
-export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -457,6 +457,7 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
         </div>
       </Section>
 
+      {guestPhotoSlot}
       <footer className="py-10 text-center relative z-10" style={{ background: "rgba(220,190,200,0.2)" }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.25em] hover:opacity-70 transition-opacity" style={{ color: '#B4A0A8', fontFamily: 'HsBombaram, serif' }}>Made by 청첩장 작업실 ›</a>
       </footer>

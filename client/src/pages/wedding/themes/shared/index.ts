@@ -95,6 +95,7 @@ export interface ThemeProps {
   onGuestbookSubmit: (data: GuestbookSubmitData) => Promise<void>;
   isRsvpLoading: boolean;
   isGuestbookLoading: boolean;
+  guestPhotoSlot?: React.ReactNode;
 }
 
 export function formatDate(dateString: string, format: 'korean' | 'dots' | 'short' = 'korean'): string {

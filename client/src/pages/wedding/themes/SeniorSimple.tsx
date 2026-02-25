@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Phone, Volume2, VolumeX, MapPin, Calendar, Clock } from 'lucide-react';
 import { KakaoMap, GuestbookList, GalleryModal, ShareModal, formatDate, formatTime, getDday, type ThemeProps } from './shared';
 
-export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [rsvpData, setRsvpData] = useState({ name: '', contact: '', attendance: true, guestCount: 1 });
   const [rsvpSubmitted, setRsvpSubmitted] = useState(false);
@@ -328,6 +328,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
 
       <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="light" />
 
+      {guestPhotoSlot}
       <footer className="py-8 text-center" style={{ background: "#F5F5F5" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-600 transition-colors text-sm">Made by 청첩장 작업실 ›</a></footer>
 
       {galleryIndex !== null && wedding.galleries && (

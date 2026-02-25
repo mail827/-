@@ -102,7 +102,7 @@ function CopyBtn({ bank, account, holder }: { bank?: string; account?: string; h
   );
 }
 
-export default function BotanicalClassic({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
+export default function BotanicalClassic({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const w = wedding;
   const galleries = (w.galleries || []).filter((g: any) => g.mediaUrl);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -276,7 +276,8 @@ export default function BotanicalClassic({ wedding, guestbooks, onRsvpSubmit, on
             </div>
             <button onClick={() => setShowShare(true)} className="inline-flex items-center gap-2 px-6 py-3 text-sm" style={{ background: P.green1, color: P.cream }}><Share2 size={14} /> 공유하기</button>
           </section>
-          <footer className="pb-8 text-center"><a href="https://weddingshop.cloud" target="_blank" rel="noreferrer" className="text-[10px] tracking-wider" style={{ color: P.textL }}>Made by 청첩장 작업실 ›</a></footer>
+          {guestPhotoSlot}
+      <footer className="pb-8 text-center"><a href="https://weddingshop.cloud" target="_blank" rel="noreferrer" className="text-[10px] tracking-wider" style={{ color: P.textL }}>Made by 청첩장 작업실 ›</a></footer>
         </div>
       </div>
       <ShareModal isOpen={showShare} onClose={() => setShowShare(false)} onShare={handleShare} variant="light" weddingId={w.id} />
