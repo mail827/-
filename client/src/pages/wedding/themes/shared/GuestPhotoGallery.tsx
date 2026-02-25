@@ -23,13 +23,15 @@ export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
   const [uploading, setUploading] = useState(false);
   const [guestName, setGuestName] = useState('');
   const [message, setMessage] = useState('');
-  const [preview, setPreview] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploadedCount, setUploadedCount] = useState(0);
   const [viewIndex, setViewIndex] = useState<number | null>(null);
   const [uploaded, setUploaded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { loadPhotos(); }, [slug]);
+  useEffect(() => () => { previews.forEach(p => URL.revokeObjectURL(p)); }, [previews]);
 
   const loadPhotos = async () => {
     try {
@@ -39,32 +41,34 @@ export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
+    const selected = Array.from(e.target.files || []).slice(0, 10);
+    if (!selected.length) return;
+    setFiles(selected);
+    setPreviews(selected.map(f => URL.createObjectURL(f)));
     setShowUpload(true);
   };
 
   const handleUpload = async () => {
-    if (!file || uploading) return;
+    if (!files.length || uploading) return;
     setUploading(true);
+    setUploadedCount(0);
     try {
-      const fd = new FormData();
-      fd.append('photo', file);
-      fd.append('guestName', guestName || '익명');
-      if (message) fd.append('message', message);
-      const res = await fetch(`${API}/guest-photo/${slug}/upload`, { method: 'POST', body: fd });
-      if (res.ok) {
-        setUploaded(true);
-        setShowUpload(false);
-        setFile(null);
-        setPreview(null);
-        setGuestName('');
-        setMessage('');
-        await loadPhotos();
-        setTimeout(() => setUploaded(false), 3000);
+      for (let i = 0; i < files.length; i++) {
+        const fd = new FormData();
+        fd.append('photo', files[i]);
+        fd.append('guestName', guestName || '익명');
+        if (message) fd.append('message', message);
+        await fetch(`${API}/guest-photo/${slug}/upload`, { method: 'POST', body: fd });
+        setUploadedCount(i + 1);
       }
+      setUploaded(true);
+      setShowUpload(false);
+      setFiles([]);
+      setPreviews([]);
+      setGuestName('');
+      setMessage('');
+      await loadPhotos();
+      setTimeout(() => setUploaded(false), 3000);
     } catch {}
     setUploading(false);
   };
@@ -97,12 +101,13 @@ export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
       )}
 
       <div className="text-center">
-        <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+        <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileSelect} />
         <button onClick={() => inputRef.current?.click()}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm border border-current opacity-70">
           <Camera className="w-4 h-4" />
           사진 올리기
         </button>
+        <p className="text-xs mt-1 opacity-50">(최대 10장)</p>
         <AnimatePresence>
           {uploaded && (
             <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -112,16 +117,20 @@ export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
       </div>
 
       <AnimatePresence>
-        {showUpload && preview && (
+        {showUpload && previews.length > 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center" onClick={() => { setShowUpload(false); setPreview(null); setFile(null); }}>
+            className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center" onClick={() => { setShowUpload(false); setPreviews([]); setFiles([]); }}>
             <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }}
               className="bg-white w-full max-w-md rounded-t-3xl p-6 space-y-4" onClick={e => e.stopPropagation()}>
               <div className="flex justify-between items-center">
                 <p className="text-sm font-semibold text-stone-800">사진 올리기</p>
-                <button onClick={() => { setShowUpload(false); setPreview(null); setFile(null); }}><X className="w-5 h-5 text-stone-400" /></button>
+                <button onClick={() => { setShowUpload(false); setPreviews([]); setFiles([]); }}><X className="w-5 h-5 text-stone-400" /></button>
               </div>
-              <img src={preview} alt="preview" className="w-full aspect-square object-cover rounded-xl" />
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {previews.map((p, i) => (
+                  <img key={i} src={p} alt="" className="w-20 h-20 object-cover rounded-lg flex-shrink-0" />
+                ))}
+              </div>
               <input value={guestName} onChange={e => setGuestName(e.target.value)} placeholder="이름 (선택)"
                 className="w-full px-4 py-2.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:border-stone-400" />
               <input value={message} onChange={e => setMessage(e.target.value)} placeholder="한마디 (선택)"
@@ -129,7 +138,7 @@ export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
               <button onClick={handleUpload} disabled={uploading}
                 className="w-full py-3 bg-stone-800 text-white rounded-xl text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50">
                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                {uploading ? '업로드 중...' : '올리기'}
+                {uploading ? `${uploadedCount}/${files.length} 업로드 중...` : `${files.length}장 올리기`}
               </button>
             </motion.div>
           </motion.div>
