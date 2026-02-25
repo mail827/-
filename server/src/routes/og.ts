@@ -6,6 +6,44 @@ const router = Router();
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+router.get('/pair/:code', async (req: Request, res: Response) => {
+  const { code } = req.params;
+  try {
+    const invite = await prisma.pairInvite.findUnique({
+      where: { code },
+      include: { wedding: true }
+    });
+    if (!invite || !invite.wedding) return res.redirect(302, `https://weddingshop.cloud/pair/accept?code=${code}`);
+    const w = invite.wedding;
+    const title = esc(`${w.groomName} & ${w.brideName} 청첩장을 함께 꾸며요`);
+    const desc = esc(`${w.groomName}과 ${w.brideName}의 청첩장을 같이 수정할 수 있도록 초대합니다.`);
+    const image = w.heroMedia || 'https://weddingshop.cloud/og-image.png';
+    const url = `https://weddingshop.cloud/pair/accept?code=${code}`;
+    const html = `<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<title>${title}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="청첩장 작업실">
+<meta property="og:title" content="${title}">
+<meta property="og:description" content="${desc}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${image}">
+<meta property="og:image:width" content="800">
+<meta property="og:image:height" content="800">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${title}">
+<meta name="twitter:description" content="${desc}">
+<meta name="twitter:image" content="${image}">
+<meta http-equiv="refresh" content="0;url=${url}">
+</head><body><h1>${title}</h1><p>${desc}</p><a href="${url}">초대 수락하기</a></body></html>`;
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+    res.status(200).send(html);
+  } catch (e) {
+    res.redirect(302, `https://weddingshop.cloud/pair/accept?code=${code}`);
+  }
+});
+
 router.get('/:slug', async (req: Request, res: Response) => {
   const { slug } = req.params;
 
