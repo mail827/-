@@ -187,7 +187,7 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
       body: JSON.stringify({
         prompt,
         image_urls: imageUrls,
-        strength: 0.45,
+        strength: 0.35,
         num_images: 1,
       }),
     });
@@ -410,7 +410,7 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
       body: JSON.stringify({
         prompt,
         image_urls: imageUrls,
-        strength: 0.45,
+        strength: 0.35,
         num_images: 1,
       }),
     });
