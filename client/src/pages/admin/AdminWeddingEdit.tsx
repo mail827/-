@@ -1024,7 +1024,7 @@ export default function AdminWeddingEdit() {
       
       {tab === 'pair' && (
         <div className="space-y-6">
-          <PairManager weddingId={wedding.id} />
+          <PairManager weddingId={wedding.id} groomName={wedding.groomName} brideName={wedding.brideName} heroMedia={wedding.heroMedia} />
           <div className="bg-white border border-stone-200 rounded-2xl p-6">
             <h2 className="font-semibold text-lg text-stone-800 mb-4">공동 편집 안내</h2>
             <div className="space-y-3 text-[14px] text-stone-500 leading-relaxed">

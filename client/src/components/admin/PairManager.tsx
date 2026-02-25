@@ -14,9 +14,10 @@ interface Props {
   weddingId: string;
   groomName?: string;
   brideName?: string;
+  heroMedia?: string;
 }
 
-export default function PairManager({ weddingId, groomName, brideName }: Props) {
+export default function PairManager({ weddingId, groomName, brideName, heroMedia }: Props) {
   const [status, setStatus] = useState<PairStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
@@ -112,7 +113,7 @@ export default function PairManager({ weddingId, groomName, brideName }: Props) 
         content: {
           title: '함께 청첩장을 꾸며요',
           description: `${names} 청첩장을 같이 수정할 수 있도록 초대합니다.`,
-          imageUrl: 'https://weddingshop.cloud/og-image.png',
+          imageUrl: heroMedia || 'https://weddingshop.cloud/og-image.png',
           link: { mobileWebUrl: link, webUrl: link },
         },
         buttons: [
