@@ -56,6 +56,13 @@ export default function PairAccept() {
       });
       const data = await res.json();
 
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.setItem('pairReturnCode', code);
+        navigate('/login');
+        return;
+      }
+
       if (!res.ok) {
         setError(data.error);
         return;
