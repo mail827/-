@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import JSZip from 'jszip';
-import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download, Loader2, ChevronLeft, ChevronRight, Camera } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import QRCardModal from '../components/QRCardModal';
+import ImageCropper from '../components/ImageCropper';
 
 interface User {
   id: string;
@@ -102,6 +103,77 @@ export default function Dashboard() {
   const [guestPhotoViewIndex, setGuestPhotoViewIndex] = useState<number | null>(null);
   const [deleteConfirmPhoto, setDeleteConfirmPhoto] = useState<GuestPhoto | null>(null);
   const [zipLoading, setZipLoading] = useState(false);
+  const [heroCropWedding, setHeroCropWedding] = useState<Wedding | null>(null);
+  const [heroCropSrc, setHeroCropSrc] = useState('');
+  const [heroCropFile, setHeroCropFile] = useState<File | null>(null);
+  const [heroUploading, setHeroUploading] = useState(false);
+  const [heroPendingWedding, setHeroPendingWedding] = useState<Wedding | null>(null);
+  const heroFileInputRef = useRef<HTMLInputElement>(null);
+
+  const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'wedding_guide';
+
+  const uploadBlobToCloudinary = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const fd = new FormData();
+      fd.append('file', blob, 'hero.jpg');
+      fd.append('upload_preset', UPLOAD_PRESET);
+      fd.append('folder', 'wedding');
+      const xhr = new XMLHttpRequest();
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const res = JSON.parse(xhr.responseText);
+          resolve(res.secure_url);
+        } else reject(new Error('업로드 실패'));
+      };
+      xhr.onerror = () => reject(new Error('네트워크 오류'));
+      xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`);
+      xhr.send(fd);
+    });
+  };
+
+  const handleHeroCropComplete = async (blob: Blob) => {
+    if (!heroCropWedding || heroUploading) return;
+    setHeroUploading(true);
+    try {
+      const url = await uploadBlobToCloudinary(blob);
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/weddings/${heroCropWedding.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ heroMedia: url }),
+      });
+      if (res.ok) {
+        setWeddings(prev => prev.map(w => w.id === heroCropWedding.id ? { ...w, heroMedia: url } : w));
+      }
+    } catch {}
+    setHeroUploading(false);
+    setHeroCropWedding(null);
+    setHeroCropSrc('');
+    setHeroCropFile(null);
+  };
+
+  const handleHeroFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const w = heroPendingWedding;
+    setHeroPendingWedding(null);
+    if (!w) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setHeroCropWedding(w);
+      setHeroCropSrc(reader.result as string);
+      setHeroCropFile(file);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const openHeroCropForExisting = (wedding: Wedding) => {
+    setHeroCropWedding(wedding);
+    setHeroCropSrc(wedding.heroMedia!);
+    setHeroCropFile(null);
+  };
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -341,6 +413,13 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#fefefe]">
+      <input
+        ref={heroFileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleHeroFileSelect}
+      />
       <header className="border-b border-stone-200 sticky top-0 z-40 bg-white/80 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="font-serif text-xl text-stone-800">청첩장 작업실</Link>
@@ -589,15 +668,35 @@ export default function Dashboard() {
                   transition={{ delay: idx * 0.1 }}
                   className="bg-white rounded-2xl overflow-hidden border border-stone-200 hover:shadow-lg transition-all"
                 >
-                  <div className="h-36 bg-gradient-to-br from-stone-100 to-stone-50 flex items-center justify-center relative overflow-hidden">
-                    {wedding.heroMedia ? <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover" /> : <Heart className="w-8 h-8 text-stone-300" />}
+                  <div className="h-36 bg-gradient-to-br from-stone-100 to-stone-50 flex items-center justify-center relative overflow-hidden group">
+                    {wedding.heroMedia ? (
+                      <img src={wedding.heroMedia} alt="" className="w-full h-full object-cover cursor-pointer" onClick={() => openHeroCropForExisting(wedding)} />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => { setHeroPendingWedding(wedding); heroFileInputRef.current?.click(); }}
+                        className="w-full h-full flex flex-col items-center justify-center text-stone-400 hover:text-stone-600 hover:bg-stone-50/50 transition-colors"
+                      >
+                        <Camera className="w-8 h-8 mb-1" />
+                        <span className="text-xs">대표 이미지</span>
+                      </button>
+                    )}
                     <button
-                      onClick={() => handleDelete(wedding.id, wedding.groomName, wedding.brideName)}
+                      onClick={(e) => { e.stopPropagation(); handleDelete(wedding.id, wedding.groomName, wedding.brideName); }}
                       className="absolute top-3 right-3 p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="삭제"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
+                    {wedding.heroMedia && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); openHeroCropForExisting(wedding); }}
+                        className="absolute bottom-2 right-2 px-2 py-1 bg-black/50 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        크롭 조정
+                      </button>
+                    )}
                   </div>
                   <div className="p-5">
                     <h3 className="font-serif text-lg text-stone-800 mb-1">
@@ -954,6 +1053,22 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
+      {heroCropWedding && heroCropSrc && (
+        <ImageCropper
+          imageSrc={heroCropSrc}
+          onCropComplete={handleHeroCropComplete}
+          onCancel={() => { setHeroCropWedding(null); setHeroCropSrc(''); setHeroCropFile(null); }}
+          originalFile={heroCropFile}
+        />
+      )}
+      {heroUploading && (
+        <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
+          <div className="bg-white rounded-xl px-6 py-4 flex items-center gap-3">
+            <Loader2 className="w-5 h-5 animate-spin text-stone-600" />
+            <span className="text-sm text-stone-700">업로드 중...</span>
+          </div>
+        </div>
+      )}
       {qrWedding && (
         <QRCardModal
           isOpen={!!qrWedding}
