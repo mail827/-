@@ -71,7 +71,7 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
   magazine_cover: {
     label: '매거진 커버',
-    base: 'clean minimalist high fashion studio, single dramatic spotlight, strong editorial poses, Vogue Korea cover aesthetic, high contrast lighting',
+    base: 'clean minimalist high fashion studio, single dramatic spotlight, strong editorial poses, luxury fashion magazine cover aesthetic, high contrast lighting',
   },
   rainy_day: {
     label: '비오는 날',
