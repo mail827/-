@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 
 const SECTION_ID_MAP: Record<string, string> = {
   'gallery-section': 'gallery',
-  'guest-gallery-section': 'guestGallery',
   'venue-section': 'location',
   'rsvp-section': 'rsvp',
   'rsvp': 'rsvp',
@@ -18,7 +17,7 @@ const DEFAULT_ORDER = [
   'location', 'rsvp', 'account', 'guestbook', 'closing',
 ];
 
-const KNOWN_IDS = ['gallery-section', 'guest-gallery-section', 'venue-section', 'rsvp-section', 'rsvp', 'account-section', 'guestbook-section', 'guestbook', 'greeting-section', 'calendar-section'];
+const KNOWN_IDS = ['gallery-section', 'venue-section', 'rsvp-section', 'rsvp', 'account-section', 'guestbook-section', 'guestbook', 'greeting-section', 'calendar-section'];
 
 function detectKeyByContent(el: HTMLElement): string | null {
   const text = el.textContent || '';

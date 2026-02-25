@@ -22,7 +22,6 @@ const SECTION_META: Record<string, { label: string; desc: string }> = {
   calendar: { label: '캘린더', desc: '예식 날짜 달력' },
   loveStory: { label: '러브스토리', desc: '영상 또는 사진 슬라이드' },
   gallery: { label: '갤러리', desc: '웨딩 사진 모아보기' },
-  guestGallery: { label: '하객 갤러리', desc: '하객이 직접 사진을 올리는 공간' },
   location: { label: '예식장 위치', desc: '지도와 교통 안내' },
   rsvp: { label: '참석 여부', desc: 'RSVP 응답 폼' },
   account: { label: '축의금', desc: '계좌 정보와 간편 송금' },
@@ -30,7 +29,7 @@ const SECTION_META: Record<string, { label: string; desc: string }> = {
   closing: { label: '마무리 인사', desc: '감사 문구와 연락처' },
 };
 
-const DEFAULT_ORDER = ['greeting', 'calendar', 'loveStory', 'gallery', 'location', 'rsvp', 'account', 'guestbook', 'guestGallery', 'closing'];
+const DEFAULT_ORDER = ['greeting', 'calendar', 'loveStory', 'gallery', 'location', 'rsvp', 'account', 'guestbook', 'closing'];
 
 interface Props {
   value: string[] | null | undefined;
@@ -66,11 +65,9 @@ function SortableItem({ id }: { id: string }) {
 }
 
 export default function SectionOrderEditor({ value, onChange }: Props) {
-  const [items, setItems] = useState<string[]>(() => {
-    const base = Array.isArray(value) && value.length > 0 ? value : [...DEFAULT_ORDER];
-    const missing = DEFAULT_ORDER.filter(s => !base.includes(s));
-    return [...base, ...missing];
-  });
+  const [items, setItems] = useState<string[]>(
+    Array.isArray(value) && value.length > 0 ? value : [...DEFAULT_ORDER]
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),

@@ -2,7 +2,7 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown, MapPin, Calendar, Clock } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, Section, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
 
 const W = {
   bg: '#FAF5EE', sand: '#F0E8DA', warm: '#A08060', deep: '#7A5E42',
@@ -91,7 +91,7 @@ function CopyBtn({ bank, account, holder }: { bank?: string; account?: string; h
   );
 }
 
-export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading }: ThemeProps) {
   const w = wedding;
   const galleries = (w.galleries || []).filter((g: any) => g.mediaUrl);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -268,12 +268,6 @@ export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestb
             {(localGuestbooks || []).length > 0 && <GuestbookList guestbooks={localGuestbooks || []} weddingSlug={w.slug} onDelete={handleGuestbookDelete} />}
           </div>
         </motion.section>
-
-        {guestPhotoSlot && (
-          <Section id="guest-gallery-section">
-            {guestPhotoSlot}
-          </Section>
-        )}
 
         <WaveTransition from={W.bg} to={W.sand} />
 

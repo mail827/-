@@ -15,13 +15,9 @@ interface GuestPhoto {
 interface Props {
   slug: string;
   enabled?: boolean;
-  accentColor?: string;
-  bgColor?: string;
-  textColor?: string;
-  SectionTitle?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
-export default function GuestPhotoGallery({ slug, enabled = true, accentColor = '#8B7355', bgColor = 'transparent', textColor = '#44403c', SectionTitle }: Props) {
+export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
   const [photos, setPhotos] = useState<GuestPhoto[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -75,15 +71,11 @@ export default function GuestPhotoGallery({ slug, enabled = true, accentColor = 
 
   if (!enabled) return null;
 
-  const Title = SectionTitle || (({ children }: { children: React.ReactNode }) => (
-    <h3 className="text-lg tracking-[0.15em] mb-6" style={{ color: textColor }}>{children}</h3>
-  ));
-
   return (
-    <div className="py-12 px-4" style={{ background: bgColor, fontFamily: "inherit" }}>
+    <div className="py-12 px-4">
       <div className="text-center mb-8">
-        <Title>GUEST GALLERY</Title>
-        <p className="text-sm mt-2" style={{ color: textColor, opacity: 0.6 }}>우리의 순간을 함께 채워주세요</p>
+        <h3 className="text-lg tracking-[0.15em] mb-6">GUEST GALLERY</h3>
+        <p className="text-sm mt-2 opacity-60">우리의 순간을 함께 채워주세요</p>
       </div>
 
       {photos.length > 0 && (
@@ -99,23 +91,22 @@ export default function GuestPhotoGallery({ slug, enabled = true, accentColor = 
 
       {photos.length === 0 && (
         <div className="text-center py-8 mb-6">
-          <Camera className="w-8 h-8 mx-auto mb-2" style={{ color: textColor, opacity: 0.3 }} />
-          <p className="text-sm" style={{ color: textColor, opacity: 0.4 }}>첫 번째 사진을 올려주세요</p>
+          <Camera className="w-8 h-8 mx-auto mb-2 opacity-30" />
+          <p className="text-sm opacity-40">첫 번째 사진을 올려주세요</p>
         </div>
       )}
 
       <div className="text-center">
         <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
         <button onClick={() => inputRef.current?.click()}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm transition-all"
-          style={{ border: `1px solid ${accentColor}40`, color: accentColor }}>
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm border border-current opacity-70">
           <Camera className="w-4 h-4" />
           사진 올리기
         </button>
         <AnimatePresence>
           {uploaded && (
             <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="text-xs mt-3" style={{ color: accentColor }}>감사합니다! 사진이 업로드됐어요</motion.p>
+              className="text-xs mt-3 opacity-70">감사합니다! 사진이 업로드됐어요</motion.p>
           )}
         </AnimatePresence>
       </div>

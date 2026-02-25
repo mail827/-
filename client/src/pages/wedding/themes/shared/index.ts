@@ -1,4 +1,3 @@
-export { default as Section } from './Section';
 export { default as RsvpForm } from './RsvpForm';
 export { default as GuestbookForm } from './GuestbookForm';
 export { default as GuestbookList } from './GuestbookList';
@@ -96,7 +95,6 @@ export interface ThemeProps {
   onGuestbookSubmit: (data: GuestbookSubmitData) => Promise<void>;
   isRsvpLoading: boolean;
   isGuestbookLoading: boolean;
-  guestPhotoSlot?: React.ReactNode;
 }
 
 export function formatDate(dateString: string, format: 'korean' | 'dots' | 'short' = 'korean'): string {
