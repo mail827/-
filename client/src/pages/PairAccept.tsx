@@ -42,7 +42,7 @@ export default function PairAccept() {
   const handleAccept = async () => {
     if (!isLoggedIn) {
       localStorage.setItem('pairReturnCode', code);
-      navigate('/login');
+      navigate('/?login=pair');
       return;
     }
 
@@ -59,7 +59,7 @@ export default function PairAccept() {
       if (res.status === 401) {
         localStorage.removeItem('token');
         localStorage.setItem('pairReturnCode', code);
-        navigate('/login');
+        navigate('/?login=pair');
         return;
       }
 

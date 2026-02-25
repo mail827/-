@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, MessageCircle, X, Send, Sparkles, Mail, Loader2, Gift, Eye } from 'lucide-react';
 
@@ -24,6 +25,7 @@ interface ChatMessage {
 }
 
 export default function Landing() {
+  const [searchParams] = useSearchParams();
   const [packages, setPackages] = useState<Package[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [reviews, setReviews] = useState<{id: string; rating: number; content: string; source: string; groomName: string; brideName: string; packageName: string | null; createdAt: string}[]>([]);
@@ -51,6 +53,12 @@ export default function Landing() {
   const [chatLoading, setChatLoading] = useState(false);
   const [visitorId] = useState(() => localStorage.getItem('visitorId') || `visitor_${Date.now()}`);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (searchParams.get('login') === 'pair') {
+      setShowLoginModal(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     localStorage.setItem('visitorId', visitorId);
