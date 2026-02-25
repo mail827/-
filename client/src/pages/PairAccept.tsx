@@ -41,7 +41,7 @@ export default function PairAccept() {
 
   const handleAccept = async () => {
     if (!isLoggedIn) {
-      sessionStorage.setItem('pairReturnCode', code);
+      localStorage.setItem('pairReturnCode', code);
       navigate('/login');
       return;
     }

@@ -11,6 +11,8 @@ interface Props {
   originalFile?: File | null;
 }
 
+const DEFAULT_CROP: Crop = { unit: '%', width: 80, height: 80, x: 10, y: 10 };
+
 const ASPECT_OPTIONS = [
   { label: '16:9', value: 16 / 9 },
   { label: '4:3', value: 4 / 3 },
@@ -27,7 +29,7 @@ function getCenterCrop(mediaWidth: number, mediaHeight: number, aspect: number):
 }
 
 export default function ImageCropper({ imageSrc, onCropComplete, onCancel, aspect: initialAspect, originalFile }: Props) {
-  const [crop, setCrop] = useState<Crop>();
+  const [crop, setCrop] = useState<Crop>(DEFAULT_CROP);
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [aspect, setAspect] = useState<number | undefined>(initialAspect);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -37,14 +39,14 @@ export default function ImageCropper({ imageSrc, onCropComplete, onCancel, aspec
     if (aspect) {
       setCrop(getCenterCrop(naturalWidth, naturalHeight, aspect));
     } else {
-      setCrop({ unit: '%', x: 5, y: 5, width: 90, height: 90 });
+      setCrop(DEFAULT_CROP);
     }
   }, [aspect]);
 
   const handleAspectChange = (value: number) => {
     if (value === 0) {
       setAspect(undefined);
-      setCrop({ unit: '%', x: 5, y: 5, width: 90, height: 90 });
+      setCrop(DEFAULT_CROP);
     } else {
       setAspect(value);
       if (imgRef.current) {
@@ -60,7 +62,7 @@ export default function ImageCropper({ imageSrc, onCropComplete, onCancel, aspec
       if (aspect) {
         setCrop(getCenterCrop(naturalWidth, naturalHeight, aspect));
       } else {
-        setCrop({ unit: '%', x: 5, y: 5, width: 90, height: 90 });
+        setCrop(DEFAULT_CROP);
       }
     }
   };
@@ -144,7 +146,7 @@ export default function ImageCropper({ imageSrc, onCropComplete, onCancel, aspec
             onLoad={onImageLoad}
             crossOrigin="anonymous"
             alt="크롭"
-            className="max-h-[65vh] max-w-full object-contain block"
+            className="max-h-[70vh] max-w-full object-contain block"
           />
         </ReactCrop>
       </div>
