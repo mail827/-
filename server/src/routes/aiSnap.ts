@@ -37,6 +37,7 @@ const PACKAGE_QUOTA: Record<string, number> = {
 };
 const FREE_TRIAL = 1;
 const EXTRA_PRICE = 1500;
+const CRUISE_CONCEPTS = ['cruise_sunset', 'cruise_bluesky'];
 
 const SOLO_PROMPTS: Record<string, { groom: string; bride: string }> = {
   studio_classic: {
@@ -100,12 +101,12 @@ const SOLO_PROMPTS: Record<string, { groom: string; bride: string }> = {
     bride: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. place the same person in a vintage film bridal portrait, classic A-line lace dress, warm Kodak Portra 400 color palette, soft film grain texture, natural window light, nostalgic romantic, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks',
   },
   cruise_sunset: {
-    groom: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. luxury yacht deck at golden hour sunset, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, romantic warm cinematic lighting, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k',
-    bride: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. luxury yacht deck at golden hour sunset, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, romantic warm cinematic lighting, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k',
+    groom: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. luxury yacht deck at golden hour sunset, groom wearing cream linen suit with open collar white shirt, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, romantic warm cinematic lighting, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k',
+    bride: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. luxury yacht deck at golden hour sunset, bride wearing flowing white chiffon dress with wind-blown fabric, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, romantic warm cinematic lighting, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k',
   },
   cruise_bluesky: {
-    groom: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. luxury cruise ship deck under vivid blue sky, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k',
-    bride: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. luxury cruise ship deck under vivid blue sky, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k',
+    groom: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. luxury cruise ship deck under vivid blue sky, groom wearing light beige summer suit with white shirt, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k',
+    bride: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. luxury cruise ship deck under vivid blue sky, bride wearing strapless ivory organza dress, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k',
   },
 };
 
@@ -125,8 +126,8 @@ const COUPLE_PROMPTS: Record<string, string> = {
   autumn_leaves: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. place the same couple in an autumn wedding scene, the man in warm brown tweed suit on the left, the woman in ivory dress on the right, surrounded by golden red maple leaves, tree-lined avenue with fall foliage canopy, warm amber golden hour light, romantic cozy autumn atmosphere, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks',
   winter_snow: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. place the same couple in a winter wonderland wedding, the man in charcoal wool coat suit on the left, the woman in white fur-trimmed gown on the right, gentle snowfall, frosted pine trees, soft blue-white winter light, breath visible in cold air, magical serene winter romance, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks',
   vintage_film: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. place the same couple in a vintage film photography wedding, the man in retro brown suit with wide lapels on the left, the woman in classic A-line lace dress on the right, warm film grain texture, slightly faded Kodak Portra 400 color palette, soft natural window light, nostalgic 1970s wedding aesthetic, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks',
-  cruise_sunset: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. luxury yacht deck at golden hour sunset, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, romantic warm cinematic lighting, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k',
-  cruise_bluesky: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. luxury cruise ship deck under vivid blue sky, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k',
+  cruise_sunset: 'keep the exact same faces, facial features, face shapes, eyes, nose, lips unchanged. romantic couple on luxury yacht deck at golden hour sunset, groom wearing cream linen suit with open collar white shirt, bride wearing flowing white chiffon dress with wind-blown fabric, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, couple standing close together looking at each other lovingly, romantic warm cinematic lighting, no text no logos no watermarks, preserve original facial identities exactly, do not alter or beautify the faces, photorealistic, 8k',
+  cruise_bluesky: 'keep the exact same faces, facial features, face shapes, eyes, nose, lips unchanged. elegant couple on luxury cruise ship deck under vivid blue sky, groom wearing light beige summer suit with white shirt, bride wearing strapless ivory organza dress, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, couple embracing naturally on deck, clean nautical atmosphere, no text no logos no watermarks, preserve original facial identities exactly, do not alter or beautify the faces, photorealistic, 8k',
 };
 
 const falFetch = async (url: string, opts?: RequestInit) => {
@@ -194,12 +195,13 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
       prompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
     }
 
+    const strength = CRUISE_CONCEPTS.includes(concept) ? 0.38 : 0.35;
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
       method: 'POST',
       body: JSON.stringify({
         prompt,
         image_urls: imageUrls,
-        strength: 0.35,
+        strength,
         num_images: 1,
       }),
     });
@@ -425,12 +427,13 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
     } else {
       prompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
     }
+    const strength = CRUISE_CONCEPTS.includes(concept) ? 0.38 : 0.35;
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
       method: 'POST',
       body: JSON.stringify({
         prompt,
         image_urls: imageUrls,
-        strength: 0.35,
+        strength,
         num_images: 1,
       }),
     });

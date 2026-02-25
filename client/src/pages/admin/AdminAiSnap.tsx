@@ -121,6 +121,7 @@ export default function AdminAiSnap() {
   const generate = async () => {
     if (!canGen()) return;
     setGenerating(true);
+    setResults([]);
     try {
       const res = await api('/quick-generate', {
         method: 'POST',
