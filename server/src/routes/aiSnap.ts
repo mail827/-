@@ -357,6 +357,52 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
   }
 });
 
+router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, res) => {
+  if (req.user?.role !== 'ADMIN') return res.status(403).json({ error: '관리자만 가능' });
+  const { concept, imageUrls, mode } = req.body;
+  if (!concept || !imageUrls || imageUrls.length < 1) return res.status(400).json({ error: 'concept, imageUrls required' });
+  try {
+    let prompt = '';
+    if (mode === 'couple') {
+      prompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
+    } else if (mode === 'groom') {
+      prompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
+    } else {
+      prompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
+    }
+    const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
+      method: 'POST',
+      body: JSON.stringify({ prompt, image_urls: imageUrls }),
+    });
+    if (submit.images) {
+      return res.json({ status: 'done', resultUrl: submit.images[0]?.url });
+    }
+    if (!submit.status_url) throw new Error('No status_url');
+    res.json({ statusUrl: submit.status_url, responseUrl: submit.response_url });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get('/admin/poll', async (req, res) => {
+  const { statusUrl, responseUrl } = req.query;
+  if (!statusUrl) return res.status(400).json({ error: 'statusUrl required' });
+  try {
+    const status = await falFetch(statusUrl as string);
+    if (status.status === 'COMPLETED') {
+      const result = await falFetch(responseUrl as string);
+      const resultUrl = result.images?.[0]?.url;
+      return res.json({ status: 'done', resultUrl });
+    }
+    if (status.status === 'FAILED') {
+      return res.json({ status: 'failed', error: status.error });
+    }
+    res.json({ status: 'processing' });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 router.get('/admin/list', authMiddleware, async (req: AuthRequest, res) => {
   if ((req as AuthRequest).user?.role !== 'ADMIN') return res.status(403).json({ error: '관리자만 접근 가능' });
   try {
