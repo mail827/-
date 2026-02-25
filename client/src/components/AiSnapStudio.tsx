@@ -25,6 +25,11 @@ const CONCEPT_META: Record<string, { emoji: string; sub: string }> = {
   castle_garden: { emoji: 'K', sub: '유럽 고성' },
   cathedral: { emoji: 'T', sub: '성당 스테인드글라스' },
   watercolor: { emoji: 'W', sub: '파스텔 수채화' },
+  magazine_cover: { emoji: 'M', sub: '하이패션 화보' },
+  rainy_day: { emoji: 'R', sub: '감성 빗속' },
+  autumn_leaves: { emoji: 'A', sub: '단풍길 로맨스' },
+  winter_snow: { emoji: 'I', sub: '눈 내리는 날' },
+  vintage_film: { emoji: 'V', sub: '필름 감성' },
 };
 
 type Mode = 'couple' | 'groom' | 'bride';

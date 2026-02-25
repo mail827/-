@@ -69,6 +69,26 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '수채화',
     base: 'dreamy soft pastel watercolor world, impressionistic flower garden, gentle ethereal light rays, fine art cinematic atmosphere',
   },
+  magazine_cover: {
+    label: '매거진 커버',
+    base: 'clean minimalist high fashion studio, single dramatic spotlight, strong editorial poses, Vogue Korea cover aesthetic, high contrast lighting',
+  },
+  rainy_day: {
+    label: '비오는 날',
+    base: 'gentle rain with beautiful bokeh, wet cobblestone street reflections, transparent umbrella, intimate romantic mood, soft diffused overcast light, cinematic rain atmosphere',
+  },
+  autumn_leaves: {
+    label: '가을 단풍',
+    base: 'golden red maple tree-lined avenue with fall foliage canopy, leaves gently falling, warm amber golden hour light, romantic cozy autumn atmosphere',
+  },
+  winter_snow: {
+    label: '겨울 눈',
+    base: 'gentle snowfall in winter wonderland, frosted pine trees, soft blue-white winter light, breath visible in cold air, magical serene winter romance',
+  },
+  vintage_film: {
+    label: '빈티지 필름',
+    base: 'warm Kodak Portra 400 film grain texture, slightly faded nostalgic color palette, soft natural window light, 1970s vintage wedding aesthetic',
+  },
 };
 
 const SHOT_VARIANTS = [
@@ -128,6 +148,11 @@ const OUTFIT_GROOM: Record<string, string> = {
   castle_garden: 'wearing classic black formal morning suit with vest, patterned tie',
   cathedral: 'wearing refined charcoal morning suit with ivory vest, patterned silk tie',
   watercolor: 'wearing cream colored linen suit with no tie, relaxed artistic elegance',
+  magazine_cover: 'wearing designer black suit with perfect fit, strong editorial style',
+  rainy_day: 'wearing dark navy coat suit, holding umbrella',
+  autumn_leaves: 'wearing warm brown tweed suit with earth tones',
+  winter_snow: 'wearing charcoal wool coat suit, winter layers',
+  vintage_film: 'wearing retro brown suit with wide lapels, 1970s style',
 };
 
 const OUTFIT_BRIDE: Record<string, string> = {
@@ -141,6 +166,11 @@ const OUTFIT_BRIDE: Record<string, string> = {
   castle_garden: 'wearing magnificent white ball gown with long royal train, tiara, pearl jewelry',
   cathedral: 'wearing classic white cathedral-length wedding gown with long veil, pearl earrings',
   watercolor: 'wearing delicate off-white silk slip dress with thin straps, loose romantic waves in hair',
+  magazine_cover: 'wearing haute couture white gown, high fashion editorial style',
+  rainy_day: 'wearing white dress, transparent umbrella, romantic rain aesthetic',
+  autumn_leaves: 'wearing ivory dress, warm autumn tones',
+  winter_snow: 'wearing white fur-trimmed gown, winter wonderland style',
+  vintage_film: 'wearing classic A-line lace dress, 1970s vintage bridal aesthetic',
 };
 
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {

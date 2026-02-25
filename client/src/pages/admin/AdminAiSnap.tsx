@@ -29,6 +29,11 @@ const CONCEPTS = [
   { id: 'castle_garden', label: '캐슬 가든' },
   { id: 'cathedral', label: '성당 웨딩' },
   { id: 'watercolor', label: '수채화' },
+  { id: 'magazine_cover', label: '매거진 커버' },
+  { id: 'rainy_day', label: '비오는 날' },
+  { id: 'autumn_leaves', label: '가을 단풍' },
+  { id: 'winter_snow', label: '겨울 눈' },
+  { id: 'vintage_film', label: '빈티지 필름' },
 ];
 
 const CONCEPT_MAP = Object.fromEntries(CONCEPTS.map(c => [c.id, c.label]));

@@ -414,6 +414,11 @@ export default function Landing() {
                 { label: '캐슬 가든', sub: '유럽 고성', cat: 'cinematic' },
                 { label: '성당 웨딩', sub: '스테인드글라스', cat: 'cinematic' },
                 { label: '수채화', sub: '파스텔 수채화', cat: 'cinematic' },
+                { label: '매거진 커버', sub: '하이패션 화보', cat: 'cinematic' },
+                { label: '비오는 날', sub: '감성 빗속', cat: 'cinematic' },
+                { label: '가을 단풍', sub: '단풍길 로맨스', cat: 'cinematic' },
+                { label: '겨울 눈', sub: '눈 내리는 날', cat: 'cinematic' },
+                { label: '빈티지 필름', sub: '필름 감성', cat: 'cinematic' },
               ].map((c, i) => (
                 <motion.a
                   href="/ai-snap"
