@@ -218,6 +218,7 @@ export default function ForestGarden({ wedding, guestbooks, onRsvpSubmit, onGues
         </motion.div>
       </Section>
 
+      {guestPhotoSlot}
       {wedding.closingMessage && (
         <Section className="bg-[#EEF2EB]">
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
@@ -237,7 +238,6 @@ export default function ForestGarden({ wedding, guestbooks, onRsvpSubmit, onGues
         </div>
       </Section>
 
-      {guestPhotoSlot}
       <footer className="py-8 text-center text-[10px] tracking-widest" style={{ background: "#E8EDE8" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[#5A6B5A] hover:text-[#3A4B3A] transition-colors">Made by 청첩장 작업실 ›</a></footer>
 
       <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="FOREST_GARDEN" usePhotoFilter={wedding.usePhotoFilter ?? true} />}</AnimatePresence>

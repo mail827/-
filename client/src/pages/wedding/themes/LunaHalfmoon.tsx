@@ -307,6 +307,7 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
         </motion.div>
       </section>
 
+      {guestPhotoSlot}
       <section className="py-24 px-10">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto">
           <div className="flex justify-center gap-16 mb-16">
@@ -333,7 +334,6 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
         </motion.div>
       </section>
 
-      {guestPhotoSlot}
       <footer className="py-16 text-center">
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.3em] hover:opacity-70 transition-opacity duration-500" style={{ ...dacapoFont, color: '#C8D7E0' }}>
           Made by 청첩장 작업실 ›

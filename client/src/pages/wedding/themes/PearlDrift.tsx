@@ -296,6 +296,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </motion.div>
       </section>
 
+      {guestPhotoSlot}
       <section className="py-24 px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-md mx-auto">
           <div className="flex justify-center gap-14 mb-14">
@@ -322,7 +323,6 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </motion.div>
       </section>
 
-      {guestPhotoSlot}
       <footer className="py-14 text-center" style={{ background: '#0A0A0A' }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.25em] hover:opacity-70 transition-opacity" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.25)' }}>
           Made by 청첩장 작업실 ›

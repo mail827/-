@@ -219,6 +219,7 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
         </motion.div>
       </Section>
 
+      {guestPhotoSlot}
       {wedding.closingMessage && (
         <Section className="bg-[#F5F3EF]">
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
@@ -237,7 +238,6 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
         </div>
       </Section>
 
-      {guestPhotoSlot}
       <footer className="py-8 text-center text-[10px] tracking-widest" style={{ background: "#F5EDE0" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[#8B7355] hover:text-[#6B5540] transition-colors">Made by 청첩장 작업실 ›</a></footer>
 
       <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="BOHEMIAN_DREAM" usePhotoFilter={wedding.usePhotoFilter ?? true} />}</AnimatePresence>

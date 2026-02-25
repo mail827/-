@@ -268,6 +268,7 @@ export default function BotanicalClassic({ wedding, guestbooks, onRsvpSubmit, on
           </motion.section>
 
           <BotanicalDivider variant="fern" />
+          {guestPhotoSlot}
           <section className="px-10 py-12 text-center">
             {w.closingMessage && <p className="text-[13px] leading-[2.4] whitespace-pre-line mb-10" style={{ color: P.text, ...fm }}>{w.closingMessage}</p>}
             <div className="flex justify-center gap-3 mb-8">
@@ -276,8 +277,7 @@ export default function BotanicalClassic({ wedding, guestbooks, onRsvpSubmit, on
             </div>
             <button onClick={() => setShowShare(true)} className="inline-flex items-center gap-2 px-6 py-3 text-sm" style={{ background: P.green1, color: P.cream }}><Share2 size={14} /> 공유하기</button>
           </section>
-          {guestPhotoSlot}
-      <footer className="pb-8 text-center"><a href="https://weddingshop.cloud" target="_blank" rel="noreferrer" className="text-[10px] tracking-wider" style={{ color: P.textL }}>Made by 청첩장 작업실 ›</a></footer>
+          <footer className="pb-8 text-center"><a href="https://weddingshop.cloud" target="_blank" rel="noreferrer" className="text-[10px] tracking-wider" style={{ color: P.textL }}>Made by 청첩장 작업실 ›</a></footer>
         </div>
       </div>
       <ShareModal isOpen={showShare} onClose={() => setShowShare(false)} onShare={handleShare} variant="light" weddingId={w.id} />

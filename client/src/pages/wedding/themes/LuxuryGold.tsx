@@ -219,6 +219,7 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </motion.div>
       </Section>
 
+      {guestPhotoSlot}
       {wedding.closingMessage && (
         <Section className="bg-[#111]">
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
@@ -237,7 +238,6 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </div>
       </Section>
 
-      {guestPhotoSlot}
       <footer className="py-8 text-center text-[10px] tracking-[0.3em]" style={{ background: "#1A1A1A" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[#666] hover:text-[#888] transition-colors">Made by 청첩장 작업실 ›</a></footer>
 
       <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="LUXURY_GOLD" usePhotoFilter={wedding.usePhotoFilter ?? true} />}</AnimatePresence>

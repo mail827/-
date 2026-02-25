@@ -290,6 +290,7 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
         </motion.div>
       </section>
 
+      {guestPhotoSlot}
       <section className="py-20 px-6" style={{ background: '#161918' }}>
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="max-w-sm mx-auto">
           <div className="flex justify-center gap-12 mb-12">
@@ -300,7 +301,6 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
         </motion.div>
       </section>
 
-      {guestPhotoSlot}
       <footer className="py-12 text-center" style={{ background: "#0F1210" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.3em] hover:opacity-70 transition-opacity" style={{ ...serifFont, color: "#2A3B30" }}>Made by 청첩장 작업실 ›</a></footer>
 
       {galleryIndex !== null && galleries.length > 0 && <GalleryModal galleries={galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="GALLERY_MIRIM_2" usePhotoFilter={wedding.usePhotoFilter ?? true} />}

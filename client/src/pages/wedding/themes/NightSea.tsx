@@ -665,6 +665,7 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
         </motion.div>
       </section>
 
+      {guestPhotoSlot}
       <section className="py-20 px-8 relative" style={{ zIndex: 1 }}>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-md mx-auto">
           {wedding.closingMessage && (
@@ -694,7 +695,6 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
         </motion.div>
       </section>
 
-      {guestPhotoSlot}
       <footer className="py-12 text-center relative" style={{ zIndex: 1 }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.25em] hover:opacity-70 transition-opacity" style={{ ...f, color: 'rgba(140, 170, 200, 0.2)' }}>
           Made by 청첩장 작업실 ›

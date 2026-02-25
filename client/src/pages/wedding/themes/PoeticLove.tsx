@@ -403,6 +403,7 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </motion.div>
       </Section>
 
+      {guestPhotoSlot}
       {wedding.closingMessage && (
         <>
           <div className="h-px bg-gradient-to-r from-transparent via-[#E5DDF5] to-transparent mx-12" />
@@ -454,7 +455,6 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </div>
       </Section>
 
-      {guestPhotoSlot}
       <footer className="py-12 text-center" style={{ background: "#F0EAF5" }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#9A88C0] tracking-[0.2em] hover:text-[#7A68A0] transition-colors">Made by 청첩장 작업실 ›</a>
       </footer>

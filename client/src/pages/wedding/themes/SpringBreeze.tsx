@@ -404,6 +404,7 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
         </motion.div>
       </Section>
 
+      {guestPhotoSlot}
       {wedding.closingMessage && (
         <Section>
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
@@ -457,7 +458,6 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
         </div>
       </Section>
 
-      {guestPhotoSlot}
       <footer className="py-10 text-center relative z-10" style={{ background: "rgba(220,190,200,0.2)" }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.25em] hover:opacity-70 transition-opacity" style={{ color: '#B4A0A8', fontFamily: 'HsBombaram, serif' }}>Made by 청첩장 작업실 ›</a>
       </footer>

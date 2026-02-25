@@ -614,6 +614,7 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
         </section>
       )}
 
+      {guestPhotoSlot}
       <section className="py-16 px-8 relative" style={{ zIndex: 1 }}>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-lg mx-auto">
           {wedding.closingMessage && <div className="py-8 px-6 rounded-3xl mb-12" style={{ background: 'rgba(255,255,255,0.35)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.4)' }}><p className="text-center text-sm leading-[2.2] whitespace-pre-line" style={{ ...f, color: c.textSoft }}>{wedding.closingMessage}</p></div>}
@@ -623,7 +624,6 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
         </motion.div>
       </section>
 
-      {guestPhotoSlot}
       <footer className="py-10 text-center relative" style={{ zIndex: 1 }}>
         <p className="text-[0.65rem] tracking-wider" style={{ ...f, color: c.textFaint }}>Made by 청첩장 작업실 ›</p>
       </footer>

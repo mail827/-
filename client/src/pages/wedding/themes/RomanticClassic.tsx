@@ -370,6 +370,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
         </motion.div>
       </Section>
 
+      {guestPhotoSlot}
       {wedding.closingMessage && (
         <Section>
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center px-4">
@@ -412,7 +413,6 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
         </div>
       </Section>
 
-      {guestPhotoSlot}
       <footer className="py-10 text-center" style={{ background: "#FAF6F0" }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.3em] hover:opacity-80 transition-opacity" style={{ color: '#A08540' }}>Made by 청첩장 작업실 ›</a>
       </footer>
