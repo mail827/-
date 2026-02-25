@@ -66,7 +66,7 @@ export default function AdminAiSnap() {
   const [bridePhoto, setBridePhoto] = useState('');
   const [uploading, setUploading] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [results, setResults] = useState<{ url: string; concept: string; mode: string }[]>([]);
+  const [results, setResults] = useState<{ id: string; url: string; concept: string; mode: string }[]>([]);
   const pollRef = useRef<ReturnType<typeof setInterval>>();
 
   const token = localStorage.getItem('token');
@@ -121,7 +121,6 @@ export default function AdminAiSnap() {
   const generate = async () => {
     if (!canGen()) return;
     setGenerating(true);
-    setResults([]);
     try {
       const res = await api('/quick-generate', {
         method: 'POST',
@@ -129,7 +128,8 @@ export default function AdminAiSnap() {
       });
       const data = await res.json();
       if (data.status === 'done' && data.resultUrl) {
-        setResults(prev => [{ url: data.resultUrl, concept, mode }, ...prev]);
+        const newResult = { id: data.resultUrl, url: data.resultUrl, concept, mode };
+        setResults(prev => [...prev.filter(r => r.id !== newResult.id), newResult]);
         setGenerating(false);
       } else if (data.statusUrl) {
         pollRef.current = setInterval(async () => {
@@ -137,7 +137,8 @@ export default function AdminAiSnap() {
           const pData = await pRes.json();
           if (pData.status === 'done') {
             clearInterval(pollRef.current);
-            setResults(prev => [{ url: pData.resultUrl, concept, mode }, ...prev]);
+            const newResult = { id: pData.resultUrl, url: pData.resultUrl, concept, mode };
+            setResults(prev => [...prev.filter(r => r.id !== newResult.id), newResult]);
             setGenerating(false);
           } else if (pData.status === 'failed') {
             clearInterval(pollRef.current);
@@ -230,8 +231,8 @@ export default function AdminAiSnap() {
 
             {results.length > 0 && (
               <div className="grid grid-cols-3 gap-2 pt-2">
-                {results.map((r, i) => (
-                  <div key={i} className="relative group">
+                {results.map((r) => (
+                  <div key={r.id} className="relative group">
                     <div onClick={() => setViewUrl(r.url)} className="aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border border-stone-200 hover:border-stone-400 transition-all">
                       <img src={r.url} alt="" className="w-full h-full object-cover" />
                     </div>
