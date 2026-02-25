@@ -660,13 +660,13 @@ export default function Dashboard() {
 
         {weddings.length > 0 && (
           <section className="mt-12">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
                 <div>
-                  <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">GUEST GALLERY</p>
-                  <h2 className="font-serif text-2xl text-stone-800">하객 갤러리</h2>
+                  <p className="text-xs tracking-[0.2em] text-stone-400 mb-1">GUEST GALLERY</p>
+                  <h2 className="font-serif text-xl sm:text-2xl text-stone-800">하객 갤러리</h2>
                 </div>
-                <span className="px-3 py-1 bg-stone-100 text-stone-600 text-sm rounded-full self-start mt-1">{guestPhotos.length}장</span>
+                <span className="px-2.5 py-0.5 bg-stone-100 text-stone-600 text-xs rounded-full">{guestPhotos.length}장</span>
               </div>
               <div className="flex items-center gap-2">
                 {weddings.length > 1 && (

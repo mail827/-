@@ -193,23 +193,31 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
     });
 
     if (submit.images) {
-      const resultUrl = submit.images[0]?.url;
-      await prisma.aiSnap.update({
-        where: { id: snapId },
-        data: { status: resultUrl ? 'done' : 'failed', resultUrl, prompt },
-      });
+      const falUrl = submit.images[0]?.url;
+      if (falUrl) {
+        const uploaded = await uploadFromUrl(falUrl, 'ai-snap');
+        await prisma.aiSnap.update({
+          where: { id: snapId },
+          data: { status: 'done', resultUrl: uploaded.url, prompt },
+        });
+      } else {
+        await prisma.aiSnap.update({
+          where: { id: snapId },
+          data: { status: 'failed', prompt },
+        });
+      }
       return;
     }
 
     if (!submit.status_url) throw new Error('No status_url');
 
     const result = await waitForResult(submit.status_url, submit.response_url);
-    const resultUrl = result.images?.[0]?.url;
-    if (!resultUrl) throw new Error('No result image');
-
+    const falUrl = result.images?.[0]?.url;
+    if (!falUrl) throw new Error('No result image');
+    const uploaded = await uploadFromUrl(falUrl, 'ai-snap');
     await prisma.aiSnap.update({
       where: { id: snapId },
-      data: { status: 'done', resultUrl, prompt },
+      data: { status: 'done', resultUrl: uploaded.url, prompt },
     });
   } catch (err: any) {
     await prisma.aiSnap.update({
@@ -415,7 +423,11 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
       }),
     });
     if (submit.images) {
-      return res.json({ status: 'done', resultUrl: submit.images[0]?.url });
+      const falUrl = submit.images[0]?.url;
+      if (falUrl) {
+        const uploaded = await uploadFromUrl(falUrl, 'ai-snap');
+        return res.json({ status: 'done', resultUrl: uploaded.url });
+      }
     }
     if (!submit.status_url) throw new Error('No status_url');
     res.json({ statusUrl: submit.status_url, responseUrl: submit.response_url });
@@ -431,8 +443,12 @@ router.get('/admin/poll', async (req, res) => {
     const status = await falFetch(statusUrl as string);
     if (status.status === 'COMPLETED') {
       const result = await falFetch(responseUrl as string);
-      const resultUrl = result.images?.[0]?.url;
-      return res.json({ status: 'done', resultUrl });
+      const falUrl = result.images?.[0]?.url;
+      if (falUrl) {
+        const uploaded = await uploadFromUrl(falUrl, 'ai-snap');
+        return res.json({ status: 'done', resultUrl: uploaded.url });
+      }
+      return res.json({ status: 'done', resultUrl: null });
     }
     if (status.status === 'FAILED') {
       return res.json({ status: 'failed', error: status.error });
