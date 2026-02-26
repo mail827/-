@@ -198,6 +198,8 @@ model WeddingSnapshot {
   id        String   @id @default(cuid())
   weddingId String
   version   String   @unique
+  label     String?
+  viewCount Int      @default(0)
   data      Json
   sharedAt  DateTime @default(now())
   createdAt DateTime @default(now())
@@ -231,6 +233,7 @@ model GuestPhoto {
   wedding    Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
   guestName  String   @default("익명")
   imageUrl   String
+  mediaType  String   @default("IMAGE")
   publicId   String?
   message    String?
   approved   Boolean  @default(true)

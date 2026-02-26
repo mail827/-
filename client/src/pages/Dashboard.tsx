@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import JSZip from 'jszip';
-import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download, Loader2, ChevronLeft, ChevronRight, Camera } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download, Loader2, ChevronLeft, ChevronRight, Camera, Play } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import QRCardModal from '../components/QRCardModal';
 import ImageCropper from '../components/ImageCropper';
+import SharedLinkManager from '../components/SharedLinkManager';
 
 interface User {
   id: string;
@@ -60,6 +61,7 @@ interface GuestPhoto {
   id: string;
   guestName: string;
   imageUrl: string;
+  mediaType?: string;
   message?: string;
   createdAt: string;
 }
@@ -348,9 +350,10 @@ export default function Dashboard() {
 
   const handleDownloadGuestPhoto = (photo: GuestPhoto) => {
     fetch(photo.imageUrl).then(r => r.blob()).then(blob => {
+      const ext = photo.mediaType === 'VIDEO' ? 'mp4' : 'jpg';
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `guest-${photo.guestName}-${photo.id.slice(0, 8)}.jpg`;
+      a.download = `guest-${photo.guestName}-${photo.id.slice(0, 8)}.${ext}`;
       a.click();
       URL.revokeObjectURL(a.href);
     });
@@ -758,6 +761,10 @@ export default function Dashboard() {
         </section>
 
         {weddings.length > 0 && (
+          <SharedLinkManager weddings={weddings} />
+        )}
+
+        {weddings.length > 0 && (
           <section className="mt-12">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
@@ -802,12 +809,18 @@ export default function Dashboard() {
                     key={photo.id}
                     className="group relative rounded-xl overflow-hidden border border-stone-200 aspect-square bg-stone-50"
                   >
-                    <img
-                      src={photo.imageUrl}
-                      alt={photo.guestName}
-                      className="w-full h-full object-cover cursor-pointer"
-                      onClick={() => setGuestPhotoViewIndex(i)}
-                    />
+                    {photo.mediaType === 'VIDEO' ? (
+                      <div className="relative w-full h-full cursor-pointer" onClick={() => setGuestPhotoViewIndex(i)}>
+                        <video src={photo.imageUrl} className="w-full h-full object-cover" muted preload="metadata" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+                            <Play className="w-5 h-5 text-white ml-0.5" fill="white" />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <img src={photo.imageUrl} alt={photo.guestName} className="w-full h-full object-cover cursor-pointer" onClick={() => setGuestPhotoViewIndex(i)} />
+                    )}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                       <button
                         onClick={e => { e.stopPropagation(); handleDownloadGuestPhoto(photo); }}
@@ -1013,7 +1026,11 @@ export default function Dashboard() {
               <ChevronLeft className="w-6 h-6" />
             </button>
             <div className="max-w-4xl w-full px-4" onClick={e => e.stopPropagation()}>
-              <img src={guestPhotos[guestPhotoViewIndex].imageUrl} alt="" className="w-full rounded-lg" />
+              {guestPhotos[guestPhotoViewIndex].mediaType === 'VIDEO' ? (
+                <video src={guestPhotos[guestPhotoViewIndex].imageUrl} controls autoPlay playsInline className="w-full rounded-lg max-h-[70vh]" />
+              ) : (
+                <img src={guestPhotos[guestPhotoViewIndex].imageUrl} alt="" className="w-full rounded-lg" />
+              )}
               <div className="text-center mt-3">
                 <p className="text-white/80 text-sm">{guestPhotos[guestPhotoViewIndex].guestName}</p>
                 {guestPhotos[guestPhotoViewIndex].message && <p className="text-white/50 text-xs mt-1">{guestPhotos[guestPhotoViewIndex].message}</p>}

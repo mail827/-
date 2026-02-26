@@ -12,6 +12,8 @@ interface ShareModalProps {
 export default function ShareModal({ isOpen, onClose, onShare, variant = 'light', weddingId }: ShareModalProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showLabel, setShowLabel] = useState(false);
+  const [label, setLabel] = useState('');
 
   if (!isOpen) return null;
 
@@ -21,7 +23,11 @@ export default function ShareModal({ isOpen, onClose, onShare, variant = 'light'
     const baseUrl = window.location.origin + window.location.pathname;
     if (!weddingId) return baseUrl;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/snapshot/${weddingId}`, { method: 'POST' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/snapshot/${weddingId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label: label.trim() || null })
+      });
       const data = await res.json();
       return data.version ? `${baseUrl}?v=${data.version}` : baseUrl;
     } catch {
@@ -36,6 +42,8 @@ export default function ShareModal({ isOpen, onClose, onShare, variant = 'light'
       onShare('kakao', url.includes('?v=') ? url.split('?v=')[1] : undefined);
     } finally {
       setIsCreating(false);
+      setLabel('');
+      setShowLabel(false);
     }
   };
 
@@ -60,6 +68,8 @@ export default function ShareModal({ isOpen, onClose, onShare, variant = 'light'
       }
     } finally {
       setIsCreating(false);
+      setLabel('');
+      setShowLabel(false);
     }
   };
 
@@ -74,8 +84,12 @@ export default function ShareModal({ isOpen, onClose, onShare, variant = 'light'
       setCopied(false);
     } finally {
       setIsCreating(false);
+      setLabel('');
+      setShowLabel(false);
     }
   };
+
+  const labelPresets = ['부모님용', '친구용', '직장동료', '친척'];
 
   return (
     <motion.div
@@ -92,10 +106,61 @@ export default function ShareModal({ isOpen, onClose, onShare, variant = 'light'
         onClick={(e) => e.stopPropagation()}
         className={`w-full max-w-md rounded-t-2xl p-6 ${isDark ? 'bg-[#1a1a1a]' : 'bg-white'}`}
       >
-        <p className={`text-center mb-6 ${isDark ? 'text-white' : 'text-stone-700'}`}>
+        <p className={`text-center mb-4 ${isDark ? 'text-white' : 'text-stone-700'}`}>
           {isCreating ? '공유 링크 생성 중...' : copied ? '링크가 복사되었습니다!' : '공유하기'}
         </p>
-        
+
+        <div className="mb-5">
+          <button
+            onClick={() => setShowLabel(!showLabel)}
+            className={`w-full text-left text-xs px-3 py-2 rounded-lg transition-colors ${
+              isDark
+                ? 'text-[#888] hover:bg-[#222]'
+                : 'text-stone-400 hover:bg-stone-50'
+            }`}
+          >
+            {showLabel ? '▾ 링크에 이름 붙이기' : '▸ 링크에 이름 붙이기 (선택)'}
+          </button>
+
+          {showLabel && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              className="overflow-hidden"
+            >
+              <div className="px-3 pt-2 pb-1">
+                <input
+                  type="text"
+                  value={label}
+                  onChange={(e) => setLabel(e.target.value)}
+                  placeholder="예: 부모님용, 친구용"
+                  maxLength={20}
+                  className={`w-full text-sm px-3 py-2 rounded-lg border outline-none transition-colors ${
+                    isDark
+                      ? 'bg-[#222] border-[#333] text-white placeholder-[#555] focus:border-[#555]'
+                      : 'bg-white border-stone-200 text-stone-800 placeholder-stone-300 focus:border-stone-400'
+                  }`}
+                />
+                <div className="flex gap-1.5 mt-2 flex-wrap">
+                  {labelPresets.map((preset) => (
+                    <button
+                      key={preset}
+                      onClick={() => setLabel(preset)}
+                      className={`px-2.5 py-1 text-xs rounded-full transition-colors ${
+                        label === preset
+                          ? isDark ? 'bg-white text-black' : 'bg-stone-800 text-white'
+                          : isDark ? 'bg-[#333] text-[#888] hover:bg-[#444]' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </div>
+
         <div className="flex justify-center gap-6">
           <button onClick={handleKakao} disabled={isCreating} className="flex flex-col items-center gap-2 disabled:opacity-50">
             <div className="w-14 h-14 rounded-full bg-[#FEE500] flex items-center justify-center">
