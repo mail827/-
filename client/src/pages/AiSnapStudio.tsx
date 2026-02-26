@@ -520,7 +520,7 @@ export default function AiSnapStudioPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="font-serif text-xl text-stone-800">내 웨딩 화보</h2>
-                  <p className="text-xs text-stone-400 mt-1">{activePack.concept} · {activePack.usedSnaps}/{activePack.totalSnaps}장</p>
+                  <p className="text-xs text-stone-400 mt-1">{activePack.concept} · {activePack.usedSnaps}/{activePack.totalSnaps}장</p><p className="text-[10px] text-stone-300 mt-0.5">AI가 생성한 이미지로 실제와 다소 차이가 있을 수 있습니다</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => { setSelectedTier(''); setSelectedConcept(''); setCategory('studio'); setGroomPhoto(''); setBridePhoto(''); setCouponCode(''); setCouponResult(null); setCouponError(''); setStep(1); }}
