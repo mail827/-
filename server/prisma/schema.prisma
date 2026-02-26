@@ -509,6 +509,8 @@ model SnapPack {
   mode        String    @default("groom")
   inputUrls   Json      @default("[]")
   amount      Int
+  couponCode    String?
+  chainRefUrls  Json      @default("{}")
   status      String    @default("PENDING")
   paymentKey  String?
   orderId     String    @unique

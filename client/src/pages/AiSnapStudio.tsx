@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Camera, X, Download, Loader2, User, Users, ArrowRight, ArrowLeft, Package, Image, CreditCard, Gift } from 'lucide-react';
+import { Sparkles, Camera, X, Download, Loader2, User, Users, ArrowRight, ArrowLeft, Package, Image, CreditCard, Gift, RefreshCw } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL;
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -46,7 +46,12 @@ export default function AiSnapStudioPage() {
   const [selectedConcept, setSelectedConcept] = useState('');
   const [groomPhoto, setGroomPhoto] = useState('');
   const [bridePhoto, setBridePhoto] = useState('');
+  const [couplePhoto, setCouplePhoto] = useState('');
   const [uploading, setUploading] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponResult, setCouponResult] = useState<{valid:boolean;discountType:string;discountValue:number;name:string}|null>(null);
+  const [couponChecking, setCouponChecking] = useState(false);
+  const [couponError, setCouponError] = useState('');
 
   const [activePack, setActivePack] = useState<Pack | null>(null);
   const [myPacks, setMyPacks] = useState<Pack[]>([]);
@@ -99,7 +104,7 @@ export default function AiSnapStudioPage() {
     return () => { clearInterval(progressRef.current); clearInterval(pollRef.current); };
   }, []);
 
-  const uploadPhoto = async (file: File, type: 'groom' | 'bride') => {
+  const uploadPhoto = async (file: File, type: 'groom' | 'bride' | 'couple') => {
     setUploading(type);
     const fd = new FormData();
     fd.append('file', file);
@@ -107,7 +112,7 @@ export default function AiSnapStudioPage() {
     try {
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
       const data = await res.json();
-      if (type === 'groom') setGroomPhoto(data.secure_url);
+      if (type === 'groom') setGroomPhoto(data.secure_url);      else if (type === 'couple') setCouplePhoto(data.secure_url);
       else setBridePhoto(data.secure_url);
     } catch {}
     setUploading(null);
@@ -125,7 +130,7 @@ export default function AiSnapStudioPage() {
       const res = await fetch(`${API}/snap-pack/pack/${setupPackId}/setup`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ concept: selectedConcept, category, mode: 'mix', imageUrls: [groomPhoto, bridePhoto] }),
+        body: JSON.stringify({ concept: selectedConcept, category, mode: 'mix', imageUrls: [groomPhoto, bridePhoto, ...(couplePhoto ? [couplePhoto] : [])] }),
       });
       if (res.status === 401) {
         localStorage.removeItem('token');
@@ -145,13 +150,36 @@ export default function AiSnapStudioPage() {
     setSetupLoading(false);
   };
 
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponChecking(true);
+    setCouponError('');
+    setCouponResult(null);
+    try {
+      const res = await fetch(`${API}/coupon/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponCode.trim() }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setCouponResult({ valid: true, discountType: data.coupon.discountType, discountValue: data.coupon.discountValue, name: data.coupon.name });
+      } else {
+        setCouponError(data.error || '유효하지 않은 코드입니다');
+      }
+    } catch {
+      setCouponError('확인 중 오류가 발생했습니다');
+    }
+    setCouponChecking(false);
+  };
+
   const handlePayment = async () => {
     if (!selectedTier || !selectedConcept || !groomPhoto || !bridePhoto) return;
     try {
       const orderRes = await fetch(`${API}/snap-pack/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ tier: selectedTier, concept: selectedConcept, category, mode: 'mix', imageUrls: [groomPhoto, bridePhoto] }),
+        body: JSON.stringify({ tier: selectedTier, concept: selectedConcept, category, mode: 'mix', imageUrls: [groomPhoto, bridePhoto, ...(couplePhoto ? [couplePhoto] : [])], couponCode: couponResult?.valid ? couponCode.trim().toUpperCase() : undefined }),
       });
       const order = await orderRes.json();
       if (!order.orderId) return;
@@ -228,7 +256,7 @@ export default function AiSnapStudioPage() {
         if (snap.status === 'done' || snap.status === 'failed') {
           clearInterval(pollRef.current);
           clearInterval(progressRef.current);
-          setProgress(snap.status === 'done' ? 100 : 0);
+          setProgress(snap.status === 'done' ? 100 : 0);          if (snap.status === 'failed') alert('생성에 실패했어요. 횟수가 복구되었으니 다시 시도해주세요.');
           setPollingId(null);
           setGenerating(false);
           setShotMode(null);
@@ -305,10 +333,16 @@ export default function AiSnapStudioPage() {
                 <UploadCard label="신랑" photo={groomPhoto} uploading={uploading === 'groom'} onUpload={f => uploadPhoto(f, 'groom')} onClear={() => setGroomPhoto('')} />
                 <UploadCard label="신부" photo={bridePhoto} uploading={uploading === 'bride'} onUpload={f => uploadPhoto(f, 'bride')} onClear={() => setBridePhoto('')} />
               </div>
-              <p className="text-center text-[11px] text-stone-400 pt-2">얼굴이 잘 보이는 사진으로 올려주세요. 매 컷 생성 시 신랑/신부/커플을 선택할 수 있어요.</p>
-              <div className="flex justify-end pt-4">
+              <div className="mt-3"><UploadCard label="커플 사진 (선택)" photo={couplePhoto} uploading={uploading === 'couple'} onUpload={f => uploadPhoto(f, 'couple')} onClear={() => setCouplePhoto('')} /></div><p className="text-center text-[11px] text-stone-400 pt-2">얼굴이 잘 보이는 정면 사진을 올려주세요</p><p className="text-center text-[11px] text-amber-600 font-medium">커플 사진을 올리면 함께 찍은 화보 퀄리티가 크게 올라가요</p>
+              <div className="flex gap-3 pt-4">
+                {!isSetupMode && myPacks.length > 0 && (
+                  <button onClick={() => { const rp = myPacks.find(p => p.concept && p.concept !== ''); if (rp) { setActivePack(rp); setStep(10); } }}
+                    className="px-6 py-3 rounded-xl border border-stone-200 text-sm text-stone-500 hover:bg-stone-50 flex items-center gap-1">
+                    <ArrowLeft className="w-4 h-4" /> 내 화보
+                  </button>
+                )}
                 <button onClick={() => setStep(2)} disabled={!groomPhoto || !bridePhoto}
-                  className="px-8 py-3 rounded-xl bg-stone-800 text-white text-sm font-medium disabled:opacity-30 hover:bg-stone-900 transition-all flex items-center gap-1">
+                  className="flex-1 px-8 py-3 rounded-xl bg-stone-800 text-white text-sm font-medium disabled:opacity-30 hover:bg-stone-900 transition-all flex items-center gap-1 justify-center">
                   다음 <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -391,6 +425,13 @@ export default function AiSnapStudioPage() {
                 const t = tiers.find(t => t.id === selectedTier);
                 const allC = [...concepts.studio, ...concepts.cinematic];
                 const c = allC.find(c => c.id === selectedConcept);
+                const originalPrice = t?.price || 0;
+                const discountedPrice = couponResult?.valid
+                  ? couponResult.discountType === 'PERCENT'
+                    ? Math.round(originalPrice * (1 - couponResult.discountValue / 100))
+                    : Math.max(0, originalPrice - couponResult.discountValue)
+                  : originalPrice;
+                const saved = originalPrice - discountedPrice;
                 return (
                   <div className="space-y-6">
                     <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5 space-y-3">
@@ -398,9 +439,38 @@ export default function AiSnapStudioPage() {
                       <Row label="컨셉" value={c?.label || ''} />
                       <Row label="장수" value={`${t?.snaps}장`} />
                       <Row label="모드" value="매 컷 선택 (신랑/신부/커플)" />
-                      <div className="border-t border-stone-200 pt-3 flex justify-between">
-                        <span className="font-semibold text-stone-800">결제 금액</span>
-                        <span className="text-xl font-light text-stone-800">{t?.price.toLocaleString()}<span className="text-xs text-stone-400">원</span></span>
+                      <div className="border-t border-stone-200 pt-3">
+                        <div className="flex items-center gap-2 mb-3">
+                          <input
+                            type="text"
+                            placeholder="할인코드 입력"
+                            value={couponCode}
+                            onChange={e => { setCouponCode(e.target.value); setCouponResult(null); setCouponError(''); }}
+                            className="flex-1 px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-stone-400 bg-white"
+                          />
+                          <button
+                            onClick={validateCoupon}
+                            disabled={couponChecking || !couponCode.trim()}
+                            className="px-5 py-3 rounded-xl bg-stone-800 text-white text-sm font-medium disabled:opacity-40 hover:bg-stone-900 transition-all shrink-0">
+                            {couponChecking ? '...' : '적용'}
+                          </button>
+                        </div>
+                        {couponError && <p className="text-xs text-red-500 mb-2">{couponError}</p>}
+                        {couponResult?.valid && (
+                          <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 mb-3">
+                            <span className="text-xs text-emerald-700 font-medium">{couponResult.name} 적용</span>
+                            <span className="text-xs text-emerald-600 font-semibold">-{saved.toLocaleString()}원</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-end">
+                          <span className="font-semibold text-stone-800">결제 금액</span>
+                          <div className="text-right">
+                            {couponResult?.valid && (
+                              <p className="text-xs text-stone-400 line-through">{originalPrice.toLocaleString()}원</p>
+                            )}
+                            <span className="text-xl font-light text-stone-800">{discountedPrice.toLocaleString()}<span className="text-xs text-stone-400">원</span></span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <button onClick={handlePayment}
@@ -452,10 +522,26 @@ export default function AiSnapStudioPage() {
                   <h2 className="font-serif text-xl text-stone-800">내 웨딩 화보</h2>
                   <p className="text-xs text-stone-400 mt-1">{activePack.concept} · {activePack.usedSnaps}/{activePack.totalSnaps}장</p>
                 </div>
-                <div className="px-3 py-1.5 bg-stone-100 rounded-full text-xs text-stone-600">
-                  {activePack.totalSnaps - activePack.usedSnaps}장 남음
+                <div className="flex items-center gap-2">
+                  <button onClick={() => { setSelectedTier(''); setSelectedConcept(''); setCategory('studio'); setGroomPhoto(''); setBridePhoto(''); setCouponCode(''); setCouponResult(null); setCouponError(''); setStep(1); }}
+                    className="px-3 py-1.5 bg-stone-800 text-white rounded-full text-xs font-medium hover:bg-stone-900 transition-all flex items-center gap-1">
+                    <Package className="w-3 h-3" /> 새 패키지
+                  </button>
+                  <div className="px-3 py-1.5 bg-stone-100 rounded-full text-xs text-stone-600">
+                    {activePack.totalSnaps - activePack.usedSnaps}장 남음
+                  </div>
                 </div>
               </div>
+              {myPacks.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                  {myPacks.filter(p => p.concept && p.concept !== '').map(p => (
+                    <button key={p.id} onClick={() => setActivePack(p)}
+                      className={`shrink-0 px-3 py-1.5 rounded-full text-xs border transition-all ${activePack.id === p.id ? 'border-stone-800 bg-stone-800 text-white' : 'border-stone-200 text-stone-500 hover:border-stone-300'}`}>
+                      {p.concept} · {p.usedSnaps}/{p.totalSnaps}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
                 <div className="h-full bg-stone-800 rounded-full transition-all" style={{ width: `${(activePack.usedSnaps / activePack.totalSnaps) * 100}%` }} />
@@ -508,7 +594,7 @@ export default function AiSnapStudioPage() {
                       </div>
                     ) : (
                       <div className="aspect-square bg-stone-50 flex items-center justify-center">
-                        <X className="w-6 h-6 text-red-400" />
+                        <RefreshCw className="w-5 h-5 text-stone-400" /><span className="text-[10px] text-stone-400">탭하여 재생성</span>
                       </div>
                     )}
                   </div>

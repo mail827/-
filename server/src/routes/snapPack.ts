@@ -1,13 +1,35 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { v2 as cloudinary } from 'cloudinary';
 
 const router = Router();
 const prisma = new PrismaClient();
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 const FAL_API_KEY = process.env.FAL_API_KEY;
 const FAL_QUEUE = 'https://queue.fal.run';
 const TOSS_SECRET = process.env.TOSS_SECRET_KEY;
+
+const uploadToCloudinary = async (imageUrl: string, snapId: string): Promise<string> => {
+  try {
+    const result = await cloudinary.uploader.upload(imageUrl, {
+      folder: 'wedding/ai-snap/paid',
+      public_id: snapId,
+      overwrite: true,
+      resource_type: 'image',
+      transformation: [{ quality: 'auto:best', fetch_format: 'auto' }],
+    });
+    return result.secure_url;
+  } catch {
+    return imageUrl;
+  }
+};
 
 const TIERS: Record<string, { snaps: number; price: number; label: string }> = {
   'snap-3': { snaps: 3, price: 5900, label: '3장 세트' },
@@ -189,27 +211,36 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const allConcepts = { ...STUDIO_CONCEPTS, ...CINEMATIC_CONCEPTS };
   const scene = allConcepts[concept]?.base || STUDIO_CONCEPTS.studio_classic.base;
   const isCinematic = category === 'cinematic';
-
   const variants = mode === 'couple' ? COUPLE_SHOT_VARIANTS : SHOT_VARIANTS;
   const shot = variants[shotIdx % variants.length];
 
-  const continuity = 'maintaining exact same outfit, same hairstyle, same accessories, same jewelry throughout, strict wardrobe continuity';
-  const faceQuality = 'natural facial proportions, refined delicate nose bridge, photorealistic skin texture, no uncanny valley, lifelike';
-  const photoTexture = 'shot on Canon EOS R5, 85mm f/1.4 lens, natural film grain, realistic photograph texture';
-  const cinemaExtra = isCinematic ? ', anamorphic lens flare, subtle motion blur on fabric edges, cinematic color grading, 2.39:1 widescreen feel' : '';
+  const face = 'preserve exact facial features from reference photo, natural Korean face proportions, keep original nose bridge width and shape, maintain authentic jawline, real skin texture with natural pores';
+  const outfit = 'keep identical outfit hairstyle accessories from reference throughout all shots';
+  const cam = isCinematic
+    ? 'cinematic 85mm f/1.4, anamorphic bokeh, filmic color grading'
+    : 'Canon EOS R5 85mm f/1.4, natural soft lighting, fine film grain';
 
   if (mode === 'couple') {
-    const groomOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
-    const brideOutfit = OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic;
-    return `transform into ${isCinematic ? 'cinematic' : 'professional'} wedding photograph, the man on the left ${groomOutfit}, the woman on the right ${brideOutfit}, ${shot.prompt}, ${scene}, ${continuity}, ${faceQuality}, ${photoTexture}${cinemaExtra}, 8k`;
+    const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
+    const bOutfit = OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic;
+    return `${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${shot.prompt}, ${scene}, ${face}, ${outfit}, ${cam}, 8k ultra detailed`;
   }
 
-  const outfit = mode === 'groom'
+  const clothe = mode === 'groom'
     ? (OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic)
     : (OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic);
+  const subj = mode === 'groom' ? 'Korean groom' : 'Korean bride';
+  return `${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${shot.prompt}, ${scene}, ${face}, ${outfit}, ${cam}, 8k ultra detailed`;
+};
 
-  const subject = mode === 'groom' ? 'groom' : 'bride';
-  return `transform into ${isCinematic ? 'cinematic' : 'professional'} ${subject} wedding portrait, ${outfit}, ${shot.prompt}, ${scene}, ${continuity}, ${faceQuality}, ${photoTexture}${cinemaExtra}, 8k`;
+const buildNegativePrompt = (mode: string): string => {
+  const base = 'deformed face, elongated banana-shaped face, stretched face, pinched nose, bulbous nose, uncanny valley, plastic skin, wax figure, 3D render, cartoon, anime, illustration, painting, doll-like, mannequin, blurry, low quality, watermark, text overlay';
+  const male = 'overly angular square jaw, exaggerated chin, feminized male face, too-smooth airbrush skin, unnaturally narrow face';
+  const female = 'masculine jaw, wide nose bridge, overly sharp features, generic AI female face';
+
+  if (mode === 'groom') return `${base}, ${male}`;
+  if (mode === 'bride') return `${base}, ${female}`;
+  return `${base}, ${male}, ${female}`;
 };
 
 const falFetch = async (url: string, opts?: RequestInit) => {
@@ -219,6 +250,27 @@ const falFetch = async (url: string, opts?: RequestInit) => {
   });
   const text = await res.text();
   try { return JSON.parse(text); } catch { throw new Error(`fal error (${res.status}): ${text.slice(0, 300)}`); }
+};
+
+const validateCoupon = async (code: string, originalPrice: number): Promise<{ valid: boolean; finalPrice: number; couponCode: string | null }> => {
+  if (!code) return { valid: false, finalPrice: originalPrice, couponCode: null };
+  try {
+    const coupon = await prisma.coupon.findUnique({ where: { code: code.toUpperCase() } });
+    if (!coupon || !coupon.isActive) return { valid: false, finalPrice: originalPrice, couponCode: null };
+    if (coupon.expiresAt && new Date() > coupon.expiresAt) return { valid: false, finalPrice: originalPrice, couponCode: null };
+    if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) return { valid: false, finalPrice: originalPrice, couponCode: null };
+
+    let finalPrice = originalPrice;
+    if (coupon.discountType === 'PERCENT') {
+      finalPrice = Math.round(originalPrice * (1 - coupon.discountValue / 100));
+    } else {
+      finalPrice = Math.max(0, originalPrice - coupon.discountValue);
+    }
+
+    return { valid: true, finalPrice, couponCode: coupon.code };
+  } catch {
+    return { valid: false, finalPrice: originalPrice, couponCode: null };
+  }
 };
 
 router.get('/toss-client-key', (_req, res) => {
@@ -239,10 +291,12 @@ router.post('/create-order', authMiddleware, async (req: AuthRequest, res) => {
   const userId = (req as AuthRequest).user?.id;
   if (!userId) return res.status(401).json({ error: '로그인 필요' });
 
-  const { tier, concept, category, mode, imageUrls } = req.body;
+  const { tier, concept, category, mode, imageUrls, couponCode } = req.body;
   const tierInfo = TIERS[tier];
   if (!tierInfo) return res.status(400).json({ error: '잘못된 티어' });
   if (!concept || !imageUrls || imageUrls.length < 1) return res.status(400).json({ error: 'concept, imageUrls required' });
+
+  const { valid, finalPrice, couponCode: validCode } = await validateCoupon(couponCode, tierInfo.price);
 
   const orderId = `SNAP_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -250,11 +304,17 @@ router.post('/create-order', authMiddleware, async (req: AuthRequest, res) => {
     data: {
       userId, tier, totalSnaps: tierInfo.snaps, concept,
       category: category || 'studio', mode: mode || 'groom',
-      inputUrls: imageUrls, amount: tierInfo.price, orderId,
+      inputUrls: imageUrls, amount: finalPrice, orderId,
+      couponCode: valid ? validCode : null,
     },
   });
 
-  res.json({ packId: pack.id, orderId, amount: tierInfo.price, label: tierInfo.label });
+  res.json({
+    packId: pack.id, orderId, amount: finalPrice, label: tierInfo.label,
+    originalPrice: tierInfo.price,
+    discounted: valid,
+    couponCode: valid ? validCode : null,
+  });
 });
 
 router.post('/confirm-payment', authMiddleware, async (req: AuthRequest, res) => {
@@ -281,6 +341,13 @@ router.post('/confirm-payment', authMiddleware, async (req: AuthRequest, res) =>
       where: { orderId },
       data: { status: 'PAID', paymentKey, paidAt: new Date() },
     });
+
+    if (pack.couponCode) {
+      await prisma.coupon.update({
+        where: { code: pack.couponCode },
+        data: { usedCount: { increment: 1 } },
+      });
+    }
 
     res.json({ success: true, packId: pack.id });
   } catch (e: any) {
@@ -363,9 +430,18 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     const effectiveMode = mode || pack.mode;
     const shotIdx = pack.usedSnaps;
     const prompt = buildPrompt(pack.concept, pack.category, effectiveMode, shotIdx);
+    const negativePrompt = buildNegativePrompt(effectiveMode);
 
     const inputUrlsArr = pack.inputUrls as string[];
-    const imageUrls = effectiveMode === 'groom' ? [inputUrlsArr[0]] : effectiveMode === 'bride' ? [inputUrlsArr[1]] : effectiveMode === 'couple' ? inputUrlsArr : inputUrlsArr;
+    const chainRefs = (pack.chainRefUrls || {}) as Record<string, string>;
+
+    let imageUrls: string[] = effectiveMode === 'groom' ? [inputUrlsArr[0]]
+      : effectiveMode === 'bride' ? [inputUrlsArr[1]]
+      : inputUrlsArr.length >= 3 ? [inputUrlsArr[2], inputUrlsArr[0], inputUrlsArr[1]] : inputUrlsArr.slice(0, 2);
+
+    if (chainRefs[effectiveMode]) {
+      imageUrls = [...imageUrls, chainRefs[effectiveMode]];
+    }
 
     const snap = await prisma.aiSnap.create({
       data: {
@@ -380,29 +456,49 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
       try {
         const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
           method: 'POST',
-          body: JSON.stringify({ prompt, image_urls: imageUrls }),
+          body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt }),
         });
 
-        if (submit.images) {
-          await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: submit.images[0]?.url } });
-          return;
-        }
-        if (!submit.status_url) throw new Error('No status_url');
+        let falUrl: string | null = null;
 
-        const start = Date.now();
-        while (Date.now() - start < 180000) {
-          await new Promise(r => setTimeout(r, 3000));
-          const status = await falFetch(submit.status_url);
-          if (status.status === 'COMPLETED') {
-            const result = await falFetch(submit.response_url);
-            await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: result.images?.[0]?.url } });
-            return;
+        if (submit.images && submit.images[0]?.url) {
+          falUrl = submit.images[0].url;
+        } else if (submit.status_url) {
+          const start = Date.now();
+          while (Date.now() - start < 180000) {
+            await new Promise(r => setTimeout(r, 3000));
+            const status = await falFetch(submit.status_url);
+            if (status.status === 'COMPLETED') {
+              const result = await falFetch(submit.response_url);
+              falUrl = result.images?.[0]?.url || null;
+              break;
+            }
+            if (status.status === 'FAILED') throw new Error(status.error || 'Failed');
           }
-          if (status.status === 'FAILED') throw new Error(status.error || 'Failed');
+          if (!falUrl) throw new Error('Timeout');
+        } else {
+          throw new Error('No images or status_url');
         }
-        throw new Error('Timeout');
+
+        const validateRes = await fetch(falUrl!, { method: 'HEAD' });
+        const cType = validateRes.headers.get('content-type') || '';
+        const cLen = parseInt(validateRes.headers.get('content-length') || '0', 10);
+        if (!cType.startsWith('image/') || cLen < 10000) {
+          throw new Error('Invalid image: ' + cType + ' size=' + cLen);
+        }
+        const permanentUrl = await uploadToCloudinary(falUrl!, snap.id);
+        await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: permanentUrl } });
+
+        if (!chainRefs[effectiveMode]) {
+          chainRefs[effectiveMode] = permanentUrl;
+          await prisma.snapPack.update({
+            where: { id: packId },
+            data: { chainRefUrls: chainRefs },
+          });
+        }
       } catch (err: any) {
         await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: err.message?.slice(0, 500) } });
+        await prisma.snapPack.update({ where: { id: packId }, data: { usedSnaps: { decrement: 1 } } });
       }
     })();
 
@@ -411,7 +507,6 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-
 router.get('/pack/:id', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const pack = await prisma.snapPack.findUnique({
