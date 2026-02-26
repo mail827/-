@@ -121,7 +121,30 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
 };
 
-const SHOT_VARIANTS = [
+const GROOM_SHOT_VARIANTS = [
+  { id: 'jacket_adjust', prompt: 'upper body, one hand adjusting suit jacket lapel, relaxed confident smirk, slight head tilt, natural masculine charm' },
+  { id: 'hands_pocket', prompt: 'three quarter body, one hand casually in trouser pocket, other hand relaxed at side, easy confident stance, subtle smile' },
+  { id: 'leaning_cool', prompt: 'leaning against wall with one shoulder, arms loosely crossed, cool relaxed expression, candid editorial mood' },
+  { id: 'walking_stride', prompt: 'mid-stride walking toward camera, jacket unbuttoned, natural movement, looking slightly off-camera, cinematic candid' },
+  { id: 'seated_relaxed', prompt: 'seated on steps or ledge, elbows resting on knees, hands loosely clasped, relaxed genuine smile, natural light' },
+  { id: 'profile_sharp', prompt: 'sharp side profile, jaw defined by rim lighting, looking into distance, contemplative masculine presence' },
+  { id: 'cuff_fixing', prompt: 'close-up upper body, adjusting shirt cuff or watch, eyes downcast with slight smile, intimate grooming moment' },
+  { id: 'back_turn_glance', prompt: 'turned away, glancing back over shoulder with half smile, mysterious confident expression, dramatic backlight' },
+  { id: 'tie_touch', prompt: 'upper body, one hand lightly touching tie or collar, direct eye contact, warm confident expression' },
+  { id: 'laughing_natural', prompt: 'genuine laughing moment, head slightly tilted back, natural joy, eyes crinkled, candid movement' },
+  { id: 'low_angle_power', prompt: 'low angle shot, standing tall with hands in pockets, powerful silhouette against sky, heroic cinematic mood' },
+  { id: 'arm_cross_lean', prompt: 'arms crossed casually, slight lean, knowing smile, editorial magazine pose, strong but approachable' },
+  { id: 'looking_down', prompt: 'looking down with gentle smile, hands adjusting boutonniere, soft overhead lighting, intimate reflective moment' },
+  { id: 'dramatic_half', prompt: 'dramatic half-face lighting, one side illuminated, serious composed expression, deep shadows, painterly mood' },
+  { id: 'wide_cinematic', prompt: 'wide shot, walking alone through grand scene, small figure in epic environment, cinematic scale and atmosphere' },
+  { id: 'collar_up', prompt: 'upper body, turning up coat collar or adjusting scarf, windswept hair, rugged elegant vibe' },
+  { id: 'three_quarter_smirk', prompt: 'three quarter view, slight smirk, one eyebrow subtly raised, charismatic effortless cool' },
+  { id: 'hands_behind', prompt: 'full body, hands clasped behind back, standing upright with relaxed shoulders, dignified calm confidence' },
+  { id: 'over_shoulder_depth', prompt: 'shot from behind over shoulder, partial face visible, looking into scenic distance, mysterious depth' },
+  { id: 'dynamic_motion', prompt: 'dynamic movement, jacket swinging with motion, slight wind effect, frozen cinematic action moment' },
+];
+
+const BRIDE_SHOT_VARIANTS = [
   { id: 'full_front', prompt: 'full body shot, facing camera directly, confident gentle expression, eye contact with camera' },
   { id: 'upper_body', prompt: 'upper body portrait, slightly turned 30 degrees left, warm natural smile, soft eye contact' },
   { id: 'closeup', prompt: 'close-up portrait from chest up, gentle tilt of head, intimate warm expression, shallow depth of field' },
@@ -211,7 +234,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const allConcepts = { ...STUDIO_CONCEPTS, ...CINEMATIC_CONCEPTS };
   const scene = allConcepts[concept]?.base || STUDIO_CONCEPTS.studio_classic.base;
   const isCinematic = category === 'cinematic';
-  const variants = mode === 'couple' ? COUPLE_SHOT_VARIANTS : SHOT_VARIANTS;
+  const variants = mode === 'couple' ? COUPLE_SHOT_VARIANTS : mode === 'groom' ? GROOM_SHOT_VARIANTS : BRIDE_SHOT_VARIANTS;
   const shot = variants[shotIdx % variants.length];
 
   const face = 'preserve exact facial features from reference photo, natural Korean face proportions, keep original nose bridge width and shape, maintain authentic jawline, real skin texture with natural pores';
