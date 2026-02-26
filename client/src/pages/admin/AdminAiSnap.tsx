@@ -64,10 +64,11 @@ export default function AdminAiSnap() {
   const [concept, setConcept] = useState('studio_classic');
   const [groomPhoto, setGroomPhoto] = useState('');
   const [bridePhoto, setBridePhoto] = useState('');
+  const [couplePhoto, setCouplePhoto] = useState('');
   const [uploading, setUploading] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [results, setResults] = useState<{ id: string; url: string; concept: string; mode: string }[]>([]);
-  const pollRef = useRef<ReturnType<typeof setInterval>>();
+  const pollRef = useRef<ReturnType<typeof setTimeout>>();
 
   const token = localStorage.getItem('token');
 
@@ -91,7 +92,9 @@ export default function AdminAiSnap() {
 
   useEffect(() => { load(); }, []);
 
-  const uploadPhoto = async (file: File, type: 'groom' | 'bride') => {
+  useEffect(() => () => { if (pollRef.current) clearTimeout(pollRef.current); }, []);
+
+  const uploadPhoto = async (file: File, type: 'groom' | 'bride' | 'couple') => {
     setUploading(type);
     const fd = new FormData();
     fd.append('file', file);
@@ -100,20 +103,21 @@ export default function AdminAiSnap() {
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
       const data = await res.json();
       if (type === 'groom') setGroomPhoto(data.secure_url);
-      else setBridePhoto(data.secure_url);
+      else if (type === 'bride') setBridePhoto(data.secure_url);
+      else setCouplePhoto(data.secure_url);
     } catch {}
     setUploading(null);
   };
 
   const getUrls = () => {
-    if (mode === 'couple') return [groomPhoto, bridePhoto];
+    if (mode === 'couple') return [couplePhoto];
     if (mode === 'groom') return [groomPhoto];
     return [bridePhoto];
   };
 
   const canGen = () => {
     if (generating) return false;
-    if (mode === 'couple') return !!groomPhoto && !!bridePhoto;
+    if (mode === 'couple') return !!couplePhoto;
     if (mode === 'groom') return !!groomPhoto;
     return !!bridePhoto;
   };
@@ -133,18 +137,23 @@ export default function AdminAiSnap() {
         return;
       }
       if (data.statusUrl) {
-        pollRef.current = setInterval(async () => {
-          const pRes = await api(`/poll?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}`);
-          const pData = await pRes.json();
-          if (pData.status === 'done') {
-            clearInterval(pollRef.current);
-            setResults(prev => [{ id: Date.now().toString(), url: pData.resultUrl, concept, mode }, ...prev]);
-            setGenerating(false);
-          } else if (pData.status === 'failed') {
-            clearInterval(pollRef.current);
+        const poll = async () => {
+          try {
+            const pRes = await api(`/poll?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}`);
+            const pData = await pRes.json();
+            if (pData.status === 'done') {
+              setResults(prev => [{ id: Date.now().toString(), url: pData.resultUrl, concept, mode }, ...prev]);
+              setGenerating(false);
+            } else if (pData.status === 'failed') {
+              setGenerating(false);
+            } else {
+              pollRef.current = setTimeout(poll, 3000);
+            }
+          } catch {
             setGenerating(false);
           }
-        }, 3000);
+        };
+        pollRef.current = setTimeout(poll, 3000);
       }
     } catch {
       setGenerating(false);
@@ -207,15 +216,16 @@ export default function AdminAiSnap() {
             </div>
 
             <div className="flex gap-3">
-              {(mode === 'couple' || mode === 'groom') && (
-                <MiniUpload label="신랑" photo={groomPhoto} uploading={uploading === 'groom'}
-                  onUpload={f => uploadPhoto(f, 'groom')} onClear={() => setGroomPhoto('')} />
+              {mode === 'couple' && (
+                <MiniUpload label="커플 사진" photo={couplePhoto} uploading={uploading === 'couple'}
+                  onUpload={f => uploadPhoto(f, 'couple')} onClear={() => setCouplePhoto('')} />
               )}
-              {(mode === 'couple' || mode === 'bride') && (
-                <MiniUpload label="신부" photo={bridePhoto} uploading={uploading === 'bride'}
-                  onUpload={f => uploadPhoto(f, 'bride')} onClear={() => setBridePhoto('')} />
+              {(mode === 'groom' || mode === 'bride') && (
+                <MiniUpload label={mode === 'groom' ? '신랑' : '신부'} photo={mode === 'groom' ? groomPhoto : bridePhoto} uploading={uploading === (mode === 'groom' ? 'groom' : 'bride')}
+                  onUpload={f => uploadPhoto(f, mode)} onClear={() => mode === 'groom' ? setGroomPhoto('') : setBridePhoto('')} />
               )}
             </div>
+            {mode === 'couple' && <p className="text-xs text-stone-400">둘이 함께 찍은 사진을 올려주세요</p>}
 
             <select value={concept} onChange={e => setConcept(e.target.value)}
               className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-300">

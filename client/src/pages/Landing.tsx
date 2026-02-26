@@ -401,7 +401,7 @@ export default function Landing() {
           >
             <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">AI WEDDING SNAP</p>
             <h2 className="font-serif text-3xl text-stone-800 mb-4">AI 웨딩 화보</h2>
-            <p className="text-stone-500">사진 한 장으로 10가지 컨셉의 웨딩 화보를 만들어보세요</p>
+            <p className="text-stone-500">둘이 함께 찍은 사진 한 장이면 충분해요</p>
           </motion.div>
 
           <motion.div
@@ -459,7 +459,7 @@ export default function Landing() {
             <h3 className="font-serif text-2xl text-stone-800 mb-3">지금 바로 만들어보세요</h3>
             <p className="text-sm text-stone-500 mb-8 max-w-md mx-auto">
               회원가입 후 무료로 1장 체험할 수 있어요.<br/>
-              내 사진이 웨딩 화보로 변하는 마법을 경험하세요.
+              사진 한 장으로 웨딩 화보를 만들어보세요.
             </p>
             
               <a

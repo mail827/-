@@ -26,6 +26,7 @@ export default function AiSnapFree() {
   const [mode, setMode] = useState<Mode>('groom');
   const [groomPhoto, setGroomPhoto] = useState('');
   const [bridePhoto, setBridePhoto] = useState('');
+  const [couplePhoto, setCouplePhoto] = useState('');
   const [concept, setConcept] = useState('studio_classic');
   const [uploading, setUploading] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -62,7 +63,7 @@ export default function AiSnapFree() {
       .finally(() => setChecking(false));
   }, [token]);
 
-  const uploadPhoto = async (file: File, type: 'groom' | 'bride') => {
+  const uploadPhoto = async (file: File, type: 'groom' | 'bride' | 'couple') => {
     setUploading(type);
     const fd = new FormData();
     fd.append('file', file);
@@ -71,19 +72,20 @@ export default function AiSnapFree() {
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
       const data = await res.json();
       if (type === 'groom') setGroomPhoto(data.secure_url);
-      else setBridePhoto(data.secure_url);
+      else if (type === 'bride') setBridePhoto(data.secure_url);
+      else setCouplePhoto(data.secure_url);
     } catch {}
     setUploading(null);
   };
 
   const canProceed = () => {
-    if (mode === 'couple') return !!groomPhoto && !!bridePhoto;
+    if (mode === 'couple') return !!couplePhoto;
     if (mode === 'groom') return !!groomPhoto;
     return !!bridePhoto;
   };
 
   const getUrls = () => {
-    if (mode === 'couple') return [groomPhoto, bridePhoto];
+    if (mode === 'couple') return [couplePhoto];
     if (mode === 'groom') return [groomPhoto];
     return [bridePhoto];
   };
@@ -214,7 +216,7 @@ export default function AiSnapFree() {
                 {([
                   { m: 'groom' as Mode, icon: User, label: '신랑 단독', desc: '신랑 사진 1장으로 화보 생성' },
                   { m: 'bride' as Mode, icon: User, label: '신부 단독', desc: '신부 사진 1장으로 화보 생성' },
-                  { m: 'couple' as Mode, icon: Users, label: '커플 화보', desc: '신랑 + 신부 사진으로 커플 화보' },
+                  { m: 'couple' as Mode, icon: Users, label: '커플 화보', desc: '둘이 함께 찍은 사진 1장으로 화보 생성' },
                 ]).map(item => (
                   <button key={item.m} onClick={() => { setMode(item.m); setStep(2); }}
                     className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-stone-200 hover:border-stone-800 transition-all text-left group">
@@ -236,14 +238,18 @@ export default function AiSnapFree() {
             <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
               <div className="text-center">
                 <h2 className="font-serif text-2xl text-stone-800 mb-2">사진 업로드</h2>
-                <p className="text-sm text-stone-500">정면 얼굴이 잘 보이는 사진이 좋아요</p>
+                <p className="text-sm text-stone-500">{mode === 'couple' ? '둘이 함께 찍은 사진을 올려주세요' : '정면 얼굴이 잘 보이는 사진이 좋아요'}</p>
               </div>
-              <div className={`grid gap-4 ${mode === 'couple' ? 'grid-cols-2' : 'grid-cols-1 max-w-[200px] mx-auto'}`}>
-                {(mode === 'couple' || mode === 'groom') && (
+              <div className="grid gap-4 grid-cols-1 max-w-[200px] mx-auto">
+                {mode === 'couple' && (
+                  <UploadCard label="커플 사진" photo={couplePhoto} uploading={uploading === 'couple'}
+                    onUpload={f => uploadPhoto(f, 'couple')} onClear={() => setCouplePhoto('')} />
+                )}
+                {mode === 'groom' && (
                   <UploadCard label="신랑" photo={groomPhoto} uploading={uploading === 'groom'}
                     onUpload={f => uploadPhoto(f, 'groom')} onClear={() => setGroomPhoto('')} />
                 )}
-                {(mode === 'couple' || mode === 'bride') && (
+                {mode === 'bride' && (
                   <UploadCard label="신부" photo={bridePhoto} uploading={uploading === 'bride'}
                     onUpload={f => uploadPhoto(f, 'bride')} onClear={() => setBridePhoto('')} />
                 )}

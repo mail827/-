@@ -59,6 +59,7 @@ export default function AiSnapStudio({ weddingId }: Props) {
   const [mode, setMode] = useState<Mode>('couple');
   const [groomPhoto, setGroomPhoto] = useState('');
   const [bridePhoto, setBridePhoto] = useState('');
+  const [couplePhoto, setCouplePhoto] = useState('');
   const [uploading, setUploading] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [pollingId, setPollingId] = useState<string | null>(null);
@@ -67,7 +68,7 @@ export default function AiSnapStudio({ weddingId }: Props) {
   const [progress, setProgress] = useState(0);
   const progressRef = useRef<ReturnType<typeof setInterval>>();
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryItem[]>([]);
-  const [pickFor, setPickFor] = useState<'groom' | 'bride' | null>(null);
+  const [pickFor, setPickFor] = useState<'groom' | 'bride' | 'couple' | null>(null);
   const [quota, setQuota] = useState<Quota | null>(null);
   const token = localStorage.getItem('token');
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
@@ -110,7 +111,7 @@ export default function AiSnapStudio({ weddingId }: Props) {
     return () => clearInterval(intervalRef.current);
   }, [pollingId]);
 
-  const uploadPhoto = async (file: File, type: 'groom' | 'bride') => {
+  const uploadPhoto = async (file: File, type: 'groom' | 'bride' | 'couple') => {
     setUploading(type);
     const formData = new FormData();
     formData.append('file', file);
@@ -119,20 +120,21 @@ export default function AiSnapStudio({ weddingId }: Props) {
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
       const data = await res.json();
       if (type === 'groom') setGroomPhoto(data.secure_url);
-      else setBridePhoto(data.secure_url);
+      else if (type === 'bride') setBridePhoto(data.secure_url);
+      else setCouplePhoto(data.secure_url);
     } catch {}
     setUploading(null);
   };
 
   const getImageUrls = (): string[] => {
-    if (mode === 'couple') return [groomPhoto, bridePhoto];
+    if (mode === 'couple') return [couplePhoto];
     if (mode === 'groom') return [groomPhoto];
     return [bridePhoto];
   };
 
   const canGenerate = () => {
     if (!selectedConcept || generating) return false;
-    if (mode === 'couple') return !!groomPhoto && !!bridePhoto;
+    if (mode === 'couple') return !!couplePhoto;
     if (mode === 'groom') return !!groomPhoto;
     return !!bridePhoto;
   };
@@ -176,8 +178,9 @@ export default function AiSnapStudio({ weddingId }: Props) {
     }).catch(() => {});
   };
 
-  const needsGroom = mode === 'couple' || mode === 'groom';
-  const needsBride = mode === 'couple' || mode === 'bride';
+  const needsGroom = mode === 'groom';
+  const needsBride = mode === 'bride';
+  const needsCouple = mode === 'couple';
 
   return (
     <div className="space-y-8">
@@ -230,8 +233,9 @@ export default function AiSnapStudio({ weddingId }: Props) {
       </div>
 
       <div>
-        <StepLabel num={2} text="사진 업로드" sub="정면 얼굴이 잘 보이는 사진이 좋아요" />
-        <div className={`grid gap-3 mt-3 ${needsGroom && needsBride ? 'grid-cols-2' : 'grid-cols-1 max-w-[200px]'}`}>
+        <StepLabel num={2} text="사진 업로드" sub={mode === 'couple' ? '둘이 함께 찍은 사진 1장' : '정면 얼굴이 잘 보이는 사진이 좋아요'} />
+        <div className="grid gap-3 mt-3 grid-cols-1 max-w-[200px]">
+          {needsCouple && <PhotoUpload label="커플 사진" photo={couplePhoto} uploading={uploading === 'couple'} onUpload={f => uploadPhoto(f, 'couple')} onClear={() => setCouplePhoto('')} onGalleryPick={() => setPickFor('couple')} hasGallery={galleryPhotos.length > 0} />}
           {needsGroom && <PhotoUpload label="신랑" photo={groomPhoto} uploading={uploading === 'groom'} onUpload={f => uploadPhoto(f, 'groom')} onClear={() => setGroomPhoto('')} onGalleryPick={() => setPickFor('groom')} hasGallery={galleryPhotos.length > 0} />}
           {needsBride && <PhotoUpload label="신부" photo={bridePhoto} uploading={uploading === 'bride'} onUpload={f => uploadPhoto(f, 'bride')} onClear={() => setBridePhoto('')} onGalleryPick={() => setPickFor('bride')} hasGallery={galleryPhotos.length > 0} />}
         </div>
@@ -340,7 +344,7 @@ export default function AiSnapStudio({ weddingId }: Props) {
             <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }}
               className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
               <div className="sticky top-0 bg-white border-b border-stone-100 px-5 py-4 flex items-center justify-between">
-                <p className="text-sm font-semibold text-stone-800">갤러리에서 {pickFor === 'groom' ? '신랑' : '신부'} 사진 선택</p>
+                <p className="text-sm font-semibold text-stone-800">갤러리에서 {pickFor === 'groom' ? '신랑' : pickFor === 'bride' ? '신부' : '커플'} 사진 선택</p>
                 <button onClick={() => setPickFor(null)} className="p-1 hover:bg-stone-100 rounded-lg">
                   <X className="w-5 h-5 text-stone-400" />
                 </button>
@@ -349,7 +353,8 @@ export default function AiSnapStudio({ weddingId }: Props) {
                 {galleryPhotos.map(g => (
                   <button key={g.id} onClick={() => {
                     if (pickFor === 'groom') setGroomPhoto(g.mediaUrl);
-                    else setBridePhoto(g.mediaUrl);
+                    else if (pickFor === 'bride') setBridePhoto(g.mediaUrl);
+                    else setCouplePhoto(g.mediaUrl);
                     setPickFor(null);
                   }} className="aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-stone-800 transition-all">
                     <img src={g.mediaUrl} alt="" className="w-full h-full object-cover" />
