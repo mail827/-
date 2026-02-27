@@ -36,6 +36,8 @@ const CONCEPT_META: Record<string, { emoji: string; sub: string }> = {
   winter_snow: { emoji: 'I', sub: '눈 내리는 날' },
   vintage_film: { emoji: 'V', sub: '필름 감성' },
   cruise_sunset: { emoji: 'S', sub: '선셋 요트' },
+  iphone_selfie: { emoji: 'P', sub: '힙한 셀카' },
+  iphone_mirror: { emoji: 'P', sub: '거울 플래시' },
   cruise_bluesky: { emoji: 'B', sub: '청명한 바다' },
 };
 

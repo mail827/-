@@ -39,6 +39,8 @@ const CONCEPTS = [
   { id: 'winter_snow', label: '겨울 눈' },
   { id: 'vintage_film', label: '빈티지 필름' },
   { id: 'cruise_sunset', label: '크루즈 선셋' },
+  { id: 'iphone_selfie', label: '셀카 스냅' },
+  { id: 'iphone_mirror', label: '거울 셀카' },
   { id: 'cruise_bluesky', label: '크루즈 블루스카이' },
 ];
 

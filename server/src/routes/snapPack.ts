@@ -131,6 +131,14 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '크루즈 선셋',
     base: 'luxury yacht deck at golden hour sunset, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, romantic warm cinematic lighting',
   },
+  iphone_selfie: {
+    label: '셀카 스냅',
+    base: 'casual iPhone selfie photo, high angle selfie perspective arm extended holding phone, subtle natural motion blur on hair tips, visible analog film grain and warm noise, golden hour warm ambient window light, slightly overexposed warm highlights, candid not-perfectly-posed moment, authentic effortless vibe, soft bokeh background of cozy interior',
+  },
+  iphone_mirror: {
+    label: '거울 셀카',
+    base: 'mirror selfie with iPhone flash reflection visible in mirror, full body or upper body reflected in large clean mirror, bright harsh flash creating high contrast, slightly washed out flash aesthetic, visible phone in hand, casual posed mirror shot, trendy social media mirror selfie style, clean minimal background behind mirror',
+  },
   cruise_bluesky: {
     label: '크루즈 블루스카이',
     base: 'luxury cruise ship deck under vivid blue sky, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere',
@@ -297,14 +305,22 @@ const buildNegativePrompt = (mode: string, concept: string): string => {
   const male = 'overly angular square jaw, exaggerated chin, feminized male face, too-smooth airbrush skin, unnaturally narrow face';
   const female = 'masculine jaw, wide nose bridge, overly sharp features, generic AI female face';
 
+  const isSelfie = concept === 'iphone_selfie' || concept === 'iphone_mirror';
+  const mirrorExtra = concept === 'iphone_mirror'
+    ? ', no second person reflection, no background clutter, dirty mirror, cracked mirror'
+    : '';
+  const selfieNeg = isSelfie
+    ? ', perfect studio lighting, overly sharp image, professional photography setup, flash photography, ring light reflection in eyes, heavily retouched skin, overdone makeup, stiff formal pose, symmetrical composition'
+    : '';
+
   const isHanbok = HANBOK_CONCEPTS.has(concept);
   const hanbokNeg = isHanbok
     ? ', Japanese kimono, Chinese hanfu, inaccurate hanbok structure, wrong collar direction, synthetic fabric look, plastic-looking silk, anachronistic modern elements mixed with traditional'
     : '';
 
-  if (mode === 'groom') return `${base}, ${consistencyBlock}, ${male}${hanbokNeg}`;
-  if (mode === 'bride') return `${base}, ${consistencyBlock}, ${female}${hanbokNeg}`;
-  return `${base}, ${consistencyBlock}, ${male}, ${female}${hanbokNeg}`;
+  if (mode === 'groom') return `${base}, ${consistencyBlock}, ${male}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
+  if (mode === 'bride') return `${base}, ${consistencyBlock}, ${female}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
+  return `${base}, ${consistencyBlock}, ${male}, ${female}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
 };
 
 const falFetch = async (url: string, opts?: RequestInit) => {
@@ -537,7 +553,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
       try {
         const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
           method: 'POST',
-          body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt, strength: effectiveMode === 'couple' ? 0.18 : 0.28, num_images: 1 }),
+          body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt, strength: effectiveMode === 'couple' ? 0.15 : 0.28, num_images: 1 }),
         });
 
         let falUrl: string | null = null;

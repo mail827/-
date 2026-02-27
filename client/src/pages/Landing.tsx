@@ -615,7 +615,7 @@ export default function Landing() {
                     </li>
                     <li className="flex items-start gap-2 text-xs text-stone-600">
                       <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
-                      <span>22가지 컨셉</span>
+                      <span>24가지 컨셉</span>
                     </li>
                     <li className="flex items-start gap-2 text-xs text-stone-600">
                       <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
