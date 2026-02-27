@@ -56,17 +56,11 @@ export const getWatermarkedUrl = (publicId: string): string => {
     transformation: [
       { quality: 'auto:good', fetch_format: 'auto' },
       {
-        overlay: { font_family: 'Arial', font_size: 50, font_weight: 'bold', text: encodeURIComponent('청첩장 작업실') },
-        color: '#ffffff',
-        opacity: 35,
+        overlay: 'watermark-wedding-studio_g2yls0',
         gravity: 'center',
-      },
-      {
-        overlay: { font_family: 'Arial', font_size: 30, text: encodeURIComponent('WEDDING STUDIO LAB') },
-        color: '#ffffff',
-        opacity: 25,
-        gravity: 'center',
-        y: 60,
+        width: 500,
+        opacity: 100,
+        flags: 'relative',
       },
     ],
     secure: true,
