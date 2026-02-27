@@ -374,14 +374,40 @@ export default function AiSnapStudioPage() {
 
           {step === 3 && (
             <Step title="컨셉 선택" sub="세트 내 모든 사진이 이 컨셉의 장소와 의상으로 통일돼요">
-              <div className="grid grid-cols-2 gap-2">
-                {(category === 'studio' ? concepts.studio : concepts.cinematic).map(c => (
-                  <button key={c.id} onClick={() => setSelectedConcept(c.id)}
-                    className={`rounded-2xl py-3.5 px-4 text-left transition-all border-2 ${selectedConcept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
-                    <p className={`text-sm font-semibold ${selectedConcept === c.id ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
-                  </button>
-                ))}
-              </div>
+              {(() => {
+                const allItems = category === 'studio' ? concepts.studio : concepts.cinematic;
+                const hanbokItems = allItems.filter(c => c.id.startsWith('hanbok_'));
+                const otherItems = allItems.filter(c => !c.id.startsWith('hanbok_'));
+                return (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-2">
+                      {otherItems.map(c => (
+                        <button key={c.id} onClick={() => setSelectedConcept(c.id)}
+                          className={`rounded-2xl py-3.5 px-4 text-left transition-all border-2 ${selectedConcept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
+                          <p className={`text-sm font-semibold ${selectedConcept === c.id ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
+                        </button>
+                      ))}
+                    </div>
+                    {hanbokItems.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="h-px flex-1 bg-stone-200" />
+                          <span className="text-xs font-semibold text-stone-500 tracking-widest uppercase">한복 컬렉션</span>
+                          <div className="h-px flex-1 bg-stone-200" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {hanbokItems.map(c => (
+                            <button key={c.id} onClick={() => setSelectedConcept(c.id)}
+                              className={`rounded-2xl py-3.5 px-4 text-left transition-all border-2 ${selectedConcept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
+                              <p className={`text-sm font-semibold ${selectedConcept === c.id ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
               <NavButtons
                 onBack={() => setStep(2)}
                 onNext={() => setStep(isSetupMode ? 7 : 4)}

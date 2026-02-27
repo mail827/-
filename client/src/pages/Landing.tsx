@@ -415,7 +415,11 @@ export default function Landing() {
                 { label: '스튜디오', sub: '정석 화보', cat: 'studio' },
                 { label: '야외 가든', sub: '꽃과 자연빛', cat: 'studio' },
                 { label: '해변 선셋', sub: '노을빛 해변', cat: 'studio' },
-                { label: '한복 전통', sub: '전통 궁궐', cat: 'studio' },
+                { label: '궁중 혼례', sub: '화려한 궁중 예복', cat: 'studio' },
+                { label: '당의 한복', sub: '단아한 정원 화보', cat: 'studio' },
+                { label: '모던 한복', sub: '현대적 한옥 감성', cat: 'studio' },
+                { label: '사극풍', sub: '왕과 왕비 컨셉', cat: 'studio' },
+                { label: '꽃한복', sub: '봄꽃 한옥마당', cat: 'studio' },
                 { label: '벚꽃', sub: '봄날 감성', cat: 'studio' },
                 { label: '시티 나이트', sub: '도시 야경', cat: 'cinematic' },
                 { label: '숲속 웨딩', sub: '숲속 빛내림', cat: 'cinematic' },
@@ -611,7 +615,7 @@ export default function Landing() {
                     </li>
                     <li className="flex items-start gap-2 text-xs text-stone-600">
                       <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
-                      <span>10가지 컨셉</span>
+                      <span>22가지 컨셉</span>
                     </li>
                     <li className="flex items-start gap-2 text-xs text-stone-600">
                       <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />

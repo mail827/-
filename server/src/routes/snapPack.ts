@@ -60,9 +60,25 @@ const STUDIO_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '해변 선셋',
     base: 'pristine white sand beach at golden sunset, warm orange pink sky reflecting on calm ocean, gentle sea breeze atmosphere',
   },
-  hanbok_traditional: {
-    label: '한복 전통',
-    base: 'traditional Korean palace courtyard with wooden pillars and dancheong, soft natural daylight, dignified atmosphere',
+  hanbok_wonsam: {
+    label: '궁중 혼례',
+    base: 'grand Korean royal palace Geunjeongjeon main hall, red lacquered wooden pillars with golden dancheong patterns, traditional ceremonial table with bongchidari and jeonan, warm natural daylight streaming through wooden lattice, dignified regal atmosphere',
+  },
+  hanbok_dangui: {
+    label: '당의 한복',
+    base: 'serene traditional Korean garden with lotus pond, stone bridge, aged pine trees and bamboo grove, wooden hanok pavilion with tiled roof, gentle morning sunlight, refined scholarly atmosphere',
+  },
+  hanbok_modern: {
+    label: '모던 한복',
+    base: 'minimalist modern hanok interior with clean white walls, warm wood floor, simple sliding paper doors, single branch ikebana arrangement, soft diffused natural light from large window, contemporary elegant atmosphere',
+  },
+  hanbok_saeguk: {
+    label: '사극풍',
+    base: 'magnificent Gyeongbokgung throne hall interior, grand golden dragon screen behind, ornate wooden columns with vivid dancheong, silk lanterns hanging, cinematic golden hour light streaming through doors, epic royal drama atmosphere',
+  },
+  hanbok_flower: {
+    label: '꽃한복',
+    base: 'blooming hanok courtyard filled with spring flowers, cherry blossoms and azaleas surrounding wooden veranda, petals gently falling, warm golden spring sunlight, romantic traditional garden atmosphere',
   },
   cherry_blossom: {
     label: '벚꽃',
@@ -194,7 +210,11 @@ const OUTFIT_GROOM: Record<string, string> = {
   studio_classic: 'wearing elegant black tuxedo with white dress shirt, black bow tie, polished shoes',
   outdoor_garden: 'wearing navy blue suit with white shirt, floral boutonniere pinned to lapel',
   beach_sunset: 'wearing light beige linen suit with open collar white shirt, barefoot',
-  hanbok_traditional: 'wearing navy blue dopo hanbok with gat hat, traditional Korean wedding attire',
+  hanbok_wonsam: 'wearing heukdallyeong (black ceremonial robe) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, samo headpiece (official Korean groom wedding hat with wings), gold-embroidered belt over white inner jeogori, NOT a western suit NOT a coat NOT modern clothing, authentic traditional Korean royal groom wedding attire',
+  hanbok_dangui: 'wearing jade-green dopo (Korean scholar overcoat) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, yugeon (soft fabric headband), white inner jeogori visible underneath, delicate jade ornament at waist, NOT a western suit NOT a coat, refined traditional Korean scholar groom attire',
+  hanbok_modern: 'wearing charcoal gray modern durumagi (Korean traditional long overcoat) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, Korean traditional fabric texture, white inner jeogori with mandarin collar visible at neckline, NOT a western suit NOT a blazer NOT a trench coat, contemporary minimalist Korean hanbok groom attire',
+  hanbok_saeguk: 'wearing deep crimson gonryongpo (Korean royal dragon robe) with traditional V-shaped crossed collar (gyotgit), wide sleeves, golden dragon embroidery on chest, golden gwanmo crown headpiece, jade belt, NOT a western suit NOT modern clothing, magnificent royal Korean king ceremonial attire',
+  hanbok_flower: 'wearing ivory white durumagi (Korean traditional long overcoat) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, subtle floral embroidery at hem, soft pastel inner jeogori visible at neckline, small flower accent, NOT a western suit NOT a blazer, gentle spring Korean hanbok groom attire',
   cherry_blossom: 'wearing soft gray suit with light pink boutonniere, white pocket square',
   city_night: 'wearing sleek black tuxedo with satin lapels, black bow tie, cufflinks',
   forest_wedding: 'wearing dark charcoal suit with emerald green silk tie, white rose boutonniere',
@@ -214,7 +234,11 @@ const OUTFIT_BRIDE: Record<string, string> = {
   studio_classic: 'wearing elegant white lace wedding gown with sweetheart neckline, holding white rose bouquet',
   outdoor_garden: 'wearing flowing white organza wedding dress with delicate floral embroidery, wildflower bouquet',
   beach_sunset: 'wearing flowing lightweight white chiffon dress with open back, barefoot, windswept hair',
-  hanbok_traditional: 'wearing red and green wonsam hanbok with jokduri headpiece, traditional Korean bridal attire',
+  hanbok_wonsam: 'wearing vibrant red wonsam (ceremonial robe) layered over yellow chima, golden phoenix embroidery across chest and sleeves, elaborate hwagwan (jeweled crown) with dangling ornaments, white socks with kkotsin (flower shoes), holding a ceremonial fan, traditional Korean royal bride wedding attire',
+  hanbok_dangui: 'wearing soft blush-pink dangui (short ceremonial jacket) with gold-thread floral embroidery over deep navy chima (skirt), small jokduri (bridal coronet) with jade and coral beads, delicate binyeo (hairpin) in updo, refined elegant traditional Korean bridal attire',
+  hanbok_modern: 'wearing pastel lavender modern jeogori with clean lines over white chima (skirt), hair in loose low bun with single minimalist binyeo (silver hairpin), no heavy ornament, contemporary minimalist Korean bridal attire',
+  hanbok_saeguk: 'wearing magnificent golden hwarot (queen ceremonial robe) with vivid phoenix and peony embroidery across entire surface, grand jokduri crown with long bead strings, layered silk underskirts visible at hem, opulent royal Korean queen ceremonial bridal attire',
+  hanbok_flower: 'wearing light lilac jeogori with delicate flower embroidery over soft white chima (skirt), fresh flower hairpin tucked behind ear, loose natural hairstyle with soft waves, romantic spring Korean bridal attire',
   cherry_blossom: 'wearing soft white tulle wedding dress with cap sleeves, delicate flower crown',
   city_night: 'wearing sparkling white sequin evening gown with plunging back, elegant updo',
   forest_wedding: 'wearing ethereal white lace gown with cathedral train, baby breath flower crown',
@@ -230,40 +254,57 @@ const OUTFIT_BRIDE: Record<string, string> = {
   cruise_bluesky: 'wearing white summer dress, clean nautical bridal style',
 };
 
+const HANBOK_CONCEPTS = new Set(['hanbok_wonsam', 'hanbok_dangui', 'hanbok_modern', 'hanbok_saeguk', 'hanbok_flower']);
+
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {
   const allConcepts = { ...STUDIO_CONCEPTS, ...CINEMATIC_CONCEPTS };
   const scene = allConcepts[concept]?.base || STUDIO_CONCEPTS.studio_classic.base;
   const isCinematic = category === 'cinematic';
+  const isHanbok = HANBOK_CONCEPTS.has(concept);
   const variants = mode === 'couple' ? COUPLE_SHOT_VARIANTS : mode === 'groom' ? GROOM_SHOT_VARIANTS : BRIDE_SHOT_VARIANTS;
   const shot = variants[shotIdx % variants.length];
 
-  const face = 'preserve exact facial features from reference photo, natural Korean face proportions, keep original nose bridge width and shape, maintain authentic jawline, real skin texture with natural pores';
-  const outfit = 'keep identical outfit hairstyle accessories from reference throughout all shots';
+  const face = 'preserve exact facial features from reference photo, natural Korean face proportions, keep original nose bridge width and shape, maintain authentic jawline and cheekbones, real skin texture with natural pores, no facial modification';
+
+  const outfitLock = 'CRITICAL: maintain absolutely identical outfit from first generated image — same fabric, same color, same pattern, same embroidery, same neckline, same sleeves, same hemline, same shoes. Maintain absolutely identical hairstyle — same parting, same length, same curl pattern, same hair color, same hair accessories, same headpiece position. Maintain absolutely identical jewelry and accessories — same earrings, same necklace, same rings, same belt, same hairpin position. Zero deviation allowed between shots';
+
   const cam = isCinematic
     ? 'cinematic 85mm f/1.4, anamorphic bokeh, filmic color grading'
     : 'Canon EOS R5 85mm f/1.4, natural soft lighting, fine film grain';
 
+  const hanbokExtra = isHanbok
+    ? ', authentic traditional Korean hanbok fabric texture with visible silk sheen, accurate hanbok layering and draping, traditional Korean color palette'
+    : '';
+
   if (mode === 'couple') {
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
     const bOutfit = OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic;
-    return `${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${shot.prompt}, ${scene}, ${face}, ${outfit}, ${cam}, 8k ultra detailed`;
+    return `${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${shot.prompt}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${cam}, 8k ultra detailed`;
   }
 
   const clothe = mode === 'groom'
     ? (OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic)
     : (OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic);
   const subj = mode === 'groom' ? 'Korean groom' : 'Korean bride';
-  return `${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${shot.prompt}, ${scene}, ${face}, ${outfit}, ${cam}, 8k ultra detailed`;
+  return `${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${shot.prompt}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${cam}, 8k ultra detailed`;
 };
 
-const buildNegativePrompt = (mode: string): string => {
+const buildNegativePrompt = (mode: string, concept: string): string => {
   const base = 'deformed face, elongated banana-shaped face, stretched face, pinched nose, bulbous nose, uncanny valley, plastic skin, wax figure, 3D render, cartoon, anime, illustration, painting, doll-like, mannequin, blurry, low quality, watermark, text overlay';
+
+  const consistencyBlock = 'different outfit, changed clothes, different hairstyle, new accessories, altered jewelry, different headpiece, modified hair color, changed fabric color, inconsistent pattern, different shoes, wardrobe change, costume switch, hair restyled, accessories swapped';
+
   const male = 'overly angular square jaw, exaggerated chin, feminized male face, too-smooth airbrush skin, unnaturally narrow face';
   const female = 'masculine jaw, wide nose bridge, overly sharp features, generic AI female face';
 
-  if (mode === 'groom') return `${base}, ${male}`;
-  if (mode === 'bride') return `${base}, ${female}`;
-  return `${base}, ${male}, ${female}`;
+  const isHanbok = HANBOK_CONCEPTS.has(concept);
+  const hanbokNeg = isHanbok
+    ? ', Japanese kimono, Chinese hanfu, inaccurate hanbok structure, wrong collar direction, synthetic fabric look, plastic-looking silk, anachronistic modern elements mixed with traditional'
+    : '';
+
+  if (mode === 'groom') return `${base}, ${consistencyBlock}, ${male}${hanbokNeg}`;
+  if (mode === 'bride') return `${base}, ${consistencyBlock}, ${female}${hanbokNeg}`;
+  return `${base}, ${consistencyBlock}, ${male}, ${female}${hanbokNeg}`;
 };
 
 const falFetch = async (url: string, opts?: RequestInit) => {
@@ -453,17 +494,34 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     const effectiveMode = mode || pack.mode;
     const shotIdx = pack.usedSnaps;
     const prompt = buildPrompt(pack.concept, pack.category, effectiveMode, shotIdx);
-    const negativePrompt = buildNegativePrompt(effectiveMode);
+    const negativePrompt = buildNegativePrompt(effectiveMode, pack.concept);
 
     const inputUrlsArr = pack.inputUrls as string[];
     const chainRefs = (pack.chainRefUrls || {}) as Record<string, string>;
 
-    let imageUrls: string[] = effectiveMode === 'groom' ? [inputUrlsArr[0]]
-      : effectiveMode === 'bride' ? [inputUrlsArr[1]]
-      : inputUrlsArr.length >= 3 ? [inputUrlsArr[2], inputUrlsArr[0], inputUrlsArr[1]] : inputUrlsArr.slice(0, 2);
+    let imageUrls: string[];
 
     if (chainRefs[effectiveMode]) {
-      imageUrls = [...imageUrls, chainRefs[effectiveMode]];
+      const refUrl = chainRefs[effectiveMode];
+      if (effectiveMode === 'groom') {
+        imageUrls = [refUrl, inputUrlsArr[0]];
+      } else if (effectiveMode === 'bride') {
+        imageUrls = [refUrl, inputUrlsArr[1]];
+      } else {
+        imageUrls = inputUrlsArr.length >= 3
+          ? [refUrl, inputUrlsArr[2], inputUrlsArr[0], inputUrlsArr[1]]
+          : [refUrl, ...inputUrlsArr.slice(0, 2)];
+      }
+    } else {
+      if (effectiveMode === 'groom') {
+        imageUrls = [inputUrlsArr[0]];
+      } else if (effectiveMode === 'bride') {
+        imageUrls = [inputUrlsArr[1]];
+      } else {
+        imageUrls = inputUrlsArr.length >= 3
+          ? [inputUrlsArr[2], inputUrlsArr[0], inputUrlsArr[1]]
+          : inputUrlsArr.slice(0, 2);
+      }
     }
 
     const snap = await prisma.aiSnap.create({
@@ -479,7 +537,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
       try {
         const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
           method: 'POST',
-          body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt }),
+          body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt, strength: effectiveMode === 'couple' ? 0.18 : 0.28, num_images: 1 }),
         });
 
         let falUrl: string | null = null;
@@ -530,6 +588,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 router.get('/pack/:id', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const pack = await prisma.snapPack.findUnique({
