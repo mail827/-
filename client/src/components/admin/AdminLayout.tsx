@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, Crown, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Heart, Film, Music, Sparkles } from 'lucide-react';
+import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, Crown, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Heart, Film, Music, Sparkles, Image } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminLayout() {
@@ -31,6 +31,7 @@ export default function AdminLayout() {
     { path: '/admin/bg-music', icon: Music, label: '배경음악' },
     { path: '/admin/ai-snap', icon: Sparkles, label: 'AI 웨딩스냅' },
     { path: '/admin/snap-gift', icon: Gift, label: 'AI스냅 선물' },
+    { path: '/admin/snap-samples', icon: Image, label: 'AI스냅 샘플' },
   ];
 
   return (

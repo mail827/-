@@ -247,6 +247,7 @@ export default function AiSnapStudioPage() {
         clearInterval(progressRef.current);
         setGenerating(false);
         setShotMode(null);
+        await loadPack(activePack.id);
         return;
       }
       setPollingId(data.snapId);

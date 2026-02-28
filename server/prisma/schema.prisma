@@ -540,3 +540,15 @@ model AiSnap {
   errorMsg    String?
   createdAt   DateTime  @default(now())
 }
+
+model AiSnapSample {
+  id        String   @id @default(cuid())
+  concept   String
+  mode      String   @default("couple")
+  imageUrl  String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([concept])
+}

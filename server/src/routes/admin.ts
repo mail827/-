@@ -69,17 +69,24 @@ router.get('/stats', authMiddleware, adminMiddleware, async (req, res) => {
     prisma.order.count({ where: { status: 'PAID' } }),
   ]);
   
-  const revenue = await prisma.order.aggregate({
-    where: { status: 'PAID' },
-    _sum: { amount: true },
-  });
+  const [orderRevenue, snapRevenue] = await Promise.all([
+    prisma.order.aggregate({
+      where: { status: 'PAID' },
+      _sum: { amount: true },
+    }),
+    prisma.snapPack.aggregate({
+      where: { status: 'PAID' },
+      _sum: { amount: true },
+    }),
+  ]);
+  const revenue = (orderRevenue._sum.amount || 0) + (snapRevenue._sum.amount || 0);
   
   res.json({
     users: usersCount,
     weddings: weddingsCount,
     orders: ordersCount,
     paidOrders: paidOrdersCount,
-    revenue: revenue._sum.amount || 0,
+    revenue,
   });
 });
 
@@ -331,6 +338,27 @@ router.put('/packages/:id', authMiddleware, adminMiddleware, async (req, res) =>
     console.error('Update package error:', error);
     res.status(500).json({ error: 'Failed to update package' });
   }
+});
+
+router.get('/snap-samples', async (_req, res) => {
+  const samples = await prisma.aiSnapSample.findMany({
+    where: { isActive: true },
+    orderBy: [{ concept: 'asc' }, { sortOrder: 'asc' }],
+  });
+  res.json(samples);
+});
+
+router.post('/snap-samples', authMiddleware, adminMiddleware, async (req, res) => {
+  const { concept, mode, imageUrl, sortOrder } = req.body;
+  const sample = await prisma.aiSnapSample.create({
+    data: { concept, mode: mode || 'couple', imageUrl, sortOrder: sortOrder || 0 },
+  });
+  res.json(sample);
+});
+
+router.delete('/snap-samples/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  await prisma.aiSnapSample.delete({ where: { id: req.params.id } });
+  res.json({ success: true });
 });
 
 export const adminRouter = router;

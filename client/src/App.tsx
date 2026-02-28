@@ -10,6 +10,7 @@ const AiSnapGift = lazy(() => import('./pages/AiSnapGift'));
 const AiSnapGiftCallback = lazy(() => import('./pages/AiSnapGiftCallback'));
 const AiSnapAddCallback = lazy(() => import('./pages/AiSnapAddCallback'));
 import AdminSnapGift from './pages/admin/AdminSnapGift';
+import AdminSnapSample from './pages/admin/AdminSnapSample';
 import OAuthCallback from './pages/OAuthCallback';
 import Dashboard from './pages/Dashboard';
 import CreateWedding from './pages/CreateWedding';
@@ -128,6 +129,7 @@ export default function App() {
               <Route path="bg-music" element={<AdminBgMusic />} />
         <Route path="ai-snap" element={<AdminAiSnap />} />
             <Route path="snap-gift" element={<AdminSnapGift />} />
+        <Route path="snap-samples" element={<AdminSnapSample />} />
         <Route path="weddings" element={<AdminWeddingList />} />
         <Route path="weddings/create" element={<AdminWeddingCreate />} />
         <Route path="weddings/new" element={<AdminWeddingCreate />} />

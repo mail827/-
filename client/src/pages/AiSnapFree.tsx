@@ -17,6 +17,15 @@ const CONCEPTS = [
   { id: 'castle_garden', label: '캐슬 가든', sub: '유럽 고성' },
   { id: 'cathedral', label: '성당 웨딩', sub: '스테인드글라스' },
   { id: 'watercolor', label: '수채화', sub: '파스텔 수채화' },
+  { id: 'magazine_cover', label: '매거진 커버', sub: '하이패션 화보' },
+  { id: 'rainy_day', label: '비오는 날', sub: '감성 빗속' },
+  { id: 'autumn_leaves', label: '가을 단풍', sub: '단풍길 로맨스' },
+  { id: 'winter_snow', label: '겨울 눈', sub: '눈 내리는 날' },
+  { id: 'vintage_film', label: '빈티지 필름', sub: '필름 감성' },
+  { id: 'iphone_selfie', label: '셀카 스냅', sub: 'iPhone 감성' },
+  { id: 'iphone_mirror', label: '거울 셀카', sub: '미러 셀카' },
+  { id: 'cruise_sunset', label: '크루즈 선셋', sub: '노을빛 크루즈' },
+  { id: 'cruise_bluesky', label: '크루즈 블루', sub: '푸른 바다 크루즈' },
 ];
 
 type Mode = 'groom' | 'bride' | 'couple';
@@ -41,6 +50,7 @@ export default function AiSnapFree() {
   const [, setSnapId] = useState('');
   const [, setIsLoggedIn] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [samples, setSamples] = useState<{ id: string; concept: string; mode: string; imageUrl: string }[]>([]);
   const pollRef = useRef<ReturnType<typeof setInterval>>();
   const token = localStorage.getItem('token');
 
@@ -66,6 +76,10 @@ export default function AiSnapFree() {
       .catch(() => setStep(1))
       .finally(() => setChecking(false));
   }, [token]);
+
+  useEffect(() => {
+    fetch(`${API}/admin/snap-samples`).then(r => r.json()).then(setSamples).catch(() => {});
+  }, []);
 
   const uploadPhoto = async (file: File, type: 'groom' | 'bride' | 'couple') => {
     setUploading(type);
@@ -281,6 +295,18 @@ export default function AiSnapFree() {
                   </button>
                 ))}
               </div>
+              {samples.filter(s => s.concept === concept).length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-xs text-stone-400 text-center">이런 느낌으로 만들어드려요</p>
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                    {samples.filter(s => s.concept === concept).map(s => (
+                      <div key={s.id} className="flex-shrink-0 w-28 aspect-[3/4] rounded-xl overflow-hidden border border-stone-100">
+                        <img src={s.imageUrl} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="flex gap-3">
                 <button onClick={() => setStep(2)} className="px-6 py-3 rounded-xl border border-stone-200 text-sm text-stone-500 hover:bg-stone-50">이전</button>
                 <button onClick={generate}

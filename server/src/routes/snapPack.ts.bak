@@ -235,9 +235,7 @@ const OUTFIT_GROOM: Record<string, string> = {
   winter_snow: 'wearing charcoal wool coat suit, winter layers',
   vintage_film: 'wearing retro brown suit with wide lapels, 1970s style',
   cruise_sunset: 'wearing light linen suit, nautical elegance',
-  cruise_bluesky: 'wearing white or navy blazer, crisp linen shirt, no tie, nautical casual style',
-  iphone_selfie: 'wearing casual white shirt with rolled sleeves, relaxed natural look, no tie no jacket',
-  iphone_mirror: 'wearing casual white shirt with rolled sleeves, relaxed natural look, no tie no jacket, holding phone for mirror selfie',
+  cruise_bluesky: 'wearing white or navy blazer, crisp shirt, nautical style',
 };
 
 const OUTFIT_BRIDE: Record<string, string> = {
@@ -261,38 +259,10 @@ const OUTFIT_BRIDE: Record<string, string> = {
   winter_snow: 'wearing white fur-trimmed gown, winter wonderland style',
   vintage_film: 'wearing classic A-line lace dress, 1970s vintage bridal aesthetic',
   cruise_sunset: 'wearing flowing white dress, windswept hair, golden hour elegance',
-  cruise_bluesky: 'wearing white summer dress, windswept hair, clean nautical bridal style',
-  iphone_selfie: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress',
-  iphone_mirror: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress, holding phone for mirror selfie',
+  cruise_bluesky: 'wearing white summer dress, clean nautical bridal style',
 };
 
 const HANBOK_CONCEPTS = new Set(['hanbok_wonsam', 'hanbok_dangui', 'hanbok_modern', 'hanbok_saeguk', 'hanbok_flower']);
-
-const DETAIL_SHOTS = new Set([
-  'hand_holding_close', 'hands_detail', 'cuff_fixing', 'looking_down',
-]);
-
-const WIDE_SHOTS = new Set([
-  'dramatic_wide', 'wide_shot', 'wide_cinematic', 'low_angle_epic', 'low_angle_power', 'walking_away',
-]);
-
-const CLOSEUP_SHOTS = new Set([
-  'closeup', 'face_to_face_close', 'dramatic_half', 'dramatic_light', 'close_eyes', 'profile_sharp',
-]);
-
-const getShotStrength = (mode: string, concept: string, shotIdx: number): number => {
-  const variants = mode === 'couple' ? COUPLE_SHOT_VARIANTS : mode === 'groom' ? GROOM_SHOT_VARIANTS : BRIDE_SHOT_VARIANTS;
-  const shot = variants[shotIdx % variants.length];
-  const isSelfie = concept === 'iphone_selfie' || concept === 'iphone_mirror';
-  const isCruise = concept === 'cruise_sunset' || concept === 'cruise_bluesky';
-  if (isSelfie) return 0.22;
-  if (DETAIL_SHOTS.has(shot.id)) return 0.38;
-  if (WIDE_SHOTS.has(shot.id)) return mode === 'couple' ? 0.30 : 0.35;
-  if (CLOSEUP_SHOTS.has(shot.id)) return mode === 'couple' ? 0.18 : 0.22;
-  if (isCruise) return mode === 'couple' ? 0.28 : 0.30;
-  if (mode === 'couple') return 0.22;
-  return 0.28;
-};
 
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {
   const allConcepts = { ...STUDIO_CONCEPTS, ...CINEMATIC_CONCEPTS };
@@ -301,60 +271,56 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const isHanbok = HANBOK_CONCEPTS.has(concept);
   const variants = mode === 'couple' ? COUPLE_SHOT_VARIANTS : mode === 'groom' ? GROOM_SHOT_VARIANTS : BRIDE_SHOT_VARIANTS;
   const shot = variants[shotIdx % variants.length];
-  const isDetail = DETAIL_SHOTS.has(shot.id);
 
-  const face = 'preserve exact facial features from reference, natural Korean proportions, authentic skin texture';
+  const face = 'preserve exact facial features from reference photo, natural Korean face proportions, keep original nose bridge width and shape, maintain authentic jawline and cheekbones, real skin texture with natural pores, no facial modification';
 
-  const outfitLock = 'keep identical outfit, hairstyle, accessories from first shot';
-
-  const detailFocus = isDetail
-    ? 'sharp macro focus on hands and rings, anatomically correct five fingers per hand, natural finger spacing, realistic ring placement on ring finger'
-    : '';
+  const outfitLock = 'CRITICAL: maintain absolutely identical outfit from first generated image — same fabric, same color, same pattern, same embroidery, same neckline, same sleeves, same hemline, same shoes. Maintain absolutely identical hairstyle — same parting, same length, same curl pattern, same hair color, same hair accessories, same headpiece position. Maintain absolutely identical jewelry and accessories — same earrings, same necklace, same rings, same belt, same hairpin position. Zero deviation allowed between shots';
 
   const cam = isCinematic
-    ? 'cinematic 85mm f/1.4, anamorphic bokeh, filmic grading'
-    : 'Canon EOS R5 85mm f/1.4, natural light, fine grain';
+    ? 'cinematic 85mm f/1.4, anamorphic bokeh, filmic color grading'
+    : 'Canon EOS R5 85mm f/1.4, natural soft lighting, fine film grain';
 
   const hanbokExtra = isHanbok
-    ? ', authentic hanbok silk texture, accurate layering and draping'
+    ? ', authentic traditional Korean hanbok fabric texture with visible silk sheen, accurate hanbok layering and draping, traditional Korean color palette'
     : '';
 
   if (mode === 'couple') {
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
     const bOutfit = OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic;
-    return `${shot.prompt}, ${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
+    return `${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${shot.prompt}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${cam}, 8k ultra detailed`;
   }
 
   const clothe = mode === 'groom'
     ? (OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic)
     : (OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic);
   const subj = mode === 'groom' ? 'Korean groom' : 'Korean bride';
-  return `${shot.prompt}, ${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
+  return `${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${shot.prompt}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${cam}, 8k ultra detailed`;
 };
 
-const buildNegativePrompt = (mode: string, concept: string, shotIdx?: number): string => {
-  const base = 'deformed face, elongated face, stretched face, pinched nose, bulbous nose, uncanny valley, plastic skin, wax figure, 3D render, cartoon, anime, illustration, painting, doll-like, mannequin, blurry, low quality, watermark, text overlay';
-  const consistencyBlock = 'different outfit, changed clothes, different hairstyle, altered jewelry, wardrobe change, accessories swapped';
-  const male = 'overly angular jaw, exaggerated chin, feminized male face, airbrush skin';
-  const female = 'masculine jaw, wide nose bridge, overly sharp features, generic AI face';
+const buildNegativePrompt = (mode: string, concept: string): string => {
+  const base = 'deformed face, elongated banana-shaped face, stretched face, pinched nose, bulbous nose, uncanny valley, plastic skin, wax figure, 3D render, cartoon, anime, illustration, painting, doll-like, mannequin, blurry, low quality, watermark, text overlay';
 
-  const variants = mode === 'couple' ? COUPLE_SHOT_VARIANTS : mode === 'groom' ? GROOM_SHOT_VARIANTS : BRIDE_SHOT_VARIANTS;
-  const shot = shotIdx !== undefined ? variants[shotIdx % variants.length] : null;
-  const isDetail = shot && DETAIL_SHOTS.has(shot.id);
-  const detailNeg = isDetail
-    ? ', extra fingers, merged fingers, missing fingers, deformed hands, fused digits, wrong finger count, six fingers, four fingers, unnatural hand pose, melted ring, blurred ring, malformed jewelry, twisted wrist'
-    : '';
+  const consistencyBlock = 'different outfit, changed clothes, different hairstyle, new accessories, altered jewelry, different headpiece, modified hair color, changed fabric color, inconsistent pattern, different shoes, wardrobe change, costume switch, hair restyled, accessories swapped';
+
+  const male = 'overly angular square jaw, exaggerated chin, feminized male face, too-smooth airbrush skin, unnaturally narrow face';
+  const female = 'masculine jaw, wide nose bridge, overly sharp features, generic AI female face';
 
   const isSelfie = concept === 'iphone_selfie' || concept === 'iphone_mirror';
-  const mirrorExtra = concept === 'iphone_mirror' ? ', second person reflection, dirty mirror, cracked mirror' : '';
-  const selfieNeg = isSelfie ? ', perfect studio lighting, ring light reflection, heavily retouched skin, stiff formal pose, warm golden color cast, orange skin tone' : '';
+  const mirrorExtra = concept === 'iphone_mirror'
+    ? ', no second person reflection, no background clutter, dirty mirror, cracked mirror'
+    : '';
+  const selfieNeg = isSelfie
+    ? ', perfect studio lighting, overly sharp image, professional photography setup, ring light reflection in eyes, heavily retouched skin, overdone makeup, stiff formal pose, symmetrical composition, warm golden color cast, orange skin tone, yellow tint, amber lighting, golden hour warmth'
+    : '';
 
   const isHanbok = HANBOK_CONCEPTS.has(concept);
-  const hanbokNeg = isHanbok ? ', Japanese kimono, Chinese hanfu, inaccurate hanbok structure, wrong collar direction, synthetic fabric' : '';
+  const hanbokNeg = isHanbok
+    ? ', Japanese kimono, Chinese hanfu, inaccurate hanbok structure, wrong collar direction, synthetic fabric look, plastic-looking silk, anachronistic modern elements mixed with traditional'
+    : '';
 
-  if (mode === 'groom') return `${base}, ${consistencyBlock}, ${male}${detailNeg}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
-  if (mode === 'bride') return `${base}, ${consistencyBlock}, ${female}${detailNeg}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
-  return `${base}, ${consistencyBlock}, ${male}, ${female}${detailNeg}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
+  if (mode === 'groom') return `${base}, ${consistencyBlock}, ${male}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
+  if (mode === 'bride') return `${base}, ${consistencyBlock}, ${female}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
+  return `${base}, ${consistencyBlock}, ${male}, ${female}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
 };
 
 const falFetch = async (url: string, opts?: RequestInit) => {
@@ -544,7 +510,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     const effectiveMode = mode || pack.mode;
     const shotIdx = pack.usedSnaps;
     const prompt = buildPrompt(pack.concept, pack.category, effectiveMode, shotIdx);
-    const negativePrompt = buildNegativePrompt(effectiveMode, pack.concept, shotIdx);
+    const negativePrompt = buildNegativePrompt(effectiveMode, pack.concept);
 
     const inputUrlsArr = pack.inputUrls as string[];
     const chainRefs = (pack.chainRefUrls || {}) as Record<string, string>;
@@ -587,7 +553,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
       try {
         const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
           method: 'POST',
-          body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt, strength: getShotStrength(effectiveMode, pack.concept, shotIdx), num_images: 1 }),
+          body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt, strength: effectiveMode === 'couple' ? 0.15 : (pack.concept.startsWith('iphone_') ? 0.22 : 0.28), num_images: 1 }),
         });
 
         let falUrl: string | null = null;
