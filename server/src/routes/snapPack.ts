@@ -96,8 +96,8 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     base: 'deep enchanted forest with golden sunlight streaming through tall ancient trees, white rose and ivy flower arch, floating golden dust particles, magical cinematic atmosphere',
   },
   castle_garden: {
-    label: '캐슬 가든',
-    base: 'outdoor European castle garden, stone castle towers in background, ornate fountain and trimmed hedge maze, warm golden hour sunlight, NOT indoor NOT palace interior NOT ballroom, cinematic fairy tale atmosphere',
+    label: '유럽 궁전',
+    base: 'outdoor European castle garden, couple standing on stone pathway surrounded by trimmed hedges and rose bushes, medieval stone castle towers visible far behind, golden hour sunlight streaming across open-air garden, ornate stone fountain nearby, wide open sky above',
   },
   cathedral: {
     label: '성당 웨딩',
@@ -302,7 +302,7 @@ const CONCEPT_MOOD: Record<string, string> = {
   cruise_sunset: 'ocean breeze windswept hair, golden light on deck railing, relaxed nautical vibe',
   cruise_bluesky: 'bright sea breeze, crisp blue sky, wind in hair, relaxed deck atmosphere',
   city_night: 'neon reflections on wet pavement, moody urban glow, cinematic city depth',
-  castle_garden: 'outdoor castle garden with stone towers visible behind, fountain and hedge maze, NOT indoor NOT palace interior NOT ballroom',
+  castle_garden: 'standing outdoors in castle garden, open sky above, natural sunlight, stone pathway underfoot, green hedges surrounding',
   cathedral: 'dramatic stained glass light beams, sacred solemn beauty, high ceiling depth',
   rainy_day: 'rain droplets on umbrella, wet street reflections, cozy intimate closeness',
   autumn_leaves: 'golden leaves falling around couple, warm amber light, crunchy leaf ground',

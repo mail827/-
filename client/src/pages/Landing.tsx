@@ -435,7 +435,7 @@ export default function Landing() {
                 { id: 'cruise_bluesky', label: '크루즈 블루', sub: '푸른 바다 크루즈', cat: 'studio' },
                 { id: 'city_night', label: '시티 나이트', sub: '도시 야경', cat: 'cinematic' },
                 { id: 'forest_wedding', label: '숲속 웨딩', sub: '숲속 빛내림', cat: 'cinematic' },
-                { id: 'castle_garden', label: '캐슬 가든', sub: '유럽 고성', cat: 'cinematic' },
+                { id: 'castle_garden', label: '유럽 궁전', sub: '궁전 웨딩', cat: 'cinematic' },
                 { id: 'cathedral', label: '성당 웨딩', sub: '스테인드글라스', cat: 'cinematic' },
                 { id: 'watercolor', label: '수채화', sub: '파스텔 수채화', cat: 'cinematic' },
                 { id: 'magazine_cover', label: '매거진 커버', sub: '하이패션 화보', cat: 'cinematic' },

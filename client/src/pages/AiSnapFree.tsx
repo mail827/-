@@ -14,7 +14,7 @@ const CONCEPTS = [
   { id: 'city_night', label: '시티 나이트', sub: '도시 야경' },
   { id: 'cherry_blossom', label: '벚꽃', sub: '벚꽃잎 흩날림' },
   { id: 'forest_wedding', label: '숲속 웨딩', sub: '숲속 빛내림' },
-  { id: 'castle_garden', label: '캐슬 가든', sub: '유럽 고성' },
+  { id: 'castle_garden', label: '유럽 궁전', sub: '궁전 웨딩' },
   { id: 'cathedral', label: '성당 웨딩', sub: '스테인드글라스' },
   { id: 'watercolor', label: '수채화', sub: '파스텔 수채화' },
   { id: 'magazine_cover', label: '매거진 커버', sub: '하이패션 화보' },

@@ -21,7 +21,7 @@ const CONCEPTS = [
   { id: 'cruise_bluesky', label: '크루즈 블루' },
   { id: 'city_night', label: '시티 나이트' },
   { id: 'forest_wedding', label: '숲속 웨딩' },
-  { id: 'castle_garden', label: '캐슬 가든' },
+  { id: 'castle_garden', label: '유럽 궁전' },
   { id: 'cathedral', label: '성당 웨딩' },
   { id: 'watercolor', label: '수채화' },
   { id: 'magazine_cover', label: '매거진 커버' },
