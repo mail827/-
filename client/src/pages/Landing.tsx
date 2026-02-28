@@ -7,6 +7,8 @@ import { Check, MessageCircle, X, Send, Sparkles, Mail, Loader2, Gift, Eye } fro
 import ThemeShowcaseModal from '../components/ThemeShowcaseModal';
 import HighlightVideoSection from '../components/HighlightVideoSection';
 
+const API = import.meta.env.VITE_API_URL;
+
 interface Package {
   id: string;
   name: string;
@@ -52,6 +54,8 @@ export default function Landing() {
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [visitorId] = useState(() => localStorage.getItem('visitorId') || `visitor_${Date.now()}`);
+  const [selectedSnap, setSelectedSnap] = useState<string | null>(null);
+  const [snapSamples, setSnapSamples] = useState<{ id: string; concept: string; imageUrl: string; mode: string }[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,6 +69,10 @@ export default function Landing() {
     fetchPackages();
     fetchReviews();
     fetchGuides();
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API}/admin/snap-samples`).then(r => r.json()).then(setSnapSamples).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -412,46 +420,87 @@ export default function Landing() {
           >
             <div className="flex gap-3 overflow-x-auto pb-4 px-1 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {[
-                { label: '스튜디오', sub: '정석 화보', cat: 'studio' },
-                { label: '야외 가든', sub: '꽃과 자연빛', cat: 'studio' },
-                { label: '해변 선셋', sub: '노을빛 해변', cat: 'studio' },
-                { label: '궁중 혼례', sub: '화려한 궁중 예복', cat: 'studio' },
-                { label: '당의 한복', sub: '단아한 정원 화보', cat: 'studio' },
-                { label: '모던 한복', sub: '현대적 한옥 감성', cat: 'studio' },
-                { label: '사극풍', sub: '왕과 왕비 컨셉', cat: 'studio' },
-                { label: '꽃한복', sub: '봄꽃 한옥마당', cat: 'studio' },
-                { label: '벚꽃', sub: '봄날 감성', cat: 'studio' },
-                { label: '셀카 스냅', sub: 'iPhone 감성', cat: 'studio' },
-                { label: '거울 셀카', sub: '미러 셀카', cat: 'studio' },
-                { label: '크루즈 선셋', sub: '노을빛 크루즈', cat: 'studio' },
-                { label: '크루즈 블루', sub: '푸른 바다 크루즈', cat: 'studio' },
-                { label: '시티 나이트', sub: '도시 야경', cat: 'cinematic' },
-                { label: '숲속 웨딩', sub: '숲속 빛내림', cat: 'cinematic' },
-                { label: '캐슬 가든', sub: '유럽 고성', cat: 'cinematic' },
-                { label: '성당 웨딩', sub: '스테인드글라스', cat: 'cinematic' },
-                { label: '수채화', sub: '파스텔 수채화', cat: 'cinematic' },
-                { label: '매거진 커버', sub: '하이패션 화보', cat: 'cinematic' },
-                { label: '비오는 날', sub: '감성 빗속', cat: 'cinematic' },
-                { label: '가을 단풍', sub: '단풍길 로맨스', cat: 'cinematic' },
-                { label: '겨울 눈', sub: '눈 내리는 날', cat: 'cinematic' },
-                { label: '빈티지 필름', sub: '필름 감성', cat: 'cinematic' },
+                { id: 'studio_classic', label: '스튜디오', sub: '정석 화보', cat: 'studio' },
+                { id: 'outdoor_garden', label: '야외 가든', sub: '꽃과 자연빛', cat: 'studio' },
+                { id: 'beach_sunset', label: '해변 선셋', sub: '노을빛 해변', cat: 'studio' },
+                { id: 'hanbok_wonsam', label: '궁중 혼례', sub: '화려한 궁중 예복', cat: 'studio' },
+                { id: 'hanbok_dangui', label: '당의 한복', sub: '단아한 정원 화보', cat: 'studio' },
+                { id: 'hanbok_modern', label: '모던 한복', sub: '현대적 한옥 감성', cat: 'studio' },
+                { id: 'hanbok_saeguk', label: '사극풍', sub: '왕과 왕비 컨셉', cat: 'studio' },
+                { id: 'hanbok_flower', label: '꽃한복', sub: '봄꽃 한옥마당', cat: 'studio' },
+                { id: 'cherry_blossom', label: '벚꽃', sub: '봄날 감성', cat: 'studio' },
+                { id: 'iphone_selfie', label: '셀카 스냅', sub: 'iPhone 감성', cat: 'studio' },
+                { id: 'iphone_mirror', label: '거울 셀카', sub: '미러 셀카', cat: 'studio' },
+                { id: 'cruise_sunset', label: '크루즈 선셋', sub: '노을빛 크루즈', cat: 'studio' },
+                { id: 'cruise_bluesky', label: '크루즈 블루', sub: '푸른 바다 크루즈', cat: 'studio' },
+                { id: 'city_night', label: '시티 나이트', sub: '도시 야경', cat: 'cinematic' },
+                { id: 'forest_wedding', label: '숲속 웨딩', sub: '숲속 빛내림', cat: 'cinematic' },
+                { id: 'castle_garden', label: '캐슬 가든', sub: '유럽 고성', cat: 'cinematic' },
+                { id: 'cathedral', label: '성당 웨딩', sub: '스테인드글라스', cat: 'cinematic' },
+                { id: 'watercolor', label: '수채화', sub: '파스텔 수채화', cat: 'cinematic' },
+                { id: 'magazine_cover', label: '매거진 커버', sub: '하이패션 화보', cat: 'cinematic' },
+                { id: 'rainy_day', label: '비오는 날', sub: '감성 빗속', cat: 'cinematic' },
+                { id: 'autumn_leaves', label: '가을 단풍', sub: '단풍길 로맨스', cat: 'cinematic' },
+                { id: 'winter_snow', label: '겨울 눈', sub: '눈 내리는 날', cat: 'cinematic' },
+                { id: 'vintage_film', label: '빈티지 필름', sub: '필름 감성', cat: 'cinematic' },
               ].map((c, i) => (
-                <motion.a
-                  href="/ai-snap"
-                  key={c.label}
+                <motion.button
+                  onClick={() => setSelectedSnap(selectedSnap === c.id ? null : c.id)}
+                  key={c.id}
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05 }}
-                  className="flex-shrink-0 snap-start w-32 bg-white rounded-2xl border border-stone-200 p-4 text-center hover:border-stone-800 hover:shadow-lg transition-all group cursor-pointer"
+                  className={`flex-shrink-0 snap-start w-32 rounded-2xl border p-4 text-center transition-all group cursor-pointer ${selectedSnap === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-800 hover:shadow-lg'}`}
                 >
-                  <p className="text-xs text-stone-400 mb-1">{c.cat === 'studio' ? 'STUDIO' : 'CINEMATIC'}</p>
-                  <p className="text-sm font-medium text-stone-800 group-hover:text-stone-900">{c.label}</p>
-                  <p className="text-[11px] text-stone-400 mt-0.5">{c.sub}</p>
-                </motion.a>
+                  <p className={`text-xs mb-1 ${selectedSnap === c.id ? 'text-white/60' : 'text-stone-400'}`}>{c.cat === 'studio' ? 'STUDIO' : 'CINEMATIC'}</p>
+                  <p className={`text-sm font-medium ${selectedSnap === c.id ? 'text-white' : 'text-stone-800 group-hover:text-stone-900'}`}>{c.label}</p>
+                  <p className={`text-[11px] mt-0.5 ${selectedSnap === c.id ? 'text-white/50' : 'text-stone-400'}`}>{c.sub}</p>
+                </motion.button>
               ))}
             </div>
-            <p className="text-[11px] text-stone-400 text-center mt-2">옆으로 스와이프하여 더 보기</p>
+            <p className="text-[11px] text-stone-400 text-center mt-2">컨셉을 눌러 샘플을 확인해보세요</p>
+
+            <AnimatePresence mode="wait">
+              {selectedSnap && snapSamples.filter(s => s.concept === selectedSnap).length > 0 && (
+                <motion.div
+                  key={selectedSnap}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-6 overflow-hidden"
+                >
+                  <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                    {snapSamples.filter(s => s.concept === selectedSnap).map(s => (
+                      <div key={s.id} className="flex-shrink-0 w-40 aspect-[3/4] rounded-2xl overflow-hidden border border-stone-100 shadow-sm">
+                        <img src={s.imageUrl} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-center mt-4">
+                    <a href="/ai-snap" className="inline-flex items-center gap-2 px-6 py-2.5 bg-stone-800 text-white text-sm rounded-full hover:bg-stone-900 transition-all">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      이 컨셉으로 만들어보기
+                    </a>
+                  </div>
+                </motion.div>
+              )}
+              {selectedSnap && snapSamples.filter(s => s.concept === selectedSnap).length === 0 && (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="mt-6 text-center py-8"
+                >
+                  <p className="text-sm text-stone-400 mb-3">아직 샘플이 준비 중이에요</p>
+                  <a href="/ai-snap" className="inline-flex items-center gap-2 px-6 py-2.5 bg-stone-800 text-white text-sm rounded-full hover:bg-stone-900 transition-all">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    무료로 먼저 체험해보기
+                  </a>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
 
           <motion.div
