@@ -97,7 +97,7 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
   castle_garden: {
     label: '캐슬 가든',
-    base: 'magnificent European stone castle with towers, grand garden with ornate fountain and hedge maze, warm golden hour, Disney-like cinematic dream atmosphere',
+    base: 'outdoor European castle garden, stone castle towers in background, ornate fountain and trimmed hedge maze, warm golden hour sunlight, NOT indoor NOT palace interior NOT ballroom, cinematic fairy tale atmosphere',
   },
   cathedral: {
     label: '성당 웨딩',
@@ -290,7 +290,7 @@ const getShotStrength = (mode: string, concept: string, shotIdx: number): number
   if (WIDE_SHOTS.has(shot.id)) return mode === 'couple' ? 0.30 : 0.35;
   if (CLOSEUP_SHOTS.has(shot.id)) return mode === 'couple' ? 0.18 : 0.22;
   if (isCruise) return mode === 'couple' ? 0.28 : 0.30;
-  if (mode === 'couple') return 0.22;
+  if (mode === 'couple') return 0.28;
   return 0.28;
 };
 
@@ -302,7 +302,7 @@ const CONCEPT_MOOD: Record<string, string> = {
   cruise_sunset: 'ocean breeze windswept hair, golden light on deck railing, relaxed nautical vibe',
   cruise_bluesky: 'bright sea breeze, crisp blue sky, wind in hair, relaxed deck atmosphere',
   city_night: 'neon reflections on wet pavement, moody urban glow, cinematic city depth',
-  castle_garden: 'European old stone texture, ivy walls, regal but relaxed atmosphere',
+  castle_garden: 'outdoor castle garden with stone towers visible behind, fountain and hedge maze, NOT indoor NOT palace interior NOT ballroom',
   cathedral: 'dramatic stained glass light beams, sacred solemn beauty, high ceiling depth',
   rainy_day: 'rain droplets on umbrella, wet street reflections, cozy intimate closeness',
   autumn_leaves: 'golden leaves falling around couple, warm amber light, crunchy leaf ground',
@@ -344,7 +344,8 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   if (mode === 'couple') {
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
     const bOutfit = OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic;
-    return `${shot.prompt}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
+    const coupleNatural = 'natural relaxed body language, genuine warm smiles, not stiff not rigid, candid authentic interaction';
+    return `${shot.prompt}, ${coupleNatural}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
   }
 
   const clothe = mode === 'groom'
@@ -376,7 +377,7 @@ const buildNegativePrompt = (mode: string, concept: string, shotIdx?: number): s
 
   if (mode === 'groom') return `${base}, ${consistencyBlock}, ${male}${detailNeg}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
   if (mode === 'bride') return `${base}, ${consistencyBlock}, ${female}${detailNeg}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
-  return `${base}, ${consistencyBlock}, ${male}, ${female}${detailNeg}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
+  return `${base}, ${consistencyBlock}, ${male}, ${female}, stiff pose, rigid body, passport photo, mugshot, expressionless, arms at sides${detailNeg}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
 };
 
 const falFetch = async (url: string, opts?: RequestInit) => {
