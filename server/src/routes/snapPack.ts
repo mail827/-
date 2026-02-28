@@ -294,6 +294,26 @@ const getShotStrength = (mode: string, concept: string, shotIdx: number): number
   return 0.28;
 };
 
+const CONCEPT_MOOD: Record<string, string> = {
+  beach_sunset: 'wind blowing through hair naturally, barefoot on wet sand, relaxed playful movement, golden hour warmth on skin',
+  outdoor_garden: 'dappled sunlight through leaves, soft petal falling, relaxed garden stroll',
+  cherry_blossom: 'cherry petals drifting in breeze, soft pink tones, gentle spring wind',
+  forest_wedding: 'misty ethereal forest light, dappled sun rays through canopy, mossy ground',
+  cruise_sunset: 'ocean breeze windswept hair, golden light on deck railing, relaxed nautical vibe',
+  cruise_bluesky: 'bright sea breeze, crisp blue sky, wind in hair, relaxed deck atmosphere',
+  city_night: 'neon reflections on wet pavement, moody urban glow, cinematic city depth',
+  castle_garden: 'European old stone texture, ivy walls, regal but relaxed atmosphere',
+  cathedral: 'dramatic stained glass light beams, sacred solemn beauty, high ceiling depth',
+  rainy_day: 'rain droplets on umbrella, wet street reflections, cozy intimate closeness',
+  autumn_leaves: 'golden leaves falling around couple, warm amber light, crunchy leaf ground',
+  winter_snow: 'gentle snowflakes on hair and shoulders, visible breath in cold air, cozy warmth',
+  watercolor: 'soft dreamy pastel wash, painterly light diffusion',
+  magazine_cover: 'strong editorial lighting, confident powerful pose, high fashion attitude',
+  vintage_film: 'warm film grain, slightly faded colors, nostalgic soft focus edges',
+  iphone_selfie: 'casual spontaneous vibe, slightly imperfect framing, authentic not posed',
+  iphone_mirror: 'mirror reflection with flash, casual standing pose, trendy social media aesthetic',
+};
+
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {
   const allConcepts = { ...STUDIO_CONCEPTS, ...CINEMATIC_CONCEPTS };
   const scene = allConcepts[concept]?.base || STUDIO_CONCEPTS.studio_classic.base;
@@ -319,17 +339,19 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
     ? ', authentic hanbok silk texture, accurate layering and draping'
     : '';
 
+  const mood = CONCEPT_MOOD[concept] || '';
+
   if (mode === 'couple') {
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
     const bOutfit = OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic;
-    return `${shot.prompt}, ${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
+    return `${shot.prompt}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
   }
 
   const clothe = mode === 'groom'
     ? (OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic)
     : (OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic);
   const subj = mode === 'groom' ? 'Korean groom' : 'Korean bride';
-  return `${shot.prompt}, ${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
+  return `${shot.prompt}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
 };
 
 const buildNegativePrompt = (mode: string, concept: string, shotIdx?: number): string => {
