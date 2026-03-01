@@ -137,13 +137,15 @@ export default function WeddingPage() {
     const bride = searchParams.get("bride");
     const date = searchParams.get("date");
     const venue = searchParams.get("venue");
-    if (groom || bride || date || venue) {
+    const heroMedia = searchParams.get("heroMedia");
+    if (groom || bride || date || venue || heroMedia) {
       setWedding(prev => prev ? {
         ...prev,
         ...(groom && { groomName: groom }),
         ...(bride && { brideName: bride }),
         ...(date && { weddingDate: date }),
         ...(venue && { venue }),
+        ...(heroMedia && { heroMedia, heroMediaType: "IMAGE" as const }),
       } : prev);
       setPreviewApplied(true);
     }

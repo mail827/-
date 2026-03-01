@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight, Check, Sparkles, ChevronRight, Heart, MapPin, Calendar,
-  Send, Copy, CreditCard, Camera, MessageCircle, Zap, X,
+  Send, Copy, CreditCard, Camera, ChevronDown, MessageCircle, Zap, X,
   Mail, Loader2, Gift
 } from "lucide-react";
 import ThemeShowcaseModal from "../components/ThemeShowcaseModal";
@@ -279,14 +279,19 @@ function ScenarioCard({ item, index, parentInView }: { item: { q: string; a: str
   );
 }
 
+
 function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
   const [ref, inView] = useInView(0.08);
   const [showcases, setShowcases] = useState<{ name: string; url: string; description?: string }[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [formData, setFormData] = useState({ groom: "", bride: "", date: "", venue: "" });
+  const [formData, setFormData] = useState({ groom: "", bride: "", date: "", venue: "", heroMedia: "" });
   const [iframeKey, setIframeKey] = useState(0);
+  const [formOpen, setFormOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch(`${API}/public/theme-showcases`)
@@ -297,14 +302,33 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    setIframeLoaded(false);
-  }, [activeIdx, iframeKey]);
+  useEffect(() => { setIframeLoaded(false); }, [activeIdx, iframeKey]);
 
   const updateForm = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => setIframeKey(k => k + 1), 800);
+  };
+
+  const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setPhotoPreview(URL.createObjectURL(file));
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("upload_preset", "wedding_guide");
+      const res = await fetch("https://api.cloudinary.com/v1_1/" + import.meta.env.VITE_CLOUDINARY_CLOUD_NAME + "/image/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.secure_url) updateForm("heroMedia", data.secure_url);
+    } catch {} finally { setUploading(false); }
+  };
+
+  const removePhoto = () => {
+    setPhotoPreview("");
+    updateForm("heroMedia", "");
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   const buildPreviewUrl = (baseUrl: string) => {
@@ -314,6 +338,7 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
     if (formData.bride) params.set("bride", formData.bride);
     if (formData.date) params.set("date", formData.date);
     if (formData.venue) params.set("venue", formData.venue);
+    if (formData.heroMedia) params.set("heroMedia", formData.heroMedia);
     const separator = baseUrl.includes("?") ? "&" : "?";
     return `${baseUrl}${separator}${params.toString()}`;
   };
@@ -326,10 +351,7 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
             <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Themes</p>
             <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>19개의 테마, 직접 확인하세요.</h2>
             <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 32 }}>디자인은 기본입니다. 기능이 다릅니다.</p>
-            <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>
-              전체 19개 테마 보기
-              <ArrowRight size={14} />
-            </button>
+            <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>전체 19개 테마 보기 <ArrowRight size={14} /></button>
           </div>
         </div>
       </section>
@@ -338,7 +360,8 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
 
   const current = showcases[activeIdx];
   const previewUrl = buildPreviewUrl(current.url);
-  const hasInput = formData.groom || formData.bride || formData.date || formData.venue;
+  const hasInput = formData.groom || formData.bride || formData.date || formData.venue || formData.heroMedia;
+  const filledCount = [formData.groom, formData.bride, formData.date, formData.venue, formData.heroMedia].filter(Boolean).length;
 
   return (
     <section id="themes" ref={ref as React.RefObject<HTMLElement>} style={{ padding: "100px 0", borderTop: "1px solid #E8E5E0" }}>
@@ -350,14 +373,37 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
         </div>
         <div className="theme-builder-grid" style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 56, opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(20px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1) 0.15s" }}>
           <div style={{ width: 340, flexShrink: 0 }}>
-            <p style={{ fontSize: 12, color: "#999", marginBottom: 16, fontWeight: 500, letterSpacing: 0.5 }}>내 정보 입력</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-              <div style={{ display: "flex", gap: 10 }}>
-                <input type="text" placeholder="신랑 이름" value={formData.groom} onChange={e => updateForm("groom", e.target.value)} style={{ flex: 1, padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none", fontFamily: "'Noto Sans KR', sans-serif" }} />
-                <input type="text" placeholder="신부 이름" value={formData.bride} onChange={e => updateForm("bride", e.target.value)} style={{ flex: 1, padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none", fontFamily: "'Noto Sans KR', sans-serif" }} />
+            <button onClick={() => setFormOpen(p => !p)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", background: "none", border: "none", borderBottom: "1px solid #E8E5E0", cursor: "pointer", marginBottom: formOpen ? 16 : 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <p style={{ fontSize: 13, color: "#1a1a1a", fontWeight: 600, letterSpacing: 0.3 }}>내 정보 입력</p>
+                {filledCount > 0 && !formOpen && <span style={{ fontSize: 10, color: "#fff", background: "#1a1a1a", borderRadius: 10, padding: "2px 8px", fontWeight: 500 }}>{filledCount}개 입력됨</span>}
               </div>
-              <input type="date" value={formData.date} onChange={e => updateForm("date", e.target.value)} style={{ width: "100%", padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: formData.date ? "#1a1a1a" : "#bbb", outline: "none", fontFamily: "'Noto Sans KR', sans-serif" }} />
-              <input type="text" placeholder="예식장 (예: 더채플하우스 3층 그랜드홀)" value={formData.venue} onChange={e => updateForm("venue", e.target.value)} style={{ width: "100%", padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none", fontFamily: "'Noto Sans KR', sans-serif" }} />
+              <ChevronDown size={16} color="#999" style={{ transform: formOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s" }} />
+            </button>
+            <div style={{ maxHeight: formOpen ? 500 : 0, overflow: "hidden", transition: "max-height 0.4s cubic-bezier(0.22,1,0.36,1)", opacity: formOpen ? 1 : 0 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20, paddingBottom: 20, borderBottom: "1px solid #E8E5E0" }}>
+                <div className="showcase-name-row" style={{ display: "flex", gap: 10 }}>
+                  <input type="text" placeholder="신랑 이름" value={formData.groom} onChange={e => updateForm("groom", e.target.value)} style={{ flex: 1, padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none" }} />
+                  <input type="text" placeholder="신부 이름" value={formData.bride} onChange={e => updateForm("bride", e.target.value)} style={{ flex: 1, padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none" }} />
+                </div>
+                <input type="date" value={formData.date} onChange={e => updateForm("date", e.target.value)} style={{ width: "100%", padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: formData.date ? "#1a1a1a" : "#bbb", outline: "none" }} />
+                <input type="text" placeholder="예식장 (예: 더채플하우스 3층 그랜드홀)" value={formData.venue} onChange={e => updateForm("venue", e.target.value)} style={{ width: "100%", padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none" }} />
+                <div>
+                  <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: "none" }} id="showcase-photo" />
+                  {photoPreview ? (
+                    <div style={{ position: "relative", borderRadius: 8, overflow: "hidden", border: "1px solid #E0DDD8" }}>
+                      <img src={photoPreview} alt="" style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
+                      {uploading && <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}><Loader2 size={20} color="#999" style={{ animation: "spin 1s linear infinite" }} /></div>}
+                      <button onClick={removePhoto} style={{ position: "absolute", top: 6, right: 6, width: 24, height: 24, borderRadius: "50%", background: "rgba(0,0,0,0.5)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={12} color="#fff" /></button>
+                    </div>
+                  ) : (
+                    <label htmlFor="showcase-photo" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px", borderRadius: 8, border: "1px dashed #D0CCC6", background: "#FAFAF8", cursor: "pointer" }}>
+                      <Camera size={16} color="#bbb" />
+                      <span style={{ fontSize: 12, color: "#aaa" }}>대표 사진 추가 (선택)</span>
+                    </label>
+                  )}
+                </div>
+              </div>
             </div>
             <p style={{ fontSize: 12, color: "#999", marginBottom: 12, fontWeight: 500, letterSpacing: 0.5 }}>테마 선택</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 24, maxHeight: 240, overflowY: "auto" }}>
@@ -365,17 +411,14 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
                 <button key={i} onClick={() => setActiveIdx(i)} style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: activeIdx === i ? "2px solid #1a1a1a" : "1px solid #E0DDD8", background: activeIdx === i ? "#F5F4F1" : "#fff", cursor: "pointer", textAlign: "left", transition: "all 0.25s", display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: activeIdx === i ? "#1a1a1a" : "#ddd", flexShrink: 0, transition: "all 0.25s" }} />
                   <div>
-                    <p style={{ fontSize: 13, color: activeIdx === i ? "#1a1a1a" : "#666", fontWeight: activeIdx === i ? 600 : 400, fontFamily: "'Noto Sans KR', sans-serif" }}>{s.name}</p>
+                    <p style={{ fontSize: 13, color: activeIdx === i ? "#1a1a1a" : "#666", fontWeight: activeIdx === i ? 600 : 400 }}>{s.name}</p>
                     {s.description && <p style={{ fontSize: 11, color: "#bbb", marginTop: 1 }}>{s.description}</p>}
                   </div>
                 </button>
               ))}
             </div>
             {hasInput ? (
-              <button onClick={onLogin} className="chat-msg-enter" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", padding: "14px 0", borderRadius: 10, background: "#1a1a1a", color: "#fff", fontSize: 14, fontWeight: 500, border: "none", cursor: "pointer" }}>
-                이 디자인으로 시작하기
-                <ArrowRight size={16} />
-              </button>
+              <button onClick={onLogin} className="chat-msg-enter" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", padding: "14px 0", borderRadius: 10, background: "#1a1a1a", color: "#fff", fontSize: 14, fontWeight: 500, border: "none", cursor: "pointer" }}>이 디자인으로 시작하기 <ArrowRight size={16} /></button>
             ) : (
               <p style={{ fontSize: 12, color: "#ccc", textAlign: "center" }}>정보를 입력하면 실시간으로 반영됩니다.</p>
             )}
@@ -384,38 +427,23 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
             <div style={{ width: 280, height: 580, borderRadius: 40, border: "6px solid #1a1a1a", background: "#000", padding: 2, boxShadow: "0 25px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.08)" }}>
               <div style={{ width: "100%", height: "100%", borderRadius: 34, overflow: "hidden", position: "relative", background: "#FAF9F7" }}>
                 <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 100, height: 28, background: "#1a1a1a", borderBottomLeftRadius: 16, borderBottomRightRadius: 16, zIndex: 10 }} />
-                {!iframeLoaded && (
-                  <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, zIndex: 5 }}>
-                    <Loader2 size={20} color="#bbb" style={{ animation: "spin 1s linear infinite" }} />
-                    <p style={{ fontSize: 11, color: "#bbb" }}>불러오는 중...</p>
-                  </div>
-                )}
-                <iframe
-                  key={`${activeIdx}-${iframeKey}`}
-                  src={previewUrl}
-                  onLoad={() => setIframeLoaded(true)}
-                  style={{ width: "100%", height: "100%", border: "none", opacity: iframeLoaded ? 1 : 0, transition: "opacity 0.4s" }}
-                  title={`${current.name} 미리보기`}
-                />
+                {!iframeLoaded && <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, zIndex: 5 }}><Loader2 size={20} color="#bbb" style={{ animation: "spin 1s linear infinite" }} /><p style={{ fontSize: 11, color: "#bbb" }}>불러오는 중...</p></div>}
+                <iframe key={`${activeIdx}-${iframeKey}`} src={previewUrl} onLoad={() => setIframeLoaded(true)} style={{ width: "100%", height: "100%", border: "none", opacity: iframeLoaded ? 1 : 0, transition: "opacity 0.4s" }} title={`${current.name} 미리보기`} />
               </div>
             </div>
             <div style={{ position: "absolute", bottom: -32, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 6 }}>
-              {showcases.map((_, i) => (
-                <button key={i} onClick={() => setActiveIdx(i)} style={{ width: activeIdx === i ? 20 : 6, height: 6, borderRadius: 3, background: activeIdx === i ? "#1a1a1a" : "#ddd", transition: "all 0.3s", border: "none", cursor: "pointer", padding: 0 }} />
-              ))}
+              {showcases.map((_, i) => <button key={i} onClick={() => setActiveIdx(i)} style={{ width: activeIdx === i ? 20 : 6, height: 6, borderRadius: 3, background: activeIdx === i ? "#1a1a1a" : "#ddd", transition: "all 0.3s", border: "none", cursor: "pointer", padding: 0 }} />)}
             </div>
           </div>
         </div>
         <div style={{ textAlign: "center", marginTop: 64 }}>
-          <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>
-            전체 19개 테마 보기
-            <ArrowRight size={14} />
-          </button>
+          <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>전체 19개 테마 보기 <ArrowRight size={14} /></button>
         </div>
       </div>
     </section>
   );
 }
+
 
 export default function Landing() {
   const [searchParams] = useSearchParams();
@@ -587,30 +615,50 @@ export default function Landing() {
         @keyframes chatEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .chat-msg-enter { animation: chatEnter 0.3s ease-out; }
         .nav-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+          @media (max-width: 480px) {
+            .nav-blur > div { padding: 12px 16px !important; }
+            .nav-blur > div > div:last-child { gap: 12px !important; }
+            .nav-blur > div > div:last-child a { display: none !important; }
+          }
         .landing-body ::-webkit-scrollbar { display: none; }
         .snap-pill::-webkit-scrollbar { display: none; }
         @media (max-width: 768px) {
-          .hero-grid { flex-direction: column !important; text-align: center !important; padding: 120px 24px 60px !important; gap: 40px !important; }
-          .hero-text h1 { font-size: 28px !important; }
+          .hero-grid { flex-direction: column !important; text-align: center !important; padding: 100px 20px 60px !important; gap: 40px !important; }
+          .hero-text h1 { font-size: 26px !important; line-height: 1.4 !important; letter-spacing: -0.3px !important; }
           .hero-stats { justify-content: center !important; }
           .hero-btns { justify-content: center !important; }
           .engine-grid { grid-template-columns: 1fr !important; }
-          .chat-section { flex-direction: column !important; padding: 80px 24px !important; gap: 48px !important; }
-          .snap-section { flex-direction: column-reverse !important; padding: 80px 24px !important; gap: 48px !important; }
+          .chat-section { flex-direction: column !important; padding: 60px 20px !important; gap: 40px !important; }
+          .snap-section { flex-direction: column-reverse !important; padding: 60px 20px !important; gap: 40px !important; }
           .snap-text, .chat-text-col { max-width: 100% !important; }
           .specs-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .pricing-grid { grid-template-columns: 1fr !important; }
           .problem-grid { grid-template-columns: 1fr !important; }
-          .theme-builder-grid { flex-direction: column-reverse !important; align-items: center !important; gap: 36px !important; }
-          .theme-builder-grid > div:first-child { width: 100% !important; max-width: 340px !important; }
+          .theme-builder-grid { flex-direction: column-reverse !important; align-items: center !important; gap: 32px !important; padding: 0 4px !important; }
+          .showcase-name-row { flex-direction: column !important; }
+          .theme-builder-grid > div:first-child { width: 100% !important; max-width: 100% !important; padding: 0 16px !important; }
+          .theme-builder-grid > div:last-child { transform: scale(0.75) !important; transform-origin: top center !important; margin-bottom: -100px !important; }
           .snap-pack-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .weddingai-grid { flex-direction: column !important; gap: 32px !important; }
+          .weddingai-grid > div:first-child { min-width: 0 !important; width: 100% !important; word-break: keep-all !important; }
           .weddingai-grid > div:last-child { width: 100% !important; }
+          .theme-builder-grid > div:first-child > div > div:first-child { flex-direction: column !important; }
+          .theme-builder-grid > div:first-child { padding: 0 20px !important; }
+          #themes > div { padding: 0 20px !important; }
+          .footer-info { flex-direction: column !important; gap: 16px !important; }
+          .serif { font-size: inherit !important; }
+          section { padding-left: 20px !important; padding-right: 20px !important; }
+          section h2.serif { font-size: 24px !important; line-height: 1.4 !important; word-break: keep-all !important; }
+          section h3.serif { font-size: 22px !important; line-height: 1.4 !important; word-break: keep-all !important; }
+        }
+          .theme-builder-grid > div:first-child > div > div:first-child { flex-direction: column !important; }
+          .theme-builder-grid > div:first-child { padding: 0 20px !important; }
+          #themes > div { padding: 0 20px !important; }
           .footer-info { flex-direction: column !important; gap: 16px !important; }
         }
       `}</style>
 
-      <div className="landing-body" style={{ minHeight: "100vh", background: "#FAF9F7", fontFamily: "'Noto Sans KR', -apple-system, sans-serif", WebkitFontSmoothing: "antialiased" }}>
+      <div className="landing-body" style={{ minHeight: "100vh", background: "#FAF9F7", overflowX: "hidden", fontFamily: "'Noto Sans KR', -apple-system, sans-serif", WebkitFontSmoothing: "antialiased" }}>
 
         <nav className="nav-blur" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(250,249,247,0.85)", borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", padding: "14px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
