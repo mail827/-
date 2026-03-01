@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import type { Wedding, Theme, Guestbook } from '../../types';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 
 const RomanticClassic = lazy(() => import('./themes/RomanticClassic'));
 const ModernMinimal = lazy(() => import('./themes/ModernMinimal'));
@@ -87,6 +87,9 @@ export default function WeddingPage() {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const version = searchParams.get("v");
+  const isPreview = searchParams.get("preview") === "1";
+  const [previewApplied, setPreviewApplied] = useState(false);
+  const [wedding, setWedding] = useState<Wedding | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['wedding', slug, version],
@@ -120,6 +123,31 @@ export default function WeddingPage() {
       alert('메시지가 등록되었습니다 💝');
     }
   });
+
+  useEffect(() => {
+    if (data?.wedding) {
+      setWedding(data.wedding);
+      setPreviewApplied(false);
+    }
+  }, [data?.wedding?.id]);
+
+  useEffect(() => {
+    if (!wedding || !isPreview || previewApplied) return;
+    const groom = searchParams.get("groom");
+    const bride = searchParams.get("bride");
+    const date = searchParams.get("date");
+    const venue = searchParams.get("venue");
+    if (groom || bride || date || venue) {
+      setWedding(prev => prev ? {
+        ...prev,
+        ...(groom && { groomName: groom }),
+        ...(bride && { brideName: bride }),
+        ...(date && { weddingDate: date }),
+        ...(venue && { venue }),
+      } : prev);
+      setPreviewApplied(true);
+    }
+  }, [wedding?.id]);
 
   if (isLoading) {
     return (
@@ -159,13 +187,14 @@ export default function WeddingPage() {
     );
   }
 
-  const wedding = data.wedding;
+  const weddingToUse = wedding ?? data.wedding;
+
   const urlTheme = searchParams.get('theme') as Theme | null;
-  const theme = urlTheme || wedding.theme || 'ROMANTIC_CLASSIC';
+  const theme = urlTheme || weddingToUse.theme || 'ROMANTIC_CLASSIC';
   const ThemeComponent = themeComponents[theme] || RomanticClassic;
 
   const galleryAspectStyle = (() => {
-    const ratio = wedding.galleryRatio || '1:1';
+    const ratio = weddingToUse.galleryRatio || '1:1';
     if (ratio === '1:1') return '';
     const cssRatio = ratio === '3:4' ? '3/4' : ratio === '4:3' ? '4/3' : 'auto';
     return '#gallery-section .grid > div { aspect-ratio: ' + cssRatio + ' !important; }';
@@ -177,23 +206,23 @@ export default function WeddingPage() {
       {galleryAspectStyle && <style>{galleryAspectStyle}</style>}
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Heart className="w-6 h-6 animate-pulse text-stone-300" /></div>}>
         <ThemeComponent
-          wedding={wedding}
+          wedding={weddingToUse}
           guestbooks={guestbookData?.guestbooks || []}
           onRsvpSubmit={(data: any) => rsvpMutation.mutate(data)}
           onGuestbookSubmit={(data: any) => guestbookMutation.mutate(data)}
           isRsvpLoading={rsvpMutation.isPending}
           isGuestbookLoading={guestbookMutation.isPending}
           refetchGuestbook={refetchGuestbook}
-          guestPhotoSlot={wedding.guestPhotoEnabled !== false ? <GuestPhotoGallery slug={wedding.slug} enabled={true} /> : undefined}
+          guestPhotoSlot={weddingToUse.guestPhotoEnabled !== false ? <GuestPhotoGallery slug={weddingToUse.slug} enabled={true} /> : undefined}
         />
       </Suspense>
       </div>
-      {wedding.aiEnabled && (
+      {weddingToUse.aiEnabled && (
         <AiChat
-          slug={wedding.slug}
-          groomName={wedding.groomName}
-          brideName={wedding.brideName}
-          wedding={wedding}
+          slug={weddingToUse.slug}
+          groomName={weddingToUse.groomName}
+          brideName={weddingToUse.brideName}
+          wedding={weddingToUse}
         />
       )}
     </>

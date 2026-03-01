@@ -23,6 +23,7 @@ import AdminWeddingList from './pages/admin/AdminWeddingList';
 import AdminGuides from "./pages/admin/AdminGuides";
 import AdminHighlightVideos from "./pages/admin/AdminHighlightVideos";
 import AdminThemeShowcase from "./pages/admin/AdminThemeShowcase";
+import AdminShowcase from "./components/admin/AdminShowcase";
 import AdminWeddingCreate from './pages/admin/AdminWeddingCreate';
 import AdminWeddingEdit from './pages/admin/AdminWeddingEdit';
 import AiReport from "./pages/admin/AiReport";
@@ -126,6 +127,7 @@ export default function App() {
         <Route path="guides" element={<AdminGuides />} />
             <Route path="highlight-videos" element={<AdminHighlightVideos />} />
         <Route path="theme-showcase" element={<AdminThemeShowcase />} />
+        <Route path="showcase" element={<AdminShowcase />} />
               <Route path="bg-music" element={<AdminBgMusic />} />
         <Route path="ai-snap" element={<AdminAiSnap />} />
             <Route path="snap-gift" element={<AdminSnapGift />} />

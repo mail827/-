@@ -1,13 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Check, MessageCircle, X, Send, Sparkles, Mail, Loader2, Gift, Eye } from 'lucide-react';
-
-
-import ThemeShowcaseModal from '../components/ThemeShowcaseModal';
-import HighlightVideoSection from '../components/HighlightVideoSection';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowRight, Check, Sparkles, ChevronRight, Heart, MapPin, Calendar,
+  Send, Copy, CreditCard, Camera, MessageCircle, Zap, X,
+  Mail, Loader2, Gift
+} from "lucide-react";
+import ThemeShowcaseModal from "../components/ThemeShowcaseModal";
+import HighlightVideoSection from "../components/HighlightVideoSection";
 
 const API = import.meta.env.VITE_API_URL;
+
+const FONT_LINK = "https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@200;300;400;500;600;700&display=swap";
 
 interface Package {
   id: string;
@@ -18,966 +22,1087 @@ interface Package {
   features: string[];
 }
 
-interface ChatAction { type: 'button' | 'link'; label: string; action: string; url?: string; style?: 'primary' | 'secondary' | 'kakao'; }
+interface ChatAction {
+  type: "button" | "link";
+  label: string;
+  action: string;
+  url?: string;
+  style?: "primary" | "secondary" | "kakao";
+}
 
 interface ChatMessage {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   actions?: ChatAction[];
   content: string;
+}
+
+const CHAT_SEQUENCE = [
+  { q: "주차 어디로 가면 되나요?", a: "그랜드컨벤션 지하 2층 무료 주차장 이용 가능합니다. 만차 시 인근 공영주차장도 도보 2분 거리에 있어요.", delay: 800 },
+  { q: "식사는 몇 시부터 가능한가요?", a: "2시 30분부터 식사 가능합니다. 뷔페식으로 준비되어 있으며 예식 후에도 여유롭게 이용하실 수 있어요.", delay: 400 },
+  { q: "축의금 계좌 알려주세요", a: "신랑 측 카카오뱅크 3333-12-XXXXXX (김현우)입니다. 아래 카카오페이 송금 버튼으로 바로 보내실 수도 있어요.", delay: 400 },
+];
+
+
+
+
+
+function useInView(threshold = 0.15) {
+  const ref = useRef<HTMLElement | null>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } }, { threshold });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return [ref, inView] as const;
+}
+
+function PhoneMockup({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={className}>
+      <div style={{ width: 280, height: 580, borderRadius: 40, border: "6px solid #1a1a1a", background: "#000", padding: 2, boxShadow: "0 25px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.08)" }}>
+        <div style={{ width: "100%", height: "100%", borderRadius: 34, overflow: "hidden", background: "#fff", position: "relative" }}>
+          <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 100, height: 28, background: "#1a1a1a", borderBottomLeftRadius: 16, borderBottomRightRadius: 16, zIndex: 10 }} />
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HeroPhone({ url }: { url?: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <PhoneMockup>
+      {url ? (
+        <div style={{ position: "absolute", inset: 0 }}>
+          {!loaded && (
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#FAF9F7", zIndex: 2 }}>
+              <Loader2 size={20} color="#ccc" style={{ animation: "spin 1s linear infinite" }} />
+            </div>
+          )}
+          <iframe
+            src={url}
+            onLoad={() => setLoaded(true)}
+            style={{ width: "100%", height: "100%", border: "none", opacity: loaded ? 1 : 0, transition: "opacity 0.4s" }}
+            title="청첩장 미리보기"
+          />
+        </div>
+      ) : (
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+          <div className="hero-scroll-content" style={{ position: "absolute", top: 0, left: 0, right: 0 }}>
+            <div style={{ background: "linear-gradient(180deg, #F4F1EC 0%, #E8EBE4 100%)", minHeight: 1200, padding: "60px 24px 40px" }}>
+              <div style={{ textAlign: "center", paddingTop: 20 }}>
+                <div style={{ width: 40, height: 1, background: "#7C8C6E", margin: "0 auto 20px", opacity: 0.5 }} />
+                <p style={{ fontFamily: "'KyoboHandwriting2022KimHyenaem', serif", fontSize: 13, letterSpacing: 3, color: "#7C8C6E", textTransform: "uppercase", marginBottom: 24 }}>Wedding Invitation</p>
+                <h3 style={{ fontFamily: "'KyoboHandwriting2022KimHyenaem', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 4 }}>현우</h3>
+                <p style={{ fontFamily: "'KyoboHandwriting2022KimHyenaem', serif", fontSize: 16, color: "#999", margin: "8px 0" }}>&</p>
+                <h3 style={{ fontFamily: "'KyoboHandwriting2022KimHyenaem', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 20 }}>수빈</h3>
+                <p style={{ fontSize: 12, color: "#888", letterSpacing: 1.5, marginBottom: 28 }}>2025. 06. 14 SAT PM 2:00</p>
+              </div>
+              <div style={{ width: "100%", height: 240, borderRadius: 4, background: "linear-gradient(135deg, #D4C5B0 0%, #B8A88A 50%, #C4B496 100%)", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Heart size={20} color="#fff" strokeWidth={1} style={{ opacity: 0.7 }} />
+              </div>
+              <div style={{ textAlign: "center", padding: "16px 0", borderTop: "1px solid rgba(124,140,110,0.15)", borderBottom: "1px solid rgba(124,140,110,0.15)", marginBottom: 24 }}>
+                <p style={{ fontSize: 13, color: "#666", lineHeight: 2 }}>서로의 마음을 확인하고<br />하나의 길을 함께 걸으려 합니다</p>
+              </div>
+              <div style={{ padding: "16px 0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <MapPin size={14} color="#7C8C6E" />
+                  <p style={{ fontSize: 12, color: "#555" }}>그랜드컨벤션 3층 그랜드홀</p>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+                  <Calendar size={14} color="#7C8C6E" />
+                  <p style={{ fontSize: 12, color: "#555" }}>2025년 6월 14일 토요일 오후 2시</p>
+                </div>
+                <div style={{ width: "100%", height: 140, borderRadius: 4, background: "#E8E5E0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <p style={{ fontSize: 11, color: "#aaa", letterSpacing: 1 }}>MAP</p>
+                </div>
+              </div>
+              <div style={{ marginTop: 20, padding: "20px 0", borderTop: "1px solid rgba(124,140,110,0.15)" }}>
+                <p style={{ fontSize: 12, color: "#888", textAlign: "center", marginBottom: 16 }}>참석 여부를 알려주세요</p>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ flex: 1, padding: "12px 0", borderRadius: 4, background: "#7C8C6E", textAlign: "center" }}>
+                    <p style={{ fontSize: 12, color: "#fff" }}>참석</p>
+                  </div>
+                  <div style={{ flex: 1, padding: "12px 0", borderRadius: 4, border: "1px solid #ddd", textAlign: "center" }}>
+                    <p style={{ fontSize: 12, color: "#888" }}>미정</p>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 20, padding: "20px 0", borderTop: "1px solid rgba(124,140,110,0.15)" }}>
+                <p style={{ fontSize: 12, color: "#888", textAlign: "center", marginBottom: 16 }}>축의금 안내</p>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ flex: 1, padding: "10px", borderRadius: 4, border: "1px solid #e0e0e0", textAlign: "center" }}>
+                    <p style={{ fontSize: 10, color: "#aaa", marginBottom: 2 }}>신랑 측</p>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                      <Copy size={10} color="#999" />
+                      <p style={{ fontSize: 11, color: "#666" }}>계좌복사</p>
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, padding: "10px", borderRadius: 4, border: "1px solid #e0e0e0", textAlign: "center" }}>
+                    <p style={{ fontSize: 10, color: "#aaa", marginBottom: 2 }}>신부 측</p>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                      <CreditCard size={10} color="#999" />
+                      <p style={{ fontSize: 11, color: "#666" }}>카카오페이</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </PhoneMockup>
+  );
+}
+
+function AiChatDemo() {
+  const [step, setStep] = useState(0);
+  const [typing, setTyping] = useState(false);
+  const [messages, setMessages] = useState<{ type: string; text: string }[]>([]);
+  const chatRef = useRef<HTMLDivElement>(null);
+
+  const runSequence = useCallback(() => {
+    setMessages([]);
+    setStep(0);
+    setTyping(false);
+  }, []);
+
+  useEffect(() => {
+    if (step >= CHAT_SEQUENCE.length) {
+      const t = setTimeout(runSequence, 3500);
+      return () => clearTimeout(t);
+    }
+    const item = CHAT_SEQUENCE[step];
+    const t1 = setTimeout(() => {
+      setMessages(prev => [...prev, { type: "user", text: item.q }]);
+      setTyping(true);
+    }, item.delay);
+    const t2 = setTimeout(() => {
+      setTyping(false);
+      setMessages(prev => [...prev, { type: "ai", text: item.a }]);
+      setStep(prev => prev + 1);
+    }, item.delay + 2000);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [step, runSequence]);
+
+  useEffect(() => {
+    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+  }, [messages, typing]);
+
+  return (
+    <PhoneMockup>
+      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", background: "#FAF9F7" }}>
+        <div style={{ padding: "44px 16px 12px", borderBottom: "1px solid #E8E5E0", display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #2C2C2C, #555)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Sparkles size={14} color="#fff" />
+          </div>
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>AI 웨딩 비서</p>
+            <p style={{ fontSize: 10, color: "#7C8C6E" }}>현우 · 수빈 결혼식</p>
+          </div>
+          <div style={{ marginLeft: "auto", width: 6, height: 6, borderRadius: "50%", background: "#7C8C6E" }} />
+        </div>
+        <div ref={chatRef} style={{ flex: 1, overflow: "auto", padding: "16px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ alignSelf: "flex-start", maxWidth: "82%", padding: "10px 14px", borderRadius: "4px 16px 16px 16px", background: "#fff", border: "1px solid #E8E5E0" }}>
+            <p style={{ fontSize: 12, color: "#555", lineHeight: 1.6 }}>안녕하세요! 현우 · 수빈 결혼식에 대해 궁금한 점이 있으시면 편하게 물어보세요.</p>
+          </div>
+          {messages.map((msg, i) => (
+            msg.type === "user" ? (
+              <div key={i} className="chat-msg-enter" style={{ alignSelf: "flex-end", maxWidth: "75%", padding: "10px 14px", borderRadius: "16px 4px 16px 16px", background: "#2C2C2C" }}>
+                <p style={{ fontSize: 12, color: "#fff", lineHeight: 1.5 }}>{msg.text}</p>
+              </div>
+            ) : (
+              <div key={i} className="chat-msg-enter" style={{ alignSelf: "flex-start", maxWidth: "82%", padding: "10px 14px", borderRadius: "4px 16px 16px 16px", background: "#fff", border: "1px solid #E8E5E0" }}>
+                <p style={{ fontSize: 12, color: "#555", lineHeight: 1.6 }}>{msg.text}</p>
+              </div>
+            )
+          ))}
+          {typing && (
+            <div style={{ alignSelf: "flex-start", padding: "12px 18px", borderRadius: "4px 16px 16px 16px", background: "#fff", border: "1px solid #E8E5E0" }}>
+              <div style={{ display: "flex", gap: 4 }}>
+                {[0, 200, 400].map(d => <span key={d} className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#bbb", animationDelay: `${d}ms` }} />)}
+              </div>
+            </div>
+          )}
+        </div>
+        <div style={{ padding: "10px 14px 24px", borderTop: "1px solid #E8E5E0" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 24, border: "1px solid #E0DDD8", background: "#fff" }}>
+            <p style={{ flex: 1, fontSize: 12, color: "#bbb" }}>메시지를 입력하세요</p>
+            <Send size={16} color="#ccc" />
+          </div>
+        </div>
+      </div>
+    </PhoneMockup>
+  );
+}
+
+function ScenarioCard({ item, index, parentInView }: { item: { q: string; a: string }; index: number; parentInView: boolean }) {
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [typedText, setTypedText] = useState("");
+
+  useEffect(() => {
+    if (!parentInView) return;
+    const t = setTimeout(() => setShowAnswer(true), 1200 + index * 1800);
+    return () => clearTimeout(t);
+  }, [parentInView, index]);
+
+  useEffect(() => {
+    if (!showAnswer) return;
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setTypedText(item.a.slice(0, i));
+      if (i >= item.a.length) clearInterval(interval);
+    }, 18);
+    return () => clearInterval(interval);
+  }, [showAnswer, item.a]);
+
+  return (
+    <div style={{ padding: "14px 16px", borderRadius: 10, border: "1px solid #E8E5E0", background: "#FAFAF8", opacity: parentInView ? 1 : 0, transform: parentInView ? "translateY(0)" : "translateY(12px)", transition: `all 0.5s cubic-bezier(0.22,1,0.36,1) ${index * 400}ms` }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: showAnswer ? 8 : 0 }}>
+        <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#E8E5E0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
+          <MessageCircle size={9} color="#999" />
+        </div>
+        <p style={{ fontSize: 12, color: "#999" }}>{item.q}</p>
+      </div>
+      {showAnswer && (
+        <div className="chat-msg-enter" style={{ display: "flex", alignItems: "flex-start", gap: 8, paddingLeft: 26 }}>
+          <ArrowRight size={10} color="#bbb" style={{ marginTop: 3, flexShrink: 0 }} />
+          <p style={{ fontSize: 12, color: "#555", lineHeight: 1.5 }}>{typedText}<span style={{ opacity: typedText.length < item.a.length ? 1 : 0, transition: "opacity 0.3s" }}>|</span></p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
+  const [ref, inView] = useInView(0.08);
+  const [showcases, setShowcases] = useState<{ name: string; url: string; description?: string }[]>([]);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [formData, setFormData] = useState({ groom: "", bride: "", date: "", venue: "" });
+  const [iframeKey, setIframeKey] = useState(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    fetch(`${API}/public/theme-showcases`)
+      .then(r => r.json())
+      .then((data: { name: string; url: string; description?: string }[]) => {
+        if (data.length > 0) setShowcases(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    setIframeLoaded(false);
+  }, [activeIdx, iframeKey]);
+
+  const updateForm = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setIframeKey(k => k + 1), 800);
+  };
+
+  const buildPreviewUrl = (baseUrl: string) => {
+    const params = new URLSearchParams();
+    params.set("preview", "1");
+    if (formData.groom) params.set("groom", formData.groom);
+    if (formData.bride) params.set("bride", formData.bride);
+    if (formData.date) params.set("date", formData.date);
+    if (formData.venue) params.set("venue", formData.venue);
+    const separator = baseUrl.includes("?") ? "&" : "?";
+    return `${baseUrl}${separator}${params.toString()}`;
+  };
+
+  if (showcases.length === 0) {
+    return (
+      <section id="themes" ref={ref as React.RefObject<HTMLElement>} style={{ padding: "100px 0", borderTop: "1px solid #E8E5E0" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px", textAlign: "center" }}>
+          <div style={{ opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
+            <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Themes</p>
+            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>19개의 테마, 직접 확인하세요.</h2>
+            <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 32 }}>디자인은 기본입니다. 기능이 다릅니다.</p>
+            <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>
+              전체 19개 테마 보기
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const current = showcases[activeIdx];
+  const previewUrl = buildPreviewUrl(current.url);
+  const hasInput = formData.groom || formData.bride || formData.date || formData.venue;
+
+  return (
+    <section id="themes" ref={ref as React.RefObject<HTMLElement>} style={{ padding: "100px 0", borderTop: "1px solid #E8E5E0" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px" }}>
+        <div style={{ textAlign: "center", marginBottom: 56, opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
+          <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Themes</p>
+          <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>내 청첩장, 미리 만들어 보세요.</h2>
+          <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8 }}>이름과 날짜를 넣으면 실시간으로 반영됩니다.</p>
+        </div>
+        <div className="theme-builder-grid" style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 56, opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(20px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1) 0.15s" }}>
+          <div style={{ width: 340, flexShrink: 0 }}>
+            <p style={{ fontSize: 12, color: "#999", marginBottom: 16, fontWeight: 500, letterSpacing: 0.5 }}>내 정보 입력</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+              <div style={{ display: "flex", gap: 10 }}>
+                <input type="text" placeholder="신랑 이름" value={formData.groom} onChange={e => updateForm("groom", e.target.value)} style={{ flex: 1, padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none", fontFamily: "'Noto Sans KR', sans-serif" }} />
+                <input type="text" placeholder="신부 이름" value={formData.bride} onChange={e => updateForm("bride", e.target.value)} style={{ flex: 1, padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none", fontFamily: "'Noto Sans KR', sans-serif" }} />
+              </div>
+              <input type="date" value={formData.date} onChange={e => updateForm("date", e.target.value)} style={{ width: "100%", padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: formData.date ? "#1a1a1a" : "#bbb", outline: "none", fontFamily: "'Noto Sans KR', sans-serif" }} />
+              <input type="text" placeholder="예식장 (예: 더채플하우스 3층 그랜드홀)" value={formData.venue} onChange={e => updateForm("venue", e.target.value)} style={{ width: "100%", padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none", fontFamily: "'Noto Sans KR', sans-serif" }} />
+            </div>
+            <p style={{ fontSize: 12, color: "#999", marginBottom: 12, fontWeight: 500, letterSpacing: 0.5 }}>테마 선택</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 24, maxHeight: 240, overflowY: "auto" }}>
+              {showcases.map((s, i) => (
+                <button key={i} onClick={() => setActiveIdx(i)} style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: activeIdx === i ? "2px solid #1a1a1a" : "1px solid #E0DDD8", background: activeIdx === i ? "#F5F4F1" : "#fff", cursor: "pointer", textAlign: "left", transition: "all 0.25s", display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: activeIdx === i ? "#1a1a1a" : "#ddd", flexShrink: 0, transition: "all 0.25s" }} />
+                  <div>
+                    <p style={{ fontSize: 13, color: activeIdx === i ? "#1a1a1a" : "#666", fontWeight: activeIdx === i ? 600 : 400, fontFamily: "'Noto Sans KR', sans-serif" }}>{s.name}</p>
+                    {s.description && <p style={{ fontSize: 11, color: "#bbb", marginTop: 1 }}>{s.description}</p>}
+                  </div>
+                </button>
+              ))}
+            </div>
+            {hasInput ? (
+              <button onClick={onLogin} className="chat-msg-enter" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", padding: "14px 0", borderRadius: 10, background: "#1a1a1a", color: "#fff", fontSize: 14, fontWeight: 500, border: "none", cursor: "pointer" }}>
+                이 디자인으로 시작하기
+                <ArrowRight size={16} />
+              </button>
+            ) : (
+              <p style={{ fontSize: 12, color: "#ccc", textAlign: "center" }}>정보를 입력하면 실시간으로 반영됩니다.</p>
+            )}
+          </div>
+          <div style={{ position: "relative" }}>
+            <div style={{ width: 280, height: 580, borderRadius: 40, border: "6px solid #1a1a1a", background: "#000", padding: 2, boxShadow: "0 25px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.08)" }}>
+              <div style={{ width: "100%", height: "100%", borderRadius: 34, overflow: "hidden", position: "relative", background: "#FAF9F7" }}>
+                <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 100, height: 28, background: "#1a1a1a", borderBottomLeftRadius: 16, borderBottomRightRadius: 16, zIndex: 10 }} />
+                {!iframeLoaded && (
+                  <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, zIndex: 5 }}>
+                    <Loader2 size={20} color="#bbb" style={{ animation: "spin 1s linear infinite" }} />
+                    <p style={{ fontSize: 11, color: "#bbb" }}>불러오는 중...</p>
+                  </div>
+                )}
+                <iframe
+                  key={`${activeIdx}-${iframeKey}`}
+                  src={previewUrl}
+                  onLoad={() => setIframeLoaded(true)}
+                  style={{ width: "100%", height: "100%", border: "none", opacity: iframeLoaded ? 1 : 0, transition: "opacity 0.4s" }}
+                  title={`${current.name} 미리보기`}
+                />
+              </div>
+            </div>
+            <div style={{ position: "absolute", bottom: -32, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 6 }}>
+              {showcases.map((_, i) => (
+                <button key={i} onClick={() => setActiveIdx(i)} style={{ width: activeIdx === i ? 20 : 6, height: 6, borderRadius: 3, background: activeIdx === i ? "#1a1a1a" : "#ddd", transition: "all 0.3s", border: "none", cursor: "pointer", padding: 0 }} />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div style={{ textAlign: "center", marginTop: 64 }}>
+          <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>
+            전체 19개 테마 보기
+            <ArrowRight size={14} />
+          </button>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export default function Landing() {
   const [searchParams] = useSearchParams();
   const [packages, setPackages] = useState<Package[]>([]);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [reviews, setReviews] = useState<{id: string; rating: number; content: string; source: string; groomName: string; brideName: string; packageName: string | null; createdAt: string}[]>([]);
+  const [reviews, setReviews] = useState<{ id: string; rating: number; content: string; source: string; groomName: string; brideName: string; packageName: string | null; createdAt: string }[]>([]);
+  const [guides, setGuides] = useState<{ id: string; title: string; description: string | null; videoUrl: string; videoType?: string; category: string }[]>([]);
+  const [selectedGuide, setSelectedGuide] = useState<typeof guides[0] | null>(null);
+
   const [showThemeShowcase, setShowThemeShowcase] = useState(false);
-  const [guides, setGuides] = useState<{id: string; title: string; description: string | null; videoUrl: string; videoType?: string; category: string}[]>([]);
-  const [selectedGuide, setSelectedGuide] = useState<{id: string; title: string; description: string | null; videoUrl: string; videoType?: string; category: string} | null>(null);
-  const [showInquiryForm, setShowInquiryForm] = useState(false);
-  const [showEmailLogin, setShowEmailLogin] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [emailStep, setEmailStep] = useState<'email' | 'code' | 'password' | 'setPassword'>('email');
-  const [passwordInput, setPasswordInput] = useState('');
-  const [_isNewUser, setIsNewUser] = useState(false);
-  const [emailInput, setEmailInput] = useState('');
-  const [codeInput, setCodeInput] = useState('');
+  const [showEmailLogin, setShowEmailLogin] = useState(false);
+  const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [emailStep, setEmailStep] = useState<"email" | "code" | "password" | "setPassword">("email");
+  const [emailInput, setEmailInput] = useState("");
+  const [codeInput, setCodeInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
   const [emailLoading, setEmailLoading] = useState(false);
-  const [emailError, setEmailError] = useState('');
-  const isLoggedIn = !!localStorage.getItem('token');
-  const [inquiryForm, setInquiryForm] = useState({ name: '', email: '', phone: '', type: 'general', message: '' });
+  const [emailError, setEmailError] = useState("");
+  const [_isNewUser, setIsNewUser] = useState(false);
+  const [inquiryForm, setInquiryForm] = useState({ name: "", email: "", phone: "", type: "general", message: "" });
   const [inquirySending, setInquirySending] = useState(false);
   const [inquirySuccess, setInquirySuccess] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: '안녕하세요! 청첩장 작업실 웨딩이예요 💕\n\n결혼 준비하시나요? 축하드려요!\n궁금한 거 있으시면 편하게 물어보세요~' }
-  ]);
-  const [chatInput, setChatInput] = useState('');
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{ role: "assistant", content: "안녕하세요! 청첩장 작업실 웨딩이예요.\n\n결혼 준비하시나요? 축하드려요!\n궁금한 거 있으시면 편하게 물어보세요~" }]);
+  const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
-  const [visitorId] = useState(() => localStorage.getItem('visitorId') || `visitor_${Date.now()}`);
-  const [selectedSnap, setSelectedSnap] = useState<string | null>(null);
+  const [visitorId] = useState(() => localStorage.getItem("visitorId") || `visitor_${Date.now()}`);
+  const [greeting, setGreeting] = useState(false);
+  const [greetingDismissed, setGreetingDismissed] = useState(false);
   const [snapSamples, setSnapSamples] = useState<{ id: string; concept: string; imageUrl: string; mode: string }[]>([]);
+  const [selectedSnap, setSelectedSnap] = useState<string | null>(null);
+  const [heroShowcaseUrl, setHeroShowcaseUrl] = useState<string | undefined>(undefined);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const isLoggedIn = !!localStorage.getItem("token");
+
+  const [heroRef, heroInView] = useInView(0.05);
+  const [problemRef, problemInView] = useInView(0.15);
+  const [engineRef, engineInView] = useInView(0.1);
+  const [chatSectionRef, chatSectionInView] = useInView(0.1);
+  const [snapRef, snapInView] = useInView(0.1);
+  const [specRef, specInView] = useInView(0.1);
+  const [pricingRef, pricingInView] = useInView(0.1);
+  const [ctaRef, ctaInView] = useInView(0.1);
 
   useEffect(() => {
-    if (searchParams.get('login') === 'pair') {
-      setShowLoginModal(true);
-    }
+    if (searchParams.get("login") === "pair") setShowLoginModal(true);
   }, [searchParams]);
 
   useEffect(() => {
-    localStorage.setItem('visitorId', visitorId);
-    fetchPackages();
-    fetchReviews();
-    fetchGuides();
-  }, []);
-
-  useEffect(() => {
+    localStorage.setItem("visitorId", visitorId);
+    fetch(`${API}/payment/packages`).then(r => r.json()).then(setPackages).catch(() => {});
+    fetch(`${API}/public/reviews`).then(r => r.json()).then(setReviews).catch(() => {});
+    fetch(`${API}/guide`).then(r => r.json()).then(setGuides).catch(() => {});
     fetch(`${API}/admin/snap-samples`).then(r => r.json()).then(setSnapSamples).catch(() => {});
+    fetch(`${API}/public/hero-showcase`).then(r => r.json()).then((data: { url: string }) => {
+      if (data.url) setHeroShowcaseUrl(data.url);
+    }).catch(() => {});
+
   }, []);
 
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
+  useEffect(() => { document.body.style.overflow = chatOpen ? "hidden" : ""; }, [chatOpen]);
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
+    const t1 = setTimeout(() => setGreeting(true), 3000);
+    const t2 = setTimeout(() => setGreetingDismissed(true), 10000);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
 
-  useEffect(() => {
-    if (chatOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-  }, [chatOpen]);
+  const handleLogin = (provider: "kakao" | "google") => { window.location.href = `${API}/oauth/${provider}`; };
 
-  const fetchPackages = async () => {
+  const sendChat = async () => {
+    if (!chatInput.trim() || chatLoading) return;
+    const msg = chatInput.trim();
+    setChatInput("");
+    setChatMessages(prev => [...prev, { role: "user", content: msg }]);
+    setChatLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/payment/packages`);
-      if (res.ok) {
-        const data = await res.json();
-        setPackages(data);
-      }
-    } catch (e) {
-      console.error('Failed to fetch packages:', e);
-    }
+      const res = await fetch(`${API}/chat`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: msg, visitorId }) });
+      const data = await res.json();
+      setChatMessages(prev => [...prev, { role: "assistant", content: data.message, actions: data.actions }]);
+    } catch {
+      setChatMessages(prev => [...prev, { role: "assistant", content: "죄송해요, 잠시 문제가 생겼어요. 다시 시도해주세요!" }]);
+    } finally { setChatLoading(false); }
   };
 
-  const fetchReviews = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/public/reviews`);
-      if (res.ok) {
-        const data = await res.json();
-        setReviews(data);
-      }
-    } catch (e) {
-      console.error("Failed to fetch reviews:", e);
-    }
-  };
-
-
-  const fetchGuides = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/guide`);
-      if (res.ok) {
-        const data = await res.json();
-        setGuides(data);
-      }
-    } catch (e) {
-      console.error("Failed to fetch guides:", e);
-    }
-  };
   const submitInquiry = async () => {
     if (!inquiryForm.name || !inquiryForm.email || !inquiryForm.message) return;
     setInquirySending(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/public/inquiry`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(inquiryForm),
-      });
-      if (res.ok) {
-        setInquirySuccess(true);
-        setInquiryForm({ name: '', email: '', phone: '', type: 'general', message: '' });
-        setTimeout(() => {
-          setShowInquiryForm(false);
-          setInquirySuccess(false);
-        }, 2000);
-      }
-    } catch (e) {
-      console.error('Inquiry error:', e);
-    } finally {
-      setInquirySending(false);
-    }
-  };
-
-  const sendChat = async () => {
-    if (!chatInput.trim() || chatLoading) return;
-    
-    const userMessage = chatInput.trim();
-    setChatInput('');
-    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
-    setChatLoading(true);
-
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage, visitorId }),
-      });
-      const data = await res.json();
-      setChatMessages(prev => [...prev, { role: 'assistant', content: data.message, actions: data.actions }]);
-    } catch {
-      setChatMessages(prev => [...prev, { role: 'assistant', content: '죄송해요, 잠시 문제가 생겼어요. 다시 시도해주세요!' }]);
-    } finally {
-      setChatLoading(false);
-    }
-  };
-
-  const handleLogin = (provider: 'kakao' | 'google') => {
-    window.location.href = `${import.meta.env.VITE_API_URL}/oauth/${provider}`;
+      const res = await fetch(`${API}/public/inquiry`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(inquiryForm) });
+      if (res.ok) { setInquirySuccess(true); setInquiryForm({ name: "", email: "", phone: "", type: "general", message: "" }); setTimeout(() => { setShowInquiryForm(false); setInquirySuccess(false); }, 2000); }
+    } catch (e) { console.error("Inquiry error:", e); }
+    finally { setInquirySending(false); }
   };
 
   const handleCheckEmail = async () => {
-    if (!emailInput || !emailInput.includes('@')) { setEmailError('유효한 이메일을 입력해주세요'); return; }
-    setEmailLoading(true); setEmailError('');
+    if (!emailInput || !emailInput.includes("@")) { setEmailError("유효한 이메일을 입력해주세요"); return; }
+    setEmailLoading(true); setEmailError("");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/check-email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput }) });
+      const res = await fetch(`${API}/email-auth/check-email`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: emailInput }) });
       const data = await res.json();
-      if (data.exists && data.hasPassword) { setIsNewUser(false); setEmailStep('password'); }
+      if (data.exists && data.hasPassword) { setIsNewUser(false); setEmailStep("password"); }
       else { setIsNewUser(true); await handleSendCode(); }
-    } catch { setEmailError('네트워크 오류가 발생했습니다'); } finally { setEmailLoading(false); }
+    } catch { setEmailError("네트워크 오류가 발생했습니다"); } finally { setEmailLoading(false); }
   };
 
   const handleSendCode = async () => {
-    setEmailLoading(true); setEmailError('');
+    setEmailLoading(true); setEmailError("");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/send-code`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput }) });
-      if (res.ok) { setEmailStep('code'); } else { const data = await res.json(); setEmailError(data.error || '발송 실패'); }
-    } catch { setEmailError('네트워크 오류'); } finally { setEmailLoading(false); }
+      const res = await fetch(`${API}/email-auth/send-code`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: emailInput }) });
+      if (res.ok) setEmailStep("code");
+      else { const data = await res.json(); setEmailError(data.error || "발송 실패"); }
+    } catch { setEmailError("네트워크 오류"); } finally { setEmailLoading(false); }
   };
 
   const handleVerifyCode = async () => {
-    if (codeInput.length !== 6) { setEmailError('6자리 인증번호를 입력해주세요'); return; }
-    setEmailLoading(true); setEmailError('');
+    if (codeInput.length !== 6) { setEmailError("6자리 인증번호를 입력해주세요"); return; }
+    setEmailLoading(true); setEmailError("");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/verify-code`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput, code: codeInput }) });
+      const res = await fetch(`${API}/email-auth/verify-code`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: emailInput, code: codeInput }) });
       const data = await res.json();
-      if (res.ok && data.verified) { setEmailStep('setPassword'); } else { setEmailError(data.error || '인증 실패'); }
-    } catch { setEmailError('네트워크 오류'); } finally { setEmailLoading(false); }
+      if (res.ok && data.verified) setEmailStep("setPassword");
+      else setEmailError(data.error || "인증 실패");
+    } catch { setEmailError("네트워크 오류"); } finally { setEmailLoading(false); }
   };
 
   const handleEmailLogin = async () => {
-    if (!passwordInput) { setEmailError('비밀번호를 입력해주세요'); return; }
-    setEmailLoading(true); setEmailError('');
+    if (!passwordInput) { setEmailError("비밀번호를 입력해주세요"); return; }
+    setEmailLoading(true); setEmailError("");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput, password: passwordInput }) });
+      const res = await fetch(`${API}/email-auth/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: emailInput, password: passwordInput }) });
       const data = await res.json();
-      if (res.ok) { localStorage.setItem('token', data.token); window.location.href = '/dashboard'; } else { setEmailError(data.error || '로그인 실패'); }
-    } catch { setEmailError('네트워크 오류'); } finally { setEmailLoading(false); }
+      if (res.ok) { localStorage.setItem("token", data.token); window.location.href = "/dashboard"; }
+      else setEmailError(data.error || "로그인 실패");
+    } catch { setEmailError("네트워크 오류"); } finally { setEmailLoading(false); }
   };
 
   const handleRegister = async () => {
-    if (!passwordInput || passwordInput.length < 6) { setEmailError('비밀번호는 6자 이상이어야 합니다'); return; }
-    setEmailLoading(true); setEmailError('');
+    if (!passwordInput || passwordInput.length < 6) { setEmailError("비밀번호는 6자 이상이어야 합니다"); return; }
+    setEmailLoading(true); setEmailError("");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/email-auth/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailInput, password: passwordInput }) });
+      const res = await fetch(`${API}/email-auth/register`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: emailInput, password: passwordInput }) });
       const data = await res.json();
-      if (res.ok) { localStorage.setItem('token', data.token); window.location.href = '/dashboard'; } else { setEmailError(data.error || '회원가입 실패'); }
-    } catch { setEmailError('네트워크 오류'); } finally { setEmailLoading(false); }
+      if (res.ok) { localStorage.setItem("token", data.token); window.location.href = "/dashboard"; }
+      else setEmailError(data.error || "회원가입 실패");
+    } catch { setEmailError("네트워크 오류"); } finally { setEmailLoading(false); }
   };
 
-  const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const openLogin = () => setShowLoginModal(true);
+
+  const specs = [
+    { num: "19", label: "테마", desc: "복붙 테마 아닙니다. 전부 개별 설계." },
+    { num: "24", label: "AI 화보 컨셉", desc: "스튜디오 촬영 대체 가능. 한복 · 크루즈 · 셀카." },
+    { num: "10", label: "종이청첩장", desc: "3단 · 2단 · 단일카드. 인쇄 가이드 제공." },
+    { num: "19", label: "QR카드", desc: "테마별 맞춤 디자인. 명함 · 엽서 사이즈." },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#fefefe]">
-      <section className="relative min-h-screen flex items-center justify-center px-4">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519741497674-611481863552?w=1920')] bg-cover bg-center opacity-[0.07]" />
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="relative text-center max-w-2xl mx-auto"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-stone-100 rounded-full mb-8 border border-stone-200"
-          >
-            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-sm text-stone-600">AI 컨시어지 탑재</span>
-          </motion.div>
-          
-          <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl text-stone-800 mb-6 leading-tight">
-            언제까지 <span className="text-rose-400">3초 보고 닫히는</span><br />
-            링크를 보내시겠습니까?
-          </h1>
-          
-          <p className="text-lg text-stone-500 mb-2">
-            아름다운 영상 위로,
-          </p>
-          <p className="text-lg text-stone-700 mb-12">
-            똑똑한 비서가 마중 나갈게요.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <motion.button
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => scrollToSection("reviews")}
-              className="px-8 py-4 bg-stone-800 text-white rounded-full text-sm tracking-wide hover:bg-stone-700 transition-all flex items-center justify-center gap-2"
-            >
-              <span>고객 후기 보기</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </motion.button>
-            
-            <motion.button
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleLogin("kakao")}
-              className="px-8 py-4 bg-[#FEE500] text-stone-800 rounded-full text-sm tracking-wide hover:shadow-lg transition-all flex items-center justify-center gap-3"
-            >
-              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                <path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.72 1.8 5.108 4.514 6.467-.144.521-.926 3.354-.964 3.587 0 0-.02.167.088.231.108.064.235.015.235.015.31-.044 3.592-2.34 4.158-2.74.639.092 1.3.14 1.969.14 5.523 0 10-3.463 10-7.7C22 6.463 17.523 3 12 3z"/>
-              </svg>
-              카카오로 시작하기
-            </motion.button>
-            
-            <motion.button
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleLogin("google")}
-              className="px-8 py-4 bg-white border border-stone-200 text-stone-700 rounded-full text-sm tracking-wide hover:shadow-lg transition-all flex items-center justify-center gap-3"
-            >
-              <svg viewBox="0 0 24 24" className="w-5 h-5">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              Google로 시작하기
-            </motion.button>
-          </div>
-          
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2 }}
-            onClick={() => setShowEmailLogin(true)}
-            className="mt-4 text-stone-400 hover:text-stone-600 text-sm flex items-center justify-center gap-2 mx-auto transition-colors"
-          >
-            <Mail className="w-4 h-4" />
-            이메일로 시작하기
-          </motion.button>
-          
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
-            className="mt-8 text-stone-400 text-sm"
-          >
-            3분 만에 완성되는 시네마틱 AI 청첩장
-          </motion.p>
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2, duration: 1 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        >
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="text-stone-300"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-          </motion.div>
-        </motion.div>
-      </section>
+    <>
+      <style>{`
+        @import url('${FONT_LINK}');
+        @font-face { font-family: 'KyoboHandwriting2022KimHyenaem'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/KyoboHandwriting2022khn.woff2') format('woff2'); font-weight: normal; font-display: swap; }
+        .serif { font-family: 'KyoboHandwriting2022KimHyenaem', 'Georgia', serif; }
+        @keyframes heroScroll { 0%, 8% { transform: translateY(0); } 42%, 58% { transform: translateY(calc(-100% + 580px)); } 92%, 100% { transform: translateY(0); } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .hero-scroll-content { animation: heroScroll 8s cubic-bezier(0.45,0,0.55,1) infinite; }
+        @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
+        .typing-dot { animation: typingBounce 1.2s infinite; }
+        @keyframes chatEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-msg-enter { animation: chatEnter 0.3s ease-out; }
+        .nav-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .landing-body ::-webkit-scrollbar { display: none; }
+        .snap-pill::-webkit-scrollbar { display: none; }
+        @media (max-width: 768px) {
+          .hero-grid { flex-direction: column !important; text-align: center !important; padding: 120px 24px 60px !important; gap: 40px !important; }
+          .hero-text h1 { font-size: 28px !important; }
+          .hero-stats { justify-content: center !important; }
+          .hero-btns { justify-content: center !important; }
+          .engine-grid { grid-template-columns: 1fr !important; }
+          .chat-section { flex-direction: column !important; padding: 80px 24px !important; gap: 48px !important; }
+          .snap-section { flex-direction: column-reverse !important; padding: 80px 24px !important; gap: 48px !important; }
+          .snap-text, .chat-text-col { max-width: 100% !important; }
+          .specs-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .pricing-grid { grid-template-columns: 1fr !important; }
+          .problem-grid { grid-template-columns: 1fr !important; }
+          .theme-builder-grid { flex-direction: column-reverse !important; align-items: center !important; gap: 36px !important; }
+          .theme-builder-grid > div:first-child { width: 100% !important; max-width: 340px !important; }
+          .snap-pack-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .weddingai-grid { flex-direction: column !important; gap: 32px !important; }
+          .weddingai-grid > div:last-child { width: 100% !important; }
+          .footer-info { flex-direction: column !important; gap: 16px !important; }
+        }
+      `}</style>
 
-      <section id="features" className="py-32 px-4 bg-stone-50">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
-            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">WHY US</p>
-            <h2 className="font-serif text-3xl text-stone-800">왜 청첩장 작업실인가요?</h2>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-3 gap-12">
-            {[
-              { path: 'M12 3l1.5 3.4 3.7.5-2.7 2.6.6 3.7L12 11.5 8.9 13.2l.6-3.7-2.7-2.6 3.7-.5L12 3z M4.5 6.5l1 2.2 2.4.3-1.8 1.7.4 2.4L4.5 12l-2 1.1.4-2.4-1.8-1.7 2.4-.3 1-2.2z M19.5 9l.7 1.6 1.8.2-1.3 1.3.3 1.8-1.5-.8-1.5.8.3-1.8-1.3-1.3 1.8-.2L19.5 9z', title: '감각적인 디자인', desc: '트렌디하면서도 클래식한\n19가지 테마' },
-              { path: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z', title: '빠른 제작', desc: 'Lite는 5분 만에\n즉시 발행 가능' },
-              { path: 'M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z', title: '어르신 배려', desc: '큰 글씨와 심플한 구성의\n어르신용 테마' },
-              { path: 'M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8 M16 6l-4-4-4 4 M12 2v13', title: '간편한 공유', desc: '카카오톡, 문자, 인스타그램\n한 번에 공유' },
-              { path: 'M9 11l3 3L22 4 M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11', title: 'RSVP 관리', desc: '참석 여부를\n한눈에 확인' },
-              { path: 'M12 8V4H8 M2 14h2 M20 14h2 M15 13a3 3 0 11-6 0V9a3 3 0 016 0v4z M12 19v3 M8 22h8', title: 'AI 컨시어지', desc: '하객과 대화하는\n살아있는 청첩장' },
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="text-center"
-              >
-                <div className="w-12 h-12 mx-auto mb-6 flex items-center justify-center rounded-2xl bg-stone-100">
-                  <svg className="w-6 h-6 text-stone-500" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d={item.path} /></svg>
-                </div>
-                <h3 className="text-lg text-stone-800 mb-3">{item.title}</h3>
-                <p className="text-stone-500 text-sm whitespace-pre-line leading-relaxed">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <div className="landing-body" style={{ minHeight: "100vh", background: "#FAF9F7", fontFamily: "'Noto Sans KR', -apple-system, sans-serif", WebkitFontSmoothing: "antialiased" }}>
 
-      <section id="themes" className="py-20 px-4 bg-stone-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">THEMES</p>
-            <h2 className="font-serif text-3xl text-stone-800 mb-4">19가지 감성 테마</h2>
-            <p className="text-stone-500 mb-8">실제 청첩장을 미리 체험해보세요</p>
-            <button
-              onClick={() => setShowThemeShowcase(true)}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-stone-800 text-white rounded-full hover:bg-stone-900 transition-all hover:scale-105"
-            >
-              <Eye className="w-5 h-5" />
-              테마 미리보기
-            </button>
-          </motion.div>
-        </div>
-      </section>
-
-      <HighlightVideoSection />
-
-      <section id="ai-snap" className="py-32 px-4">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">AI WEDDING SNAP</p>
-            <h2 className="font-serif text-3xl text-stone-800 mb-4">AI 웨딩 화보</h2>
-            <p className="text-stone-500">둘이 함께 찍은 사진 한 장이면 충분해요</p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <div className="flex gap-3 overflow-x-auto pb-4 px-1 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-              {[
-                { id: 'studio_classic', label: '스튜디오', sub: '정석 화보', cat: 'studio' },
-                { id: 'outdoor_garden', label: '야외 가든', sub: '꽃과 자연빛', cat: 'studio' },
-                { id: 'beach_sunset', label: '해변 선셋', sub: '노을빛 해변', cat: 'studio' },
-                { id: 'hanbok_wonsam', label: '궁중 혼례', sub: '화려한 궁중 예복', cat: 'studio' },
-                { id: 'hanbok_dangui', label: '당의 한복', sub: '단아한 정원 화보', cat: 'studio' },
-                { id: 'hanbok_modern', label: '모던 한복', sub: '현대적 한옥 감성', cat: 'studio' },
-                { id: 'hanbok_saeguk', label: '사극풍', sub: '왕과 왕비 컨셉', cat: 'studio' },
-                { id: 'hanbok_flower', label: '꽃한복', sub: '봄꽃 한옥마당', cat: 'studio' },
-                { id: 'cherry_blossom', label: '벚꽃', sub: '봄날 감성', cat: 'studio' },
-                { id: 'iphone_selfie', label: '셀카 스냅', sub: 'iPhone 감성', cat: 'studio' },
-                { id: 'iphone_mirror', label: '거울 셀카', sub: '미러 셀카', cat: 'studio' },
-                { id: 'cruise_sunset', label: '크루즈 선셋', sub: '노을빛 크루즈', cat: 'studio' },
-                { id: 'cruise_bluesky', label: '크루즈 블루', sub: '푸른 바다 크루즈', cat: 'studio' },
-                { id: 'city_night', label: '시티 나이트', sub: '도시 야경', cat: 'cinematic' },
-                { id: 'forest_wedding', label: '숲속 웨딩', sub: '숲속 빛내림', cat: 'cinematic' },
-                { id: 'castle_garden', label: '유럽 궁전', sub: '궁전 웨딩', cat: 'cinematic' },
-                { id: 'cathedral', label: '성당 웨딩', sub: '스테인드글라스', cat: 'cinematic' },
-                { id: 'watercolor', label: '수채화', sub: '파스텔 수채화', cat: 'cinematic' },
-                { id: 'magazine_cover', label: '매거진 커버', sub: '하이패션 화보', cat: 'cinematic' },
-                { id: 'rainy_day', label: '비오는 날', sub: '감성 빗속', cat: 'cinematic' },
-                { id: 'autumn_leaves', label: '가을 단풍', sub: '단풍길 로맨스', cat: 'cinematic' },
-                { id: 'winter_snow', label: '겨울 눈', sub: '눈 내리는 날', cat: 'cinematic' },
-                { id: 'vintage_film', label: '빈티지 필름', sub: '필름 감성', cat: 'cinematic' },
-              ].map((c, i) => (
-                <motion.button
-                  onClick={() => setSelectedSnap(selectedSnap === c.id ? null : c.id)}
-                  key={c.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  className={`flex-shrink-0 snap-start w-32 rounded-2xl border p-4 text-center transition-all group cursor-pointer ${selectedSnap === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-800 hover:shadow-lg'}`}
-                >
-                  <p className={`text-xs mb-1 ${selectedSnap === c.id ? 'text-white/60' : 'text-stone-400'}`}>{c.cat === 'studio' ? 'STUDIO' : 'CINEMATIC'}</p>
-                  <p className={`text-sm font-medium ${selectedSnap === c.id ? 'text-white' : 'text-stone-800 group-hover:text-stone-900'}`}>{c.label}</p>
-                  <p className={`text-[11px] mt-0.5 ${selectedSnap === c.id ? 'text-white/50' : 'text-stone-400'}`}>{c.sub}</p>
-                </motion.button>
-              ))}
+        <nav className="nav-blur" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(250,249,247,0.85)", borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto", padding: "14px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", letterSpacing: -0.3 }}>청첩장 작업실</p>
+              <p style={{ fontSize: 10, color: "#bbb", letterSpacing: 1 }}>WEDDING ENGINE</p>
             </div>
-            <p className="text-[11px] text-stone-400 text-center mt-2">컨셉을 눌러 샘플을 확인해보세요</p>
-
-            <AnimatePresence mode="wait">
-              {selectedSnap && snapSamples.filter(s => s.concept === selectedSnap).length > 0 && (
-                <motion.div
-                  key={selectedSnap}
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-6 overflow-hidden"
-                >
-                  <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                    {snapSamples.filter(s => s.concept === selectedSnap).map(s => (
-                      <div key={s.id} className="flex-shrink-0 w-40 aspect-[3/4] rounded-2xl overflow-hidden border border-stone-100 shadow-sm">
-                        <img src={s.imageUrl} alt="" className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-center mt-4">
-                    <a href="/ai-snap" className="inline-flex items-center gap-2 px-6 py-2.5 bg-stone-800 text-white text-sm rounded-full hover:bg-stone-900 transition-all">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      이 컨셉으로 만들어보기
-                    </a>
-                  </div>
-                </motion.div>
-              )}
-              {selectedSnap && snapSamples.filter(s => s.concept === selectedSnap).length === 0 && (
-                <motion.div
-                  key="empty"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="mt-6 text-center py-8"
-                >
-                  <p className="text-sm text-stone-400 mb-3">아직 샘플이 준비 중이에요</p>
-                  <a href="/ai-snap" className="inline-flex items-center gap-2 px-6 py-2.5 bg-stone-800 text-white text-sm rounded-full hover:bg-stone-900 transition-all">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    무료로 먼저 체험해보기
-                  </a>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-stone-50 rounded-3xl border border-stone-200 p-8 sm:p-12 text-center"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-stone-800 text-white text-xs rounded-full mb-6">
-              <Sparkles className="w-3 h-3" />
-              무료 체험 1장
+            <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
+              <a href="#themes" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>테마</a>
+              <a href="#pricing" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>요금</a>
+              <button onClick={openLogin} style={{ fontSize: 12, color: "#fff", background: "#1a1a1a", padding: "8px 20px", borderRadius: 6, border: "none", cursor: "pointer", fontWeight: 500 }}>시작하기</button>
             </div>
-            <h3 className="font-serif text-2xl text-stone-800 mb-3">지금 바로 만들어보세요</h3>
-            <p className="text-sm text-stone-500 mb-8 max-w-md mx-auto">
-              회원가입 후 무료로 1장 체험할 수 있어요.<br/>
-              사진 한 장으로 웨딩 화보를 만들어보세요.
+          </div>
+        </nav>
+
+        <section ref={heroRef as React.RefObject<HTMLElement>} className="hero-grid" style={{ maxWidth: 1200, margin: "0 auto", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "120px 48px 80px", gap: 60 }}>
+          <div className="hero-text" style={{ maxWidth: 540, opacity: heroInView ? 1 : 0, transform: heroInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1)" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 100, border: "1px solid #E0DDD8", marginBottom: 28, background: "#fff" }}>
+              <Zap size={11} color="#999" />
+              <p style={{ fontSize: 11, color: "#888", letterSpacing: 0.3 }}>Wedding Automation Platform</p>
+            </div>
+            <h1 className="serif" style={{ fontSize: 42, fontWeight: 400, lineHeight: 1.35, color: "#1a1a1a", marginBottom: 24, letterSpacing: -0.5 }}>
+              모바일 청첩장은 많습니다.<br />
+              <span style={{ color: "#999" }}>하객 응대까지 자동인<br />청첩장은,</span> 거의 없습니다.
+            </h1>
+            <p style={{ fontSize: 15, color: "#777", lineHeight: 1.8, marginBottom: 36 }}>
+              모바일 청첩장부터 하객 응대, AI 화보 제작까지.<br />
+              결혼 준비를 자동화하는 웨딩 엔진.
             </p>
-            
-              <a
-              href="/ai-snap"
-              className="inline-flex items-center gap-2.5 px-8 py-4 bg-stone-800 text-white rounded-full hover:bg-stone-900 transition-all hover:scale-105 text-sm font-medium"
-            >
-              <Sparkles className="w-5 h-5" />
-              무료로 웨딩 화보 만들기
-            </a>
-          </motion.div>
-        </div>
-      </section>
-
-      <section id="pricing" className="py-32 px-4">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
-            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">PRICING</p>
-            <h2 className="font-serif text-3xl text-stone-800">요금 안내</h2>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex justify-center mb-8"
-          >
-            <a
-              href="/gift/redeem"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-100 hover:bg-stone-200 rounded-full text-sm text-stone-600 transition-colors"
-            >
-              <Gift className="w-4 h-4" />
-              선물 코드가 있으신가요?
-            </a>
-          </motion.div>
-
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
-            {packages.map((pkg, idx) => (
-              <motion.div
-                key={pkg.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className={`relative bg-white rounded-2xl p-5 border transition-all hover:shadow-xl min-w-[75vw] sm:min-w-[45vw] lg:min-w-0 snap-center ${
-                  pkg.slug === 'ai-reception' 
-                    ? 'border-stone-800 shadow-lg' 
-                    : pkg.slug === 'basic-video' 
-                      ? 'border-stone-800 shadow-lg' 
-                      : 'border-stone-200'
-                }`}
-              >
-                {pkg.slug === 'ai-reception' && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-stone-800 text-white text-xs rounded-full flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> NEW
-                  </div>
-                )}
-                {pkg.slug === 'basic-video' && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-stone-800 text-white text-xs rounded-full flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> 추천
-                  </div>
-                )}
-                
-                <h3 className="text-lg font-medium text-stone-800 mb-1">{pkg.name}</h3>
-                <p className="text-xs text-stone-500 mb-4 h-8">{pkg.description}</p>
-                
-                <div className="mb-4">
-                  <span className="text-2xl font-light text-stone-800">
-                    {pkg.price.toLocaleString()}
-                  </span>
-                  <span className="text-stone-400 text-xs">원</span>
-                </div>
-                
-                <ul className="space-y-2 mb-6">
-                  {pkg.features.slice(0, 6).map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-stone-600">
-                      <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                  {pkg.features.length > 6 && (
-                    <li className="text-xs text-stone-400 pl-5">+{pkg.features.length - 6}개 더</li>
-                  )}
-                </ul>
-                
-                <button
-                  onClick={() => setShowLoginModal(true)}
-                  className={`w-full py-2.5 rounded-full text-sm transition-all ${
-                    pkg.slug === 'ai-reception'
-                      ? 'bg-stone-800 text-white hover:bg-stone-900'
-                      : pkg.slug === 'basic-video'
-                        ? 'bg-stone-800 text-white hover:bg-stone-900'
-                        : 'border border-stone-300 text-stone-600 hover:bg-stone-50'
-                  }`}
-                >
-                  시작하기
-                </button>
-              </motion.div>
-            ))}
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mt-20"
-          >
-            <div className="text-center mb-10">
-              <p className="text-sm tracking-[0.2em] text-stone-400 mb-3">AI WEDDING SNAP</p>
-              <h3 className="font-serif text-2xl text-stone-800 mb-2">AI 웨딩 화보 단독 패키지</h3>
-              <p className="text-sm text-stone-500">청첩장 없이 AI 웨딩 화보만 이용할 수 있어요</p>
-            </div>
-
-            <div className="flex gap-4 overflow-x-auto pb-4 pt-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 lg:grid lg:grid-cols-4 lg:overflow-visible lg:mx-0 lg:px-0">
-              {[
-                { snaps: 3, price: 5900, per: 1967 },
-                { snaps: 5, price: 9900, per: 1980 },
-                { snaps: 10, price: 14900, per: 1490, popular: true },
-                { snaps: 20, price: 24900, per: 1245 },
-              ].map((t, idx) => (
-                <motion.div
-                  key={t.snaps}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.08 }}
-                  className={`relative bg-white rounded-2xl p-5 border transition-all hover:shadow-xl min-w-[75vw] sm:min-w-[45vw] lg:min-w-0 snap-center ${t.popular ? 'border-stone-800 shadow-lg' : 'border-stone-200'}`}
-                >
-                  {t.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-stone-800 text-white text-xs rounded-full">
-                      인기
-                    </div>
-                  )}
-                  <p className="text-lg font-medium text-stone-800 mb-1">{t.snaps}장 세트</p>
-                  <p className="text-xs text-stone-400 mb-4">장당 {t.per.toLocaleString()}원</p>
-                  <div className="mb-4">
-                    <span className="text-2xl font-light text-stone-800">{t.price.toLocaleString()}</span>
-                    <span className="text-stone-400 text-xs">원</span>
-                  </div>
-                  <ul className="space-y-2 mb-6">
-                    <li className="flex items-start gap-2 text-xs text-stone-600">
-                      <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
-                      <span>스튜디오 / 시네마틱 선택</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs text-stone-600">
-                      <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
-                      <span>24가지 컨셉</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs text-stone-600">
-                      <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
-                      <span>고화질 원본 다운로드</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs text-stone-600">
-                      <Check className="w-3.5 h-3.5 text-stone-400 mt-0.5 flex-shrink-0" />
-                      <span>추가 생성 장당 2,900원~</span>
-                    </li>
-                  </ul>
-                  
-                  <a
-                    href="/ai-snap/studio"
-                    className={`block w-full py-2.5 rounded-full text-sm text-center transition-all ${t.popular ? 'bg-stone-800 text-white hover:bg-stone-900' : 'border border-stone-300 text-stone-600 hover:bg-stone-50'}`}
-                  >
-                    시작하기
-                  </a>
-                </motion.div>
-              ))}
-            </div>
-            <div className="flex justify-center mt-6">
-              <a
-                href="/ai-snap/gift"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-100 hover:bg-stone-200 rounded-full text-sm text-stone-600 transition-colors"
-              >
-                <Gift className="w-4 h-4" />
-                소중한 분에게 선물하기
+            <div className="hero-btns" style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 48 }}>
+              <button onClick={openLogin} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#fff", background: "#1a1a1a", padding: "14px 28px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 500 }}>
+                자동화 시작하기
+                <ArrowRight size={16} />
+              </button>
+              <a href="#engine" style={{ fontSize: 13, color: "#999", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                엔진 구조 보기
+                <ChevronRight size={14} />
               </a>
             </div>
-          </motion.div>
+            <p style={{ fontSize: 12, color: "#bbb", marginTop: 12 }}>사진이 아직 없어도 시작할 수 있습니다.</p>
+            <div className="hero-stats" style={{ display: "flex", gap: 36, paddingTop: 32, borderTop: "1px solid #E8E5E0", marginTop: 32 }}>
+              {[["19", "테마"], ["24", "AI 스냅"], ["10", "종이청첩장"]].map(([n, l]) => (
+                <div key={l}>
+                  <p className="serif" style={{ fontSize: 28, fontWeight: 200, color: "#1a1a1a" }}>{n}</p>
+                  <p style={{ fontSize: 11, color: "#aaa", marginTop: 2, letterSpacing: 0.5 }}>{l}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ opacity: heroInView ? 1 : 0, transform: heroInView ? "translateY(0)" : "translateY(40px)", transition: "all 1s cubic-bezier(0.22,1,0.36,1) 0.2s" }}>
+            <HeroPhone url={heroShowcaseUrl} />
+          </div>
+        </section>
 
-        </div>
-      </section>
-
-      {guides.length > 0 && (
-        <section id="how-to-use" className="py-32 px-4 bg-stone-50">
-          <div className="max-w-6xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-3xl sm:text-4xl font-bold text-stone-800 mb-4">이용 방법</h2>
-              <p className="text-stone-500">청첩장 작업실, 이렇게 사용하세요</p>
-            </motion.div>
-            <div className="flex gap-4 overflow-x-auto pb-4 pt-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
-              {guides.map((guide, index) => (
-                <motion.div
-                  key={guide.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  onClick={() => setSelectedGuide(guide)}
-                  className="flex-shrink-0 w-72 sm:w-80 snap-start bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md transition-shadow cursor-pointer group"
-                >
-                  <div className="aspect-video bg-stone-100 relative overflow-hidden">
-                    {guide.videoType === 'YOUTUBE' ? (
-                      <img
-                        src={`https://img.youtube.com/vi/${guide.videoUrl.split('/embed/')[1]}/mqdefault.jpg`}
-                        className="w-full h-full object-cover"
-                        alt={guide.title}
-                      />
-                    ) : (
-                      <video
-                        src={guide.videoUrl}
-                        className="w-full h-full object-cover"
-                        preload="metadata"
-                        muted
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
-                        <svg className="w-8 h-8 text-stone-800 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z"/>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-semibold text-stone-800 mb-2">{guide.title}</h3>
-                    {guide.description && (
-                      <p className="text-sm text-stone-500">{guide.description}</p>
-                    )}
-                  </div>
-                </motion.div>
+        <section ref={problemRef as React.RefObject<HTMLElement>} style={{ padding: "80px 48px", borderTop: "1px solid #E8E5E0" }}>
+          <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center", opacity: problemInView ? 1 : 0, transform: problemInView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
+            <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1, marginBottom: 20, textTransform: "uppercase" }}>The Problem</p>
+            <h2 className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a", lineHeight: 1.5, marginBottom: 20 }}>청첩장 보내고 나면,<br />같은 질문이 반복됩니다.</h2>
+            <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 40 }}>주차장 어디야? 식사 몇 시부터야? 계좌 다시 보내줘.<br />하객 100명이면 같은 질문 100번입니다.</p>
+            <div className="problem-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, textAlign: "left" }}>
+              {[
+                { icon: <MessageCircle size={18} />, title: "같은 질문 반복", desc: "하객 100명이면 같은 질문 100번" },
+                { icon: <Copy size={18} />, title: "계좌 안내", desc: "카톡으로 일일이 보내는 계좌번호" },
+                { icon: <MapPin size={18} />, title: "위치 · 주차 안내", desc: "지도 캡처 돌리는 비효율" },
+              ].map((item, i) => (
+                <div key={i} style={{ padding: 24, borderRadius: 12, border: "1px solid #E8E5E0", background: "#fff", opacity: problemInView ? 1 : 0, transform: problemInView ? "translateY(0)" : "translateY(15px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${200 + i * 100}ms` }}>
+                  <div style={{ color: "#bbb", marginBottom: 12 }}>{item.icon}</div>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>{item.title}</p>
+                  <p style={{ fontSize: 12, color: "#999", lineHeight: 1.6 }}>{item.desc}</p>
+                </div>
               ))}
             </div>
           </div>
         </section>
-      )}
 
-      {/* 가이드 영상 모달 */}
-      <AnimatePresence>
-        {selectedGuide && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedGuide(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-2xl overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between p-4 border-b border-stone-100">
-                <h3 className="font-semibold text-stone-800">{selectedGuide.title}</h3>
-                <button
-                  onClick={() => setSelectedGuide(null)}
-                  className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5 text-stone-500" />
-                </button>
-              </div>
-              <div className="flex-1 bg-black flex items-center justify-center">
-                {selectedGuide.videoType === 'YOUTUBE' ? (
-              <iframe
-                src={selectedGuide.videoUrl}
-                className="w-full aspect-video"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            ) : (
-              <video
-                src={selectedGuide.videoUrl}
-                controls
-                autoPlay
-                className="max-w-full max-h-[70vh]"
-              />
-            )}
-              </div>
-              {selectedGuide.description && (
-                <div className="p-4 border-t border-stone-100">
-                  <p className="text-sm text-stone-500">{selectedGuide.description}</p>
+        <section id="engine" ref={engineRef as React.RefObject<HTMLElement>} style={{ padding: "80px 48px", background: "#F5F4F1", borderTop: "1px solid #E8E5E0", borderBottom: "1px solid #E8E5E0" }}>
+          <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: 48, opacity: engineInView ? 1 : 0, transform: engineInView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
+              <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1, marginBottom: 16, textTransform: "uppercase" }}>Wedding Engine</p>
+              <h2 className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>우리는 두 가지를 자동화합니다.</h2>
+              <p style={{ fontSize: 14, color: "#999" }}>청첩장 너머의 문제를 해결하는 두 개의 엔진.</p>
+            </div>
+            <div className="engine-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+              {[
+                { icon: <MessageCircle size={20} color="#1a1a1a" />, tag: "Engine 01", title: "하객 응대 자동화", desc: "반복 질문 80% 제거.\nAI 비서가 청첩장 정보를 기반으로\n하객에게 즉시 응답합니다.", features: ["듀얼 페르소나 (신랑 · 신부)", "3가지 응답 모드", "실시간 방명록 답장", "하객 질문 분석 리포트"], delay: 0.15 },
+                { icon: <Camera size={20} color="#1a1a1a" />, tag: "Engine 02", title: "촬영 없는 AI 화보", desc: "24개 컨셉 자동 생성.\n한복, 크루즈, 셀카 스냅까지\n스튜디오 없이 완성합니다.", features: ["한복 5종 (궁중혼례 · 당의 · 모던)", "크루즈 · 셀카 · 시네마틱", "커플 사진 체이닝", "무료 체험 1장 제공"], delay: 0.3 },
+              ].map((e, i) => (
+                <div key={i} style={{ padding: "40px 36px", borderRadius: 16, background: "#fff", border: "1px solid #E8E5E0", opacity: engineInView ? 1 : 0, transform: engineInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.7s cubic-bezier(0.22,1,0.36,1) ${e.delay}s` }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "#F5F4F1", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>{e.icon}</div>
+                  <p style={{ fontSize: 12, color: "#bbb", letterSpacing: 1, marginBottom: 8, textTransform: "uppercase" }}>{e.tag}</p>
+                  <h3 style={{ fontSize: 20, fontWeight: 600, color: "#1a1a1a", marginBottom: 12 }}>{e.title}</h3>
+                  <p style={{ fontSize: 14, color: "#888", lineHeight: 1.8, marginBottom: 20, whiteSpace: "pre-line" }}>{e.desc}</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {e.features.map((f, j) => (
+                      <div key={j} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <Check size={12} color="#bbb" strokeWidth={2.5} />
+                        <p style={{ fontSize: 12, color: "#666" }}>{f}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </motion.div>
-          </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section ref={chatSectionRef as React.RefObject<HTMLElement>} className="chat-section" style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "100px 48px", gap: 72 }}>
+          <div className="chat-text-col" style={{ maxWidth: 440, opacity: chatSectionInView ? 1 : 0, transform: chatSectionInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1)" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 100, border: "1px solid #E0DDD8", marginBottom: 24, background: "#F5F4F1" }}>
+              <Sparkles size={11} color="#999" />
+              <p style={{ fontSize: 11, color: "#888" }}>AI Reception</p>
+            </div>
+            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.4, color: "#1a1a1a", marginBottom: 16 }}>하객이 물으면,<br />AI가 답합니다.</h2>
+            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 32 }}>주차장 위치, 축의금 계좌, 식사 시간.<br />반복되는 질문에 신랑신부가 답할 필요 없습니다.</p>
+            <div style={{ marginBottom: 32 }}>
+              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 1, marginBottom: 16, textTransform: "uppercase" }}>실제 시나리오</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {CHAT_SEQUENCE.map((item, i) => (
+                  <ScenarioCard key={i} item={item} index={i} parentInView={chatSectionInView} />
+                ))}
+              </div>
+            </div>
+            <div style={{ padding: "16px 20px", borderRadius: 10, background: "#1a1a1a" }}>
+              <p style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>AI Reception 패키지</p>
+              <p style={{ fontSize: 14, color: "#fff" }}>자동 응대 시스템에 <span style={{ fontWeight: 600 }}>AI 화보 10컷</span> 포함.</p>
+              <p className="serif" style={{ fontSize: 24, fontWeight: 400, color: "#fff", marginTop: 8 }}>129,000<span style={{ fontSize: 13, color: "#666", fontFamily: "'Noto Sans KR', sans-serif" }}>원</span></p>
+            </div>
+          </div>
+          <div style={{ opacity: chatSectionInView ? 1 : 0, transform: chatSectionInView ? "translateY(0)" : "translateY(40px)", transition: "all 1s cubic-bezier(0.22,1,0.36,1) 0.2s" }}>
+            <AiChatDemo />
+          </div>
+        </section>
+
+        <section ref={snapRef as React.RefObject<HTMLElement>} className="snap-section" style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "100px 48px", gap: 72, borderTop: "1px solid #E8E5E0" }}>
+          <div style={{ opacity: snapInView ? 1 : 0, transform: snapInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, width: 280 }}>
+              {(() => {
+                const showcaseConcepts = ["hanbok_wonsam", "iphone_selfie", "cruise_sunset", "hanbok_modern"];
+                const fallbacks = [
+                  { label: "궁중혼례", gradient: "linear-gradient(135deg, #8B6914 0%, #C4956A 100%)" },
+                  { label: "셀카 스냅", gradient: "linear-gradient(135deg, #5A6B7A 0%, #8A9BAA 100%)" },
+                  { label: "크루즈 선셋", gradient: "linear-gradient(135deg, #B08968 0%, #D4B896 100%)" },
+                  { label: "모던 한복", gradient: "linear-gradient(135deg, #7C8C6E 0%, #A0B090 100%)" },
+                ];
+                return showcaseConcepts.map((concept, i) => {
+                  const sample = snapSamples.find(s => s.concept === concept);
+                  return (
+                    <div key={i} style={{ height: 170, borderRadius: 10, background: sample ? `url(${sample.imageUrl}) center/cover` : fallbacks[i].gradient, display: "flex", alignItems: "flex-end", padding: 12, position: "relative", overflow: "hidden", cursor: "pointer" }} onClick={() => setSelectedSnap(selectedSnap === concept ? null : concept)}>
+                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.5) 100%)" }} />
+                      <p style={{ fontSize: 11, color: "#fff", position: "relative", fontWeight: 500 }}>{fallbacks[i].label}</p>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+            <p style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "#bbb" }}>
+              {snapSamples.length > 0 ? `${snapSamples.length}개 샘플 등록됨` : "24개 컨셉 중 일부"}
+            </p>
+            {selectedSnap && snapSamples.filter(s => s.concept === selectedSnap).length > 0 && (
+              <div style={{ marginTop: 12, display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
+                {snapSamples.filter(s => s.concept === selectedSnap).map(s => (
+                  <div key={s.id} style={{ flexShrink: 0, width: 100, height: 130, borderRadius: 8, overflow: "hidden", border: "1px solid #E8E5E0" }}>
+                    <img src={s.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="snap-text" style={{ maxWidth: 440, opacity: snapInView ? 1 : 0, transform: snapInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1) 0.15s" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 100, border: "1px solid #E0DDD8", marginBottom: 24, background: "#F5F4F1" }}>
+              <Camera size={11} color="#999" />
+              <p style={{ fontSize: 11, color: "#888" }}>AI Wedding Snap</p>
+            </div>
+            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.4, color: "#1a1a1a", marginBottom: 8 }}>얼굴 사진 한 장이면<br />충분합니다.</h2>
+            <p className="serif" style={{ fontSize: 20, fontWeight: 300, color: "#aaa", marginBottom: 20 }}>촬영 없이, 화보를 만듭니다.</p>
+            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 24 }}>24가지 컨셉의 웨딩 화보를 자동 생성합니다.<br />한복, 크루즈, 셀카, 시네마틱 — 스튜디오 촬영을 대체합니다.</p>
+            <div style={{ padding: "16px 18px", borderRadius: 10, border: "1px solid #E8E5E0", background: "#FAFAF8", marginBottom: 24 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>아직 촬영 전이신가요?</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {["얼굴 사진 한 장으로 미리 화보 제작", "촬영 콘셉트 미리 테스트 가능", "청첩장 제작까지 바로 연결"].map((t, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <Check size={11} color="#bbb" strokeWidth={2.5} />
+                    <p style={{ fontSize: 12, color: "#666" }}>{t}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#1a1a1a", textDecoration: "none", fontWeight: 500, padding: "10px 20px", borderRadius: 8, border: "1px solid #E0DDD8" }}>
+              촬영 전에 미리 체험하기
+              <ArrowRight size={14} />
+            </a>
+          </div>
+        </section>
+
+        <ThemeShowcase onLogin={openLogin} />
+
+        <section ref={specRef as React.RefObject<HTMLElement>} style={{ padding: "80px 0", background: "#1a1a1a" }}>
+          <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+            <div className="specs-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 1, padding: "0 48px" }}>
+              {specs.map((s, i) => (
+                <div key={i} style={{ textAlign: "center", padding: "40px 16px", opacity: specInView ? 1 : 0, transform: specInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 100}ms` }}>
+                  <p className="serif" style={{ fontSize: 48, fontWeight: 300, color: "#fff", marginBottom: 8 }}>{s.num}</p>
+                  <p style={{ fontSize: 14, color: "#fff", marginBottom: 8, fontWeight: 500 }}>{s.label}</p>
+                  <p style={{ fontSize: 12, color: "#666", lineHeight: 1.5 }}>{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" ref={pricingRef as React.RefObject<HTMLElement>} style={{ padding: "100px 0" }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px" }}>
+            <div style={{ textAlign: "center", marginBottom: 56 }}>
+              <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Pricing</p>
+              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>간단한 요금제</h2>
+              <p style={{ fontSize: 14, color: "#999" }}>숨은 비용 없습니다. 종이청첩장 · QR카드 디자인 무료 포함.</p>
+            </div>
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <a href="/gift/redeem" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 20px", borderRadius: 100, border: "1px solid #E0DDD8", fontSize: 13, color: "#888", textDecoration: "none" }}>
+                <Gift size={14} />
+                선물 코드가 있으신가요?
+              </a>
+            </div>
+            {packages.length > 0 ? (
+              <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
+                {packages.map((pkg, i) => {
+                  const isHighlight = pkg.slug === "ai-reception" || pkg.slug === "basic-video";
+                  return (
+                    <div key={pkg.id} style={{ padding: "32px 24px", borderRadius: 14, border: isHighlight ? "2px solid #1a1a1a" : "1px solid #E8E5E0", background: isHighlight ? "#FAFAF8" : "#fff", position: "relative", opacity: pricingInView ? 1 : 0, transform: pricingInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 80}ms` }}>
+                      {pkg.slug === "ai-reception" && <div style={{ position: "absolute", top: -1, left: 24, transform: "translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 12px", borderRadius: 100, fontWeight: 500 }}>BEST</div>}
+                      {pkg.slug === "basic-video" && <div style={{ position: "absolute", top: -1, left: 24, transform: "translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 12px", borderRadius: 100, fontWeight: 500 }}>PREMIUM</div>}
+                      <p style={{ fontSize: 11, color: "#bbb", marginBottom: 4 }}>{pkg.description}</p>
+                      <p style={{ fontSize: 16, fontWeight: 600, color: "#1a1a1a", marginBottom: 16 }}>{pkg.name}</p>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 2, marginBottom: 20 }}>
+                        <p className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a" }}>{pkg.price.toLocaleString()}</p>
+                        <p style={{ fontSize: 13, color: "#999" }}>원</p>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
+                        {pkg.features.slice(0, 6).map((f, j) => (
+                          <div key={j} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <Check size={13} color={isHighlight ? "#1a1a1a" : "#ccc"} strokeWidth={2} />
+                            <p style={{ fontSize: 13, color: "#666" }}>{f}</p>
+                          </div>
+                        ))}
+                        {pkg.features.length > 6 && <p style={{ fontSize: 12, color: "#bbb", paddingLeft: 21 }}>+{pkg.features.length - 6}개 더</p>}
+                      </div>
+                      <button onClick={openLogin} style={{ display: "block", width: "100%", textAlign: "center", padding: "12px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, background: isHighlight ? "#1a1a1a" : "transparent", color: isHighlight ? "#fff" : "#1a1a1a", border: isHighlight ? "none" : "1px solid #E0DDD8", cursor: "pointer" }}>시작하기</button>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: 40, color: "#bbb", fontSize: 13 }}>요금 정보를 불러오는 중...</div>
+            )}
+          </div>
+        </section>
+
+        <section id="ai-snap-pricing" style={{ padding: "100px 0", background: "#F5F4F1", borderTop: "1px solid #E8E5E0", borderBottom: "1px solid #E8E5E0" }}>
+          <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 48px" }}>
+            <div style={{ textAlign: "center", marginBottom: 48 }}>
+              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>AI WEDDING SNAP</p>
+              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 10 }}>AI 웨딩 화보 단독 패키지</h2>
+              <p style={{ fontSize: 14, color: "#999" }}>청첩장 없이 AI 웨딩 화보만 이용할 수 있어요</p>
+            </div>
+            <div className="snap-pack-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
+              {[
+                { name: "3장 세트", per: "장당 1,967원", price: "5,900", popular: false },
+                { name: "5장 세트", per: "장당 1,980원", price: "9,900", popular: false },
+                { name: "10장 세트", per: "장당 1,490원", price: "14,900", popular: true },
+                { name: "20장 세트", per: "장당 1,245원", price: "24,900", popular: false },
+              ].map((pack) => (
+                <div key={pack.name} style={{ padding: "28px 20px", borderRadius: 14, background: "#fff", border: pack.popular ? "2px solid #1a1a1a" : "1px solid #E8E5E0", textAlign: "left", position: "relative" }}>
+                  {pack.popular && <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%) translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 14px", borderRadius: 100, fontWeight: 500 }}>인기</div>}
+                  <p style={{ fontSize: 16, fontWeight: 600, color: "#1a1a1a", marginBottom: 4 }}>{pack.name}</p>
+                  <p style={{ fontSize: 11, color: "#bbb", marginBottom: 16 }}>{pack.per}</p>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 2, marginBottom: 20 }}>
+                    <p className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a" }}>{pack.price}</p>
+                    <p style={{ fontSize: 12, color: "#999" }}>원</p>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+                    {["스튜디오 / 시네마틱 선택", "24가지 컨셉", "고화질 원본 다운로드"].map((f, j) => (
+                      <div key={j} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <Check size={12} color={pack.popular ? "#1a1a1a" : "#ccc"} strokeWidth={2} />
+                        <p style={{ fontSize: 12, color: "#666" }}>{f}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <a href="/ai-snap/studio" style={{ display: "block", textAlign: "center", padding: "11px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, textDecoration: "none", background: pack.popular ? "#1a1a1a" : "transparent", color: pack.popular ? "#fff" : "#1a1a1a", border: pack.popular ? "none" : "1px solid #E0DDD8" }}>시작하기</a>
+                </div>
+              ))}
+            </div>
+            <div style={{ textAlign: "center", marginTop: 16 }}>
+              <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#fff", background: "#1a1a1a", padding: "14px 28px", borderRadius: 10, textDecoration: "none", fontWeight: 500 }}>
+                무료 1장 체험하기
+                <Camera size={16} />
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section style={{ padding: "80px 48px", background: "#FAF9F7" }}>
+          <div style={{ maxWidth: 900, margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: 36 }}>
+              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>PREMIUM ADD-ON</p>
+              <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>식전 · 식중 영상 제작</h3>
+              <p style={{ fontSize: 13, color: "#999", lineHeight: 1.8 }}>자동화 엔진 위에 얹는 수제 옵션. 미술감독이 1:1로 편집합니다.</p>
+            </div>
+              <HighlightVideoSection />
+          </div>
+        </section>
+
+        {guides.length > 0 && (
+          <section style={{ padding: "80px 48px", background: "#F5F4F1", borderTop: "1px solid #E8E5E0" }}>
+            <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+              <div style={{ textAlign: "center", marginBottom: 40 }}>
+                <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>HOW TO USE</p>
+                <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>이용 방법</h3>
+              </div>
+              <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 16 }} className="snap-pill">
+                {guides.map((g) => (
+                  <div key={g.id} onClick={() => setSelectedGuide(g)} style={{ flex: "0 0 280px", borderRadius: 14, overflow: "hidden", background: "#fff", border: "1px solid #E8E5E0", cursor: "pointer" }}>
+                    <div style={{ aspectRatio: "16/9", background: "#E8E5E0", position: "relative", overflow: "hidden" }}>
+                      {g.videoType === "YOUTUBE" ? (
+                        <img src={`https://img.youtube.com/vi/${g.videoUrl.split("/embed/")[1]}/mqdefault.jpg`} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt={g.title} />
+                      ) : (
+                        <video src={g.videoUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} preload="metadata" muted />
+                      )}
+                      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.2)", opacity: 0, transition: "opacity 0.2s" }} onMouseEnter={e => (e.currentTarget.style.opacity = "1")} onMouseLeave={e => (e.currentTarget.style.opacity = "0")}>
+                        <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <svg style={{ width: 18, height: 18, marginLeft: 2 }} fill="#1a1a1a" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ padding: "14px 16px" }}>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1a1a", marginBottom: 4 }}>{g.title}</p>
+                      {g.description && <p style={{ fontSize: 12, color: "#999" }}>{g.description}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
         )}
-      </AnimatePresence>
 
-      {reviews.length > 0 && (
-      <section id="reviews" className="py-32 px-4 bg-gradient-to-b from-white to-stone-50">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <p className="text-sm tracking-[0.2em] text-stone-400 mb-4">REVIEWS</p>
-            <h2 className="font-serif text-3xl text-stone-800 mb-4">고객님들의 후기</h2>
-            <p className="text-stone-500">실제 사용하신 분들의 생생한 이야기</p>
-          </motion.div>
-          
-{reviews.length > 0 ? (
-  <div className="relative">
-    <div 
-      className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4"
-      style={{ scrollBehavior: 'smooth' }}
-    >
-      {reviews.map((review, i) => (
-        <motion.div
-          key={review.id}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: i * 0.1 }}
-          className="min-w-[240px] max-w-[240px] bg-white p-4 rounded-xl shadow-sm border border-stone-100 flex-shrink-0 snap-start"
-        >
-          <div className="flex gap-0.5 mb-2">
-            {[...Array(5)].map((_, j) => (
-              <svg key={j} className={`w-3 h-3 ${j < review.rating ? "text-yellow-400 fill-yellow-400" : "text-stone-200"}`} viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-1 mb-2">
-  {review.packageName && (
-    <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-emerald-50 text-emerald-600">
-      {review.packageName}
-    </span>
-  )}
-  {review.source === 'AI_REPORT' && (
-    <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-violet-50 text-violet-600">
-      AI 리포트
-    </span>
-  )}
-</div>
-          <p className="text-stone-700 text-xs leading-relaxed mb-3 line-clamp-3">{review.content || "정말 만족스러웠어요!"}</p>
-          <div className="flex items-center justify-between text-[10px] text-stone-400">
-            <span>{review.groomName} & {review.brideName}</span>
-            <span>{new Date(review.createdAt).toLocaleDateString("ko-KR")}</span>
-          </div>
-        </motion.div>
-      ))}
-    </div>
-  </div>
-) : (
-  <div className="text-center py-12">
-    <p className="text-stone-400">아직 등록된 후기가 없습니다</p>
-  </div>
-)}
-        </div>
-      </section>
-      )}
-
-      <footer className="py-12 px-4 border-t border-stone-100 relative bg-stone-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <p className="font-serif text-xl text-stone-800 mb-4">청첩장 작업실</p>
-            <div className="flex items-center justify-center gap-6 text-sm flex-wrap">
-              <a href="/notice" className="text-stone-500 hover:text-stone-800 transition-colors">공지사항</a>
-              <a href="/faq" className="text-stone-500 hover:text-stone-800 transition-colors">자주 묻는 질문</a>
-              <a href="/terms" className="text-stone-500 hover:text-stone-800 transition-colors">이용약관</a>
-              <a href="/privacy" className="text-stone-500 hover:text-stone-800 transition-colors">개인정보처리방침</a>
-              <a href="/refund-policy" className="text-stone-500 hover:text-stone-800 transition-colors">환불정책</a>
-            </div>
-          </div>
-          <div className="border-t border-stone-200 pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-stone-400">
-              <div className="space-y-1">
-                <p><span className="text-stone-500">상호</span> 이다겸</p>
-                <p><span className="text-stone-500">대표</span> 이다겸</p>
-                <p><span className="text-stone-500">사업자등록번호</span> 413-03-96815</p>
+        {reviews.length > 0 && (
+          <section style={{ padding: "80px 48px", borderTop: "1px solid #E8E5E0" }}>
+            <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+              <div style={{ textAlign: "center", marginBottom: 40 }}>
+                <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>REVIEWS</p>
+                <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>고객님들의 후기</h3>
               </div>
-              <div className="space-y-1">
-                <p><span className="text-stone-500">주소</span> 부산광역시 부산진구 전포대로 224번길 22</p>
-                <p><span className="text-stone-500">연락처</span> 010-2768-3187</p>
-                <p><span className="text-stone-500">이메일</span> mail@weddingshop.cloud</p>
-                <p><span className="text-stone-500">통신판매업신고</span> 제2026-부산진-0007741호</p>
+              <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 16 }} className="snap-pill">
+                {reviews.map((r) => (
+                  <div key={r.id} style={{ flex: "0 0 240px", padding: 20, borderRadius: 14, border: "1px solid #E8E5E0", background: "#fff" }}>
+                    <div style={{ display: "flex", gap: 2, marginBottom: 10 }}>
+                      {[...Array(5)].map((_, j) => (
+                        <svg key={j} style={{ width: 12, height: 12 }} viewBox="0 0 24 24" fill={j < r.rating ? "#F59E0B" : "#E8E5E0"}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                      ))}
+                    </div>
+                    <p style={{ fontSize: 12, color: "#555", lineHeight: 1.6, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{r.content || "정말 만족스러웠어요!"}</p>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#bbb" }}>
+                      <span>{r.groomName} & {r.brideName}</span>
+                      <span>{new Date(r.createdAt).toLocaleDateString("ko-KR")}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            <p className="text-center text-xs text-stone-300 mt-6">Made with love by 청첩장 작업실</p>
-          </div>
-        </div>
-      </footer>
+          </section>
+        )}
 
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setChatOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-stone-800 text-white rounded-full shadow-lg flex items-center justify-center z-50 md:w-auto md:px-6 md:gap-2"
-      >
-        <MessageCircle className="w-5 h-5" />
-        <span className="hidden md:inline text-sm">상담하기</span>
-      </motion.button>
+        <section style={{ padding: "100px 48px", borderTop: "1px solid #E8E5E0" }}>
+          <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", alignItems: "center", gap: 56 }} className="weddingai-grid">
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>WEDDING ENGINE ASSISTANT</p>
+              <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8, lineHeight: 1.4 }}>웨딩이</h3>
+              <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 28 }}>설명서를 읽지 않아도 됩니다.<br />웨딩이가 대신 안내합니다.</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
+                {["서비스 · 테마 · 요금 안내", "청첩장 기능 상세 설명", "제휴 · 할인 정보 안내"].map((f, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Check size={12} color="#bbb" strokeWidth={2.5} />
+                    <p style={{ fontSize: 13, color: "#666" }}>{f}</p>
+                  </div>
+                ))}
+              </div>
+              <p style={{ fontSize: 11, color: "#ccc" }}>우측 하단에서 바로 대화할 수 있어요.</p>
+            </div>
+            <div style={{ width: 300, flexShrink: 0 }}>
+              <div style={{ borderRadius: 16, border: "1px solid #E8E5E0", background: "#fff", overflow: "hidden", boxShadow: "0 8px 30px rgba(0,0,0,0.06)" }}>
+                <div style={{ padding: "14px 16px", borderBottom: "1px solid #F0EFEC", display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#1a1a1a", display: "flex", alignItems: "center", justifyContent: "center" }}><Sparkles size={12} color="#fff" /></div>
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: "#1a1a1a" }}>웨딩이</p>
+                    <p style={{ fontSize: 9, color: "#7C8C6E" }}>온라인</p>
+                  </div>
+                </div>
+                <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ alignSelf: "flex-end", maxWidth: "80%", padding: "9px 13px", borderRadius: "14px 4px 14px 14px", background: "#2C2C2C" }}><p style={{ fontSize: 11, color: "#fff" }}>테마 추천해주세요</p></div>
+                  <div style={{ alignSelf: "flex-start", maxWidth: "85%", padding: "9px 13px", borderRadius: "4px 14px 14px 14px", background: "#F5F4F1" }}><p style={{ fontSize: 11, color: "#555", lineHeight: 1.6 }}>어떤 분위기를 좋아하세요? 내추럴, 모던, 클래식 중 골라주시면 딱 맞는 테마를 추천해드릴게요.</p></div>
+                  <div style={{ alignSelf: "flex-end", maxWidth: "80%", padding: "9px 13px", borderRadius: "14px 4px 14px 14px", background: "#2C2C2C" }}><p style={{ fontSize: 11, color: "#fff" }}>내추럴이요!</p></div>
+                  <div style={{ alignSelf: "flex-start", maxWidth: "85%", padding: "9px 13px", borderRadius: "4px 14px 14px 14px", background: "#F5F4F1" }}><p style={{ fontSize: 11, color: "#555", lineHeight: 1.6 }}>Botanical 테마 추천드려요! 세이지그린 톤에 자연스러운 느낌이에요.</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section ref={ctaRef as React.RefObject<HTMLElement>} style={{ padding: "100px 48px", textAlign: "center" }}>
+          <div style={{ opacity: ctaInView ? 1 : 0, transform: ctaInView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
+            <h2 className="serif" style={{ fontSize: 38, fontWeight: 400, color: "#1a1a1a", marginBottom: 16 }}>결혼 준비,<br />자동화하세요.</h2>
+            <p style={{ fontSize: 14, color: "#999", marginBottom: 36, lineHeight: 1.8 }}>모바일 청첩장 · 종이청첩장 · QR카드 · AI 화보 · AI 하객 응대<br />하나의 플랫폼에서 전부 해결됩니다.</p>
+            <button onClick={openLogin} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 15, color: "#fff", background: "#1a1a1a", padding: "16px 36px", borderRadius: 10, border: "none", cursor: "pointer", fontWeight: 500 }}>
+              자동화 시작하기
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        </section>
+
+        <footer style={{ borderTop: "1px solid #E8E5E0" }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 48px" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 20 }}>
+              <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a" }}>청첩장 작업실</p>
+              <p style={{ fontSize: 10, color: "#ccc", letterSpacing: 1 }}>WEDDING ENGINE</p>
+            </div>
+            <div style={{ display: "flex", gap: 24, marginBottom: 28, flexWrap: "wrap" }}>
+              {[{ l: "공지사항", h: "/notice" }, { l: "자주 묻는 질문", h: "/faq" }, { l: "이용약관", h: "/terms" }, { l: "개인정보처리방침", h: "/privacy" }, { l: "환불정책", h: "/refund-policy" }].map((link) => (
+                <a key={link.l} href={link.h} style={{ fontSize: 12, color: "#888", textDecoration: "none" }}>{link.l}</a>
+              ))}
+            </div>
+            <div className="footer-info" style={{ display: "flex", justifyContent: "space-between", gap: 40, flexWrap: "wrap", marginBottom: 28 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <p style={{ fontSize: 11, color: "#bbb" }}><span style={{ color: "#999" }}>상호</span> 이다겸</p>
+                <p style={{ fontSize: 11, color: "#bbb" }}><span style={{ color: "#999" }}>대표</span> 이다겸</p>
+                <p style={{ fontSize: 11, color: "#bbb" }}><span style={{ color: "#999" }}>사업자등록번호</span> 413-03-96815</p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <p style={{ fontSize: 11, color: "#bbb" }}><span style={{ color: "#999" }}>주소</span> 부산광역시 부산진구 전포대로 224번길 22</p>
+                <p style={{ fontSize: 11, color: "#bbb" }}><span style={{ color: "#999" }}>연락처</span> 010-2768-3187</p>
+                <p style={{ fontSize: 11, color: "#bbb" }}><span style={{ color: "#999" }}>이메일</span> mail@weddingshop.cloud</p>
+                <p style={{ fontSize: 11, color: "#bbb" }}><span style={{ color: "#999" }}>통신판매업신고</span> 제2026-부산진-0007741호</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 20, borderTop: "1px solid #F0EFEC" }}>
+              <p style={{ fontSize: 11, color: "#ccc" }}>Made with love by 청첩장 작업실</p>
+              <div style={{ display: "flex", gap: 20 }}>
+                <a href="https://instagram.com/weddingstudiolab" target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "#bbb", textDecoration: "none" }}>Instagram</a>
+                <a href="https://pf.kakao.com/_xkaQxon" target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "#bbb", textDecoration: "none" }}>KakaoTalk</a>
+              </div>
+            </div>
+          </div>
+        </footer>
+
+      </div>
+
+      <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 50, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+        {greeting && !greetingDismissed && !chatOpen && (
+          <div className="chat-msg-enter" style={{ padding: "10px 16px", borderRadius: "14px 14px 4px 14px", background: "#fff", border: "1px solid #E8E5E0", boxShadow: "0 4px 20px rgba(0,0,0,0.08)", maxWidth: 220, position: "relative" }}>
+            <button onClick={() => setGreetingDismissed(true)} style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", background: "#eee", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><X size={10} color="#999" /></button>
+            <p style={{ fontSize: 12, color: "#555" }}>안녕하세요, 결혼 준비 도와드릴까요?</p>
+          </div>
+        )}
+        <button onClick={() => { setChatOpen(true); setGreetingDismissed(true); }} style={{ width: 52, height: 52, borderRadius: "50%", background: "#1a1a1a", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.15)" }}>
+          <Sparkles size={20} color="#fff" />
+        </button>
+      </div>
 
       <AnimatePresence>
         {chatOpen && (
           <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setChatOpen(false)}
-              className="fixed inset-0 bg-black/50 z-50 md:hidden"
-            />
-            
-            <motion.div
-              initial={{ opacity: 0, y: 100 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 100 }}
-              id="chat-modal" className="fixed inset-0 h-[100dvh] md:inset-auto md:h-[520px] md:bottom-24 md:right-6 md:w-[380px] md:h-[520px] bg-white md:rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden rounded-t-3xl"
-            >
-              <div className="p-4 bg-stone-800 text-white flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-lg">💕</div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setChatOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 50 }} className="md:hidden" />
+            <motion.div initial={{ opacity: 0, y: 100 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 100 }} style={{ position: "fixed", inset: 0, zIndex: 50, background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden" }} className="md:!inset-auto md:!bottom-24 md:!right-6 md:!w-[380px] md:!h-[520px] md:!rounded-2xl md:!shadow-2xl">
+              <div style={{ padding: "16px", background: "#1a1a1a", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 36, height: 36, background: "rgba(255,255,255,0.15)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}><Sparkles size={16} /></div>
                   <div>
-                    <p className="font-medium">웨딩이</p>
-                    <p className="text-xs text-stone-400">청첩장 상담 AI</p>
+                    <p style={{ fontWeight: 600, fontSize: 14 }}>웨딩이</p>
+                    <p style={{ fontSize: 11, color: "#666" }}>청첩장 상담 AI</p>
                   </div>
                 </div>
-                <button onClick={() => setChatOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
+                <button onClick={() => setChatOpen(false)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", padding: 8 }}><X size={20} /></button>
               </div>
-              
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                 {chatMessages.map((msg, idx) => (
-                  <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                    <div className="max-w-[85%]">
-                      <div className={`p-4 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed ${
-                        msg.role === "user"
-                          ? "bg-stone-800 text-white rounded-br-sm"
-                          : "bg-stone-100 text-stone-700 rounded-bl-sm"
-                      }`}>
+                  <div key={idx} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+                    <div style={{ maxWidth: "85%" }}>
+                      <div style={{ padding: "12px 16px", borderRadius: msg.role === "user" ? "16px 4px 16px 16px" : "4px 16px 16px 16px", background: msg.role === "user" ? "#2C2C2C" : "#F5F4F1", color: msg.role === "user" ? "#fff" : "#555", fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
                         {msg.content}
                       </div>
                       {msg.actions && msg.actions.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2">
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
                           {msg.actions.map((act, i) => (
-                            <button
-                              key={i}
-                              onClick={() => {
-                                if (act.action === "external") window.open(act.url, "_blank");
-                                else if (act.action === "navigate") window.location.href = act.url || "/";
-                              }}
-                              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                                act.style === "primary" ? "bg-stone-800 text-white hover:bg-stone-900" :
-                                act.style === "kakao" ? "bg-[#FEE500] text-[#191919] hover:bg-[#FDD800]" :
-                                "bg-white text-stone-700 border border-stone-300 hover:bg-stone-50"
-                              }`}
-                            >
+                            <button key={i} onClick={() => { if (act.action === "external") window.open(act.url, "_blank"); else if (act.action === "navigate") window.location.href = act.url || "/"; }} style={{ padding: "8px 16px", borderRadius: 100, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "none", background: act.style === "primary" ? "#1a1a1a" : act.style === "kakao" ? "#FEE500" : "#fff", color: act.style === "primary" ? "#fff" : act.style === "kakao" ? "#191919" : "#555", boxShadow: act.style === "primary" || act.style === "kakao" ? "none" : "inset 0 0 0 1px #E0DDD8" }}>
                               {act.label}
                             </button>
                           ))}
@@ -987,51 +1112,24 @@ export default function Landing() {
                   </div>
                 ))}
                 {chatLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-stone-100 p-4 rounded-2xl rounded-bl-sm">
-                      <div className="flex gap-1">
-                        <span className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                    <div style={{ padding: "14px 20px", borderRadius: "4px 16px 16px 16px", background: "#F5F4F1" }}>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        {[0, 150, 300].map(d => <span key={d} className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#bbb", animationDelay: `${d}ms` }} />)}
                       </div>
                     </div>
                   </div>
                 )}
                 <div ref={chatEndRef} />
               </div>
-              
-              <div className="p-4 border-t border-stone-100 shrink-0">
-                <button
-                  onClick={() => {
-                    if (!isLoggedIn) {
-                      if (confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) {
-                        window.location.href = '/dashboard';
-                      }
-                    } else {
-                      setShowInquiryForm(true);
-                    }
-                  }}
-                  className="w-full mb-3 py-2 text-sm text-stone-500 hover:text-stone-700 hover:bg-stone-50 rounded-lg transition-colors"
-                >
-                  💬 1:1 문의하기
+              <div style={{ padding: 16, borderTop: "1px solid #E8E5E0", flexShrink: 0 }}>
+                <button onClick={() => { if (!isLoggedIn) { if (confirm("로그인이 필요한 서비스입니다. 로그인 하시겠습니까?")) window.location.href = "/dashboard"; } else setShowInquiryForm(true); }} style={{ width: "100%", marginBottom: 10, padding: "8px 0", fontSize: 12, color: "#999", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                  <MessageCircle size={13} />
+                  1:1 문의하기
                 </button>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onFocus={() => window.scrollTo(0, 0)}
-                    onKeyPress={(e) => e.key === "Enter" && sendChat()}
-                    placeholder="메시지를 입력하세요..."
-                    className="flex-1 px-4 py-3 bg-stone-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-stone-300"
-                  />
-                  <button
-                    onClick={sendChat}
-                    disabled={chatLoading || !chatInput.trim()}
-                    className="w-12 h-12 bg-stone-800 text-white rounded-full flex items-center justify-center hover:bg-stone-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendChat()} onFocus={() => window.scrollTo(0, 0)} placeholder="메시지를 입력하세요..." style={{ flex: 1, padding: "12px 16px", borderRadius: 24, border: "1px solid #E0DDD8", background: "#F5F4F1", fontSize: 13, outline: "none" }} />
+                  <button onClick={sendChat} disabled={chatLoading || !chatInput.trim()} style={{ width: 44, height: 44, borderRadius: "50%", background: "#1a1a1a", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: chatLoading || !chatInput.trim() ? 0.4 : 1 }}><Send size={16} color="#fff" /></button>
                 </div>
               </div>
             </motion.div>
@@ -1039,39 +1137,29 @@ export default function Landing() {
         )}
       </AnimatePresence>
 
-    {showLoginModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowLoginModal(false)} />
-          <div className="relative bg-white rounded-2xl p-8 w-full max-w-sm mx-4 shadow-2xl">
-            <button onClick={() => setShowLoginModal(false)} className="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-600">
-              <X className="w-5 h-5" />
-            </button>
-            <h3 className="text-xl font-medium text-stone-800 mb-2 text-center">로그인</h3>
-            <p className="text-sm text-stone-500 mb-6 text-center">청첩장 제작을 시작해보세요</p>
-            <div className="space-y-3">
-              <button
-                onClick={() => { setShowLoginModal(false); handleLogin('kakao'); }}
-                className="w-full py-3 bg-[#FEE500] text-[#3C1E1E] rounded-xl font-medium flex items-center justify-center gap-2 hover:brightness-95 transition"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.48 3 2 6.58 2 11c0 2.83 1.82 5.3 4.54 6.7-.2.74-.73 2.64-.84 3.05-.13.5.18.5.39.36.16-.1 2.59-1.76 3.63-2.47.74.1 1.5.16 2.28.16 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
+      {showLoginModal && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }} onClick={() => setShowLoginModal(false)} />
+          <div style={{ position: "relative", background: "#fff", borderRadius: 16, padding: "36px 32px", width: "100%", maxWidth: 380, margin: "0 16px", boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}>
+            <button onClick={() => setShowLoginModal(false)} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", cursor: "pointer", color: "#bbb" }}><X size={20} /></button>
+            <h3 style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 6, textAlign: "center" }}>로그인</h3>
+            <p style={{ fontSize: 13, color: "#999", marginBottom: 24, textAlign: "center" }}>청첩장 제작을 시작해보세요</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <button onClick={() => { setShowLoginModal(false); handleLogin("kakao"); }} style={{ width: "100%", padding: "13px 0", background: "#FEE500", color: "#3C1E1E", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <svg style={{ width: 18, height: 18 }} viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.48 3 2 6.58 2 11c0 2.83 1.82 5.3 4.54 6.7-.2.74-.73 2.64-.84 3.05-.13.5.18.5.39.36.16-.1 2.59-1.76 3.63-2.47.74.1 1.5.16 2.28.16 5.52 0 10-3.58 10-8s-4.48-8-10-8z" /></svg>
                 카카오로 시작하기
               </button>
-              <button
-                onClick={() => { setShowLoginModal(false); handleLogin('google'); }}
-                className="w-full py-3 bg-white border border-stone-200 text-stone-700 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-stone-50 transition"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+              <button onClick={() => { setShowLoginModal(false); handleLogin("google"); }} style={{ width: "100%", padding: "13px 0", background: "#fff", color: "#555", borderRadius: 10, border: "1px solid #E0DDD8", fontWeight: 500, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <svg style={{ width: 18, height: 18 }} viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
                 Google로 시작하기
               </button>
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-stone-200"></div></div>
-                <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-stone-400">또는</span></div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "8px 0" }}>
+                <div style={{ flex: 1, height: 1, background: "#E8E5E0" }} />
+                <span style={{ fontSize: 12, color: "#bbb" }}>또는</span>
+                <div style={{ flex: 1, height: 1, background: "#E8E5E0" }} />
               </div>
-              <button
-                onClick={() => { setShowLoginModal(false); setShowEmailLogin(true); }}
-                className="w-full py-3 border border-stone-300 text-stone-600 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-stone-50 transition"
-              >
-                <Mail className="w-5 h-5" />
+              <button onClick={() => { setShowLoginModal(false); setShowEmailLogin(true); }} style={{ width: "100%", padding: "13px 0", background: "#fff", color: "#555", borderRadius: 10, border: "1px solid #E0DDD8", fontWeight: 500, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <Mail size={18} />
                 이메일로 시작하기
               </button>
             </div>
@@ -1080,123 +1168,84 @@ export default function Landing() {
       )}
 
       {showEmailLogin && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
-          onClick={() => setShowEmailLogin(false)}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl max-w-sm w-full p-6 relative"
-          >
-            <button onClick={() => { setShowEmailLogin(false); setEmailStep('email'); setEmailInput(''); setCodeInput(''); setPasswordInput(''); setEmailError(''); }} className="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-600"><X className="w-5 h-5" /></button>
-            <div className="text-center mb-6">
-              <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4"><Mail className="w-6 h-6 text-stone-600" /></div>
-              <h3 className="text-xl font-medium text-stone-800">{emailStep === 'setPassword' ? '비밀번호 설정' : emailStep === 'password' ? '로그인' : '이메일로 시작하기'}</h3>
-              <p className="text-sm text-stone-500 mt-1">{emailStep === 'email' ? '이메일을 입력해주세요' : emailStep === 'code' ? '인증번호를 입력해주세요' : emailStep === 'password' ? '비밀번호를 입력해주세요' : '사용할 비밀번호를 설정해주세요'}</p>
+        <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)" }} onClick={() => setShowEmailLogin(false)} />
+          <div style={{ position: "relative", background: "#fff", borderRadius: 16, padding: "36px 32px", width: "100%", maxWidth: 380, margin: "0 16px" }}>
+            <button onClick={() => { setShowEmailLogin(false); setEmailStep("email"); setEmailInput(""); setCodeInput(""); setPasswordInput(""); setEmailError(""); }} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", cursor: "pointer", color: "#bbb" }}><X size={20} /></button>
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <div style={{ width: 48, height: 48, background: "#F5F4F1", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}><Mail size={22} color="#555" /></div>
+              <h3 style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a" }}>{emailStep === "setPassword" ? "비밀번호 설정" : emailStep === "password" ? "로그인" : "이메일로 시작하기"}</h3>
+              <p style={{ fontSize: 13, color: "#999", marginTop: 4 }}>{emailStep === "email" ? "이메일을 입력해주세요" : emailStep === "code" ? "인증번호를 입력해주세요" : emailStep === "password" ? "비밀번호를 입력해주세요" : "사용할 비밀번호를 설정해주세요"}</p>
             </div>
-            {emailStep === 'email' && (
-              <div className="space-y-4">
-                <input type="email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} placeholder="이메일 주소" className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm" onKeyPress={(e) => e.key === 'Enter' && handleCheckEmail()} />
-                {emailError && <p className="text-sm text-rose-500">{emailError}</p>}
-                <button onClick={handleCheckEmail} disabled={emailLoading} className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2">{emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}계속하기</button>
+            {emailStep === "email" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <input type="email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} placeholder="이메일 주소" onKeyDown={(e) => e.key === "Enter" && handleCheckEmail()} style={{ width: "100%", padding: "13px 16px", border: "1px solid #E0DDD8", borderRadius: 10, fontSize: 13, outline: "none" }} />
+                {emailError && <p style={{ fontSize: 12, color: "#E53E3E" }}>{emailError}</p>}
+                <button onClick={handleCheckEmail} disabled={emailLoading} style={{ width: "100%", padding: "13px 0", background: "#1a1a1a", color: "#fff", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", opacity: emailLoading ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>{emailLoading && <Loader2 size={16} className="animate-spin" />}계속하기</button>
               </div>
             )}
-            {emailStep === 'password' && (
-              <div className="space-y-4">
-                <p className="text-sm text-stone-500 text-center mb-2">{emailInput}</p>
-                <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="비밀번호" className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm" onKeyPress={(e) => e.key === 'Enter' && handleEmailLogin()} />
-                {emailError && <p className="text-sm text-rose-500">{emailError}</p>}
-                <button onClick={handleEmailLogin} disabled={emailLoading} className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2">{emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}로그인</button>
-                <button onClick={() => { setEmailStep('email'); setPasswordInput(''); setEmailError(''); }} className="w-full py-2 text-sm text-stone-500 hover:text-stone-700">다른 이메일로 변경</button>
+            {emailStep === "password" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <p style={{ fontSize: 12, color: "#999", textAlign: "center" }}>{emailInput}</p>
+                <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="비밀번호" onKeyDown={(e) => e.key === "Enter" && handleEmailLogin()} style={{ width: "100%", padding: "13px 16px", border: "1px solid #E0DDD8", borderRadius: 10, fontSize: 13, outline: "none" }} />
+                {emailError && <p style={{ fontSize: 12, color: "#E53E3E" }}>{emailError}</p>}
+                <button onClick={handleEmailLogin} disabled={emailLoading} style={{ width: "100%", padding: "13px 0", background: "#1a1a1a", color: "#fff", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", opacity: emailLoading ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>{emailLoading && <Loader2 size={16} className="animate-spin" />}로그인</button>
+                <button onClick={() => { setEmailStep("email"); setPasswordInput(""); setEmailError(""); }} style={{ background: "none", border: "none", fontSize: 12, color: "#999", cursor: "pointer", padding: "8px 0" }}>다른 이메일로 변경</button>
               </div>
             )}
-            {emailStep === 'code' && (
-              <div className="space-y-4">
-                <p className="text-sm text-stone-500 text-center mb-2">{emailInput}</p>
-                <input type="text" value={codeInput} onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="인증번호 6자리" className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm text-center text-2xl tracking-[0.5em]" onKeyPress={(e) => e.key === 'Enter' && handleVerifyCode()} />
-                {emailError && <p className="text-sm text-rose-500 text-center">{emailError}</p>}
-                <button onClick={handleVerifyCode} disabled={emailLoading || codeInput.length !== 6} className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2">{emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}확인</button>
-                <button onClick={handleSendCode} disabled={emailLoading} className="w-full py-2 text-sm text-stone-500 hover:text-stone-700">인증번호 다시 받기</button>
+            {emailStep === "code" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <p style={{ fontSize: 12, color: "#999", textAlign: "center" }}>{emailInput}</p>
+                <input type="text" value={codeInput} onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="인증번호 6자리" onKeyDown={(e) => e.key === "Enter" && handleVerifyCode()} style={{ width: "100%", padding: "13px 16px", border: "1px solid #E0DDD8", borderRadius: 10, fontSize: 20, outline: "none", textAlign: "center", letterSpacing: "0.5em" }} />
+                {emailError && <p style={{ fontSize: 12, color: "#E53E3E", textAlign: "center" }}>{emailError}</p>}
+                <button onClick={handleVerifyCode} disabled={emailLoading || codeInput.length !== 6} style={{ width: "100%", padding: "13px 0", background: "#1a1a1a", color: "#fff", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", opacity: emailLoading || codeInput.length !== 6 ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>{emailLoading && <Loader2 size={16} className="animate-spin" />}확인</button>
+                <button onClick={handleSendCode} disabled={emailLoading} style={{ background: "none", border: "none", fontSize: 12, color: "#999", cursor: "pointer", padding: "8px 0" }}>인증번호 다시 받기</button>
               </div>
             )}
-            {emailStep === 'setPassword' && (
-              <div className="space-y-4">
-                <p className="text-sm text-stone-500 text-center mb-2">{emailInput}</p>
-                <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="비밀번호 (6자 이상)" className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 text-sm" onKeyPress={(e) => e.key === 'Enter' && handleRegister()} />
-                {emailError && <p className="text-sm text-rose-500">{emailError}</p>}
-                <button onClick={handleRegister} disabled={emailLoading || passwordInput.length < 6} className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-2">{emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}회원가입 완료</button>
+            {emailStep === "setPassword" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <p style={{ fontSize: 12, color: "#999", textAlign: "center" }}>{emailInput}</p>
+                <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="비밀번호 (6자 이상)" onKeyDown={(e) => e.key === "Enter" && handleRegister()} style={{ width: "100%", padding: "13px 16px", border: "1px solid #E0DDD8", borderRadius: 10, fontSize: 13, outline: "none" }} />
+                {emailError && <p style={{ fontSize: 12, color: "#E53E3E" }}>{emailError}</p>}
+                <button onClick={handleRegister} disabled={emailLoading || passwordInput.length < 6} style={{ width: "100%", padding: "13px 0", background: "#1a1a1a", color: "#fff", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", opacity: emailLoading || passwordInput.length < 6 ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>{emailLoading && <Loader2 size={16} className="animate-spin" />}회원가입 완료</button>
               </div>
             )}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
+
       {showInquiryForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto"
-          >
+        <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)" }} onClick={() => setShowInquiryForm(false)} />
+          <div style={{ position: "relative", background: "#fff", borderRadius: 16, padding: "32px", width: "100%", maxWidth: 420, maxHeight: "90vh", overflowY: "auto" }}>
             {inquirySuccess ? (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl">✓</span>
-                </div>
-                <h3 className="text-xl font-bold text-stone-800 mb-2">문의가 접수되었습니다</h3>
-                <p className="text-stone-500">빠른 시일 내에 답변 드릴게요!</p>
+              <div style={{ textAlign: "center", padding: "32px 0" }}>
+                <div style={{ width: 56, height: 56, background: "#ECFDF5", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}><Check size={24} color="#059669" /></div>
+                <h3 style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>문의가 접수되었습니다</h3>
+                <p style={{ fontSize: 13, color: "#999" }}>빠른 시일 내에 답변 드릴게요!</p>
               </div>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-stone-800">1:1 문의</h3>
-                  <button onClick={() => setShowInquiryForm(false)} className="p-2 hover:bg-stone-100 rounded-full">
-                    <X className="w-5 h-5 text-stone-500" />
-                  </button>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a" }}>1:1 문의</h3>
+                  <button onClick={() => setShowInquiryForm(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#bbb" }}><X size={20} /></button>
                 </div>
-                <div className="space-y-4">
+                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">이름 *</label>
-                    <input
-                      type="text"
-                      value={inquiryForm.name}
-                      onChange={(e) => setInquiryForm({...inquiryForm, name: e.target.value})}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800"
-                      placeholder="홍길동"
-                    />
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "#555", marginBottom: 6 }}>이름 *</label>
+                    <input type="text" value={inquiryForm.name} onChange={(e) => setInquiryForm({ ...inquiryForm, name: e.target.value })} style={{ width: "100%", padding: "12px 14px", border: "1px solid #E0DDD8", borderRadius: 10, fontSize: 13, outline: "none" }} placeholder="홍길동" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">이메일 *</label>
-                    <input
-                      type="email"
-                      value={inquiryForm.email}
-                      onChange={(e) => setInquiryForm({...inquiryForm, email: e.target.value})}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800"
-                      placeholder="example@email.com"
-                    />
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "#555", marginBottom: 6 }}>이메일 *</label>
+                    <input type="email" value={inquiryForm.email} onChange={(e) => setInquiryForm({ ...inquiryForm, email: e.target.value })} style={{ width: "100%", padding: "12px 14px", border: "1px solid #E0DDD8", borderRadius: 10, fontSize: 13, outline: "none" }} placeholder="example@email.com" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">연락처</label>
-                    <input
-                      type="tel"
-                      value={inquiryForm.phone}
-                      onChange={(e) => setInquiryForm({...inquiryForm, phone: e.target.value})}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800"
-                      placeholder="010-1234-5678"
-                    />
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "#555", marginBottom: 6 }}>연락처</label>
+                    <input type="tel" value={inquiryForm.phone} onChange={(e) => setInquiryForm({ ...inquiryForm, phone: e.target.value })} style={{ width: "100%", padding: "12px 14px", border: "1px solid #E0DDD8", borderRadius: 10, fontSize: 13, outline: "none" }} placeholder="010-1234-5678" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">문의 유형</label>
-                    <select
-                      value={inquiryForm.type}
-                      onChange={(e) => setInquiryForm({...inquiryForm, type: e.target.value})}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800"
-                    >
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "#555", marginBottom: 6 }}>문의 유형</label>
+                    <select value={inquiryForm.type} onChange={(e) => setInquiryForm({ ...inquiryForm, type: e.target.value })} style={{ width: "100%", padding: "12px 14px", border: "1px solid #E0DDD8", borderRadius: 10, fontSize: 13, outline: "none", background: "#fff" }}>
                       <option value="general">일반 문의</option>
                       <option value="custom">커스텀 청첩장</option>
                       <option value="video">영상 문의</option>
@@ -1204,29 +1253,45 @@ export default function Landing() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">문의 내용 *</label>
-                    <textarea
-                      value={inquiryForm.message}
-                      onChange={(e) => setInquiryForm({...inquiryForm, message: e.target.value})}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 h-32 resize-none"
-                      placeholder="문의하실 내용을 자세히 적어주세요"
-                    />
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "#555", marginBottom: 6 }}>문의 내용 *</label>
+                    <textarea value={inquiryForm.message} onChange={(e) => setInquiryForm({ ...inquiryForm, message: e.target.value })} style={{ width: "100%", padding: "12px 14px", border: "1px solid #E0DDD8", borderRadius: 10, fontSize: 13, outline: "none", height: 120, resize: "none" }} placeholder="문의하실 내용을 자세히 적어주세요" />
                   </div>
-                  <button
-                    onClick={submitInquiry}
-                    disabled={inquirySending || !inquiryForm.name || !inquiryForm.email || !inquiryForm.message}
-                    className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                {inquirySending ? '전송 중...' : '문의하기'}
+                  <button onClick={submitInquiry} disabled={inquirySending || !inquiryForm.name || !inquiryForm.email || !inquiryForm.message} style={{ width: "100%", padding: "13px 0", background: "#1a1a1a", color: "#fff", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", opacity: inquirySending || !inquiryForm.name || !inquiryForm.email || !inquiryForm.message ? 0.5 : 1 }}>
+                    {inquirySending ? "전송 중..." : "문의하기"}
                   </button>
                 </div>
               </>
             )}
-          </motion.div>
+          </div>
         </div>
       )}
 
+      <AnimatePresence>
+        {selectedGuide && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedGuide(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", maxWidth: 800, width: "100%", maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding: "14px 20px", borderBottom: "1px solid #E8E5E0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <p style={{ fontWeight: 600, color: "#1a1a1a" }}>{selectedGuide.title}</p>
+                <button onClick={() => setSelectedGuide(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#bbb" }}><X size={20} /></button>
+              </div>
+              <div style={{ flex: 1, background: "#000", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {selectedGuide.videoType === "YOUTUBE" ? (
+                  <iframe src={selectedGuide.videoUrl} style={{ width: "100%", aspectRatio: "16/9" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                ) : (
+                  <video src={selectedGuide.videoUrl} controls autoPlay style={{ maxWidth: "100%", maxHeight: "70vh" }} />
+                )}
+              </div>
+              {selectedGuide.description && (
+                <div style={{ padding: "14px 20px", borderTop: "1px solid #E8E5E0" }}>
+                  <p style={{ fontSize: 13, color: "#999" }}>{selectedGuide.description}</p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <ThemeShowcaseModal isOpen={showThemeShowcase} onClose={() => setShowThemeShowcase(false)} />
-    </div>
+    </>
   );
 }

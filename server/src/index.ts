@@ -34,6 +34,7 @@ import aiSnapRouter from "./routes/aiSnap.js";
 import snapPackRouter from "./routes/snapPack.js";
 import snapGiftRouter from "./routes/snapGift.js";
 import guestPhotoRouter from './routes/guestPhoto.js';
+import showcaseRouter from "./routes/showcase.js";
 
 dotenv.config();
 
@@ -71,6 +72,7 @@ app.use('/api/guestbook', guestbookRouter);
 app.use('/api/public', publicRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/payment', paymentRouter);
+app.use("/api", showcaseRouter);
 app.use('/api/admin', adminRouter);
 app.use("/api/weddings", aiReportRouter);
 app.use("/api/report", reportRouter);
