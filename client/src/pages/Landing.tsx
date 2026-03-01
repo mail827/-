@@ -74,20 +74,41 @@ function PhoneMockup({ children, className = "" }: { children: React.ReactNode; 
 
 function HeroPhone({ url }: { url?: string }) {
   const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    if (!url) return;
+    try {
+      const origin = new URL(url).origin;
+      if (!document.querySelector(`link[href="${origin}"]`)) {
+        const link = document.createElement("link");
+        link.rel = "preconnect";
+        link.href = origin;
+        document.head.appendChild(link);
+      }
+    } catch {}
+  }, [url]);
   return (
     <PhoneMockup>
       {url ? (
         <div style={{ position: "absolute", inset: 0 }}>
           {!loaded && (
-            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#FAF9F7", zIndex: 2 }}>
-              <Loader2 size={20} color="#ccc" style={{ animation: "spin 1s linear infinite" }} />
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#FAF9F7", zIndex: 2, gap: 16 }}>
+              <div style={{ width: "70%", aspectRatio: "3/4", borderRadius: 4, background: "linear-gradient(135deg, #EDE9E3 0%, #E0DDD8 100%)", animation: "pulse 1.8s ease-in-out infinite" }} />
+              <div style={{ width: 60, height: 1, background: "#D4CFC8" }} />
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div style={{ width: 40, height: 10, borderRadius: 2, background: "#E0DDD8" }} />
+                <div style={{ fontSize: 12, color: "#ccc" }}>&</div>
+                <div style={{ width: 40, height: 10, borderRadius: 2, background: "#E0DDD8" }} />
+              </div>
+              <div style={{ width: 80, height: 8, borderRadius: 2, background: "#E8E5E0", marginTop: 4 }} />
+              <style>{`@keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }`}</style>
             </div>
           )}
           <iframe
             src={url}
             onLoad={() => setLoaded(true)}
-            style={{ width: "100%", height: "100%", border: "none", opacity: loaded ? 1 : 0, transition: "opacity 0.4s" }}
+            style={{ width: "100%", height: "100%", border: "none", opacity: loaded ? 1 : 0, transition: "opacity 0.5s ease" }}
             title="청첩장 미리보기"
+            loading="eager"
           />
         </div>
       ) : (
@@ -96,10 +117,10 @@ function HeroPhone({ url }: { url?: string }) {
             <div style={{ background: "linear-gradient(180deg, #F4F1EC 0%, #E8EBE4 100%)", minHeight: 1200, padding: "60px 24px 40px" }}>
               <div style={{ textAlign: "center", paddingTop: 20 }}>
                 <div style={{ width: 40, height: 1, background: "#7C8C6E", margin: "0 auto 20px", opacity: 0.5 }} />
-                <p style={{ fontFamily: "'KyoboHandwriting2022KimHyenaem', serif", fontSize: 13, letterSpacing: 3, color: "#7C8C6E", textTransform: "uppercase", marginBottom: 24 }}>Wedding Invitation</p>
-                <h3 style={{ fontFamily: "'KyoboHandwriting2022KimHyenaem', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 4 }}>현우</h3>
-                <p style={{ fontFamily: "'KyoboHandwriting2022KimHyenaem', serif", fontSize: 16, color: "#999", margin: "8px 0" }}>&</p>
-                <h3 style={{ fontFamily: "'KyoboHandwriting2022KimHyenaem', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 20 }}>수빈</h3>
+                <p style={{ fontFamily: "'JeonjuCraftMyungjo', serif", fontSize: 13, letterSpacing: 3, color: "#7C8C6E", textTransform: "uppercase", marginBottom: 24 }}>Wedding Invitation</p>
+                <h3 style={{ fontFamily: "'JeonjuCraftMyungjo', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 4 }}>현우</h3>
+                <p style={{ fontFamily: "'JeonjuCraftMyungjo', serif", fontSize: 16, color: "#999", margin: "8px 0" }}>&</p>
+                <h3 style={{ fontFamily: "'JeonjuCraftMyungjo', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 20 }}>수빈</h3>
                 <p style={{ fontSize: 12, color: "#888", letterSpacing: 1.5, marginBottom: 28 }}>2025. 06. 14 SAT PM 2:00</p>
               </div>
               <div style={{ width: "100%", height: 240, borderRadius: 4, background: "linear-gradient(135deg, #D4C5B0 0%, #B8A88A 50%, #C4B496 100%)", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -475,7 +496,9 @@ export default function Landing() {
   const [greetingDismissed, setGreetingDismissed] = useState(false);
   const [snapSamples, setSnapSamples] = useState<{ id: string; concept: string; imageUrl: string; mode: string }[]>([]);
   const [selectedSnap, setSelectedSnap] = useState<string | null>(null);
-  const [heroShowcaseUrl, setHeroShowcaseUrl] = useState<string | undefined>(undefined);
+  const [heroShowcaseUrl, setHeroShowcaseUrl] = useState<string | undefined>(() => {
+    try { return localStorage.getItem("heroShowcaseUrl") || undefined; } catch { return undefined; }
+  });
   const chatEndRef = useRef<HTMLDivElement>(null);
   const isLoggedIn = !!localStorage.getItem("token");
 
@@ -499,7 +522,10 @@ export default function Landing() {
     fetch(`${API}/guide`).then(r => r.json()).then(setGuides).catch(() => {});
     fetch(`${API}/admin/snap-samples`).then(r => r.json()).then(setSnapSamples).catch(() => {});
     fetch(`${API}/public/hero-showcase`).then(r => r.json()).then((data: { url: string }) => {
-      if (data.url) setHeroShowcaseUrl(data.url);
+      if (data.url) {
+        setHeroShowcaseUrl(data.url);
+        try { localStorage.setItem("heroShowcaseUrl", data.url); } catch {}
+      }
     }).catch(() => {});
 
   }, []);
@@ -605,8 +631,9 @@ export default function Landing() {
     <>
       <style>{`
         @import url('${FONT_LINK}');
-        @font-face { font-family: 'KyoboHandwriting2022KimHyenaem'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/KyoboHandwriting2022khn.woff2') format('woff2'); font-weight: normal; font-display: swap; }
-        .serif { font-family: 'KyoboHandwriting2022KimHyenaem', 'Georgia', serif; }
+        @font-face { font-family: 'JeonjuCraftMyungjo'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2310@1.0/JeonjuCraftMjL.woff2') format('woff2'); font-weight: 300; font-display: swap; }
+        @font-face { font-family: 'JeonjuCraftMyungjo'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2310@1.0/JeonjuCraftMjB.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+        .serif { font-family: 'JeonjuCraftMyungjo', 'Georgia', serif; }
         @keyframes heroScroll { 0%, 8% { transform: translateY(0); } 42%, 58% { transform: translateY(calc(-100% + 580px)); } 92%, 100% { transform: translateY(0); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .hero-scroll-content { animation: heroScroll 8s cubic-bezier(0.45,0,0.55,1) infinite; }

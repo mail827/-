@@ -105,7 +105,7 @@ export default function WeddingPage() {
   const { data: guestbookData, refetch: refetchGuestbook } = useQuery({
     queryKey: ['guestbook', slug],
     queryFn: () => publicApi<{ guestbooks: Guestbook[] }>(`/wedding/${slug}/guestbook`),
-    enabled: !!slug
+    enabled: !!slug && !isPreview
   });
 
   const rsvpMutation = useMutation({
@@ -215,11 +215,11 @@ export default function WeddingPage() {
           isRsvpLoading={rsvpMutation.isPending}
           isGuestbookLoading={guestbookMutation.isPending}
           refetchGuestbook={refetchGuestbook}
-          guestPhotoSlot={weddingToUse.guestPhotoEnabled !== false ? <GuestPhotoGallery slug={weddingToUse.slug} enabled={true} /> : undefined}
+          guestPhotoSlot={!isPreview && weddingToUse.guestPhotoEnabled !== false ? <GuestPhotoGallery slug={weddingToUse.slug} enabled={true} /> : undefined}
         />
       </Suspense>
       </div>
-      {weddingToUse.aiEnabled && (
+      {weddingToUse.aiEnabled && !isPreview && (
         <AiChat
           slug={weddingToUse.slug}
           groomName={weddingToUse.groomName}
