@@ -87,24 +87,31 @@ const getRandomPose = (mode: string): string => {
   return arr[Math.floor(Math.random() * arr.length)];
 };
 
-const applyFaceSwap = async (baseUrl: string, isCouple: boolean, imageUrls: string[]): Promise<string> => {
-  return baseUrl;
+const applyFaceSwap = async (baseUrl: string, mode: string, imageUrls: string[]): Promise<string> => {
   try {
-    const groomFace = imageUrls[0];
-    const brideFace = imageUrls[1];
-    const swap1 = await falFetch('https://fal.run/fal-ai/face-swap', {
-      method: 'POST',
-      body: JSON.stringify({ base_image_url: baseUrl, swap_image_url: groomFace }),
-    });
-    if (swap1?.image?.url) {
-      const swap2 = await falFetch('https://fal.run/fal-ai/face-swap', {
-        method: 'POST',
-        body: JSON.stringify({ base_image_url: swap1.image.url, swap_image_url: brideFace }),
-      });
-      if (swap2?.image?.url) return swap2.image.url;
-      return swap1.image.url;
+    let swapBody: Record<string, any> = { workflow_type: 'user_hair', upscale: true, target_image: baseUrl };
+    if (mode === 'couple' && imageUrls.length >= 2) {
+      swapBody.face_image_0 = imageUrls[0];
+      swapBody.gender_0 = 'male';
+      swapBody.face_image_1 = imageUrls[1];
+      swapBody.gender_1 = 'female';
+    } else if (mode === 'groom') {
+      swapBody.face_image_0 = imageUrls[0];
+      swapBody.gender_0 = 'male';
+    } else {
+      swapBody.face_image_0 = imageUrls[imageUrls.length > 1 ? 1 : 0];
+      swapBody.gender_0 = 'female';
     }
-  } catch (e: any) { console.log('Face-swap skipped:', e.message); }
+    const swapResult = await falFetch('https://fal.run/easel-ai/advanced-face-swap', {
+      method: 'POST',
+      body: JSON.stringify(swapBody),
+    });
+    if (swapResult?.image?.url) {
+      const checkSwap = await fetch(swapResult.image.url, { method: 'HEAD' });
+      const swapSize = parseInt(checkSwap.headers.get('content-length') || '0', 10);
+      if (swapSize > 10000) return swapResult.image.url;
+    }
+  } catch (e: any) { console.log('Easel face-swap skipped:', e.message); }
   return baseUrl;
 };
 
@@ -314,7 +321,7 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
     const prompt = pose + ', ' + basePrompt;
 
     const isCouple = mode === 'couple';
-    const strength = isCouple ? 0.15 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.20 : 0.20));
+    const strength = isCouple ? 0.20 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.22 : 0.28));
     let urls: string[];
     if (isCouple) {
       if (imageUrls.length >= 3) {
@@ -341,7 +348,7 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
     if (submit.images) {
       const falUrl = submit.images[0]?.url;
       if (falUrl) {
-        const swappedUrl = await applyFaceSwap(falUrl, mode === 'couple', imageUrls);
+        const swappedUrl = await applyFaceSwap(falUrl, mode, imageUrls);
         const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap');
         await prisma.aiSnap.update({
           where: { id: snapId },
@@ -414,7 +421,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
     const isCouple = mode === 'couple';
     const isSelfie = concept === 'iphone_selfie' || concept === 'iphone_mirror';
     const isCruise = concept === 'cruise_sunset' || concept === 'cruise_bluesky';
-    const strength = isSelfie ? 0.22 : isCruise ? 0.20 : isCouple ? 0.18 : 0.20;
+    const strength = isSelfie ? 0.22 : isCruise ? 0.22 : isCouple ? 0.20 : 0.28;
 
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
@@ -423,7 +430,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     if (submit.images) {
       const rawUrl = submit.images[0]?.url;
-      const swappedUrl = await applyFaceSwap(rawUrl, isCouple, imageUrls);
+      const swappedUrl = await applyFaceSwap(rawUrl, mode, imageUrls);
       const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap/free');
       const watermarked = getWatermarkedUrl(uploaded.publicId);
       await prisma.aiSnap.create({
@@ -583,7 +590,7 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
     const prompt = pose + ', ' + basePrompt;
     const effectiveMode = req.body.mode || 'groom';
     const isCouple = effectiveMode === 'couple';
-    const strength = isCouple ? 0.15 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.20 : 0.20));
+    const strength = isCouple ? 0.20 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.22 : 0.28));
     let urls: string[];
     if (isCouple) {
       if (imageUrls.length >= 3) {
@@ -608,7 +615,30 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
     if (submit.images) {
       const falUrl = submit.images[0]?.url;
       if (falUrl) {
-        const swappedUrl = falUrl;
+        let swappedUrl = falUrl;
+        try {
+          let swapBody: Record<string, any> = { workflow_type: 'user_hair', upscale: true, target_image: falUrl };
+          if (effectiveMode === 'couple' && imageUrls.length >= 2) {
+            swapBody.face_image_0 = imageUrls[0];
+            swapBody.gender_0 = 'male';
+            swapBody.face_image_1 = imageUrls[1];
+            swapBody.gender_1 = 'female';
+          } else if (effectiveMode === 'groom') {
+            swapBody.face_image_0 = imageUrls[0];
+            swapBody.gender_0 = 'male';
+          } else {
+            swapBody.face_image_0 = imageUrls[imageUrls.length > 1 ? 1 : 0];
+            swapBody.gender_0 = 'female';
+          }
+          const swapRes = await falFetch('https://fal.run/easel-ai/advanced-face-swap', {
+            method: 'POST',
+            body: JSON.stringify(swapBody),
+          });
+          if (swapRes?.image?.url) {
+            const chk = await fetch(swapRes.image.url, { method: 'HEAD' });
+            if (parseInt(chk.headers.get('content-length') || '0', 10) > 10000) swappedUrl = swapRes.image.url;
+          }
+        } catch (swapErr: any) { console.log('Easel face-swap skipped:', swapErr.message); }
         const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap');
         return res.json({ status: 'done', resultUrl: uploaded.url });
       }
