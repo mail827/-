@@ -34,6 +34,8 @@ const CONCEPTS = [
   { id: 'iphone_selfie', label: '셀카 스냅' },
   { id: 'iphone_mirror', label: '거울 셀카' },
   { id: 'cruise_bluesky', label: '크루즈 블루스카이' },
+  { id: 'vintage_record', label: '빈티지 레코드' },
+  { id: 'retro_hongkong', label: '레트로 홍콩' },
 ];
 
 const PACKAGE_QUOTA: Record<string, number> = {
@@ -45,6 +47,67 @@ const PACKAGE_QUOTA: Record<string, number> = {
 const FREE_TRIAL = 1;
 const EXTRA_PRICE = 1500;
 const CRUISE_CONCEPTS = ['cruise_sunset', 'cruise_bluesky'];
+
+
+const RANDOM_POSES_GROOM = [
+  'tight closeup framing at chest level, close-up portrait, slight confident smile, direct warm eye contact, extremely shallow depth of field',
+  'extreme closeup framing at shoulder level, sharp side profile, moody rim lighting on jawline, contemplative expression',
+  'medium shot framing at waist level, upper body, one hand touching open collar casually, slight head tilt, intimate warm gaze',
+  'medium shot framing at waist level, upper body leaning shoulder against wall, relaxed smirk, dramatic side lighting',
+  'tight closeup framing at chest level, genuine laughing moment, head tilted, natural joy, eyes crinkled with warmth',
+  'three quarter body mid-stride, one hand in pocket, looking slightly off-camera with half-smile',
+  'medium shot framing at waist level, upper body looking down with gentle smile, adjusting cuff, soft intimate moment',
+  'medium shot framing at waist level, upper body turned away, glancing back over shoulder, charming half smile, dramatic backlight',
+];
+
+const RANDOM_POSES_BRIDE = [
+  'tight closeup framing at chest level, close-up portrait, soft warm smile, gentle eye contact, extremely shallow depth of field, beautiful skin glow',
+  'extreme closeup framing at shoulder level, elegant side profile close-up, chin slightly lifted, serene expression, earring catching light',
+  'medium shot framing at waist level, upper body, one hand gracefully touching hair behind ear, gentle head tilt, soft warm smile',
+  'medium shot framing at waist level, upper body candid laughing moment, eyes crinkled with genuine joy, hand near face',
+  'medium shot framing at waist level, upper body looking back over shoulder with mysterious inviting smile, dramatic backlight',
+  'medium shot framing at waist level, upper body looking down with gentle smile, one hand adjusting earring, soft intimate moment',
+  'three quarter body leaning casually against wall, one leg bent, relaxed confident expression',
+  'three quarter body mid-walk, dress visible, looking ahead with gentle smile, natural stride',
+];
+
+const RANDOM_POSES_COUPLE = [
+  'tight closeup framing at chest level, extreme close-up foreheads gently touching, eyes closed, peaceful intimate moment',
+  'tight closeup framing at chest level, close-up gentle cheek kiss, her hand on his chest, warm spontaneous moment',
+  'medium shot framing at waist level, upper body facing each other with warm gentle smiles, intimate close distance',
+  'medium shot framing at waist level, back hug from behind, both smiling warmly, her hand on his arm',
+  'three quarter body walking together mid-stride, turning to look at each other with warm smiles',
+  'tight closeup framing at chest level, him whispering in her ear, she smiles with eyes closed, intimate tender moment',
+  'extreme closeup framing at shoulder level, noses almost touching, playful eye contact, warm smiles',
+  'medium shot framing at waist level, arms linked, she leaning head on his shoulder, both with content smiles',
+];
+
+const getRandomPose = (mode: string): string => {
+  const arr = mode === 'couple' ? RANDOM_POSES_COUPLE : mode === 'groom' ? RANDOM_POSES_GROOM : RANDOM_POSES_BRIDE;
+  return arr[Math.floor(Math.random() * arr.length)];
+};
+
+const applyFaceSwap = async (baseUrl: string, isCouple: boolean, imageUrls: string[]): Promise<string> => {
+  return baseUrl;
+  try {
+    const groomFace = imageUrls[0];
+    const brideFace = imageUrls[1];
+    const swap1 = await falFetch('https://fal.run/fal-ai/face-swap', {
+      method: 'POST',
+      body: JSON.stringify({ base_image_url: baseUrl, swap_image_url: groomFace }),
+    });
+    if (swap1?.image?.url) {
+      const swap2 = await falFetch('https://fal.run/fal-ai/face-swap', {
+        method: 'POST',
+        body: JSON.stringify({ base_image_url: swap1.image.url, swap_image_url: brideFace }),
+      });
+      if (swap2?.image?.url) return swap2.image.url;
+      return swap1.image.url;
+    }
+  } catch (e: any) { console.log('Face-swap skipped:', e.message); }
+  return baseUrl;
+};
+
 const NEGATIVE_PROMPT = 'distorted face, deformed nose, asymmetric eyes, blurry face, smoothed skin, plastic face, bumpy skin, uneven skin texture, cartoon face, ugly face, merged faces, elongated face, enhanced jawline, square jaw, chiseled face, narrow face, donkey face, horse face, long chin, protruding jaw, swollen face, inflated cheeks, inhuman proportions, uncanny valley face, alien features';
 
 const SOLO_PROMPTS: Record<string, { groom: string; bride: string }> = {
@@ -144,6 +207,14 @@ iphone_selfie: {
     groom: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. luxury cruise ship deck under vivid blue sky, groom wearing light beige summer suit with white shirt, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no face elongation no jaw enhancement no face slimming',
     bride: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. elegant bride on luxury cruise ship deck under vivid blue sky, wearing strapless ivory organza dress with light flowing fabric, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze blowing veil gently, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere, no text no logos no watermarks, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no face elongation no jaw enhancement no face slimming',
   },
+  vintage_record: {
+    groom: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. place the same person in a cozy vintage vinyl record shop, wearing olive khaki brown blazer over light blue open-collar shirt with pinstripe grey trousers and brown leather shoes, surrounded by wooden shelves filled with LP records and album covers on walls, warm tungsten incandescent bulb lighting casting golden amber glow, vinyl turntable nearby, intimate nostalgic 1970s atmosphere, Kodak Portra 400 warm film tones with soft grain, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
+    bride: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. place the same person in a cozy vintage vinyl record shop, wearing ivory puff-sleeve lace high-neck wedding dress with sweetheart neckline under sheer lace bodice, satin ribbon waist belt, elbow-length white satin gloves, short tulle veil with pearl hairpin, surrounded by wooden shelves filled with LP records and album covers, warm tungsten incandescent bulb lighting casting golden amber glow, vintage floral wallpaper in background, intimate nostalgic 1960s bridal atmosphere, Kodak Portra 400 warm film tones with soft grain, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
+  },
+  retro_hongkong: {
+    groom: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. place the same person in Hong Kong Mong Kok night market with red lanterns overhead and neon signs, wearing dark burgundy wine double-breasted blazer with silky sheen over black silk shirt unbuttoned showing collarbone, ivory pocket square, black slim trousers, black chelsea boots, candid mid-stride with hand in pocket, warm red lantern glow on face, rain-slicked street reflecting neon lights, Wong Kar-wai cinematic color grading, shallow depth of field, Fuji Superia 400 film grain, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
+    bride: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. place the same person in Hong Kong Mong Kok night market with red lanterns overhead and neon signs, wearing champagne gold silk satin halter-neck dress with thin spaghetti straps and open cutout sides, small low mandarin collar, body-hugging silhouette with gold plum blossom embroidery, thigh-high side slit, pearl drop earrings, gold ankle-strap heels, hairstyle matching reference photo exactly, candid natural moment, warm red lantern glow, rain-slicked street, Wong Kar-wai cinematic grading, Fuji Superia 400 film grain, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
+  },
 };
 
 const COUPLE_PROMPTS: Record<string, string> = {
@@ -171,6 +242,8 @@ const COUPLE_PROMPTS: Record<string, string> = {
 iphone_selfie: 'preserve both faces with absolute accuracy, maintain exact facial proportions face shape eye spacing nose size lip shape for both subjects, keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. authentic iPhone couple selfie from above at arms length, both faces close together filling frame, slightly tilted off-center, the man in white button-up shirt open collar on the left, the woman in white top or camisole on the right, on-camera flash with neutral cool white balance, digital noise and grain, slightly overexposed flash, both with candid natural laughing or smiling expressions, heads touching or very close, NOT studio NOT warm golden NOT formal, raw couple selfie, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks ultra sharp facial details, no face distortion no face morphing no face smoothing, maintain natural skin texture pores and contours for both faces, no face elongation no jaw enhancement no face slimming',
   iphone_mirror: 'preserve both faces with absolute accuracy, maintain exact facial proportions face shape eye spacing nose size lip shape for both subjects, keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. couple mirror selfie with iPhone flash, both reflected in large clean mirror, the man in white t-shirt under open black blazer on the left, the woman in fitted white satin slip dress on the right, one person holding iPhone visible in mirror, bright harsh flash high contrast, slightly washed out flash aesthetic, casual fun couple mirror pose, NOT formal, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks ultra sharp facial details, no face distortion no face morphing no face smoothing, maintain natural skin texture pores and contours for both faces, no face elongation no jaw enhancement no face slimming',
   cruise_bluesky: 'preserve both faces with absolute accuracy, maintain exact facial proportions face shape eye spacing nose size lip shape for both subjects, keep the exact same faces, facial features, face shapes, eyes, nose, lips unchanged. elegant couple on luxury cruise ship deck under vivid blue sky, groom wearing light beige summer suit with white shirt, bride wearing strapless ivory organza dress, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, couple embracing naturally on deck, clean nautical atmosphere, no text no logos no watermarks, preserve original facial identities exactly, do not alter or beautify the faces, photorealistic, 8k ultra sharp facial details, no face distortion no face morphing no face smoothing, maintain natural skin texture pores and contours for both faces, no face elongation no jaw enhancement no face slimming',
+  vintage_record: 'preserve both faces with absolute accuracy, maintain exact facial proportions face shape eye spacing nose size lip shape for both subjects, keep the exact same faces, facial features, face shapes, eyes, nose, lips unchanged. romantic couple in a cozy vintage vinyl record shop, the man wearing olive khaki brown blazer over light blue open-collar shirt with pinstripe grey trousers on the left, the woman wearing ivory puff-sleeve lace high-neck wedding dress with sweetheart neckline under sheer lace bodice satin ribbon waist belt elbow-length white satin gloves and short tulle veil with pearl hairpin on the right, surrounded by wooden shelves filled with LP records and album covers on walls, warm tungsten incandescent bulb lighting casting golden amber glow, vinyl turntable nearby, couple looking at each other lovingly or browsing records together, intimate nostalgic 1970s atmosphere, Kodak Portra 400 warm film tones with soft grain, no text no logos no watermarks, preserve original facial identities exactly, do not alter or beautify the faces, photorealistic, 8k ultra sharp facial details, no face distortion no face morphing no face smoothing, maintain natural skin texture pores and contours for both faces, no face elongation no jaw enhancement no face slimming',
+  retro_hongkong: 'preserve both faces with absolute accuracy, maintain exact facial proportions face shape eye spacing nose size lip shape for both subjects, keep the exact same faces unchanged. couple walking together in Hong Kong Mong Kok night market with red lanterns overhead, the man wearing dark burgundy double-breasted blazer with silky sheen over black silk shirt unbuttoned showing collarbone with ivory pocket square on the left, the woman wearing champagne gold silk satin halter-neck dress with spaghetti straps open cutout sides small mandarin collar gold plum blossom embroidery thigh-high slit pearl earrings on the right, neon signs with Chinese characters, rain-slicked street reflecting red and amber lights, candid walking moment looking at each other warmly, Wong Kar-wai cinematic grading, Fuji Superia 400 grain, no text no logos no watermarks, preserve original facial identities exactly, do not alter or beautify the faces, photorealistic, 8k ultra sharp facial details, no face distortion no face morphing no face smoothing, no face elongation no jaw enhancement no face slimming',
 };
 
 const falFetch = async (url: string, opts?: RequestInit) => {
@@ -229,14 +302,16 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
   try {
     await prisma.aiSnap.update({ where: { id: snapId }, data: { status: 'generating' } });
 
-    let prompt = '';
+    let basePrompt = '';
     if (mode === 'couple') {
-      prompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
+      basePrompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
     } else if (mode === 'groom') {
-      prompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
+      basePrompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
     } else {
-      prompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
+      basePrompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
     }
+    const pose = getRandomPose(mode);
+    const prompt = pose + ', ' + basePrompt;
 
     const isCouple = mode === 'couple';
     const strength = isCouple ? 0.15 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.30 : 0.28));
@@ -265,7 +340,8 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
     if (submit.images) {
       const falUrl = submit.images[0]?.url;
       if (falUrl) {
-        const uploaded = await uploadFromUrl(falUrl, 'ai-snap');
+        const swappedUrl = await applyFaceSwap(falUrl, mode === 'couple', imageUrls);
+        const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap');
         await prisma.aiSnap.update({
           where: { id: snapId },
           data: { status: 'done', resultUrl: uploaded.url, prompt },
@@ -311,14 +387,16 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
   if (!concept || !imageUrls || imageUrls.length < 1) return res.status(400).json({ error: 'concept, imageUrls required' });
 
   try {
-    let prompt = '';
+    let basePrompt = '';
     if (mode === 'couple') {
-      prompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
+      basePrompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
     } else if (mode === 'groom') {
-      prompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
+      basePrompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
     } else {
-      prompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
+      basePrompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
     }
+    const pose = getRandomPose(mode);
+    const prompt = pose + ', ' + basePrompt;
 
     await prisma.user.update({ where: { id: userId }, data: { freeSnapUsed: true } });
 
@@ -343,7 +421,9 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
     });
 
     if (submit.images) {
-      const uploaded = await uploadFromUrl(submit.images[0]?.url, 'ai-snap/free');
+      const rawUrl = submit.images[0]?.url;
+      const swappedUrl = await applyFaceSwap(rawUrl, isCouple, imageUrls);
+      const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap/free');
       const watermarked = getWatermarkedUrl(uploaded.publicId);
       await prisma.aiSnap.create({
         data: {
@@ -490,14 +570,16 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
   const { concept, imageUrls, mode } = req.body;
   if (!concept || !imageUrls || imageUrls.length < 1) return res.status(400).json({ error: 'concept, imageUrls required' });
   try {
-    let prompt = '';
+    let basePrompt = '';
     if (mode === 'couple') {
-      prompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
+      basePrompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
     } else if (mode === 'groom') {
-      prompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
+      basePrompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
     } else {
-      prompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
+      basePrompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
     }
+    const pose = getRandomPose(mode);
+    const prompt = pose + ', ' + basePrompt;
     const effectiveMode = req.body.mode || 'groom';
     const isCouple = effectiveMode === 'couple';
     const strength = isCouple ? 0.15 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.30 : 0.28));
@@ -524,7 +606,8 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
     if (submit.images) {
       const falUrl = submit.images[0]?.url;
       if (falUrl) {
-        const uploaded = await uploadFromUrl(falUrl, 'ai-snap');
+        const swappedUrl = falUrl;
+        const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap');
         return res.json({ status: 'done', resultUrl: uploaded.url });
       }
     }
@@ -544,7 +627,8 @@ router.get('/admin/poll', async (req, res) => {
       const result = await falFetch(responseUrl as string);
       const falUrl = result.images?.[0]?.url;
       if (falUrl) {
-        const uploaded = await uploadFromUrl(falUrl, 'ai-snap');
+        const swappedUrl = falUrl;
+        const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap');
         return res.json({ status: 'done', resultUrl: uploaded.url });
       }
       return res.json({ status: 'done', resultUrl: null });

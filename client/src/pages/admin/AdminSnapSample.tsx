@@ -19,6 +19,8 @@ const CONCEPTS = [
   { id: 'iphone_mirror', label: '거울 셀카' },
   { id: 'cruise_sunset', label: '크루즈 선셋' },
   { id: 'cruise_bluesky', label: '크루즈 블루' },
+  { id: 'vintage_record', label: '빈티지 레코드' },
+  { id: 'retro_hongkong', label: '레트로 홍콩' },
   { id: 'city_night', label: '시티 나이트' },
   { id: 'forest_wedding', label: '숲속 웨딩' },
   { id: 'castle_garden', label: '유럽 궁전' },

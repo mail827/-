@@ -39,6 +39,8 @@ const CONCEPT_META: Record<string, { emoji: string; sub: string }> = {
   iphone_selfie: { emoji: 'P', sub: '힙한 셀카' },
   iphone_mirror: { emoji: 'P', sub: '거울 플래시' },
   cruise_bluesky: { emoji: 'B', sub: '청명한 바다' },
+  vintage_record: { emoji: 'V', sub: '레코드샵 레트로' },
+  retro_hongkong: { emoji: 'H', sub: '홍콩 야시장' },
 };
 
 type Mode = 'couple' | 'groom' | 'bride';

@@ -26,6 +26,8 @@ const CONCEPTS = [
   { id: 'iphone_mirror', label: '거울 셀카', sub: '미러 셀카' },
   { id: 'cruise_sunset', label: '크루즈 선셋', sub: '노을빛 크루즈' },
   { id: 'cruise_bluesky', label: '크루즈 블루', sub: '푸른 바다 크루즈' },
+  { id: 'vintage_record', label: '빈티지 레코드', sub: '레코드샵 빈티지' },
+  { id: 'retro_hongkong', label: '레트로 홍콩', sub: '홍콩 야시장 무드' },
 ];
 
 type Mode = 'groom' | 'bride' | 'couple';

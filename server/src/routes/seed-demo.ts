@@ -147,10 +147,6 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '빈티지 레코드',
     base: 'cozy vintage vinyl record shop interior, wooden shelves filled with LP records and colorful album covers displayed on walls, warm tungsten incandescent bulb lighting casting golden amber glow, vinyl turntable on wooden counter, old concert posters on ceiling, intimate nostalgic 1960s 1970s atmosphere, Kodak Portra 400 warm film tones with soft grain',
   },
-  retro_hongkong: {
-    label: '레트로 홍콩',
-    base: 'narrow Hong Kong Mong Kok night market alley, rows of glowing crimson red Chinese paper lanterns strung tightly overhead creating tunnel of warm light, vintage neon signs with traditional Chinese characters in pink cyan and green glow, rain-slicked cobblestone street with deep puddle reflections of all lights, blurred crowd silhouettes in background creating depth, steamy food stall smoke drifting through scene, Wong Kar-wai In the Mood for Love color grading with deep teal shadows and warm crimson highlights, cross-processed film look, shallow depth of field 85mm f1.4, Fuji Superia 400 grain with teal-red color shift',
-  },
 };
 
 const GROOM_SHOT_VARIANTS = [
@@ -166,7 +162,6 @@ const GROOM_SHOT_VARIANTS = [
   { id: 'laughing_natural', prompt: 'genuine laughing moment, head slightly tilted back, natural joy, eyes crinkled, candid movement' },
   { id: 'low_angle_power', prompt: 'low angle shot, standing tall with hands in pockets, powerful silhouette against sky, heroic cinematic mood' },
   { id: 'arm_cross_lean', prompt: 'arms crossed casually, slight lean, knowing smile, editorial magazine pose, strong but approachable' },
-  { id: 'elbow_lean_sign', prompt: 'upper body shot, casually leaning elbow on market stall counter or shop sign railing, one hand in pocket, relaxed warm genuine smile, slight head tilt, intimate close-up night portrait' },
   { id: 'looking_down', prompt: 'looking down with gentle smile, hands adjusting boutonniere, soft overhead lighting, intimate reflective moment' },
   { id: 'dramatic_half', prompt: 'dramatic half-face lighting, one side illuminated, serious composed expression, deep shadows, painterly mood' },
   { id: 'wide_cinematic', prompt: 'wide shot, walking alone through grand scene, small figure in epic environment, cinematic scale and atmosphere' },
@@ -245,8 +240,7 @@ const OUTFIT_GROOM: Record<string, string> = {
   vintage_film: 'wearing retro brown suit with wide lapels, 1970s style',
   cruise_sunset: 'wearing light linen suit, nautical elegance',
   cruise_bluesky: 'wearing white or navy blazer, crisp linen shirt, no tie, nautical casual style',
-  vintage_record: 'wearing olive khaki brown wide-lapel vintage blazer over light blue open-collar dress shirt with wide pointed collar visible over blazer lapels, grey pinstripe pleated trousers, brown leather oxford shoes, same outfit in every shot, 1970s retro groom',
-  retro_hongkong: 'wearing dark burgundy wine double-breasted blazer with silky sheen over black silk shirt unbuttoned showing collarbone, ivory pocket square, black slim trousers, black chelsea boots, relaxed confident lean with hand in pocket, effortless cool charm',
+  vintage_record: 'wearing olive khaki brown vintage blazer over light blue open-collar shirt, pinstripe grey trousers, brown leather shoes, retro 1970s casual groom style',
   iphone_selfie: 'wearing casual white shirt with rolled sleeves, relaxed natural look, no tie no jacket',
   iphone_mirror: 'wearing casual white shirt with rolled sleeves, relaxed natural look, no tie no jacket, holding phone for mirror selfie',
 };
@@ -273,8 +267,7 @@ const OUTFIT_BRIDE: Record<string, string> = {
   vintage_film: 'wearing classic A-line lace dress, 1970s vintage bridal aesthetic',
   cruise_sunset: 'wearing flowing white dress, windswept hair, golden hour elegance',
   cruise_bluesky: 'wearing white summer dress, windswept hair, clean nautical bridal style',
-  vintage_record: 'wearing ivory cream Victorian puff-sleeve wedding dress with sheer floral lace high-neck bodice over sweetheart neckline, short puffy gathered sleeves at shoulder, fitted ivory satin ribbon belt at waist, full A-line satin skirt with front slit, elbow-length white satin opera gloves, short tulle veil on back of head, hair worn completely down and loose past shoulders, same dress same gloves same veil in every shot, 1960s vintage bridal',
-  retro_hongkong: 'wearing champagne gold silk satin halter-neck dress with thin spaghetti straps and open cutout sides showing skin, small low mandarin collar detail at neckline, body-hugging silhouette, scattered delicate gold plum blossom embroidery, thigh-high side slit, vintage pearl drop earrings, metallic gold ankle-strap heels, hairstyle matching reference photo exactly, natural hair movement',
+  vintage_record: 'wearing ivory puff-sleeve lace high-neck wedding dress with sweetheart neckline under sheer lace bodice, satin ribbon waist belt, elbow-length white satin gloves, short tulle veil with pearl hairpin, vintage 1960s romantic bridal style',
   iphone_selfie: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress',
   iphone_mirror: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress, holding phone for mirror selfie',
 };
@@ -293,56 +286,8 @@ const CLOSEUP_SHOTS = new Set([
   'closeup', 'face_to_face_close', 'dramatic_half', 'dramatic_light', 'close_eyes', 'profile_sharp',
 ]);
 
-
-const CINEMATIC_GROOM_SHOTS = [
-  { id: 'closeup_gaze', prompt: 'tight closeup framing at chest level, face and upper chest only, no waist no legs, close-up portrait, direct warm eye contact, slight confident smile, extremely shallow depth of field' },
-  { id: 'profile_rim', prompt: 'extreme closeup framing at shoulder level, face only sharp side profile, moody rim lighting on jawline, contemplative expression, dramatic cinematic' },
-  { id: 'collar_touch', prompt: 'medium shot framing at waist level, upper body only, one hand touching open shirt collar casually, slight head tilt, intimate warm gaze toward camera' },
-  { id: 'leaning_wall', prompt: 'medium shot framing at waist level, upper body casually leaning shoulder against neon-lit wall, relaxed smirk, arms loosely crossed, dramatic side lighting' },
-  { id: 'laughing_close', prompt: 'tight closeup framing at chest level, close-up genuine laughing moment, head tilted, natural joy, eyes crinkled with warmth' },
-  { id: 'walking_stride', prompt: 'three quarter body mid-stride, one hand in pocket, looking slightly off-camera with half-smile, natural movement' },
-  { id: 'looking_down', prompt: 'medium shot framing at waist level, upper body looking down with gentle thoughtful smile, hand adjusting cuff, soft intimate moment' },
-  { id: 'back_glance', prompt: 'medium shot framing at waist level, upper body turned away, glancing back over shoulder with charming half smile, dramatic backlight' },
-  { id: 'three_quarter_smirk', prompt: 'tight closeup framing at chest level, three quarter view close-up face, slight knowing smirk, one eyebrow subtly raised, effortless charisma' },
-  { id: 'seated_cool', prompt: 'seated casually, elbows on knees, relaxed genuine smile looking up, intimate eye level angle' },
-];
-
-const CINEMATIC_BRIDE_SHOTS = [
-  { id: 'closeup_smile', prompt: 'tight closeup framing at chest level, face and upper chest only visible, no waist no legs, close-up portrait, soft warm smile, gentle eye contact, extremely shallow depth of field, beautiful skin glow from neon light' },
-  { id: 'profile_earring', prompt: 'extreme closeup framing at shoulder level, face only side profile close-up, chin slightly lifted, serene expression, earring catching neon light, wind in hair, blurred background' },
-  { id: 'hair_touch', prompt: 'medium shot framing at waist level, upper body only, one hand gracefully touching hair behind ear, gentle head tilt, soft warm smile, intimate framing' },
-  { id: 'laughing_candid', prompt: 'medium shot framing at waist level, upper body candid laughing moment, eyes crinkled with genuine joy, hand near face, natural warmth' },
-  { id: 'over_shoulder', prompt: 'medium shot framing at waist level, upper body looking back over shoulder with mysterious inviting smile, dramatic backlight on face and hair' },
-  { id: 'adjusting', prompt: 'upper body, looking down with gentle smile, one hand adjusting earring, soft intimate moment' },
-  { id: 'leaning_wall', prompt: 'three quarter body leaning casually against neon-lit wall, one leg bent, relaxed confident expression, warm glow on face' },
-  { id: 'walking_slit', prompt: 'three quarter body mid-walk, dress slit visible, looking ahead with gentle smile, natural stride' },
-  { id: 'three_quarter_warm', prompt: 'medium shot framing at waist level, upper body turned 45 degrees, warm inviting expression, extremely shallow depth of field' },
-  { id: 'wind_moment', prompt: 'tight closeup framing at chest level, close-up face and hair, wind catching hair across face, natural surprised expression, authentic beauty' },
-];
-
-const CINEMATIC_COUPLE_SHOTS_DYNAMIC = [
-  { id: 'closeup_foreheads', prompt: 'tight closeup framing at chest level, extreme close-up foreheads gently touching, eyes closed, peaceful intimate moment, faces fill entire frame, shallow depth of field' },
-  { id: 'cheek_kiss_close', prompt: 'tight closeup framing at chest level, close-up gentle cheek kiss, her hand on his chest, warm spontaneous moment, faces prominent' },
-  { id: 'facing_smile', prompt: 'medium shot framing at waist level, upper body facing each other with warm gentle smiles, intimate close distance, soft natural moment' },
-  { id: 'back_hug_smile', prompt: 'medium shot framing at waist level, back hug from behind, both smiling warmly, her hand on his arm, cozy natural embrace, upper body framing' },
-  { id: 'walking_look', prompt: 'three quarter body walking together mid-stride, turning to look at each other with warm smiles, natural hand holding' },
-  { id: 'whisper_ear', prompt: 'tight closeup framing at chest level, close-up him whispering in her ear, she smiles with eyes closed, intimate tender moment' },
-  { id: 'nose_touch', prompt: 'extreme closeup framing at shoulder level, extreme close-up noses almost touching, playful eye contact, warm smiles, romantic tension' },
-  { id: 'playful_pull', prompt: 'three quarter body playful moment, one pulling other by hand, genuine laughter, dynamic joyful movement' },
-  { id: 'linked_lean', prompt: 'medium shot framing at waist level, arms linked, she leaning head on his shoulder, both with content smiles, intimate medium shot' },
-  { id: 'behind_silhouette', prompt: 'couple from behind walking away hand in hand, looking at each other, silhouettes against neon lights and lanterns' },
-];
-
-const DYNAMIC_CONCEPTS = new Set(['retro_hongkong', 'vintage_record']);
-
-const getVariants = (mode: string, concept: string) => {
-  if (DYNAMIC_CONCEPTS.has(concept)) {
-    return mode === 'couple' ? CINEMATIC_COUPLE_SHOTS_DYNAMIC : mode === 'groom' ? CINEMATIC_GROOM_SHOTS : CINEMATIC_BRIDE_SHOTS;
-  }
-  return mode === 'couple' ? COUPLE_SHOT_VARIANTS : mode === 'groom' ? GROOM_SHOT_VARIANTS : BRIDE_SHOT_VARIANTS;
-};
 const getShotStrength = (mode: string, concept: string, shotIdx: number): number => {
-  const variants = getVariants(mode, concept);
+  const variants = mode === 'couple' ? COUPLE_SHOT_VARIANTS : mode === 'groom' ? GROOM_SHOT_VARIANTS : BRIDE_SHOT_VARIANTS;
   const shot = variants[shotIdx % variants.length];
   const isSelfie = concept === 'iphone_selfie' || concept === 'iphone_mirror';
   const isCruise = concept === 'cruise_sunset' || concept === 'cruise_bluesky';
@@ -351,7 +296,6 @@ const getShotStrength = (mode: string, concept: string, shotIdx: number): number
   if (WIDE_SHOTS.has(shot.id)) return mode === 'couple' ? 0.30 : 0.35;
   if (CLOSEUP_SHOTS.has(shot.id)) return mode === 'couple' ? 0.18 : 0.22;
   if (isCruise) return mode === 'couple' ? 0.28 : 0.30;
-  if (DYNAMIC_CONCEPTS.has(concept)) return mode === 'couple' ? 0.18 : mode === 'bride' ? 0.20 : 0.23;
   if (mode === 'couple') return 0.28;
   return 0.28;
 };
@@ -374,8 +318,7 @@ const CONCEPT_MOOD: Record<string, string> = {
   vintage_film: 'warm film grain, slightly faded colors, nostalgic soft focus edges',
   iphone_selfie: 'casual spontaneous vibe, slightly imperfect framing, authentic not posed',
   iphone_mirror: 'mirror reflection with flash, casual standing pose, trendy social media aesthetic',
-  vintage_record: 'candid relaxed moment browsing records, warm tungsten glow on skin, LP records surrounding, vinyl turntable spinning, natural smile or looking down at records, intimate cozy nostalgia, retro film grain',
-  retro_hongkong: 'candid moment mid-stride, body turned at natural angle, weight on one leg, wind in hair, warm red lantern glow on skin, neon reflections on wet pavement, shallow depth of field f1.4 crowd bokeh, Wong Kar-wai intimate mood, gentle natural smile, relaxed body language, cinematic Fuji Superia grain',
+  vintage_record: 'warm tungsten glow on skin, LP records and album covers surrounding, vinyl turntable spinning, intimate cozy record shop nostalgia, retro film grain texture',
 };
 
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {
@@ -383,13 +326,13 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const scene = allConcepts[concept]?.base || STUDIO_CONCEPTS.studio_classic.base;
   const isCinematic = category === 'cinematic';
   const isHanbok = HANBOK_CONCEPTS.has(concept);
-  const variants = getVariants(mode, concept);
+  const variants = mode === 'couple' ? COUPLE_SHOT_VARIANTS : mode === 'groom' ? GROOM_SHOT_VARIANTS : BRIDE_SHOT_VARIANTS;
   const shot = variants[shotIdx % variants.length];
   const isDetail = DETAIL_SHOTS.has(shot.id);
 
   const face = 'preserve exact facial features from reference, natural Korean proportions, authentic skin texture';
 
-  const outfitLock = DYNAMIC_CONCEPTS.has(concept) ? 'MUST keep absolutely identical outfit from first shot, same fabric same color same accessories same shoes same hairstyle, do not change any clothing detail' : 'keep identical outfit, hairstyle, accessories from first shot';
+  const outfitLock = 'keep identical outfit, hairstyle, accessories from first shot';
 
   const detailFocus = isDetail
     ? 'sharp macro focus on hands and rings, anatomically correct five fingers per hand, natural finger spacing, realistic ring placement on ring finger'
@@ -420,12 +363,12 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
 };
 
 const buildNegativePrompt = (mode: string, concept: string, shotIdx?: number): string => {
-  const base = 'deformed face, elongated face, stretched face, pinched nose, bulbous nose, uncanny valley, plastic skin, wax figure, 3D render, cartoon, anime, illustration, painting, doll-like, mannequin, blurry, low quality, watermark, text overlay, collage, grid, multiple frames, split screen, four panel, multi image, photo strip, contact sheet, neon glow on skin, blue light artifact, lens flare on face, color fringing';
+  const base = 'deformed face, elongated face, stretched face, pinched nose, bulbous nose, uncanny valley, plastic skin, wax figure, 3D render, cartoon, anime, illustration, painting, doll-like, mannequin, blurry, low quality, watermark, text overlay';
   const consistencyBlock = 'different outfit, changed clothes, different hairstyle, altered jewelry, wardrobe change, accessories swapped';
   const male = 'overly angular jaw, exaggerated chin, feminized male face, airbrush skin';
   const female = 'masculine jaw, wide nose bridge, overly sharp features, generic AI face';
 
-  const variants = getVariants(mode, concept);
+  const variants = mode === 'couple' ? COUPLE_SHOT_VARIANTS : mode === 'groom' ? GROOM_SHOT_VARIANTS : BRIDE_SHOT_VARIANTS;
   const shot = shotIdx !== undefined ? variants[shotIdx % variants.length] : null;
   const isDetail = shot && DETAIL_SHOTS.has(shot.id);
   const detailNeg = isDetail
@@ -704,43 +647,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
         if (!cType.startsWith('image/') || cLen < 10000) {
           throw new Error('Invalid image: ' + cType + ' size=' + cLen);
         }
-
-        let finalUrl = falUrl!;
-        const skipSwapShots = new Set(['closeup_foreheads', 'cheek_kiss_close', 'nose_touch', 'whisper_ear']);
-        const currentShot = getVariants(effectiveMode, pack.concept)[shotIdx % getVariants(effectiveMode, pack.concept).length];
-        const shouldSwap = effectiveMode === 'couple' && inputUrlsArr.length >= 2 && !skipSwapShots.has(currentShot.id);
-        if (false && shouldSwap) {
-          try {
-            const groomFace = inputUrlsArr[0];
-            const brideFace = inputUrlsArr[1];
-            const swapPass1 = await falFetch('https://fal.run/fal-ai/face-swap', {
-              method: 'POST',
-              body: JSON.stringify({ base_image_url: finalUrl, swap_image_url: groomFace }),
-            });
-            if (swapPass1?.image?.url) {
-              const check1 = await fetch(swapPass1.image.url, { method: 'HEAD' });
-              const size1 = parseInt(check1.headers.get('content-length') || '0', 10);
-              if (size1 > 10000) {
-                finalUrl = swapPass1.image.url;
-                const swapPass2 = await falFetch('https://fal.run/fal-ai/face-swap', {
-                  method: 'POST',
-                  body: JSON.stringify({ base_image_url: finalUrl, swap_image_url: brideFace }),
-                });
-                if (swapPass2?.image?.url) {
-                  const check2 = await fetch(swapPass2.image.url, { method: 'HEAD' });
-                  const size2 = parseInt(check2.headers.get('content-length') || '0', 10);
-                  if (size2 > 10000) {
-                    finalUrl = swapPass2.image.url;
-                  }
-                }
-              }
-            }
-          } catch (swapErr: any) {
-            console.log('Face-swap skipped:', swapErr.message);
-          }
-        }
-
-        const permanentUrl = await uploadToCloudinary(finalUrl, snap.id);
+        const permanentUrl = await uploadToCloudinary(falUrl!, snap.id);
         await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: permanentUrl } });
 
         if (!chainRefs[effectiveMode]) {

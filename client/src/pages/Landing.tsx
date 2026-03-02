@@ -622,7 +622,7 @@ export default function Landing() {
 
   const specs = [
     { num: "19", label: "테마", desc: "복붙 테마 아닙니다. 전부 개별 설계." },
-    { num: "24", label: "AI 화보 컨셉", desc: "스튜디오 촬영 대체 가능. 한복 · 크루즈 · 셀카." },
+    { num: "26", label: "AI 화보 컨셉", desc: "스튜디오 촬영 대체 가능. 한복 · 크루즈 · 셀카." },
     { num: "10", label: "종이청첩장", desc: "3단 · 2단 · 단일카드. 인쇄 가이드 제공." },
     { num: "19", label: "QR카드", desc: "테마별 맞춤 디자인. 명함 · 엽서 사이즈." },
   ];
@@ -727,7 +727,7 @@ export default function Landing() {
             </div>
             <p style={{ fontSize: 12, color: "#bbb", marginTop: 12 }}>사진이 아직 없어도 시작할 수 있습니다.</p>
             <div className="hero-stats" style={{ display: "flex", gap: 36, paddingTop: 32, borderTop: "1px solid #E8E5E0", marginTop: 32 }}>
-              {[["19", "테마"], ["24", "AI 스냅"], ["10", "종이청첩장"]].map(([n, l]) => (
+              {[["19", "테마"], ["26", "AI 스냅"], ["10", "종이청첩장"]].map(([n, l]) => (
                 <div key={l}>
                   <p className="serif" style={{ fontSize: 28, fontWeight: 200, color: "#1a1a1a" }}>{n}</p>
                   <p style={{ fontSize: 11, color: "#aaa", marginTop: 2, letterSpacing: 0.5 }}>{l}</p>
@@ -842,7 +842,7 @@ export default function Landing() {
               })()}
             </div>
             <p style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "#bbb" }}>
-              {snapSamples.length > 0 ? `${snapSamples.length}개 샘플 등록됨` : "24개 컨셉 중 일부"}
+              {snapSamples.length > 0 ? `${snapSamples.length}개 샘플 등록됨` : "26개 컨셉 중 일부"}
             </p>
             {selectedSnap && snapSamples.filter(s => s.concept === selectedSnap).length > 0 && (
               <div style={{ marginTop: 12, display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
@@ -861,7 +861,7 @@ export default function Landing() {
             </div>
             <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.4, color: "#1a1a1a", marginBottom: 8 }}>얼굴 사진 한 장이면<br />충분합니다.</h2>
             <p className="serif" style={{ fontSize: 20, fontWeight: 300, color: "#aaa", marginBottom: 20 }}>촬영 없이, 화보를 만듭니다.</p>
-            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 24 }}>24가지 컨셉의 웨딩 화보를 자동 생성합니다.<br />한복, 크루즈, 셀카, 시네마틱 — 스튜디오 촬영을 대체합니다.</p>
+            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 24 }}>26가지 컨셉의 웨딩 화보를 자동 생성합니다.<br />한복, 크루즈, 셀카, 시네마틱 — 스튜디오 촬영을 대체합니다.</p>
             <div style={{ padding: "16px 18px", borderRadius: 10, border: "1px solid #E8E5E0", background: "#FAFAF8", marginBottom: 24 }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>아직 촬영 전이신가요?</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -966,7 +966,7 @@ export default function Landing() {
                     <p style={{ fontSize: 12, color: "#999" }}>원</p>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
-                    {["스튜디오 / 시네마틱 선택", "24가지 컨셉", "고화질 원본 다운로드"].map((f, j) => (
+                    {["스튜디오 / 시네마틱 선택", "26가지 컨셉", "고화질 원본 다운로드"].map((f, j) => (
                       <div key={j} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         <Check size={12} color={pack.popular ? "#1a1a1a" : "#ccc"} strokeWidth={2} />
                         <p style={{ fontSize: 12, color: "#666" }}>{f}</p>
@@ -1117,7 +1117,7 @@ export default function Landing() {
             </div>
             <div className="footer-info" style={{ display: "flex", justifyContent: "space-between", gap: 40, flexWrap: "wrap", marginBottom: 28 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                <p style={{ fontSize: 11, color: "#bbb" }}><span style={{ color: "#999" }}>상호</span> 이다겸</p>
+                <p style={{ fontSize: 11, color: "#bbb" }}><span style={{ color: "#999" }}>상호</span> 청첩장작업실</p>
                 <p style={{ fontSize: 11, color: "#bbb" }}><span style={{ color: "#999" }}>대표</span> 이다겸</p>
                 <p style={{ fontSize: 11, color: "#bbb" }}><span style={{ color: "#999" }}>사업자등록번호</span> 413-03-96815</p>
               </div>

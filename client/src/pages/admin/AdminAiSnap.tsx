@@ -42,6 +42,8 @@ const CONCEPTS = [
   { id: 'iphone_selfie', label: '셀카 스냅' },
   { id: 'iphone_mirror', label: '거울 셀카' },
   { id: 'cruise_bluesky', label: '크루즈 블루스카이' },
+  { id: 'vintage_record', label: '빈티지 레코드' },
+  { id: 'retro_hongkong', label: '레트로 홍콩' },
 ];
 
 const CONCEPT_MAP = Object.fromEntries(CONCEPTS.map(c => [c.id, c.label]));
