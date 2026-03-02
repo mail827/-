@@ -74,7 +74,7 @@ const STUDIO_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
   hanbok_saeguk: {
     label: '사극풍',
-    base: 'magnificent Gyeongbokgung throne hall interior, grand golden dragon screen behind, ornate wooden columns with vivid dancheong, silk lanterns hanging, cinematic golden hour light streaming through doors, epic royal drama atmosphere',
+    base: 'traditional Korean historical drama film set, wooden hanok palace corridor with painted dancheong ceiling beams, warm natural daylight through paper lattice doors, traditional wooden floor, museum-quality recreation of Joseon era interior, cinematic warm tone',
   },
   hanbok_flower: {
     label: '꽃한복',
@@ -129,7 +129,7 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
   cruise_sunset: {
     label: '크루즈 선셋',
-    base: 'luxury yacht deck at golden hour sunset, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, romantic warm cinematic lighting',
+    base: 'luxury yacht deck at golden hour sunset, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, romantic warm cinematic lighting, three quarter body or full body framing showing legs and feet, never extreme closeup never head-only shot, camera pulled back to show full scene',
   },
   iphone_selfie: {
     label: '셀카 스냅',
@@ -141,7 +141,7 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
   cruise_bluesky: {
     label: '크루즈 블루스카이',
-    base: 'luxury cruise ship deck under vivid blue sky, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere',
+    base: 'luxury cruise ship deck under vivid blue sky, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere, three quarter body or full body framing showing legs and feet, never extreme closeup never head-only shot, camera pulled back to show full scene',
   },
   vintage_record: {
     label: '빈티지 레코드',
@@ -230,7 +230,7 @@ const OUTFIT_GROOM: Record<string, string> = {
   hanbok_wonsam: 'MUST wear heukdallyeong (black ceremonial robe with golden circular embroidery on chest) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, samo headpiece (official Korean groom wedding hat with angular wings), gold-embroidered wide belt over white inner jeogori, NOT a western suit NOT a coat NOT modern clothing, authentic traditional Korean royal groom wedding attire',
   hanbok_dangui: 'wearing jade-green dopo (Korean scholar overcoat) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, yugeon (soft fabric headband), white inner jeogori visible underneath, delicate jade ornament at waist, NOT a western suit NOT a coat, refined traditional Korean scholar groom attire',
   hanbok_modern: 'wearing charcoal gray modern durumagi (Korean traditional long overcoat) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, Korean traditional fabric texture, white inner jeogori with mandarin collar visible at neckline, NOT a western suit NOT a blazer NOT a trench coat, contemporary minimalist Korean hanbok groom attire',
-  hanbok_saeguk: 'wearing deep crimson gonryongpo (Korean royal dragon robe) with traditional V-shaped crossed collar (gyotgit), wide sleeves, golden dragon embroidery on chest, wearing iconic Korean king black ikseongwan hat (tall structured black fabric headpiece with two wide angular wing-shaped flaps extending horizontally from both sides exactly like Korean historical drama Joseon king hat), NOT a small golden crown NOT a tiara NOT a western crown NOT samo, jade belt, NOT a western suit NOT modern clothing, magnificent Joseon dynasty Korean king ceremonial attire',
+  hanbok_saeguk: 'wearing dark navy blue dopo (long traditional Korean overcoat) over white inner robe, traditional V-shaped crossed collar, hair pulled up in traditional Korean topknot with simple black gat hat (wide brimmed Korean traditional hat), subtle gold thread embroidery at hem, dignified composed posture, Korean historical drama nobleman wedding attire, NOT Chinese NOT imperial NOT dragon robe NOT crown',
   hanbok_flower: 'wearing ivory white durumagi (Korean traditional long overcoat) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, subtle floral embroidery at hem, soft pastel inner jeogori visible at neckline, small flower accent, NOT a western suit NOT a blazer, gentle spring Korean hanbok groom attire',
   cherry_blossom: 'wearing soft gray suit with light pink boutonniere, white pocket square',
   city_night: 'wearing sleek black tuxedo with satin lapels, black bow tie, cufflinks',
@@ -258,7 +258,7 @@ const OUTFIT_BRIDE: Record<string, string> = {
   hanbok_wonsam: 'wearing vibrant red wonsam (ceremonial robe) layered over yellow chima, golden phoenix embroidery across chest and sleeves, elaborate hwagwan (jeweled crown) with dangling ornaments, white socks with kkotsin (flower shoes), holding a ceremonial fan, traditional Korean royal bride wedding attire',
   hanbok_dangui: 'wearing soft blush-pink dangui (short ceremonial jacket) with gold-thread floral embroidery over deep navy chima (skirt), small jokduri (bridal coronet) with jade and coral beads, delicate binyeo (hairpin) in updo, refined elegant traditional Korean bridal attire',
   hanbok_modern: 'wearing pastel lavender modern jeogori with clean lines over white chima (skirt), hair in loose low bun with single minimalist binyeo (silver hairpin), no heavy ornament, contemporary minimalist Korean bridal attire',
-  hanbok_saeguk: 'wearing magnificent deep emerald green hwarot (Korean queen ceremonial wedding robe) with vivid golden phoenix and peony embroidery across entire surface, hair in elegant traditional Korean chignon with small refined jokduri coronet and simple daenggi ribbon, NOT Chinese style NOT long bead curtain hanging over face NOT mianguan NOT phoenix crown with hanging beads, layered silk underskirts visible at hem, NOT golden NOT yellow robe, authentic Joseon dynasty Korean queen bridal attire in green',
+  hanbok_saeguk: 'wearing deep emerald green traditional Korean wedding robe with wide sleeves, golden floral embroidery on green silk fabric, white inner collar visible, hair in traditional Korean low chignon bun with small black silk jokduri (low flat minimal Korean bridal headpiece sitting close to head) with minimal gold trim, NOT tall crown NOT multi-gem crown NOT phoenix crown NOT hanging beads NOT imperial Chinese headdress, robe MUST be dark green NOT golden NOT yellow, Korean historical drama traditional bride wedding attire',
   hanbok_flower: 'wearing light lilac jeogori with delicate flower embroidery over soft white chima (skirt), fresh flower hairpin tucked behind ear, loose natural hairstyle with soft waves, romantic spring Korean bridal attire',
   cherry_blossom: 'wearing soft white tulle wedding dress with cap sleeves, delicate flower crown',
   city_night: 'wearing sparkling white sequin evening gown with plunging back, elegant updo',
@@ -310,7 +310,7 @@ const CINEMATIC_GROOM_SHOTS = [
 
 const CINEMATIC_BRIDE_SHOTS = [
   { id: 'closeup_smile', prompt: 'tight closeup framing at chest level, face and upper chest only visible, no waist no legs, close-up portrait, soft warm smile, gentle eye contact, extremely shallow depth of field, beautiful skin glow from neon light' },
-  { id: 'profile_earring', prompt: 'extreme closeup framing at shoulder level, face only side profile close-up, chin slightly lifted, serene expression, earring catching neon light, wind in hair, blurred background' },
+  { id: 'profile_earring', prompt: 'extreme closeup framing at shoulder level, face only side profile close-up, chin slightly lifted, serene expression, subtle elegant earring visible, wind in hair, blurred background' },
   { id: 'hair_touch', prompt: 'medium shot framing at waist level, upper body only, one hand gracefully touching hair behind ear, gentle head tilt, soft warm smile, intimate framing' },
   { id: 'laughing_candid', prompt: 'medium shot framing at waist level, upper body candid laughing moment, eyes crinkled with genuine joy, hand near face, natural warmth' },
   { id: 'over_shoulder', prompt: 'medium shot framing at waist level, upper body looking back over shoulder with mysterious inviting smile, dramatic backlight on face and hair' },
@@ -349,12 +349,12 @@ const getShotStrength = (mode: string, concept: string, shotIdx: number): number
   const isCruise = concept === 'cruise_sunset' || concept === 'cruise_bluesky';
   if (isSelfie) return 0.22;
   if (DETAIL_SHOTS.has(shot.id)) return 0.38;
-  if (WIDE_SHOTS.has(shot.id)) return mode === 'couple' ? 0.30 : 0.35;
+  if (WIDE_SHOTS.has(shot.id)) return mode === 'couple' ? 0.22 : 0.25;
   if (CLOSEUP_SHOTS.has(shot.id)) return mode === 'couple' ? 0.18 : 0.22;
-  if (isCruise) return mode === 'couple' ? 0.28 : 0.30;
+  if (isCruise) return mode === 'couple' ? 0.18 : 0.22;
   if (DYNAMIC_CONCEPTS.has(concept)) return mode === 'couple' ? 0.15 : mode === 'bride' ? 0.20 : 0.23;
-  if (mode === 'couple') return 0.28;
-  return 0.28;
+  if (mode === 'couple') return 0.20;
+  return 0.20;
 };
 
 const CONCEPT_MOOD: Record<string, string> = {
@@ -376,7 +376,7 @@ const CONCEPT_MOOD: Record<string, string> = {
   iphone_selfie: 'casual spontaneous vibe, slightly imperfect framing, authentic not posed',
   iphone_mirror: 'mirror reflection with flash, casual standing pose, trendy social media aesthetic',
   vintage_record: 'candid relaxed moment browsing records, warm tungsten glow on skin, LP records surrounding, vinyl turntable spinning, natural smile or looking down at records, intimate cozy nostalgia, retro film grain',
-  retro_hongkong: 'candid moment mid-stride, body turned at natural angle, weight on one leg, wind in hair, warm red lantern glow on skin, neon reflections on wet pavement, shallow depth of field f1.4 crowd bokeh, Wong Kar-wai intimate mood, gentle natural smile, relaxed body language, cinematic Fuji Superia grain',
+  retro_hongkong: 'direct harsh on-camera flash fired at subject, bright white flash illuminating face and body against dark night background, flash falloff creating dark shadows behind subject, paparazzi snapshot caught off-guard moment, candid mid-stride body turned at natural angle, weight on one leg, wind in hair, neon reflections on wet pavement, shallow depth of field f1.4 crowd bokeh, Wong Kar-wai intimate mood, relaxed body language, Fuji Superia 400 cross-processed grain',
 };
 
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {
@@ -388,7 +388,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const shot = variants[shotIdx % variants.length];
   const isDetail = DETAIL_SHOTS.has(shot.id);
 
-  const face = 'preserve exact facial features from reference, natural Korean proportions, authentic skin texture';
+  const face = 'MUST keep the exact same face from reference image, identical face shape eye shape nose shape lip shape jawline unchanged, maintain exact facial proportions eye spacing nose size lip fullness, do not alter or beautify the face, preserve original facial identity with absolute accuracy, natural Korean skin texture';
 
   const outfitLock = DYNAMIC_CONCEPTS.has(concept) ? 'MUST keep absolutely identical outfit from first shot, same fabric same color same accessories same shoes same hairstyle, do not change any clothing detail' : 'keep identical outfit, hairstyle, accessories from first shot';
 
@@ -421,7 +421,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
 };
 
 const buildNegativePrompt = (mode: string, concept: string, shotIdx?: number): string => {
-  const base = 'deformed face, elongated face, stretched face, pinched nose, bulbous nose, uncanny valley, plastic skin, wax figure, 3D render, cartoon, anime, illustration, painting, doll-like, mannequin, blurry, low quality, watermark, text overlay, collage, grid, multiple frames, split screen, four panel, multi image, photo strip, contact sheet, neon glow on skin, blue light artifact, lens flare on face, color fringing';
+  const base = 'deformed face, elongated face, stretched face, pinched nose, bulbous nose, uncanny valley, plastic skin, wax figure, 3D render, cartoon, anime, illustration, painting, doll-like, mannequin, blurry, low quality, watermark, text overlay, collage, grid, multiple frames, split screen, four panel, multi image, photo strip, contact sheet, neon glow on skin, blue light artifact, lens flare on face, color fringing, glowing earring, sparkling earring, lens flare on earring, star burst on jewelry, bright light reflecting off earring';
   const consistencyBlock = 'different outfit, changed clothes, different hairstyle, altered jewelry, wardrobe change, accessories swapped';
   const male = 'overly angular jaw, exaggerated chin, feminized male face, airbrush skin';
   const female = 'masculine jaw, wide nose bridge, overly sharp features, generic AI face';
@@ -438,11 +438,13 @@ const buildNegativePrompt = (mode: string, concept: string, shotIdx?: number): s
   const selfieNeg = isSelfie ? ', perfect studio lighting, ring light reflection, heavily retouched skin, stiff formal pose, warm golden color cast, orange skin tone' : '';
 
   const isHanbok = HANBOK_CONCEPTS.has(concept);
+  const isSaeguk = concept === 'hanbok_saeguk';
   const hanbokNeg = isHanbok ? ', Japanese kimono, Chinese hanfu, inaccurate hanbok structure, wrong collar direction, synthetic fabric' : '';
+  const saegukNeg = isSaeguk ? ', tall crown, multi-gem crown, phoenix crown, imperial Chinese headdress, hanging beads over face, forbidden city, dragon throne, golden dragon screen, Ming dynasty, Qing dynasty, Chinese emperor, Chinese empress, ornate golden tiara, bead curtain headpiece, yellow imperial robe' : '';
 
-  if (mode === 'groom') return `${base}, ${consistencyBlock}, ${male}${detailNeg}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
-  if (mode === 'bride') return `${base}, ${consistencyBlock}, ${female}${detailNeg}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
-  return `${base}, ${consistencyBlock}, ${male}, ${female}, stiff pose, rigid body, passport photo, mugshot, expressionless, arms at sides${detailNeg}${hanbokNeg}${selfieNeg}${mirrorExtra}`;
+  if (mode === 'groom') return `${base}, ${consistencyBlock}, ${male}${detailNeg}${hanbokNeg}${saegukNeg}${selfieNeg}${mirrorExtra}`;
+  if (mode === 'bride') return `${base}, ${consistencyBlock}, ${female}${detailNeg}${hanbokNeg}${saegukNeg}${selfieNeg}${mirrorExtra}`;
+  return `${base}, ${consistencyBlock}, ${male}, ${female}, stiff pose, rigid body, passport photo, mugshot, expressionless, arms at sides${detailNeg}${hanbokNeg}${saegukNeg}${selfieNeg}${mirrorExtra}`;
 };
 
 const falFetch = async (url: string, opts?: RequestInit) => {
