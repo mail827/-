@@ -352,7 +352,7 @@ const getShotStrength = (mode: string, concept: string, shotIdx: number): number
   if (WIDE_SHOTS.has(shot.id)) return mode === 'couple' ? 0.30 : 0.35;
   if (CLOSEUP_SHOTS.has(shot.id)) return mode === 'couple' ? 0.18 : 0.22;
   if (isCruise) return mode === 'couple' ? 0.28 : 0.30;
-  if (DYNAMIC_CONCEPTS.has(concept)) return mode === 'couple' ? 0.18 : mode === 'bride' ? 0.20 : 0.23;
+  if (DYNAMIC_CONCEPTS.has(concept)) return mode === 'couple' ? 0.15 : mode === 'bride' ? 0.20 : 0.23;
   if (mode === 'couple') return 0.28;
   return 0.28;
 };
@@ -631,7 +631,8 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     const effectiveMode = mode || pack.mode;
     const variantLen = getVariants(effectiveMode, pack.concept).length;
-    const shotIdx = Math.floor(Math.random() * variantLen);
+    const modeCount = await prisma.aiSnap.count({ where: { snapPackId: pack.id, mode: effectiveMode } });
+    const shotIdx = modeCount % variantLen;
     const prompt = buildPrompt(pack.concept, pack.category, effectiveMode, shotIdx);
     const negativePrompt = buildNegativePrompt(effectiveMode, pack.concept, shotIdx);
 
@@ -666,7 +667,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     const snap = await prisma.aiSnap.create({
       data: {
         snapPackId: pack.id, userId: pack.userId, concept: pack.concept, mode: effectiveMode,
-        engine: 'nano-banana-pro', prompt, inputUrls: pack.inputUrls as any, status: 'processing',
+        engine: 'nano-banana-2', prompt, inputUrls: pack.inputUrls as any, status: 'processing',
       },
     });
 
@@ -674,7 +675,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     (async () => {
       try {
-        const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
+        const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
           method: 'POST',
           body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt, strength: getShotStrength(effectiveMode, pack.concept, shotIdx), num_images: 1 }),
         });

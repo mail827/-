@@ -332,7 +332,7 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
       num_images: 1,
       negative_prompt: NEGATIVE_PROMPT,
     };
-    const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
+    const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
       body: JSON.stringify(body),
     });
@@ -415,7 +415,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
     const isCruise = concept === 'cruise_sunset' || concept === 'cruise_bluesky';
     const strength = isSelfie ? 0.22 : isCruise ? 0.28 : isCouple ? 0.22 : 0.28;
 
-    const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
+    const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
       body: JSON.stringify({ prompt, image_urls: urls, strength, num_images: 1, negative_prompt: NEGATIVE_PROMPT }),
     });
@@ -427,7 +427,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
       const watermarked = getWatermarkedUrl(uploaded.publicId);
       await prisma.aiSnap.create({
         data: {
-          userId, concept, engine: 'nano-banana-pro', prompt,
+          userId, concept, engine: 'nano-banana-2', prompt,
           inputUrls: imageUrls, resultUrl: watermarked,
           resultOriginalUrl: uploaded.url, status: 'done', isFree: true,
         },
@@ -437,7 +437,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
     if (!submit.status_url) throw new Error('No status_url');
     const snap = await prisma.aiSnap.create({
       data: {
-        userId, concept, engine: 'nano-banana-pro', prompt,
+        userId, concept, engine: 'nano-banana-2', prompt,
         inputUrls: imageUrls, status: 'processing', isFree: true,
       },
     });
@@ -551,7 +551,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     const snap = await prisma.aiSnap.create({
       data: {
-        weddingId, concept, engine: 'nano-banana-pro',
+        weddingId, concept, engine: 'nano-banana-2',
         prompt: '', inputUrls: imageUrls, status: 'processing',
       },
     });
@@ -593,7 +593,7 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
     } else {
       urls = imageUrls;
     }
-    const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-pro/edit`, {
+    const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
       body: JSON.stringify({
         prompt,
