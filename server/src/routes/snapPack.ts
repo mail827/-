@@ -149,7 +149,7 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
   retro_hongkong: {
     label: '레트로 홍콩',
-    base: 'narrow Hong Kong Mong Kok night market alley, rows of glowing crimson red Chinese paper lanterns strung tightly overhead creating tunnel of warm light, vintage neon signs with traditional Chinese characters in pink cyan and green glow, rain-slicked cobblestone street with deep puddle reflections of all lights, blurred crowd silhouettes in background creating depth, steamy food stall smoke drifting through scene, Wong Kar-wai In the Mood for Love color grading with deep teal shadows and warm crimson highlights, cross-processed film look, shallow depth of field 85mm f1.4, Fuji Superia 400 grain with teal-red color shift',
+    base: 'narrow Hong Kong Mong Kok night market alley, rows of glowing crimson red Chinese paper lanterns strung tightly overhead creating tunnel of warm light, vintage neon signs with traditional Chinese characters in pink cyan and green glow, rain-slicked cobblestone street with deep puddle reflections of all lights, blurred crowd silhouettes in background creating depth, steamy food stall smoke drifting through scene, direct on-camera flash photography, harsh bright flash on subjects with dark background falloff, high contrast paparazzi snapshot style, Wong Kar-wai teal shadows and warm crimson highlights, cross-processed film look, 85mm f1.4, Fuji Superia 400 grain with teal-red color shift',
   },
 };
 
@@ -274,7 +274,7 @@ const OUTFIT_BRIDE: Record<string, string> = {
   cruise_sunset: 'wearing flowing white dress, windswept hair, golden hour elegance',
   cruise_bluesky: 'wearing white summer dress, windswept hair, clean nautical bridal style',
   vintage_record: 'wearing ivory cream Victorian puff-sleeve wedding dress with sheer floral lace high-neck bodice over sweetheart neckline, short puffy gathered sleeves at shoulder, fitted ivory satin ribbon belt at waist, full A-line satin skirt with front slit, elbow-length white satin opera gloves, short tulle veil on back of head, hair worn completely down and loose past shoulders, same dress same gloves same veil in every shot, 1960s vintage bridal',
-  retro_hongkong: 'wearing champagne gold silk satin halter-neck dress with thin spaghetti straps and open cutout sides showing skin, small low mandarin collar detail at neckline, body-hugging silhouette, scattered delicate gold plum blossom embroidery, thigh-high side slit, vintage pearl drop earrings, metallic gold ankle-strap heels, hairstyle matching reference photo exactly, natural hair movement',
+  retro_hongkong: 'wearing champagne gold silk satin halter-neck dress with thin spaghetti straps and open cutout sides showing skin, small low mandarin collar detail at neckline, body-hugging silhouette, scattered delicate gold plum blossom embroidery, thigh-high side slit, vintage pearl drop earrings, metallic gold ankle-strap heels, long loose black hair flowing down past shoulders, never tied up never in bun never in updo, hairstyle matching reference photo exactly',
   iphone_selfie: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress',
   iphone_mirror: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress, holding phone for mirror selfie',
 };
@@ -306,6 +306,7 @@ const CINEMATIC_GROOM_SHOTS = [
   { id: 'three_quarter_smirk', prompt: 'tight closeup framing at chest level, three quarter view close-up face, slight knowing smirk, one eyebrow subtly raised, effortless charisma' },
   { id: 'seated_cool', prompt: 'seated casually, elbows on knees, relaxed genuine smile looking up, intimate eye level angle' },
 ];
+
 
 const CINEMATIC_BRIDE_SHOTS = [
   { id: 'closeup_smile', prompt: 'tight closeup framing at chest level, face and upper chest only visible, no waist no legs, close-up portrait, soft warm smile, gentle eye contact, extremely shallow depth of field, beautiful skin glow from neon light' },
@@ -629,7 +630,8 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     if (pack.usedSnaps >= pack.totalSnaps) return res.status(403).json({ error: '생성 가능 횟수 초과', needExtra: true });
 
     const effectiveMode = mode || pack.mode;
-    const shotIdx = pack.usedSnaps;
+    const variantLen = getVariants(effectiveMode, pack.concept).length;
+    const shotIdx = Math.floor(Math.random() * variantLen);
     const prompt = buildPrompt(pack.concept, pack.category, effectiveMode, shotIdx);
     const negativePrompt = buildNegativePrompt(effectiveMode, pack.concept, shotIdx);
 
