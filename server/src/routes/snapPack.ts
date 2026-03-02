@@ -78,7 +78,7 @@ const STUDIO_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
   hanbok_flower: {
     label: '꽃한복',
-    base: 'blooming hanok courtyard filled with spring flowers, cherry blossoms and azaleas surrounding wooden veranda, petals gently falling, warm golden spring sunlight, romantic traditional garden atmosphere',
+    base: 'wide spacious hanok courtyard with blooming spring flowers, cherry blossoms and azaleas framing the scene in background, stone pathway center, petals gently falling, warm golden spring sunlight, romantic traditional garden with room for two people',
   },
   cherry_blossom: {
     label: '벚꽃',
@@ -93,7 +93,7 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
   forest_wedding: {
     label: '숲속 웨딩',
-    base: 'deep enchanted forest with golden sunlight streaming through tall ancient trees, white rose and ivy flower arch, floating golden dust particles, magical cinematic atmosphere',
+    base: 'tall ancient oak forest with warm golden sunlight streaming through dense green canopy, natural mossy forest floor with ferns and wildflowers, soft dappled light, peaceful serene woodland atmosphere',
   },
   castle_garden: {
     label: '유럽 궁전',
@@ -227,14 +227,14 @@ const OUTFIT_GROOM: Record<string, string> = {
   studio_classic: 'wearing elegant black tuxedo with white dress shirt, black bow tie, polished shoes',
   outdoor_garden: 'wearing navy blue suit with white shirt, floral boutonniere pinned to lapel',
   beach_sunset: 'wearing light beige linen suit with open collar white shirt, barefoot',
-  hanbok_wonsam: 'wearing heukdallyeong (black ceremonial robe) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, samo headpiece (official Korean groom wedding hat with wings), gold-embroidered belt over white inner jeogori, NOT a western suit NOT a coat NOT modern clothing, authentic traditional Korean royal groom wedding attire',
+  hanbok_wonsam: 'MUST wear heukdallyeong (black ceremonial robe with golden circular embroidery on chest) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, samo headpiece (official Korean groom wedding hat with angular wings), gold-embroidered wide belt over white inner jeogori, NOT a western suit NOT a coat NOT modern clothing, authentic traditional Korean royal groom wedding attire',
   hanbok_dangui: 'wearing jade-green dopo (Korean scholar overcoat) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, yugeon (soft fabric headband), white inner jeogori visible underneath, delicate jade ornament at waist, NOT a western suit NOT a coat, refined traditional Korean scholar groom attire',
   hanbok_modern: 'wearing charcoal gray modern durumagi (Korean traditional long overcoat) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, Korean traditional fabric texture, white inner jeogori with mandarin collar visible at neckline, NOT a western suit NOT a blazer NOT a trench coat, contemporary minimalist Korean hanbok groom attire',
-  hanbok_saeguk: 'wearing deep crimson gonryongpo (Korean royal dragon robe) with traditional V-shaped crossed collar (gyotgit), wide sleeves, golden dragon embroidery on chest, golden gwanmo crown headpiece, jade belt, NOT a western suit NOT modern clothing, magnificent royal Korean king ceremonial attire',
+  hanbok_saeguk: 'wearing deep crimson gonryongpo (Korean royal dragon robe) with traditional V-shaped crossed collar (gyotgit), wide sleeves, golden dragon embroidery on chest, ornate golden royal crown (ikseongwan winged crown with jewels and beaded dangles) NOT samo NOT gat NOT simple headband, jade belt, NOT a western suit NOT modern clothing, magnificent royal Korean king ceremonial attire',
   hanbok_flower: 'wearing ivory white durumagi (Korean traditional long overcoat) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, subtle floral embroidery at hem, soft pastel inner jeogori visible at neckline, small flower accent, NOT a western suit NOT a blazer, gentle spring Korean hanbok groom attire',
   cherry_blossom: 'wearing soft gray suit with light pink boutonniere, white pocket square',
   city_night: 'wearing sleek black tuxedo with satin lapels, black bow tie, cufflinks',
-  forest_wedding: 'wearing dark charcoal suit with emerald green silk tie, white rose boutonniere',
+  forest_wedding: 'wearing dark charcoal wool suit with forest green silk tie, simple white boutonniere, polished leather shoes',
   castle_garden: 'wearing classic black formal morning suit with vest, patterned tie',
   cathedral: 'wearing refined charcoal morning suit with ivory vest, patterned silk tie',
   watercolor: 'wearing cream colored linen suit with no tie, relaxed artistic elegance',
@@ -242,7 +242,7 @@ const OUTFIT_GROOM: Record<string, string> = {
   rainy_day: 'wearing dark navy coat suit, holding umbrella',
   autumn_leaves: 'wearing warm brown tweed suit with earth tones',
   winter_snow: 'wearing charcoal wool coat suit, winter layers',
-  vintage_film: 'wearing retro brown suit with wide lapels, 1970s style',
+  vintage_film: 'wearing warm camel brown tweed three-piece suit with wide peaked lapels, matching brown vest with gold buttons, cream white dress shirt with wide pointed collar visible over vest, brown patterned wide tie, brown leather oxford shoes, same outfit in every shot, 1970s retro groom',
   cruise_sunset: 'wearing light linen suit, nautical elegance',
   cruise_bluesky: 'wearing white or navy blazer, crisp linen shirt, no tie, nautical casual style',
   vintage_record: 'wearing olive khaki brown wide-lapel vintage blazer over light blue open-collar dress shirt with wide pointed collar visible over blazer lapels, grey pinstripe pleated trousers, brown leather oxford shoes, same outfit in every shot, 1970s retro groom',
@@ -258,11 +258,11 @@ const OUTFIT_BRIDE: Record<string, string> = {
   hanbok_wonsam: 'wearing vibrant red wonsam (ceremonial robe) layered over yellow chima, golden phoenix embroidery across chest and sleeves, elaborate hwagwan (jeweled crown) with dangling ornaments, white socks with kkotsin (flower shoes), holding a ceremonial fan, traditional Korean royal bride wedding attire',
   hanbok_dangui: 'wearing soft blush-pink dangui (short ceremonial jacket) with gold-thread floral embroidery over deep navy chima (skirt), small jokduri (bridal coronet) with jade and coral beads, delicate binyeo (hairpin) in updo, refined elegant traditional Korean bridal attire',
   hanbok_modern: 'wearing pastel lavender modern jeogori with clean lines over white chima (skirt), hair in loose low bun with single minimalist binyeo (silver hairpin), no heavy ornament, contemporary minimalist Korean bridal attire',
-  hanbok_saeguk: 'wearing magnificent golden hwarot (queen ceremonial robe) with vivid phoenix and peony embroidery across entire surface, grand jokduri crown with long bead strings, layered silk underskirts visible at hem, opulent royal Korean queen ceremonial bridal attire',
+  hanbok_saeguk: 'wearing magnificent deep emerald green hwarot (queen ceremonial robe) with vivid golden phoenix and peony embroidery across entire surface, grand jokduri crown with long bead strings, layered silk underskirts visible at hem, NOT golden NOT yellow, opulent royal Korean queen ceremonial bridal attire in green',
   hanbok_flower: 'wearing light lilac jeogori with delicate flower embroidery over soft white chima (skirt), fresh flower hairpin tucked behind ear, loose natural hairstyle with soft waves, romantic spring Korean bridal attire',
   cherry_blossom: 'wearing soft white tulle wedding dress with cap sleeves, delicate flower crown',
   city_night: 'wearing sparkling white sequin evening gown with plunging back, elegant updo',
-  forest_wedding: 'wearing ethereal white lace gown with cathedral train, baby breath flower crown',
+  forest_wedding: 'wearing elegant white lace gown with natural flowing train, loose wavy hair with simple greenery hairpin, no flower crown no wreath',
   castle_garden: 'wearing magnificent white ball gown with long royal train, tiara, pearl jewelry',
   cathedral: 'wearing classic white cathedral-length wedding gown with long veil, pearl earrings',
   watercolor: 'wearing delicate off-white silk slip dress with thin straps, loose romantic waves in hair',
@@ -270,7 +270,7 @@ const OUTFIT_BRIDE: Record<string, string> = {
   rainy_day: 'wearing white dress, transparent umbrella, romantic rain aesthetic',
   autumn_leaves: 'wearing ivory dress, warm autumn tones',
   winter_snow: 'wearing white fur-trimmed gown, winter wonderland style',
-  vintage_film: 'wearing classic A-line lace dress, 1970s vintage bridal aesthetic',
+  vintage_film: 'wearing ivory cream vintage lace A-line wedding dress with long bell sleeves, high modest neckline with scalloped lace trim, natural waistline with satin ribbon, ankle-length hem showing white kitten heels, loose natural hair with baby breath flowers, same dress in every shot, 1970s vintage bridal aesthetic',
   cruise_sunset: 'wearing flowing white dress, windswept hair, golden hour elegance',
   cruise_bluesky: 'wearing white summer dress, windswept hair, clean nautical bridal style',
   vintage_record: 'wearing ivory cream Victorian puff-sleeve wedding dress with sheer floral lace high-neck bodice over sweetheart neckline, short puffy gathered sleeves at shoulder, fitted ivory satin ribbon belt at waist, full A-line satin skirt with front slit, elbow-length white satin opera gloves, short tulle veil on back of head, hair worn completely down and loose past shoulders, same dress same gloves same veil in every shot, 1960s vintage bridal',
@@ -361,7 +361,7 @@ const CONCEPT_MOOD: Record<string, string> = {
   beach_sunset: 'wind blowing through hair naturally, barefoot on wet sand, relaxed playful movement, golden hour warmth on skin',
   outdoor_garden: 'dappled sunlight through leaves, soft petal falling, relaxed garden stroll',
   cherry_blossom: 'cherry petals drifting in breeze, soft pink tones, gentle spring wind',
-  forest_wedding: 'misty ethereal forest light, dappled sun rays through canopy, mossy ground',
+  forest_wedding: 'warm golden light filtering through tall trees, natural fern and moss ground, peaceful woodland serenity, nature documentary cinematography',
   cruise_sunset: 'ocean breeze windswept hair, golden light on deck railing, relaxed nautical vibe',
   cruise_bluesky: 'bright sea breeze, crisp blue sky, wind in hair, relaxed deck atmosphere',
   city_night: 'neon reflections on wet pavement, moody urban glow, cinematic city depth',
@@ -677,7 +677,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
       try {
         const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
           method: 'POST',
-          body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt, strength: getShotStrength(effectiveMode, pack.concept, shotIdx), num_images: 1 }),
+          body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt, strength: getShotStrength(effectiveMode, pack.concept, shotIdx), num_images: 1, image_size: { width: 768, height: 1152 } }),
         });
 
         let falUrl: string | null = null;

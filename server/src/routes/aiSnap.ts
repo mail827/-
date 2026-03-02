@@ -330,6 +330,7 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
       image_urls: urls,
       strength,
       num_images: 1,
+      image_size: { width: 768, height: 1152 },
       negative_prompt: NEGATIVE_PROMPT,
     };
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
@@ -417,7 +418,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
-      body: JSON.stringify({ prompt, image_urls: urls, strength, num_images: 1, negative_prompt: NEGATIVE_PROMPT }),
+      body: JSON.stringify({ prompt, image_urls: urls, strength, num_images: 1, image_size: { width: 768, height: 1152 }, negative_prompt: NEGATIVE_PROMPT }),
     });
 
     if (submit.images) {
@@ -600,6 +601,7 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
         image_urls: urls,
         strength,
         num_images: 1,
+      image_size: { width: 768, height: 1152 },
         negative_prompt: NEGATIVE_PROMPT,
       }),
     });
