@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { classifyEyelidType, validateEyelidPreservation } from '../utils/eyelidValidator';
+import { classifyEyelidType, validateEyelidPreservation } from '../utils/eyelidValidator.js';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { v2 as cloudinary } from 'cloudinary';
