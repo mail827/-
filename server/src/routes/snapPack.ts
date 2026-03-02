@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { classifyEyelidType, validateEyelidPreservation } from '../utils/eyelidValidator';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { v2 as cloudinary } from 'cloudinary';
@@ -716,7 +717,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
         const shouldSwap = !skipSwapShots.has(currentShot.id);
         if (shouldSwap) {
           try {
-            let swapBody: Record<string, any> = { workflow_type: 'user_hair', upscale: true, target_image: finalUrl };
+            let swapBody: Record<string, any> = { workflow_type: 'target_hair', upscale: false, target_image: finalUrl };
             if (effectiveMode === 'couple' && inputUrlsArr.length >= 2) {
               swapBody.face_image_0 = inputUrlsArr[0];
               swapBody.gender_0 = 'male';
@@ -737,7 +738,28 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
               const checkSwap = await fetch(swapResult.image.url, { method: 'HEAD' });
               const swapSize = parseInt(checkSwap.headers.get('content-length') || '0', 10);
               if (swapSize > 10000) {
-                finalUrl = swapResult.image.url;
+                const faceRef = effectiveMode === 'groom' ? inputUrlsArr[0] : inputUrlsArr[inputUrlsArr.length > 1 ? 1 : 0];
+                const eyelidType = effectiveMode !== 'groom' ? await classifyEyelidType(faceRef) : 'unknown';
+                if (eyelidType === 'monolid' || eyelidType === 'inner_double') {
+                  const validation = await validateEyelidPreservation(faceRef, swapResult.image.url, eyelidType);
+                  if (validation.passed) {
+                    console.log(`Eyelid validation PASS: ${snap.concept}`);
+                    finalUrl = swapResult.image.url;
+                  } else {
+                    console.log(`Eyelid validation FAIL: ${snap.concept} - retrying...`);
+                    for (let retry = 0; retry < 2; retry++) {
+                      const retrySwap = await falFetch('https://fal.run/easel-ai/advanced-face-swap', { method: 'POST', body: JSON.stringify(swapBody) });
+                      if (retrySwap?.image?.url) {
+                        const rv = await validateEyelidPreservation(faceRef, retrySwap.image.url, eyelidType);
+                        if (rv.passed) { console.log(`Eyelid PASS retry ${retry+1}`); finalUrl = retrySwap.image.url; break; }
+                        console.log(`Eyelid FAIL retry ${retry+1}`);
+                        finalUrl = retrySwap.image.url;
+                      }
+                    }
+                  }
+                } else {
+                  finalUrl = swapResult.image.url;
+                }
               }
             }
           } catch (swapErr: any) {
