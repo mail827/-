@@ -650,30 +650,10 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
     if (submit.images) {
       const falUrl = submit.images[0]?.url;
       if (falUrl) {
-        let swappedUrl = falUrl;
-        try {
-          let swapBody: Record<string, any> = { workflow_type: 'target_hair', upscale: false, target_image: falUrl };
-          if (effectiveMode === 'couple' && imageUrls.length >= 2) {
-            swapBody.face_image_0 = imageUrls[0];
-            swapBody.gender_0 = 'male';
-            swapBody.face_image_1 = imageUrls[1];
-            swapBody.gender_1 = 'female';
-          } else if (effectiveMode === 'groom') {
-            swapBody.face_image_0 = imageUrls[0];
-            swapBody.gender_0 = 'male';
-          } else {
-            swapBody.face_image_0 = imageUrls[imageUrls.length > 1 ? 1 : 0];
-            swapBody.gender_0 = 'female';
-          }
-          const swapRes = await falFetch('https://fal.run/easel-ai/advanced-face-swap', {
-            method: 'POST',
-            body: JSON.stringify(swapBody),
-          });
-          if (swapRes?.image?.url) {
-            const chk = await fetch(swapRes.image.url, { method: 'HEAD' });
-            if (parseInt(chk.headers.get('content-length') || '0', 10) > 10000) swappedUrl = swapRes.image.url;
-          }
-        } catch (swapErr: any) { console.log('Easel face-swap skipped:', swapErr.message); }
+        const faceRef = effectiveMode === 'groom' ? imageUrls[0] : imageUrls[imageUrls.length > 1 ? 1 : 0];
+        const eyelidType = effectiveMode !== 'groom' ? await classifyEyelidType(faceRef) : 'unknown';
+        if (eyelidType === 'monolid' || eyelidType === 'inner_double') console.log('Monolid detected (quick-generate) - eyelid validation enabled');
+        const swappedUrl = await applyFaceSwap(falUrl, effectiveMode, imageUrls, eyelidType);
         const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap');
         return res.json({ status: 'done', resultUrl: uploaded.url });
       }
@@ -694,7 +674,14 @@ router.get('/admin/poll', async (req, res) => {
       const result = await falFetch(responseUrl as string);
       const falUrl = result.images?.[0]?.url;
       if (falUrl) {
-        const swappedUrl = falUrl;
+        const mode = (req.query.mode as string) || 'groom';
+        const imageUrlsRaw = req.query.imageUrls as string || '[]';
+        let imageUrls: string[] = [];
+        try { imageUrls = JSON.parse(imageUrlsRaw); } catch {}
+        const faceRef = mode === 'groom' ? imageUrls[0] : imageUrls[imageUrls.length > 1 ? 1 : 0];
+        const eyelidType = faceRef && mode !== 'groom' ? await classifyEyelidType(faceRef) : 'unknown';
+        if (eyelidType === 'monolid' || eyelidType === 'inner_double') console.log('Monolid detected (admin/poll) - eyelid validation enabled');
+        const swappedUrl = imageUrls.length > 0 ? await applyFaceSwap(falUrl, mode, imageUrls, eyelidType) : falUrl;
         const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap');
         return res.json({ status: 'done', resultUrl: uploaded.url });
       }
