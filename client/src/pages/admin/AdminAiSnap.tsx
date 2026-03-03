@@ -147,7 +147,7 @@ export default function AdminAiSnap() {
       if (data.statusUrl) {
         const poll = async () => {
           try {
-            const pRes = await api(`/poll?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}`);
+            const pRes = await api(`/poll?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}&mode=${encodeURIComponent(mode)}&imageUrls=${encodeURIComponent(JSON.stringify(getUrls()))}`);
             const pData = await pRes.json();
             if (pData.status === 'done') {
               setResults(prev => [{ id: Date.now().toString(), url: pData.resultUrl, concept, mode }, ...prev]);
