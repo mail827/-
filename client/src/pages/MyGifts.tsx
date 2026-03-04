@@ -274,7 +274,7 @@ export default function MyGifts() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
-            <div className="bg-white rounded-xl border border-stone-200 p-5">
+            <div className="bg-white rounded-lg border border-stone-200 p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Gift className="w-5 h-5 text-stone-600" />
                 <span className="font-medium text-stone-800">패키지 선택</span>
@@ -284,7 +284,7 @@ export default function MyGifts() {
                   <button
                     key={pkg.id}
                     onClick={() => setSelectedPkg(pkg.id)}
-                    className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                    className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
                       selectedPkg === pkg.id
                         ? 'border-stone-800 bg-stone-50'
                         : 'border-stone-200'
@@ -300,7 +300,7 @@ export default function MyGifts() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-stone-200 p-5">
+            <div className="bg-white rounded-lg border border-stone-200 p-5">
               <label className="block text-sm font-medium text-stone-700 mb-3">
                 받는 분 연락처 (선택)
               </label>
@@ -314,7 +314,7 @@ export default function MyGifts() {
                     value={toEmail}
                     onChange={e => setToEmail(e.target.value)}
                     placeholder="email@example.com"
-                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-500"
+                    className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500"
                   />
                 </div>
                 
@@ -326,13 +326,13 @@ export default function MyGifts() {
                     onChange={handlePhoneChange}
                     placeholder="010-0000-0000"
                     maxLength={13}
-                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-500"
+                    className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-stone-200 p-5">
+            <div className="bg-white rounded-lg border border-stone-200 p-5">
               <label className="block text-sm font-medium text-stone-700 mb-2">
                 메시지 (선택)
               </label>
@@ -340,7 +340,7 @@ export default function MyGifts() {
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 placeholder="축하 메시지를 적어주세요"
-                className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none h-24 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none h-24 focus:outline-none focus:ring-2 focus:ring-stone-500"
               />
             </div>
 
@@ -348,7 +348,7 @@ export default function MyGifts() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-green-50 border border-green-200 rounded-xl p-5"
+                className="bg-green-50 border border-green-200 rounded-lg p-5"
               >
                 <div className="flex items-center gap-2 text-green-700 mb-3">
                   <Check className="w-5 h-5" />
@@ -361,14 +361,14 @@ export default function MyGifts() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => shareKakao(success)}
-                    className="py-3 bg-[#FEE500] text-stone-800 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
+                    className="py-3 bg-[#FEE500] text-stone-800 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
                   >
                     <MessageCircle className="w-4 h-4" />
                     카카오톡 공유
                   </button>
                   <button
                     onClick={() => navigator.clipboard.writeText(success)}
-                    className="py-3 bg-stone-100 text-stone-700 rounded-xl text-sm font-medium"
+                    className="py-3 bg-stone-100 text-stone-700 rounded-lg text-sm font-medium"
                   >
                     코드 복사
                   </button>
@@ -380,7 +380,7 @@ export default function MyGifts() {
             <button
               onClick={handleSend}
               disabled={loading || !selectedPkg}
-              className="w-full py-4 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-4 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -406,7 +406,7 @@ export default function MyGifts() {
               </div>
             ) : (
               sent.map(gift => (
-                <div key={gift.id} className="bg-white rounded-xl border border-stone-200 p-4">
+                <div key={gift.id} className="bg-white rounded-lg border border-stone-200 p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-stone-800">{gift.package.name}</span>
                     <span className={`text-xs px-2 py-1 rounded-full ${
@@ -453,7 +453,7 @@ export default function MyGifts() {
               </div>
             ) : (
               received.map(gift => (
-                <div key={gift.id} className="bg-white rounded-xl border border-stone-200 p-4">
+                <div key={gift.id} className="bg-white rounded-lg border border-stone-200 p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-stone-800">{gift.package.name}</span>
                     <span className={`text-xs px-2 py-1 rounded-full ${gift.isRedeemed ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>

@@ -339,18 +339,18 @@ export default function CreateWedding() {
   return (
     <div className="min-h-screen bg-[#fefefe]">
       <header className="border-b border-stone-200 sticky top-0 z-40 bg-white/80 backdrop-blur-sm">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-2xl mx-auto px-5 h-14 flex items-center justify-between">
           <button onClick={handleBack} className="flex items-center gap-2 text-stone-600">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <span className="font-serif text-lg text-stone-800">청첩장 만들기</span>
+          <span className="text-[15px] font-semibold text-stone-800">청첩장 만들기</span>
           <div className="w-10" />
         </div>
       </header>
 
       {isGiftFlow && (
         <div className="max-w-2xl mx-auto px-4 pt-4">
-          <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-lg p-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
               <Gift className="w-5 h-5 text-emerald-600" />
             </div>
@@ -391,12 +391,12 @@ export default function CreateWedding() {
           >
             {!isGiftFlow && step === 0 && (
               <div className="space-y-4">
-                <h2 className="text-xl font-serif text-stone-800 mb-6">패키지를 선택해주세요</h2>
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">패키지를 선택해주세요</h2>
                 {packages.map(pkg => (
                   <button
                     key={pkg.id}
                     onClick={() => setSelectedPackageId(pkg.id)}
-                    className={`w-full p-6 rounded-2xl border-2 text-left transition-all ${
+                    className={`w-full p-6 rounded-lg border-2 text-left transition-all ${
                       selectedPackageId === pkg.id ? 'border-stone-800 bg-stone-50' : 'border-stone-200 hover:border-stone-400'
                     }`}
                   >
@@ -424,13 +424,13 @@ export default function CreateWedding() {
 
             {((isGiftFlow && step === 0) || (!isGiftFlow && step === 1)) && (
               <div className="space-y-4">
-                <h2 className="text-xl font-serif text-stone-800 mb-6">테마를 선택해주세요</h2>
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">테마를 선택해주세요</h2>
                 <div className="grid grid-cols-2 gap-4">
                   {THEMES.map(theme => (
                     <button
                       key={theme.id}
                       onClick={() => updateForm('theme', theme.id)}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all ${
+                      className={`p-4 rounded-lg border-2 text-left transition-all ${
                         formData.theme === theme.id ? 'border-stone-800 bg-stone-50' : 'border-stone-200 hover:border-stone-400'
                       }`}
                     >
@@ -445,7 +445,7 @@ export default function CreateWedding() {
 
             {((isGiftFlow && step === 1) || (!isGiftFlow && step === 2)) && (
               <div className="space-y-6">
-                <h2 className="text-xl font-serif text-stone-800 mb-6">기본 정보를 입력해주세요</h2>
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">기본 정보를 입력해주세요</h2>
                 <Section title="신랑 정보">
                   <div className="grid grid-cols-2 gap-4">
                     <Input label="이름 *" value={formData.groomName} onChange={v => updateForm('groomName', v)} />
@@ -482,19 +482,19 @@ export default function CreateWedding() {
                 </Section>
                 <Section title="인사말">
                   <Input label="제목" value={formData.greetingTitle} onChange={v => updateForm('greetingTitle', v)} />
-                  <textarea value={formData.greeting} onChange={e => updateForm('greeting', e.target.value)} rows={4} className="w-full mt-3 px-4 py-3 border border-stone-200 rounded-xl resize-none" />
+                  <textarea value={formData.greeting} onChange={e => updateForm('greeting', e.target.value)} rows={4} className="w-full mt-3 px-4 py-3 border border-stone-200 rounded-lg resize-none" />
                 </Section>
               </div>
             )}
 
             {((isGiftFlow && step === 2) || (!isGiftFlow && step === 3)) && (
               <div className="space-y-6">
-                <h2 className="text-xl font-serif text-stone-800 mb-6">예식 정보를 입력해주세요</h2>
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">예식 정보를 입력해주세요</h2>
                 <Section title="예식 일시">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm text-stone-600 mb-2">날짜 *</label>
-                      <input type="date" value={formData.weddingDate} onChange={e => updateForm('weddingDate', e.target.value)} className="w-full px-4 py-3 border border-stone-200 rounded-xl" />
+                      <input type="date" value={formData.weddingDate} onChange={e => updateForm('weddingDate', e.target.value)} className="w-full px-4 py-3 border border-stone-200 rounded-lg" />
                     </div>
                     <div>
                       <label className="block text-sm text-stone-600 mb-2">시간 *</label>
@@ -509,7 +509,7 @@ export default function CreateWedding() {
                             if (period === 'PM') h = h < 12 ? h + 12 : h;
                             updateForm('weddingTime', String(h).padStart(2, '0') + ':' + (parts[1] || '00'));
                           }}
-                          className="flex-1 px-3 py-3 border border-stone-200 rounded-xl text-center appearance-none bg-white"
+                          className="flex-1 px-3 py-3 border border-stone-200 rounded-lg text-center appearance-none bg-white"
                         >
                           <option value="">-</option>
                           <option value="AM">오전</option>
@@ -525,7 +525,7 @@ export default function CreateWedding() {
                             if (!isPM && h === 12) h = 0;
                             updateForm('weddingTime', String(h).padStart(2, '0') + ':' + (parts[1] || '00'));
                           }}
-                          className="flex-1 px-3 py-3 border border-stone-200 rounded-xl text-center appearance-none bg-white"
+                          className="flex-1 px-3 py-3 border border-stone-200 rounded-lg text-center appearance-none bg-white"
                         >
                           <option value="">시</option>
                           {[12,1,2,3,4,5,6,7,8,9,10,11].map(h => <option key={h} value={String(h)}>{h}시</option>)}
@@ -536,7 +536,7 @@ export default function CreateWedding() {
                             const parts = formData.weddingTime ? formData.weddingTime.split(':') : ['12', '00'];
                             updateForm('weddingTime', parts[0] + ':' + e.target.value);
                           }}
-                          className="flex-1 px-3 py-3 border border-stone-200 rounded-xl text-center appearance-none bg-white"
+                          className="flex-1 px-3 py-3 border border-stone-200 rounded-lg text-center appearance-none bg-white"
                         >
                           <option value="">분</option>
                           {['00','10','20','30','40','50'].map(m => <option key={m} value={m}>{m}분</option>)}
@@ -560,7 +560,7 @@ export default function CreateWedding() {
 
             {((isGiftFlow && step === 3) || (!isGiftFlow && step === 4)) && (
               <div className="space-y-6">
-                <h2 className="text-xl font-serif text-stone-800 mb-6">계좌 정보를 입력해주세요</h2>
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">계좌 정보를 입력해주세요</h2>
                 <p className="text-sm text-stone-500 -mt-4 mb-6">* 나중에 수정할 수 있어요</p>
                 <Section title="신랑 계좌">
                   <div className="grid grid-cols-3 gap-3">
@@ -581,8 +581,8 @@ export default function CreateWedding() {
 
             {((isGiftFlow && step === 4) || (!isGiftFlow && step === 5)) && (
               <div className="space-y-6">
-                <h2 className="text-xl font-serif text-stone-800 mb-6">{isGiftFlow ? '정보 확인' : '결제 정보 확인'}</h2>
-                <div className="bg-stone-50 rounded-2xl p-6">
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{isGiftFlow ? '정보 확인' : '결제 정보 확인'}</h2>
+                <div className="bg-stone-50 rounded-lg p-6">
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-stone-600">선택 패키지</span>
                     <span className="font-semibold text-stone-800">{currentPackage?.name}</span>
@@ -651,8 +651,8 @@ export default function CreateWedding() {
       {!isLastStep && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4">
           <div className="max-w-2xl mx-auto flex gap-3">
-            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-xl font-medium text-stone-600 hover:bg-stone-50">이전</button>
-            <button onClick={handleNext} disabled={!canNext()} className="flex-1 py-4 bg-stone-800 text-white rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-lg font-medium text-stone-600 hover:bg-stone-50">이전</button>
+            <button onClick={handleNext} disabled={!canNext()} className="flex-1 py-4 bg-stone-800 text-white rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
               다음 <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -662,18 +662,18 @@ export default function CreateWedding() {
       {isLastStep && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4">
           <div className="max-w-2xl mx-auto flex gap-3">
-            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-xl font-medium text-stone-600 hover:bg-stone-50">이전</button>
+            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-lg font-medium text-stone-600 hover:bg-stone-50">이전</button>
             {isGiftFlow ? (
-              <button onClick={handleCreateWedding} className="flex-1 py-4 bg-emerald-600 text-white rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-emerald-700">
+              <button onClick={handleCreateWedding} className="flex-1 py-4 bg-emerald-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-emerald-700">
                 <Gift className="w-5 h-5" />
                 청첩장 만들기
               </button>
             ) : user?.role === 'ADMIN' ? (
-              <button onClick={handleAdminCreate} className="flex-1 py-4 bg-stone-800 text-white rounded-xl font-medium flex items-center justify-center gap-2">
+              <button onClick={handleAdminCreate} className="flex-1 py-4 bg-stone-800 text-white rounded-lg font-medium flex items-center justify-center gap-2">
                 무료로 생성하기
               </button>
             ) : (
-              <button onClick={handlePayment} className="flex-1 py-4 bg-stone-800 text-white rounded-xl font-medium flex items-center justify-center gap-2">
+              <button onClick={handlePayment} className="flex-1 py-4 bg-stone-800 text-white rounded-lg font-medium flex items-center justify-center gap-2">
                 {appliedCoupon ? getDiscountedPrice().toLocaleString() : currentPackage?.price.toLocaleString()}원 결제하기
               </button>
             )}
@@ -684,7 +684,7 @@ export default function CreateWedding() {
       <AnimatePresence>
         {showPaymentModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white rounded-2xl p-6 max-w-sm w-full">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white rounded-lg p-6 max-w-sm w-full">
               {paymentStatus === 'processing' && (
                 <div className="text-center">
                   <div className="w-16 h-16 border-4 border-stone-200 border-t-stone-800 rounded-full animate-spin mx-auto mb-4" />
@@ -699,7 +699,7 @@ export default function CreateWedding() {
                   </div>
                   <p className="text-lg font-medium text-stone-800">결제 실패</p>
                   <p className="text-sm text-stone-500 mt-2">다시 시도해주세요</p>
-                  <button onClick={() => { setShowPaymentModal(false); setPaymentStatus('idle'); }} className="mt-6 w-full py-3 bg-stone-800 text-white rounded-xl">닫기</button>
+                  <button onClick={() => { setShowPaymentModal(false); setPaymentStatus('idle'); }} className="mt-6 w-full py-3 bg-stone-800 text-white rounded-lg">닫기</button>
                 </div>
               )}
             </motion.div>
@@ -712,7 +712,7 @@ export default function CreateWedding() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-stone-200 rounded-2xl p-5">
+    <div className="bg-white border border-stone-200 rounded-lg p-5">
       <h3 className="font-medium text-stone-800 mb-4">{title}</h3>
       <div className="space-y-3">{children}</div>
     </div>
@@ -723,7 +723,7 @@ function Input({ label, value, onChange, placeholder }: { label: string; value: 
   return (
     <div>
       <label className="block text-sm text-stone-600 mb-1.5">{label}</label>
-      <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-300" />
+      <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-300" />
     </div>
   );
 }

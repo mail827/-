@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import JSZip from 'jszip';
-import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download, Loader2, ChevronLeft, ChevronRight, Camera, Play } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download, Loader2, ChevronLeft, ChevronRight, ChevronDown, Camera, Play } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import QRCardModal from '../components/QRCardModal';
 import ImageCropper from '../components/ImageCropper';
@@ -100,6 +100,7 @@ export default function Dashboard() {
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [showModal, setShowModal] = useState<'inquiries' | 'orders' | null>(null);
   const [retryingOrderId, setRetryingOrderId] = useState<string | null>(null);
+  const [snapOpen, setSnapOpen] = useState(false);
   const [guestPhotos, setGuestPhotos] = useState<GuestPhoto[]>([]);
   const [guestPhotoSlug, setGuestPhotoSlug] = useState<string | null>(null);
   const [guestPhotoViewIndex, setGuestPhotoViewIndex] = useState<number | null>(null);
@@ -423,22 +424,24 @@ export default function Dashboard() {
         className="hidden"
         onChange={handleHeroFileSelect}
       />
-      <header className="border-b border-stone-200 sticky top-0 z-40 bg-white/80 backdrop-blur-sm">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="font-serif text-xl text-stone-800">청첩장 작업실</Link>
-          
-          <div className="flex items-center gap-4">
-            <Link to="/mypage" className="flex items-center gap-2 hover:bg-stone-50 px-3 py-2 rounded-xl transition-all group">
-              <div className="w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center text-sm text-stone-600">
+      <header className="border-b border-stone-100 sticky top-0 z-40 bg-white/80 backdrop-blur-sm">
+        <div className="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <span className="text-[15px] font-semibold text-stone-800">청첩장 작업실</span>
+            <span className="text-[10px] tracking-[0.1em] text-stone-400 font-medium hidden sm:inline">WEDDING ENGINE</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Link to="/mypage" className="flex items-center gap-2 hover:bg-stone-50 px-2.5 py-1.5 rounded-lg transition-all">
+              <div className="w-7 h-7 bg-stone-100 rounded-full flex items-center justify-center text-[11px] text-stone-600 font-medium">
                 {user?.name?.[0] || '?'}
               </div>
-              <span className="text-sm text-stone-700 font-medium hidden sm:block">{user?.name}</span>
+              <span className="text-[13px] text-stone-700 font-medium hidden sm:block">{user?.name}</span>
               {user?.role === 'ADMIN' && (
-                <span className="px-2 py-1 bg-stone-800 text-white text-xs rounded-full">Admin</span>
+                <span className="text-[10px] tracking-[0.1em] text-stone-400 font-medium">ADMIN</span>
               )}
             </Link>
-            <button onClick={handleLogout} className="p-2 text-stone-400 hover:text-stone-600 transition-colors">
-              <LogOut className="w-5 h-5" />
+            <button onClick={handleLogout} className="p-1.5 text-stone-400 hover:text-stone-600 transition-colors">
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -450,91 +453,94 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-12"
         >
-          <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">DASHBOARD</p>
-          <h1 className="font-serif text-3xl text-stone-800">
+          <p className="text-[11px] tracking-[0.15em] text-stone-400 mb-2">DASHBOARD</p>
+          <h1 className="font-serif text-2xl text-stone-800">
             안녕하세요, {user?.name}님
           </h1>
         </motion.div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-14">
           <motion.button
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             onClick={() => navigate('/create')}
-            className="p-6 bg-stone-800 text-white rounded-2xl flex items-center gap-4 hover:bg-stone-900 transition-colors text-left"
+            className="p-4 bg-stone-900 text-white rounded-lg flex items-center gap-3 hover:bg-stone-800 transition-colors text-left"
           >
-            <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
-              <Plus className="w-6 h-6" />
+            <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
+              <Plus className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-medium">청첩장 만들기</p>
-              <p className="text-sm text-stone-400">새 청첩장을 만들어보세요</p>
+              <p className="text-[13px] font-medium">청첩장 만들기</p>
+              <p className="text-[11px] text-stone-400">새 청첩장</p>
             </div>
           </motion.button>
-
           <motion.button
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
+            transition={{ delay: 0.03 }}
             onClick={() => navigate('/ai-snap/gift')}
-            className="p-6 bg-white rounded-2xl flex items-center gap-4 hover:shadow-lg transition-all text-left border border-stone-200"
+            className="p-4 bg-white rounded-lg flex items-center gap-3 hover:bg-stone-50 transition-all text-left border border-stone-200"
           >
-            <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
-              <Gift className="w-6 h-6" />
+            <div className="w-9 h-9 bg-stone-100 rounded-lg flex items-center justify-center">
+              <Gift className="w-4 h-4 text-stone-500" />
             </div>
             <div>
-              <p className="font-medium text-stone-800">화보 선물하기</p>
-              <p className="text-sm text-stone-500">소중한 분에게 선물</p>
+              <p className="text-[13px] font-medium text-stone-800">화보 선물하기</p>
+              <p className="text-[11px] text-stone-400">소중한 분에게</p>
             </div>
           </motion.button>
-
           <motion.button
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
+            transition={{ delay: 0.06 }}
             onClick={() => setShowModal('orders')}
-            className="p-6 bg-white rounded-2xl flex items-center gap-4 hover:shadow-lg transition-all text-left border border-stone-200"
+            className="p-4 bg-white rounded-lg flex items-center gap-3 hover:bg-stone-50 transition-all text-left border border-stone-200"
           >
-            <div className="w-12 h-12 bg-stone-100 rounded-xl flex items-center justify-center text-stone-600">
-              <CreditCard className="w-6 h-6" />
+            <div className="w-9 h-9 bg-stone-100 rounded-lg flex items-center justify-center">
+              <CreditCard className="w-4 h-4 text-stone-500" />
             </div>
             <div>
-              <p className="font-medium text-stone-800">주문 내역</p>
-              <p className="text-sm text-stone-500">{orders.length}개의 주문</p>
+              <p className="text-[13px] font-medium text-stone-800">주문 내역</p>
+              <p className="text-[11px] text-stone-400">{orders.length}개의 주문</p>
             </div>
           </motion.button>
-
           {user?.role === 'ADMIN' && (
             <motion.button
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
+              transition={{ delay: 0.09 }}
               onClick={() => navigate('/admin')}
-              className="p-6 bg-stone-800 text-white rounded-2xl flex items-center gap-4 hover:bg-stone-900 transition-all text-left"
+              className="p-4 bg-stone-900 text-white rounded-lg flex items-center gap-3 hover:bg-stone-800 transition-all text-left"
             >
-              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
-                <Crown className="w-6 h-6" />
+              <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
+                <Crown className="w-4 h-4" />
               </div>
               <div>
-                <p className="font-medium">관리자 패널</p>
-                <p className="text-sm text-stone-400">전체 청첩장 관리</p>
+                <p className="text-[13px] font-medium">관리자 패널</p>
+                <p className="text-[11px] text-stone-400">전체 관리</p>
               </div>
             </motion.button>
           )}
         </div>
 
         <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">AI WEDDING SNAP</p>
-              <h2 className="font-serif text-2xl text-stone-800">내 AI 웨딩스냅</h2>
+          <button onClick={() => setSnapOpen(!snapOpen)} className="w-full flex items-center justify-between mb-0 group">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-stone-100 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-stone-500" />
+              </div>
+              <div className="text-left">
+                <p className="text-[11px] tracking-[0.15em] text-stone-400">AI WEDDING SNAP</p>
+                <h2 className="font-serif text-lg text-stone-800">내 AI 웨딩스냅</h2>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <a href="/ai-snap/studio" className="px-4 py-2 bg-stone-800 text-white rounded-xl text-xs font-medium hover:bg-stone-900 transition-all flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
+              <a href="/ai-snap/studio" onClick={e => e.stopPropagation()} className="px-3 py-1.5 bg-stone-800 text-white rounded-lg text-xs font-medium hover:bg-stone-900 transition-all flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" /> 화보 스튜디오
               </a>
+              <ChevronDown className={`w-5 h-5 text-stone-400 transition-transform ${snapOpen ? "rotate-180" : ""}`} />
             </div>
-          </div>
+          </button>
+          {snapOpen && <div className="mt-6">
 
           {hasStudioContent && (
             <div className="space-y-6 mb-8">
@@ -542,7 +548,7 @@ export default function Dashboard() {
                 const done = pack.snaps.filter(s => s.status === 'done' && s.resultUrl);
                 if (done.length === 0) return null;
                 return (
-                  <div key={pack.id} className="bg-white rounded-2xl border border-stone-200 p-5">
+                  <div key={pack.id} className="bg-white rounded-lg border border-stone-200 p-5">
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <p className="text-sm font-semibold text-stone-800">{pack.concept}</p>
@@ -555,7 +561,7 @@ export default function Dashboard() {
                     </div>
                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                       {done.map((snap, i) => (
-                        <div key={snap.id} className="rounded-xl overflow-hidden border border-stone-100 group relative">
+                        <div key={snap.id} className="rounded-lg overflow-hidden border border-stone-100 group relative">
                           <img src={snap.resultUrl} alt={`Snap ${i + 1}`} className="w-full aspect-square object-cover" />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
                             <a href={snap.resultUrl} download target="_blank"
@@ -574,7 +580,7 @@ export default function Dashboard() {
                       ))}
                       {pack.usedSnaps < pack.totalSnaps && (
                         <a href={`/ai-snap/studio?packId=${pack.id}`}
-                          className="rounded-xl border-2 border-dashed border-stone-200 aspect-square flex flex-col items-center justify-center hover:border-stone-400 transition-all">
+                          className="rounded-lg border-2 border-dashed border-stone-200 aspect-square flex flex-col items-center justify-center hover:border-stone-400 transition-all">
                           <Plus className="w-5 h-5 text-stone-400 mb-1" />
                           <span className="text-[10px] text-stone-400">{pack.totalSnaps - pack.usedSnaps}장 남음</span>
                         </a>
@@ -591,7 +597,7 @@ export default function Dashboard() {
               <p className="text-sm font-medium text-stone-500 mb-4">무료 체험 스냅</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
                 {mySnaps.map((snap: any) => (
-                  <div key={snap.id} className="rounded-2xl overflow-hidden border border-stone-200 group relative">
+                  <div key={snap.id} className="rounded-lg overflow-hidden border border-stone-200 group relative">
                     {snap.resultUrl ? (
                       <>
                         <img src={snap.resultUrl} alt="AI Snap" className="w-full aspect-square object-cover" />
@@ -616,12 +622,12 @@ export default function Dashboard() {
                 ))}
               </div>
               {mySnaps.some((s: any) => s.isFree && !s.unlocked) && (
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
+                <div className="bg-stone-100 border border-stone-200 rounded-lg p-4 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-stone-800">워터마크 없는 원본이 필요하세요?</p>
                     <p className="text-xs text-stone-500 mt-0.5">패키지 구매 시 워터마크 제거 + 다양한 컨셉 이용 가능</p>
                   </div>
-                  <a href="/ai-snap/studio" className="flex-shrink-0 px-4 py-2 bg-stone-800 text-white rounded-xl text-xs font-medium hover:bg-stone-900 transition-all">
+                  <a href="/ai-snap/studio" className="flex-shrink-0 px-4 py-2 bg-stone-800 text-white rounded-lg text-xs font-medium hover:bg-stone-900 transition-all">
                     패키지 보기
                   </a>
                 </div>
@@ -630,28 +636,29 @@ export default function Dashboard() {
           )}
 
           {!hasStudioContent && !hasFreeSnaps && (
-            <div className="bg-stone-50 rounded-2xl border border-stone-200 p-8 text-center">
+            <div className="bg-stone-50 rounded-lg border border-stone-200 p-8 text-center">
               <Sparkles className="w-8 h-8 text-stone-300 mx-auto mb-3" />
               <p className="text-sm text-stone-500 mb-1">아직 만든 웨딩스냅이 없어요</p>
               <p className="text-xs text-stone-400 mb-5">AI가 사진 한 장으로 웨딩 화보를 만들어드려요</p>
               <div className="flex gap-3 justify-center">
-                <a href="/ai-snap" className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 transition-all">
+                <a href="/ai-snap" className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white rounded-lg text-sm hover:bg-stone-900 transition-all">
                   <Sparkles className="w-4 h-4" /> 무료 체험하기
                 </a>
-                <a href="/ai-snap/studio" className="inline-flex items-center gap-2 px-5 py-2.5 border border-stone-200 text-stone-600 rounded-xl text-sm hover:bg-stone-50 transition-all">
+                <a href="/ai-snap/studio" className="inline-flex items-center gap-2 px-5 py-2.5 border border-stone-200 text-stone-600 rounded-lg text-sm hover:bg-stone-50 transition-all">
                   <ImageIcon className="w-4 h-4" /> 화보 스튜디오
                 </a>
               </div>
             </div>
           )}
+          </div>}
         </section>
 
         <section>
-          <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">MY INVITATIONS</p>
-          <h2 className="font-serif text-2xl text-stone-800 mb-8">내 청첩장</h2>
+          <p className="text-[11px] tracking-[0.15em] text-stone-400 mb-2">MY INVITATIONS</p>
+          <h2 className="font-serif text-lg text-stone-800 mb-8">내 청첩장</h2>
           
           {weddings.length === 0 ? (
-            <div className="bg-stone-50 rounded-2xl p-16 text-center">
+            <div className="bg-stone-50 rounded-lg p-16 text-center">
               <Heart className="w-10 h-10 text-stone-300 mx-auto mb-4" />
               <p className="text-stone-500 mb-6">아직 만든 청첩장이 없어요</p>
               <button
@@ -669,7 +676,7 @@ export default function Dashboard() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="bg-white rounded-2xl overflow-hidden border border-stone-200 hover:shadow-lg transition-all"
+                  className="bg-white rounded-lg overflow-hidden border border-stone-200 hover:shadow-lg transition-all"
                 >
                   <div className="h-36 bg-gradient-to-br from-stone-100 to-stone-50 flex items-center justify-center relative overflow-hidden group">
                     {wedding.heroMedia ? (
@@ -702,7 +709,7 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div className="p-5">
-                    <h3 className="font-serif text-lg text-stone-800 mb-1">
+                    <h3 className="font-serif text-[15px] text-stone-800 mb-1">
                       {wedding.groomName} & {wedding.brideName}
                     </h3>
                     <p className="text-sm text-stone-400 mb-4">
@@ -770,7 +777,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-3">
                 <div>
                   <p className="text-xs tracking-[0.2em] text-stone-400 mb-1">GUEST GALLERY</p>
-                  <h2 className="font-serif text-xl sm:text-2xl text-stone-800">하객 갤러리</h2>
+                  <h2 className="font-serif text-lg sm:text-xl text-stone-800">하객 갤러리</h2>
                 </div>
                 <span className="px-2.5 py-0.5 bg-stone-100 text-stone-600 text-xs rounded-full">{guestPhotos.length}장</span>
               </div>
@@ -779,7 +786,7 @@ export default function Dashboard() {
                   <select
                     value={guestPhotoSlug || ''}
                     onChange={e => setGuestPhotoSlug(e.target.value)}
-                    className="px-3 py-2 border border-stone-200 rounded-xl text-sm text-stone-700 bg-white"
+                    className="px-3 py-2 border border-stone-200 rounded-lg text-sm text-stone-700 bg-white"
                   >
                     {weddings.map(w => (
                       <option key={w.id} value={w.slug}>{w.groomName} & {w.brideName}</option>
@@ -789,7 +796,7 @@ export default function Dashboard() {
                 <button
                   onClick={handleDownloadAllZip}
                   disabled={guestPhotos.length === 0 || zipLoading}
-                  className="inline-flex items-center gap-2 px-4 py-2 border border-stone-200 text-stone-600 rounded-xl text-sm hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-stone-200 text-stone-600 rounded-lg text-sm hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {zipLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                   전체 다운로드
@@ -798,7 +805,7 @@ export default function Dashboard() {
             </div>
 
             {guestPhotos.length === 0 ? (
-              <div className="bg-stone-50 rounded-2xl border border-stone-200 p-12 text-center">
+              <div className="bg-stone-50 rounded-lg border border-stone-200 p-12 text-center">
                 <ImageIcon className="w-10 h-10 text-stone-300 mx-auto mb-3" />
                 <p className="text-sm text-stone-500">아직 하객이 올린 사진이 없어요</p>
               </div>
@@ -807,7 +814,7 @@ export default function Dashboard() {
                 {guestPhotos.map((photo, i) => (
                   <div
                     key={photo.id}
-                    className="group relative rounded-xl overflow-hidden border border-stone-200 aspect-square bg-stone-50"
+                    className="group relative rounded-lg overflow-hidden border border-stone-200 aspect-square bg-stone-50"
                   >
                     {photo.mediaType === 'VIDEO' ? (
                       <div className="relative w-full h-full cursor-pointer" onClick={() => setGuestPhotoViewIndex(i)}>
@@ -843,11 +850,11 @@ export default function Dashboard() {
         )}
 
         <section className="mt-12">
-          <p className="text-sm tracking-[0.2em] text-stone-400 mb-2">MY PAGE</p>
-          <h2 className="font-serif text-2xl text-stone-800 mb-8">내 정보</h2>
+          <p className="text-[11px] tracking-[0.15em] text-stone-400 mb-2">MY PAGE</p>
+          <h2 className="font-serif text-lg text-stone-800 mb-8">내 정보</h2>
           
           <div className="grid sm:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl border border-stone-200 p-6">
+            <div className="bg-white rounded-lg border border-stone-200 p-6">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-14 h-14 bg-stone-100 rounded-full flex items-center justify-center">
                   <UserIcon className="w-7 h-7 text-stone-500" />
@@ -861,7 +868,7 @@ export default function Dashboard() {
 
             <div 
               onClick={() => setShowModal('inquiries')}
-              className="bg-white rounded-2xl border border-stone-200 p-6 cursor-pointer hover:border-stone-400 transition-colors"
+              className="bg-white rounded-lg border border-stone-200 p-6 cursor-pointer hover:border-stone-400 transition-colors"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -876,7 +883,7 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-2">
                   {inquiries.slice(0, 3).map((inq: any) => (
-                    <div key={inq.id} className="flex items-center justify-between p-3 bg-stone-50 rounded-xl">
+                    <div key={inq.id} className="flex items-center justify-between p-3 bg-stone-50 rounded-lg">
                       <p className="text-sm text-stone-600 truncate flex-1 mr-2">{inq.message}</p>
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         inq.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
@@ -899,9 +906,9 @@ export default function Dashboard() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] overflow-hidden">
+          <div className="bg-white rounded-lg max-w-lg w-full max-h-[80vh] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-stone-200">
-              <h3 className="text-lg font-bold text-stone-800">
+              <h3 className="font-serif text-lg text-stone-800">
                 {showModal === 'inquiries' ? '내 문의 내역' : '주문 내역'}
               </h3>
               <button onClick={() => setShowModal(null)} className="p-2 hover:bg-stone-100 rounded-full">
@@ -915,7 +922,7 @@ export default function Dashboard() {
                     <p className="text-sm text-stone-400 text-center py-8">주문 내역이 없습니다</p>
                   ) : (
                     orders.map((order: Order) => (
-                      <div key={order.id} className={`p-4 rounded-xl border ${
+                      <div key={order.id} className={`p-4 rounded-lg border ${
                         order.status === 'PENDING' ? 'bg-yellow-50 border-yellow-200' :
                         order.status === 'PAID' ? 'bg-green-50 border-green-200' :
                         'bg-stone-50 border-stone-200'
@@ -986,7 +993,7 @@ export default function Dashboard() {
                     <p className="text-sm text-stone-400 text-center py-8">문의 내역이 없습니다</p>
                   ) : (
                     inquiries.map((inq: any) => (
-                      <div key={inq.id} className="p-4 bg-stone-50 rounded-xl">
+                      <div key={inq.id} className="p-4 bg-stone-50 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <span className={`px-2 py-1 text-xs rounded-full ${
                             inq.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
@@ -1052,16 +1059,16 @@ export default function Dashboard() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setDeleteConfirmPhoto(null)}>
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-              className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+              className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
               <p className="text-stone-800 font-medium mb-2">이 사진을 삭제하시겠습니까?</p>
               <p className="text-sm text-stone-500 mb-6">{deleteConfirmPhoto.guestName}님이 올린 사진입니다.</p>
               <div className="flex gap-2">
                 <button onClick={() => setDeleteConfirmPhoto(null)}
-                  className="flex-1 py-2.5 border border-stone-200 text-stone-600 rounded-xl text-sm hover:bg-stone-50">
+                  className="flex-1 py-2.5 border border-stone-200 text-stone-600 rounded-lg text-sm hover:bg-stone-50">
                   취소
                 </button>
                 <button onClick={handleDeleteGuestPhoto}
-                  className="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-sm hover:bg-red-600">
+                  className="flex-1 py-2.5 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600">
                   삭제
                 </button>
               </div>
@@ -1080,7 +1087,7 @@ export default function Dashboard() {
       )}
       {heroUploading && (
         <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
-          <div className="bg-white rounded-xl px-6 py-4 flex items-center gap-3">
+          <div className="bg-white rounded-lg px-6 py-4 flex items-center gap-3">
             <Loader2 className="w-5 h-5 animate-spin text-stone-600" />
             <span className="text-sm text-stone-700">업로드 중...</span>
           </div>

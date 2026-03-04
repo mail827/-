@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { classifyEyelidType, validateEyelidPreservation } from '../utils/eyelidValidator.js';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { uploadFromUrl, getWatermarkedUrl } from '../utils/cloudinary.js';
@@ -88,58 +87,25 @@ const getRandomPose = (mode: string): string => {
   return arr[Math.floor(Math.random() * arr.length)];
 };
 
-const runFaceSwap = async (baseUrl: string, mode: string, imageUrls: string[]): Promise<string> => {
-  try {
-    let swapBody: Record<string, any> = { workflow_type: 'target_hair', upscale: false, target_image: baseUrl };
-    if (mode === 'couple' && imageUrls.length >= 2) {
-      swapBody.face_image_0 = imageUrls[0];
-      swapBody.gender_0 = 'male';
-      swapBody.face_image_1 = imageUrls[1];
-      swapBody.gender_1 = 'female';
-    } else if (mode === 'groom') {
-      swapBody.face_image_0 = imageUrls[0];
-      swapBody.gender_0 = 'male';
-    } else {
-      swapBody.face_image_0 = imageUrls[imageUrls.length > 1 ? 1 : 0];
-      swapBody.gender_0 = 'female';
-    }
-    const swapResult = await falFetch('https://fal.run/easel-ai/advanced-face-swap', {
-      method: 'POST',
-      body: JSON.stringify(swapBody),
-    });
-    if (swapResult?.image?.url) {
-      const checkSwap = await fetch(swapResult.image.url, { method: 'HEAD' });
-      const swapSize = parseInt(checkSwap.headers.get('content-length') || '0', 10);
-      if (swapSize > 10000) return swapResult.image.url;
-    }
-  } catch (e: any) { console.log('Easel face-swap skipped:', e.message); }
+const applyFaceSwap = async (baseUrl: string, isCouple: boolean, imageUrls: string[]): Promise<string> => {
   return baseUrl;
-};
-
-const applyFaceSwap = async (baseUrl: string, mode: string, imageUrls: string[], eyelidType?: string): Promise<string> => {
-  const maxRetries = eyelidType === 'monolid' || eyelidType === 'inner_double' ? 2 : 0;
-  const faceRef = mode === 'groom' ? imageUrls[0] : imageUrls[imageUrls.length > 1 ? 1 : 0];
-  let result = await runFaceSwap(baseUrl, mode, imageUrls);
-  if (result === baseUrl || maxRetries === 0) return result;
-  const validation = await validateEyelidPreservation(faceRef, result, eyelidType || 'unknown');
-  if (validation.passed) {
-    console.log('Eyelid validation: PASS');
-    return result;
-  }
-  console.log('Eyelid validation: FAIL - retrying face-swap...');
-  for (let retry = 0; retry < maxRetries; retry++) {
-    const retryResult = await runFaceSwap(baseUrl, mode, imageUrls);
-    if (retryResult === baseUrl) continue;
-    const retryValidation = await validateEyelidPreservation(faceRef, retryResult, eyelidType || 'unknown');
-    if (retryValidation.passed) {
-      console.log(`Eyelid validation: PASS on retry ${retry + 1}`);
-      return retryResult;
+  try {
+    const groomFace = imageUrls[0];
+    const brideFace = imageUrls[1];
+    const swap1 = await falFetch('https://fal.run/fal-ai/face-swap', {
+      method: 'POST',
+      body: JSON.stringify({ base_image_url: baseUrl, swap_image_url: groomFace }),
+    });
+    if (swap1?.image?.url) {
+      const swap2 = await falFetch('https://fal.run/fal-ai/face-swap', {
+        method: 'POST',
+        body: JSON.stringify({ base_image_url: swap1.image.url, swap_image_url: brideFace }),
+      });
+      if (swap2?.image?.url) return swap2.image.url;
+      return swap1.image.url;
     }
-    console.log(`Eyelid validation: FAIL on retry ${retry + 1}`);
-    result = retryResult;
-  }
-  console.log('Eyelid validation: all retries failed, returning best result');
-  return result;
+  } catch (e: any) { console.log('Face-swap skipped:', e.message); }
+  return baseUrl;
 };
 
 const NEGATIVE_PROMPT = 'distorted face, deformed nose, asymmetric eyes, blurry face, smoothed skin, plastic face, bumpy skin, uneven skin texture, cartoon face, ugly face, merged faces, elongated face, enhanced jawline, square jaw, chiseled face, narrow face, donkey face, horse face, long chin, protruding jaw, swollen face, inflated cheeks, inhuman proportions, uncanny valley face, alien features';
@@ -344,15 +310,11 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
     } else {
       basePrompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
     }
-    const faceRef = mode === 'groom' ? imageUrls[0] : imageUrls[imageUrls.length > 1 ? 1 : 0];
-    const eyelidType = mode !== 'groom' ? await classifyEyelidType(faceRef) : 'unknown';
-    if (eyelidType === 'monolid' || eyelidType === 'inner_double') console.log('Monolid detected - eyelid validation enabled');
-
     const pose = getRandomPose(mode);
     const prompt = pose + ', ' + basePrompt;
 
     const isCouple = mode === 'couple';
-    const strength = isCouple ? 0.20 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.22 : 0.28));
+    const strength = isCouple ? 0.15 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.20 : 0.20));
     let urls: string[];
     if (isCouple) {
       if (imageUrls.length >= 3) {
@@ -379,7 +341,7 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
     if (submit.images) {
       const falUrl = submit.images[0]?.url;
       if (falUrl) {
-        const swappedUrl = await applyFaceSwap(falUrl, mode, imageUrls, eyelidType);
+        const swappedUrl = await applyFaceSwap(falUrl, mode === 'couple', imageUrls);
         const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap');
         await prisma.aiSnap.update({
           where: { id: snapId },
@@ -434,10 +396,6 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
     } else {
       basePrompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
     }
-    const faceRef = mode === 'groom' ? imageUrls[0] : imageUrls[imageUrls.length > 1 ? 1 : 0];
-    const eyelidType = mode !== 'groom' ? await classifyEyelidType(faceRef) : 'unknown';
-    if (eyelidType === 'monolid' || eyelidType === 'inner_double') console.log('Monolid detected (free) - eyelid validation enabled');
-
     const pose = getRandomPose(mode);
     const prompt = pose + ', ' + basePrompt;
 
@@ -456,7 +414,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
     const isCouple = mode === 'couple';
     const isSelfie = concept === 'iphone_selfie' || concept === 'iphone_mirror';
     const isCruise = concept === 'cruise_sunset' || concept === 'cruise_bluesky';
-    const strength = isSelfie ? 0.22 : isCruise ? 0.22 : isCouple ? 0.20 : 0.28;
+    const strength = isSelfie ? 0.22 : isCruise ? 0.20 : isCouple ? 0.18 : 0.20;
 
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
@@ -465,7 +423,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     if (submit.images) {
       const rawUrl = submit.images[0]?.url;
-      const swappedUrl = await applyFaceSwap(rawUrl, mode, imageUrls, eyelidType);
+      const swappedUrl = await applyFaceSwap(rawUrl, isCouple, imageUrls);
       const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap/free');
       const watermarked = getWatermarkedUrl(uploaded.publicId);
       await prisma.aiSnap.create({
@@ -625,7 +583,7 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
     const prompt = pose + ', ' + basePrompt;
     const effectiveMode = req.body.mode || 'groom';
     const isCouple = effectiveMode === 'couple';
-    const strength = isCouple ? 0.20 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.22 : 0.28));
+    const strength = isCouple ? 0.15 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.20 : 0.20));
     let urls: string[];
     if (isCouple) {
       if (imageUrls.length >= 3) {
@@ -650,10 +608,7 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
     if (submit.images) {
       const falUrl = submit.images[0]?.url;
       if (falUrl) {
-        const faceRef = effectiveMode === 'groom' ? imageUrls[0] : imageUrls[imageUrls.length > 1 ? 1 : 0];
-        const eyelidType = effectiveMode !== 'groom' ? await classifyEyelidType(faceRef) : 'unknown';
-        if (eyelidType === 'monolid' || eyelidType === 'inner_double') console.log('Monolid detected (quick-generate) - eyelid validation enabled');
-        const swappedUrl = await applyFaceSwap(falUrl, effectiveMode, imageUrls, eyelidType);
+        const swappedUrl = falUrl;
         const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap');
         return res.json({ status: 'done', resultUrl: uploaded.url });
       }
@@ -674,14 +629,7 @@ router.get('/admin/poll', async (req, res) => {
       const result = await falFetch(responseUrl as string);
       const falUrl = result.images?.[0]?.url;
       if (falUrl) {
-        const mode = (req.query.mode as string) || 'groom';
-        const imageUrlsRaw = req.query.imageUrls as string || '[]';
-        let imageUrls: string[] = [];
-        try { imageUrls = JSON.parse(imageUrlsRaw); } catch {}
-        const faceRef = mode === 'groom' ? imageUrls[0] : imageUrls[imageUrls.length > 1 ? 1 : 0];
-        const eyelidType = faceRef && mode !== 'groom' ? await classifyEyelidType(faceRef) : 'unknown';
-        if (eyelidType === 'monolid' || eyelidType === 'inner_double') console.log('Monolid detected (admin/poll) - eyelid validation enabled');
-        const swappedUrl = imageUrls.length > 0 ? await applyFaceSwap(falUrl, mode, imageUrls, eyelidType) : falUrl;
+        const swappedUrl = falUrl;
         const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap');
         return res.json({ status: 'done', resultUrl: uploaded.url });
       }

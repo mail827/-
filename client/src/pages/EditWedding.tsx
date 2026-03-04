@@ -584,7 +584,7 @@ export default function EditWedding() {
                   <button
                     key={theme.id}
                     onClick={() => updateField('theme', theme.id)}
-                    className={`p-3 rounded-xl border-2 text-sm transition-all ${
+                    className={`p-3 rounded-lg border-2 text-sm transition-all ${
                       wedding.theme === theme.id
                         ? 'border-stone-800 bg-stone-50'
                         : 'border-stone-200 hover:border-stone-400'
@@ -598,7 +598,7 @@ export default function EditWedding() {
               <button
                 type="button"
                 onClick={() => setShowThemePreview(true)}
-                className="mt-4 w-full py-3 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-stone-400 hover:text-stone-700 flex items-center justify-center gap-2 text-sm transition-colors"
+                className="mt-4 w-full py-3 border-2 border-dashed border-stone-300 rounded-lg text-stone-500 hover:border-stone-400 hover:text-stone-700 flex items-center justify-center gap-2 text-sm transition-colors"
               >
                 <Eye className="w-4 h-4" />
                 선택한 테마로 미리보기
@@ -614,7 +614,7 @@ export default function EditWedding() {
                         key={color.value}
                         type="button"
                         onClick={() => updateField('themeColor', color.value)}
-                        className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                        className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all ${
                           wedding.themeColor === color.value
                             ? 'border-stone-800 bg-stone-50'
                             : 'border-stone-200 hover:border-stone-400'
@@ -685,7 +685,7 @@ export default function EditWedding() {
                 value={wedding.greeting || ''}
                 onChange={(e) => updateField('greeting', e.target.value)}
                 rows={6}
-                className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none mt-4"
+                className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none mt-4"
               />
               <AiWritingAssistant
                 fieldType="greeting"
@@ -705,7 +705,7 @@ export default function EditWedding() {
                 value={wedding.closingMessage || ''}
                 onChange={(e) => updateField('closingMessage', e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
               />
               <AiWritingAssistant
                 fieldType="closingMessage"
@@ -729,7 +729,7 @@ export default function EditWedding() {
                     type="date"
                     value={wedding.weddingDate?.split('T')[0] || ''}
                     onChange={(e) => updateField('weddingDate', e.target.value)}
-                    className="w-full px-4 py-3 border border-stone-200 rounded-xl"
+                    className="w-full px-4 py-3 border border-stone-200 rounded-lg"
                   />
                 </div>
                 <div>
@@ -738,7 +738,7 @@ export default function EditWedding() {
                     type="time"
                     value={wedding.weddingTime || ''}
                     onChange={(e) => updateField('weddingTime', e.target.value)}
-                    className="w-full px-4 py-3 border border-stone-200 rounded-xl"
+                    className="w-full px-4 py-3 border border-stone-200 rounded-lg"
                   />
                 </div>
               </div>
@@ -774,7 +774,7 @@ export default function EditWedding() {
                     value={wedding.transportInfo || ''}
                     onChange={(e) => updateField('transportInfo', e.target.value)}
                     placeholder={"지하철 2호선 강남역 3번 출구 도보 5분\n버스: 356, 479, 3111"}
-                    className="w-full px-4 py-3 text-sm border border-stone-200 rounded-xl focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
+                    className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
                     rows={4}
                   />
                 </div>
@@ -784,7 +784,7 @@ export default function EditWedding() {
                     value={wedding.parkingInfo || ''}
                     onChange={(e) => updateField('parkingInfo', e.target.value)}
                     placeholder="건물 내 지하 주차장 무료 이용 가능 (3시간)"
-                    className="w-full px-4 py-3 text-sm border border-stone-200 rounded-xl focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
+                    className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
                     rows={3}
                   />
                 </div>
@@ -860,14 +860,14 @@ export default function EditWedding() {
                   isYouTubeUrl(wedding.heroMedia) ? (
                     <iframe
                       src={getYouTubeEmbedUrl(wedding.heroMedia)}
-                      className="w-full h-64 rounded-xl"
+                      className="w-full h-64 rounded-lg"
                       allowFullScreen
                     />
                   ) : (
-                    <video src={wedding.heroMedia} controls className="w-full h-64 object-cover rounded-xl" />
+                    <video src={wedding.heroMedia} controls className="w-full h-64 object-cover rounded-lg" />
                   )
                 ) : (
-                  <img src={wedding.heroMedia} alt="Hero" className="w-full h-64 object-cover rounded-xl" />
+                  <img src={wedding.heroMedia} alt="Hero" className="w-full h-64 object-cover rounded-lg" />
                 )}
                 <button
                   onClick={() => {
@@ -882,7 +882,7 @@ export default function EditWedding() {
             ) : (
               <div className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400">
+                  <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-stone-400">
                     <Image className="w-8 h-8 text-stone-400 mb-2" />
                     <span className="text-stone-500 text-sm">이미지 업로드</span>
                     <span className="text-stone-400 text-xs mt-1">최대 20MB</span>
@@ -894,7 +894,7 @@ export default function EditWedding() {
                       disabled={uploading}
                     />
                   </label>
-                  <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400">
+                  <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-stone-400">
                     <Film className="w-8 h-8 text-stone-400 mb-2" />
                     <span className="text-stone-500 text-sm">영상 업로드</span>
                     <span className="text-stone-400 text-xs mt-1">최대 200MB</span>
@@ -953,9 +953,9 @@ export default function EditWedding() {
                   'aspect-square'
                 }`}>
                   {item.mediaType === 'VIDEO' ? (
-                    <video src={item.mediaUrl} className="w-full h-full object-cover rounded-xl" />
+                    <video src={item.mediaUrl} className="w-full h-full object-cover rounded-lg" />
                   ) : (
-                    <img src={item.mediaUrl} alt="" className="w-full h-full object-cover rounded-xl" />
+                    <img src={item.mediaUrl} alt="" className="w-full h-full object-cover rounded-lg" />
                   )}
                   <button
                     onClick={() => handleDeleteGallery(item.id)}
@@ -976,7 +976,7 @@ export default function EditWedding() {
                   (wedding.galleryRatio || '1:1') === '4:3' ? 'aspect-[4/3]' :
                   (wedding.galleryRatio || '1:1') === 'original' ? 'aspect-square' :
                   'aspect-square'
-                } flex flex-col items-center justify-center border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                } flex flex-col items-center justify-center border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                 <Plus className="w-8 h-8 text-stone-400 mb-2" />
                 <span className="text-stone-500 text-sm">추가</span>
                 <input
@@ -1036,11 +1036,11 @@ export default function EditWedding() {
                 {isYouTubeUrl(wedding.loveStoryVideo) ? (
                   <iframe
                     src={getYouTubeEmbedUrl(wedding.loveStoryVideo)}
-                    className="w-full aspect-video rounded-xl"
+                    className="w-full aspect-video rounded-lg"
                     allowFullScreen
                   />
                 ) : (
-                  <video src={wedding.loveStoryVideo} controls className="w-full rounded-xl" />
+                  <video src={wedding.loveStoryVideo} controls className="w-full rounded-lg" />
                 )}
                 <button
                   onClick={() => updateField('loveStoryVideo', '')}
@@ -1051,7 +1051,7 @@ export default function EditWedding() {
               </div>
             ) : (
               <div className="space-y-4">
-                <label className={`flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                <label className={`flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                   <Film className="w-8 h-8 text-stone-400 mb-2" />
                   <span className="text-stone-500 text-sm">영상 파일 업로드</span>
                   <span className="text-stone-400 text-xs mt-1">최대 200MB</span>
@@ -1088,7 +1088,7 @@ export default function EditWedding() {
                   {bgMusics.map(m => (
                     <div
                       key={m.id}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border cursor-pointer transition-all ${
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-all ${
                         wedding.bgMusicUrl === m.url
                           ? 'bg-stone-100 border-stone-400'
                           : 'bg-white border-stone-200 hover:border-stone-300'
@@ -1138,7 +1138,7 @@ export default function EditWedding() {
             
             {wedding.bgMusicUrl ? (
               <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 bg-stone-50 rounded-xl">
+                <div className="flex items-center gap-4 p-4 bg-stone-50 rounded-lg">
                   <div className="w-12 h-12 bg-stone-200 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Music className="w-6 h-6 text-stone-500" />
                   </div>
@@ -1166,7 +1166,7 @@ export default function EditWedding() {
               </div>
             ) : (
               <div className="space-y-4">
-                <label className={`flex flex-col items-center justify-center h-32 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                <label className={`flex flex-col items-center justify-center h-32 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                   <Music className="w-8 h-8 text-stone-400 mb-2" />
                   <span className="text-stone-500 text-sm">음악 파일 업로드</span>
                   <span className="text-stone-400 text-xs mt-1">MP3, WAV (최대 20MB)</span>
@@ -1205,9 +1205,9 @@ export default function EditWedding() {
 
         {tab === 'ai' && (
           <>
-            <div className="bg-stone-800 rounded-2xl p-6 text-white">
+            <div className="bg-stone-800 rounded-lg p-6 text-white">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                   <Sparkles className="w-6 h-6" />
                 </div>
                 <div>
@@ -1231,7 +1231,7 @@ export default function EditWedding() {
             </div>
             
             {wedding.aiEnabled && (
-              <Link to={`/admin/weddings/${id}/ai-report`} className="block mb-6 p-4 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl text-white hover:opacity-90 transition-opacity">
+              <Link to={`/admin/weddings/${id}/ai-report`} className="block mb-6 p-4 bg-gradient-to-r from-violet-500 to-purple-600 rounded-lg text-white hover:opacity-90 transition-opacity">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">AI 리포트 보기</p>
@@ -1251,27 +1251,27 @@ export default function EditWedding() {
                     value={wedding.aiName || ""}
                     onChange={(e) => updateField("aiName", e.target.value)}
                     placeholder="자비스, 알프레드, 댕댕이, 흰둥이..."
-                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800"
+                    className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-800"
                   />
                 </Section>
                 <Section title="AI 인터랙션 스타일">
                   <p className="text-sm text-stone-500 mb-4">AI가 하객과 소통하는 방식을 선택하세요</p>
                   <div className="space-y-3">
-                    <label className="flex items-start gap-3 p-4 border border-stone-200 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors">
+                    <label className="flex items-start gap-3 p-4 border border-stone-200 rounded-lg cursor-pointer hover:bg-stone-50 transition-colors">
                       <input type="radio" name="aiMode" value="classic" checked={wedding.aiMode === "classic" || !wedding.aiMode} onChange={(e) => updateField("aiMode", e.target.value)} className="mt-1" />
                       <div>
                         <p className="font-medium text-stone-800">클래식 모드</p>
                         <p className="text-sm text-stone-500">정중하고 친절한 안내. 어르신 하객이 많은 예식에 추천</p>
                       </div>
                     </label>
-                    <label className="flex items-start gap-3 p-4 border border-stone-200 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors">
+                    <label className="flex items-start gap-3 p-4 border border-stone-200 rounded-lg cursor-pointer hover:bg-stone-50 transition-colors">
                       <input type="radio" name="aiMode" value="variety" checked={wedding.aiMode === "variety"} onChange={(e) => updateField("aiMode", e.target.value)} className="mt-1" />
                       <div>
                         <p className="font-medium text-stone-800">버라이어티 모드</p>
                         <p className="text-sm text-stone-500">신랑/신부 선택 + 비밀 폭로전. 친구들이 많은 힙한 결혼식에 추천</p>
                       </div>
                     </label>
-                    <label className="flex items-start gap-3 p-4 border border-stone-200 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors">
+                    <label className="flex items-start gap-3 p-4 border border-stone-200 rounded-lg cursor-pointer hover:bg-stone-50 transition-colors">
                       <input type="radio" name="aiMode" value="active" checked={wedding.aiMode === "active"} onChange={(e) => updateField("aiMode", e.target.value)} className="mt-1" />
                       <div>
                         <p className="font-medium text-stone-800">액티브 모드</p>
@@ -1285,7 +1285,7 @@ export default function EditWedding() {
                     <select
                       value={wedding.aiToneStyle || "default"}
                       onChange={(e) => updateField("aiToneStyle", e.target.value)}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl bg-white"
+                      className="w-full px-4 py-3 border border-stone-200 rounded-lg bg-white"
                     >
                       {(wedding.aiMode === "classic" || !wedding.aiMode) && (
                         <>
@@ -1321,7 +1321,7 @@ export default function EditWedding() {
                         onChange={(e) => updateField('aiGroomPersonality', e.target.value)}
                         placeholder="예: 유머러스하고 장난기 많음"
                         rows={3}
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                        className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                       />
                       <AiWritingAssistant
                         fieldType="groomPersonality"
@@ -1336,7 +1336,7 @@ export default function EditWedding() {
                         onChange={(e) => updateField('aiBridePersonality', e.target.value)}
                         placeholder="예: 다정하고 따뜻한 성격"
                         rows={3}
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                        className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                       />
                       <AiWritingAssistant
                         fieldType="bridePersonality"
@@ -1357,7 +1357,7 @@ export default function EditWedding() {
                       onChange={(e) => updateAiSecrets('groomSecret', e.target.value)}
                       placeholder="예: 사실 프로포즈 3번 실패함"
                       rows={2}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                      className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                     />
                     <AiWritingAssistant
                       fieldType="secret"
@@ -1376,7 +1376,7 @@ export default function EditWedding() {
                       onChange={(e) => updateAiSecrets('brideSecret', e.target.value)}
                       placeholder="예: 첫만남 때 신랑 별로였음"
                       rows={2}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                      className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                     />
                     <AiWritingAssistant
                       fieldType="secret"
@@ -1395,7 +1395,7 @@ export default function EditWedding() {
                       onChange={(e) => updateAiSecrets('firstMeetStory', e.target.value)}
                       placeholder="어디서 어떻게 처음 만났는지"
                       rows={2}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                      className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                     />
                     <AiWritingAssistant
                       fieldType="secret"
@@ -1414,7 +1414,7 @@ export default function EditWedding() {
                       onChange={(e) => updateAiSecrets('proposeStory', e.target.value)}
                       placeholder="프로포즈 장소와 에피소드"
                       rows={2}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                      className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                     />
                     <AiWritingAssistant
                       fieldType="secret"
@@ -1433,7 +1433,7 @@ export default function EditWedding() {
                       onChange={(e) => updateAiSecrets('funnyStory', e.target.value)}
                       placeholder="둘만 아는 재미있는 이야기"
                       rows={2}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                      className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                     />
                     <AiWritingAssistant
                       fieldType="secret"
@@ -1452,7 +1452,7 @@ export default function EditWedding() {
                       onChange={(e) => updateAiSecrets('firstImpression', e.target.value)}
                       placeholder="서로의 첫인상과 지금 생각"
                       rows={2}
-                      className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                      className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                     />
                     <AiWritingAssistant
                       fieldType="secret"
@@ -1477,7 +1477,7 @@ export default function EditWedding() {
                         onChange={(e) => updateAiMenu('menuList', e.target.value)}
                         placeholder="예: 한우불고기, 해물찜, 훈제연어, 초밥, 파스타, 스테이크 등"
                         rows={3}
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                        className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                       />
                     </div>
                     <div>
@@ -1487,7 +1487,7 @@ export default function EditWedding() {
                         onChange={(e) => updateAiMenu('recommendation', e.target.value)}
                         placeholder="추천 메뉴가 있다면 알려주세요"
                         rows={2}
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                        className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                       />
                     </div>
                     <div>
@@ -1497,7 +1497,7 @@ export default function EditWedding() {
                         onChange={(e) => updateAiMenu('specialNote', e.target.value)}
                         placeholder="특별히 알려드리고 싶은 점"
                         rows={2}
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                        className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                       />
                     </div>
                   </div>
@@ -1513,7 +1513,7 @@ export default function EditWedding() {
                         onChange={(e) => updateAiTransport('parking', e.target.value)}
                         placeholder="주차 가능 대수, 요금, 대안 등"
                         rows={2}
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                        className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                       />
                     </div>
                     <div>
@@ -1523,7 +1523,7 @@ export default function EditWedding() {
                         onChange={(e) => updateAiTransport('publicTransport', e.target.value)}
                         placeholder="예: 2호선 강남역 3번 출구에서 도보 10분, 신분당선 신논현역 5번 출구에서 도보 5분"
                         rows={2}
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                        className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                       />
                     </div>
                     <div>
@@ -1533,7 +1533,7 @@ export default function EditWedding() {
                         onChange={(e) => updateAiTransport('taxi', e.target.value)}
                         placeholder="예: 강남역에서 택시 타면 약 15분, 토요일 낮이라 20분 정도 걸릴 수도 있어요"
                         rows={2}
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none"
+                        className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none"
                       />
                     </div>
                   </div>
@@ -1543,7 +1543,7 @@ export default function EditWedding() {
                   <p className="text-sm text-stone-500 mb-4">자주 받는 질문과 답변을 미리 등록해두세요</p>
                   <div className="space-y-4">
                     {(wedding.aiCustomQna || []).map((qna: any, index: number) => (
-                      <div key={index} className="p-4 bg-stone-50 rounded-xl space-y-3">
+                      <div key={index} className="p-4 bg-stone-50 rounded-lg space-y-3">
                         <div className="flex justify-between items-start">
                           <span className="text-xs font-medium text-stone-500">Q&A #{index + 1}</span>
                           <button
@@ -1580,7 +1580,7 @@ export default function EditWedding() {
                     ))}
                     <button
                       onClick={addCustomQna}
-                      className="w-full py-3 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-stone-400 hover:text-stone-600 flex items-center justify-center gap-2"
+                      className="w-full py-3 border-2 border-dashed border-stone-300 rounded-lg text-stone-500 hover:border-stone-400 hover:text-stone-600 flex items-center justify-center gap-2"
                     >
                       <Plus className="w-4 h-4" />
                       Q&A 추가
@@ -1616,27 +1616,27 @@ export default function EditWedding() {
                 <div className="w-8 h-8 border-2 border-stone-300 border-t-stone-800 rounded-full animate-spin" />
               </div>
             ) : rsvpList.length === 0 ? (
-              <div className="text-center py-12 bg-stone-50 rounded-2xl">
+              <div className="text-center py-12 bg-stone-50 rounded-lg">
                 <p className="text-stone-500">아직 응답이 없습니다</p>
               </div>
             ) : (
               <div className="space-y-3">
                 <div className="grid grid-cols-3 gap-4 mb-4">
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
                     <p className="text-2xl font-bold text-green-700">{rsvpList.filter(r => r.attending === true).length}</p>
                     <p className="text-sm text-green-600">참석</p>
                   </div>
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
                     <p className="text-2xl font-bold text-red-700">{rsvpList.filter(r => r.attending === false).length}</p>
                     <p className="text-sm text-red-600">불참</p>
                   </div>
-                  <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 text-center">
+                  <div className="bg-stone-50 border border-stone-200 rounded-lg p-4 text-center">
                     <p className="text-2xl font-bold text-stone-700">{rsvpList.reduce((sum, r) => sum + (r.guestCount || 1), 0)}</p>
                     <p className="text-sm text-stone-600">총 인원</p>
                   </div>
                 </div>
                 
-                <div className="bg-white border border-stone-200 rounded-xl overflow-hidden">
+                <div className="bg-white border border-stone-200 rounded-lg overflow-hidden">
                   <table className="w-full">
                     <thead className="bg-stone-50">
                       <tr>
@@ -1726,7 +1726,7 @@ export default function EditWedding() {
                   <button
                     key={color.value}
                     onClick={() => updateField('textColor', color.value)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
                       wedding.textColor === color.value 
                         ? 'border-stone-800 bg-stone-50' 
                         : 'border-stone-200 hover:border-stone-400'
@@ -1747,7 +1747,7 @@ export default function EditWedding() {
                   value={wedding.textColor || '#ffffff'}
                   onChange={(e) => updateField('textColor', e.target.value)}
                   placeholder="#ffffff"
-                  className="w-32 px-4 py-2 border border-stone-200 rounded-xl text-sm"
+                  className="w-32 px-4 py-2 border border-stone-200 rounded-lg text-sm"
                 />
               </div>
             </Section>
@@ -1802,7 +1802,7 @@ export default function EditWedding() {
                   type="text"
                   value={wedding.slug || ''}
                   onChange={(e) => updateField('slug', e.target.value)}
-                  className="w-full px-4 py-3 border border-stone-200 rounded-xl"
+                  className="w-full px-4 py-3 border border-stone-200 rounded-lg"
                 />
               </div>
               <p className="text-xs text-stone-400 mt-2">* 영문, 숫자, 하이픈만 사용 가능해요</p>
@@ -1840,7 +1840,7 @@ export default function EditWedding() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="bg-white border border-stone-200 rounded-2xl p-6">
+    <section className="bg-white border border-stone-200 rounded-lg p-6">
       <h2 className="font-serif text-xl text-stone-800 mb-6">{title}</h2>
       {children}
     </section>
@@ -1856,7 +1856,7 @@ function Input({ label, value, onChange, placeholder }: { label: string; value: 
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-300"
+        className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-300"
       />
     </div>
   );

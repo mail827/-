@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles, Camera, X, Download,
-  Loader2, Trash2, ChevronRight, Image, Users, User, Zap, ImagePlus
+  Loader2, Trash2, ChevronRight, Image, Users, User, Zap, ImagePlus, RefreshCw
 } from 'lucide-react';
 
 interface Concept { id: string; label: string; }
@@ -176,6 +176,35 @@ export default function AiSnapStudio({ weddingId }: Props) {
     }
   };
 
+  const handleRegenerate = async (snap: any) => {
+    if (generating) return;
+    setGenerating(true);
+    setProgress(0);
+    progressRef.current = setInterval(() => setProgress(p => p >= 92 ? 92 : p + Math.random() * 8), 800);
+    try {
+      await api('/' + snap.id, { method: 'DELETE' });
+      setSnaps(prev => prev.filter(s => s.id !== snap.id));
+      const res = await api('/generate', {
+        method: 'POST',
+        body: JSON.stringify({ weddingId, concept: snap.concept || selectedConcept, imageUrls: getImageUrls(), mode: snap.mode || mode }),
+      });
+      const data = await res.json();
+      if (data.error) {
+        clearInterval(progressRef.current);
+        setGenerating(false);
+        return;
+      }
+      if (data.id) {
+        setPollingId(data.id);
+        if (data.quota) setQuota(data.quota);
+        setSnaps(prev => [{ ...data, concept: snap.concept || selectedConcept, engine: 'nano-banana-pro', createdAt: new Date().toISOString() }, ...prev]);
+      }
+    } catch {
+      clearInterval(progressRef.current);
+      setGenerating(false);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     await api(`/${id}`, { method: 'DELETE' });
     setSnaps(prev => prev.filter(s => s.id !== id));
@@ -321,9 +350,9 @@ export default function AiSnapStudio({ weddingId }: Props) {
                     <img src={snap.resultUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
                   </div>
                 ) : snap.status === 'failed' ? (
-                  <div className="aspect-[3/4] rounded-2xl border border-red-100 flex flex-col items-center justify-center bg-red-50/50">
-                    <X className="w-5 h-5 text-red-300 mb-1" />
-                    <p className="text-[11px] text-red-400">생성 실패</p>
+                  <div onClick={() => { if (generating) return; handleRegenerate(snap); }} className="aspect-[3/4] rounded-2xl border border-red-100 flex flex-col items-center justify-center bg-red-50/50 cursor-pointer hover:bg-red-100/50 transition-colors">
+                    {generating ? <Loader2 className="w-5 h-5 text-red-300 animate-spin mb-1" /> : <RefreshCw className="w-5 h-5 text-red-300 mb-1" />}
+                    <p className="text-[11px] text-red-400">{generating ? '재생성 중...' : '탭하여 재생성'}</p>
                   </div>
                 ) : (
                   <div className="aspect-[3/4] rounded-2xl border border-stone-200 flex flex-col items-center justify-center bg-stone-50/50">

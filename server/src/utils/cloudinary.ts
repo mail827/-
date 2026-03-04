@@ -20,7 +20,7 @@ export const uploadToCloudinary = async (
         folder: `wedding/${folder}`,
         resource_type: resourceType,
         transformation: resourceType === 'image' ? [
-          { quality: 'auto:good', fetch_format: 'auto' }
+          { quality: 'auto:best', fetch_format: 'auto' }
         ] : undefined
       },
       (error, result) => {
@@ -46,7 +46,7 @@ export const uploadFromUrl = async (
   const result = await cloudinary.uploader.upload(imageUrl, {
     folder: `wedding/${folder}`,
     resource_type: 'image',
-    transformation: [{ quality: 'auto:good', fetch_format: 'auto' }],
+    transformation: [{ quality: 'auto:best', fetch_format: 'auto' }],
   });
   return { url: result.secure_url, publicId: result.public_id };
 };
@@ -54,7 +54,7 @@ export const uploadFromUrl = async (
 export const getWatermarkedUrl = (publicId: string): string => {
   return cloudinary.url(publicId, {
     transformation: [
-      { quality: 'auto:good', fetch_format: 'auto' },
+      { quality: 'auto:best', fetch_format: 'auto' },
       {
         overlay: 'watermark-wedding-studio_g2yls0',
         gravity: 'center',

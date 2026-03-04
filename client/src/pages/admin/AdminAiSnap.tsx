@@ -75,6 +75,9 @@ export default function AdminAiSnap() {
   const [couplePhoto, setCouplePhoto] = useState('');
   const [uploading, setUploading] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [genStep, setGenStep] = useState(0);
+  const stepRef = useRef<ReturnType<typeof setInterval>>();
+  const GEN_STEPS = ['AI가 컨셉을 분석하고 있어요', '이미지를 생성하고 있어요', '얼굴을 정밀 보정 중이에요', '고화질로 변환하고 있어요', '거의 다 됐어요'];
   const [results, setResults] = useState<{ id: string; url: string; concept: string; mode: string }[]>([]);
   const pollRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -133,6 +136,8 @@ export default function AdminAiSnap() {
   const generate = async () => {
     if (!canGen()) return;
     setGenerating(true);
+    setGenStep(0);
+    stepRef.current = setInterval(() => setGenStep(prev => Math.min(prev + 1, 4)), 5000);
     try {
       const res = await api('/quick-generate', {
         method: 'POST',
@@ -142,18 +147,21 @@ export default function AdminAiSnap() {
       if (data.status === 'done' && data.resultUrl) {
         setResults(prev => [{ id: Date.now().toString(), url: data.resultUrl, concept, mode }, ...prev]);
         setGenerating(false);
+        clearInterval(stepRef.current);
         return;
       }
       if (data.statusUrl) {
         const poll = async () => {
           try {
-            const pRes = await api(`/poll?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}&mode=${encodeURIComponent(mode)}&imageUrls=${encodeURIComponent(JSON.stringify(getUrls()))}`);
+            const pRes = await api(`/poll?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}&mode=${encodeURIComponent(mode)}&imageUrls=${encodeURIComponent(JSON.stringify(getUrls()))}&_t=${Date.now()}`);
             const pData = await pRes.json();
-            if (pData.status === 'done') {
+            if (pData.status === 'done' && pData.resultUrl) {
               setResults(prev => [{ id: Date.now().toString(), url: pData.resultUrl, concept, mode }, ...prev]);
               setGenerating(false);
+              clearInterval(stepRef.current);
             } else if (pData.status === 'failed') {
               setGenerating(false);
+              clearInterval(stepRef.current);
             } else {
               pollRef.current = setTimeout(poll, 3000);
             }
@@ -165,6 +173,7 @@ export default function AdminAiSnap() {
       }
     } catch {
       setGenerating(false);
+      clearInterval(stepRef.current);
     }
   };
 
@@ -244,7 +253,7 @@ export default function AdminAiSnap() {
               className="w-full py-3 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-30"
               style={{ background: canGen() ? '#1c1917' : '#d6d3d1' }}>
               {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {generating ? '생성 중...' : '생성하기'}
+              {generating ? GEN_STEPS[genStep] : '생성하기'}
             </button>
 
             {results.length > 0 && (

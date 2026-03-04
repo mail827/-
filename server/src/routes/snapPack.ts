@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { classifyEyelidType, validateEyelidPreservation } from '../utils/eyelidValidator.js';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { v2 as cloudinary } from 'cloudinary';
@@ -204,7 +203,7 @@ const BRIDE_SHOT_VARIANTS = [
 const COUPLE_SHOT_VARIANTS = [
   { id: 'facing_each', prompt: 'couple facing each other, close intimate distance, gentle smiles, eye contact between them' },
   { id: 'side_by_side', prompt: 'couple standing side by side, arms linked, both looking at camera with warm smiles' },
-  { id: 'from_behind', prompt: 'couple seen from behind, walking together hand in hand, silhouettes against scenic background' },
+  { id: 'from_behind', prompt: 'couple seen from behind, walking together hand in hand, soft studio lighting on their backs' },
   { id: 'forehead_touch', prompt: 'foreheads gently touching, eyes closed, intimate peaceful moment, close-up' },
   { id: 'laughing_together', prompt: 'couple laughing together candidly, genuine joy, natural movement, candid moment' },
   { id: 'walking_together', prompt: 'couple walking together, slight motion, looking at each other while walking, cinematic candid' },
@@ -355,7 +354,7 @@ const getShotStrength = (mode: string, concept: string, shotIdx: number): number
   if (isCruise) return mode === 'couple' ? 0.18 : 0.22;
   if (DYNAMIC_CONCEPTS.has(concept)) return mode === 'couple' ? 0.15 : mode === 'bride' ? 0.20 : 0.23;
   if (mode === 'couple') return 0.20;
-  return 0.28;
+  return 0.20;
 };
 
 const CONCEPT_MOOD: Record<string, string> = {
@@ -389,7 +388,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const shot = variants[shotIdx % variants.length];
   const isDetail = DETAIL_SHOTS.has(shot.id);
 
-  const face = 'MUST keep the exact same face from reference image, identical face shape eye shape nose shape lip shape jawline unchanged, maintain exact facial proportions eye spacing nose size lip fullness, MUST preserve original eye shape including monolid or double eyelid exactly as in reference, keep original eye corner angle upward or downward exactly as reference, do not add double eyelids do not change eye corner direction do not enlarge eyes, do not alter or beautify the face, preserve original facial identity with absolute accuracy, natural Korean skin texture';
+  const face = 'MUST keep the exact same face from reference image, identical face shape eye shape nose shape lip shape jawline unchanged, maintain exact facial proportions eye spacing nose size lip fullness, do not alter or beautify the face, preserve original facial identity with absolute accuracy, natural Korean skin texture';
 
   const outfitLock = DYNAMIC_CONCEPTS.has(concept) ? 'MUST keep absolutely identical outfit from first shot, same fabric same color same accessories same shoes same hairstyle, do not change any clothing detail' : 'keep identical outfit, hairstyle, accessories from first shot';
 
@@ -411,21 +410,21 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
     const bOutfit = OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic;
     const coupleNatural = 'natural relaxed body language, genuine warm smiles, not stiff not rigid, candid authentic interaction';
-    return `${face}, ${shot.prompt}, ${coupleNatural}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${scene}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
+    return `${shot.prompt}, ${coupleNatural}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
   }
 
   const clothe = mode === 'groom'
     ? (OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic)
     : (OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic);
   const subj = mode === 'groom' ? 'Korean groom' : 'Korean bride';
-  return `${face}, ${shot.prompt}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${scene}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
+  return `${shot.prompt}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
 };
 
 const buildNegativePrompt = (mode: string, concept: string, shotIdx?: number): string => {
   const base = 'deformed face, elongated face, stretched face, pinched nose, bulbous nose, uncanny valley, plastic skin, wax figure, 3D render, cartoon, anime, illustration, painting, doll-like, mannequin, blurry, low quality, watermark, text overlay, collage, grid, multiple frames, split screen, four panel, multi image, photo strip, contact sheet, neon glow on skin, blue light artifact, lens flare on face, color fringing, glowing earring, sparkling earring, lens flare on earring, star burst on jewelry, bright light reflecting off earring';
   const consistencyBlock = 'different outfit, changed clothes, different hairstyle, altered jewelry, wardrobe change, accessories swapped';
   const male = 'overly angular jaw, exaggerated chin, feminized male face, airbrush skin';
-  const female = 'masculine jaw, wide nose bridge, overly sharp features, generic AI face, AI beautified face, added double eyelids, changed eye corner angle, enlarged eyes, softened jawline, slimmed face, plastic surgery look';
+  const female = 'masculine jaw, wide nose bridge, overly sharp features, generic AI face';
 
   const variants = getVariants(mode, concept);
   const shot = shotIdx !== undefined ? variants[shotIdx % variants.length] : null;
@@ -714,56 +713,35 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
         let finalUrl = falUrl!;
         const skipSwapShots = new Set(['closeup_foreheads', 'cheek_kiss_close', 'nose_touch', 'whisper_ear']);
         const currentShot = getVariants(effectiveMode, pack.concept)[shotIdx % getVariants(effectiveMode, pack.concept).length];
-        const shouldSwap = !skipSwapShots.has(currentShot.id);
-        if (shouldSwap) {
+        const shouldSwap = effectiveMode === 'couple' && inputUrlsArr.length >= 2 && !skipSwapShots.has(currentShot.id);
+        if (false && shouldSwap) {
           try {
-            let swapBody: Record<string, any> = { workflow_type: 'target_hair', upscale: false, target_image: finalUrl };
-            if (effectiveMode === 'couple' && inputUrlsArr.length >= 2) {
-              swapBody.face_image_0 = inputUrlsArr[0];
-              swapBody.gender_0 = 'male';
-              swapBody.face_image_1 = inputUrlsArr[1];
-              swapBody.gender_1 = 'female';
-            } else if (effectiveMode === 'groom') {
-              swapBody.face_image_0 = inputUrlsArr[0];
-              swapBody.gender_0 = 'male';
-            } else {
-              swapBody.face_image_0 = inputUrlsArr[inputUrlsArr.length > 1 ? 1 : 0];
-              swapBody.gender_0 = 'female';
-            }
-            const swapResult = await falFetch('https://fal.run/easel-ai/advanced-face-swap', {
+            const groomFace = inputUrlsArr[0];
+            const brideFace = inputUrlsArr[1];
+            const swapPass1 = await falFetch('https://fal.run/fal-ai/face-swap', {
               method: 'POST',
-              body: JSON.stringify(swapBody),
+              body: JSON.stringify({ base_image_url: finalUrl, swap_image_url: groomFace }),
             });
-            if (swapResult?.image?.url) {
-              const checkSwap = await fetch(swapResult.image.url, { method: 'HEAD' });
-              const swapSize = parseInt(checkSwap.headers.get('content-length') || '0', 10);
-              if (swapSize > 10000) {
-                const faceRef = effectiveMode === 'groom' ? inputUrlsArr[0] : inputUrlsArr[inputUrlsArr.length > 1 ? 1 : 0];
-                const eyelidType = effectiveMode !== 'groom' ? await classifyEyelidType(faceRef) : 'unknown';
-                if (eyelidType === 'monolid' || eyelidType === 'inner_double') {
-                  const validation = await validateEyelidPreservation(faceRef, swapResult.image.url, eyelidType);
-                  if (validation.passed) {
-                    console.log(`Eyelid validation PASS: ${snap.concept}`);
-                    finalUrl = swapResult.image.url;
-                  } else {
-                    console.log(`Eyelid validation FAIL: ${snap.concept} - retrying...`);
-                    for (let retry = 0; retry < 2; retry++) {
-                      const retrySwap = await falFetch('https://fal.run/easel-ai/advanced-face-swap', { method: 'POST', body: JSON.stringify(swapBody) });
-                      if (retrySwap?.image?.url) {
-                        const rv = await validateEyelidPreservation(faceRef, retrySwap.image.url, eyelidType);
-                        if (rv.passed) { console.log(`Eyelid PASS retry ${retry+1}`); finalUrl = retrySwap.image.url; break; }
-                        console.log(`Eyelid FAIL retry ${retry+1}`);
-                        finalUrl = retrySwap.image.url;
-                      }
-                    }
+            if (swapPass1?.image?.url) {
+              const check1 = await fetch(swapPass1.image.url, { method: 'HEAD' });
+              const size1 = parseInt(check1.headers.get('content-length') || '0', 10);
+              if (size1 > 10000) {
+                finalUrl = swapPass1.image.url;
+                const swapPass2 = await falFetch('https://fal.run/fal-ai/face-swap', {
+                  method: 'POST',
+                  body: JSON.stringify({ base_image_url: finalUrl, swap_image_url: brideFace }),
+                });
+                if (swapPass2?.image?.url) {
+                  const check2 = await fetch(swapPass2.image.url, { method: 'HEAD' });
+                  const size2 = parseInt(check2.headers.get('content-length') || '0', 10);
+                  if (size2 > 10000) {
+                    finalUrl = swapPass2.image.url;
                   }
-                } else {
-                  finalUrl = swapResult.image.url;
                 }
               }
             }
           } catch (swapErr: any) {
-            console.log('Easel face-swap skipped:', swapErr.message);
+            console.log('Face-swap skipped:', swapErr.message);
           }
         }
 

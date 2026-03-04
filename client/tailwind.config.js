@@ -8,7 +8,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Pretendard', 'sans-serif'],
-        serif: ['Nanum Myeongjo', 'Batang', 'serif'],
+        serif: ['JeonjuCraftMyungjo', 'Nanum Myeongjo', 'serif'],
       },
       colors: {
         rose: {

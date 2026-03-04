@@ -164,7 +164,7 @@ export default function MyPage() {
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
               activeTab === 'profile' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600'
             }`}
           >
@@ -172,7 +172,7 @@ export default function MyPage() {
           </button>
           <button
             onClick={() => setActiveTab('inquiries')}
-            className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
               activeTab === 'inquiries' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600'
             }`}
           >
@@ -180,7 +180,7 @@ export default function MyPage() {
           </button>
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
               activeTab === 'reviews' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600'
             }`}
           >
@@ -189,7 +189,7 @@ export default function MyPage() {
         </div>
 
         {activeTab === 'profile' && user && (
-          <div className="bg-white rounded-2xl border border-stone-200 p-6">
+          <div className="bg-white rounded-lg border border-stone-200 p-6">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-16 h-16 bg-stone-200 rounded-full flex items-center justify-center">
                 <User className="w-8 h-8 text-stone-500" />
@@ -200,21 +200,21 @@ export default function MyPage() {
               </div>
             </div>
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-4 bg-stone-50 rounded-xl">
+              <div className="flex items-center gap-3 p-4 bg-stone-50 rounded-lg">
                 <Mail className="w-5 h-5 text-stone-400" />
                 <div>
                   <p className="text-sm text-stone-500">이메일</p>
                   <p className="text-stone-800">{user.email}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-4 bg-stone-50 rounded-xl">
+              <div className="flex items-center gap-3 p-4 bg-stone-50 rounded-lg">
                 <Calendar className="w-5 h-5 text-stone-400" />
                 <div>
                   <p className="text-sm text-stone-500">가입일</p>
                   <p className="text-stone-800">{new Date(user.createdAt).toLocaleDateString('ko-KR')}</p>
                 </div>
               </div>
-              <Link to="/my/gifts" className="flex items-center justify-between p-4 bg-gradient-to-r from-stone-50 to-stone-100 rounded-xl border border-stone-200 hover:border-stone-300 transition-colors">
+              <Link to="/my/gifts" className="flex items-center justify-between p-4 bg-gradient-to-r from-stone-50 to-stone-100 rounded-lg border border-stone-200 hover:border-stone-300 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-stone-200 rounded-full flex items-center justify-center">
                     <Gift className="w-5 h-5 text-stone-600" />
@@ -233,7 +233,7 @@ export default function MyPage() {
         {activeTab === 'inquiries' && (
           <div className="space-y-4">
             {inquiries.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center">
+              <div className="bg-white rounded-lg border border-stone-200 p-8 text-center">
                 <MessageSquare className="w-12 h-12 text-stone-300 mx-auto mb-3" />
                 <p className="text-stone-500">문의 내역이 없습니다</p>
               </div>
@@ -243,7 +243,7 @@ export default function MyPage() {
                 const StatusIcon = status.icon;
                 
                 return (
-                  <div key={inquiry.id} className="bg-white rounded-2xl border border-stone-200 p-5">
+                  <div key={inquiry.id} className="bg-white rounded-lg border border-stone-200 p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full ${status.color}`}>
                         <StatusIcon className="w-3 h-3" />
@@ -260,7 +260,7 @@ export default function MyPage() {
                     <p className="text-stone-700 whitespace-pre-wrap mb-3">{inquiry.message}</p>
                     
                     {inquiry.reply && (
-                      <div className="bg-stone-800 text-white rounded-xl p-4 mt-3">
+                      <div className="bg-stone-800 text-white rounded-lg p-4 mt-3">
                         <div className="flex items-center gap-2 mb-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
                           <span className="text-sm text-stone-300">
@@ -280,14 +280,14 @@ export default function MyPage() {
         {activeTab === 'reviews' && (
           <div className="space-y-4">
             {weddings.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center">
+              <div className="bg-white rounded-lg border border-stone-200 p-8 text-center">
                 <Star className="w-12 h-12 text-stone-300 mx-auto mb-3" />
                 <p className="text-stone-500">아직 청첩장이 없습니다</p>
                 <p className="text-sm text-stone-400 mt-1">청첩장을 만들고 결혼식 후 리뷰를 남겨주세요!</p>
               </div>
             ) : (
               weddings.map((wedding) => (
-                <div key={wedding.id} className="bg-white rounded-2xl border border-stone-200 p-5">
+                <div key={wedding.id} className="bg-white rounded-lg border border-stone-200 p-5">
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <h3 className="font-medium text-stone-800">{wedding.groomName} ♥ {wedding.brideName}</h3>
@@ -301,7 +301,7 @@ export default function MyPage() {
                   </div>
                   
                   {wedding.hasReview && wedding.review ? (
-                    <div className="bg-stone-50 rounded-xl p-4">
+                    <div className="bg-stone-50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex gap-0.5">
                           {[...Array(5)].map((_, i) => (
@@ -321,12 +321,12 @@ export default function MyPage() {
                   ) : wedding.canReview ? (
                     <button
                       onClick={() => openReviewModal(wedding)}
-                      className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-700 transition-colors"
+                      className="w-full py-3 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition-colors"
                     >
                       리뷰 작성하기
                     </button>
                   ) : (
-                    <div className="text-center py-3 bg-stone-50 rounded-xl">
+                    <div className="text-center py-3 bg-stone-50 rounded-lg">
                       <p className="text-sm text-stone-400">결혼식 후 리뷰를 작성할 수 있어요</p>
                     </div>
                   )}
@@ -339,7 +339,7 @@ export default function MyPage() {
 
       {reviewModal.open && reviewModal.wedding && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6">
+          <div className="bg-white rounded-lg w-full max-w-md p-6">
             <h3 className="text-lg font-bold text-stone-800 mb-1">리뷰 작성</h3>
             <p className="text-sm text-stone-500 mb-6">{reviewModal.wedding.groomName} ♥ {reviewModal.wedding.brideName}</p>
             
@@ -363,21 +363,21 @@ export default function MyPage() {
                 value={reviewForm.content}
                 onChange={(e) => setReviewForm(f => ({ ...f, content: e.target.value }))}
                 placeholder="청첩장 작업실 이용 경험을 들려주세요!"
-                className="w-full px-4 py-3 border border-stone-200 rounded-xl resize-none h-32 focus:outline-none focus:ring-2 focus:ring-stone-300"
+                className="w-full px-4 py-3 border border-stone-200 rounded-lg resize-none h-32 focus:outline-none focus:ring-2 focus:ring-stone-300"
               />
             </div>
             
             <div className="flex gap-3">
               <button
                 onClick={() => setReviewModal({ open: false, wedding: null })}
-                className="flex-1 py-3 border border-stone-200 rounded-xl font-medium text-stone-600 hover:bg-stone-50"
+                className="flex-1 py-3 border border-stone-200 rounded-lg font-medium text-stone-600 hover:bg-stone-50"
               >
                 취소
               </button>
               <button
                 onClick={submitReview}
                 disabled={submitting}
-                className="flex-1 py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-700 disabled:opacity-50"
+                className="flex-1 py-3 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 disabled:opacity-50"
               >
                 {submitting ? '저장 중...' : '저장'}
               </button>

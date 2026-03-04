@@ -257,7 +257,7 @@ export default function AiSnapStudioPage() {
         if (snap.status === 'done' || snap.status === 'failed') {
           clearInterval(pollRef.current);
           clearInterval(progressRef.current);
-          setProgress(snap.status === 'done' ? 100 : 0);          if (snap.status === 'failed') alert('생성에 실패했어요. 횟수가 복구되었으니 다시 시도해주세요.');
+          setProgress(snap.status === 'done' ? 100 : 0);          if (snap.status === 'failed') { await fetch(`${API}/snap-pack/snap/${data.snapId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); }
           setPollingId(null);
           setGenerating(false);
           setShotMode(null);
@@ -286,7 +286,7 @@ export default function AiSnapStudioPage() {
     <div className="min-h-screen bg-white">
       <header className="border-b border-stone-200 sticky top-0 z-40 bg-white/80 backdrop-blur-sm">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <a href="/" className="font-serif text-xl text-stone-800">청첩장 작업실</a>
+          <div className="flex items-center gap-3"><a href="/dashboard" className="text-[13px] text-stone-400 hover:text-stone-700 transition-colors">&larr; 대시보드</a><a href="/" className="text-[15px] font-semibold text-stone-800">청첩장 작업실</a></div>
           {step >= 1 && step <= 7 && (
             <div className="flex items-center gap-1.5">
               {stepMap.map((_, i) => (
@@ -302,18 +302,18 @@ export default function AiSnapStudioPage() {
           {step === 0 && (
             <motion.div key="login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center py-16 space-y-8">
               <div>
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-stone-800 to-stone-600 flex items-center justify-center mx-auto mb-6">
+                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-stone-800 to-stone-600 flex items-center justify-center mx-auto mb-6">
                   <Sparkles className="w-7 h-7 text-amber-300" />
                 </div>
-                <h1 className="font-serif text-2xl text-stone-800 mb-2">AI 웨딩 화보 스튜디오</h1>
+                <h1 className="text-xl font-semibold text-stone-800 mb-2">AI 웨딩 화보 스튜디오</h1>
                 <p className="text-sm text-stone-500">사진으로 프로 웨딩 화보 세트를 만들어보세요</p>
               </div>
               <div className="space-y-3 max-w-xs mx-auto">
-                <button onClick={() => handleLogin('kakao')} className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-2xl hover:opacity-90 transition-all" style={{ background: '#FEE500' }}>
+                <button onClick={() => handleLogin('kakao')} className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-lg hover:opacity-90 transition-all" style={{ background: '#FEE500' }}>
                   <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.722 1.755 5.108 4.396 6.462-.148.536-.954 3.442-.984 3.66 0 0-.02.163.086.226.105.063.23.03.23.03.303-.042 3.514-2.313 4.07-2.707.717.1 1.457.153 2.202.153 5.523 0 10-3.463 10-7.824C22 6.463 17.523 3 12 3" fill="#3C1E1E"/></svg>
                   <span className="text-sm font-medium" style={{ color: '#3C1E1E' }}>카카오로 시작하기</span>
                 </button>
-                <button onClick={() => handleLogin('google')} className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white border-2 border-stone-200 rounded-2xl hover:border-stone-400 transition-all">
+                <button onClick={() => handleLogin('google')} className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white border-2 border-stone-200 rounded-lg hover:border-stone-400 transition-all">
                   <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                   <span className="text-sm font-medium text-stone-700">Google로 시작하기</span>
                 </button>
@@ -325,7 +325,7 @@ export default function AiSnapStudioPage() {
           {step === 1 && (
             <Step title="사진 업로드" sub="신랑과 신부의 정면 사진을 올려주세요">
               {isSetupMode && (
-                <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200 mb-4">
+                <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-50 border border-amber-200 mb-4">
                   <Gift className="w-5 h-5 text-amber-600 shrink-0" />
                   <p className="text-sm text-amber-800">선물받은 <span className="font-semibold">{setupTier?.label}</span> 패키지를 설정하고 있어요</p>
                 </div>
@@ -338,12 +338,12 @@ export default function AiSnapStudioPage() {
               <div className="flex gap-3 pt-4">
                 {!isSetupMode && myPacks.length > 0 && (
                   <button onClick={() => { const rp = myPacks.find(p => p.concept && p.concept !== ''); if (rp) { setActivePack(rp); setStep(10); } }}
-                    className="px-6 py-3 rounded-xl border border-stone-200 text-sm text-stone-500 hover:bg-stone-50 flex items-center gap-1">
+                    className="px-6 py-3 rounded-lg border border-stone-200 text-sm text-stone-500 hover:bg-stone-50 flex items-center gap-1">
                     <ArrowLeft className="w-4 h-4" /> 내 화보
                   </button>
                 )}
                 <button onClick={() => setStep(2)} disabled={!groomPhoto || !bridePhoto}
-                  className="flex-1 px-8 py-3 rounded-xl bg-stone-800 text-white text-sm font-medium disabled:opacity-30 hover:bg-stone-900 transition-all flex items-center gap-1 justify-center">
+                  className="flex-1 px-8 py-3 rounded-lg bg-stone-800 text-white text-sm font-medium disabled:opacity-30 hover:bg-stone-900 transition-all flex items-center gap-1 justify-center">
                   다음 <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -358,7 +358,7 @@ export default function AiSnapStudioPage() {
                   { c: 'cinematic' as Category, label: '시네마틱', desc: '영화 같은 드라마틱 화보', icon: Sparkles },
                 ]).map(item => (
                   <button key={item.c} onClick={() => { setCategory(item.c); setStep(3); }}
-                    className={`p-6 rounded-2xl border-2 text-center transition-all hover:shadow-lg ${category === item.c ? 'border-stone-800 bg-stone-800' : 'border-stone-200 hover:border-stone-400'}`}>
+                    className={`p-6 rounded-lg border-2 text-center transition-all hover:shadow-lg ${category === item.c ? 'border-stone-800 bg-stone-800' : 'border-stone-200 hover:border-stone-400'}`}>
                     <item.icon className={`w-8 h-8 mx-auto mb-3 ${category === item.c ? 'text-amber-300' : 'text-stone-400'}`} />
                     <p className={`font-semibold mb-1 ${category === item.c ? 'text-white' : 'text-stone-800'}`}>{item.label}</p>
                     <p className={`text-xs ${category === item.c ? 'text-white/60' : 'text-stone-400'}`}>{item.desc}</p>
@@ -366,7 +366,7 @@ export default function AiSnapStudioPage() {
                 ))}
               </div>
               <div className="flex pt-4">
-                <button onClick={() => setStep(1)} className="px-6 py-3 rounded-xl border border-stone-200 text-sm text-stone-500 hover:bg-stone-50 flex items-center gap-1">
+                <button onClick={() => setStep(1)} className="px-6 py-3 rounded-lg border border-stone-200 text-sm text-stone-500 hover:bg-stone-50 flex items-center gap-1">
                   <ArrowLeft className="w-4 h-4" /> 이전
                 </button>
               </div>
@@ -384,7 +384,7 @@ export default function AiSnapStudioPage() {
                     <div className="grid grid-cols-2 gap-2">
                       {otherItems.map(c => (
                         <button key={c.id} onClick={() => setSelectedConcept(c.id)}
-                          className={`rounded-2xl py-3.5 px-4 text-left transition-all border-2 ${selectedConcept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
+                          className={`rounded-lg py-3.5 px-4 text-left transition-all border-2 ${selectedConcept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
                           <p className={`text-sm font-semibold ${selectedConcept === c.id ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
                         </button>
                       ))}
@@ -399,7 +399,7 @@ export default function AiSnapStudioPage() {
                         <div className="grid grid-cols-2 gap-2">
                           {hanbokItems.map(c => (
                             <button key={c.id} onClick={() => setSelectedConcept(c.id)}
-                              className={`rounded-2xl py-3.5 px-4 text-left transition-all border-2 ${selectedConcept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
+                              className={`rounded-lg py-3.5 px-4 text-left transition-all border-2 ${selectedConcept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
                               <p className={`text-sm font-semibold ${selectedConcept === c.id ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
                             </button>
                           ))}
@@ -425,9 +425,9 @@ export default function AiSnapStudioPage() {
                   const perSnap = Math.round(t.price / t.snaps);
                   return (
                     <button key={t.id} onClick={() => setSelectedTier(t.id)}
-                      className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all ${selectedTier === t.id ? 'border-stone-800 bg-stone-50' : 'border-stone-200 hover:border-stone-300'}`}>
+                      className={`w-full flex items-center justify-between p-5 rounded-lg border-2 transition-all ${selectedTier === t.id ? 'border-stone-800 bg-stone-50' : 'border-stone-200 hover:border-stone-300'}`}>
                       <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedTier === t.id ? 'bg-stone-800' : 'bg-stone-100'}`}>
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${selectedTier === t.id ? 'bg-stone-800' : 'bg-stone-100'}`}>
                           <Package className={`w-5 h-5 ${selectedTier === t.id ? 'text-white' : 'text-stone-400'}`} />
                         </div>
                         <div className="text-left">
@@ -461,7 +461,7 @@ export default function AiSnapStudioPage() {
                 const saved = originalPrice - discountedPrice;
                 return (
                   <div className="space-y-6">
-                    <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5 space-y-3">
+                    <div className="bg-stone-50 rounded-lg border border-stone-200 p-5 space-y-3">
                       <Row label="카테고리" value={category === 'studio' ? '스튜디오' : '시네마틱'} />
                       <Row label="컨셉" value={c?.label || ''} />
                       <Row label="장수" value={`${t?.snaps}장`} />
@@ -473,18 +473,18 @@ export default function AiSnapStudioPage() {
                             placeholder="할인코드 입력"
                             value={couponCode}
                             onChange={e => { setCouponCode(e.target.value); setCouponResult(null); setCouponError(''); }}
-                            className="flex-1 px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-stone-400 bg-white"
+                            className="flex-1 px-4 py-3 rounded-lg border border-stone-200 text-sm focus:outline-none focus:border-stone-400 bg-white"
                           />
                           <button
                             onClick={validateCoupon}
                             disabled={couponChecking || !couponCode.trim()}
-                            className="px-5 py-3 rounded-xl bg-stone-800 text-white text-sm font-medium disabled:opacity-40 hover:bg-stone-900 transition-all shrink-0">
+                            className="px-5 py-3 rounded-lg bg-stone-800 text-white text-sm font-medium disabled:opacity-40 hover:bg-stone-900 transition-all shrink-0">
                             {couponChecking ? '...' : '적용'}
                           </button>
                         </div>
                         {couponError && <p className="text-xs text-red-500 mb-2">{couponError}</p>}
                         {couponResult?.valid && (
-                          <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 mb-3">
+                          <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-2.5 mb-3">
                             <span className="text-xs text-emerald-700 font-medium">{couponResult.name} 적용</span>
                             <span className="text-xs text-emerald-600 font-semibold">-{saved.toLocaleString()}원</span>
                           </div>
@@ -501,7 +501,7 @@ export default function AiSnapStudioPage() {
                       </div>
                     </div>
                     <button onClick={handlePayment}
-                      className="w-full py-4 rounded-2xl bg-stone-800 text-white font-medium flex items-center justify-center gap-2 hover:bg-stone-900 transition-all">
+                      className="w-full py-4 rounded-lg bg-stone-800 text-white font-medium flex items-center justify-center gap-2 hover:bg-stone-900 transition-all">
                       <CreditCard className="w-5 h-5" /> 결제하기
                     </button>
                   </div>
@@ -517,7 +517,7 @@ export default function AiSnapStudioPage() {
                 const c = allC.find(c => c.id === selectedConcept);
                 return (
                   <div className="space-y-6">
-                    <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5 space-y-3">
+                    <div className="bg-stone-50 rounded-lg border border-stone-200 p-5 space-y-3">
                       <div className="flex items-center gap-2 mb-1">
                         <Gift className="w-4 h-4 text-amber-600" />
                         <span className="text-xs text-amber-600 font-semibold">선물 패키지</span>
@@ -532,7 +532,7 @@ export default function AiSnapStudioPage() {
                       </div>
                     </div>
                     <button onClick={handleSetup} disabled={setupLoading}
-                      className="w-full py-4 rounded-2xl bg-stone-800 text-white font-medium flex items-center justify-center gap-2 hover:bg-stone-900 transition-all disabled:opacity-50">
+                      className="w-full py-4 rounded-lg bg-stone-800 text-white font-medium flex items-center justify-center gap-2 hover:bg-stone-900 transition-all disabled:opacity-50">
                       {setupLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
                       화보 시작하기
                     </button>
@@ -544,12 +544,12 @@ export default function AiSnapStudioPage() {
 
           {step === 10 && activePack && (
             <motion.div key="studio" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                  <h2 className="font-serif text-xl text-stone-800">내 웨딩 화보</h2>
+                  <h2 className="text-lg font-semibold text-stone-800">내 웨딩 화보</h2>
                   <p className="text-xs text-stone-400 mt-1">{activePack.concept} · {activePack.usedSnaps}/{activePack.totalSnaps}장</p><p className="text-[10px] text-stone-300 mt-0.5">AI가 생성한 이미지로 실제와 다소 차이가 있을 수 있습니다</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <button onClick={() => { setSelectedTier(''); setSelectedConcept(''); setCategory('studio'); setGroomPhoto(''); setBridePhoto(''); setCouponCode(''); setCouponResult(null); setCouponError(''); setStep(1); }}
                     className="px-3 py-1.5 bg-stone-800 text-white rounded-full text-xs font-medium hover:bg-stone-900 transition-all flex items-center gap-1">
                     <Package className="w-3 h-3" /> 새 패키지
@@ -575,7 +575,7 @@ export default function AiSnapStudioPage() {
               </div>
 
               {generating && (
-                <div className="bg-stone-50 rounded-2xl border border-stone-200 p-6">
+                <div className="bg-stone-50 rounded-lg border border-stone-200 p-6">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center">
                       <Loader2 className="w-5 h-5 text-white animate-spin" />
@@ -595,8 +595,8 @@ export default function AiSnapStudioPage() {
               )}
 
               <div className="grid grid-cols-2 gap-3">
-                {activePack.snaps.map((snap, i) => (
-                  <div key={snap.id} className="rounded-2xl overflow-hidden border border-stone-200">
+                {activePack.snaps.filter((s: any) => s.status !== 'failed').map((snap, i) => (
+                  <div key={snap.id} className="rounded-lg overflow-hidden border border-stone-200">
                     {snap.status === 'done' && snap.resultUrl ? (
                       <div className="relative group">
                         <img src={snap.resultUrl} alt={`Shot ${i + 1}`} className="w-full aspect-square object-cover" />
@@ -620,8 +620,8 @@ export default function AiSnapStudioPage() {
                         <Loader2 className="w-6 h-6 text-stone-400 animate-spin" />
                       </div>
                     ) : (
-                      <div className="aspect-square bg-stone-50 flex items-center justify-center">
-                        <RefreshCw className="w-5 h-5 text-stone-400" /><span className="text-[10px] text-stone-400">탭하여 재생성</span>
+                      <div onClick={() => { if (generating) return; generateSnap((snap.mode as ShotMode) || 'bride'); }} className="aspect-square bg-stone-50 flex items-center justify-center cursor-pointer hover:bg-stone-100 transition-colors">
+                        {generating ? <Loader2 className="w-5 h-5 text-stone-400 animate-spin" /> : <><RefreshCw className="w-5 h-5 text-stone-400" /><span className="text-[10px] text-stone-400">탭하여 재생성</span></>}
                       </div>
                     )}
                   </div>
@@ -633,22 +633,22 @@ export default function AiSnapStudioPage() {
                   <p className="text-sm text-stone-500 text-center">다음 컷의 모드를 선택하세요</p>
                   <div className="grid grid-cols-3 gap-2">
                     <button onClick={() => generateSnap('groom')}
-                      className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-stone-200 hover:border-stone-800 hover:bg-stone-50 transition-all group">
-                      <div className="w-10 h-10 rounded-xl bg-stone-100 group-hover:bg-stone-800 flex items-center justify-center transition-colors">
+                      className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-stone-200 hover:border-stone-800 hover:bg-stone-50 transition-all group">
+                      <div className="w-10 h-10 rounded-lg bg-stone-100 group-hover:bg-stone-800 flex items-center justify-center transition-colors">
                         <User className="w-5 h-5 text-stone-500 group-hover:text-white transition-colors" />
                       </div>
                       <span className="text-xs font-semibold text-stone-700">신랑</span>
                     </button>
                     <button onClick={() => generateSnap('bride')}
-                      className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-stone-200 hover:border-stone-800 hover:bg-stone-50 transition-all group">
-                      <div className="w-10 h-10 rounded-xl bg-stone-100 group-hover:bg-stone-800 flex items-center justify-center transition-colors">
+                      className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-stone-200 hover:border-stone-800 hover:bg-stone-50 transition-all group">
+                      <div className="w-10 h-10 rounded-lg bg-stone-100 group-hover:bg-stone-800 flex items-center justify-center transition-colors">
                         <User className="w-5 h-5 text-stone-500 group-hover:text-white transition-colors" />
                       </div>
                       <span className="text-xs font-semibold text-stone-700">신부</span>
                     </button>
                     <button onClick={() => generateSnap('couple')}
-                      className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-stone-200 hover:border-stone-800 hover:bg-stone-50 transition-all group">
-                      <div className="w-10 h-10 rounded-xl bg-stone-100 group-hover:bg-stone-800 flex items-center justify-center transition-colors">
+                      className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-stone-200 hover:border-stone-800 hover:bg-stone-50 transition-all group">
+                      <div className="w-10 h-10 rounded-lg bg-stone-100 group-hover:bg-stone-800 flex items-center justify-center transition-colors">
                         <Users className="w-5 h-5 text-stone-500 group-hover:text-white transition-colors" />
                       </div>
                       <span className="text-xs font-semibold text-stone-700">커플</span>
@@ -659,12 +659,12 @@ export default function AiSnapStudioPage() {
               )}
 
               {activePack.usedSnaps >= activePack.totalSnaps && !generating && (
-                <div className="bg-stone-50 rounded-2xl border border-stone-200 p-6 text-center">
+                <div className="bg-stone-50 rounded-lg border border-stone-200 p-6 text-center">
                   <p className="text-sm font-semibold text-stone-800 mb-2">모든 생성이 완료됐어요!</p>
                   {!showAddSnaps ? (
                     <>
                       <p className="text-xs text-stone-400 mb-4">추가 생성이 필요하다면 장당 구매할 수 있어요</p>
-                      <button onClick={() => setShowAddSnaps(true)} className="px-6 py-2.5 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 transition-all">
+                      <button onClick={() => setShowAddSnaps(true)} className="px-6 py-2.5 bg-stone-800 text-white rounded-lg text-sm hover:bg-stone-900 transition-all">
                         추가 생성하기
                       </button>
                     </>
@@ -673,16 +673,16 @@ export default function AiSnapStudioPage() {
                       <div className="grid grid-cols-4 gap-2">
                         {ADD_TIERS.map(t => (
                           <button key={t.id} onClick={() => setAddTier(t.id)}
-                            className={`p-3 rounded-xl border-2 transition-all ${addTier === t.id ? 'border-stone-800 bg-stone-800 text-white' : 'border-stone-200 hover:border-stone-300'}`}>
+                            className={`p-3 rounded-lg border-2 transition-all ${addTier === t.id ? 'border-stone-800 bg-stone-800 text-white' : 'border-stone-200 hover:border-stone-300'}`}>
                             <p className={`text-sm font-semibold ${addTier === t.id ? 'text-white' : 'text-stone-800'}`}>{t.label}</p>
                             <p className={`text-xs ${addTier === t.id ? 'text-white/60' : 'text-stone-400'}`}>{t.price.toLocaleString()}원</p>
                           </button>
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => setShowAddSnaps(false)} className="flex-1 py-2.5 border border-stone-200 text-stone-500 rounded-xl text-sm hover:bg-stone-50">취소</button>
+                        <button onClick={() => setShowAddSnaps(false)} className="flex-1 py-2.5 border border-stone-200 text-stone-500 rounded-lg text-sm hover:bg-stone-50">취소</button>
                         <button onClick={handleAddSnaps} disabled={addPaying}
-                          className="flex-1 py-2.5 bg-stone-800 text-white rounded-xl text-sm hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-1.5">
+                          className="flex-1 py-2.5 bg-stone-800 text-white rounded-lg text-sm hover:bg-stone-900 disabled:opacity-50 flex items-center justify-center gap-1.5">
                           {addPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                           결제하기
                         </button>
@@ -698,7 +698,7 @@ export default function AiSnapStudioPage() {
                   <div className="flex gap-2 overflow-x-auto pb-2">
                     {myPacks.filter(p => p.concept && p.concept !== '').map(p => (
                       <button key={p.id} onClick={() => setActivePack(p)}
-                        className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs transition-all ${p.id === activePack?.id ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
+                        className={`flex-shrink-0 px-4 py-2 rounded-lg text-xs transition-all ${p.id === activePack?.id ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
                         {p.concept} · {p.usedSnaps}/{p.totalSnaps}
                       </button>
                     ))}
@@ -723,7 +723,7 @@ function Step({ title, sub, children }: { title: string; sub: string; children: 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
       <div className="text-center">
-        <h2 className="font-serif text-2xl text-stone-800 mb-2">{title}</h2>
+        <h2 className="text-xl font-semibold text-stone-800 mb-2">{title}</h2>
         <p className="text-sm text-stone-500">{sub}</p>
       </div>
       {children}
@@ -734,11 +734,11 @@ function Step({ title, sub, children }: { title: string; sub: string; children: 
 function NavButtons({ onBack, onNext, disabled, nextLabel = '다음' }: { onBack: () => void; onNext: () => void; disabled: boolean; nextLabel?: string }) {
   return (
     <div className="flex gap-3 pt-4">
-      <button onClick={onBack} className="px-6 py-3 rounded-xl border border-stone-200 text-sm text-stone-500 hover:bg-stone-50 flex items-center gap-1">
+      <button onClick={onBack} className="px-6 py-3 rounded-lg border border-stone-200 text-sm text-stone-500 hover:bg-stone-50 flex items-center gap-1">
         <ArrowLeft className="w-4 h-4" /> 이전
       </button>
       <button onClick={onNext} disabled={disabled}
-        className="flex-1 py-3 rounded-xl bg-stone-800 text-white text-sm font-medium disabled:opacity-30 hover:bg-stone-900 transition-all flex items-center justify-center gap-1">
+        className="flex-1 py-3 rounded-lg bg-stone-800 text-white text-sm font-medium disabled:opacity-30 hover:bg-stone-900 transition-all flex items-center justify-center gap-1">
         {nextLabel} <ArrowRight className="w-4 h-4" />
       </button>
     </div>
@@ -758,13 +758,13 @@ function UploadCard({ label, photo, uploading, onUpload, onClear }: {
   label: string; photo: string; uploading: boolean; onUpload: (f: File) => void; onClear: () => void;
 }) {
   return photo ? (
-    <div className="relative aspect-square rounded-2xl overflow-hidden border border-stone-200">
+    <div className="relative aspect-square rounded-lg overflow-hidden border border-stone-200">
       <img src={photo} alt={label} className="w-full h-full object-cover" />
       <button onClick={onClear} className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70"><X className="w-4 h-4" /></button>
       <div className="absolute bottom-0 inset-x-0 py-2 bg-gradient-to-t from-black/50 text-center"><span className="text-xs text-white font-medium">{label}</span></div>
     </div>
   ) : (
-    <label className={`aspect-square rounded-2xl border-2 border-dashed border-stone-300 flex flex-col items-center justify-center cursor-pointer hover:border-stone-400 transition-all ${uploading ? 'opacity-50' : ''}`}>
+    <label className={`aspect-square rounded-lg border-2 border-dashed border-stone-300 flex flex-col items-center justify-center cursor-pointer hover:border-stone-400 transition-all ${uploading ? 'opacity-50' : ''}`}>
       {uploading ? <Loader2 className="w-8 h-8 text-stone-400 animate-spin" /> : (
         <>
           <Camera className="w-8 h-8 text-stone-400 mb-2" />
