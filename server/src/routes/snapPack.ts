@@ -179,8 +179,8 @@ const GROOM_SHOT_VARIANTS = [
 ];
 
 const BRIDE_SHOT_VARIANTS = [
-  { id: 'full_front', prompt: 'full body shot, weight shifted to one leg, one hand lightly holding bouquet or touching hip, relaxed natural smile, gentle eye contact' },
-  { id: 'upper_body', prompt: 'upper body portrait, slightly turned 30 degrees left, warm natural smile, soft eye contact' },
+  { id: 'full_front', prompt: 'full body shot, elegant contrapposto pose, one hand lightly resting at side, relaxed natural smile, gentle eye contact, graceful posture' },
+  { id: 'upper_body', prompt: 'upper body portrait, slightly turned 30 degrees, chin slightly lifted, warm natural smile, soft eye contact, relaxed shoulders' },
   { id: 'closeup', prompt: 'close-up portrait from chest up, gentle tilt of head, intimate warm expression, shallow depth of field' },
   { id: 'three_quarter', prompt: 'three quarter body shot, turned 45 degrees right, looking over shoulder with smile, elegant pose' },
   { id: 'profile_left', prompt: 'side profile facing left, chin slightly lifted, serene expression, natural facial proportions, refined delicate nose bridge' },
@@ -389,7 +389,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const shot = variants[shotIdx % variants.length];
   const isDetail = DETAIL_SHOTS.has(shot.id);
 
-  const face = 'MUST keep the exact same face from reference image, identical face shape eye shape nose shape lip shape jawline unchanged, maintain exact facial proportions eye spacing nose size lip fullness, MUST preserve original eye shape including monolid or double eyelid exactly as in reference, keep original eye corner angle upward or downward exactly as reference, do not add double eyelids do not change eye corner direction do not enlarge eyes, do not alter or beautify the face, preserve original facial identity with absolute accuracy, natural Korean skin texture';
+  const face = 'MUST keep the exact same face from reference image, identical face shape eye shape nose shape lip shape jawline unchanged, maintain exact facial proportions eye spacing nose size lip fullness, MUST preserve original eye shape including monolid or double eyelid exactly as in reference, keep original eye corner angle upward or downward exactly as reference, do not add double eyelids do not change eye corner direction do not enlarge eyes, do not alter or beautify the face, preserve original facial identity with absolute accuracy, natural Korean skin texture, MUST match the body type and build from reference image exactly, maintain same slim or average proportions as reference person';
 
   const outfitLock = DYNAMIC_CONCEPTS.has(concept) ? 'MUST keep absolutely identical outfit from first shot, same fabric same color same accessories same shoes same hairstyle, do not change any clothing detail' : 'keep identical outfit, hairstyle, accessories from first shot';
 
@@ -722,7 +722,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
         let finalUrl = falUrl!;
         const skipSwapShots = new Set(['closeup_foreheads', 'cheek_kiss_close', 'nose_touch', 'whisper_ear']);
         const currentShot = getVariants(effectiveMode, pack.concept)[shotIdx % getVariants(effectiveMode, pack.concept).length];
-        const shouldSwap = inputUrlsArr.length >= 1 && !skipSwapShots.has(currentShot.id);
+        const shouldSwap = false;
         if (shouldSwap) {
           try {
             if (effectiveMode === "groom") {
