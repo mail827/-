@@ -179,7 +179,7 @@ const GROOM_SHOT_VARIANTS = [
 ];
 
 const BRIDE_SHOT_VARIANTS = [
-  { id: 'full_front', prompt: 'full body shot, facing camera directly, confident gentle expression, eye contact with camera' },
+  { id: 'full_front', prompt: 'full body shot, weight shifted to one leg, one hand lightly holding bouquet or touching hip, relaxed natural smile, gentle eye contact' },
   { id: 'upper_body', prompt: 'upper body portrait, slightly turned 30 degrees left, warm natural smile, soft eye contact' },
   { id: 'closeup', prompt: 'close-up portrait from chest up, gentle tilt of head, intimate warm expression, shallow depth of field' },
   { id: 'three_quarter', prompt: 'three quarter body shot, turned 45 degrees right, looking over shoulder with smile, elegant pose' },
@@ -244,7 +244,7 @@ const OUTFIT_GROOM: Record<string, string> = {
   autumn_leaves: 'wearing warm brown tweed suit with earth tones',
   winter_snow: 'wearing charcoal wool coat suit, winter layers',
   vintage_film: 'wearing warm camel brown tweed three-piece suit with wide peaked lapels, matching brown vest with gold buttons, cream white dress shirt with wide pointed collar visible over vest, brown patterned wide tie, brown leather oxford shoes, same outfit in every shot, 1970s retro groom',
-  cruise_sunset: 'wearing light linen suit, nautical elegance',
+  cruise_sunset: 'wearing cream beige linen suit, white open collar shirt, no tie, golden hour nautical groom elegance',
   cruise_bluesky: 'wearing cream beige linen suit, white open collar shirt, no tie, nautical groom elegance',
   vintage_record: 'wearing olive khaki brown wide-lapel vintage blazer over light blue open-collar dress shirt with wide pointed collar visible over blazer lapels, grey pinstripe pleated trousers, brown leather oxford shoes, same outfit in every shot, 1970s retro groom',
   retro_hongkong: 'wearing dark burgundy wine double-breasted blazer with silky sheen over black silk shirt unbuttoned showing collarbone, ivory pocket square, black slim trousers, black chelsea boots, relaxed confident lean with hand in pocket, effortless cool charm',
@@ -272,8 +272,8 @@ const OUTFIT_BRIDE: Record<string, string> = {
   autumn_leaves: 'wearing ivory dress, warm autumn tones',
   winter_snow: 'wearing white fur-trimmed gown, winter wonderland style',
   vintage_film: 'wearing ivory cream vintage lace A-line wedding dress with long bell sleeves, high modest neckline with scalloped lace trim, natural waistline with satin ribbon, ankle-length hem showing white kitten heels, loose natural hair with baby breath flowers, same dress in every shot, 1970s vintage bridal aesthetic',
-  cruise_sunset: 'wearing flowing white dress, windswept hair, golden hour elegance',
-  cruise_bluesky: 'wearing elegant off-shoulder white organza bridal gown, flowing tulle veil catching sea breeze, windswept hair, nautical bridal elegance',
+  cruise_sunset: 'wearing ivory strapless tube top bridal gown with sheer tulle skirt catching golden wind, long tulle veil in sunset light, windswept loose hair, golden hour bridal elegance',
+  cruise_bluesky: 'wearing ivory strapless tube top bridal gown with sheer tulle skirt flowing in sea breeze, long tulle veil billowing in wind, windswept loose hair, ethereal nautical bridal elegance',
   vintage_record: 'wearing ivory cream Victorian puff-sleeve wedding dress with sheer floral lace high-neck bodice over sweetheart neckline, short puffy gathered sleeves at shoulder, fitted ivory satin ribbon belt at waist, full A-line satin skirt with front slit, elbow-length white satin opera gloves, short tulle veil on back of head, hair worn completely down and loose past shoulders, same dress same gloves same veil in every shot, 1960s vintage bridal',
   retro_hongkong: 'wearing champagne gold silk satin halter-neck dress with thin spaghetti straps and open cutout sides showing skin, small low mandarin collar detail at neckline, body-hugging silhouette, scattered delicate gold plum blossom embroidery, thigh-high side slit, vintage pearl drop earrings, metallic gold ankle-strap heels, long loose black hair flowing down past shoulders, never tied up never in bun never in updo, hairstyle matching reference photo exactly',
   iphone_selfie: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress',
@@ -722,29 +722,45 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
         let finalUrl = falUrl!;
         const skipSwapShots = new Set(['closeup_foreheads', 'cheek_kiss_close', 'nose_touch', 'whisper_ear']);
         const currentShot = getVariants(effectiveMode, pack.concept)[shotIdx % getVariants(effectiveMode, pack.concept).length];
-        const shouldSwap = effectiveMode === 'couple' && inputUrlsArr.length >= 2 && !skipSwapShots.has(currentShot.id);
-        if (false && shouldSwap) {
+        const shouldSwap = inputUrlsArr.length >= 1 && !skipSwapShots.has(currentShot.id);
+        if (shouldSwap) {
           try {
-            const groomFace = inputUrlsArr[0];
-            const brideFace = inputUrlsArr[1];
-            const swapPass1 = await falFetch('https://fal.run/fal-ai/face-swap', {
-              method: 'POST',
-              body: JSON.stringify({ base_image_url: finalUrl, swap_image_url: groomFace }),
-            });
-            if (swapPass1?.image?.url) {
-              const check1 = await fetch(swapPass1.image.url, { method: 'HEAD' });
-              const size1 = parseInt(check1.headers.get('content-length') || '0', 10);
-              if (size1 > 10000) {
-                finalUrl = swapPass1.image.url;
-                const swapPass2 = await falFetch('https://fal.run/fal-ai/face-swap', {
-                  method: 'POST',
-                  body: JSON.stringify({ base_image_url: finalUrl, swap_image_url: brideFace }),
-                });
-                if (swapPass2?.image?.url) {
-                  const check2 = await fetch(swapPass2.image.url, { method: 'HEAD' });
-                  const size2 = parseInt(check2.headers.get('content-length') || '0', 10);
-                  if (size2 > 10000) {
-                    finalUrl = swapPass2.image.url;
+            if (effectiveMode === "groom") {
+              const swapRes = await falFetch("https://fal.run/fal-ai/face-swap", {
+                method: "POST",
+                body: JSON.stringify({ base_image_url: finalUrl, swap_image_url: inputUrlsArr[0] }),
+              });
+              if (swapRes?.image?.url) {
+                const check = await fetch(swapRes.image.url, { method: "HEAD" });
+                if (parseInt(check.headers.get("content-length") || "0", 10) > 10000) finalUrl = swapRes.image.url;
+              }
+            } else if (effectiveMode === "bride") {
+              const swapRes = await falFetch("https://fal.run/fal-ai/face-swap", {
+                method: "POST",
+                body: JSON.stringify({ base_image_url: finalUrl, swap_image_url: inputUrlsArr[1] || inputUrlsArr[0] }),
+              });
+              if (swapRes?.image?.url) {
+                const check = await fetch(swapRes.image.url, { method: "HEAD" });
+                if (parseInt(check.headers.get("content-length") || "0", 10) > 10000) finalUrl = swapRes.image.url;
+              }
+            } else {
+              const groomFace = inputUrlsArr[0];
+              const brideFace = inputUrlsArr[1];
+              const swap1 = await falFetch("https://fal.run/fal-ai/face-swap", {
+                method: "POST",
+                body: JSON.stringify({ base_image_url: finalUrl, swap_image_url: groomFace }),
+              });
+              if (swap1?.image?.url) {
+                const c1 = await fetch(swap1.image.url, { method: "HEAD" });
+                if (parseInt(c1.headers.get("content-length") || "0", 10) > 10000) {
+                  finalUrl = swap1.image.url;
+                  const swap2 = await falFetch("https://fal.run/fal-ai/face-swap", {
+                    method: "POST",
+                    body: JSON.stringify({ base_image_url: finalUrl, swap_image_url: brideFace }),
+                  });
+                  if (swap2?.image?.url) {
+                    const c2 = await fetch(swap2.image.url, { method: "HEAD" });
+                    if (parseInt(c2.headers.get("content-length") || "0", 10) > 10000) finalUrl = swap2.image.url;
                   }
                 }
               }
