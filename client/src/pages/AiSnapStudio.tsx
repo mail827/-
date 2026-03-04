@@ -574,6 +574,44 @@ export default function AiSnapStudioPage() {
                 <div className="h-full bg-stone-800 rounded-full transition-all" style={{ width: `${(activePack.usedSnaps / activePack.totalSnaps) * 100}%` }} />
               </div>
 
+              <div className="bg-stone-50 rounded-lg border border-stone-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[12px] font-medium text-stone-600">등록된 사진</p>
+                  <p className="text-[10px] text-stone-400">클릭하여 교체</p>
+                </div>
+                <div className="flex gap-3">
+                  {(activePack.inputUrls as string[]).map((url, idx) => (
+                    <label key={idx} className="relative cursor-pointer group">
+                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                        const file = e.target.files?.[0]; if (!file) return;
+                        const fd = new FormData(); fd.append("file", file); fd.append("upload_preset", UPLOAD_PRESET);
+                        try {
+                          const r = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: "POST", body: fd });
+                          const d = await r.json(); if (!d.secure_url) return;
+                          const token = localStorage.getItem("token");
+                          const res = await fetch(`${import.meta.env.VITE_API_URL}/snap-pack/pack/${activePack.id}/photos`, {
+                            method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({ index: idx, url: d.secure_url }),
+                          });
+                          if (res.ok) {
+                            const updated = await res.json();
+                            setActivePack({ ...activePack, inputUrls: updated.inputUrls });
+                            setMyPacks(prev => prev.map(p => p.id === activePack.id ? { ...p, inputUrls: updated.inputUrls } : p));
+                          }
+                        } catch (err) { console.error(err); }
+                      }} />
+                      <div className="w-16 h-16 rounded-lg overflow-hidden border border-stone-200 group-hover:border-stone-400 transition-all">
+                        <img src={url} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 40%27%3E%3Crect fill=%27%23f5f5f4%27 width=%2740%27 height=%2740%27/%3E%3Ctext x=%2720%27 y=%2722%27 text-anchor=%27middle%27 fill=%27%23a8a29e%27 font-size=%2710%27%3E!%3C/text%3E%3C/svg%3E"; }} />
+                      </div>
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-lg flex items-center justify-center transition-all">
+                        <Camera className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-all" />
+                      </div>
+                      <p className="text-[9px] text-stone-400 text-center mt-1">{idx === 0 ? "신랑" : idx === 1 ? "신부" : "커플"}</p>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {generating && (
                 <div className="bg-stone-50 rounded-lg border border-stone-200 p-6">
                   <div className="flex items-center gap-4 mb-4">

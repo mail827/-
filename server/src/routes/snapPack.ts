@@ -86,6 +86,7 @@ const STUDIO_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
 };
 
+
 const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
   city_night: {
     label: '시티 나이트',
@@ -203,7 +204,7 @@ const BRIDE_SHOT_VARIANTS = [
 const COUPLE_SHOT_VARIANTS = [
   { id: 'facing_each', prompt: 'couple facing each other, close intimate distance, gentle smiles, eye contact between them' },
   { id: 'side_by_side', prompt: 'couple standing side by side, arms linked, both looking at camera with warm smiles' },
-  { id: 'from_behind', prompt: 'couple seen from behind, walking together hand in hand, soft studio lighting on their backs' },
+  { id: 'from_behind', prompt: 'couple seen from behind, walking together hand in hand, silhouettes against scenic background' },
   { id: 'forehead_touch', prompt: 'foreheads gently touching, eyes closed, intimate peaceful moment, close-up' },
   { id: 'laughing_together', prompt: 'couple laughing together candidly, genuine joy, natural movement, candid moment' },
   { id: 'walking_together', prompt: 'couple walking together, slight motion, looking at each other while walking, cinematic candid' },
@@ -244,7 +245,7 @@ const OUTFIT_GROOM: Record<string, string> = {
   winter_snow: 'wearing charcoal wool coat suit, winter layers',
   vintage_film: 'wearing warm camel brown tweed three-piece suit with wide peaked lapels, matching brown vest with gold buttons, cream white dress shirt with wide pointed collar visible over vest, brown patterned wide tie, brown leather oxford shoes, same outfit in every shot, 1970s retro groom',
   cruise_sunset: 'wearing light linen suit, nautical elegance',
-  cruise_bluesky: 'wearing white or navy blazer, crisp linen shirt, no tie, nautical casual style',
+  cruise_bluesky: 'wearing cream beige linen suit, white open collar shirt, no tie, nautical groom elegance',
   vintage_record: 'wearing olive khaki brown wide-lapel vintage blazer over light blue open-collar dress shirt with wide pointed collar visible over blazer lapels, grey pinstripe pleated trousers, brown leather oxford shoes, same outfit in every shot, 1970s retro groom',
   retro_hongkong: 'wearing dark burgundy wine double-breasted blazer with silky sheen over black silk shirt unbuttoned showing collarbone, ivory pocket square, black slim trousers, black chelsea boots, relaxed confident lean with hand in pocket, effortless cool charm',
   iphone_selfie: 'wearing casual white shirt with rolled sleeves, relaxed natural look, no tie no jacket',
@@ -272,7 +273,7 @@ const OUTFIT_BRIDE: Record<string, string> = {
   winter_snow: 'wearing white fur-trimmed gown, winter wonderland style',
   vintage_film: 'wearing ivory cream vintage lace A-line wedding dress with long bell sleeves, high modest neckline with scalloped lace trim, natural waistline with satin ribbon, ankle-length hem showing white kitten heels, loose natural hair with baby breath flowers, same dress in every shot, 1970s vintage bridal aesthetic',
   cruise_sunset: 'wearing flowing white dress, windswept hair, golden hour elegance',
-  cruise_bluesky: 'wearing white summer dress, windswept hair, clean nautical bridal style',
+  cruise_bluesky: 'wearing elegant off-shoulder white organza bridal gown, flowing tulle veil catching sea breeze, windswept hair, nautical bridal elegance',
   vintage_record: 'wearing ivory cream Victorian puff-sleeve wedding dress with sheer floral lace high-neck bodice over sweetheart neckline, short puffy gathered sleeves at shoulder, fitted ivory satin ribbon belt at waist, full A-line satin skirt with front slit, elbow-length white satin opera gloves, short tulle veil on back of head, hair worn completely down and loose past shoulders, same dress same gloves same veil in every shot, 1960s vintage bridal',
   retro_hongkong: 'wearing champagne gold silk satin halter-neck dress with thin spaghetti straps and open cutout sides showing skin, small low mandarin collar detail at neckline, body-hugging silhouette, scattered delicate gold plum blossom embroidery, thigh-high side slit, vintage pearl drop earrings, metallic gold ankle-strap heels, long loose black hair flowing down past shoulders, never tied up never in bun never in updo, hairstyle matching reference photo exactly',
   iphone_selfie: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress',
@@ -388,7 +389,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const shot = variants[shotIdx % variants.length];
   const isDetail = DETAIL_SHOTS.has(shot.id);
 
-  const face = 'MUST keep the exact same face from reference image, identical face shape eye shape nose shape lip shape jawline unchanged, maintain exact facial proportions eye spacing nose size lip fullness, do not alter or beautify the face, preserve original facial identity with absolute accuracy, natural Korean skin texture';
+  const face = 'MUST keep the exact same face from reference image, identical face shape eye shape nose shape lip shape jawline unchanged, maintain exact facial proportions eye spacing nose size lip fullness, MUST preserve original eye shape including monolid or double eyelid exactly as in reference, keep original eye corner angle upward or downward exactly as reference, do not add double eyelids do not change eye corner direction do not enlarge eyes, do not alter or beautify the face, preserve original facial identity with absolute accuracy, natural Korean skin texture';
 
   const outfitLock = DYNAMIC_CONCEPTS.has(concept) ? 'MUST keep absolutely identical outfit from first shot, same fabric same color same accessories same shoes same hairstyle, do not change any clothing detail' : 'keep identical outfit, hairstyle, accessories from first shot';
 
@@ -623,6 +624,21 @@ router.post('/add-snaps/confirm', authMiddleware, async (req: any, res) => {
   res.json(updated);
 });
 
+
+router.patch("/pack/:packId/photos", authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const { packId } = req.params;
+    const { index, url } = req.body;
+    const pack = await prisma.snapPack.findFirst({ where: { id: packId, userId: req.user!.id } });
+    if (!pack) return res.status(404).json({ error: "Pack not found" });
+    const urls = pack.inputUrls as string[];
+    if (index < 0 || index >= urls.length) return res.status(400).json({ error: "Invalid index" });
+    urls[index] = url;
+    const updated = await prisma.snapPack.update({ where: { id: packId }, data: { inputUrls: urls } });
+    res.json({ inputUrls: updated.inputUrls });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
 router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
   const { packId, mode } = req.body;
 
@@ -640,30 +656,23 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     const inputUrlsArr = pack.inputUrls as string[];
     const chainRefs = (pack.chainRefUrls || {}) as Record<string, string>;
-
     let imageUrls: string[];
 
-    if (chainRefs[effectiveMode]) {
-      const refUrl = chainRefs[effectiveMode];
-      if (effectiveMode === 'groom') {
-        imageUrls = [refUrl, inputUrlsArr[0]];
-      } else if (effectiveMode === 'bride') {
-        imageUrls = [refUrl, inputUrlsArr[1]];
-      } else {
-        imageUrls = inputUrlsArr.length >= 3
-          ? [refUrl, inputUrlsArr[2], inputUrlsArr[0], inputUrlsArr[1]]
-          : [refUrl, ...inputUrlsArr.slice(0, 2)];
-      }
+    if (effectiveMode === "groom") {
+      const ref = chainRefs.groom;
+      imageUrls = ref ? [ref, inputUrlsArr[0]] : [inputUrlsArr[0]];
+    } else if (effectiveMode === "bride") {
+      const ref = chainRefs.bride;
+      imageUrls = ref ? [ref, inputUrlsArr[1]] : [inputUrlsArr[1]];
     } else {
-      if (effectiveMode === 'groom') {
-        imageUrls = [inputUrlsArr[0]];
-      } else if (effectiveMode === 'bride') {
-        imageUrls = [inputUrlsArr[1]];
-      } else {
-        imageUrls = inputUrlsArr.length >= 3
-          ? [inputUrlsArr[2], inputUrlsArr[0], inputUrlsArr[1]]
-          : inputUrlsArr.slice(0, 2);
-      }
+      const refs: string[] = [];
+      if (chainRefs.couple) refs.push(chainRefs.couple);
+      if (chainRefs.groom) refs.push(chainRefs.groom);
+      if (chainRefs.bride) refs.push(chainRefs.bride);
+      const base = inputUrlsArr.length >= 3
+        ? [inputUrlsArr[2], inputUrlsArr[0], inputUrlsArr[1]]
+        : inputUrlsArr.slice(0, 2);
+      imageUrls = [...refs, ...base].slice(0, 4);
     }
 
     const snap = await prisma.aiSnap.create({

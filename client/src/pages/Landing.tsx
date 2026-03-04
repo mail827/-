@@ -117,10 +117,10 @@ function HeroPhone({ url }: { url?: string }) {
             <div style={{ background: "linear-gradient(180deg, #F4F1EC 0%, #E8EBE4 100%)", minHeight: 1200, padding: "60px 24px 40px" }}>
               <div style={{ textAlign: "center", paddingTop: 20 }}>
                 <div style={{ width: 40, height: 1, background: "#7C8C6E", margin: "0 auto 20px", opacity: 0.5 }} />
-                <p style={{ fontFamily: "'JeonjuCraftMyungjo', serif", fontSize: 13, letterSpacing: 3, color: "#7C8C6E", textTransform: "uppercase", marginBottom: 24 }}>Wedding Invitation</p>
-                <h3 style={{ fontFamily: "'JeonjuCraftMyungjo', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 4 }}>현우</h3>
-                <p style={{ fontFamily: "'JeonjuCraftMyungjo', serif", fontSize: 16, color: "#999", margin: "8px 0" }}>&</p>
-                <h3 style={{ fontFamily: "'JeonjuCraftMyungjo', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 20 }}>수빈</h3>
+                <p style={{ fontFamily: "'BookendBatang', serif", fontSize: 13, letterSpacing: 3, color: "#7C8C6E", textTransform: "uppercase", marginBottom: 24 }}>Wedding Invitation</p>
+                <h3 style={{ fontFamily: "'BookendBatang', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 4 }}>현우</h3>
+                <p style={{ fontFamily: "'BookendBatang', serif", fontSize: 16, color: "#999", margin: "8px 0" }}>&</p>
+                <h3 style={{ fontFamily: "'BookendBatang', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 20 }}>수빈</h3>
                 <p style={{ fontSize: 12, color: "#888", letterSpacing: 1.5, marginBottom: 28 }}>2025. 06. 14 SAT PM 2:00</p>
               </div>
               <div style={{ width: "100%", height: 240, borderRadius: 4, background: "linear-gradient(135deg, #D4C5B0 0%, #B8A88A 50%, #C4B496 100%)", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -631,9 +631,9 @@ export default function Landing() {
     <>
       <style>{`
         @import url('${FONT_LINK}');
-        @font-face { font-family: 'JeonjuCraftMyungjo'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2310@1.0/JeonjuCraftMjL.woff2') format('woff2'); font-weight: 300; font-display: swap; }
-        @font-face { font-family: 'JeonjuCraftMyungjo'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2310@1.0/JeonjuCraftMjB.woff2') format('woff2'); font-weight: 700; font-display: swap; }
-        .serif { font-family: 'JeonjuCraftMyungjo', 'Georgia', serif; }
+        @font-face { font-family: 'BookendBatang'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2410-2@1.0/TTBookendBatangR.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+        @font-face { font-family: 'BookendBatang'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2410-2@1.0/TTBookendBatangSB.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+        .serif { font-family: 'BookendBatang', 'Georgia', serif; }
         @keyframes heroScroll { 0%, 8% { transform: translateY(0); } 42%, 58% { transform: translateY(calc(-100% + 580px)); } 92%, 100% { transform: translateY(0); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .hero-scroll-content { animation: heroScroll 8s cubic-bezier(0.45,0,0.55,1) infinite; }
