@@ -28,6 +28,8 @@ const CONCEPTS = [
   { id: 'cruise_bluesky', label: '크루즈 블루', sub: '푸른 바다 크루즈' },
   { id: 'vintage_record', label: '빈티지 레코드', sub: '레코드샵 빈티지' },
   { id: 'retro_hongkong', label: '레트로 홍콩', sub: '홍콩 야시장 무드' },
+  { id: 'black_swan', label: '블랙스완', sub: '다크 시네마틱' },
+  { id: 'blue_hour', label: '블루아워', sub: '트와일라잇 로맨스' },
 ];
 
 type Mode = 'groom' | 'bride' | 'couple';

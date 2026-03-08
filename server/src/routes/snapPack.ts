@@ -130,7 +130,7 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
   cruise_sunset: {
     label: '크루즈 선셋',
-    base: 'luxury yacht deck at golden hour sunset, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, romantic warm cinematic lighting, three quarter body or full body framing showing legs and feet, never extreme closeup never head-only shot, camera pulled back to show full scene',
+    base: 'luxury yacht deck at golden hour sunset, warm amber ocean light, gentle sea breeze blowing hair softly, turquoise Mediterranean sea behind, yacht railing and polished wood deck, golden sun reflecting on calm water waves, romantic warm cinematic lighting',
   },
   iphone_selfie: {
     label: '셀카 스냅',
@@ -142,7 +142,7 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
   cruise_bluesky: {
     label: '크루즈 블루스카이',
-    base: 'luxury cruise ship deck under vivid blue sky, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere, three quarter body or full body framing showing legs and feet, never extreme closeup never head-only shot, camera pulled back to show full scene',
+    base: 'luxury cruise ship deck under vivid blue sky, crystal clear ocean stretching to horizon, white yacht railing, fresh sea breeze, bright natural daylight, gentle ocean waves sparkling in sunlight, clean nautical atmosphere',
   },
   vintage_record: {
     label: '빈티지 레코드',
@@ -152,6 +152,8 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '레트로 홍콩',
     base: 'narrow Hong Kong Mong Kok night market alley, rows of glowing crimson red Chinese paper lanterns strung tightly overhead creating tunnel of warm light, vintage neon signs with traditional Chinese characters in pink cyan and green glow, rain-slicked cobblestone street with deep puddle reflections of all lights, blurred crowd silhouettes in background creating depth, steamy food stall smoke drifting through scene, direct on-camera flash photography, harsh bright flash on subjects with dark background falloff, high contrast paparazzi snapshot style, Wong Kar-wai teal shadows and warm crimson highlights, cross-processed film look, 85mm f1.4, Fuji Superia 400 grain with teal-red color shift',
   },
+
+
 };
 
 const GROOM_SHOT_VARIANTS = [
@@ -247,9 +249,13 @@ const OUTFIT_GROOM: Record<string, string> = {
   cruise_sunset: 'wearing cream beige linen suit, white open collar shirt, no tie, golden hour nautical groom elegance',
   cruise_bluesky: 'wearing cream beige linen suit, white open collar shirt, no tie, nautical groom elegance',
   vintage_record: 'wearing olive khaki brown wide-lapel vintage blazer over light blue open-collar dress shirt with wide pointed collar visible over blazer lapels, grey pinstripe pleated trousers, brown leather oxford shoes, same outfit in every shot, 1970s retro groom',
+
+
   retro_hongkong: 'wearing dark burgundy wine double-breasted blazer with silky sheen over black silk shirt unbuttoned showing collarbone, ivory pocket square, black slim trousers, black chelsea boots, relaxed confident lean with hand in pocket, effortless cool charm',
   iphone_selfie: 'wearing casual white shirt with rolled sleeves, relaxed natural look, no tie no jacket',
   iphone_mirror: 'wearing casual white shirt with rolled sleeves, relaxed natural look, no tie no jacket, holding phone for mirror selfie',
+
+
 };
 
 const OUTFIT_BRIDE: Record<string, string> = {
@@ -275,9 +281,13 @@ const OUTFIT_BRIDE: Record<string, string> = {
   cruise_sunset: 'wearing ivory strapless tube top bridal gown with sheer tulle skirt catching golden wind, long tulle veil in sunset light, windswept loose hair, golden hour bridal elegance',
   cruise_bluesky: 'wearing ivory strapless tube top bridal gown with sheer tulle skirt flowing in sea breeze, long tulle veil billowing in wind, windswept loose hair, ethereal nautical bridal elegance',
   vintage_record: 'wearing ivory cream Victorian puff-sleeve wedding dress with sheer floral lace high-neck bodice over sweetheart neckline, short puffy gathered sleeves at shoulder, fitted ivory satin ribbon belt at waist, full A-line satin skirt with front slit, elbow-length white satin opera gloves, short tulle veil on back of head, hair worn completely down and loose past shoulders, same dress same gloves same veil in every shot, 1960s vintage bridal',
+
+
   retro_hongkong: 'wearing champagne gold silk satin halter-neck dress with thin spaghetti straps and open cutout sides showing skin, small low mandarin collar detail at neckline, body-hugging silhouette, scattered delicate gold plum blossom embroidery, thigh-high side slit, vintage pearl drop earrings, metallic gold ankle-strap heels, long loose black hair flowing down past shoulders, never tied up never in bun never in updo, hairstyle matching reference photo exactly',
   iphone_selfie: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress',
   iphone_mirror: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress, holding phone for mirror selfie',
+
+
 };
 
 const HANBOK_CONCEPTS = new Set(['hanbok_wonsam', 'hanbok_dangui', 'hanbok_modern', 'hanbok_saeguk', 'hanbok_flower']);
@@ -324,18 +334,18 @@ const CINEMATIC_BRIDE_SHOTS = [
 
 const CINEMATIC_COUPLE_SHOTS_DYNAMIC = [
   { id: 'closeup_foreheads', prompt: 'tight closeup framing at chest level, extreme close-up foreheads gently touching, eyes closed, peaceful intimate moment, faces fill entire frame, shallow depth of field' },
-  { id: 'cheek_kiss_close', prompt: 'tight closeup framing at chest level, close-up gentle cheek kiss, her hand on his chest, warm spontaneous moment, faces prominent' },
-  { id: 'facing_smile', prompt: 'medium shot framing at waist level, upper body facing each other with warm gentle smiles, intimate close distance, soft natural moment' },
-  { id: 'back_hug_smile', prompt: 'medium shot framing at waist level, back hug from behind, both smiling warmly, her hand on his arm, cozy natural embrace, upper body framing' },
   { id: 'walking_look', prompt: 'three quarter body walking together mid-stride, turning to look at each other with warm smiles, natural hand holding' },
-  { id: 'whisper_ear', prompt: 'tight closeup framing at chest level, close-up him whispering in her ear, she smiles with eyes closed, intimate tender moment' },
-  { id: 'nose_touch', prompt: 'extreme closeup framing at shoulder level, extreme close-up noses almost touching, playful eye contact, warm smiles, romantic tension' },
+  { id: 'back_hug_smile', prompt: 'medium shot framing at waist level, back hug from behind, both smiling warmly, her hand on his arm, cozy natural embrace, upper body framing' },
+  { id: 'behind_silhouette', prompt: 'couple from behind walking away hand in hand, looking at each other, silhouettes against beautiful background light' },
+  { id: 'facing_smile', prompt: 'medium shot framing at waist level, upper body facing each other with warm gentle smiles, intimate close distance, soft natural moment' },
   { id: 'playful_pull', prompt: 'three quarter body playful moment, one pulling other by hand, genuine laughter, dynamic joyful movement' },
+  { id: 'cheek_kiss_close', prompt: 'tight closeup framing at chest level, close-up gentle cheek kiss, her hand on his chest, warm spontaneous moment, faces prominent' },
   { id: 'linked_lean', prompt: 'medium shot framing at waist level, arms linked, she leaning head on his shoulder, both with content smiles, intimate medium shot' },
-  { id: 'behind_silhouette', prompt: 'couple from behind walking away hand in hand, looking at each other, silhouettes against neon lights and lanterns' },
+  { id: 'nose_touch', prompt: 'extreme closeup framing at shoulder level, extreme close-up noses almost touching, playful eye contact, warm smiles, romantic tension' },
+  { id: 'whisper_ear', prompt: 'tight closeup framing at chest level, close-up him whispering in her ear, she smiles with eyes closed, intimate tender moment' },
 ];
 
-const DYNAMIC_CONCEPTS = new Set(['retro_hongkong', 'vintage_record']);
+const DYNAMIC_CONCEPTS = new Set(['retro_hongkong', 'vintage_record', 'cruise_sunset', 'cruise_bluesky', 'black_swan', 'blue_hour']);
 
 const getVariants = (mode: string, concept: string) => {
   if (DYNAMIC_CONCEPTS.has(concept)) {
@@ -344,17 +354,9 @@ const getVariants = (mode: string, concept: string) => {
   return mode === 'couple' ? COUPLE_SHOT_VARIANTS : mode === 'groom' ? GROOM_SHOT_VARIANTS : BRIDE_SHOT_VARIANTS;
 };
 const getShotStrength = (mode: string, concept: string, shotIdx: number): number => {
-  const variants = getVariants(mode, concept);
-  const shot = variants[shotIdx % variants.length];
   const isSelfie = concept === 'iphone_selfie' || concept === 'iphone_mirror';
-  const isCruise = concept === 'cruise_sunset' || concept === 'cruise_bluesky';
   if (isSelfie) return 0.22;
-  if (DETAIL_SHOTS.has(shot.id)) return 0.38;
-  if (WIDE_SHOTS.has(shot.id)) return mode === 'couple' ? 0.22 : 0.25;
-  if (CLOSEUP_SHOTS.has(shot.id)) return mode === 'couple' ? 0.18 : 0.22;
-  if (isCruise) return mode === 'couple' ? 0.18 : 0.22;
-  if (DYNAMIC_CONCEPTS.has(concept)) return mode === 'couple' ? 0.15 : mode === 'bride' ? 0.20 : 0.23;
-  if (mode === 'couple') return 0.20;
+  if (mode === 'couple') return 0.15;
   return 0.20;
 };
 
@@ -377,6 +379,10 @@ const CONCEPT_MOOD: Record<string, string> = {
   iphone_selfie: 'casual spontaneous vibe, slightly imperfect framing, authentic not posed',
   iphone_mirror: 'mirror reflection with flash, casual standing pose, trendy social media aesthetic',
   vintage_record: 'candid relaxed moment browsing records, warm tungsten glow on skin, LP records surrounding, vinyl turntable spinning, natural smile or looking down at records, intimate cozy nostalgia, retro film grain',
+
+
+  black_swan: 'dark dramatic shadows, moody blue-purple color grading, fog and mist atmosphere, haunting beautiful tension, cold blue tones through stained glass, editorial fashion darkness, 35mm lens',
+  blue_hour: 'warm golden street lamp glow contrasting cool blue twilight sky, romantic European evening, gentle wind catching hair and dress fabric, cinematic warm bokeh city lights, purple-blue sky gradient, 50mm lens',
   retro_hongkong: 'direct harsh on-camera flash fired at subject, bright white flash illuminating face and body against dark night background, flash falloff creating dark shadows behind subject, paparazzi snapshot caught off-guard moment, candid mid-stride body turned at natural angle, weight on one leg, wind in hair, neon reflections on wet pavement, shallow depth of field f1.4 crowd bokeh, Wong Kar-wai intimate mood, relaxed body language, Fuji Superia 400 cross-processed grain',
 };
 
@@ -411,14 +417,14 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
     const bOutfit = OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic;
     const coupleNatural = 'natural relaxed body language, genuine warm smiles, not stiff not rigid, candid authentic interaction';
-    return `${shot.prompt}, ${coupleNatural}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
+    return `${face}, ${shot.prompt}, ${coupleNatural}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${scene}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
   }
 
   const clothe = mode === 'groom'
     ? (OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic)
     : (OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic);
   const subj = mode === 'groom' ? 'Korean groom' : 'Korean bride';
-  return `${shot.prompt}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${scene}, ${face}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
+  return `${face}, ${shot.prompt}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${scene}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
 };
 
 const buildNegativePrompt = (mode: string, concept: string, shotIdx?: number): string => {
