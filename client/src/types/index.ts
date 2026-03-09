@@ -1,4 +1,4 @@
-export type Theme = 'ROMANTIC_CLASSIC' | 'MODERN_MINIMAL' | 'BOHEMIAN_DREAM' | 'LUXURY_GOLD' | 'POETIC_LOVE' | 'SENIOR_SIMPLE' | 'FOREST_GARDEN' | 'OCEAN_BREEZE' | 'GLASS_BUBBLE' | 'SPRING_BREEZE' | 'GALLERY_MIRIM_1' | 'GALLERY_MIRIM_2' | 'LUNA_HALFMOON' | 'PEARL_DRIFT' | 'NIGHT_SEA' | 'AQUA_GLOBE' | 'WAVE_BORDER' | 'HEART_MINIMAL' | 'BOTANICAL_CLASSIC';
+export type Theme = 'ROMANTIC_CLASSIC' | 'MODERN_MINIMAL' | 'BOHEMIAN_DREAM' | 'LUXURY_GOLD' | 'POETIC_LOVE' | 'SENIOR_SIMPLE' | 'FOREST_GARDEN' | 'OCEAN_BREEZE' | 'GLASS_BUBBLE' | 'SPRING_BREEZE' | 'GALLERY_MIRIM_1' | 'GALLERY_MIRIM_2' | 'LUNA_HALFMOON' | 'PEARL_DRIFT' | 'NIGHT_SEA' | 'AQUA_GLOBE' | 'WAVE_BORDER' | 'HEART_MINIMAL' | 'BOTANICAL_CLASSIC' | 'CRUISE_DAY' | 'CRUISE_SUNSET' | 'VOYAGE_BLUE' | 'EDITORIAL';
 export type MediaType = 'IMAGE' | 'VIDEO';
 export type StoryType = 'PHOTO' | 'VIDEO';
 export type Side = 'GROOM' | 'BRIDE';
@@ -194,6 +194,10 @@ export const THEME_NAMES: Record<Theme, string> = {
   NIGHT_SEA: '밤바다',
   AQUA_GLOBE: '아쿠아 글로브',
   WAVE_BORDER: '웨이브 보더',
+  CRUISE_DAY: '크루즈 데이',
+  CRUISE_SUNSET: '크루즈 선셋',
+  VOYAGE_BLUE: '보야지 블루',
+  EDITORIAL: '에디토리얼',
   HEART_MINIMAL: '하트 미니멀',
   BOTANICAL_CLASSIC: '보태니컬 클래식'
 };
@@ -216,6 +220,10 @@ export const THEME_COLORS: Record<Theme, { primary: string; secondary: string; a
   NIGHT_SEA: { primary: '#4A8EC2', secondary: '#070B14', accent: '#5BA0D0', bg: '#070B14' },
   AQUA_GLOBE: { primary: '#2C5F7C', secondary: '#E8F4FD', accent: '#FF8C42', bg: '#E8F4FD' },
   WAVE_BORDER: { primary: '#8B7355', secondary: '#F5F0E8', accent: '#6B5A42', bg: '#F5F0E8' },
+  CRUISE_DAY: { primary: '#3B7DD8', secondary: '#F5F8FA', accent: '#1A2B3A', bg: '#F5F8FA' },
+  CRUISE_SUNSET: { primary: '#D4A054', secondary: '#1A1714', accent: '#E8DFD4', bg: '#0D0B09' },
+  VOYAGE_BLUE: { primary: '#1A365D', secondary: '#F9F7F2', accent: '#8E9775', bg: '#F9F7F2' },
+  EDITORIAL: { primary: '#0e0e0e', secondary: '#f0f0f0', accent: '#f0f0f0', bg: '#0e0e0e' },
   HEART_MINIMAL: { primary: '#D4956A', secondary: '#FDF5ED', accent: '#C07B52', bg: '#FDF5ED' },
   BOTANICAL_CLASSIC: { primary: '#6B8F5B', secondary: '#F4F1E8', accent: '#3D5A32', bg: '#F4F1E8' }
 };

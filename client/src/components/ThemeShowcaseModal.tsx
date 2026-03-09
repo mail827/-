@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Camera, User, ChevronUp, ChevronDown } from 'lucide-react';
 import { lazy, Suspense } from 'react';
+import { themeConfigs } from '../pages/wedding/themes/shared/themeConfig';
 
 const RomanticClassic = lazy(() => import('../pages/wedding/themes/RomanticClassic'));
 const ModernMinimal = lazy(() => import('../pages/wedding/themes/ModernMinimal'));
@@ -227,6 +228,10 @@ const themeComponents: Record<string, React.ComponentType<any>> = {
   BOTANICAL_CLASSIC: BotanicalClassic,
   HEART_MINIMAL: HeartMinimal,
   WAVE_BORDER: WaveBorder,
+  CRUISE_DAY: lazy(() => import('../pages/wedding/themes/CruiseDay')),
+  CRUISE_SUNSET: lazy(() => import('../pages/wedding/themes/CruiseSunset')),
+  VOYAGE_BLUE: lazy(() => import('../pages/wedding/themes/VoyageBlue')),
+  EDITORIAL: lazy(() => import('../pages/wedding/themes/Editorial')),
 };
 
 const themeAccents: Record<string, { accent: string; glow: string }> = {
@@ -247,6 +252,10 @@ const themeAccents: Record<string, { accent: string; glow: string }> = {
   NIGHT_SEA: { accent: 'rgba(80,160,240,0.15)', glow: 'rgba(80,160,240,0.1)' },
   AQUA_GLOBE: { accent: 'rgba(120,200,230,0.15)', glow: 'rgba(100,190,220,0.1)' },
   WAVE_BORDER: { accent: 'rgba(139,115,85,0.12)', glow: 'rgba(139,115,85,0.06)' },
+  CRUISE_DAY: { accent: 'rgba(59,125,216,0.12)', glow: 'rgba(59,125,216,0.06)' },
+  CRUISE_SUNSET: { accent: 'rgba(212,160,84,0.12)', glow: 'rgba(212,160,84,0.06)' },
+  VOYAGE_BLUE: { accent: 'rgba(26,54,93,0.12)', glow: 'rgba(26,54,93,0.06)' },
+  EDITORIAL: { accent: 'rgba(240,240,240,0.12)', glow: 'rgba(240,240,240,0.06)' },
   HEART_MINIMAL: { accent: 'rgba(212,149,106,0.12)', glow: 'rgba(212,149,106,0.06)' },
   BOTANICAL_CLASSIC: { accent: 'rgba(107,143,91,0.12)', glow: 'rgba(107,143,91,0.06)' },
 };
@@ -341,7 +350,7 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
         if (data.length > 0) {
           setShowcases(data);
         } else {
-          setShowcases(Object.keys(themeComponents).map((theme) => ({
+          setShowcases(Object.keys(themeComponents).filter(t => !themeConfigs[t]?.hidden).map((theme) => ({
             id: theme,
             theme,
             title: getThemeName(theme),
@@ -385,6 +394,10 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
       BOTANICAL_CLASSIC: '보태니컬 클래식',
       HEART_MINIMAL: '하트 미니멀',
       WAVE_BORDER: '웨이브 보더',
+      CRUISE_DAY: '크루즈 데이',
+      CRUISE_SUNSET: '크루즈 선셋',
+      VOYAGE_BLUE: '보야지 블루',
+      EDITORIAL: '에디토리얼',
     };
     return names[theme] || theme;
   };

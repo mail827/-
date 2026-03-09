@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, X, Gift } from 'lucide-react';
 import KakaoAddressInput from '../components/KakaoAddressInput';
+import { themeConfigs } from './wedding/themes/shared/themeConfig';
 
 const THEMES = [
   { id: 'ROMANTIC_CLASSIC', name: '로맨틱 클래식', desc: '우아하고 클래식한 분위기', color: 'from-stone-100 to-stone-200' },
@@ -24,6 +25,10 @@ const THEMES = [
   { id: 'BOTANICAL_CLASSIC', name: '보태니컬 클래식', desc: '올리브그린 보태니컬 라인아트', color: 'from-green-200 to-emerald-300' },
   { id: 'HEART_MINIMAL', name: '하트 미니멀', desc: '워피치 하트 미니멀', color: 'from-orange-200 to-rose-300' },
   { id: 'WAVE_BORDER', name: '웨이브 보더', desc: '웜브라운 물결 보더', color: 'from-amber-200 to-yellow-300' },
+  { id: 'CRUISE_DAY', name: '크루즈 데이', desc: '스카이블루 캘리그라피', color: 'from-blue-200 to-sky-300' },
+  { id: 'CRUISE_SUNSET', name: '크루즈 선셋', desc: '골든 선셋 다크', color: 'from-amber-300 to-orange-400' },
+  { id: 'VOYAGE_BLUE', name: '보야지 블루', desc: 'Voyage of Love 네이비', color: 'from-blue-800 to-indigo-300' },
+  { id: 'EDITORIAL', name: '에디토리얼', desc: '다크 에디토리얼 매거진', color: 'from-gray-800 to-gray-400' },
 ];
 
 interface Package {
@@ -426,7 +431,7 @@ export default function CreateWedding() {
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-stone-800 mb-6">테마를 선택해주세요</h2>
                 <div className="grid grid-cols-2 gap-4">
-                  {THEMES.map(theme => (
+                  {THEMES.filter(t => !themeConfigs[t.id]?.hidden).map(theme => (
                     <button
                       key={theme.id}
                       onClick={() => updateForm('theme', theme.id)}

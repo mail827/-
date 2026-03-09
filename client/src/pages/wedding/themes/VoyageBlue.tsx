@@ -1,32 +1,36 @@
 import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Phone, Copy, Check, 
+import {
+  Phone, Copy, Check,
   Share2, ChevronDown
 } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import {
+  RsvpForm, GuestbookForm, GalleryModal, GuestbookList,
+  KakaoMap, ShareModal, formatDate, formatTime, getDday,
+  getCalendarData, type ThemeProps
+} from './shared';
 
 const fontStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap');
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600&display=swap');
-  @import url('https://fonts.googleapis.com/css2?family=Diphylleia&family=Great+Vibes&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+  @font-face { font-family: 'Mabeopsa'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2402_keris@1.0/TTHakgyoansimMabeopsaR.woff2') format('woff2'); font-display: swap; }
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500&display=swap');
 `;
 
 const themeStyles = `
-  .rc-music-bars{display:flex;gap:2px;align-items:center;height:16px}
-  .rc-music-bar{display:block;width:2px;background:#8A7E72;border-radius:1px}
-  .rc-music-playing .rc-music-bar{animation:rc-eq .6s ease infinite alternate}
-  .rc-music-bar:nth-child(1){height:8px;animation-delay:0s}
-  .rc-music-bar:nth-child(2){height:12px;animation-delay:.15s}
-  .rc-music-bar:nth-child(3){height:6px;animation-delay:.3s}
-  .rc-music-bar:nth-child(4){height:10px;animation-delay:.1s}
-  .rc-music-paused .rc-music-bar{height:4px!important;animation:none}
-  @keyframes rc-eq{to{height:4px}}
-  @keyframes rc-heroZoom{from{transform:scale(1.08)}to{transform:scale(1)}}
-  .rc-hero-img{animation:rc-heroZoom 4s ease-out forwards}
-  .rc-vertical{writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg)}
-  .rc-script{font-family:'Great Vibes',cursive}
+  .vb-bars{display:flex;gap:2px;align-items:center;height:16px}
+  .vb-bar{display:block;width:2px;background:#6B7B8D;border-radius:1px}
+  .vb-playing .vb-bar{animation:vb-eq .6s ease infinite alternate}
+  .vb-bar:nth-child(1){height:8px;animation-delay:0s}
+  .vb-bar:nth-child(2){height:12px;animation-delay:.15s}
+  .vb-bar:nth-child(3){height:6px;animation-delay:.3s}
+  .vb-bar:nth-child(4){height:10px;animation-delay:.1s}
+  .vb-paused .vb-bar{height:4px!important;animation:none}
+  @keyframes vb-eq{to{height:4px}}
+  .vb-script{font-family:'Great Vibes',cursive}
+  .vb-arch-top{border-radius:999px 999px 20px 20px;overflow:hidden}
+  .vb-arch-bottom{border-radius:20px 20px 999px 999px;overflow:hidden}
 `;
 
 const sectionAnim = {
@@ -36,12 +40,6 @@ const sectionAnim = {
   transition: { duration: 1, ease: [0.22, 1, 0.36, 1] },
 };
 
-const titleAnim = {
-  initial: { opacity: 0, letterSpacing: '0.6em' },
-  whileInView: { opacity: 1, letterSpacing: '0.4em' },
-  viewport: { once: true },
-  transition: { duration: 1.2 },
-};
 
 const delayAnim = (delay: number) => ({
   initial: { opacity: 0, y: 40 },
@@ -53,22 +51,24 @@ const delayAnim = (delay: number) => ({
 const F = {
   display: "'Cormorant Garamond', serif",
   body: "'Noto Serif KR', serif",
+  script: "'Great Vibes', cursive",
 };
 
 const C = {
-  bg: '#FAF8F5',
-  bgDark: '#1A1714',
-  text: '#2C2620',
-  textMuted: '#8A7E72',
-  textLight: '#C4B9AB',
-  accent: '#B8A088',
-  white: '#FFFDF9',
-  divider: '#E8E2DA',
-  dividerDark: '#5A5048',
+  bg: '#F9F7F2',
+  bgCard: '#FFFFFF',
+  bgDark: '#1A365D',
+  text: '#2C3E50',
+  textMuted: '#6B7B8D',
+  textLight: '#9BAAB8',
+  accent: '#1A365D',
+  sage: '#8E9775',
+  white: '#FFFFFE',
+  divider: '#D1D1D1',
+  dividerDark: '#2A4A7D',
 };
 
-export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
-  const [heroHeight] = useState(() => typeof window !== "undefined" ? window.innerHeight + "px" : "100vh");
+export default function VoyageBlue({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -106,7 +106,6 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
     const baseUrl = window.location.origin + window.location.pathname;
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} ♥ ${wedding.brideName}`;
-    
     if (type === 'kakao' && window.Kakao) {
       window.Kakao.Share.sendDefault({
         objectType: 'feed',
@@ -128,126 +127,146 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
   };
 
   const calendarData = getCalendarData(wedding.weddingDate);
+  const photos = wedding.galleries || [];
 
   return (
-    <div className="min-h-screen" style={{ background: C.bg, color: C.text, fontFamily: F.body, fontWeight: 200, overflowX: 'hidden' }}>
+    <div className="min-h-screen" style={{ background: C.bg, color: C.text, fontFamily: F.body, fontWeight: 300, overflowX: 'hidden' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
 
       {wedding.bgMusicUrl && (
         <button
           onClick={toggleMusic}
-          className={`fixed top-5 right-5 z-50 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition-transform duration-200 hover:scale-105 ${isPlaying ? 'rc-music-playing' : 'rc-music-paused'}`}
-          style={{ background: 'rgba(250,248,245,0.85)', border: `1px solid ${C.divider}`, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+          className={`fixed top-5 right-5 z-50 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm ${isPlaying ? 'vb-playing' : 'vb-paused'}`}
+          style={{ background: 'rgba(249,247,242,0.9)', border: `1px solid ${C.divider}`, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
         >
-          <div className="rc-music-bars">
-            <span className="rc-music-bar" />
-            <span className="rc-music-bar" />
-            <span className="rc-music-bar" />
-            <span className="rc-music-bar" />
+          <div className="vb-bars">
+            <span className="vb-bar" /><span className="vb-bar" /><span className="vb-bar" /><span className="vb-bar" />
           </div>
         </button>
       )}
 
-      <section className="relative w-full overflow-hidden" style={{ height: heroHeight }}>
-        <div className="absolute inset-0">
-          {(wedding.heroMedia || wedding.galleries?.[0]?.mediaUrl) && (
-            wedding.heroMediaType === 'VIDEO' ? (
-              <video src={wedding.heroMedia ? heroUrl(wedding.heroMedia) : ''} autoPlay muted loop playsInline className="w-full h-full object-cover rc-hero-img" />
-            ) : (
-              <img src={heroUrl(wedding.heroMedia || wedding.galleries?.[0]?.mediaUrl || '')} alt="" className="w-full h-full object-cover rc-hero-img" />
-            )
+      <header className="text-center" style={{ paddingTop: '5rem', paddingBottom: '2.5rem', paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.2 }}
+          style={{ fontSize: 10, letterSpacing: '0.4em', color: C.sage, textTransform: 'uppercase', opacity: 0.8, marginBottom: '0.75rem' }}
+        >
+          The Voyage of Love
+        </motion.p>
+        <motion.h1
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.2, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="vb-script"
+          style={{ fontSize: 'clamp(36px, 10vw, 48px)', color: C.accent, lineHeight: 1.2 }}
+        >
+          {wedding.groomName} & {wedding.brideName}
+        </motion.h1>
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+          style={{ height: 1, width: 64, background: C.divider, margin: '1.5rem auto 0', opacity: 0.5 }}
+        />
+      </header>
+
+      <section style={{ padding: '0 1.5rem' }}>
+        <div className="space-y-6">
+          {photos[0] && (
+            <motion.div {...delayAnim(0.15)} className="relative group">
+              <div className="vb-arch-top" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+                <img
+                  src={heroUrl(photos[0].mediaUrl)}
+                  alt=""
+                  className="w-full object-cover hover:scale-105 transition-transform duration-700"
+                  style={{ height: 450, display: 'block' }}
+                />
+              </div>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="absolute bottom-6 right-8"
+                style={{ textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}
+              >
+                <p className="vb-script" style={{ fontSize: 28, color: C.white }}>The Bride</p>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {photos[1] && (
+            <motion.div {...delayAnim(0.3)} className="relative group">
+              <div className="vb-arch-bottom" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+                <img
+                  src={heroUrl(photos[1].mediaUrl)}
+                  alt=""
+                  className="w-full object-cover hover:scale-105 transition-transform duration-700"
+                  style={{ height: 450, display: 'block' }}
+                />
+              </div>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="absolute top-6 left-8"
+                style={{ textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}
+              >
+                <p className="vb-script" style={{ fontSize: 28, color: C.white }}>The Groom</p>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {!photos[0] && (wedding.heroMedia) && (
+            <motion.div {...delayAnim(0.15)}>
+              <div className="vb-arch-top" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+                <img src={heroUrl(wedding.heroMedia)} alt="" className="w-full object-cover" style={{ height: 500, display: 'block' }} />
+              </div>
+            </motion.div>
           )}
         </div>
-        <div className="absolute inset-x-0 top-0 z-10" style={{ height: '50%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)' }} />
-        <div className="absolute inset-x-0 bottom-0 z-10" style={{ height: '33%', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }} />
-
-        <div className="absolute inset-0 z-20 flex flex-col justify-between" style={{ padding: '2.5rem' }}>
-          <motion.p
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-            className="text-center"
-            style={{ fontFamily: F.body, fontWeight: 200, fontSize: 11, letterSpacing: '0.2em', color: C.white, textTransform: 'uppercase' }}
-          >
-            Happily Ever After
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
-            className="text-center"
-            style={{ marginTop: '-5rem' }}
-          >
-            <p className="rc-script" style={{ fontSize: 'clamp(56px, 14vw, 80px)', color: C.white, lineHeight: 1.1, opacity: 0.9 }}>
-              Dream your<br />Wedding Day
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.7 }}
-            className="flex flex-col items-center"
-            style={{ gap: '1.5rem' }}
-          >
-            <div className="text-center">
-              <p style={{ fontFamily: F.body, fontWeight: 200, fontSize: 11, color: C.textLight, letterSpacing: '0.1em', marginBottom: '0.5rem' }}>
-                FINALLY {formatDate(wedding.weddingDate, 'dots')}
-              </p>
-              <p style={{ fontWeight: 400, fontSize: 22, color: C.white, letterSpacing: '0.1em' }}>
-                {wedding.groomName} & {wedding.brideName}
-              </p>
-            </div>
-            <button
-              onClick={() => document.getElementById('gallery-section')?.scrollIntoView({ behavior: 'smooth' })}
-              style={{ fontFamily: F.body, fontWeight: 200, fontSize: 12, color: 'rgba(255,253,249,0.7)', letterSpacing: '0.2em', borderBottom: '1px solid rgba(255,253,249,0.3)', paddingBottom: 4, background: 'none', border: 'none', borderBottomWidth: 1, borderBottomStyle: 'solid', borderBottomColor: 'rgba(255,253,249,0.3)', cursor: 'pointer' }}
-            >
-              GALLERY
-            </button>
-          </motion.div>
-        </div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.5 }}
-          transition={{ delay: 1.2, duration: 1 }}
-          className="rc-vertical absolute z-20"
-          style={{ right: '1.5rem', top: '50%', translate: '0 -50%', fontFamily: F.body, fontWeight: 200, fontSize: 10, letterSpacing: '0.3em', color: C.textLight }}
-        >
-          new chapter
-        </motion.p>
       </section>
 
       {wedding.greeting && (
-        <section style={{ background: C.bg, padding: '7rem 2rem' }}>
-          <div className="max-w-md mx-auto">
-            <motion.div {...sectionAnim} className="text-center">
-              <motion.p {...titleAnim} style={{ fontFamily: F.display, fontWeight: 300, fontStyle: 'italic', fontSize: 12, letterSpacing: '0.4em', color: C.accent, marginBottom: '2rem' }}>
-                INVITATION
-              </motion.p>
-              <div style={{ width: 1, height: 40, background: C.divider, margin: '0 auto 2.5rem' }} />
+        <section style={{ padding: '6rem 2.5rem' }}>
+          <div className="max-w-md mx-auto text-center">
+            <motion.div {...sectionAnim}>
+              <p className="vb-script" style={{ fontSize: 36, color: C.accent, marginBottom: '2rem' }}>Save the Date</p>
             </motion.div>
-
-            <motion.div {...delayAnim(0.15)} className="text-center">
+            <motion.div {...delayAnim(0.15)}>
               {wedding.greetingTitle && (
-                <p style={{ fontWeight: 300, fontSize: 18, color: C.text, lineHeight: 2, marginBottom: '2rem' }}>
+                <p style={{ fontWeight: 300, fontSize: 16, color: C.text, lineHeight: 2, marginBottom: '1.5rem' }}>
                   {wedding.greetingTitle}
                 </p>
               )}
-              <p className="whitespace-pre-line" style={{ fontWeight: 200, fontSize: 14, color: C.textMuted, lineHeight: 2.4 }}>
+              <p className="whitespace-pre-line" style={{ fontWeight: 200, fontSize: 15, color: C.textMuted, lineHeight: 2.2 }}>
                 {wedding.greeting}
               </p>
             </motion.div>
 
+            <motion.div {...delayAnim(0.3)}>
+              <div className="flex items-center justify-center" style={{ marginTop: '4rem', borderTop: `1px solid ${C.divider}`, borderBottom: `1px solid ${C.divider}`, padding: '1.5rem 0', gap: '2.5rem', opacity: 0.9 }}>
+                <div className="text-center">
+                  <p style={{ fontSize: 9, color: C.sage, letterSpacing: '0.25em', marginBottom: '0.5rem' }}>DATE</p>
+                  <p style={{ fontSize: 17, fontWeight: 400, letterSpacing: '-0.01em' }}>{formatDate(wedding.weddingDate, 'dots')}</p>
+                </div>
+                <div style={{ width: 1, height: 40, background: C.divider }} />
+                <div className="text-center">
+                  <p style={{ fontSize: 9, color: C.sage, letterSpacing: '0.25em', marginBottom: '0.5rem' }}>TIME</p>
+                  <p style={{ fontSize: 17, fontWeight: 400, letterSpacing: '-0.01em' }}>{formatTime(wedding.weddingTime)}</p>
+                </div>
+              </div>
+            </motion.div>
+
             {wedding.showParents && (
-              <motion.div {...delayAnim(0.3)} className="text-center">
-                <div style={{ width: 48, height: 1, background: C.divider, margin: '2.5rem auto' }} />
-                <div className="flex justify-center gap-12" style={{ marginTop: '2rem' }}>
+              <motion.div {...delayAnim(0.45)} className="text-center" style={{ marginTop: '3rem' }}>
+                <div className="flex justify-center gap-12">
                   <div>
-                    <p style={{ fontFamily: F.display, fontWeight: 400, fontSize: 11, letterSpacing: '0.2em', color: C.accent, marginBottom: '0.5rem' }}>GROOM</p>
-                    <p style={{ fontWeight: 300, fontSize: 13, color: C.textMuted }}>
+                    <p style={{ fontSize: 9, color: C.sage, letterSpacing: '0.25em', marginBottom: '0.5rem' }}>GROOM</p>
+                    <p style={{ fontWeight: 200, fontSize: 13, color: C.textMuted }}>
                       {wedding.groomFatherName && <span>{wedding.groomFatherName}</span>}
                       {wedding.groomFatherName && wedding.groomMotherName && <span> · </span>}
                       {wedding.groomMotherName && <span>{wedding.groomMotherName}</span>}
@@ -257,8 +276,8 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
                     </p>
                   </div>
                   <div>
-                    <p style={{ fontFamily: F.display, fontWeight: 400, fontSize: 11, letterSpacing: '0.2em', color: C.accent, marginBottom: '0.5rem' }}>BRIDE</p>
-                    <p style={{ fontWeight: 300, fontSize: 13, color: C.textMuted }}>
+                    <p style={{ fontSize: 9, color: C.sage, letterSpacing: '0.25em', marginBottom: '0.5rem' }}>BRIDE</p>
+                    <p style={{ fontWeight: 200, fontSize: 13, color: C.textMuted }}>
                       {wedding.brideFatherName && <span>{wedding.brideFatherName}</span>}
                       {wedding.brideFatherName && wedding.brideMotherName && <span> · </span>}
                       {wedding.brideMotherName && <span>{wedding.brideMotherName}</span>}
@@ -275,44 +294,38 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
       )}
 
       {wedding.loveStoryVideo && (
-        <section style={{ background: C.white, padding: '6rem 0' }}>
+        <section style={{ background: C.bgCard, padding: '5rem 1.5rem' }}>
           <div className="max-w-md mx-auto">
-            <motion.div {...sectionAnim} className="text-center" style={{ padding: '0 2rem 2rem' }}>
-              <motion.p {...titleAnim} style={{ fontFamily: F.display, fontWeight: 300, fontStyle: 'italic', fontSize: 12, letterSpacing: '0.4em', color: C.accent }}>
-                OUR STORY
-              </motion.p>
+            <motion.div {...sectionAnim} className="text-center" style={{ marginBottom: '2rem' }}>
+              <p style={{ fontSize: 9, color: C.sage, letterSpacing: '0.4em', textTransform: 'uppercase' }}>OUR STORY</p>
             </motion.div>
-            <motion.div {...delayAnim(0.15)}>
-              <div className="overflow-hidden">
-                {wedding.loveStoryVideo.includes("youtube") || wedding.loveStoryVideo.includes("youtu.be") ? (
-                  <iframe
-                    src={wedding.loveStoryVideo.includes("youtu.be") ? `https://www.youtube.com/embed/${wedding.loveStoryVideo.split("youtu.be/")[1]?.split("?")[0]}` : `https://www.youtube.com/embed/${wedding.loveStoryVideo.split("watch?v=")[1]?.split("&")[0]}`}
-                    className="w-full aspect-video"
-                    allowFullScreen
-                  />
-                ) : (
-                  <video src={wedding.loveStoryVideo} controls className="w-full aspect-video" />
-                )}
-              </div>
+            <motion.div {...delayAnim(0.15)} className="rounded-2xl overflow-hidden">
+              {wedding.loveStoryVideo.includes("youtube") || wedding.loveStoryVideo.includes("youtu.be") ? (
+                <iframe
+                  src={wedding.loveStoryVideo.includes("youtu.be") ? `https://www.youtube.com/embed/${wedding.loveStoryVideo.split("youtu.be/")[1]?.split("?")[0]}` : `https://www.youtube.com/embed/${wedding.loveStoryVideo.split("watch?v=")[1]?.split("&")[0]}`}
+                  className="w-full aspect-video"
+                  allowFullScreen
+                />
+              ) : (
+                <video src={wedding.loveStoryVideo} controls className="w-full aspect-video" />
+              )}
             </motion.div>
           </div>
         </section>
       )}
 
-      {wedding.galleries && wedding.galleries.length > 0 && (
-        <section id="gallery-section" style={{ background: C.white, padding: '6rem 0' }}>
-          <motion.div {...sectionAnim} className="text-center" style={{ padding: '0 2rem 2rem' }}>
-            <motion.p {...titleAnim} style={{ fontFamily: F.display, fontWeight: 300, fontStyle: 'italic', fontSize: 12, letterSpacing: '0.4em', color: C.accent }}>
-              GALLERY
-            </motion.p>
+      {photos.length > 2 && (
+        <section id="gallery-section" style={{ background: C.bgCard, padding: '5rem 0' }}>
+          <motion.div {...sectionAnim} className="text-center" style={{ marginBottom: '2rem', padding: '0 2rem' }}>
+            <p style={{ fontSize: 9, color: C.sage, letterSpacing: '0.4em', textTransform: 'uppercase' }}>GALLERY</p>
           </motion.div>
           <div className="max-w-md mx-auto">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-              {wedding.galleries.slice(0, 9).map((item, index) => (
+              {photos.slice(2, 10).map((item, index) => (
                 <motion.div
                   key={item.id}
-                  {...delayAnim(index < 2 ? 0.15 : (index % 2 === 0 ? 0.15 : 0.3))}
-                  onClick={() => setGalleryIndex(index)}
+                  {...delayAnim(index % 2 === 0 ? 0.15 : 0.3)}
+                  onClick={() => setGalleryIndex(index + 2)}
                   className={`overflow-hidden cursor-pointer ${index === 0 ? 'col-span-2' : ''}`}
                   style={{ aspectRatio: index === 0 ? '4/3' : '1/1' }}
                 >
@@ -331,9 +344,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
       <section id="venue-section" style={{ background: C.bgDark, padding: '7rem 2rem', color: C.white }}>
         <div className="max-w-md mx-auto">
           <motion.div {...sectionAnim} className="text-center">
-            <motion.p {...titleAnim} style={{ fontFamily: F.display, fontWeight: 300, fontStyle: 'italic', fontSize: 12, letterSpacing: '0.4em', color: C.accent, marginBottom: '2.5rem' }}>
-              WHEN & WHERE
-            </motion.p>
+            <p className="vb-script" style={{ fontSize: 32, color: C.white, opacity: 0.9, marginBottom: '2.5rem' }}>When & Where</p>
           </motion.div>
 
           <motion.div {...delayAnim(0.15)} className="text-center">
@@ -343,15 +354,15 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
             <div className="max-w-[320px] mx-auto">
               <div className="grid grid-cols-7">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-                  <div key={i} className="text-center" style={{ fontWeight: 200, fontSize: 11, color: i === 0 ? C.accent : C.textMuted, padding: '8px 0' }}>{d}</div>
+                  <div key={i} className="text-center" style={{ fontWeight: 200, fontSize: 11, color: i === 0 ? '#E8C48A' : C.textLight, padding: '8px 0' }}>{d}</div>
                 ))}
                 {calendarData.weeks.flat().map((day, i) => {
                   const isSunday = i % 7 === 0;
                   const isTarget = day === calendarData.targetDay;
                   return (
-                    <div key={i} className="text-center relative" style={{ fontWeight: 300, fontSize: 13, color: !day ? 'transparent' : isSunday ? C.accent : C.white, padding: '10px 0' }}>
+                    <div key={i} className="text-center relative" style={{ fontWeight: 300, fontSize: 13, color: !day ? 'transparent' : isSunday ? '#E8C48A' : C.white, padding: '10px 0' }}>
                       {isTarget && (
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full" style={{ border: `1px solid ${C.accent}` }} />
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full" style={{ border: '1px solid #E8C48A' }} />
                       )}
                       <span className="relative z-10">{day || ''}</span>
                     </div>
@@ -368,7 +379,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
             </p>
             <p style={{ fontWeight: 400, fontSize: 16, color: C.white, marginTop: '1rem' }}>{wedding.venue}</p>
             {wedding.venueHall && <p style={{ fontWeight: 200, fontSize: 13, color: C.textLight, marginTop: '0.25rem' }}>{wedding.venueHall}</p>}
-            <p style={{ fontWeight: 200, fontSize: 12, color: C.textMuted, marginTop: '0.5rem' }}>{wedding.venueAddress}</p>
+            <p style={{ fontWeight: 200, fontSize: 12, color: C.textLight, marginTop: '0.5rem' }}>{wedding.venueAddress}</p>
             {wedding.venuePhone && (
               <a href={`tel:${wedding.venuePhone}`} className="inline-flex items-center gap-1.5" style={{ fontSize: 12, color: C.textLight, marginTop: '0.5rem' }}>
                 <Phone className="w-3 h-3" />{wedding.venuePhone}
@@ -376,7 +387,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
             )}
 
             {wedding.showDday && (
-              <p style={{ fontFamily: F.display, fontWeight: 300, fontSize: 13, letterSpacing: '0.15em', color: C.accent, marginTop: '1rem', display: 'block' }}>
+              <p style={{ fontFamily: F.display, fontWeight: 300, fontSize: 13, letterSpacing: '0.15em', color: '#E8C48A', marginTop: '1rem' }}>
                 {getDday(wedding.weddingDate)}
               </p>
             )}
@@ -384,22 +395,22 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
             <div className="flex justify-center gap-3" style={{ marginTop: '2rem' }}>
               {wedding.venueNaverMap && (
                 <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center rounded-full transition-colors duration-300 hover:border-[#B8A088]"
-                  style={{ background: 'transparent', border: `1px solid ${C.dividerDark}`, borderRadius: 9999, padding: '12px 20px', fontFamily: F.body, fontWeight: 200, fontSize: 12, color: C.textLight, minHeight: 48 }}>
+                  className="flex items-center justify-center rounded-full transition-colors duration-300 hover:border-white/60"
+                  style={{ background: 'transparent', border: `1px solid ${C.dividerDark}`, padding: '12px 20px', fontFamily: F.body, fontWeight: 200, fontSize: 12, color: C.textLight, minHeight: 48 }}>
                   네이버 지도
                 </a>
               )}
               {wedding.venueKakaoMap && (
                 <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center rounded-full transition-colors duration-300 hover:border-[#B8A088]"
-                  style={{ background: 'transparent', border: `1px solid ${C.dividerDark}`, borderRadius: 9999, padding: '12px 20px', fontFamily: F.body, fontWeight: 200, fontSize: 12, color: C.textLight, minHeight: 48 }}>
+                  className="flex items-center justify-center rounded-full transition-colors duration-300 hover:border-white/60"
+                  style={{ background: 'transparent', border: `1px solid ${C.dividerDark}`, padding: '12px 20px', fontFamily: F.body, fontWeight: 200, fontSize: 12, color: C.textLight, minHeight: 48 }}>
                   카카오맵
                 </a>
               )}
               {wedding.venueTmap && (
                 <a href={wedding.venueTmap} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center rounded-full transition-colors duration-300 hover:border-[#B8A088]"
-                  style={{ background: 'transparent', border: `1px solid ${C.dividerDark}`, borderRadius: 9999, padding: '12px 20px', fontFamily: F.body, fontWeight: 200, fontSize: 12, color: C.textLight, minHeight: 48 }}>
+                  className="flex items-center justify-center rounded-full transition-colors duration-300 hover:border-white/60"
+                  style={{ background: 'transparent', border: `1px solid ${C.dividerDark}`, padding: '12px 20px', fontFamily: F.body, fontWeight: 200, fontSize: 12, color: C.textLight, minHeight: 48 }}>
                   티맵
                 </a>
               )}
@@ -415,24 +426,20 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
       <section id="rsvp-section" style={{ background: C.bg, padding: '7rem 2rem' }}>
         <div className="max-w-md mx-auto">
           <motion.div {...sectionAnim} className="text-center">
-            <motion.p {...titleAnim} style={{ fontFamily: F.display, fontWeight: 300, fontStyle: 'italic', fontSize: 12, letterSpacing: '0.4em', color: C.accent, marginBottom: '2rem' }}>
-              ATTENDANCE
-            </motion.p>
+            <p style={{ fontSize: 9, color: C.sage, letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '2rem' }}>ATTENDANCE</p>
             <div style={{ width: 1, height: 40, background: C.divider, margin: '0 auto 2.5rem' }} />
           </motion.div>
           <motion.div {...delayAnim(0.15)}>
-            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="classic" />
+            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="minimal" />
           </motion.div>
         </div>
       </section>
 
       {(wedding.groomAccount || wedding.brideAccount) && (
-        <section id="account-section" style={{ background: C.white, padding: '6rem 2rem' }}>
+        <section id="account-section" style={{ background: C.bgCard, padding: '6rem 2rem' }}>
           <div className="max-w-md mx-auto">
             <motion.div {...sectionAnim} className="text-center">
-              <motion.p {...titleAnim} style={{ fontFamily: F.display, fontWeight: 300, fontStyle: 'italic', fontSize: 12, letterSpacing: '0.4em', color: C.accent, marginBottom: '2rem' }}>
-                GIFT
-              </motion.p>
+              <p style={{ fontSize: 9, color: C.sage, letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '2rem' }}>GIFT</p>
               <div style={{ width: 1, height: 40, background: C.divider, margin: '0 auto 2.5rem' }} />
             </motion.div>
 
@@ -485,16 +492,14 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
         </section>
       )}
 
-      <section id="guestbook-section" style={{ background: C.bgDark, padding: '7rem 2rem', color: C.white }}>
+      <section id="guestbook-section" style={{ background: C.bg, padding: '7rem 2rem' }}>
         <div className="max-w-md mx-auto">
           <motion.div {...sectionAnim} className="text-center">
-            <motion.p {...titleAnim} style={{ fontFamily: F.display, fontWeight: 300, fontStyle: 'italic', fontSize: 12, letterSpacing: '0.4em', color: C.accent, marginBottom: '2rem' }}>
-              GUESTBOOK
-            </motion.p>
-            <div style={{ width: 1, height: 40, background: C.dividerDark, margin: '0 auto 2.5rem' }} />
+            <p style={{ fontSize: 9, color: C.sage, letterSpacing: '0.4em', textTransform: 'uppercase', marginBottom: '2rem' }}>GUESTBOOK</p>
+            <div style={{ width: 1, height: 40, background: C.divider, margin: '0 auto 2.5rem' }} />
           </motion.div>
           <motion.div {...delayAnim(0.15)}>
-            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="classic-dark" />
+            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="minimal" />
             <GuestbookList
               guestbooks={localGuestbooks}
               weddingSlug={wedding.slug}
@@ -507,56 +512,52 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
 
       {guestPhotoSlot}
 
-      <section style={{ background: C.bg, padding: '7rem 2rem' }}>
-        <div className="max-w-md mx-auto text-center">
-          <motion.div {...sectionAnim}>
-            <motion.p {...titleAnim} style={{ fontFamily: F.display, fontWeight: 300, fontStyle: 'italic', fontSize: 12, letterSpacing: '0.4em', color: C.accent }}>
-              SHARE
-            </motion.p>
-          </motion.div>
+      <section style={{ background: C.bgDark, padding: '5rem 2rem', textAlign: 'center' }}>
+        <motion.div {...sectionAnim}>
+          <p className="vb-script" style={{ fontSize: 24, color: C.white, opacity: 0.6 }}>Smooth sailing together</p>
+        </motion.div>
 
-          <motion.div {...delayAnim(0.15)}>
-            {wedding.closingMessage && (
-              <p className="whitespace-pre-line" style={{ fontWeight: 200, fontSize: 13, color: C.textMuted, lineHeight: 2.2, marginTop: '2rem' }}>
-                {wedding.closingMessage}
-              </p>
+        <motion.div {...delayAnim(0.15)}>
+          {wedding.closingMessage && (
+            <p className="whitespace-pre-line" style={{ fontWeight: 200, fontSize: 13, color: C.textLight, lineHeight: 2.2, marginTop: '1.5rem' }}>
+              {wedding.closingMessage}
+            </p>
+          )}
+
+          <div className="flex justify-center gap-4" style={{ marginTop: '2.5rem' }}>
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="flex items-center justify-center rounded-full transition-all duration-300 hover:border-white/50"
+              style={{ width: 48, height: 48, border: `1px solid ${C.dividerDark}`, background: 'transparent' }}
+            >
+              <Share2 className="w-[18px] h-[18px]" style={{ color: C.textLight }} />
+            </button>
+          </div>
+
+          <div className="flex justify-center gap-4" style={{ marginTop: '2rem' }}>
+            {wedding.groomPhone && (
+              <a href={`tel:${wedding.groomPhone}`} className="text-center group">
+                <div className="flex items-center justify-center rounded-full transition-all duration-300 group-hover:border-white/50"
+                  style={{ width: 48, height: 48, border: `1px solid ${C.dividerDark}`, marginBottom: '0.5rem' }}>
+                  <Phone className="w-[18px] h-[18px]" style={{ color: C.textLight }} />
+                </div>
+                <span style={{ fontWeight: 200, fontSize: 11, color: C.textLight }}>신랑</span>
+              </a>
             )}
-
-            <div className="flex justify-center gap-4" style={{ marginTop: '2.5rem' }}>
-              <button
-                onClick={() => setShowShareModal(true)}
-                className="flex items-center justify-center rounded-full transition-all duration-300 hover:border-[#B8A088]"
-                style={{ width: 48, height: 48, border: `1px solid ${C.divider}`, background: 'transparent' }}
-              >
-                <Share2 className="w-[18px] h-[18px]" style={{ color: C.textMuted }} />
-              </button>
-            </div>
-
-            <div className="flex justify-center gap-4" style={{ marginTop: '2rem' }}>
-              {wedding.groomPhone && (
-                <a href={`tel:${wedding.groomPhone}`} className="text-center group">
-                  <div className="flex items-center justify-center rounded-full transition-all duration-300 group-hover:border-[#B8A088]"
-                    style={{ width: 48, height: 48, border: `1px solid ${C.divider}`, marginBottom: '0.5rem' }}>
-                    <Phone className="w-[18px] h-[18px]" style={{ color: C.textMuted }} />
-                  </div>
-                  <span style={{ fontWeight: 200, fontSize: 11, color: C.textLight }}>신랑</span>
-                </a>
-              )}
-              {wedding.bridePhone && (
-                <a href={`tel:${wedding.bridePhone}`} className="text-center group">
-                  <div className="flex items-center justify-center rounded-full transition-all duration-300 group-hover:border-[#B8A088]"
-                    style={{ width: 48, height: 48, border: `1px solid ${C.divider}`, marginBottom: '0.5rem' }}>
-                    <Phone className="w-[18px] h-[18px]" style={{ color: C.textMuted }} />
-                  </div>
-                  <span style={{ fontWeight: 200, fontSize: 11, color: C.textLight }}>신부</span>
-                </a>
-              )}
-            </div>
-          </motion.div>
-        </div>
+            {wedding.bridePhone && (
+              <a href={`tel:${wedding.bridePhone}`} className="text-center group">
+                <div className="flex items-center justify-center rounded-full transition-all duration-300 group-hover:border-white/50"
+                  style={{ width: 48, height: 48, border: `1px solid ${C.dividerDark}`, marginBottom: '0.5rem' }}>
+                  <Phone className="w-[18px] h-[18px]" style={{ color: C.textLight }} />
+                </div>
+                <span style={{ fontWeight: 200, fontSize: 11, color: C.textLight }}>신부</span>
+              </a>
+            )}
+          </div>
+        </motion.div>
       </section>
 
-      <footer style={{ padding: '2rem', textAlign: 'center' }}>
+      <footer style={{ padding: '2rem', textAlign: 'center', background: C.bg }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity"
           style={{ fontWeight: 200, fontSize: 11, color: C.textLight, textDecoration: 'none', letterSpacing: '0.05em' }}>
           Made by 청첩장 작업실 ›
@@ -569,7 +570,9 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
             galleries={wedding.galleries}
             currentIndex={galleryIndex}
             onClose={() => setGalleryIndex(null)}
-            onNavigate={setGalleryIndex} theme="ROMANTIC_CLASSIC" usePhotoFilter={wedding.usePhotoFilter ?? true}
+            onNavigate={setGalleryIndex}
+            theme="VOYAGE_BLUE"
+            usePhotoFilter={wedding.usePhotoFilter ?? true}
           />
         )}
       </AnimatePresence>
@@ -611,7 +614,7 @@ function AccountCard({ title, accounts, isOpen, onToggle, copiedAccount, onCopy 
                     <span style={{ fontWeight: 300, fontSize: 13, color: C.text }}>{acc.account}</span>
                     <button
                       onClick={() => onCopy(`${acc.bank} ${acc.account}`, `${title}-${i}`)}
-                      className="flex items-center gap-1 rounded-full transition-all duration-300 hover:border-[#B8A088] hover:text-[#B8A088]"
+                      className="flex items-center gap-1 rounded-full transition-all duration-300 hover:border-[#1A365D] hover:text-[#1A365D]"
                       style={{
                         background: 'transparent',
                         border: `1px solid ${copiedAccount === `${title}-${i}` ? C.accent : C.divider}`,

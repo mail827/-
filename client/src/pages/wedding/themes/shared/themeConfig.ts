@@ -1,5 +1,6 @@
 export interface ThemeConfig {
   name: string;
+  hidden?: boolean;
   colors: {
     primary: string;
     secondary: string;
@@ -20,18 +21,18 @@ export const themeConfigs: Record<string, ThemeConfig> = {
   ROMANTIC_CLASSIC: {
     name: '로맨틱 클래식',
     colors: {
-      primary: '#D4A5A5',
-      secondary: '#F5E6E0',
-      accent: '#8B7355',
-      text: '#5D4E4E',
-      textMuted: '#9A8A8A',
-      background: '#FDF9F7',
-      card: '#FFFFFF',
-      border: '#E8DCD6',
+      primary: '#B8A088',
+      secondary: '#FAF8F5',
+      accent: '#2C2620',
+      text: '#2C2620',
+      textMuted: '#8A7E72',
+      background: '#FAF8F5',
+      card: '#FFFDF9',
+      border: '#E8E2DA',
     },
     photoFilter: {
-      transformation: 'e_saturation:10,e_warmth:20,e_vibrance:10',
-      label: '웜톤 로맨틱',
+      transformation: 'e_saturation:5,e_warmth:15,e_vibrance:8',
+      label: '내추럴 웜',
     },
   },
   MODERN_MINIMAL: {
@@ -87,6 +88,7 @@ export const themeConfigs: Record<string, ThemeConfig> = {
   },
   POETIC_LOVE: {
     name: '포에틱 러브',
+    hidden: true,
     colors: {
       primary: '#B8A0C8',
       secondary: '#F8F5FA',
@@ -172,6 +174,7 @@ export const themeConfigs: Record<string, ThemeConfig> = {
   },
   SPRING_BREEZE: {
     name: '봄바람',
+    hidden: true,
     colors: {
       primary: '#E8B4C8',
       secondary: '#FDF5F8',
@@ -290,6 +293,7 @@ export const themeConfigs: Record<string, ThemeConfig> = {
     },
   },
   WAVE_BORDER: {
+    hidden: true,
     name: '웨이브 보더',
     colors: {
           "primary": "#8B7355",
@@ -304,6 +308,75 @@ export const themeConfigs: Record<string, ThemeConfig> = {
     photoFilter: {
       transformation: 'e_saturation:-5,e_warmth:20,e_sepia:8,e_vibrance:8',
       label: '빈티지 웜브라운',
+    },
+  },
+  CRUISE_DAY: {
+    name: '크루즈 데이',
+    colors: {
+      primary: '#3B7DD8',
+      secondary: '#F5F8FA',
+      accent: '#1A2B3A',
+      text: '#1A2B3A',
+      textMuted: '#6B8299',
+      background: '#F5F8FA',
+      card: '#FFFFFF',
+      border: '#D8E4EE',
+    },
+    photoFilter: {
+      transformation: 'e_saturation:5,e_vibrance:10,e_blue:10',
+      label: '쿨 블루',
+    },
+  },
+  CRUISE_SUNSET: {
+    name: '크루즈 선셋',
+    colors: {
+      primary: '#D4A054',
+      secondary: '#1A1714',
+      accent: '#E8DFD4',
+      text: '#E8DFD4',
+      textMuted: '#9E8E7A',
+      background: '#0D0B09',
+      card: '#1A1714',
+      border: '#2E2720',
+    },
+    photoFilter: {
+      transformation: 'e_saturation:10,e_warmth:25,e_sepia:10',
+      label: '골든 선셋',
+    },
+  },
+  VOYAGE_BLUE: {
+    hidden: true,
+    name: '보야지 블루',
+    colors: {
+      primary: '#1A365D',
+      secondary: '#F9F7F2',
+      accent: '#8E9775',
+      text: '#2C3E50',
+      textMuted: '#6B7B8D',
+      background: '#F9F7F2',
+      card: '#FFFFFF',
+      border: '#D1D1D1',
+    },
+    photoFilter: {
+      transformation: 'e_saturation:5,e_vibrance:10,e_blue:5',
+      label: '쿨 네이비',
+    },
+  },
+  EDITORIAL: {
+    name: '에디토리얼',
+    colors: {
+      primary: '#0e0e0e',
+      secondary: '#f0f0f0',
+      accent: '#f0f0f0',
+      text: '#f0f0f0',
+      textMuted: '#888888',
+      background: '#0e0e0e',
+      card: '#1a1a1a',
+      border: '#333333',
+    },
+    photoFilter: {
+      transformation: 'e_contrast:10,e_saturation:-10',
+      label: '하이 콘트라스트',
     },
   },
 };

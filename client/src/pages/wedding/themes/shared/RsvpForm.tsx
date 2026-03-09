@@ -33,7 +33,7 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
   }
 
   const styles = {
-    classic: { input: 'bg-white/60 border-rose-100 focus:border-rose-300', button: 'bg-rose-400 hover:bg-rose-500', active: 'bg-rose-400 text-white', inactive: 'bg-white border-rose-200 text-stone-600' },
+    classic: { input: 'bg-white/60 border-[#E8E2DA] focus:border-[#B8A088]', button: 'bg-[#2C2620] hover:bg-[#1A1714]', active: 'bg-[#2C2620] text-[#FFFDF9]', inactive: 'bg-white border-[#E8E2DA] text-[#8A7E72]' },
     minimal: { input: 'bg-stone-50 border-stone-200 focus:border-stone-400', button: 'bg-stone-800 hover:bg-stone-700', active: 'bg-stone-800 text-white', inactive: 'bg-white border-stone-200 text-stone-600' },
     bohemian: { input: 'bg-white border-[#5C6B54]/20 focus:border-[#5C6B54]', button: 'bg-[#5C6B54] hover:bg-[#4A5944]', active: 'bg-[#5C6B54] text-white', inactive: 'bg-white border-[#5C6B54]/20 text-[#5D5D5D]' },
     luxury: { input: 'bg-[#111] border-[#C9A96E]/30 focus:border-[#C9A96E] text-white', button: 'bg-[#C9A96E] hover:bg-[#D4B97A] text-black', active: 'bg-[#C9A96E] text-black', inactive: 'bg-[#111] border-[#C9A96E]/30 text-[#888]' },

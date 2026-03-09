@@ -24,6 +24,10 @@ const AquaGlobe = lazy(() => import('./themes/AquaGlobe'));
 const BotanicalClassic = lazy(() => import("./themes/BotanicalClassic"));
 const HeartMinimal = lazy(() => import("./themes/HeartMinimal"));
 const WaveBorder = lazy(() => import("./themes/WaveBorder"));
+const CruiseDay = lazy(() => import('./themes/CruiseDay'));
+const CruiseSunset = lazy(() => import('./themes/CruiseSunset'));
+const VoyageBlue = lazy(() => import('./themes/VoyageBlue'));
+const Editorial = lazy(() => import('./themes/Editorial'));
 import AiChat from '../../components/AiChat';
 import GuestPhotoGallery from './themes/shared/GuestPhotoGallery';
 import { useSectionOrder } from '../../hooks/useSectionOrder';
@@ -78,6 +82,10 @@ const themeComponents: Record<Theme, React.ComponentType<any>> = {
   NIGHT_SEA: NightSea,
   AQUA_GLOBE: AquaGlobe,
   WAVE_BORDER: WaveBorder,
+  CRUISE_DAY: CruiseDay,
+  CRUISE_SUNSET: CruiseSunset,
+  VOYAGE_BLUE: VoyageBlue,
+  EDITORIAL: Editorial,
   HEART_MINIMAL: HeartMinimal,
   BOTANICAL_CLASSIC: BotanicalClassic,
 };

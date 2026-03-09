@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>성준 & 다겸</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#FAF8F5;
+  --bg-dark:#1A1714;
+  --text:#2C2620;
+  --text-muted:#8A7E72;
+  --text-light:#C4B9AB;
+  --accent:#B8A088;
+  --white:#FFFDF9;
+  --divider:#E8E2DA;
+  --divider-dark:#5A5048;
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Noto Serif KR',serif;
+  font-weight:200;
+  overflow-x:hidden;
+  max-width:100vw;
+}
+.font-display{font-family:'Cormorant Garamond',serif}
+.reveal{opacity:0;transform:translateY(40px);transition:opacity 1s cubic-bezier(.22,1,.36,1),transform 1s cubic-bezier(.22,1,.36,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.15s}
+.reveal-delay-2{transition-delay:.3s}
+.reveal-delay-3{transition-delay:.45s}
+.reveal-delay-4{transition-delay:.6s}
+.title-reveal{opacity:0;letter-spacing:.6em;transition:opacity 1.2s ease,letter-spacing 1.2s ease}
+.title-reveal.visible{opacity:1;letter-spacing:.4em}
+
+.hero{position:relative;width:100%;height:100vh;height:100dvh;overflow:hidden}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:heroZoom 4s ease-out forwards}
+@keyframes heroZoom{from{transform:scale(1.08)}to{transform:scale(1)}}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(0,0,0,.55) 100%)}
+.hero-content{position:absolute;bottom:0;left:0;right:0;padding:0 2rem 15vh;text-align:center}
+.hero-label{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:11px;letter-spacing:.35em;color:var(--white);opacity:.7}
+.hero-name{font-weight:300;font-size:28px;letter-spacing:.15em;color:var(--white);line-height:1.4}
+.hero-amp{font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;font-size:22px;color:var(--white);opacity:.6;margin:8px 0}
+.hero-date{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:14px;letter-spacing:.2em;color:var(--white);opacity:.7;margin-top:16px}
+.scroll-hint{position:absolute;bottom:5vh;left:50%;transform:translateX(-50%);opacity:.4;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+.scroll-hint svg{width:20px;height:20px;stroke:var(--white);stroke-width:1.5;fill:none}
+
+.section-light{background:var(--bg);padding:7rem 2rem}
+.section-white{background:var(--white);padding:6rem 0}
+.section-dark{background:var(--bg-dark);padding:7rem 2rem;color:var(--white)}
+.section-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;font-size:12px;letter-spacing:.4em;color:var(--accent);text-align:center;margin-bottom:2rem}
+.vline{width:1px;height:40px;background:var(--divider);margin:0 auto 2.5rem}
+.vline-dark{background:var(--divider-dark)}
+.hline{width:48px;height:1px;background:var(--divider);margin:2.5rem auto}
+.hline-dark{background:var(--divider-dark)}
+
+.greeting-title{font-weight:300;font-size:18px;color:var(--text);line-height:2;text-align:center;margin-bottom:2rem}
+.greeting-body{font-weight:200;font-size:14px;color:var(--text-muted);line-height:2.4;text-align:center;white-space:pre-line}
+.parents-label{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:11px;letter-spacing:.2em;color:var(--accent);text-align:center;margin-bottom:.5rem}
+.parents-name{font-weight:300;font-size:13px;color:var(--text-muted);text-align:center}
+.parents-child{font-weight:400;font-size:14px;color:var(--text);text-align:center;margin-top:.25rem}
+
+.gallery-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:0 0}
+.gallery-grid .full{grid-column:span 2}
+.gallery-grid img{width:100%;height:100%;object-fit:cover;display:block}
+.gallery-grid .square{aspect-ratio:1/1}
+.gallery-grid .wide{aspect-ratio:4/3}
+
+.cal-table{width:100%;max-width:320px;margin:0 auto;border-collapse:collapse}
+.cal-header{font-weight:200;font-size:11px;color:var(--text-muted);padding:8px 0;text-align:center}
+.cal-day{font-weight:300;font-size:13px;color:var(--white);padding:10px 0;text-align:center;position:relative}
+.cal-day.sunday{color:var(--accent)}
+.cal-day.today{position:relative}
+.cal-day.today::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border:1px solid var(--accent);border-radius:50%}
+.cal-day.empty{color:transparent}
+.cal-month{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:13px;color:var(--text-light);letter-spacing:.2em;text-align:center;margin-bottom:1.5rem}
+.venue-name{font-weight:400;font-size:16px;color:var(--white);text-align:center;margin-top:1rem}
+.venue-hall{font-weight:200;font-size:13px;color:var(--text-light);text-align:center;margin-top:.25rem}
+.venue-addr{font-weight:200;font-size:12px;color:var(--text-muted);text-align:center;margin-top:.5rem}
+.venue-time{font-weight:300;font-size:15px;color:var(--white);text-align:center}
+.map-buttons{display:flex;gap:12px;justify-content:center;margin-top:2rem}
+.map-btn{background:transparent;border:1px solid var(--divider-dark);border-radius:9999px;padding:12px 20px;font-family:'Noto Serif KR',serif;font-weight:200;font-size:12px;color:var(--text-light);cursor:pointer;min-height:48px;display:flex;align-items:center;transition:border-color .3s}
+.map-btn:hover{border-color:var(--accent)}
+
+.map-placeholder{width:100%;height:200px;background:#2a2520;margin-top:2.5rem;display:flex;align-items:center;justify-content:center}
+.map-placeholder span{font-size:12px;color:var(--text-muted)}
+
+.rsvp-form{max-width:320px;margin:0 auto}
+.rsvp-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--divider);padding:14px 0;font-family:'Noto Serif KR',serif;font-weight:200;font-size:14px;color:var(--text);outline:none;margin-bottom:1rem}
+.rsvp-input::placeholder{color:var(--text-light)}
+.rsvp-radio-group{display:flex;gap:1rem;margin:1.5rem 0}
+.rsvp-radio{flex:1;padding:14px;border:1px solid var(--divider);text-align:center;font-size:13px;font-weight:300;color:var(--text-muted);cursor:pointer;transition:all .3s;border-radius:2px}
+.rsvp-radio.active{border-color:var(--accent);color:var(--text);background:rgba(184,160,136,.06)}
+.rsvp-submit{width:100%;padding:16px;background:var(--text);color:var(--white);border:none;font-family:'Noto Serif KR',serif;font-weight:300;font-size:13px;letter-spacing:.1em;cursor:pointer;margin-top:1rem;transition:opacity .3s}
+.rsvp-submit:hover{opacity:.85}
+
+.accordion-btn{width:100%;display:flex;justify-content:space-between;align-items:center;padding:1.25rem 0;border:none;border-bottom:1px solid var(--divider);background:transparent;cursor:pointer;font-family:'Noto Serif KR',serif;font-weight:300;font-size:14px;color:var(--text)}
+.accordion-btn svg{width:16px;height:16px;stroke:var(--text-muted);stroke-width:1.5;fill:none;transition:transform .3s}
+.accordion-btn.open svg{transform:rotate(180deg)}
+.accordion-content{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.accordion-content.open{max-height:500px}
+.account-item{padding:1.25rem 0;border-bottom:1px solid var(--divider)}
+.account-bank{font-weight:200;font-size:12px;color:var(--text-muted)}
+.account-num{font-weight:300;font-size:13px;color:var(--text);margin-top:.25rem;display:flex;justify-content:space-between;align-items:center}
+.copy-btn{display:flex;align-items:center;gap:4px;background:transparent;border:1px solid var(--divider);border-radius:9999px;padding:6px 14px;font-family:'Noto Serif KR',serif;font-weight:200;font-size:11px;color:var(--text-muted);cursor:pointer;transition:all .3s}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+.copy-btn svg{width:12px;height:12px;stroke:currentColor;stroke-width:1.5;fill:none}
+
+.guestbook-input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--divider-dark);padding:14px;font-family:'Noto Serif KR',serif;font-weight:200;font-size:13px;color:var(--white);outline:none;resize:none;margin-bottom:1rem;border-radius:2px}
+.guestbook-input::placeholder{color:var(--divider-dark)}
+.guestbook-submit{padding:12px 24px;background:transparent;border:1px solid var(--divider-dark);color:var(--text-light);font-family:'Noto Serif KR',serif;font-weight:200;font-size:12px;cursor:pointer;transition:all .3s;border-radius:2px;float:right}
+.guestbook-submit:hover{border-color:var(--accent);color:var(--accent)}
+.guestbook-item{padding:1.25rem 0;border-bottom:1px solid var(--divider-dark)}
+.guestbook-author{font-weight:300;font-size:13px;color:var(--white);margin-bottom:.375rem}
+.guestbook-msg{font-weight:200;font-size:12px;color:var(--text-light);line-height:1.8}
+.guestbook-date{font-family:'Cormorant Garamond',serif;font-size:11px;color:var(--divider-dark);margin-top:.375rem}
+
+.share-buttons{display:flex;gap:1rem;justify-content:center;margin-top:2.5rem}
+.share-btn{width:48px;height:48px;border-radius:50%;border:1px solid var(--divider);display:flex;align-items:center;justify-content:center;background:transparent;cursor:pointer;transition:all .3s}
+.share-btn:hover{border-color:var(--accent)}
+.share-btn svg{width:18px;height:18px;stroke:var(--text-muted);stroke-width:1.5;fill:none}
+
+.footer{padding:2rem;text-align:center}
+.footer a{font-weight:200;font-size:11px;color:var(--text-light);text-decoration:none;letter-spacing:.05em;transition:color .3s}
+.footer a:hover{color:var(--accent)}
+
+.dday-badge{display:inline-block;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:13px;letter-spacing:.15em;color:var(--accent);margin-top:1rem}
+
+.music-btn{position:fixed;top:20px;right:20px;z-index:100;width:40px;height:40px;border-radius:50%;background:rgba(250,248,245,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--divider);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.06);transition:transform .2s}
+.music-btn:hover{transform:scale(1.05)}
+.music-btn svg{width:16px;height:16px;stroke:var(--text-muted);stroke-width:1.5;fill:none}
+.music-btn .bar{display:block;width:2px;background:var(--text-muted);border-radius:1px;animation:eq .6s ease infinite alternate}
+.music-btn .bar:nth-child(1){height:8px;animation-delay:0s}
+.music-btn .bar:nth-child(2){height:12px;animation-delay:.15s}
+.music-btn .bar:nth-child(3){height:6px;animation-delay:.3s}
+.music-btn .bar:nth-child(4){height:10px;animation-delay:.1s}
+@keyframes eq{to{height:4px}}
+.music-bars{display:flex;gap:2px;align-items:center;height:16px}
+
+.closing-text{font-weight:200;font-size:13px;color:var(--text-muted);text-align:center;line-height:2.2}
+</style>
+</head>
+<body>
+
+<button class="music-btn" onclick="this.classList.toggle('playing')" aria-label="음악">
+  <div class="music-bars">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </div>
+</button>
+
+<section class="hero">
+  <img class="hero-img" src="https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80" alt="">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-label reveal reveal-delay-1">WEDDING INVITATION</p>
+    <div style="margin-top:24px">
+      <p class="hero-name reveal reveal-delay-2">이 성 준</p>
+      <p class="hero-amp reveal reveal-delay-3">&</p>
+      <p class="hero-name reveal reveal-delay-3">김 다 겸</p>
+    </div>
+    <p class="hero-date reveal reveal-delay-4">2026. 05. 23</p>
+  </div>
+  <div class="scroll-hint">
+    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </div>
+</section>
+
+<section class="section-light">
+  <div class="reveal">
+    <p class="section-title title-reveal">INVITATION</p>
+    <div class="vline"></div>
+  </div>
+  <div class="reveal reveal-delay-1">
+    <p class="greeting-title">서로가 마주보며 다져온 사랑을<br>이제 함께 같은 곳을 바라보며<br>걸어가고자 합니다</p>
+  </div>
+  <div class="reveal reveal-delay-2">
+    <p class="greeting-body">서로 다른 두 사람이 만나
+긴 시간 함께하며 같은 꿈을 꾸게 되었습니다.
+이제 그 꿈의 첫걸음을 내딛는 자리에
+소중한 분들을 초대합니다.
+
+따뜻한 마음으로 함께해 주시면
+더없는 기쁨이겠습니다.</p>
+  </div>
+  <div class="reveal reveal-delay-3">
+    <div class="hline"></div>
+    <div style="display:flex;gap:3rem;justify-content:center;margin-top:2rem">
+      <div>
+        <p class="parents-label">GROOM</p>
+        <p class="parents-name">이 정호 · 박 수연</p>
+        <p class="parents-child">의 아들 성준</p>
+      </div>
+      <div>
+        <p class="parents-label">BRIDE</p>
+        <p class="parents-name">김 태형 · 이 미경</p>
+        <p class="parents-child">의 딸 다겸</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-white">
+  <div class="reveal" style="padding:0 2rem 2rem">
+    <p class="section-title title-reveal">GALLERY</p>
+  </div>
+  <div class="gallery-grid">
+    <div class="full wide reveal">
+      <img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&q=80" alt="">
+    </div>
+    <div class="square reveal reveal-delay-1">
+      <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&q=80" alt="">
+    </div>
+    <div class="square reveal reveal-delay-2">
+      <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=400&q=80" alt="">
+    </div>
+    <div class="square reveal reveal-delay-1">
+      <img src="https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&q=80" alt="">
+    </div>
+    <div class="square reveal reveal-delay-2">
+      <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80" alt="">
+    </div>
+  </div>
+</section>
+
+<section class="section-dark">
+  <div class="reveal">
+    <p class="section-title title-reveal">WHEN & WHERE</p>
+  </div>
+  <div class="reveal reveal-delay-1">
+    <p class="cal-month">2026. MAY</p>
+    <table class="cal-table">
+      <thead>
+        <tr>
+          <th class="cal-header" style="color:var(--accent)">S</th>
+          <th class="cal-header">M</th>
+          <th class="cal-header">T</th>
+          <th class="cal-header">W</th>
+          <th class="cal-header">T</th>
+          <th class="cal-header">F</th>
+          <th class="cal-header">S</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cal-day empty"></td>
+          <td class="cal-day empty"></td>
+          <td class="cal-day empty"></td>
+          <td class="cal-day empty"></td>
+          <td class="cal-day empty"></td>
+          <td class="cal-day">1</td>
+          <td class="cal-day">2</td>
+        </tr>
+        <tr>
+          <td class="cal-day sunday">3</td>
+          <td class="cal-day">4</td>
+          <td class="cal-day">5</td>
+          <td class="cal-day">6</td>
+          <td class="cal-day">7</td>
+          <td class="cal-day">8</td>
+          <td class="cal-day">9</td>
+        </tr>
+        <tr>
+          <td class="cal-day sunday">10</td>
+          <td class="cal-day">11</td>
+          <td class="cal-day">12</td>
+          <td class="cal-day">13</td>
+          <td class="cal-day">14</td>
+          <td class="cal-day">15</td>
+          <td class="cal-day">16</td>
+        </tr>
+        <tr>
+          <td class="cal-day sunday">17</td>
+          <td class="cal-day">18</td>
+          <td class="cal-day">19</td>
+          <td class="cal-day">20</td>
+          <td class="cal-day">21</td>
+          <td class="cal-day">22</td>
+          <td class="cal-day today">23</td>
+        </tr>
+        <tr>
+          <td class="cal-day sunday">24</td>
+          <td class="cal-day">25</td>
+          <td class="cal-day">26</td>
+          <td class="cal-day">27</td>
+          <td class="cal-day">28</td>
+          <td class="cal-day">29</td>
+          <td class="cal-day">30</td>
+        </tr>
+        <tr>
+          <td class="cal-day sunday">31</td>
+          <td class="cal-day empty"></td>
+          <td class="cal-day empty"></td>
+          <td class="cal-day empty"></td>
+          <td class="cal-day empty"></td>
+          <td class="cal-day empty"></td>
+          <td class="cal-day empty"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="reveal reveal-delay-2">
+    <div class="hline hline-dark"></div>
+    <p class="venue-time">2026년 5월 23일 토요일 오후 12시 30분</p>
+    <p class="venue-name">그랜드 하얏트 부산</p>
+    <p class="venue-hall">그랜드 볼룸 3층</p>
+    <p class="venue-addr">부산광역시 해운대구 해운대해변로 xxx</p>
+    <p class="dday-badge" style="text-align:center;display:block">D - 75</p>
+    <div class="map-buttons">
+      <button class="map-btn">네이버 지도</button>
+      <button class="map-btn">카카오맵</button>
+      <button class="map-btn">티맵</button>
+    </div>
+  </div>
+  <div class="reveal reveal-delay-3">
+    <div class="map-placeholder">
+      <span>지도 영역</span>
+    </div>
+  </div>
+</section>
+
+<section class="section-light">
+  <div class="reveal">
+    <p class="section-title title-reveal">ATTENDANCE</p>
+    <div class="vline"></div>
+  </div>
+  <div class="reveal reveal-delay-1">
+    <form class="rsvp-form" onsubmit="return false">
+      <input class="rsvp-input" type="text" placeholder="성함">
+      <input class="rsvp-input" type="tel" placeholder="연락처">
+      <div class="rsvp-radio-group">
+        <div class="rsvp-radio active" onclick="selectRadio(this)">참석</div>
+        <div class="rsvp-radio" onclick="selectRadio(this)">불참</div>
+      </div>
+      <input class="rsvp-input" type="number" placeholder="동반 인원 (본인 포함)" min="1" max="10">
+      <button class="rsvp-submit" type="button">참석 의사 전달하기</button>
+    </form>
+  </div>
+</section>
+
+<section class="section-white" style="padding:6rem 2rem">
+  <div class="reveal">
+    <p class="section-title title-reveal">GIFT</p>
+    <div class="vline"></div>
+  </div>
+  <div class="reveal reveal-delay-1">
+    <button class="accordion-btn" onclick="toggleAccordion(this)">
+      신랑측 계좌
+      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </button>
+    <div class="accordion-content">
+      <div class="account-item">
+        <p class="account-bank">카카오뱅크 · 이 성준</p>
+        <div class="account-num">
+          <span>3333-12-3456789</span>
+          <button class="copy-btn" onclick="copyText(this,'3333-12-3456789')">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            복사
+          </button>
+        </div>
+      </div>
+      <div class="account-item">
+        <p class="account-bank">국민은행 · 이 정호</p>
+        <div class="account-num">
+          <span>123-456-78901234</span>
+          <button class="copy-btn" onclick="copyText(this,'123-456-78901234')">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            복사
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="reveal reveal-delay-2">
+    <button class="accordion-btn" onclick="toggleAccordion(this)">
+      신부측 계좌
+      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </button>
+    <div class="accordion-content">
+      <div class="account-item">
+        <p class="account-bank">신한은행 · 김 다겸</p>
+        <div class="account-num">
+          <span>110-456-789012</span>
+          <button class="copy-btn" onclick="copyText(this,'110-456-789012')">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            복사
+          </button>
+        </div>
+      </div>
+      <div class="account-item">
+        <p class="account-bank">우리은행 · 김 태형</p>
+        <div class="account-num">
+          <span>1002-345-678901</span>
+          <button class="copy-btn" onclick="copyText(this,'1002-345-678901')">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            복사
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-dark">
+  <div class="reveal">
+    <p class="section-title title-reveal">GUESTBOOK</p>
+    <div class="vline vline-dark"></div>
+  </div>
+  <div class="reveal reveal-delay-1">
+    <input class="guestbook-input" placeholder="성함" style="margin-bottom:.75rem">
+    <input class="guestbook-input" type="password" placeholder="비밀번호" style="margin-bottom:.75rem">
+    <textarea class="guestbook-input" rows="3" placeholder="축하 메시지를 남겨주세요"></textarea>
+    <button class="guestbook-submit">작성하기</button>
+    <div style="clear:both;padding-top:2rem">
+      <div class="guestbook-item">
+        <p class="guestbook-author">박 민수</p>
+        <p class="guestbook-msg">결혼 축하해! 두 사람 너무 잘 어울린다. 행복하게 살아~</p>
+        <p class="guestbook-date">2026. 03. 08</p>
+      </div>
+      <div class="guestbook-item">
+        <p class="guestbook-author">최 서연</p>
+        <p class="guestbook-msg">진심으로 축하합니다. 아름다운 가정 이루시길 바랍니다.</p>
+        <p class="guestbook-date">2026. 03. 07</p>
+      </div>
+      <div class="guestbook-item">
+        <p class="guestbook-author">정 유진</p>
+        <p class="guestbook-msg">성준아 다겸아 축하해!! 신혼여행 잘 다녀와 ㅎㅎ</p>
+        <p class="guestbook-date">2026. 03. 06</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-light" style="padding:7rem 2rem">
+  <div class="reveal">
+    <p class="section-title title-reveal">SHARE</p>
+  </div>
+  <div class="reveal reveal-delay-1">
+    <p class="closing-text">
+      가장 빛나는 순간에<br>
+      함께해 주셔서 감사합니다
+    </p>
+    <div class="share-buttons">
+      <button class="share-btn" aria-label="카카오톡 공유">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      </button>
+      <button class="share-btn" aria-label="링크 복사">
+        <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+      </button>
+      <button class="share-btn" aria-label="공유">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  <a href="/">Made by 청첩장 작업실 ›</a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('visible');
+      }
+    });
+  },{threshold:0.1,rootMargin:'-50px'});
+  document.querySelectorAll('.reveal,.title-reveal').forEach(function(el){obs.observe(el)});
+});
+
+function selectRadio(el){
+  el.parentElement.querySelectorAll('.rsvp-radio').forEach(function(r){r.classList.remove('active')});
+  el.classList.add('active');
+}
+
+function toggleAccordion(btn){
+  btn.classList.toggle('open');
+  var content=btn.nextElementSibling;
+  content.classList.toggle('open');
+}
+
+function copyText(btn,text){
+  navigator.clipboard.writeText(text).then(function(){
+    var orig=btn.innerHTML;
+    btn.innerHTML='<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;stroke-width:1.5;fill:none"><polyline points="20 6 9 17 4 12"></polyline></svg> 완료';
+    btn.style.color='#B8A088';
+    btn.style.borderColor='#B8A088';
+    setTimeout(function(){btn.innerHTML=orig;btn.style.color='';btn.style.borderColor='';},2000);
+  });
+}
+</script>
+
+</body>
+</html>

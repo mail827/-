@@ -18,4 +18,7 @@ export { default as AquaGlobe } from './AquaGlobe';
 
 export { default as BotanicalClassic } from './BotanicalClassic';
 export { default as HeartMinimal } from './HeartMinimal';
-export { default as WaveBorder } from './WaveBorder';
+export { default as WaveBorder } from './WaveBorder';export { default as CruiseDay } from './CruiseDay';
+export { default as CruiseSunset } from './CruiseSunset';
+export { default as VoyageBlue } from './VoyageBlue';
+export { default as Editorial } from './Editorial';

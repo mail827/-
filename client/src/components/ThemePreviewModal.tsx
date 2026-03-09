@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
 import { X, Heart } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { themeConfigs } from '../pages/wedding/themes/shared/themeConfig';
 
 const RomanticClassic = lazy(() => import('../pages/wedding/themes/RomanticClassic'));
 const ModernMinimal = lazy(() => import('../pages/wedding/themes/ModernMinimal'));
@@ -42,6 +43,10 @@ const themeComponents: Record<string, React.ComponentType<any>> = {
   BOTANICAL_CLASSIC: BotanicalClassic,
   HEART_MINIMAL: HeartMinimal,
   WAVE_BORDER: WaveBorder,
+  CRUISE_DAY: lazy(() => import('../pages/wedding/themes/CruiseDay')),
+  CRUISE_SUNSET: lazy(() => import('../pages/wedding/themes/CruiseSunset')),
+  VOYAGE_BLUE: lazy(() => import('../pages/wedding/themes/VoyageBlue')),
+  EDITORIAL: lazy(() => import('../pages/wedding/themes/Editorial')),
 };
 
 const THEMES = [
@@ -64,6 +69,10 @@ const THEMES = [
   { id: 'BOTANICAL_CLASSIC', name: '보태니컬 클래식' },
   { id: 'HEART_MINIMAL', name: '하트 미니멀' },
   { id: 'WAVE_BORDER', name: '웨이브 보더' },
+  { id: 'CRUISE_DAY', name: '크루즈 데이' },
+  { id: 'CRUISE_SUNSET', name: '크루즈 선셋' },
+  { id: 'VOYAGE_BLUE', name: '보야지 블루' },
+  { id: 'EDITORIAL', name: '에디토리얼' },
 ];
 
 interface Props {
@@ -114,7 +123,7 @@ export default function ThemePreviewModal({ isOpen, onClose, wedding, onApply }:
         </div>
 
         <div className="flex gap-2 px-4 py-2.5 overflow-x-auto bg-stone-900/50 scrollbar-hide flex-shrink-0">
-          {THEMES.map(t => (
+          {THEMES.filter(t => !themeConfigs[t.id]?.hidden).map(t => (
             <button
               key={t.id}
               onClick={() => setPreviewTheme(t.id)}

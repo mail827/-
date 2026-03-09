@@ -21,6 +21,10 @@ const THEME_OPTIONS = [
   { id: 'BOTANICAL_CLASSIC', name: '보태니컬 클래식' },
   { id: 'HEART_MINIMAL', name: '하트 미니멀' },
   { id: 'WAVE_BORDER', name: '웨이브 보더' },
+  { id: 'CRUISE_DAY', name: '크루즈 데이' },
+  { id: 'CRUISE_SUNSET', name: '크루즈 선셋' },
+  { id: 'VOYAGE_BLUE', name: '보야지 블루' },
+  { id: 'EDITORIAL', name: '에디토리얼' },
 ];
 
 const DEFAULT_SAMPLE_DATA = {

@@ -13,7 +13,9 @@ export function thumbnailUrl(url: string): string {
 }
 
 export function heroUrl(url: string): string {
-  return optimizeCloudinaryUrl(url, { width: 1200, quality: 'auto' });
+  if (!url || !url.includes('cloudinary.com')) return url;
+  const cleaned = url.replace(/\/upload\/(?!v\d)[^\/]+\//g, '/upload/');
+  return cleaned.replace('/upload/', '/upload/q_90,w_1800,c_limit/');
 }
 
 export function galleryThumbUrl(url: string): string {

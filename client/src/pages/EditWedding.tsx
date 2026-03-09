@@ -11,6 +11,7 @@ import ImageCropModal from '../components/ImageCropModal';
 import AiSnapStudio from '../components/AiSnapStudio';
 import { Play, Pause } from 'lucide-react';
 import KakaoAddressInput from '../components/KakaoAddressInput';
+import { themeConfigs } from './wedding/themes/shared/themeConfig';
 
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'wedding_guide';
@@ -35,6 +36,10 @@ const THEMES = [
   { id: 'BOTANICAL_CLASSIC', name: '보태니컬 클래식', desc: '올리브그린 보태니컬 라인아트' },
   { id: 'HEART_MINIMAL', name: '하트 미니멀', desc: '워피치 하트 미니멀' },
   { id: 'WAVE_BORDER', name: '웨이브 보더', desc: '웜브라운 물결 보더' },
+  { id: 'CRUISE_DAY', name: '크루즈 데이', desc: '스카이블루 캘리그라피' },
+  { id: 'CRUISE_SUNSET', name: '크루즈 선셋', desc: '골든 선셋 다크' },
+  { id: 'VOYAGE_BLUE', name: '보야지 블루', desc: 'Voyage of Love 네이비' },
+  { id: 'EDITORIAL', name: '에디토리얼', desc: '다크 에디토리얼 매거진' },
 ];
 
 const SENIOR_COLORS = [
@@ -580,7 +585,7 @@ export default function EditWedding() {
           <>
             <Section title="테마">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {THEMES.map(theme => (
+                {THEMES.filter(t => !themeConfigs[t.id]?.hidden).map(theme => (
                   <button
                     key={theme.id}
                     onClick={() => updateField('theme', theme.id)}
