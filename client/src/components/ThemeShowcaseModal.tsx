@@ -232,6 +232,10 @@ const themeComponents: Record<string, React.ComponentType<any>> = {
   CRUISE_SUNSET: lazy(() => import('../pages/wedding/themes/CruiseSunset')),
   VOYAGE_BLUE: lazy(() => import('../pages/wedding/themes/VoyageBlue')),
   EDITORIAL: lazy(() => import('../pages/wedding/themes/Editorial')),
+  EDITORIAL_WHITE: lazy(() => import('../pages/wedding/themes/EditorialWhite')),
+  EDITORIAL_GREEN: lazy(() => import('../pages/wedding/themes/EditorialGreen')),
+  EDITORIAL_BLUE: lazy(() => import('../pages/wedding/themes/EditorialBlue')),
+  EDITORIAL_BROWN: lazy(() => import('../pages/wedding/themes/EditorialBrown')),
 };
 
 const themeAccents: Record<string, { accent: string; glow: string }> = {
@@ -256,6 +260,10 @@ const themeAccents: Record<string, { accent: string; glow: string }> = {
   CRUISE_SUNSET: { accent: 'rgba(212,160,84,0.12)', glow: 'rgba(212,160,84,0.06)' },
   VOYAGE_BLUE: { accent: 'rgba(26,54,93,0.12)', glow: 'rgba(26,54,93,0.06)' },
   EDITORIAL: { accent: 'rgba(240,240,240,0.12)', glow: 'rgba(240,240,240,0.06)' },
+  EDITORIAL_WHITE: { accent: 'rgba(14,14,14,0.08)', glow: 'rgba(14,14,14,0.04)' },
+  EDITORIAL_GREEN: { accent: 'rgba(26,47,35,0.12)', glow: 'rgba(148,166,132,0.08)' },
+  EDITORIAL_BLUE: { accent: 'rgba(0,26,64,0.12)', glow: 'rgba(0,26,64,0.06)' },
+  EDITORIAL_BROWN: { accent: 'rgba(62,54,46,0.12)', glow: 'rgba(197,160,89,0.08)' },
   HEART_MINIMAL: { accent: 'rgba(212,149,106,0.12)', glow: 'rgba(212,149,106,0.06)' },
   BOTANICAL_CLASSIC: { accent: 'rgba(107,143,91,0.12)', glow: 'rgba(107,143,91,0.06)' },
 };
@@ -398,6 +406,10 @@ export default function ThemeShowcaseModal({ isOpen, onClose }: Props) {
       CRUISE_SUNSET: '크루즈 선셋',
       VOYAGE_BLUE: '보야지 블루',
       EDITORIAL: '에디토리얼',
+      EDITORIAL_WHITE: '에디토리얼 화이트',
+      EDITORIAL_GREEN: '에디토리얼 그린',
+      EDITORIAL_BLUE: '에디토리얼 블루',
+      EDITORIAL_BROWN: '에디토리얼 브라운',
     };
     return names[theme] || theme;
   };

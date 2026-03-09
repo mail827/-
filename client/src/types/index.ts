@@ -1,4 +1,4 @@
-export type Theme = 'ROMANTIC_CLASSIC' | 'MODERN_MINIMAL' | 'BOHEMIAN_DREAM' | 'LUXURY_GOLD' | 'POETIC_LOVE' | 'SENIOR_SIMPLE' | 'FOREST_GARDEN' | 'OCEAN_BREEZE' | 'GLASS_BUBBLE' | 'SPRING_BREEZE' | 'GALLERY_MIRIM_1' | 'GALLERY_MIRIM_2' | 'LUNA_HALFMOON' | 'PEARL_DRIFT' | 'NIGHT_SEA' | 'AQUA_GLOBE' | 'WAVE_BORDER' | 'HEART_MINIMAL' | 'BOTANICAL_CLASSIC' | 'CRUISE_DAY' | 'CRUISE_SUNSET' | 'VOYAGE_BLUE' | 'EDITORIAL';
+export type Theme = 'ROMANTIC_CLASSIC' | 'MODERN_MINIMAL' | 'BOHEMIAN_DREAM' | 'LUXURY_GOLD' | 'POETIC_LOVE' | 'SENIOR_SIMPLE' | 'FOREST_GARDEN' | 'OCEAN_BREEZE' | 'GLASS_BUBBLE' | 'SPRING_BREEZE' | 'GALLERY_MIRIM_1' | 'GALLERY_MIRIM_2' | 'LUNA_HALFMOON' | 'PEARL_DRIFT' | 'NIGHT_SEA' | 'AQUA_GLOBE' | 'WAVE_BORDER' | 'HEART_MINIMAL' | 'BOTANICAL_CLASSIC' | 'CRUISE_DAY' | 'CRUISE_SUNSET' | 'VOYAGE_BLUE' | 'EDITORIAL' | 'EDITORIAL_WHITE' | 'EDITORIAL_GREEN' | 'EDITORIAL_BLUE' | 'EDITORIAL_BROWN';
 export type MediaType = 'IMAGE' | 'VIDEO';
 export type StoryType = 'PHOTO' | 'VIDEO';
 export type Side = 'GROOM' | 'BRIDE';
@@ -198,6 +198,10 @@ export const THEME_NAMES: Record<Theme, string> = {
   CRUISE_SUNSET: '크루즈 선셋',
   VOYAGE_BLUE: '보야지 블루',
   EDITORIAL: '에디토리얼',
+  EDITORIAL_WHITE: '에디토리얼 화이트',
+  EDITORIAL_GREEN: '에디토리얼 그린',
+  EDITORIAL_BLUE: '에디토리얼 블루',
+  EDITORIAL_BROWN: '에디토리얼 브라운',
   HEART_MINIMAL: '하트 미니멀',
   BOTANICAL_CLASSIC: '보태니컬 클래식'
 };
@@ -224,6 +228,10 @@ export const THEME_COLORS: Record<Theme, { primary: string; secondary: string; a
   CRUISE_SUNSET: { primary: '#D4A054', secondary: '#1A1714', accent: '#E8DFD4', bg: '#0D0B09' },
   VOYAGE_BLUE: { primary: '#1A365D', secondary: '#F9F7F2', accent: '#8E9775', bg: '#F9F7F2' },
   EDITORIAL: { primary: '#0e0e0e', secondary: '#f0f0f0', accent: '#f0f0f0', bg: '#0e0e0e' },
+  EDITORIAL_WHITE: { primary: '#f0f0f0', secondary: '#0e0e0e', accent: '#0e0e0e', bg: '#f5f4f0' },
+  EDITORIAL_GREEN: { primary: '#1A2F23', secondary: '#E8EDE0', accent: '#94A684', bg: '#E8EDE0' },
+  EDITORIAL_BLUE: { primary: '#001A40', secondary: '#F2F2F2', accent: '#001A40', bg: '#F2F2F2' },
+  EDITORIAL_BROWN: { primary: '#3E362E', secondary: '#F5EFE6', accent: '#C5A059', bg: '#F5EFE6' },
   HEART_MINIMAL: { primary: '#D4956A', secondary: '#FDF5ED', accent: '#C07B52', bg: '#FDF5ED' },
   BOTANICAL_CLASSIC: { primary: '#6B8F5B', secondary: '#F4F1E8', accent: '#3D5A32', bg: '#F4F1E8' }
 };

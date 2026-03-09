@@ -180,7 +180,7 @@ export default function CruiseSunset({ wedding, guestbooks, onRsvpSubmit, onGues
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
             className="text-center"
-            style={{ marginTop: '-4rem' }}
+            style={{ marginTop: '0' }}
           >
             <p className="cs-script" style={{ fontSize: 'clamp(52px, 13vw, 76px)', color: C.white, lineHeight: 1.15, textShadow: '0 4px 30px rgba(212,160,84,0.15)' }}>
               Dream your<br />Wedding Day

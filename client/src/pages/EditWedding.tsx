@@ -40,6 +40,10 @@ const THEMES = [
   { id: 'CRUISE_SUNSET', name: '크루즈 선셋', desc: '골든 선셋 다크' },
   { id: 'VOYAGE_BLUE', name: '보야지 블루', desc: 'Voyage of Love 네이비' },
   { id: 'EDITORIAL', name: '에디토리얼', desc: '다크 에디토리얼 매거진' },
+  { id: 'EDITORIAL_WHITE', name: '에디토리얼 화이트', desc: '화이트 에디토리얼 매거진' },
+  { id: 'EDITORIAL_GREEN', name: '에디토리얼 그린', desc: '숲 에디토리얼 매거진' },
+  { id: 'EDITORIAL_BLUE', name: '에디토리얼 블루', desc: '미드나잇 블루 매거진' },
+  { id: 'EDITORIAL_BROWN', name: '에디토리얼 브라운', desc: '웜 베이지 매거진' },
 ];
 
 const SENIOR_COLORS = [
@@ -350,7 +354,7 @@ export default function EditWedding() {
               body: JSON.stringify({
                 mediaUrl: url,
                 mediaType: 'IMAGE',
-                order: galleries.length + index
+                order: Date.now() + index
               })
             });
             if (galleryRes.ok) {
@@ -397,7 +401,7 @@ export default function EditWedding() {
                 const galleryRes = await fetch(`${import.meta.env.VITE_API_URL}/weddings/${id}/gallery`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                  body: JSON.stringify({ mediaUrl: url, mediaType: 'VIDEO', order: galleries.length + i })
+                  body: JSON.stringify({ mediaUrl: url, mediaType: 'VIDEO', order: Date.now() + i })
                 });
                 if (galleryRes.ok) {
                   const newItem = await galleryRes.json();

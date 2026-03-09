@@ -29,6 +29,10 @@ const THEMES = [
   { id: 'CRUISE_SUNSET', name: '크루즈 선셋', desc: '골든 선셋 다크', color: 'from-amber-300 to-orange-400' },
   { id: 'VOYAGE_BLUE', name: '보야지 블루', desc: 'Voyage of Love 네이비', color: 'from-blue-800 to-indigo-300' },
   { id: 'EDITORIAL', name: '에디토리얼', desc: '다크 에디토리얼 매거진', color: 'from-gray-800 to-gray-400' },
+  { id: 'EDITORIAL_WHITE', name: '에디토리얼 화이트', desc: '화이트 에디토리얼 매거진', color: 'from-gray-100 to-white' },
+  { id: 'EDITORIAL_GREEN', name: '에디토리얼 그린', desc: '숲 에디토리얼 매거진', color: 'from-green-800 to-green-300' },
+  { id: 'EDITORIAL_BLUE', name: '에디토리얼 블루', desc: '미드나잇 블루 매거진', color: 'from-blue-900 to-blue-400' },
+  { id: 'EDITORIAL_BROWN', name: '에디토리얼 브라운', desc: '웜 베이지 매거진', color: 'from-amber-200 to-amber-400' },
 ];
 
 interface Package {

@@ -182,7 +182,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
             className="text-center"
-            style={{ marginTop: '-4rem' }}
+            style={{ marginTop: '0' }}
           >
             <p className="cd-script" style={{ fontSize: 'clamp(52px, 13vw, 76px)', color: C.accent, lineHeight: 1.15, textShadow: '0 2px 20px rgba(59,125,216,0.15)' }}>
               Dream your<br />Wedding Day

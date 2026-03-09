@@ -25,6 +25,10 @@ const THEME_OPTIONS = [
   { id: 'CRUISE_SUNSET', name: '크루즈 선셋' },
   { id: 'VOYAGE_BLUE', name: '보야지 블루' },
   { id: 'EDITORIAL', name: '에디토리얼' },
+  { id: 'EDITORIAL_WHITE', name: '에디토리얼 화이트' },
+  { id: 'EDITORIAL_GREEN', name: '에디토리얼 그린' },
+  { id: 'EDITORIAL_BLUE', name: '에디토리얼 블루' },
+  { id: 'EDITORIAL_BROWN', name: '에디토리얼 브라운' },
 ];
 
 const DEFAULT_SAMPLE_DATA = {

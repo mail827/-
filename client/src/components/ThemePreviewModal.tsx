@@ -47,6 +47,10 @@ const themeComponents: Record<string, React.ComponentType<any>> = {
   CRUISE_SUNSET: lazy(() => import('../pages/wedding/themes/CruiseSunset')),
   VOYAGE_BLUE: lazy(() => import('../pages/wedding/themes/VoyageBlue')),
   EDITORIAL: lazy(() => import('../pages/wedding/themes/Editorial')),
+  EDITORIAL_WHITE: lazy(() => import('../pages/wedding/themes/EditorialWhite')),
+  EDITORIAL_GREEN: lazy(() => import('../pages/wedding/themes/EditorialGreen')),
+  EDITORIAL_BLUE: lazy(() => import('../pages/wedding/themes/EditorialBlue')),
+  EDITORIAL_BROWN: lazy(() => import('../pages/wedding/themes/EditorialBrown')),
 };
 
 const THEMES = [
@@ -73,6 +77,10 @@ const THEMES = [
   { id: 'CRUISE_SUNSET', name: '크루즈 선셋' },
   { id: 'VOYAGE_BLUE', name: '보야지 블루' },
   { id: 'EDITORIAL', name: '에디토리얼' },
+  { id: 'EDITORIAL_WHITE', name: '에디토리얼 화이트' },
+  { id: 'EDITORIAL_GREEN', name: '에디토리얼 그린' },
+  { id: 'EDITORIAL_BLUE', name: '에디토리얼 블루' },
+  { id: 'EDITORIAL_BROWN', name: '에디토리얼 브라운' },
 ];
 
 interface Props {

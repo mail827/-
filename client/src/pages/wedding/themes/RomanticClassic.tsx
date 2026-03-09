@@ -178,7 +178,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
             className="text-center"
-            style={{ marginTop: '-5rem' }}
+            style={{ marginTop: '0' }}
           >
             <p className="rc-script" style={{ fontSize: 'clamp(56px, 14vw, 80px)', color: C.white, lineHeight: 1.1, opacity: 0.9 }}>
               Dream your<br />Wedding Day

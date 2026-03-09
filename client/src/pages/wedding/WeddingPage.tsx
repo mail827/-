@@ -28,6 +28,10 @@ const CruiseDay = lazy(() => import('./themes/CruiseDay'));
 const CruiseSunset = lazy(() => import('./themes/CruiseSunset'));
 const VoyageBlue = lazy(() => import('./themes/VoyageBlue'));
 const Editorial = lazy(() => import('./themes/Editorial'));
+const EditorialWhite = lazy(() => import('./themes/EditorialWhite'));
+const EditorialGreen = lazy(() => import('./themes/EditorialGreen'));
+const EditorialBlue = lazy(() => import('./themes/EditorialBlue'));
+const EditorialBrown = lazy(() => import('./themes/EditorialBrown'));
 import AiChat from '../../components/AiChat';
 import GuestPhotoGallery from './themes/shared/GuestPhotoGallery';
 import { useSectionOrder } from '../../hooks/useSectionOrder';
@@ -86,6 +90,10 @@ const themeComponents: Record<Theme, React.ComponentType<any>> = {
   CRUISE_SUNSET: CruiseSunset,
   VOYAGE_BLUE: VoyageBlue,
   EDITORIAL: Editorial,
+  EDITORIAL_WHITE: EditorialWhite,
+  EDITORIAL_GREEN: EditorialGreen,
+  EDITORIAL_BLUE: EditorialBlue,
+  EDITORIAL_BROWN: EditorialBrown,
   HEART_MINIMAL: HeartMinimal,
   BOTANICAL_CLASSIC: BotanicalClassic,
 };

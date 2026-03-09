@@ -22,3 +22,7 @@ export { default as WaveBorder } from './WaveBorder';export { default as CruiseD
 export { default as CruiseSunset } from './CruiseSunset';
 export { default as VoyageBlue } from './VoyageBlue';
 export { default as Editorial } from './Editorial';
+export { default as EditorialWhite } from './EditorialWhite';
+export { default as EditorialGreen } from './EditorialGreen';
+export { default as EditorialBlue } from './EditorialBlue';
+export { default as EditorialBrown } from './EditorialBrown';

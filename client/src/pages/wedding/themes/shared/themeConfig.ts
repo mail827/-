@@ -379,6 +379,74 @@ export const themeConfigs: Record<string, ThemeConfig> = {
       label: '하이 콘트라스트',
     },
   },
+  EDITORIAL_WHITE: {
+    name: '에디토리얼 화이트',
+    colors: {
+      primary: '#0e0e0e',
+      secondary: '#f5f4f0',
+      accent: '#0e0e0e',
+      text: '#0e0e0e',
+      textMuted: '#888888',
+      background: '#f5f4f0',
+      card: '#ffffff',
+      border: '#e0e0e0',
+    },
+    photoFilter: {
+      transformation: 'e_contrast:5,e_saturation:-5',
+      label: '소프트 콘트라스트',
+    },
+  },
+  EDITORIAL_GREEN: {
+    name: '에디토리얼 그린',
+    colors: {
+      primary: '#1A2F23',
+      secondary: '#E8EDE0',
+      accent: '#94A684',
+      text: '#1A2F23',
+      textMuted: '#5A6B5A',
+      background: '#E8EDE0',
+      card: '#F0F4EA',
+      border: '#C4D0B8',
+    },
+    photoFilter: {
+      transformation: 'e_saturation:-8,e_vibrance:10,e_green:5',
+      label: '내추럴 그린',
+    },
+  },
+  EDITORIAL_BLUE: {
+    name: '에디토리얼 블루',
+    colors: {
+      primary: '#001A40',
+      secondary: '#F2F2F2',
+      accent: '#001A40',
+      text: '#001A40',
+      textMuted: '#4A6080',
+      background: '#F2F2F2',
+      card: '#FFFFFF',
+      border: '#D0D8E0',
+    },
+    photoFilter: {
+      transformation: 'e_saturation:-5,e_vibrance:8,e_blue:8',
+      label: '딥 블루',
+    },
+  },
+  EDITORIAL_BROWN: {
+    name: '에디토리얼 브라운',
+    colors: {
+      primary: '#3E362E',
+      secondary: '#F5EFE6',
+      accent: '#C5A059',
+      text: '#3E362E',
+      textMuted: '#7A6F60',
+      background: '#F5EFE6',
+      card: '#FBF7F0',
+      border: '#DDD5C8',
+    },
+    photoFilter: {
+      transformation: 'e_saturation:-5,e_warmth:20,e_sepia:8',
+      label: '웜 베이지',
+    },
+  },
 };
 
 export function applyPhotoFilter(imageUrl: string, theme: string): string {
