@@ -215,7 +215,9 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
 
       <section id="venue-section" style={{ background: C.dark, color: C.bg, padding: '4rem 1.25rem' }}>
         <motion.div {...sectionAnim} className="text-center" style={{ marginBottom: '2rem' }}>
-          <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.3em', opacity: 0.4, marginBottom: '1.5rem' }}>CALENDAR</p>
+          <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.3em", opacity: 0.4, marginBottom: "0.75rem" }}>WHEN & WHERE</p>
+          <p style={{ fontSize: 18, fontWeight: 800, marginBottom: "0.25rem" }}>{formatDate(wedding.weddingDate, "korean")} {formatTime(wedding.weddingTime)}</p>
+          <p style={{ fontSize: 14, fontWeight: 500, opacity: 0.7, marginBottom: "2rem" }}>{wedding.venue}{wedding.venueHall ? ` ${wedding.venueHall}` : ""}</p>
           <div className="max-w-[300px] mx-auto">
             <div className="grid grid-cols-7">
               {['S','M','T','W','T','F','S'].map((d, i) => (
