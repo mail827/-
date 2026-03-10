@@ -254,6 +254,9 @@ const STUDIO_GROOM_SHOTS = [
   { id: 'adjusting_jacket', prompt: 'adjusting jacket lapel or cuff, natural grooming gesture, three quarter angle, composed elegant' },
   { id: 'standing_relaxed', prompt: 'standing relaxed, one hand in pocket, slight smile, full body natural pose' },
   { id: 'profile_look', prompt: 'profile view looking to the side, contemplative calm expression, dramatic side lighting' },
+  { id: 'bust_confident', prompt: 'tight framing from chest up, looking directly at camera with relaxed confident expression, soft studio light on face, shallow depth of field' },
+  { id: 'closeup_smile', prompt: 'extreme closeup framing from shoulders up, natural genuine smile, warm eye contact with camera, soft directional light sculpting face' },
+  { id: 'bust_side', prompt: 'bust shot from chest up, three quarter turn looking over shoulder toward camera, jawline lit by side light, calm composed expression' },
 ];
 
 const STUDIO_BRIDE_SHOTS = [
@@ -262,6 +265,9 @@ const STUDIO_BRIDE_SHOTS = [
   { id: 'looking_window', prompt: 'standing near window light, looking slightly to side, natural backlit glow, contemplative serene' },
   { id: 'walking_toward', prompt: 'walking toward camera, dress flowing with movement, confident elegant stride, slight smile' },
   { id: 'leaning_wall', prompt: 'leaning gently against wall, relaxed pose, one hand lightly on skirt, natural warm expression' },
+  { id: 'bust_soft', prompt: 'tight framing from chest up, soft natural smile, gentle eye contact, window light illuminating face, shallow depth of field blurring background' },
+  { id: 'closeup_gaze', prompt: 'extreme closeup framing from shoulders up, looking directly at camera with serene expression, soft light on cheekbones, delicate natural beauty' },
+  { id: 'bust_profile', prompt: 'bust shot from chest up, elegant profile or three quarter angle, light catching jawline and collarbone, peaceful calm expression' },
 ];
 
 const COUPLE_SHOT_VARIANTS = [
@@ -432,6 +438,10 @@ const getVariants = (mode: string, concept: string) => {
 const getShotStrength = (mode: string, concept: string, shotIdx: number): number => {
   const isSelfie = concept === 'iphone_selfie' || concept === 'iphone_mirror';
   if (isSelfie) return 0.22;
+  const variants = getVariants(mode, concept);
+  const shot = variants[shotIdx % variants.length];
+  const isCloseup = shot.id.startsWith('bust_') || shot.id.startsWith('closeup_');
+  if (isCloseup) return mode === 'couple' ? 0.13 : 0.17;
   if (mode === 'couple') return 0.15;
   return 0.20;
 };

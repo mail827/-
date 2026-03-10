@@ -105,7 +105,7 @@ export default function EditorialGreen({ wedding, guestbooks, onRsvpSubmit, onGu
   const ribbonText = `EST. ${wd.getFullYear()} / ${wedding.groomName} & ${wedding.brideName} / THE RAW NATURE EDITORIAL`;
 
   return (
-    <div className="min-h-screen eg-pre" style={{ background: C.bg, color: C.text, fontWeight: 400, overflowX: 'hidden', wordBreak: 'keep-all' }}>
+    <div className="min-h-screen max-w-[520px] mx-auto eg-pre" style={{ background: C.bg, color: C.text, fontWeight: 400, overflowX: 'hidden', wordBreak: 'keep-all' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (

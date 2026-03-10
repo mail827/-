@@ -99,7 +99,7 @@ export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGu
   const dy = String(wd.getDate()).padStart(2, '0');
 
   return (
-    <div className="min-h-screen" style={{ background: C.bg, color: C.text, fontFamily: "'Pretendard',sans-serif", fontWeight: 400, overflowX: 'hidden' }}>
+    <div className="min-h-screen max-w-[520px] mx-auto" style={{ background: C.bg, color: C.text, fontFamily: "'Pretendard',sans-serif", fontWeight: 400, overflowX: 'hidden' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (

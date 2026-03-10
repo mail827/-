@@ -120,7 +120,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
   const calendarData = getCalendarData(wedding.weddingDate);
 
   return (
-    <div className="min-h-screen" style={{ background: C.bg, color: C.point, fontFamily: "'Pretendard', sans-serif", fontWeight: 300, overflowX: 'hidden', wordBreak: 'keep-all' }}>
+    <div className="min-h-screen max-w-[520px] mx-auto" style={{ background: C.bg, color: C.point, fontFamily: "'Pretendard', sans-serif", fontWeight: 300, overflowX: 'hidden', wordBreak: 'keep-all' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
 

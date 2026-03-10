@@ -430,6 +430,24 @@ export const themeConfigs: Record<string, ThemeConfig> = {
       label: '딥 블루',
     },
   },
+  AQUA_GLOBE: {
+    hidden: true,
+    name: '아쿠아 글로브',
+    colors: {
+      primary: '#5B8FA8',
+      secondary: '#D6EFFA',
+      accent: '#2C4A5A',
+      text: '#2C4A5A',
+      textMuted: '#4A7A90',
+      background: '#D6EFFA',
+      card: '#E4F4FC',
+      border: '#A8D8EB',
+    },
+    photoFilter: {
+      transformation: 'e_saturation:5,e_vibrance:10,e_blue:5',
+      label: '아쿠아',
+    },
+  },
   EDITORIAL_BROWN: {
     name: '에디토리얼 브라운',
     colors: {
