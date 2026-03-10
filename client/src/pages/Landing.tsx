@@ -821,37 +821,39 @@ export default function Landing() {
 
         <section ref={snapRef as React.RefObject<HTMLElement>} className="snap-section" style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "100px 48px", gap: 72, borderTop: "1px solid #E8E5E0" }}>
           <div style={{ opacity: snapInView ? 1 : 0, transform: snapInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1)" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, width: 280 }}>
-              {(() => {
-                const showcaseConcepts = ["hanbok_wonsam", "iphone_selfie", "cruise_sunset", "hanbok_modern", "black_swan", "water_memory", "velvet_rouge", "blue_hour", "studio_gallery", "studio_mocha", "studio_sage", "studio_fog"];
-                const fallbacks = [
-                  { label: "궁중혼례", gradient: "linear-gradient(135deg, #8B6914 0%, #C4956A 100%)" },
-                  { label: "셀카 스냅", gradient: "linear-gradient(135deg, #5A6B7A 0%, #8A9BAA 100%)" },
-                  { label: "크루즈 선셋", gradient: "linear-gradient(135deg, #B08968 0%, #D4B896 100%)" },
-                  { label: "모던 한복", gradient: "linear-gradient(135deg, #7C8C6E 0%, #A0B090 100%)" },
-                  { label: "블랙스완", gradient: "linear-gradient(135deg, #1A1A2E 0%, #16213E 100%)" },
-                  { label: "물의 기억", gradient: "linear-gradient(135deg, #0D4F4F 0%, #1A7A6D 100%)" },
-                  { label: "벨벳 루즈", gradient: "linear-gradient(135deg, #6B1D2A 0%, #8B2F3F 100%)" },
-                  { label: "블루아워", gradient: "linear-gradient(135deg, #1B2838 0%, #2C4A6E 100%)" },
-                  { label: "갤러리", gradient: "linear-gradient(135deg, #E8E4DE 0%, #F5F2ED 100%)" },
-                  { label: "모카", gradient: "linear-gradient(135deg, #3E2C23 0%, #6B4E3D 100%)" },
-                  { label: "세이지", gradient: "linear-gradient(135deg, #5C6B4E 0%, #8A9A72 100%)" },
-                  { label: "포그", gradient: "linear-gradient(135deg, #D5CEC5 0%, #E8E2DA 100%)" },
-                ];
-                return showcaseConcepts.map((concept, i) => {
-                  const sample = snapSamples.find(s => s.concept === concept);
-                  return (
-                    <div key={i} style={{ height: 170, borderRadius: 10, background: sample ? `url(${sample.imageUrl}) center/cover` : fallbacks[i].gradient, display: "flex", alignItems: "flex-end", padding: 12, position: "relative", overflow: "hidden", cursor: "pointer" }} onClick={() => setSelectedSnap(selectedSnap === concept ? null : concept)}>
-                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.5) 100%)" }} />
-                      <p style={{ fontSize: 11, color: "#fff", position: "relative", fontWeight: 500 }}>{fallbacks[i].label}</p>
-                    </div>
-                  );
-                });
-              })()}
+            <div style={{ width: 480, overflow: "hidden" }}>
+              <div style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", paddingBottom: 8, scrollbarWidth: "none" }} >
+                {(() => {
+                  const showcaseConcepts = ["hanbok_wonsam", "iphone_selfie", "cruise_sunset", "hanbok_modern", "black_swan", "water_memory", "velvet_rouge", "blue_hour", "studio_gallery", "studio_mocha", "studio_sage", "studio_fog"];
+                  const fallbacks = [
+                    { label: "궁중혼례", gradient: "linear-gradient(135deg, #8B6914 0%, #C4956A 100%)" },
+                    { label: "셀카 스냅", gradient: "linear-gradient(135deg, #5A6B7A 0%, #8A9BAA 100%)" },
+                    { label: "크루즈 선셋", gradient: "linear-gradient(135deg, #B08968 0%, #D4B896 100%)" },
+                    { label: "모던 한복", gradient: "linear-gradient(135deg, #7C8C6E 0%, #A0B090 100%)" },
+                    { label: "블랙스완", gradient: "linear-gradient(135deg, #1A1A2E 0%, #16213E 100%)" },
+                    { label: "물의 기억", gradient: "linear-gradient(135deg, #0D4F4F 0%, #1A7A6D 100%)" },
+                    { label: "벨벳 루즈", gradient: "linear-gradient(135deg, #6B1D2A 0%, #8B2F3F 100%)" },
+                    { label: "블루아워", gradient: "linear-gradient(135deg, #1B2838 0%, #2C4A6E 100%)" },
+                    { label: "갤러리", gradient: "linear-gradient(135deg, #E8E4DE 0%, #F5F2ED 100%)" },
+                    { label: "모카", gradient: "linear-gradient(135deg, #3E2C23 0%, #6B4E3D 100%)" },
+                    { label: "세이지", gradient: "linear-gradient(135deg, #5C6B4E 0%, #8A9A72 100%)" },
+                    { label: "포그", gradient: "linear-gradient(135deg, #D5CEC5 0%, #E8E2DA 100%)" },
+                  ];
+                  return showcaseConcepts.map((concept, i) => {
+                    const sample = snapSamples.find(s => s.concept === concept);
+                    return (
+                      <div key={i} style={{ minWidth: 200, height: 280, borderRadius: 14, background: sample ? `url(${sample.imageUrl}) center/cover` : fallbacks[i].gradient, display: "flex", alignItems: "flex-end", padding: 16, position: "relative", overflow: "hidden", cursor: "pointer", scrollSnapAlign: "start", flexShrink: 0 }} onClick={() => setSelectedSnap(selectedSnap === concept ? null : concept)}>
+                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.6) 100%)" }} />
+                        <p style={{ fontSize: 13, color: "#fff", position: "relative", fontWeight: 500, letterSpacing: 0.5 }}>{fallbacks[i].label}</p>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+              <p style={{ textAlign: "center", marginTop: 14, fontSize: 11, color: "#bbb" }}>
+                {snapSamples.length > 0 ? `${snapSamples.length}개 샘플 등록됨` : "33개 컨셉 — 스와이프하여 둘러보기"}
+              </p>
             </div>
-            <p style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "#bbb" }}>
-              {snapSamples.length > 0 ? `${snapSamples.length}개 샘플 등록됨` : "33개 컨셉 중 일부"}
-            </p>
             {selectedSnap && snapSamples.filter(s => s.concept === selectedSnap).length > 0 && (
               <div style={{ marginTop: 12, display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
                 {snapSamples.filter(s => s.concept === selectedSnap).map(s => (
