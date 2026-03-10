@@ -829,6 +829,14 @@ export default function Landing() {
                   { label: "셀카 스냅", gradient: "linear-gradient(135deg, #5A6B7A 0%, #8A9BAA 100%)" },
                   { label: "크루즈 선셋", gradient: "linear-gradient(135deg, #B08968 0%, #D4B896 100%)" },
                   { label: "모던 한복", gradient: "linear-gradient(135deg, #7C8C6E 0%, #A0B090 100%)" },
+                  { label: "블랙스완", gradient: "linear-gradient(135deg, #1A1A2E 0%, #16213E 100%)" },
+                  { label: "물의 기억", gradient: "linear-gradient(135deg, #0D4F4F 0%, #1A7A6D 100%)" },
+                  { label: "벨벳 루즈", gradient: "linear-gradient(135deg, #6B1D2A 0%, #8B2F3F 100%)" },
+                  { label: "블루아워", gradient: "linear-gradient(135deg, #1B2838 0%, #2C4A6E 100%)" },
+                  { label: "갤러리", gradient: "linear-gradient(135deg, #E8E4DE 0%, #F5F2ED 100%)" },
+                  { label: "모카", gradient: "linear-gradient(135deg, #3E2C23 0%, #6B4E3D 100%)" },
+                  { label: "세이지", gradient: "linear-gradient(135deg, #5C6B4E 0%, #8A9A72 100%)" },
+                  { label: "포그", gradient: "linear-gradient(135deg, #D5CEC5 0%, #E8E2DA 100%)" },
                 ];
                 return showcaseConcepts.map((concept, i) => {
                   const sample = snapSamples.find(s => s.concept === concept);
