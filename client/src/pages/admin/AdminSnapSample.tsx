@@ -31,6 +31,14 @@ const CONCEPTS = [
   { id: 'autumn_leaves', label: '가을 단풍' },
   { id: 'winter_snow', label: '겨울 눈' },
   { id: 'vintage_film', label: '빈티지 필름' },
+  { id: 'black_swan', label: '블랙스완' },
+  { id: 'blue_hour', label: '블루아워' },
+  { id: 'water_memory', label: '물의 기억' },
+  { id: 'velvet_rouge', label: '벨벳 루즈' },
+  { id: 'studio_gallery', label: '갤러리' },
+  { id: 'studio_fog', label: '포그' },
+  { id: 'studio_mocha', label: '모카' },
+  { id: 'studio_sage', label: '세이지' },
 ];
 
 interface Sample { id: string; concept: string; mode: string; imageUrl: string; sortOrder: number }
