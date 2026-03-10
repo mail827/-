@@ -250,7 +250,7 @@ const STUDIO_COUPLE_SHOTS = [
 
 const STUDIO_GROOM_SHOTS = [
   { id: 'leaning_wall', prompt: 'leaning casually against wall, one hand in pocket, relaxed confident posture, looking at camera' },
-  { id: 'seated_chair', prompt: 'seated on chair or sofa arm, relaxed leaning forward slightly, hands clasped, natural confident' },
+  { id: 'seated_chair', prompt: 'seated on chair or sofa arm, natural seated posture with two legs visible, relaxed leaning forward slightly, hands clasped, natural confident, anatomically correct body proportions' },
   { id: 'adjusting_jacket', prompt: 'adjusting jacket lapel or cuff, natural grooming gesture, three quarter angle, composed elegant' },
   { id: 'standing_relaxed', prompt: 'standing relaxed, one hand in pocket, slight smile, full body natural pose' },
   { id: 'profile_look', prompt: 'profile view looking to the side, contemplative calm expression, dramatic side lighting' },
@@ -260,7 +260,7 @@ const STUDIO_GROOM_SHOTS = [
 ];
 
 const STUDIO_BRIDE_SHOTS = [
-  { id: 'seated_elegant', prompt: 'seated elegantly on sofa or chair, dress draped beautifully around, hands resting on lap, soft gaze at camera' },
+  { id: 'seated_elegant', prompt: 'seated elegantly on sofa or chair, natural seated posture with two legs visible beneath dress, dress draped beautifully, hands resting on lap, soft gaze at camera, anatomically correct body proportions' },
   { id: 'touching_hair', prompt: 'gently touching hair or tucking strand behind ear, soft natural smile, three quarter angle' },
   { id: 'looking_window', prompt: 'standing near window light, looking slightly to side, natural backlit glow, contemplative serene' },
   { id: 'walking_toward', prompt: 'walking toward camera, dress flowing with movement, confident elegant stride, slight smile' },
@@ -526,7 +526,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
 };
 
 const buildNegativePrompt = (mode: string, concept: string, shotIdx?: number): string => {
-  const base = 'deformed face, elongated face, stretched face, pinched nose, bulbous nose, uncanny valley, plastic skin, wax figure, 3D render, cartoon, anime, illustration, painting, doll-like, mannequin, blurry, low quality, watermark, text overlay, collage, grid, multiple frames, split screen, four panel, multi image, photo strip, contact sheet, neon glow on skin, blue light artifact, lens flare on face, color fringing, glowing earring, sparkling earring, lens flare on earring, star burst on jewelry, bright light reflecting off earring';
+  const base = 'deformed face, elongated face, stretched face, pinched nose, bulbous nose, uncanny valley, plastic skin, wax figure, 3D render, cartoon, anime, illustration, painting, doll-like, mannequin, blurry, low quality, watermark, text overlay, collage, grid, multiple frames, split screen, four panel, multi image, photo strip, contact sheet, neon glow on skin, blue light artifact, lens flare on face, color fringing, glowing earring, sparkling earring, lens flare on earring, star burst on jewelry, bright light reflecting off earring, extra fingers, merged fingers, missing fingers, deformed hands, fused digits, six fingers, four fingers, malformed hands, twisted wrist, deformed legs, missing legs, fused legs, extra limbs, melted lower body, amorphous body below waist, blob-like dress with no body structure';
   const consistencyBlock = 'different outfit, changed clothes, different hairstyle, altered jewelry, wardrobe change, accessories swapped';
   const male = 'overly angular jaw, exaggerated chin, feminized male face, airbrush skin';
   const female = 'masculine jaw, wide nose bridge, overly sharp features, generic AI face';
