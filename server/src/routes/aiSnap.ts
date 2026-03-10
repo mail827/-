@@ -38,6 +38,7 @@ const CONCEPTS = [
   { id: 'retro_hongkong', label: '레트로 홍콩' },
   { id: 'black_swan', label: '블랙스완' },
   { id: 'blue_hour', label: '블루아워' },
+  { id: 'water_memory', label: '물의 기억' },
 ];
 
 const PACKAGE_QUOTA: Record<string, number> = {
@@ -219,7 +220,11 @@ iphone_selfie: {
   },
   black_swan: {
     groom: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. dark moody cinematic portrait, wearing black silk-satin shawl-collar blazer over black silk-georgette relaxed collarless shirt with moderate V-neckline showing collarbones only, shirt tucked in, black high-waisted wide-leg tailored trousers, thin black leather belt, black chelsea boots, gothic cathedral interior or misty dark lake at blue hour, dramatic chiaroscuro lighting, cold blue tones, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
-    bride: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. dark moody cinematic portrait, wearing strapless black matte silk bodice with soft wispy black ostrich feather trim across neckline, single black ostrich feather stole on left shoulder only cascading to elbow, grand floor-length A-line black tulle skirt trailing on floor, feather clusters on lower tulle, long straight black hair with see-through bangs, dark glamorous makeup with red lips, gothic cathedral or misty winter lake, dramatic chiaroscuro lighting, cold blue tones, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
+    bride: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. dark moody cinematic portrait, wearing strapless black matte silk bodice with soft wispy black ostrich feather trim across neckline, single black ostrich feather stole on left shoulder only cascading to elbow, grand floor-length A-line black tulle skirt trailing on floor, feather clusters on lower tulle, long straight black hair with see-through bangs, natural elegant makeup, subtle lip color, gothic cathedral or misty winter lake, dramatic chiaroscuro lighting, cold blue tones, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
+  },
+  water_memory: {
+    groom: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. dreamlike cinematic portrait, wearing off-white silk mikado two-button suit with soft notch lapel and refined porcelain-like luminous sheen, white silk open-collar shirt no tie showing collarbones, off-white slim trousers, white leather dress shoes, deep teal-green underwater with caustic light patterns or vintage art deco movie theater with warm projector beam or rain-soaked night street with street lamp reflections, ethereal aquatic teal tones, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
+    bride: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. dreamlike cinematic portrait, wearing ice-blue strapless sweetheart mermaid gown in silk mikado with refined luminous sheen, fitted to below knees then dramatic cascading fin-like organza panels in ice-blue to silver-grey gradients like betta fish fins, freshwater pearl clusters near transition, long cathedral train, natural elegant makeup, deep teal-green underwater with caustic light or vintage theater with projector beam or rain-soaked night street, ethereal aquatic teal tones, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
   },
   blue_hour: {
     groom: 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. romantic twilight portrait on European cobblestone street, wearing classic navy blue fine wool two-button suit with notch lapel, crisp white dress shirt top button undone no tie, navy slim trousers, dark brown leather oxfords, vintage street lamp casting warm golden glow, purple-blue twilight sky, cinematic warm-cool contrast, preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
@@ -255,6 +260,7 @@ iphone_selfie: 'preserve both faces with absolute accuracy, maintain exact facia
   vintage_record: 'preserve both faces with absolute accuracy, maintain exact facial proportions face shape eye spacing nose size lip shape for both subjects, keep the exact same faces, facial features, face shapes, eyes, nose, lips unchanged. romantic couple in a cozy vintage vinyl record shop, the man wearing olive khaki brown blazer over light blue open-collar shirt with pinstripe grey trousers on the left, the woman wearing ivory puff-sleeve lace high-neck wedding dress with sweetheart neckline under sheer lace bodice satin ribbon waist belt elbow-length white satin gloves and short tulle veil with pearl hairpin on the right, surrounded by wooden shelves filled with LP records and album covers on walls, warm tungsten incandescent bulb lighting casting golden amber glow, vinyl turntable nearby, couple looking at each other lovingly or browsing records together, intimate nostalgic 1970s atmosphere, Kodak Portra 400 warm film tones with soft grain, no text no logos no watermarks, preserve original facial identities exactly, do not alter or beautify the faces, photorealistic, 8k ultra sharp facial details, no face distortion no face morphing no face smoothing, maintain natural skin texture pores and contours for both faces, no face elongation no jaw enhancement no face slimming',
   retro_hongkong: 'preserve both faces with absolute accuracy, maintain exact facial proportions face shape eye spacing nose size lip shape for both subjects, keep the exact same faces unchanged. couple walking together in Hong Kong Mong Kok night market with red lanterns overhead, the man wearing dark burgundy double-breasted blazer with silky sheen over black silk shirt unbuttoned showing collarbone with ivory pocket square on the left, the woman wearing champagne gold silk satin halter-neck dress with spaghetti straps open cutout sides small mandarin collar gold plum blossom embroidery thigh-high slit pearl earrings long loose black hair flowing down past shoulders never tied up on the right, neon signs with Chinese characters, rain-slicked street reflecting red and amber lights, candid walking moment looking at each other warmly, Wong Kar-wai cinematic grading, Fuji Superia 400 grain, no text no logos no watermarks, preserve original facial identities exactly, do not alter or beautify the faces, photorealistic, 8k ultra sharp facial details, no face distortion no face morphing no face smoothing, no face elongation no jaw enhancement no face slimming',
   black_swan: 'keep both faces exactly the same as reference, identical face shapes eyes noses lips unchanged. dark moody cinematic couple portrait inside gothic cathedral, man wearing black silk-satin shawl-collar blazer over black V-neck silk-georgette shirt, woman wearing strapless black feather-trimmed tulle ball gown with feather stole on left shoulder, foreheads touching, cool blue light through stained glass windows, dark stone columns, dramatic chiaroscuro lighting, cold blue tones, 35mm lens, film grain, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
+  water_memory: 'keep both faces exactly the same as reference, identical face shapes eyes noses lips unchanged. dreamlike cinematic couple portrait, man wearing off-white silk mikado suit with white open-collar shirt no tie, woman wearing ice-blue strapless sweetheart mermaid gown with cascading betta fish fin-like organza panels and freshwater pearl clusters, deep dark teal-green underwater floating together foreheads almost touching eyes closed hair floating upward tiny air bubbles soft caustic light from above, or sitting together in empty vintage art deco movie theater faded red velvet seats warm projector beam dust particles she resting head on his shoulder, or standing face to face in heavy rain on empty night street his hands on her face her hands on his chest wet reflective asphalt warm street lamp glow, ethereal teal tones, 50mm lens, film grain, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
   blue_hour: 'keep both faces exactly the same as reference, identical face shapes eyes noses lips unchanged. romantic couple portrait slow dancing under vintage street lamp at twilight, man wearing navy blue suit white shirt no tie, woman wearing sapphire blue strapless satin and chiffon gown skirt floating mid-sway, his hand on her waist her hand on his shoulder, purple-blue twilight sky with warm glowing street lamp, European cobblestone street, cinematic warm-cool contrast, 50mm lens, film grain, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming',
 };
 
@@ -573,6 +579,89 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     const updatedQuota = { ...quota, used: quota.used + 1, remaining: quota.isAdmin ? 999 : quota.remaining - 1 };
     res.json({ ...snap, quota: updatedQuota });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+
+router.post('/admin/ic-test', authMiddleware, async (req: AuthRequest, res) => {
+  if (req.user?.role !== 'ADMIN') return res.status(403).json({ error: 'admin only' });
+  const { prompt, imageUrl } = req.body;
+  if (!prompt || !imageUrl) return res.status(400).json({ error: 'prompt, imageUrl required' });
+  try {
+    const submit = await falFetch('https://queue.fal.run/fal-ai/instant-character', {
+      method: 'POST',
+      body: JSON.stringify({
+        prompt,
+        image_url: imageUrl,
+        image_size: { width: 768, height: 1152 },
+      }),
+    });
+    let falUrl: string | null = null;
+    if (submit.images && submit.images[0]?.url) {
+      falUrl = submit.images[0].url;
+    } else if (submit.status_url) {
+      const start = Date.now();
+      while (Date.now() - start < 180000) {
+        await new Promise(r => setTimeout(r, 3000));
+        const status = await falFetch(submit.status_url);
+        if (status.status === 'COMPLETED') {
+          const result = await falFetch(submit.response_url);
+          falUrl = result.images?.[0]?.url || null;
+          break;
+        }
+        if (status.status === 'FAILED') throw new Error(status.error || 'Failed');
+      }
+      if (!falUrl) throw new Error('Timeout');
+    }
+    if (!falUrl) throw new Error('No image generated');
+    const uploaded = await uploadFromUrl(falUrl, 'ai-snap-ic-test');
+    res.json({ status: 'done', resultUrl: uploaded.url, engine: 'instant-character' });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/admin/pulid-test', authMiddleware, async (req: AuthRequest, res) => {
+  if (req.user?.role !== 'ADMIN') return res.status(403).json({ error: 'admin only' });
+  const { prompt, imageUrl, idWeight, negativePrompt } = req.body;
+  if (!prompt || !imageUrl) return res.status(400).json({ error: 'prompt, imageUrl required' });
+  try {
+    const submit = await falFetch('https://queue.fal.run/fal-ai/flux-pulid', {
+      method: 'POST',
+      body: JSON.stringify({
+        prompt,
+        reference_image_url: imageUrl,
+        image_size: { width: 768, height: 1152 },
+        id_weight: idWeight || 0.85,
+        guidance_scale: 4,
+        num_inference_steps: 20,
+        negative_prompt: negativePrompt || 'deformed face, cartoon, anime, illustration, blurry, low quality',
+        max_sequence_length: '256',
+      }),
+    });
+    let falUrl: string | null = null;
+    if (submit.images && submit.images[0]?.url) {
+      falUrl = submit.images[0].url;
+    } else if (submit.status_url) {
+      const start = Date.now();
+      while (Date.now() - start < 180000) {
+        await new Promise(r => setTimeout(r, 3000));
+        const status = await falFetch(submit.status_url);
+        if (status.status === 'COMPLETED') {
+          const result = await falFetch(submit.response_url);
+          falUrl = result.images?.[0]?.url || null;
+          break;
+        }
+        if (status.status === 'FAILED') throw new Error(status.error || 'Failed');
+      }
+      if (!falUrl) throw new Error('Timeout');
+    }
+    if (!falUrl) throw new Error('No image generated');
+    const uploaded = await uploadFromUrl(falUrl, 'ai-snap-pulid-test');
+    res.json({ status: 'done', resultUrl: uploaded.url, engine: 'flux-pulid' });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }

@@ -30,6 +30,7 @@ const CONCEPTS = [
   { id: 'retro_hongkong', label: '레트로 홍콩', sub: '홍콩 야시장 무드' },
   { id: 'black_swan', label: '블랙스완', sub: '다크 시네마틱' },
   { id: 'blue_hour', label: '블루아워', sub: '트와일라잇 로맨스' },
+  { id: 'water_memory', label: '물의 기억', sub: '수중 시네마틱' },
 ];
 
 type Mode = 'groom' | 'bride' | 'couple';

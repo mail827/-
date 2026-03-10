@@ -46,6 +46,7 @@ const CONCEPTS = [
   { id: 'retro_hongkong', label: '레트로 홍콩' },
   { id: 'black_swan', label: '블랙스완' },
   { id: 'blue_hour', label: '블루아워' },
+  { id: 'water_memory', label: '물의 기억' },
 ];
 
 const CONCEPT_MAP = Object.fromEntries(CONCEPTS.map(c => [c.id, c.label]));

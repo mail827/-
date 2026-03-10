@@ -345,7 +345,7 @@ const CINEMATIC_COUPLE_SHOTS_DYNAMIC = [
   { id: 'whisper_ear', prompt: 'tight closeup framing at chest level, close-up him whispering in her ear, she smiles with eyes closed, intimate tender moment' },
 ];
 
-const DYNAMIC_CONCEPTS = new Set(['retro_hongkong', 'vintage_record', 'cruise_sunset', 'cruise_bluesky', 'black_swan', 'blue_hour']);
+const DYNAMIC_CONCEPTS = new Set(['retro_hongkong', 'vintage_record', 'cruise_sunset', 'cruise_bluesky', 'black_swan', 'blue_hour', 'water_memory']);
 
 const getVariants = (mode: string, concept: string) => {
   if (DYNAMIC_CONCEPTS.has(concept)) {
@@ -382,6 +382,7 @@ const CONCEPT_MOOD: Record<string, string> = {
 
 
   black_swan: 'dark dramatic shadows, moody blue-purple color grading, fog and mist atmosphere, haunting beautiful tension, cold blue tones through stained glass, editorial fashion darkness, 35mm lens',
+  water_memory: 'deep teal-green ethereal underwater caustic light with tiny bubbles floating, or warm projector beam cutting through dark vintage theater with dust particles in light, or heavy rain pouring on reflective wet asphalt with warm orange street lamp glow contrasting cool rain blue, dreamlike soft focus, 50mm lens',
   blue_hour: 'warm golden street lamp glow contrasting cool blue twilight sky, romantic European evening, gentle wind catching hair and dress fabric, cinematic warm bokeh city lights, purple-blue sky gradient, 50mm lens',
   retro_hongkong: 'direct harsh on-camera flash fired at subject, bright white flash illuminating face and body against dark night background, flash falloff creating dark shadows behind subject, paparazzi snapshot caught off-guard moment, candid mid-stride body turned at natural angle, weight on one leg, wind in hair, neon reflections on wet pavement, shallow depth of field f1.4 crowd bokeh, Wong Kar-wai intimate mood, relaxed body language, Fuji Superia 400 cross-processed grain',
 };
@@ -664,21 +665,25 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     const chainRefs = (pack.chainRefUrls || {}) as Record<string, string>;
     let imageUrls: string[];
 
+    const shouldResetChain = modeCount > 0 && modeCount % 5 === 0;
+
     if (effectiveMode === "groom") {
-      const ref = chainRefs.groom;
-      imageUrls = ref ? [ref, inputUrlsArr[0]] : [inputUrlsArr[0]];
+      const ref = shouldResetChain ? null : chainRefs.groom;
+      imageUrls = ref ? [inputUrlsArr[0], ref] : [inputUrlsArr[0]];
     } else if (effectiveMode === "bride") {
-      const ref = chainRefs.bride;
-      imageUrls = ref ? [ref, inputUrlsArr[1]] : [inputUrlsArr[1]];
+      const ref = shouldResetChain ? null : chainRefs.bride;
+      imageUrls = ref ? [inputUrlsArr[1], ref] : [inputUrlsArr[1]];
     } else {
       const refs: string[] = [];
-      if (chainRefs.couple) refs.push(chainRefs.couple);
-      if (chainRefs.groom) refs.push(chainRefs.groom);
-      if (chainRefs.bride) refs.push(chainRefs.bride);
+      if (!shouldResetChain) {
+        if (chainRefs.couple) refs.push(chainRefs.couple);
+        if (chainRefs.groom) refs.push(chainRefs.groom);
+        if (chainRefs.bride) refs.push(chainRefs.bride);
+      }
       const base = inputUrlsArr.length >= 3
         ? [inputUrlsArr[2], inputUrlsArr[0], inputUrlsArr[1]]
         : inputUrlsArr.slice(0, 2);
-      imageUrls = [...refs, ...base].slice(0, 4);
+      imageUrls = [...base, ...refs].slice(0, 4);
     }
 
     const snap = await prisma.aiSnap.create({
@@ -779,7 +784,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
         const permanentUrl = await uploadToCloudinary(finalUrl, snap.id);
         await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: permanentUrl } });
 
-        if (!chainRefs[effectiveMode]) {
+        if (!chainRefs[effectiveMode] || shouldResetChain) {
           chainRefs[effectiveMode] = permanentUrl;
           await prisma.snapPack.update({
             where: { id: packId },
