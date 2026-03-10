@@ -50,7 +50,7 @@ export default function AiSnapRedeem() {
       const res = await fetch(`${API}/snap-gift/redeem`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentToken}` },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code: code.trim() }),
       });
       if (res.status === 401) {
         clearAuth();
@@ -109,7 +109,7 @@ export default function AiSnapRedeem() {
               <div className="flex gap-2">
                 <input
                   value={code}
-                  onChange={e => { setCode(e.target.value.toUpperCase()); setErrorMsg(''); setInfo(null); }}
+                  onChange={e => { setCode(e.target.value.toUpperCase().trim()); setErrorMsg(''); setInfo(null); }}
                   placeholder="SNAP-XXXXXXXX"
                   className="flex-1 px-4 py-3.5 border-2 border-stone-200 rounded-xl text-center text-lg tracking-wider font-mono focus:outline-none focus:border-stone-800 transition-all"
                 />

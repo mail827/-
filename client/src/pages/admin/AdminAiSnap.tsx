@@ -20,6 +20,10 @@ interface Stats { total: number; done: number; failed: number; generating: numbe
 
 const CONCEPTS = [
   { id: 'studio_classic', label: '스튜디오 클래식' },
+  { id: 'studio_gallery', label: '갤러리' },
+  { id: 'studio_fog', label: '포그' },
+  { id: 'studio_mocha', label: '모카' },
+  { id: 'studio_sage', label: '세이지' },
   { id: 'outdoor_garden', label: '야외 가든' },
   { id: 'beach_sunset', label: '해변 선셋' },
   { id: 'hanbok_wonsam', label: '궁중 혼례' },

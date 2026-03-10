@@ -4,6 +4,10 @@ import { Sparkles, Camera, X, Loader2, User, Users, ArrowRight } from 'lucide-re
 
 const CONCEPTS = [
   { id: 'studio_classic', label: '스튜디오 클래식', sub: '정석 웨딩 화보' },
+  { id: 'studio_gallery', label: '갤러리', sub: '화이트 아치 스튜디오' },
+  { id: 'studio_fog', label: '포그', sub: '린넨 드레이프 스튜디오' },
+  { id: 'studio_mocha', label: '모카', sub: '다크 스포트라이트' },
+  { id: 'studio_sage', label: '세이지', sub: '세이지그린 에디토리얼' },
   { id: 'outdoor_garden', label: '야외 가든', sub: '꽃과 자연빛' },
   { id: 'beach_sunset', label: '해변 선셋', sub: '노을빛 해변' },
   { id: 'hanbok_wonsam', label: '궁중 혼례', sub: '화려한 궁중 예복' },

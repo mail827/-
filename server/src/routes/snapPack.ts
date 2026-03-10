@@ -50,7 +50,23 @@ const ADD_SNAP_TIERS: Record<string, { snaps: number; price: number; label: stri
 const STUDIO_CONCEPTS: Record<string, { label: string; base: string }> = {
   studio_classic: {
     label: '스튜디오 클래식',
-    base: 'professional wedding studio with soft warm lighting, ivory fabric backdrop, elegant atmosphere',
+    base: 'modern minimalist white studio with clean white walls, large floor-to-ceiling windows casting soft natural daylight, gentle shadows on polished light floor, airy open space, refined contemporary elegance',
+  },
+  studio_gallery: {
+    label: '갤러리',
+    base: 'minimal white architectural studio with large curved white plaster arch structures, smooth seamless white floor and walls, soft diffused natural light from tall arched windows on the left, clean airy bright contemporary space',
+  },
+  studio_fog: {
+    label: '포그',
+    base: 'warm-toned intimate studio with large flowing cream linen fabric draped from ceiling to floor as backdrop with soft natural wrinkles and folds, warm beige concrete floor, single dried pampas grass arrangement in ceramic vase to the side, soft warm diffused studio light',
+  },
+  studio_mocha: {
+    label: '모카',
+    base: 'moody dark studio with smooth dark mocha brown painted wall with subtle plaster texture, polished dark concrete floor, single round warm spotlight from above creating soft pool of golden light, dramatic yet minimal atmosphere',
+  },
+  studio_sage: {
+    label: '세이지',
+    base: 'modern editorial studio with muted sage green painted wall, single curved cream boucle sofa, light oak wooden herringbone floor, sheer white curtain with soft natural window light, calm muted green and cream tones, even studio lighting no harsh shadows',
   },
   outdoor_garden: {
     label: '야외 가든',
@@ -244,6 +260,10 @@ const COUPLE_SHOT_VARIANTS = [
 
 const OUTFIT_GROOM: Record<string, string> = {
   studio_classic: 'wearing elegant black tuxedo with white dress shirt, black bow tie, polished shoes',
+  studio_gallery: 'wearing charcoal grey wool-silk single-breasted one-button blazer with exaggerated angular peaked lapel with crisp geometric edges, light grey silk mock-neck top no collar, charcoal tailored straight-leg trousers with sharp center crease, black matte leather oxford shoes, architectural sharp silhouette',
+  studio_fog: 'wearing light grey wool-cashmere single-breasted two-button blazer with notch lapel and soft matte brushed texture, white linen band-collar shirt all buttons closed minimal, light grey straight-leg trousers, light grey suede desert boots, quiet tonal grey no accessories',
+  studio_mocha: 'wearing dark warm taupe brown wool gabardine single-breasted one-button blazer with notch lapel muted earthy tone like dried clay, ivory cotton open-collar shirt relaxed no tie, dark warm brown straight-leg trousers, dark brown matte leather shoes, understated earthy elegance',
+  studio_sage: 'wearing off-white matte wool-blend single-breasted two-button blazer with shawl collar soft chalky texture like unglazed porcelain, pure white fine gauge crew-neck knit top, off-white straight-leg trousers, white leather minimal sneakers, no accessories, clean ethereal',
   outdoor_garden: 'wearing navy blue suit with white shirt, floral boutonniere pinned to lapel',
   beach_sunset: 'wearing light beige linen suit with open collar white shirt, barefoot',
   hanbok_wonsam: 'MUST wear heukdallyeong (black ceremonial robe with golden circular embroidery on chest) with traditional V-shaped crossed collar (gyotgit), goreum ribbon ties at chest, samo headpiece (official Korean groom wedding hat with angular wings), gold-embroidered wide belt over white inner jeogori, NOT a western suit NOT a coat NOT modern clothing, authentic traditional Korean royal groom wedding attire',
@@ -277,7 +297,11 @@ const OUTFIT_GROOM: Record<string, string> = {
 };
 
 const OUTFIT_BRIDE: Record<string, string> = {
-  studio_classic: 'wearing elegant white lace wedding gown with sweetheart neckline, holding white rose bouquet',
+  studio_classic: 'wearing white haute couture strapless sweetheart bell gown with sculpted white silk mikado bodice, bell skirt constructed of hundreds of individually cut white silk organza petals in elongated wave shapes layered and overlapping like ocean ripples frozen in motion, each petal heat-shaped to curl slightly at edges creating three-dimensional depth, petals denser at waist gradually more sparse toward hem revealing sheer tulle underneath, long sweeping train',
+  studio_gallery: 'wearing white haute couture strapless sweetheart bell gown with sculpted white silk mikado bodice, bell skirt constructed of hundreds of individually cut white silk organza petals in elongated wave shapes layered and overlapping like ocean ripples frozen in motion, each petal heat-shaped to curl at edges creating three-dimensional depth, petals denser at waist gradually sparse toward hem revealing tulle underneath, long sweeping train, natural elegant makeup',
+  studio_fog: 'wearing white haute couture strapless sweetheart bell gown that looks like fog, ivory silk crepe smooth minimal bodice, bell skirt with over twenty layers of ultra-sheer white silk organza in gradually varying tones from pure white to softest hint of pale grey at outermost layer, each layer slightly longer than last raw-edged creating soft blurred gradient at hem like dissipating mist, no embellishment no pattern, long fading train, natural elegant makeup',
+  studio_mocha: 'wearing white haute couture halterneck bell gown, single wide fabric band of white silk mikado wrapping from front bust up around neck and down open back leaving shoulders bare, clean straight-across neckline, bell skirt of layered white silk organza panels cut in irregular jagged crystalline shapes like cracked glacier ice shards, alternating opaque and sheer panels creating depth with shadow patterns like light through ice, tiny clusters of clear glass micro-beads sparse and subtle, dramatic trailing train, natural elegant makeup',
+  studio_sage: 'wearing white haute couture one-shoulder bell gown with single wide sculptural strap over left shoulder of gathered white silk mikado fanning from narrow point into wide dramatic drape across chest wrapping torso asymmetrically, right shoulder completely bare, bell skirt cascading in long vertical knife-pleated panels of white silk organza released at different lengths like streams of water pouring over cliff edge, pleats crisp at waist softening toward hem into fluid ripples, left side longer continuing asymmetry, dramatic sweeping train from left side only, natural elegant makeup',
   outdoor_garden: 'wearing flowing white organza wedding dress with delicate floral embroidery, wildflower bouquet',
   beach_sunset: 'wearing flowing lightweight white chiffon dress with open back, barefoot, windswept hair',
   hanbok_wonsam: 'wearing vibrant red wonsam (ceremonial robe) layered over yellow chima, golden phoenix embroidery across chest and sleeves, elaborate hwagwan (jeweled crown) with dangling ornaments, white socks with kkotsin (flower shoes), holding a ceremonial fan, traditional Korean royal bride wedding attire',
@@ -401,6 +425,10 @@ const CONCEPT_MOOD: Record<string, string> = {
   vintage_record: 'candid relaxed moment browsing records, warm tungsten glow on skin, LP records surrounding, vinyl turntable spinning, natural smile or looking down at records, intimate cozy nostalgia, retro film grain',
 
 
+  studio_gallery: 'clean bright airy white space, gentle natural light casting soft geometric shadows through arched windows, serene minimal contemporary atmosphere, 50mm lens',
+  studio_fog: 'warm soft diffused light, cream linen texture visible in background, dried pampas grass adding natural warmth, intimate cozy yet refined atmosphere, 50mm lens',
+  studio_mocha: 'single dramatic warm spotlight from above creating golden pool of light against dark mocha background, deep shadows surrounding, intimate dramatic gallery atmosphere, 85mm lens',
+  studio_sage: 'soft even natural light from sheer curtain, calm muted sage green and cream tones, warm oak floor, organic curved furniture shapes, serene editorial calm, 50mm lens',
   black_swan: 'dark dramatic shadows, moody blue-purple color grading, fog and mist atmosphere, haunting beautiful tension, cold blue tones through stained glass, editorial fashion darkness, 35mm lens',
   velvet_rouge_corridor: 'dark Japanese manor long dim corridor with tatami floors and paper sliding doors, warm candlelight from paper lanterns casting golden glow, deep dramatic shadows, aristocratic moody atmosphere, 35mm lens',
   velvet_rouge_library: 'dark private library with floor-to-ceiling bookshelves filled with old leather-bound books, tufted dark brown leather armchair, single brass desk lamp casting warm golden light, dark wood paneling, Persian rug on floor, intimate amber and deep shadow tones, 50mm lens',
