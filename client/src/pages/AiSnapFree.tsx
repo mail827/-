@@ -266,7 +266,7 @@ export default function AiSnapFree() {
             <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
               <div className="text-center">
                 <h2 className="text-xl font-semibold text-stone-800 mb-2">사진 업로드</h2>
-                <p className="text-sm text-stone-500">{mode === 'couple' ? '둘이 함께 찍은 사진을 올려주세요' : '정면 얼굴이 잘 보이는 사진이 좋아요'}</p>
+                <p className="text-sm text-stone-500">{mode === 'couple' ? '둘이 함께 찍은 사진을 올려주세요' : '정면 얼굴이 잘 보이는 사진이 좋아요. 모자/선글라스/머리띠 제거 후 촬영해주세요'}</p>
               </div>
               <div className="grid gap-4 grid-cols-1 max-w-[200px] mx-auto">
                 {mode === 'couple' && (

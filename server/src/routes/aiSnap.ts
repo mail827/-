@@ -116,6 +116,14 @@ const applyFaceSwap = async (baseUrl: string, isCouple: boolean, imageUrls: stri
   return baseUrl;
 };
 
+
+const cropToPortrait = (url: string): string => {
+  if (url.includes('cloudinary.com') && url.includes('/upload/')) {
+    return url.replace('/upload/', '/upload/c_fill,ar_2:3,g_face,w_768,h_1152/');
+  }
+  return url;
+};
+
 const NEGATIVE_PROMPT = 'distorted face, deformed nose, asymmetric eyes, blurry face, smoothed skin, plastic face, bumpy skin, uneven skin texture, cartoon face, ugly face, merged faces, elongated face, enhanced jawline, square jaw, chiseled face, narrow face, donkey face, horse face, long chin, protruding jaw, swollen face, inflated cheeks, inhuman proportions, uncanny valley face, alien features';
 
 const SOLO_PROMPTS: Record<string, { groom: string; bride: string }> = {
@@ -375,7 +383,7 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
     }
     const body: Record<string, unknown> = {
       prompt,
-      image_urls: urls,
+      image_urls: urls.map(cropToPortrait),
       strength,
       num_images: 1,
       image_size: { width: 768, height: 1152 },
@@ -466,7 +474,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
-      body: JSON.stringify({ prompt, image_urls: urls, strength, num_images: 1, image_size: { width: 768, height: 1152 }, negative_prompt: NEGATIVE_PROMPT }),
+      body: JSON.stringify({ prompt, image_urls: urls.map(cropToPortrait), strength, num_images: 1, image_size: { width: 768, height: 1152 }, negative_prompt: NEGATIVE_PROMPT }),
     });
 
     if (submit.images) {
@@ -729,7 +737,7 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
       method: 'POST',
       body: JSON.stringify({
         prompt,
-        image_urls: urls,
+        image_urls: urls.map(cropToPortrait),
         strength,
         num_images: 1,
       image_size: { width: 768, height: 1152 },

@@ -758,7 +758,13 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     const prompt = buildPrompt(pack.concept, pack.category, effectiveMode, shotIdx);
     const negativePrompt = buildNegativePrompt(effectiveMode, pack.concept, shotIdx);
 
-    const inputUrlsArr = pack.inputUrls as string[];
+    const rawInputUrls = pack.inputUrls as string[];
+    const inputUrlsArr = rawInputUrls.map((url: string) => {
+      if (url.includes('cloudinary.com') && url.includes('/upload/')) {
+        return url.replace('/upload/', '/upload/c_fill,ar_2:3,g_face,w_768,h_1152/');
+      }
+      return url;
+    });
     const chainRefs = (pack.chainRefUrls || {}) as Record<string, string>;
     let imageUrls: string[];
 

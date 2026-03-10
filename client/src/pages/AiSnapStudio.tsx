@@ -334,7 +334,7 @@ export default function AiSnapStudioPage() {
                 <UploadCard label="신랑" photo={groomPhoto} uploading={uploading === 'groom'} onUpload={f => uploadPhoto(f, 'groom')} onClear={() => setGroomPhoto('')} />
                 <UploadCard label="신부" photo={bridePhoto} uploading={uploading === 'bride'} onUpload={f => uploadPhoto(f, 'bride')} onClear={() => setBridePhoto('')} />
               </div>
-              <div className="mt-3"><UploadCard label="커플 사진 (선택)" photo={couplePhoto} uploading={uploading === 'couple'} onUpload={f => uploadPhoto(f, 'couple')} onClear={() => setCouplePhoto('')} /></div><p className="text-center text-[11px] text-stone-400 pt-2">얼굴이 잘 보이는 정면 사진을 올려주세요</p><p className="text-center text-[11px] text-amber-600 font-medium">커플 사진을 올리면 함께 찍은 화보 퀄리티가 크게 올라가요</p>
+              <div className="mt-3"><UploadCard label="커플 사진 (선택)" photo={couplePhoto} uploading={uploading === 'couple'} onUpload={f => uploadPhoto(f, 'couple')} onClear={() => setCouplePhoto('')} /></div><p className="text-center text-[11px] text-stone-400 pt-2">얼굴이 잘 보이는 정면 사진을 올려주세요. 모자, 선글라스, 마스크, 머리띠 등 악세서리는 벗고 찍어주세요</p><p className="text-center text-[11px] text-amber-600 font-medium">커플 사진을 올리면 함께 찍은 화보 퀄리티가 크게 올라가요</p>
               <div className="flex gap-3 pt-4">
                 {!isSetupMode && myPacks.length > 0 && (
                   <button onClick={() => { const rp = myPacks.find(p => p.concept && p.concept !== ''); if (rp) { setActivePack(rp); setStep(10); } }}
