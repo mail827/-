@@ -156,6 +156,10 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '블루아워',
     base: 'romantic European cobblestone street at twilight blue hour, vintage wrought-iron street lamp casting warm golden glow, old stone buildings with warm lit windows, purple blue gradient sky after sunset, cinematic warm-cool contrast lighting, dreamy romantic atmosphere, film grain',
   },
+  velvet_rouge: {
+    label: '벨벳 루즈',
+    base: 'dark moody cinematic atmosphere, warm golden candlelight against deep shadows, aristocratic darkly romantic elegance, dreamlike trance-like mood, neither smiling nor sad but entranced and mesmerizing, film grain',
+  },
   water_memory: {
     label: '물의 기억',
     base: 'dreamlike cinematic atmosphere, ethereal teal tones, film grain',
@@ -268,6 +272,7 @@ const OUTFIT_GROOM: Record<string, string> = {
   iphone_mirror: 'wearing casual white shirt with rolled sleeves, relaxed natural look, no tie no jacket, holding phone for mirror selfie',
   black_swan: 'wearing black silk-satin shawl-collar blazer over black silk-georgette relaxed collarless shirt with moderate V-neckline showing collarbones only, shirt tucked in, black high-waisted wide-leg tailored trousers, thin black leather belt with matte buckle, black chelsea boots, all-black no accessories, dark sophisticated elegance',
   blue_hour: 'wearing classic navy blue fine wool two-piece suit, single-breasted two-button blazer with notch lapel fitted silhouette, crisp white dress shirt with top button undone no tie, navy blue tailored slim trousers, dark brown leather oxford shoes, simple classic timeless gentleman',
+  velvet_rouge: 'wearing deep dark teal-green silk single-breasted one-button blazer with peaked lapel and refined luminous sheen like aged jade NOT bright turquoise NOT mint, black silk open-collar shirt no tie top two buttons undone, dark teal tailored slim-straight trousers in same silk fabric, black polished leather oxford shoes, no pocket square no accessories, aristocratic sharp darkly romantic',
   water_memory: 'wearing pearl-white silk mikado single-breasted peaked lapel suit with visible luminous silk sheen like wet porcelain, NOT linen NOT matte NOT cream beige, white silk open-collar shirt no tie showing collarbones, pearl-white slim-straight trousers in same silk mikado fabric, white leather minimal dress shoes, entire outfit has unified pearlescent silk glow, ethereal dreamlike elegance',
 };
 
@@ -301,6 +306,7 @@ const OUTFIT_BRIDE: Record<string, string> = {
   iphone_mirror: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress, holding phone for mirror selfie',
   black_swan: 'wearing strapless black matte silk tube top bodice with soft wispy black ostrich feather trim running across entire straight-across bustline neckline like feathery border, single black ostrich feather stole draped over LEFT shoulder only cascading down left arm to elbow right shoulder completely bare, grand floor-length A-line bell silhouette of layered semi-sheer black tulle extremely long pooling and trailing on floor, black ostrich feather clusters scattered along lower tulle layers, natural elegant makeup, subtle lip color, vintage drop earrings, dark ethereal beauty',
   blue_hour: 'wearing deep jewel-tone sapphire blue strapless silk tube top bodice with rich royal blue subtle satin sheen, lightweight silk-chiffon A-line floor-length skirt with slight sweep that moves like liquid, layered inner silk with sheer chiffon overlay that catches air and floats with movement, no beading no sequins no feathers pure clean elegant simplicity, matching blue satin pointed-toe heels, natural dewy makeup, elegant evening glamour',
+  velvet_rouge: 'wearing deep crimson red strapless sweetheart haute couture bell gown in crimson silk mikado with soft luminous sheen, grand voluminous bell skirt constructed in layers of crimson silk with overlapping sheer crimson organza panels cut into elongated teardrop shapes resembling peacock tail plumes, hand-embroidered tonal dark burgundy and garnet peacock eye motifs with tiny freshwater pearl at center of each panel, white silk satin opera-length gloves smooth luminous fitted, long straight black hair with see-through bangs, natural elegant makeup with subtle lip color, dramatic sculptural alive with layered movement',
   water_memory: 'wearing ice-blue haute couture strapless sweetheart mermaid gown in silk mikado with refined porcelain-like luminous sheen, fitted bodice with invisible boning hugging body to below knees, below knees dramatic cascading fin-like panels of double-layered silk organza in gradients of ice-blue fading to pale silver-grey to near-transparent edges cut at different lengths like betta fish tail fins, freshwater pearls of varying sizes hand-sewn in organic irregular clusters denser near bodice-to-fin transition thinning outward, long cathedral train, natural elegant makeup',
 };
 
@@ -359,7 +365,7 @@ const CINEMATIC_COUPLE_SHOTS_DYNAMIC = [
   { id: 'whisper_ear', prompt: 'tight closeup framing at chest level, close-up him whispering in her ear, she smiles with eyes closed, intimate tender moment' },
 ];
 
-const DYNAMIC_CONCEPTS = new Set(['retro_hongkong', 'vintage_record', 'cruise_sunset', 'cruise_bluesky', 'black_swan', 'blue_hour', 'water_memory']);
+const DYNAMIC_CONCEPTS = new Set(['retro_hongkong', 'vintage_record', 'cruise_sunset', 'cruise_bluesky', 'black_swan', 'blue_hour', 'water_memory', 'velvet_rouge']);
 
 const getVariants = (mode: string, concept: string) => {
   if (DYNAMIC_CONCEPTS.has(concept)) {
@@ -396,6 +402,9 @@ const CONCEPT_MOOD: Record<string, string> = {
 
 
   black_swan: 'dark dramatic shadows, moody blue-purple color grading, fog and mist atmosphere, haunting beautiful tension, cold blue tones through stained glass, editorial fashion darkness, 35mm lens',
+  velvet_rouge_corridor: 'dark Japanese manor long dim corridor with tatami floors and paper sliding doors, warm candlelight from paper lanterns casting golden glow, deep dramatic shadows, aristocratic moody atmosphere, 35mm lens',
+  velvet_rouge_library: 'dark private library with floor-to-ceiling bookshelves filled with old leather-bound books, tufted dark brown leather armchair, single brass desk lamp casting warm golden light, dark wood paneling, Persian rug on floor, intimate amber and deep shadow tones, 50mm lens',
+  velvet_rouge_bathtub: 'dimly lit vintage bathroom with large freestanding copper bathtub filled with water, crimson organza skirt floating and spreading in water, steam rising from water, warm golden single overhead light, dark tile walls, moody atmospheric shadows, 35mm lens',
   water_memory_underwater: 'deep dark teal-green underwater, soft caustic light patterns dancing on skin from above, tiny air bubbles floating around, hair floating weightlessly in water, fabrics billowing and spreading in water, ethereal aquatic dreamlike atmosphere, 50mm lens',
   water_memory_theater: 'empty vintage art deco movie theater, faded red velvet seats, warm golden projector beam cutting through darkness with dust particles floating in light, dark teal-green walls with gold art deco trim on ceiling, warm amber and cool teal contrast, intimate cinematic atmosphere, 35mm lens',
   water_memory_rain: 'empty European city street at night in heavy rain, wet reflective asphalt with warm orange puddle reflections, vintage wrought-iron street lamps casting warm glow, rain streaks visible in lamplight, dark moody night with warm-cool contrast, cinematic rain atmosphere, 50mm lens',
@@ -428,8 +437,9 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
     ? ', authentic hanbok silk texture, accurate layering and draping'
     : '';
 
+  const VELVET_ROUGE_SCENES = ['velvet_rouge_corridor', 'velvet_rouge_library', 'velvet_rouge_bathtub'];
   const WATER_MEMORY_SCENES = ['water_memory_underwater', 'water_memory_theater', 'water_memory_rain'];
-  const mood = concept === 'water_memory' ? (CONCEPT_MOOD[WATER_MEMORY_SCENES[shotIdx % 3]] || '') : (CONCEPT_MOOD[concept] || '');
+  const mood = concept === 'velvet_rouge' ? (CONCEPT_MOOD[VELVET_ROUGE_SCENES[shotIdx % 3]] || '') : concept === 'water_memory' ? (CONCEPT_MOOD[WATER_MEMORY_SCENES[shotIdx % 3]] || '') : (CONCEPT_MOOD[concept] || '');
 
   if (mode === 'couple') {
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
