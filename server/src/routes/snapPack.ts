@@ -443,7 +443,7 @@ const getShotStrength = (mode: string, concept: string, shotIdx: number): number
   const isCloseup = shot.id.startsWith('bust_') || shot.id.startsWith('closeup_');
   if (isCloseup) return mode === 'couple' ? 0.13 : 0.17;
   if (mode === 'couple') return 0.15;
-  return 0.20;
+  return 0.18;
 };
 
 const CONCEPT_MOOD: Record<string, string> = {

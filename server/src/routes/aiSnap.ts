@@ -362,7 +362,7 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
     const prompt = pose + ', ' + basePrompt;
 
     const isCouple = mode === 'couple';
-    const strength = isCouple ? 0.15 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.20 : 0.20));
+    const strength = isCouple ? 0.15 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.18 : 0.18));
     let urls: string[];
     if (isCouple) {
       if (imageUrls.length >= 3) {
@@ -462,7 +462,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
     const isCouple = mode === 'couple';
     const isSelfie = concept === 'iphone_selfie' || concept === 'iphone_mirror';
     const isCruise = concept === 'cruise_sunset' || concept === 'cruise_bluesky';
-    const strength = isSelfie ? 0.22 : isCruise ? 0.20 : isCouple ? 0.18 : 0.20;
+    const strength = isSelfie ? 0.22 : isCruise ? 0.18 : isCouple ? 0.15 : 0.18;
 
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
@@ -714,7 +714,7 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
     const prompt = pose + ', ' + basePrompt;
     const effectiveMode = req.body.mode || 'groom';
     const isCouple = effectiveMode === 'couple';
-    const strength = isCouple ? 0.15 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.20 : 0.20));
+    const strength = isCouple ? 0.15 : (concept.startsWith('iphone_') ? 0.22 : (CRUISE_CONCEPTS.includes(concept) ? 0.18 : 0.18));
     let urls: string[];
     if (isCouple) {
       if (imageUrls.length >= 3) {
