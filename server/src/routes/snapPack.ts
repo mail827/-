@@ -235,6 +235,35 @@ const BRIDE_SHOT_VARIANTS = [
   { id: 'dramatic_light', prompt: 'dramatic chiaroscuro lighting, half face illuminated, deep shadows, painterly mood' },
 ];
 
+const STUDIO_COUPLE_SHOTS = [
+  { id: 'seated_sofa', prompt: 'couple seated together on sofa, she leaning into him, relaxed intimate, natural warm smiles' },
+  { id: 'leaning_wall', prompt: 'couple leaning against wall together, his arm around her waist, casual elegant pose, looking at camera' },
+  { id: 'forehead_touch', prompt: 'foreheads gently touching, eyes closed, intimate peaceful moment, standing close' },
+  { id: 'back_hug_stand', prompt: 'back hug pose standing, his arms wrapped around her from behind, both smiling warmly, cozy natural' },
+  { id: 'facing_close', prompt: 'couple facing each other very close, noses almost touching, gentle smiles, romantic tension' },
+  { id: 'laughing_candid', prompt: 'couple laughing together candidly, genuine joy, she playfully touching his chest, natural movement' },
+  { id: 'seated_floor', prompt: 'couple sitting on floor together, relaxed legs extended or crossed, leaning on each other, casual intimate' },
+  { id: 'dancing_slow', prompt: 'slow dance pose, his hand on her waist her hand on his shoulder, swaying gently, romantic quiet moment' },
+  { id: 'cheek_kiss', prompt: 'gentle cheek kiss, natural loving gesture, her hand on his lapel, soft intimate moment' },
+  { id: 'side_embrace', prompt: 'standing side by side, his arm around her shoulder pulling her close, her arm around his waist, warm comfortable couple' },
+];
+
+const STUDIO_GROOM_SHOTS = [
+  { id: 'leaning_wall', prompt: 'leaning casually against wall, one hand in pocket, relaxed confident posture, looking at camera' },
+  { id: 'seated_chair', prompt: 'seated on chair or sofa arm, relaxed leaning forward slightly, hands clasped, natural confident' },
+  { id: 'adjusting_jacket', prompt: 'adjusting jacket lapel or cuff, natural grooming gesture, three quarter angle, composed elegant' },
+  { id: 'standing_relaxed', prompt: 'standing relaxed, one hand in pocket, slight smile, full body natural pose' },
+  { id: 'profile_look', prompt: 'profile view looking to the side, contemplative calm expression, dramatic side lighting' },
+];
+
+const STUDIO_BRIDE_SHOTS = [
+  { id: 'seated_elegant', prompt: 'seated elegantly on sofa or chair, dress draped beautifully around, hands resting on lap, soft gaze at camera' },
+  { id: 'touching_hair', prompt: 'gently touching hair or tucking strand behind ear, soft natural smile, three quarter angle' },
+  { id: 'looking_window', prompt: 'standing near window light, looking slightly to side, natural backlit glow, contemplative serene' },
+  { id: 'walking_toward', prompt: 'walking toward camera, dress flowing with movement, confident elegant stride, slight smile' },
+  { id: 'leaning_wall', prompt: 'leaning gently against wall, relaxed pose, one hand lightly on skirt, natural warm expression' },
+];
+
 const COUPLE_SHOT_VARIANTS = [
   { id: 'facing_each', prompt: 'couple facing each other, close intimate distance, gentle smiles, eye contact between them' },
   { id: 'side_by_side', prompt: 'couple standing side by side, arms linked, both looking at camera with warm smiles' },
@@ -391,10 +420,13 @@ const CINEMATIC_COUPLE_SHOTS_DYNAMIC = [
 
 const DYNAMIC_CONCEPTS = new Set(['retro_hongkong', 'vintage_record', 'cruise_sunset', 'cruise_bluesky', 'black_swan', 'blue_hour', 'water_memory', 'velvet_rouge']);
 
+const STUDIO_SET = new Set(['studio_classic', 'studio_gallery', 'studio_fog', 'studio_mocha', 'studio_sage']);
+
 const getVariants = (mode: string, concept: string) => {
   if (DYNAMIC_CONCEPTS.has(concept)) {
     return mode === 'couple' ? CINEMATIC_COUPLE_SHOTS_DYNAMIC : mode === 'groom' ? CINEMATIC_GROOM_SHOTS : CINEMATIC_BRIDE_SHOTS;
   }
+  if (STUDIO_SET.has(concept)) return mode === 'couple' ? STUDIO_COUPLE_SHOTS : mode === 'groom' ? STUDIO_GROOM_SHOTS : STUDIO_BRIDE_SHOTS;
   return mode === 'couple' ? COUPLE_SHOT_VARIANTS : mode === 'groom' ? GROOM_SHOT_VARIANTS : BRIDE_SHOT_VARIANTS;
 };
 const getShotStrength = (mode: string, concept: string, shotIdx: number): number => {
@@ -722,15 +754,16 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     const shouldResetChain = modeCount > 0 && modeCount % 5 === 0;
 
+    const useChain = !STUDIO_SET.has(pack.concept);
     if (effectiveMode === "groom") {
-      const ref = shouldResetChain ? null : chainRefs.groom;
+      const ref = (useChain && !shouldResetChain) ? chainRefs.groom : null;
       imageUrls = ref ? [ref, inputUrlsArr[0]] : [inputUrlsArr[0]];
     } else if (effectiveMode === "bride") {
-      const ref = shouldResetChain ? null : chainRefs.bride;
+      const ref = (useChain && !shouldResetChain) ? chainRefs.bride : null;
       imageUrls = ref ? [ref, inputUrlsArr[1]] : [inputUrlsArr[1]];
     } else {
       const refs: string[] = [];
-      if (!shouldResetChain) {
+      if (useChain && !shouldResetChain) {
         if (chainRefs.couple) refs.push(chainRefs.couple);
         if (chainRefs.groom) refs.push(chainRefs.groom);
         if (chainRefs.bride) refs.push(chainRefs.bride);
