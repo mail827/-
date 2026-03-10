@@ -686,10 +686,10 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     if (effectiveMode === "groom") {
       const ref = shouldResetChain ? null : chainRefs.groom;
-      imageUrls = ref ? [inputUrlsArr[0], ref] : [inputUrlsArr[0]];
+      imageUrls = ref ? [ref, inputUrlsArr[0]] : [inputUrlsArr[0]];
     } else if (effectiveMode === "bride") {
       const ref = shouldResetChain ? null : chainRefs.bride;
-      imageUrls = ref ? [inputUrlsArr[1], ref] : [inputUrlsArr[1]];
+      imageUrls = ref ? [ref, inputUrlsArr[1]] : [inputUrlsArr[1]];
     } else {
       const refs: string[] = [];
       if (!shouldResetChain) {
@@ -700,7 +700,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
       const base = inputUrlsArr.length >= 3
         ? [inputUrlsArr[2], inputUrlsArr[0], inputUrlsArr[1]]
         : inputUrlsArr.slice(0, 2);
-      imageUrls = [...base, ...refs].slice(0, 4);
+      imageUrls = refs.length > 0 ? [...refs, ...base].slice(0, 4) : base;
     }
 
     const snap = await prisma.aiSnap.create({
