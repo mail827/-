@@ -824,20 +824,29 @@ export default function Landing() {
             <div style={{ width: 480, overflow: "hidden" }}>
               <div style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", paddingBottom: 8, scrollbarWidth: "none" }} >
                 {(() => {
-                  const showcaseConcepts = ["hanbok_wonsam", "iphone_selfie", "cruise_sunset", "hanbok_modern", "black_swan", "water_memory", "velvet_rouge", "blue_hour", "studio_gallery", "studio_mocha", "studio_sage", "studio_fog"];
+                  const showcaseConcepts = ["studio_classic", "studio_gallery", "studio_fog", "studio_mocha", "studio_sage", "black_swan", "water_memory", "velvet_rouge", "blue_hour", "magazine_cover", "hanbok_wonsam", "hanbok_dangui", "hanbok_modern", "hanbok_saeguk", "hanbok_flower", "cruise_sunset", "cruise_bluesky", "retro_hongkong", "vintage_record", "iphone_selfie", "iphone_mirror"];
                   const fallbacks = [
-                    { label: "궁중혼례", gradient: "linear-gradient(135deg, #8B6914 0%, #C4956A 100%)" },
-                    { label: "셀카 스냅", gradient: "linear-gradient(135deg, #5A6B7A 0%, #8A9BAA 100%)" },
-                    { label: "크루즈 선셋", gradient: "linear-gradient(135deg, #B08968 0%, #D4B896 100%)" },
-                    { label: "모던 한복", gradient: "linear-gradient(135deg, #7C8C6E 0%, #A0B090 100%)" },
+                    { label: "스튜디오 클래식", gradient: "linear-gradient(135deg, #E8E4DE 0%, #D5CEC5 100%)" },
+                    { label: "갤러리", gradient: "linear-gradient(135deg, #E8E4DE 0%, #F5F2ED 100%)" },
+                    { label: "포그", gradient: "linear-gradient(135deg, #D5CEC5 0%, #E8E2DA 100%)" },
+                    { label: "모카", gradient: "linear-gradient(135deg, #3E2C23 0%, #6B4E3D 100%)" },
+                    { label: "세이지", gradient: "linear-gradient(135deg, #5C6B4E 0%, #8A9A72 100%)" },
                     { label: "블랙스완", gradient: "linear-gradient(135deg, #1A1A2E 0%, #16213E 100%)" },
                     { label: "물의 기억", gradient: "linear-gradient(135deg, #0D4F4F 0%, #1A7A6D 100%)" },
                     { label: "벨벳 루즈", gradient: "linear-gradient(135deg, #6B1D2A 0%, #8B2F3F 100%)" },
                     { label: "블루아워", gradient: "linear-gradient(135deg, #1B2838 0%, #2C4A6E 100%)" },
-                    { label: "갤러리", gradient: "linear-gradient(135deg, #E8E4DE 0%, #F5F2ED 100%)" },
-                    { label: "모카", gradient: "linear-gradient(135deg, #3E2C23 0%, #6B4E3D 100%)" },
-                    { label: "세이지", gradient: "linear-gradient(135deg, #5C6B4E 0%, #8A9A72 100%)" },
-                    { label: "포그", gradient: "linear-gradient(135deg, #D5CEC5 0%, #E8E2DA 100%)" },
+                    { label: "매거진 커버", gradient: "linear-gradient(135deg, #2C2C2C 0%, #4A4A4A 100%)" },
+                    { label: "궁중혼례", gradient: "linear-gradient(135deg, #8B6914 0%, #C4956A 100%)" },
+                    { label: "당의 한복", gradient: "linear-gradient(135deg, #B8A088 0%, #D4C4A8 100%)" },
+                    { label: "모던 한복", gradient: "linear-gradient(135deg, #7C8C6E 0%, #A0B090 100%)" },
+                    { label: "사극풍", gradient: "linear-gradient(135deg, #6B4226 0%, #8B6240 100%)" },
+                    { label: "꽃한복", gradient: "linear-gradient(135deg, #C48B9F 0%, #D4A0B0 100%)" },
+                    { label: "크루즈 선셋", gradient: "linear-gradient(135deg, #B08968 0%, #D4B896 100%)" },
+                    { label: "크루즈 블루", gradient: "linear-gradient(135deg, #4A7C9B 0%, #6A9CB8 100%)" },
+                    { label: "레트로 홍콩", gradient: "linear-gradient(135deg, #8B2020 0%, #C44040 100%)" },
+                    { label: "빈티지 레코드", gradient: "linear-gradient(135deg, #8B7355 0%, #B09070 100%)" },
+                    { label: "셀카 스냅", gradient: "linear-gradient(135deg, #5A6B7A 0%, #8A9BAA 100%)" },
+                    { label: "거울 셀카", gradient: "linear-gradient(135deg, #6A6A6A 0%, #9A9A9A 100%)" },
                   ];
                   return showcaseConcepts.map((concept, i) => {
                     const sample = snapSamples.find(s => s.concept === concept);

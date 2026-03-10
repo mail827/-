@@ -23,7 +23,7 @@ const uploadToCloudinary = async (imageUrl: string, snapId: string): Promise<str
       public_id: snapId,
       overwrite: true,
       resource_type: 'image',
-      transformation: [{ quality: 'auto:best', fetch_format: 'auto' }],
+
     });
     return result.secure_url;
   } catch {
@@ -449,7 +449,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const shot = variants[shotIdx % variants.length];
   const isDetail = DETAIL_SHOTS.has(shot.id);
 
-  const face = 'MUST keep the exact same face from reference image, identical face shape eye shape nose shape lip shape jawline unchanged, maintain exact facial proportions eye spacing nose size lip fullness, MUST preserve original eye shape including monolid or double eyelid exactly as in reference, keep original eye corner angle upward or downward exactly as reference, do not add double eyelids do not change eye corner direction do not enlarge eyes, do not alter or beautify the face, preserve original facial identity with absolute accuracy, natural Korean skin texture, MUST match the body type and build from reference image exactly, maintain same slim or average proportions as reference person';
+  const face = 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming';
 
   const outfitLock = DYNAMIC_CONCEPTS.has(concept) ? 'MUST keep absolutely identical outfit from first shot, same fabric same color same accessories same shoes same hairstyle, do not change any clothing detail' : 'keep identical outfit, hairstyle, accessories from first shot';
 
