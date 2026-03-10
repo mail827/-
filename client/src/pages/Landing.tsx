@@ -823,7 +823,7 @@ export default function Landing() {
           <div style={{ opacity: snapInView ? 1 : 0, transform: snapInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1)" }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, width: 280 }}>
               {(() => {
-                const showcaseConcepts = ["hanbok_wonsam", "iphone_selfie", "cruise_sunset", "hanbok_modern"];
+                const showcaseConcepts = ["hanbok_wonsam", "iphone_selfie", "cruise_sunset", "hanbok_modern", "black_swan", "water_memory", "velvet_rouge", "blue_hour", "studio_gallery", "studio_mocha", "studio_sage", "studio_fog"];
                 const fallbacks = [
                   { label: "궁중혼례", gradient: "linear-gradient(135deg, #8B6914 0%, #C4956A 100%)" },
                   { label: "셀카 스냅", gradient: "linear-gradient(135deg, #5A6B7A 0%, #8A9BAA 100%)" },
