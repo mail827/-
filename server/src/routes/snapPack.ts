@@ -148,6 +148,18 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '빈티지 레코드',
     base: 'cozy vintage vinyl record shop interior, wooden shelves filled with LP records and colorful album covers displayed on walls, warm tungsten incandescent bulb lighting casting golden amber glow, vinyl turntable on wooden counter, old concert posters on ceiling, intimate nostalgic 1960s 1970s atmosphere, Kodak Portra 400 warm film tones with soft grain',
   },
+  black_swan: {
+    label: '블랙스왈',
+    base: 'dark moody cinematic atmosphere, gothic European stone cathedral interior with towering stained glass windows casting deep blue and purple light, dramatic chiaroscuro lighting, cold blue tones, dark stone columns and arches, haunting beautiful tension, dark romantic elegance, film grain',
+  },
+  blue_hour: {
+    label: '블루아워',
+    base: 'romantic European cobblestone street at twilight blue hour, vintage wrought-iron street lamp casting warm golden glow, old stone buildings with warm lit windows, purple blue gradient sky after sunset, cinematic warm-cool contrast lighting, dreamy romantic atmosphere, film grain',
+  },
+  water_memory: {
+    label: '물의 기억',
+    base: 'dreamlike cinematic atmosphere, ethereal teal tones, film grain',
+  },
   retro_hongkong: {
     label: '레트로 홍콩',
     base: 'narrow Hong Kong Mong Kok night market alley, rows of glowing crimson red Chinese paper lanterns strung tightly overhead creating tunnel of warm light, vintage neon signs with traditional Chinese characters in pink cyan and green glow, rain-slicked cobblestone street with deep puddle reflections of all lights, blurred crowd silhouettes in background creating depth, steamy food stall smoke drifting through scene, direct on-camera flash photography, harsh bright flash on subjects with dark background falloff, high contrast paparazzi snapshot style, Wong Kar-wai teal shadows and warm crimson highlights, cross-processed film look, 85mm f1.4, Fuji Superia 400 grain with teal-red color shift',
@@ -254,8 +266,9 @@ const OUTFIT_GROOM: Record<string, string> = {
   retro_hongkong: 'wearing dark burgundy wine double-breasted blazer with silky sheen over black silk shirt unbuttoned showing collarbone, ivory pocket square, black slim trousers, black chelsea boots, relaxed confident lean with hand in pocket, effortless cool charm',
   iphone_selfie: 'wearing casual white shirt with rolled sleeves, relaxed natural look, no tie no jacket',
   iphone_mirror: 'wearing casual white shirt with rolled sleeves, relaxed natural look, no tie no jacket, holding phone for mirror selfie',
-
-
+  black_swan: 'wearing black silk-satin shawl-collar blazer over black silk-georgette relaxed collarless shirt with moderate V-neckline showing collarbones only, shirt tucked in, black high-waisted wide-leg tailored trousers, thin black leather belt with matte buckle, black chelsea boots, all-black no accessories, dark sophisticated elegance',
+  blue_hour: 'wearing classic navy blue fine wool two-piece suit, single-breasted two-button blazer with notch lapel fitted silhouette, crisp white dress shirt with top button undone no tie, navy blue tailored slim trousers, dark brown leather oxford shoes, simple classic timeless gentleman',
+  water_memory: 'wearing pearl-white silk mikado single-breasted peaked lapel suit with visible luminous silk sheen like wet porcelain, NOT linen NOT matte NOT cream beige, white silk open-collar shirt no tie showing collarbones, pearl-white slim-straight trousers in same silk mikado fabric, white leather minimal dress shoes, entire outfit has unified pearlescent silk glow, ethereal dreamlike elegance',
 };
 
 const OUTFIT_BRIDE: Record<string, string> = {
@@ -286,8 +299,9 @@ const OUTFIT_BRIDE: Record<string, string> = {
   retro_hongkong: 'wearing champagne gold silk satin halter-neck dress with thin spaghetti straps and open cutout sides showing skin, small low mandarin collar detail at neckline, body-hugging silhouette, scattered delicate gold plum blossom embroidery, thigh-high side slit, vintage pearl drop earrings, metallic gold ankle-strap heels, long loose black hair flowing down past shoulders, never tied up never in bun never in updo, hairstyle matching reference photo exactly',
   iphone_selfie: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress',
   iphone_mirror: 'wearing casual white blouse or knit top, natural minimal makeup, hair down loosely, relaxed everyday look, no wedding dress, holding phone for mirror selfie',
-
-
+  black_swan: 'wearing strapless black matte silk tube top bodice with soft wispy black ostrich feather trim running across entire straight-across bustline neckline like feathery border, single black ostrich feather stole draped over LEFT shoulder only cascading down left arm to elbow right shoulder completely bare, grand floor-length A-line bell silhouette of layered semi-sheer black tulle extremely long pooling and trailing on floor, black ostrich feather clusters scattered along lower tulle layers, natural elegant makeup, subtle lip color, vintage drop earrings, dark ethereal beauty',
+  blue_hour: 'wearing deep jewel-tone sapphire blue strapless silk tube top bodice with rich royal blue subtle satin sheen, lightweight silk-chiffon A-line floor-length skirt with slight sweep that moves like liquid, layered inner silk with sheer chiffon overlay that catches air and floats with movement, no beading no sequins no feathers pure clean elegant simplicity, matching blue satin pointed-toe heels, natural dewy makeup, elegant evening glamour',
+  water_memory: 'wearing ice-blue haute couture strapless sweetheart mermaid gown in silk mikado with refined porcelain-like luminous sheen, fitted bodice with invisible boning hugging body to below knees, below knees dramatic cascading fin-like panels of double-layered silk organza in gradients of ice-blue fading to pale silver-grey to near-transparent edges cut at different lengths like betta fish tail fins, freshwater pearls of varying sizes hand-sewn in organic irregular clusters denser near bodice-to-fin transition thinning outward, long cathedral train, natural elegant makeup',
 };
 
 const HANBOK_CONCEPTS = new Set(['hanbok_wonsam', 'hanbok_dangui', 'hanbok_modern', 'hanbok_saeguk', 'hanbok_flower']);
@@ -382,7 +396,9 @@ const CONCEPT_MOOD: Record<string, string> = {
 
 
   black_swan: 'dark dramatic shadows, moody blue-purple color grading, fog and mist atmosphere, haunting beautiful tension, cold blue tones through stained glass, editorial fashion darkness, 35mm lens',
-  water_memory: 'deep teal-green ethereal underwater caustic light with tiny bubbles floating, or warm projector beam cutting through dark vintage theater with dust particles in light, or heavy rain pouring on reflective wet asphalt with warm orange street lamp glow contrasting cool rain blue, dreamlike soft focus, 50mm lens',
+  water_memory_underwater: 'deep dark teal-green underwater, soft caustic light patterns dancing on skin from above, tiny air bubbles floating around, hair floating weightlessly in water, fabrics billowing and spreading in water, ethereal aquatic dreamlike atmosphere, 50mm lens',
+  water_memory_theater: 'empty vintage art deco movie theater, faded red velvet seats, warm golden projector beam cutting through darkness with dust particles floating in light, dark teal-green walls with gold art deco trim on ceiling, warm amber and cool teal contrast, intimate cinematic atmosphere, 35mm lens',
+  water_memory_rain: 'empty European city street at night in heavy rain, wet reflective asphalt with warm orange puddle reflections, vintage wrought-iron street lamps casting warm glow, rain streaks visible in lamplight, dark moody night with warm-cool contrast, cinematic rain atmosphere, 50mm lens',
   blue_hour: 'warm golden street lamp glow contrasting cool blue twilight sky, romantic European evening, gentle wind catching hair and dress fabric, cinematic warm bokeh city lights, purple-blue sky gradient, 50mm lens',
   retro_hongkong: 'direct harsh on-camera flash fired at subject, bright white flash illuminating face and body against dark night background, flash falloff creating dark shadows behind subject, paparazzi snapshot caught off-guard moment, candid mid-stride body turned at natural angle, weight on one leg, wind in hair, neon reflections on wet pavement, shallow depth of field f1.4 crowd bokeh, Wong Kar-wai intimate mood, relaxed body language, Fuji Superia 400 cross-processed grain',
 };
@@ -412,7 +428,8 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
     ? ', authentic hanbok silk texture, accurate layering and draping'
     : '';
 
-  const mood = CONCEPT_MOOD[concept] || '';
+  const WATER_MEMORY_SCENES = ['water_memory_underwater', 'water_memory_theater', 'water_memory_rain'];
+  const mood = concept === 'water_memory' ? (CONCEPT_MOOD[WATER_MEMORY_SCENES[shotIdx % 3]] || '') : (CONCEPT_MOOD[concept] || '');
 
   if (mode === 'couple') {
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
