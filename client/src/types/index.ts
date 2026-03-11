@@ -79,6 +79,7 @@ export interface Wedding {
   showDday: boolean;
   heroMedia?: string;
   heroMediaType: MediaType;
+  heroImagePosition?: string;
   mainColor?: string;
   accentColor?: string;
   fontFamily?: string;

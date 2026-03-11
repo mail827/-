@@ -633,7 +633,21 @@ export default function AdminWeddingEdit() {
                   <video src={wedding.heroMedia} controls className="w-full h-64 object-cover rounded-xl" />
                 )
               ) : (
-                <img src={wedding.heroMedia} alt="Hero" className="w-full h-64 object-cover rounded-xl" />
+                <div className="relative cursor-crosshair" onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+                  const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+                  updateField('heroImagePosition', x + '% ' + y + '%');
+                }}>
+                  <img src={wedding.heroMedia} alt="Hero" className="w-full h-64 object-cover rounded-xl" style={{ objectPosition: wedding.heroImagePosition || '50% 50%' }} />
+                  <div className="absolute w-5 h-5 border-2 border-white rounded-full shadow-lg pointer-events-none" style={{
+                    left: (parseInt((wedding.heroImagePosition || '50% 50%').split(' ')[0]) || 50) + '%',
+                    top: (parseInt((wedding.heroImagePosition || '50% 50%').split(' ')[1]) || 50) + '%',
+                    transform: 'translate(-50%, -50%)',
+                    background: 'rgba(0,0,0,0.5)',
+                  }} />
+                  <p className="absolute bottom-2 left-2 text-xs text-white bg-black/50 px-2 py-1 rounded">클릭하여 사진 초점 위치 설정</p>
+                </div>
               )}
               <button onClick={() => { updateField('heroMedia', ''); updateField('heroMediaType', 'IMAGE'); }} className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/70">
                 <X className="w-4 h-4" />

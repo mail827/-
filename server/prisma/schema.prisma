@@ -149,6 +149,7 @@ model Wedding {
   showDday                 Boolean           @default(true)
   heroMedia                String?
   heroMediaType            MediaType         @default(IMAGE)
+  heroImagePosition        String?           @default("50% 50%")
   mainColor                String?
   accentColor              String?
   fontFamily               String?

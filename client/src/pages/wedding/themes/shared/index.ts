@@ -24,6 +24,7 @@ export interface WeddingData {
   venueLongitude?: number;
   heroMedia?: string;
   heroMediaType?: 'IMAGE' | 'VIDEO';
+  heroImagePosition?: string;
   greeting?: string;
   greetingTitle?: string;
   showParents?: boolean;
