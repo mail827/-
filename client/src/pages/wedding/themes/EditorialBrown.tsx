@@ -100,7 +100,8 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
   const dy = String(wd.getDate()).padStart(2, '0');
 
   return (
-    <div className="min-h-screen max-w-[520px] mx-auto ebr-pre" style={{ background: C.bg, color: C.dark, fontWeight: 400, overflowX: 'hidden', wordBreak: 'keep-all' }}>
+    <div className="min-h-screen ebr-pre" style={{ background: C.bg, overflowX: 'hidden' }}>
+      <div className="max-w-[520px] mx-auto" style={{ color: C.dark, fontWeight: 400, wordBreak: 'keep-all' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (
@@ -330,6 +331,7 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
       <AnimatePresence>
         <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} variant="light" weddingId={wedding.id} />
       </AnimatePresence>
+    </div>
     </div>
   );
 }

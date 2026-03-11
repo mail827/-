@@ -120,7 +120,8 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
   const calendarData = getCalendarData(wedding.weddingDate);
 
   return (
-    <div className="min-h-screen max-w-[520px] mx-auto" style={{ background: C.bg, color: C.point, fontFamily: "'Pretendard', sans-serif", fontWeight: 300, overflowX: 'hidden', wordBreak: 'keep-all' }}>
+    <div className="min-h-screen" style={{ background: C.bg, fontFamily: "'Pretendard', sans-serif", overflowX: 'hidden' }}>
+      <div className="max-w-[520px] mx-auto" style={{ color: C.point, fontWeight: 300, wordBreak: 'keep-all' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
 
@@ -526,6 +527,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
       <AnimatePresence>
         <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} variant="dark" weddingId={wedding.id} />
       </AnimatePresence>
+    </div>
     </div>
   );
 }

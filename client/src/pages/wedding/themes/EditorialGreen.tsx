@@ -105,7 +105,8 @@ export default function EditorialGreen({ wedding, guestbooks, onRsvpSubmit, onGu
   const ribbonText = `EST. ${wd.getFullYear()} / ${wedding.groomName} & ${wedding.brideName} / THE RAW NATURE EDITORIAL`;
 
   return (
-    <div className="min-h-screen max-w-[520px] mx-auto eg-pre" style={{ background: C.bg, color: C.text, fontWeight: 400, overflowX: 'hidden', wordBreak: 'keep-all' }}>
+    <div className="min-h-screen eg-pre" style={{ background: C.bg, overflowX: 'hidden' }}>
+      <div className="max-w-[520px] mx-auto" style={{ color: C.text, fontWeight: 400, wordBreak: 'keep-all' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (
@@ -327,6 +328,7 @@ export default function EditorialGreen({ wedding, guestbooks, onRsvpSubmit, onGu
       <AnimatePresence>
         <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} variant="light" weddingId={wedding.id} />
       </AnimatePresence>
+    </div>
     </div>
   );
 }
