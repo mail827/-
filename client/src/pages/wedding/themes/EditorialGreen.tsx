@@ -106,7 +106,7 @@ export default function EditorialGreen({ wedding, guestbooks, onRsvpSubmit, onGu
 
   return (
     <div className="min-h-screen eg-pre" style={{ background: C.bg, overflowX: 'hidden' }}>
-      <div className="max-w-[520px] mx-auto" style={{ color: C.text, fontWeight: 400, wordBreak: 'keep-all' }}>
+      <div className="w-full" style={{ color: C.text, fontWeight: 400, wordBreak: 'keep-all' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (

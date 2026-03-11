@@ -99,7 +99,7 @@ export default function EditorialBlue({ wedding, guestbooks, onRsvpSubmit, onGue
 
   return (
     <div className="min-h-screen eb-pre" style={{ background: C.bg, overflowX: 'hidden' }}>
-      <div className="max-w-[520px] mx-auto" style={{ color: C.dark, fontWeight: 400, wordBreak: 'keep-all' }}>
+      <div className="w-full" style={{ color: C.dark, fontWeight: 400, wordBreak: 'keep-all' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (

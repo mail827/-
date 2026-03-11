@@ -100,7 +100,7 @@ export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGu
 
   return (
     <div className="min-h-screen" style={{ background: C.bg, fontFamily: "'Pretendard',sans-serif", overflowX: 'hidden' }}>
-      <div className="max-w-[520px] mx-auto" style={{ color: C.text, fontWeight: 400 }}>
+      <div className="w-full" style={{ color: C.text, fontWeight: 400 }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (
