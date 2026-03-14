@@ -190,6 +190,11 @@ model Wedding {
   ogCoverType          String?          @default("default")
   ogCustomTitle        String?
   ogCustomImage        String?
+  groomLetter        String?
+  brideLetter        String?
+  groomLetterImage   String?
+  brideLetterImage   String?
+  showLetter         Boolean          @default(false)
   aiChats                  AiChat[]
   galleries                Gallery[]
   aiSnaps                  AiSnap[]

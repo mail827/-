@@ -10,6 +10,8 @@ export { default as VenueDetailTabs } from './VenueDetailTabs';
 export { default as VenueTabsOverride } from './VenueTabsOverride';
 export { default as ProfileSection } from './ProfileSection';
 export { default as ProfileOverride } from './ProfileOverride';
+export { default as LetterSection } from './LetterSection';
+export { default as LetterOverride } from './LetterOverride';
 
 
 
@@ -78,6 +80,11 @@ export interface WeddingData {
   brideIntro?: string;
   groomProfileUrl?: string;
   brideProfileUrl?: string;
+  groomLetter?: string;
+  brideLetter?: string;
+  groomLetterImage?: string;
+  brideLetterImage?: string;
+  showLetter?: boolean;
   showProfile?: boolean;
   venueDetailTabs?: { title: string; image?: string; content: string }[];
   ogCoverType?: string;

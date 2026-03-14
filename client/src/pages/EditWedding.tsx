@@ -838,6 +838,76 @@ export default function EditWedding() {
           </>
         )}
 
+        {tab === 'greeting' && (
+          <Section title="서로에게 쓰는 편지">
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="checkbox"
+                checked={wedding.showLetter || false}
+                onChange={(e) => updateField('showLetter', e.target.checked)}
+                className="rounded border-stone-300"
+              />
+              <span className="text-sm text-stone-600">편지 섹션 표시</span>
+            </div>
+            {wedding.showLetter && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs text-stone-500 mb-2">신랑이 신부에게</label>
+                  <textarea
+                    value={wedding.groomLetter || ''}
+                    onChange={(e) => updateField('groomLetter', e.target.value)}
+                    placeholder="당신을 만나 매일이 행복합니다..."
+                    className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
+                    rows={5}
+                  />
+                  <div className="mt-2">
+                    <label className="px-3 py-1.5 text-xs rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 cursor-pointer transition-all">
+                      편지 이미지 추가
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        uploadToCloudinary(file, 'groomLetter', (url) => updateField('groomLetterImage', url), () => {});
+                      }} />
+                    </label>
+                    {wedding.groomLetterImage && (
+                      <div className="mt-2 relative inline-block">
+                        <img src={wedding.groomLetterImage} alt="" className="w-32 h-32 object-cover rounded-lg" />
+                        <button onClick={() => updateField('groomLetterImage', '')} className="absolute -top-1 -right-1 w-5 h-5 bg-red-400 text-white rounded-full text-xs flex items-center justify-center">x</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs text-stone-500 mb-2">신부가 신랑에게</label>
+                  <textarea
+                    value={wedding.brideLetter || ''}
+                    onChange={(e) => updateField('brideLetter', e.target.value)}
+                    placeholder="우리 함께 걸어갈 날들이 기대됩니다..."
+                    className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
+                    rows={5}
+                  />
+                  <div className="mt-2">
+                    <label className="px-3 py-1.5 text-xs rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 cursor-pointer transition-all">
+                      편지 이미지 추가
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        uploadToCloudinary(file, 'brideLetter', (url) => updateField('brideLetterImage', url), () => {});
+                      }} />
+                    </label>
+                    {wedding.brideLetterImage && (
+                      <div className="mt-2 relative inline-block">
+                        <img src={wedding.brideLetterImage} alt="" className="w-32 h-32 object-cover rounded-lg" />
+                        <button onClick={() => updateField('brideLetterImage', '')} className="absolute -top-1 -right-1 w-5 h-5 bg-red-400 text-white rounded-full text-xs flex items-center justify-center">x</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </Section>
+        )}
+
         {tab === 'venue' && (
           <>
             <Section title="예식 일시">

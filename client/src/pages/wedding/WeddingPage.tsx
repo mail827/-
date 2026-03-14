@@ -33,7 +33,7 @@ const EditorialGreen = lazy(() => import('./themes/EditorialGreen'));
 const EditorialBlue = lazy(() => import('./themes/EditorialBlue'));
 const EditorialBrown = lazy(() => import('./themes/EditorialBrown'));
 import AiChat from '../../components/AiChat';
-import { GalleryOverride, VenueTabsOverride, ProfileOverride } from './themes/shared';
+import { GalleryOverride, VenueTabsOverride, ProfileOverride, LetterOverride } from './themes/shared';
 import GuestPhotoGallery from './themes/shared/GuestPhotoGallery';
 import { useSectionOrder } from '../../hooks/useSectionOrder';
 
@@ -251,6 +251,17 @@ export default function WeddingPage() {
           brideIntro={weddingToUse.brideIntro}
           groomProfileUrl={weddingToUse.groomProfileUrl}
           brideProfileUrl={weddingToUse.brideProfileUrl}
+          theme={theme}
+        />
+      )}
+      {weddingToUse.showLetter && !isPreview && (
+        <LetterOverride
+          groomName={weddingToUse.groomName}
+          brideName={weddingToUse.brideName}
+          groomLetter={weddingToUse.groomLetter}
+          brideLetter={weddingToUse.brideLetter}
+          groomLetterImage={weddingToUse.groomLetterImage}
+          brideLetterImage={weddingToUse.brideLetterImage}
           theme={theme}
         />
       )}

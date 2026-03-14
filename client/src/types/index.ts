@@ -103,6 +103,11 @@ export interface Wedding {
   brideIntro?: string;
   groomProfileUrl?: string;
   brideProfileUrl?: string;
+  groomLetter?: string;
+  brideLetter?: string;
+  groomLetterImage?: string;
+  brideLetterImage?: string;
+  showLetter?: boolean;
   guestPhotoEnabled?: boolean;
   createdAt: string;
   updatedAt: string;
