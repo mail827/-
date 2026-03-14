@@ -101,7 +101,7 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
 
   return (
     <div className="min-h-screen ebr-pre" style={{ background: C.bg, overflowX: 'hidden' }}>
-      <div className="w-full" style={{ color: C.dark, fontWeight: 400, wordBreak: 'keep-all' }}>
+      <div className="max-w-3xl mx-auto" style={{ color: C.dark, fontWeight: 400, wordBreak: 'keep-all' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (
