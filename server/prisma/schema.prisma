@@ -180,6 +180,16 @@ model Wedding {
   sectionOrder             Json?
   galleryRatio             String?          @default("1:1")
   guestPhotoEnabled        Boolean          @default(true)
+  galleryLayout        String?          @default("grid")
+  groomIntro           String?
+  brideIntro           String?
+  groomProfileUrl      String?
+  brideProfileUrl      String?
+  showProfile          Boolean          @default(false)
+  venueDetailTabs      Json?
+  ogCoverType          String?          @default("default")
+  ogCustomTitle        String?
+  ogCustomImage        String?
   aiChats                  AiChat[]
   galleries                Gallery[]
   aiSnaps                  AiSnap[]

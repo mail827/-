@@ -33,6 +33,7 @@ const EditorialGreen = lazy(() => import('./themes/EditorialGreen'));
 const EditorialBlue = lazy(() => import('./themes/EditorialBlue'));
 const EditorialBrown = lazy(() => import('./themes/EditorialBrown'));
 import AiChat from '../../components/AiChat';
+import { GalleryOverride } from './themes/shared';
 import GuestPhotoGallery from './themes/shared/GuestPhotoGallery';
 import { useSectionOrder } from '../../hooks/useSectionOrder';
 
@@ -234,6 +235,13 @@ export default function WeddingPage() {
           guestPhotoSlot={!isPreview && weddingToUse.guestPhotoEnabled !== false ? <GuestPhotoGallery slug={weddingToUse.slug} enabled={true} /> : undefined}
         />
       </Suspense>
+      {weddingToUse.galleryLayout === 'polaroid' && weddingToUse.galleries?.length && !isPreview && (
+        <GalleryOverride
+          galleries={weddingToUse.galleries}
+          theme={theme}
+          usePhotoFilter={weddingToUse.usePhotoFilter}
+        />
+      )}
       </div>
       {weddingToUse.aiEnabled && !isPreview && (
         <AiChat

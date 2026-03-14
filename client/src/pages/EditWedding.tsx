@@ -937,6 +937,26 @@ export default function EditWedding() {
             <p className="text-sm text-stone-500 mb-4">웨딩 사진이나 영상을 여러 장 추가할 수 있어요</p>
             
             <div className="flex items-center gap-2 mb-4">
+              <span className="text-xs text-stone-500">레이아웃</span>
+              {[
+                { value: 'grid', label: '그리드' },
+                { value: 'polaroid', label: '폴라로이드' },
+              ].map((layout) => (
+                <button
+                  key={layout.value}
+                  onClick={() => updateField('galleryLayout', layout.value)}
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
+                    (wedding.galleryLayout || 'grid') === layout.value
+                      ? 'bg-stone-800 text-white'
+                      : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                  }`}
+                >
+                  {layout.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 mb-4">
               <span className="text-xs text-stone-500">갤러리 비율</span>
               {['1:1', '3:4', '4:3', 'original'].map((ratio) => (
                 <button

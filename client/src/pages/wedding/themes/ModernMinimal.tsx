@@ -144,7 +144,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
       )}
 
       {galleryImages.length > 0 && (
-        <section className="py-16">
+        <section id="gallery-section" className="py-16">
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="px-4">
             <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-8">GALLERY</p>
             {(() => {
@@ -214,7 +214,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
         </motion.div>
       </section>
 
-      <section className="py-20 px-8">
+      <section id="venue-section" className="py-20 px-8">
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-sm mx-auto">
           <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-12">LOCATION</p>
           
@@ -257,7 +257,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
       </section>
 
       {(wedding.groomAccount || wedding.brideAccount) && (
-        <section className="py-20 px-8 bg-black/[0.02]">
+        <section id="account-section" className="py-20 px-8 bg-black/[0.02]">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-sm mx-auto">
             <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-4">GIFT</p>
             <p className="text-[13px] font-light text-black/50 text-center mb-10">마음 전하실 곳</p>
@@ -332,7 +332,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
         </section>
       )}
 
-      <section id="rsvp" className="py-20 px-8">
+      <section id="rsvp-section" className="py-20 px-8">
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-sm mx-auto">
           <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-4">RSVP</p>
           <p className="text-[13px] font-light text-black/50 text-center mb-10">참석 여부를 알려주세요</p>
@@ -341,7 +341,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
         </motion.div>
       </section>
 
-      <section id="guestbook" className="py-20 px-8 bg-black/[0.02]">
+      <section id="guestbook-section" className="py-20 px-8 bg-black/[0.02]">
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-sm mx-auto">
           <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-4">GUESTBOOK</p>
           <p className="text-[13px] font-light text-black/50 text-center mb-10">축하 메시지를 남겨주세요</p>

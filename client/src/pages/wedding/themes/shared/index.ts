@@ -4,6 +4,10 @@ export { default as GuestbookList } from './GuestbookList';
 export { default as GalleryModal } from './GalleryModal';
 export { default as KakaoMap } from './KakaoMap';
 export { default as ShareModal } from './ShareModal';
+export { default as PolaroidGallery } from './PolaroidGallery';
+export { default as GalleryOverride } from './GalleryOverride';
+
+
 
 export interface WeddingData {
   id: string;
@@ -65,6 +69,16 @@ export interface WeddingData {
   theme: string; mediaUrl: string; mediaType: 'IMAGE' | 'VIDEO'; order: number; }[];
   sectionOrder?: string[];
   galleryRatio?: string;
+  galleryLayout?: string;
+  groomIntro?: string;
+  brideIntro?: string;
+  groomProfileUrl?: string;
+  brideProfileUrl?: string;
+  showProfile?: boolean;
+  venueDetailTabs?: { title: string; image?: string; content: string }[];
+  ogCoverType?: string;
+  ogCustomTitle?: string;
+  ogCustomImage?: string;
 }
 
 export interface GuestbookData {
@@ -97,6 +111,7 @@ export interface ThemeProps {
   isRsvpLoading: boolean;
   isGuestbookLoading: boolean;
   guestPhotoSlot?: React.ReactNode;
+  gallerySlot?: React.ReactNode;
 }
 
 export function formatDate(dateString: string, format: 'korean' | 'dots' | 'short' = 'korean'): string {
