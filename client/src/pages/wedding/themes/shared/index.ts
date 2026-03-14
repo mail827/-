@@ -6,6 +6,8 @@ export { default as KakaoMap } from './KakaoMap';
 export { default as ShareModal } from './ShareModal';
 export { default as PolaroidGallery } from './PolaroidGallery';
 export { default as GalleryOverride } from './GalleryOverride';
+export { default as VenueDetailTabs } from './VenueDetailTabs';
+export { default as VenueTabsOverride } from './VenueTabsOverride';
 
 
 

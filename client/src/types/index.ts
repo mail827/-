@@ -97,6 +97,7 @@ export interface Wedding {
   sectionOrder?: string[];
   galleryRatio?: string;
   galleryLayout?: string;
+  venueDetailTabs?: { title: string; image?: string; content: string }[];
   guestPhotoEnabled?: boolean;
   createdAt: string;
   updatedAt: string;

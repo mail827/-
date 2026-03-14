@@ -799,6 +799,62 @@ export default function EditWedding() {
                 </div>
               </div>
             </Section>
+
+            <Section title="상세 안내 탭">
+              <p className="text-sm text-stone-500 mb-4">식사, 주차, 교통 등 추가 안내를 탭 형태로 보여줄 수 있어요</p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {['식사안내', '주차안내', '전세버스', '숙소안내'].map((preset) => (
+                  <button
+                    key={preset}
+                    onClick={() => {
+                      const tabs = (wedding.venueDetailTabs as any[]) || [];
+                      if (tabs.find((t: any) => t.title === preset)) return;
+                      updateField('venueDetailTabs', [...tabs, { title: preset, image: '', content: '' }]);
+                    }}
+                    className="px-3 py-1.5 text-xs rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 transition-all"
+                  >
+                    + {preset}
+                  </button>
+                ))}
+              </div>
+              {((wedding.venueDetailTabs as any[]) || []).map((tab: any, i: number) => (
+                <div key={i} className="border border-stone-200 rounded-lg p-4 mb-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <input
+                      value={tab.title}
+                      onChange={(e) => {
+                        const tabs = [...((wedding.venueDetailTabs as any[]) || [])];
+                        tabs[i] = { ...tabs[i], title: e.target.value };
+                        updateField('venueDetailTabs', tabs);
+                      }}
+                      className="text-sm font-medium bg-transparent border-b border-stone-200 focus:border-stone-400 outline-none pb-1"
+                      placeholder="탭 제목"
+                    />
+                    <button
+                      onClick={() => {
+                        const tabs = [...((wedding.venueDetailTabs as any[]) || [])];
+                        tabs.splice(i, 1);
+                        updateField('venueDetailTabs', tabs);
+                      }}
+                      className="text-xs text-red-400 hover:text-red-600"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                  <textarea
+                    value={tab.content || ''}
+                    onChange={(e) => {
+                      const tabs = [...((wedding.venueDetailTabs as any[]) || [])];
+                      tabs[i] = { ...tabs[i], content: e.target.value };
+                      updateField('venueDetailTabs', tabs);
+                    }}
+                    placeholder="안내 내용을 입력하세요 (줄바꿈 지원)"
+                    className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
+                    rows={4}
+                  />
+                </div>
+              ))}
+            </Section>
           </>
         )}
 
