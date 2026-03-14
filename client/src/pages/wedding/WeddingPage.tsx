@@ -33,7 +33,7 @@ const EditorialGreen = lazy(() => import('./themes/EditorialGreen'));
 const EditorialBlue = lazy(() => import('./themes/EditorialBlue'));
 const EditorialBrown = lazy(() => import('./themes/EditorialBrown'));
 import AiChat from '../../components/AiChat';
-import { GalleryOverride, VenueTabsOverride } from './themes/shared';
+import { GalleryOverride, VenueTabsOverride, ProfileOverride } from './themes/shared';
 import GuestPhotoGallery from './themes/shared/GuestPhotoGallery';
 import { useSectionOrder } from '../../hooks/useSectionOrder';
 
@@ -243,6 +243,17 @@ export default function WeddingPage() {
         />
       )}
       </div>
+      {weddingToUse.showProfile && !isPreview && (
+        <ProfileOverride
+          groomName={weddingToUse.groomName}
+          brideName={weddingToUse.brideName}
+          groomIntro={weddingToUse.groomIntro}
+          brideIntro={weddingToUse.brideIntro}
+          groomProfileUrl={weddingToUse.groomProfileUrl}
+          brideProfileUrl={weddingToUse.brideProfileUrl}
+          theme={theme}
+        />
+      )}
       {weddingToUse.venueDetailTabs && (weddingToUse.venueDetailTabs as any[])?.length > 0 && !isPreview && (
         <VenueTabsOverride
           tabs={weddingToUse.venueDetailTabs as { title: string; image?: string; content: string }[]}

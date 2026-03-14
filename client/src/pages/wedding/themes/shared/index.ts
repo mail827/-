@@ -8,6 +8,8 @@ export { default as PolaroidGallery } from './PolaroidGallery';
 export { default as GalleryOverride } from './GalleryOverride';
 export { default as VenueDetailTabs } from './VenueDetailTabs';
 export { default as VenueTabsOverride } from './VenueTabsOverride';
+export { default as ProfileSection } from './ProfileSection';
+export { default as ProfileOverride } from './ProfileOverride';
 
 
 

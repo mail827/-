@@ -685,6 +685,116 @@ export default function EditWedding() {
           </>
         )}
 
+        {tab === 'basic' && (
+          <Section title="프로필 소개">
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="checkbox"
+                checked={wedding.showProfile || false}
+                onChange={(e) => updateField('showProfile', e.target.checked)}
+                className="rounded border-stone-300"
+              />
+              <span className="text-sm text-stone-600">신랑신부 프로필 소개 표시</span>
+            </div>
+            {wedding.showProfile && (
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs text-stone-500 mb-2">신랑 프로필</label>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-16 h-16 rounded-full overflow-hidden border border-stone-200 bg-stone-50 flex items-center justify-center flex-shrink-0">
+                      {wedding.groomProfileUrl ? (
+                        <img src={wedding.groomProfileUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-lg text-stone-300">{(wedding.groomName || '신')[0]}</span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <label className="px-3 py-1.5 text-xs rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 cursor-pointer transition-all">
+                        사진 선택
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          uploadToCloudinary(file, 'groomProfile', (url) => updateField('groomProfileUrl', url), () => {});
+                        }} />
+                      </label>
+                      {wedding.groomProfileUrl && (
+                        <button onClick={() => updateField('groomProfileUrl', '')} className="px-3 py-1.5 text-xs rounded-lg text-red-400 hover:text-red-600">삭제</button>
+                      )}
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      {[
+                        'https://res.cloudinary.com/duzlquvxj/image/upload/v1773494940/4_h0iczw.jpg',
+                        'https://res.cloudinary.com/duzlquvxj/image/upload/v1773494940/5_vghru5.jpg',
+                        'https://res.cloudinary.com/duzlquvxj/image/upload/v1773494940/6_sptmku.jpg',
+                      ].map((url, i) => (
+                        <button key={i} onClick={() => updateField('groomProfileUrl', url)}
+                          className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all ${wedding.groomProfileUrl === url ? 'border-stone-800 scale-110' : 'border-stone-200 hover:border-stone-400'}`}>
+                          <img src={url} alt="" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <textarea
+                    value={wedding.groomIntro || ''}
+                    onChange={(e) => updateField('groomIntro', e.target.value)}
+                    placeholder="커피 없이 못 사는 개발자"
+                    className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
+                    rows={2}
+                    maxLength={100}
+                  />
+                  <p className="text-xs text-stone-400 mt-1 text-right">{(wedding.groomIntro || '').length}/100</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-stone-500 mb-2">신부 프로필</label>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-16 h-16 rounded-full overflow-hidden border border-stone-200 bg-stone-50 flex items-center justify-center flex-shrink-0">
+                      {wedding.brideProfileUrl ? (
+                        <img src={wedding.brideProfileUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-lg text-stone-300">{(wedding.brideName || '신')[0]}</span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <label className="px-3 py-1.5 text-xs rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 cursor-pointer transition-all">
+                        사진 선택
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          uploadToCloudinary(file, 'brideProfile', (url) => updateField('brideProfileUrl', url), () => {});
+                        }} />
+                      </label>
+                      {wedding.brideProfileUrl && (
+                        <button onClick={() => updateField('brideProfileUrl', '')} className="px-3 py-1.5 text-xs rounded-lg text-red-400 hover:text-red-600">삭제</button>
+                      )}
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      {[
+                        'https://res.cloudinary.com/duzlquvxj/image/upload/v1773494941/1_dgssbx.png',
+                        'https://res.cloudinary.com/duzlquvxj/image/upload/v1773494941/2_nnf22a.png',
+                        'https://res.cloudinary.com/duzlquvxj/image/upload/v1773494941/3_f9mqjc.png',
+                      ].map((url, i) => (
+                        <button key={i} onClick={() => updateField('brideProfileUrl', url)}
+                          className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all ${wedding.brideProfileUrl === url ? 'border-stone-800 scale-110' : 'border-stone-200 hover:border-stone-400'}`}>
+                          <img src={url} alt="" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <textarea
+                    value={wedding.brideIntro || ''}
+                    onChange={(e) => updateField('brideIntro', e.target.value)}
+                    placeholder="여행을 사랑하는 디자이너"
+                    className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
+                    rows={2}
+                    maxLength={100}
+                  />
+                  <p className="text-xs text-stone-400 mt-1 text-right">{(wedding.brideIntro || '').length}/100</p>
+                </div>
+              </div>
+            )}
+          </Section>
+        )}
+
         {tab === 'greeting' && (
           <>
             <Section title="인사말">

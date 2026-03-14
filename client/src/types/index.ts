@@ -98,6 +98,11 @@ export interface Wedding {
   galleryRatio?: string;
   galleryLayout?: string;
   venueDetailTabs?: { title: string; image?: string; content: string }[];
+  showProfile?: boolean;
+  groomIntro?: string;
+  brideIntro?: string;
+  groomProfileUrl?: string;
+  brideProfileUrl?: string;
   guestPhotoEnabled?: boolean;
   createdAt: string;
   updatedAt: string;
