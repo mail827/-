@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { galleryThumbUrl } from '../../../../utils/image';
 import GalleryModal from './GalleryModal';
 import { getThemeConfig } from './themeConfig';
@@ -126,6 +126,27 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
                 transform: `rotate(${rot}deg)`,
                 zIndex: z,
                 cursor: 'pointer',
+                transition: 'all 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
+              }}
+              onPointerDown={(e) => {
+                const el = e.currentTarget;
+                el.style.transform = 'rotate(0deg) scale(1.08)';
+                el.style.zIndex = '50';
+                el.style.filter = 'drop-shadow(0 8px 16px rgba(0,0,0,0.12))';
+              }}
+              onPointerUp={(e) => {
+                const el = e.currentTarget;
+                setTimeout(() => {
+                  el.style.transform = `rotate(${rot}deg)`;
+                  el.style.zIndex = String(z);
+                  el.style.filter = '';
+                }, 200);
+              }}
+              onPointerLeave={(e) => {
+                const el = e.currentTarget;
+                el.style.transform = `rotate(${rot}deg)`;
+                el.style.zIndex = String(z);
+                el.style.filter = '';
               }}
             >
               <div
