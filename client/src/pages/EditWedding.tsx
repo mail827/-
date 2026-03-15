@@ -851,7 +851,7 @@ export default function EditWedding() {
               <span className="text-sm text-stone-600">봉투 인트로 사용</span>
             </div>
             {wedding.envelopeEnabled && (
-              <div className="grid grid-cols-4 gap-3">
+              <><div className="grid grid-cols-4 gap-3">
                 {[
                   { value: 'black_ribbon', label: '블랙 레드리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551431/1-Photoroom_foq0wz.png' },
                   { value: 'white_ribbon', label: '화이트 금리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/3-Photoroom_zftkad.png' },
@@ -880,7 +880,18 @@ export default function EditWedding() {
                   </button>
                 ))}
               </div>
-            )}
+              <div className="mt-4">
+                <label className="block text-xs text-stone-500 mb-2">카드 문구 (미입력 시 기본 문구)</label>
+                <textarea
+                  value={wedding.envelopeCardText || ''}
+                  onChange={(e) => updateField('envelopeCardText', e.target.value)}
+                  placeholder={`${wedding.groomName || '신랑'} & ${wedding.brideName || '신부'}의
+결혼식에 초대합니다`}
+                  className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
+                  rows={3}
+                />
+              </div>
+            </>)}
           </Section>
         )}
 

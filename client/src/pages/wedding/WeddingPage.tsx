@@ -229,6 +229,8 @@ export default function WeddingPage() {
           brideName={weddingToUse.brideName}
           weddingDate={weddingToUse.weddingDate}
           style={weddingToUse.envelopeStyle || 'ivory'}
+          cardText={weddingToUse.envelopeCardText}
+          theme={theme}
           onComplete={() => setEnvelopeDismissed(true)}
         />
       )}
