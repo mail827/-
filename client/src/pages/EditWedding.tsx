@@ -851,13 +851,20 @@ export default function EditWedding() {
               <span className="text-sm text-stone-600">봉투 인트로 사용</span>
             </div>
             {wedding.envelopeEnabled && (
-              <div className="grid grid-cols-5 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 {[
-                  { value: 'ivory', label: '아이보리', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548951/11_ncw2o3.png' },
-                  { value: 'black', label: '블랙', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548951/%E1%84%87%E1%85%B3%E1%86%AF%E1%84%85%E1%85%A2%E1%86%A8_pdsdjy.png' },
-                  { value: 'blue', label: '네이비', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548953/%E1%84%87%E1%85%B3%E1%86%AF%E1%84%85%E1%85%AE_xfs5yd.png' },
-                  { value: 'green', label: '올리브', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548952/%E1%84%8B%E1%85%A9%E1%86%AF%E1%84%85%E1%85%B5%E1%84%87%E1%85%B3_jwf7x7.png' },
-                  { value: 'pink', label: '핑크', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548957/%E1%84%91%E1%85%B5%E1%86%BC%E1%84%8F%E1%85%B3_ahvvya.png' },
+                  { value: 'black_ribbon', label: '블랙 레드리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551431/1-Photoroom_foq0wz.png' },
+                  { value: 'white_ribbon', label: '화이트 금리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/3-Photoroom_zftkad.png' },
+                  { value: 'navy_seal', label: '네이비 엔봉', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/2-Photoroom_wmyxia.png' },
+                  { value: 'black_silver', label: '블랙 은리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/4-Photoroom_lnyaib.png' },
+                  { value: 'olive_ribbon_a', label: '올리브 리봄A', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/5-Photoroom_b3ap27.png' },
+                  { value: 'olive_ribbon_b', label: '올리브 리봄B', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/6-Photoroom_zopodw.png' },
+                  { value: 'pink_ribbon', label: '핑크 리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/7-Photoroom_y9bijv.png' },
+                  { value: 'white_bow', label: '화이트 리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/8-Photoroom_akpnjh.png' },
+                  { value: 'white_seal', label: '화이트 씨링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/9-Photoroom_vrwsw2.png' },
+                  { value: 'black_seal', label: '블랙 씨링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/10-Photoroom_ufpw7v.png' },
+                  { value: 'pink_seal', label: '핑크 씨링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551434/11-Photoroom_yitcbl.png' },
+                  { value: 'olive_seal', label: '올리브 씨링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551436/13-Photoroom_gevewd.png' },
                 ].map((env) => (
                   <button
                     key={env.value}

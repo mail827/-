@@ -1,36 +1,68 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getThemeConfig } from './themeConfig';
 
-const ENVELOPE_SETS: Record<string, { envelope: string; texture: string; textColor: string; sealColor: string }> = {
-  ivory: {
-    envelope: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548951/11_ncw2o3.png',
-    texture: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548953/13_gj3dud.png',
-    textColor: '#5a4a3a',
-    sealColor: '#C9A87C',
-  },
-  black: {
-    envelope: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548951/%E1%84%87%E1%85%B3%E1%86%AF%E1%84%85%E1%85%A2%E1%86%A8_pdsdjy.png',
-    texture: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548952/%E1%84%87%E1%85%B3%E1%86%AF%E1%84%85%E1%85%A2%E1%86%A8%E1%84%91%E1%85%A7%E1%86%AB%E1%84%8C%E1%85%B5%E1%84%8C%E1%85%B51_rlqwsh.png',
+const ENVELOPES: Record<string, { closed: string; opened?: string; bg: string; textColor: string }> = {
+  black_ribbon: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551431/1-Photoroom_foq0wz.png',
+    opened: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773552601/1-Photoroom_iwjehu.png',
+    bg: '#0a0a0a',
     textColor: '#e8dfd4',
-    sealColor: '#C9A96E',
   },
-  blue: {
-    envelope: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548953/%E1%84%87%E1%85%B3%E1%86%AF%E1%84%85%E1%85%AE_xfs5yd.png',
-    texture: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548955/%E1%84%87%E1%85%B3%E1%86%AF%E1%84%85%E1%85%AE%E1%84%91%E1%85%A7%E1%86%AB%E1%84%8C%E1%85%B5%E1%84%8C%E1%85%B52_a0xf6m.png',
-    textColor: '#e0e8f0',
-    sealColor: '#a0b8cc',
+  white_ribbon: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/3-Photoroom_zftkad.png',
+    bg: '#f5f3ef',
+    textColor: '#5a4a3a',
   },
-  green: {
-    envelope: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548952/%E1%84%8B%E1%85%A9%E1%86%AF%E1%84%85%E1%85%B5%E1%84%87%E1%85%B3_jwf7x7.png',
-    texture: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548956/%E1%84%80%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%91%E1%85%A7%E1%86%AB%E1%84%8C%E1%85%B5%E1%84%8C%E1%85%B51_xqsprh.png',
-    textColor: '#3a4a3a',
-    sealColor: '#7a8a6a',
+  navy_seal: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/2-Photoroom_wmyxia.png',
+    bg: '#0d1520',
+    textColor: '#c0d0e0',
   },
-  pink: {
-    envelope: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548957/%E1%84%91%E1%85%B5%E1%86%BC%E1%84%8F%E1%85%B3_ahvvya.png',
-    texture: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548956/%E1%84%91%E1%85%B5%E1%86%BC%E1%84%8F%E1%85%B3%E1%84%91%E1%85%A7%E1%86%AB%E1%84%8C%E1%85%B5%E1%84%8C%E1%85%B52_eqxske.png',
-    textColor: '#5a4550',
-    sealColor: '#c8a0a8',
+  black_silver: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/4-Photoroom_lnyaib.png',
+    bg: '#0a0a0a',
+    textColor: '#c0c0c0',
+  },
+  olive_ribbon_a: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/5-Photoroom_b3ap27.png',
+    bg: '#1a1f18',
+    textColor: '#c0ccb8',
+  },
+  olive_ribbon_b: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/6-Photoroom_zopodw.png',
+    bg: '#2a3028',
+    textColor: '#c8d4c0',
+  },
+  pink_ribbon: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/7-Photoroom_y9bijv.png',
+    bg: '#2a1820',
+    textColor: '#e8c0d0',
+  },
+  white_bow: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/8-Photoroom_akpnjh.png',
+    bg: '#f0eeea',
+    textColor: '#5a5a5a',
+  },
+  white_seal: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/9-Photoroom_vrwsw2.png',
+    bg: '#f0eeea',
+    textColor: '#5a5a5a',
+  },
+  black_seal: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/10-Photoroom_ufpw7v.png',
+    bg: '#0a0a0a',
+    textColor: '#c0c0c0',
+  },
+  pink_seal: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551434/11-Photoroom_yitcbl.png',
+    bg: '#1f1518',
+    textColor: '#e0c0cc',
+  },
+  olive_seal: {
+    closed: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551436/13-Photoroom_gevewd.png',
+    bg: '#1a1f18',
+    textColor: '#b8c4a8',
   },
 };
 
@@ -39,12 +71,16 @@ interface EnvelopeIntroProps {
   brideName: string;
   weddingDate: string;
   style?: string;
+  theme?: string;
   onComplete: () => void;
 }
 
-export default function EnvelopeIntro({ groomName, brideName, weddingDate, style = 'ivory', onComplete }: EnvelopeIntroProps) {
+export default function EnvelopeIntro({ groomName, brideName, weddingDate, style = 'black_ribbon', theme, onComplete }: EnvelopeIntroProps) {
   const [phase, setPhase] = useState<'sealed' | 'opening' | 'rising' | 'done'>('sealed');
-  const set = ENVELOPE_SETS[style] || ENVELOPE_SETS.ivory;
+  const env = ENVELOPES[style] || ENVELOPES.black_ribbon;
+  const hasOpened = !!env.opened;
+
+  const config = theme ? getThemeConfig(theme) : null;
 
   const dateStr = (() => {
     try {
@@ -53,27 +89,36 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
     } catch { return ''; }
   })();
 
+  const handleComplete = useCallback(() => { onComplete(); }, [onComplete]);
+
   useEffect(() => {
     if (phase === 'done') {
-      const timer = setTimeout(onComplete, 600);
+      const timer = setTimeout(handleComplete, 800);
       return () => clearTimeout(timer);
     }
-  }, [phase, onComplete]);
+  }, [phase, handleComplete]);
 
   const handleTap = () => {
-    if (phase === 'sealed') {
+    if (phase !== 'sealed') return;
+    if (hasOpened) {
       setPhase('opening');
-      setTimeout(() => setPhase('rising'), 800);
-      setTimeout(() => setPhase('done'), 2200);
+      setTimeout(() => setPhase('rising'), 1000);
+      setTimeout(() => setPhase('done'), 2800);
+    } else {
+      setPhase('opening');
+      setTimeout(() => setPhase('done'), 2000);
     }
   };
+
+  const cardBg = config ? (isColorDark(config.colors.background) ? '#1a1a1a' : '#ffffff') : '#ffffff';
+  const cardText = config ? config.colors.text : env.textColor;
 
   return (
     <AnimatePresence>
       {phase !== 'done' && (
         <motion.div
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           onClick={handleTap}
           style={{
             position: 'fixed',
@@ -85,123 +130,145 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
             justifyContent: 'center',
             cursor: phase === 'sealed' ? 'pointer' : 'default',
             overflow: 'hidden',
+            background: env.bg,
           }}
         >
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `url(${set.texture})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }} />
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: style === 'black' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)',
-          }} />
+          <div style={{ position: 'relative', width: '70vw', maxWidth: '300px' }}>
+            {hasOpened ? (
+              <>
+                <motion.div
+                  animate={phase === 'sealed' ? { opacity: 1 } : { opacity: 0 }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ position: phase === 'sealed' ? 'relative' : 'absolute', top: 0, left: 0, right: 0 }}
+                >
+                  <img
+                    src={env.closed}
+                    alt=""
+                    style={{ width: '100%', height: 'auto', display: 'block', filter: 'drop-shadow(0 12px 40px rgba(0,0,0,0.3))' }}
+                  />
+                </motion.div>
 
-          <div style={{ position: 'relative', zIndex: 2, perspective: '1200px', width: '280px' }}>
-            <div style={{ position: 'relative' }}>
-              <motion.div
-                animate={phase === 'opening' || phase === 'rising' ? { rotateX: -180 } : { rotateX: 0 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '100px',
-                  transformOrigin: 'top center',
-                  zIndex: phase === 'sealed' ? 5 : 1,
-                  transformStyle: 'preserve-3d',
-                }}
-              >
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: `linear-gradient(180deg, ${set.sealColor}22 0%, ${set.sealColor}11 100%)`,
-                  clipPath: 'polygon(0 0, 50% 100%, 100% 0)',
-                  backfaceVisibility: 'hidden',
-                  borderBottom: `1px solid ${set.sealColor}33`,
-                }} />
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: `linear-gradient(0deg, ${set.sealColor}22 0%, ${set.sealColor}11 100%)`,
-                  clipPath: 'polygon(0 100%, 50% 0, 100% 100%)',
-                  transform: 'rotateX(180deg)',
-                  backfaceVisibility: 'hidden',
-                }} />
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={(phase === 'opening' || phase === 'rising') ? { opacity: 1 } : { opacity: 0 }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ position: phase === 'sealed' ? 'absolute' : 'relative', top: 0, left: 0, right: 0 }}
+                >
+                  <img
+                    src={env.opened}
+                    alt=""
+                    style={{ width: '100%', height: 'auto', display: 'block', filter: 'drop-shadow(0 12px 40px rgba(0,0,0,0.3))' }}
+                  />
+                </motion.div>
 
-              <div style={{
-                width: '280px',
-                height: '180px',
-                borderRadius: '4px',
-                overflow: 'hidden',
-                boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
-                position: 'relative',
-              }}>
-                <img src={set.envelope} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
+                <motion.div
+                  initial={{ y: 0, opacity: 0 }}
+                  animate={phase === 'rising' ? { y: -280, opacity: 1 } : { y: 0, opacity: 0 }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                  style={{
+                    position: 'absolute',
+                    top: '30%',
+                    left: '12%',
+                    right: '12%',
+                    background: cardBg,
+                    borderRadius: '4px',
+                    padding: '2rem 1.5rem',
+                    boxShadow: '0 8px 40px rgba(0,0,0,0.15)',
+                    textAlign: 'center',
+                    zIndex: 5,
+                  }}
+                >
+                  <p style={{ fontSize: 9, letterSpacing: '0.3em', color: cardText, opacity: 0.35, marginBottom: 16, textTransform: 'uppercase' }}>
+                    Wedding Invitation
+                  </p>
+                  <p style={{ fontSize: 20, fontWeight: 300, color: cardText, letterSpacing: '0.05em', lineHeight: 1.6 }}>
+                    {groomName}
+                  </p>
+                  <p style={{ fontSize: 11, color: cardText, opacity: 0.3, margin: '4px 0' }}>&</p>
+                  <p style={{ fontSize: 20, fontWeight: 300, color: cardText, letterSpacing: '0.05em', lineHeight: 1.6 }}>
+                    {brideName}
+                  </p>
+                  <div style={{ width: 24, height: 1, background: cardText, opacity: 0.1, margin: '16px auto' }} />
+                  <p style={{ fontSize: 12, color: cardText, opacity: 0.4, letterSpacing: '0.1em' }}>
+                    {dateStr}
+                  </p>
+                </motion.div>
+              </>
+            ) : (
+              <>
+                <motion.div
+                  animate={phase === 'opening' ? { y: -60, scale: 0.85, opacity: 0 } : { y: 0, scale: 1, opacity: 1 }}
+                  transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <img
+                    src={env.closed}
+                    alt=""
+                    style={{ width: '100%', height: 'auto', display: 'block', filter: 'drop-shadow(0 12px 40px rgba(0,0,0,0.3))' }}
+                  />
+                </motion.div>
 
-              <motion.div
-                animate={
-                  phase === 'rising'
-                    ? { y: -220, opacity: 1 }
-                    : { y: 0, opacity: phase === 'opening' ? 1 : 0 }
-                }
-                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: phase === 'rising' ? 0.1 : 0 }}
-                style={{
-                  position: 'absolute',
-                  top: '20px',
-                  left: '15px',
-                  right: '15px',
-                  height: '200px',
-                  background: style === 'black' ? '#1a1a1a' : '#fff',
-                  borderRadius: '3px',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '1.5rem',
-                  zIndex: 3,
-                }}
-              >
-                <p style={{ fontSize: 10, letterSpacing: '0.3em', color: set.textColor, opacity: 0.4, marginBottom: 12 }}>
-                  WEDDING INVITATION
-                </p>
-                <p style={{ fontSize: 18, fontWeight: 300, color: set.textColor, letterSpacing: '0.1em' }}>
-                  {groomName} & {brideName}
-                </p>
-                <p style={{ fontSize: 12, color: set.textColor, opacity: 0.5, marginTop: 8 }}>
-                  {dateStr}
-                </p>
-              </motion.div>
-            </div>
+                <motion.div
+                  initial={{ y: 40, opacity: 0, scale: 0.9 }}
+                  animate={phase === 'opening' ? { y: -180, opacity: 1, scale: 1 } : { y: 40, opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+                  style={{
+                    position: 'absolute',
+                    top: '25%',
+                    left: '10%',
+                    right: '10%',
+                    background: cardBg,
+                    borderRadius: '4px',
+                    padding: '2rem 1.5rem',
+                    boxShadow: '0 8px 40px rgba(0,0,0,0.15)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <p style={{ fontSize: 9, letterSpacing: '0.3em', color: cardText, opacity: 0.35, marginBottom: 16, textTransform: 'uppercase' }}>
+                    Wedding Invitation
+                  </p>
+                  <p style={{ fontSize: 20, fontWeight: 300, color: cardText, letterSpacing: '0.05em', lineHeight: 1.6 }}>
+                    {groomName}
+                  </p>
+                  <p style={{ fontSize: 11, color: cardText, opacity: 0.3, margin: '4px 0' }}>&</p>
+                  <p style={{ fontSize: 20, fontWeight: 300, color: cardText, letterSpacing: '0.05em', lineHeight: 1.6 }}>
+                    {brideName}
+                  </p>
+                  <div style={{ width: 24, height: 1, background: cardText, opacity: 0.1, margin: '16px auto' }} />
+                  <p style={{ fontSize: 12, color: cardText, opacity: 0.4, letterSpacing: '0.1em' }}>
+                    {dateStr}
+                  </p>
+                </motion.div>
+              </>
+            )}
           </div>
 
           {phase === 'sealed' && (
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1, duration: 0.8 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
               style={{
-                position: 'relative',
-                zIndex: 2,
                 fontSize: 12,
-                color: set.textColor,
-                opacity: 0.4,
-                marginTop: '2rem',
-                letterSpacing: '0.1em',
+                color: env.textColor,
+                opacity: 0.35,
+                marginTop: '2.5rem',
+                letterSpacing: '0.15em',
               }}
             >
-              터치하여 열기
+              초대장을 열어보세요
             </motion.p>
           )}
         </motion.div>
       )}
     </AnimatePresence>
   );
+}
+
+function isColorDark(hex: string): boolean {
+  const c = hex.replace('#', '');
+  if (c.length < 6) return false;
+  const r = parseInt(c.substring(0, 2), 16);
+  const g = parseInt(c.substring(2, 4), 16);
+  const b = parseInt(c.substring(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 < 128;
 }
