@@ -418,8 +418,16 @@ export default function EditWedding() {
     }
 
     if (imageFiles.length > 0) {
-      setCropQueue(imageFiles.slice(1));
-      setCurrentCropFile(imageFiles[0]);
+      if ((wedding.galleryRatio || '1:1') === 'original') {
+        setUploading(true);
+        for (let i = 0; i < imageFiles.length; i++) {
+          await uploadSingleGallery(imageFiles[i], galleries.length + i);
+        }
+        setUploading(false);
+      } else {
+        setCropQueue(imageFiles.slice(1));
+        setCurrentCropFile(imageFiles[0]);
+      }
     }
   };
 
