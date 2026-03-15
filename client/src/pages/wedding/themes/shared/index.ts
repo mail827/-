@@ -75,6 +75,7 @@ export interface WeddingData {
   theme: string; mediaUrl: string; mediaType: 'IMAGE' | 'VIDEO'; order: number; }[];
   sectionOrder?: string[];
   galleryRatio?: string;
+  heroTextPosition?: string;
   galleryLayout?: string;
   groomIntro?: string;
   brideIntro?: string;

@@ -2210,15 +2210,20 @@ export default function EditWedding() {
                 <div className="absolute inset-0 bg-black/20" />
                 <div
                   className="absolute left-0 right-0 flex flex-col items-center transition-all duration-200"
-                  style={{ top: `${Number(wedding.heroTextPosition) || 50}%`, transform: 'translateY(-50%)' }}
+                  style={{ top: `${Math.max(3, (Number(wedding.heroTextPosition) || 50) * 0.85)}%`, gap: '12px' }}
                 >
-                  <p className="text-white/60 text-[10px] tracking-[0.3em] uppercase">Wedding Day</p>
-                  <p className="text-white text-lg font-light tracking-wider mt-1">
-                    {wedding.groomName || '신랑'} & {wedding.brideName || '신부'}
+                  <p className="text-white/60 text-[9px] tracking-[0.25em] uppercase font-light">Happily Ever After</p>
+                  <p className="text-white text-xl italic font-light" style={{ fontFamily: 'Georgia, serif' }}>
+                    Dream your<br />Wedding Day
                   </p>
-                  <p className="text-white/50 text-xs mt-1">
-                    {wedding.weddingDate ? new Date(wedding.weddingDate).toLocaleDateString('ko-KR') : '2026.00.00'}
-                  </p>
+                  <div className="text-center">
+                    <p className="text-white/50 text-[9px] tracking-[0.15em]">
+                      FINALLY {wedding.weddingDate ? new Date(wedding.weddingDate).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.') : '2026.00.00'}
+                    </p>
+                    <p className="text-white text-sm font-light tracking-wider mt-0.5">
+                      {wedding.groomName || '신랑'} & {wedding.brideName || '신부'}
+                    </p>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-4">

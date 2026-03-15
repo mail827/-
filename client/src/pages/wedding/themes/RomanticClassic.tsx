@@ -162,7 +162,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
         <div className="absolute inset-x-0 top-0 z-10" style={{ height: '50%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)' }} />
         <div className="absolute inset-x-0 bottom-0 z-10" style={{ height: '33%', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }} />
 
-        <div className="absolute inset-0 z-20 flex flex-col justify-between" style={{ padding: '2.5rem' }}>
+        <div className="absolute inset-0 z-20 flex flex-col items-center" style={{ padding: '2.5rem', paddingTop: `${Math.max(3, (Number(wedding.heroTextPosition) || 50) * 0.85)}vh`, gap: '2rem' }}>
           <motion.p
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

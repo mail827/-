@@ -226,14 +226,6 @@ export default function WeddingPage() {
   const theme = urlTheme || weddingToUse.theme || 'ROMANTIC_CLASSIC';
   const ThemeComponent = themeComponents[theme] || RomanticClassic;
 
-  const heroPositionStyle = (() => {
-    const pos = Number(weddingToUse.heroTextPosition);
-    if (!pos || pos === 50) return '';
-    const targetThemes = ['ROMANTIC_CLASSIC', 'CRUISE_DAY', 'CRUISE_SUNSET'];
-    if (!targetThemes.includes(theme)) return '';
-    return 'section[style] > .absolute.z-20 { justify-content: flex-start !important; padding-top: ' + (pos * 0.75) + 'vh !important; gap: 1.5rem !important; }';
-  })();
-
   const galleryAspectStyle = (() => {
     const ratio = weddingToUse.galleryRatio || '1:1';
     if (ratio === '1:1') return '';
@@ -259,7 +251,6 @@ export default function WeddingPage() {
         />
       )}
       <div ref={sectionRef}>
-      {heroPositionStyle && <style>{heroPositionStyle}</style>}
       {galleryAspectStyle && <style>{galleryAspectStyle}</style>}
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Heart className="w-6 h-6 animate-pulse text-stone-300" /></div>}>
         <ThemeComponent

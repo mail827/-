@@ -166,7 +166,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
         <div className="absolute inset-x-0 top-0" style={{ height: '40%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)' }} />
         <div className="absolute inset-x-0 bottom-0" style={{ height: '30%', background: 'linear-gradient(to top, rgba(0,0,0,0.35), transparent)' }} />
 
-        <div className="absolute inset-0 z-20 flex flex-col justify-between" style={{ padding: '2.5rem 2rem' }}>
+        <div className="absolute inset-0 z-20 flex flex-col items-center" style={{ padding: '2.5rem 2rem', paddingTop: `${Math.max(3, (Number(wedding.heroTextPosition) || 50) * 0.85)}vh`, gap: '2rem' }}>
           <motion.p
             initial={{ opacity: 0, y: -15 }}
             animate={{ opacity: 1, y: 0 }}
