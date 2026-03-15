@@ -106,7 +106,7 @@ export default function EditorialGreen({ wedding, guestbooks, onRsvpSubmit, onGu
 
   return (
     <div className="min-h-screen eg-pre" style={{ background: C.bg, overflowX: 'hidden' }}>
-      <div className="max-w-3xl mx-auto" style={{ color: C.text, fontWeight: 400, wordBreak: 'keep-all' }}>
+      <div className="w-full" style={{ color: C.text, fontWeight: 400, wordBreak: 'keep-all' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
       {wedding.bgMusicUrl && (
@@ -124,9 +124,9 @@ export default function EditorialGreen({ wedding, guestbooks, onRsvpSubmit, onGu
           <motion.div initial={{ opacity: 0, scale: 1.03 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.2, delay: 0.3 }}
             style={{ width: '75%', height: '38vh', alignSelf: 'center', margin: '12px 0', overflow: 'hidden', zIndex: 1 }}>
             {wedding.heroMediaType === 'VIDEO' ? (
-              <video src={wedding.heroMedia ? heroUrl(wedding.heroMedia) : ''} autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: wedding.heroImagePosition || '50% 50%', display: 'block' }} />
+              <video src={wedding.heroMedia ? heroUrl(wedding.heroMedia) : ''} autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
             ) : (
-              <img src={heroUrl(wedding.heroMedia || wedding.galleries?.[0]?.mediaUrl || '')} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: wedding.heroImagePosition || '50% 50%', display: 'block' }} />
+              <img src={heroUrl(wedding.heroMedia || wedding.galleries?.[0]?.mediaUrl || '')} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
             )}
           </motion.div>
         )}

@@ -121,7 +121,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
 
   return (
     <div className="min-h-screen" style={{ background: C.bg, fontFamily: "'Pretendard', sans-serif", overflowX: 'hidden' }}>
-      <div className="max-w-3xl mx-auto" style={{ color: C.point, fontWeight: 300, wordBreak: 'keep-all' }}>
+      <div className="w-full" style={{ color: C.point, fontWeight: 300, wordBreak: 'keep-all' }}>
       <style>{fontStyles}{themeStyles}</style>
       {wedding.bgMusicUrl && <audio ref={audioRef} src={wedding.bgMusicUrl} loop />}
 
