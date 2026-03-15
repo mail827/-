@@ -25,7 +25,7 @@ function getFrameStyle(theme: string) {
     return {
       frame: '#1a1a1a',
       border: 'rgba(255,255,255,0.06)',
-      shadow: '0 1px 8px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.2)',
+      shadow: '1px 2px 8px rgba(0,0,0,0.4), 0 6px 20px rgba(0,0,0,0.2)',
       caption: 'rgba(255,255,255,0.12)',
       imgBg: '#111',
     };
@@ -38,7 +38,7 @@ function getFrameStyle(theme: string) {
     return {
       frame: '#FFFDF8',
       border: 'rgba(0,0,0,0.04)',
-      shadow: '0 1px 6px rgba(139,111,71,0.08), 0 4px 16px rgba(139,111,71,0.04)',
+      shadow: '1px 2px 8px rgba(139,111,71,0.08), 0 6px 20px rgba(139,111,71,0.04)',
       caption: 'rgba(139,111,71,0.15)',
       imgBg: '#f5f0e8',
     };
@@ -48,7 +48,7 @@ function getFrameStyle(theme: string) {
     return {
       frame: '#FAFCFD',
       border: 'rgba(0,0,0,0.03)',
-      shadow: '0 1px 6px rgba(91,143,168,0.08), 0 4px 16px rgba(91,143,168,0.04)',
+      shadow: '1px 2px 8px rgba(91,143,168,0.08), 0 6px 20px rgba(91,143,168,0.04)',
       caption: 'rgba(91,143,168,0.15)',
       imgBg: '#f0f4f7',
     };
@@ -57,7 +57,7 @@ function getFrameStyle(theme: string) {
   return {
     frame: '#fff',
     border: 'rgba(0,0,0,0.04)',
-    shadow: '0 1px 6px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)',
+    shadow: '1px 2px 8px rgba(0,0,0,0.07), 0 6px 20px rgba(0,0,0,0.04)',
     caption: 'rgba(0,0,0,0.12)',
     imgBg: '#f5f5f3',
   };
@@ -80,71 +80,58 @@ function getWarmth(hex: string): number {
   return r / (r + b + 1);
 }
 
-function seededRandom(seed: number) {
-  let s = seed;
-  return () => {
-    s = (s * 16807 + 0) % 2147483647;
-    return (s - 1) / 2147483646;
-  };
-}
+const ROTATIONS = [8, -5, 3, -10, 6, -3, 11, -7, 4, -6, 9, -4, 7, -11, 2, -8, 5, -9, 10, -2];
+const OFFSETS_X = [2, 6, -4, -2, 8, -6, 0, 4, -3, 5, -5, 3, -1, 7, -7, 1, -4, 6, -2, 4];
+const OFFSETS_Y = [-6, 4, -2, 8, -4, 6, -8, 2, 5, -3, 7, -5, 3, -7, 1, -6, 4, -1, 6, -4];
+const Z_ORDER = [3, 7, 1, 5, 9, 2, 8, 4, 6, 10, 1, 7, 3, 8, 5, 2, 9, 4, 6, 1];
 
 export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', usePhotoFilter = true }: PolaroidGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const images = galleries.filter(g => g.mediaType === 'IMAGE');
-
-  const transforms = useMemo(() => {
-    return images.map((item, i) => {
-      const rng = seededRandom(item.id.charCodeAt(0) * 1000 + i * 137);
-      const rotation = (rng() - 0.5) * 16;
-      const tx = (rng() - 0.5) * 12;
-      const ty = (rng() - 0.5) * 8;
-      const scale = 0.92 + rng() * 0.08;
-      return { rotation, tx, ty, scale };
-    });
-  }, [images.length]);
-
   if (!images.length) return null;
 
   const style = getFrameStyle(theme);
+  const cols = 3;
+  const cellW = 100 / cols;
+  const rowH = 58;
 
   return (
     <>
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '12px 8px',
-          padding: '4px 12px',
+          position: 'relative',
+          width: '100%',
+          height: Math.ceil(images.length / cols) * rowH + 16 + 'vw',
+          minHeight: Math.ceil(images.length / cols) * 160 + 40,
         }}
       >
         {images.map((item, i) => {
-          const t = transforms[i];
-          const baseTransform = `rotate(${t.rotation}deg) translate(${t.tx}px, ${t.ty}px) scale(${t.scale})`;
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const rot = ROTATIONS[i % ROTATIONS.length];
+          const ox = OFFSETS_X[i % OFFSETS_X.length];
+          const oy = OFFSETS_Y[i % OFFSETS_Y.length];
+          const z = Z_ORDER[i % Z_ORDER.length];
+
           return (
             <div
               key={item.id}
               onClick={() => setSelectedIndex(i)}
               style={{
+                position: 'absolute',
+                left: `calc(${col * cellW + cellW * 0.08}% + ${ox}px)`,
+                top: `calc(${row * rowH}vw * 0.85 + ${oy}px + 8px)`,
+                width: `${cellW * 0.82}%`,
+                transform: `rotate(${rot}deg)`,
+                zIndex: z,
                 cursor: 'pointer',
-                transform: baseTransform,
-                transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
-                transformOrigin: 'center center',
-                position: 'relative',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'rotate(0deg) translate(0,0) scale(1.04)';
-                e.currentTarget.style.zIndex = '10';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = baseTransform;
-                e.currentTarget.style.zIndex = '0';
               }}
             >
               <div
                 style={{
                   background: style.frame,
-                  padding: '4px 4px 22px 4px',
+                  padding: '4px 4px 20px 4px',
                   boxShadow: style.shadow,
                   borderRadius: '1px',
                   border: `1px solid ${style.border}`,
@@ -165,7 +152,7 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
                 </div>
                 <div
                   style={{
-                    height: '18px',
+                    height: '16px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -173,10 +160,11 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
                 >
                   <span
                     style={{
-                      fontSize: '7px',
+                      fontSize: '6px',
                       letterSpacing: '0.15em',
                       color: style.caption,
                       userSelect: 'none',
+                      fontFamily: 'monospace',
                     }}
                   >
                     {String(i + 1).padStart(2, '0')}
