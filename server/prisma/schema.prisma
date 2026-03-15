@@ -195,6 +195,8 @@ model Wedding {
   groomLetterImage   String?
   brideLetterImage   String?
   showLetter         Boolean          @default(false)
+  envelopeEnabled      Boolean          @default(false)
+  envelopeStyle        String?          @default("ivory")
   aiChats                  AiChat[]
   galleries                Gallery[]
   aiSnaps                  AiSnap[]

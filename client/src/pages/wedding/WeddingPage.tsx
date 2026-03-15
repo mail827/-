@@ -34,6 +34,7 @@ const EditorialBlue = lazy(() => import('./themes/EditorialBlue'));
 const EditorialBrown = lazy(() => import('./themes/EditorialBrown'));
 import AiChat from '../../components/AiChat';
 import { GalleryOverride, VenueTabsOverride, ProfileOverride, LetterOverride } from './themes/shared';
+import EnvelopeIntro from './themes/shared/EnvelopeIntro';
 import GuestPhotoGallery from './themes/shared/GuestPhotoGallery';
 import { useSectionOrder } from '../../hooks/useSectionOrder';
 
@@ -106,6 +107,7 @@ export default function WeddingPage() {
   const version = searchParams.get("v");
   const isPreview = searchParams.get("preview") === "1";
   const [previewApplied, setPreviewApplied] = useState(false);
+  const [envelopeDismissed, setEnvelopeDismissed] = useState(false);
   const [wedding, setWedding] = useState<Wedding | null>(null);
 
   const { data, isLoading, error } = useQuery({
@@ -221,6 +223,15 @@ export default function WeddingPage() {
 
   return (
     <>
+      {weddingToUse.envelopeEnabled && !envelopeDismissed && !isPreview && (
+        <EnvelopeIntro
+          groomName={weddingToUse.groomName}
+          brideName={weddingToUse.brideName}
+          weddingDate={weddingToUse.weddingDate}
+          style={weddingToUse.envelopeStyle || 'ivory'}
+          onComplete={() => setEnvelopeDismissed(true)}
+        />
+      )}
       <div ref={sectionRef}>
       {galleryAspectStyle && <style>{galleryAspectStyle}</style>}
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Heart className="w-6 h-6 animate-pulse text-stone-300" /></div>}>

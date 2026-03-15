@@ -85,6 +85,8 @@ export interface WeddingData {
   groomLetterImage?: string;
   brideLetterImage?: string;
   showLetter?: boolean;
+  envelopeEnabled?: boolean;
+  envelopeStyle?: string;
   showProfile?: boolean;
   venueDetailTabs?: { title: string; image?: string; content: string }[];
   ogCoverType?: string;

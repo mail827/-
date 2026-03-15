@@ -839,6 +839,45 @@ export default function EditWedding() {
         )}
 
         {tab === 'basic' && (
+          <Section title="봉투 인트로">
+            <p className="text-sm text-stone-500 mb-4">청첩장에 접속하면 봉투가 먼저 보이고, 터치하면 열리는 애니메이션이에요</p>
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="checkbox"
+                checked={wedding.envelopeEnabled || false}
+                onChange={(e) => updateField('envelopeEnabled', e.target.checked)}
+                className="rounded border-stone-300"
+              />
+              <span className="text-sm text-stone-600">봉투 인트로 사용</span>
+            </div>
+            {wedding.envelopeEnabled && (
+              <div className="grid grid-cols-5 gap-3">
+                {[
+                  { value: 'ivory', label: '아이보리', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548951/11_ncw2o3.png' },
+                  { value: 'black', label: '블랙', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548951/%E1%84%87%E1%85%B3%E1%86%AF%E1%84%85%E1%85%A2%E1%86%A8_pdsdjy.png' },
+                  { value: 'blue', label: '네이비', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548953/%E1%84%87%E1%85%B3%E1%86%AF%E1%84%85%E1%85%AE_xfs5yd.png' },
+                  { value: 'green', label: '올리브', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548952/%E1%84%8B%E1%85%A9%E1%86%AF%E1%84%85%E1%85%B5%E1%84%87%E1%85%B3_jwf7x7.png' },
+                  { value: 'pink', label: '핑크', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773548957/%E1%84%91%E1%85%B5%E1%86%BC%E1%84%8F%E1%85%B3_ahvvya.png' },
+                ].map((env) => (
+                  <button
+                    key={env.value}
+                    onClick={() => updateField('envelopeStyle', env.value)}
+                    className={`rounded-lg overflow-hidden border-2 transition-all ${
+                      (wedding.envelopeStyle || 'ivory') === env.value
+                        ? 'border-stone-800 scale-105'
+                        : 'border-stone-200 hover:border-stone-400'
+                    }`}
+                  >
+                    <img src={env.preview} alt={env.label} className="w-full aspect-[3/2] object-cover" />
+                    <p className="text-[10px] text-stone-500 py-1 text-center">{env.label}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </Section>
+        )}
+
+        {tab === 'basic' && (
           <Section title="카톡 공유 설정">
             <p className="text-sm text-stone-500 mb-4">카카오톡으로 공유할 때 보여지는 이미지와 문구를 설정해요</p>
             <div className="flex flex-wrap gap-2 mb-4">
