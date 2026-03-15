@@ -88,6 +88,7 @@ export interface WeddingData {
   envelopeEnabled?: boolean;
   envelopeStyle?: string;
   envelopeCardText?: string;
+  envelopeCardColor?: string;
   showProfile?: boolean;
   venueDetailTabs?: { title: string; image?: string; content: string }[];
   ogCoverType?: string;

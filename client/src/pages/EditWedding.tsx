@@ -930,6 +930,34 @@ export default function EditWedding() {
                   rows={3}
                 />
               </div>
+              <div className="mt-4">
+                <label className="block text-xs text-stone-500 mb-2">카드 글씨 색상</label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: '', label: '기본' },
+                    { value: '#1a1a1a', label: '블랙' },
+                    { value: '#4a4038', label: '브라운' },
+                    { value: '#2a3a4a', label: '네이비' },
+                    { value: '#3a4a3a', label: '올리브' },
+                    { value: '#5a3a4a', label: '와인' },
+                    { value: '#C9A96E', label: '골드' },
+                    { value: '#e8dfd4', label: '아이보리' },
+                    { value: '#ffffff', label: '화이트' },
+                  ].map((c) => (
+                    <button
+                      key={c.value}
+                      onClick={() => updateField('envelopeCardColor', c.value || null)}
+                      className={`w-8 h-8 rounded-full border-2 transition-all ${
+                        (wedding.envelopeCardColor || '') === c.value
+                          ? 'border-stone-800 scale-110'
+                          : 'border-stone-200'
+                      }`}
+                      style={{ background: c.value || '#ccc' }}
+                      title={c.label}
+                    />
+                  ))}
+                </div>
+              </div>
             </>)}
           </Section>
         )}

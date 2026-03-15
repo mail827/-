@@ -171,6 +171,15 @@ export default function WeddingPage() {
     }
   }, [wedding?.id]);
 
+  useEffect(() => {
+    const font = wedding?.fontFamily || data?.wedding?.fontFamily;
+    if (font) {
+      document.documentElement.style.setProperty('--wedding-font', font);
+      document.body.style.fontFamily = `'${font}', 'Noto Sans KR', sans-serif`;
+      return () => { document.body.style.fontFamily = ''; };
+    }
+  }, [wedding?.fontFamily, data?.wedding?.fontFamily]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 to-amber-50">
@@ -211,13 +220,7 @@ export default function WeddingPage() {
 
   const weddingToUse = wedding ?? data.wedding;
 
-  useEffect(() => {
-    if (weddingToUse?.fontFamily) {
-      document.documentElement.style.setProperty('--wedding-font', weddingToUse.fontFamily);
-      document.body.style.fontFamily = `'${weddingToUse.fontFamily}', 'Noto Sans KR', sans-serif`;
-      return () => { document.body.style.fontFamily = ''; };
-    }
-  }, [weddingToUse?.fontFamily]);
+
 
   const urlTheme = searchParams.get('theme') as Theme | null;
   const theme = urlTheme || weddingToUse.theme || 'ROMANTIC_CLASSIC';
@@ -239,6 +242,8 @@ export default function WeddingPage() {
           weddingDate={weddingToUse.weddingDate}
           style={weddingToUse.envelopeStyle || 'ivory'}
           cardText={weddingToUse.envelopeCardText}
+          fontFamily={weddingToUse.fontFamily}
+          cardColor={weddingToUse.envelopeCardColor}
           onComplete={() => setEnvelopeDismissed(true)}
         />
       )}

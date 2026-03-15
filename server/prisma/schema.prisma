@@ -198,6 +198,7 @@ model Wedding {
   envelopeEnabled      Boolean          @default(false)
   envelopeStyle        String?          @default("ivory")
   envelopeCardText     String?
+  envelopeCardColor    String?
   aiChats                  AiChat[]
   galleries                Gallery[]
   aiSnaps                  AiSnap[]

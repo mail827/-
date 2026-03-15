@@ -111,6 +111,7 @@ export interface Wedding {
   envelopeEnabled?: boolean;
   envelopeStyle?: string;
   envelopeCardText?: string;
+  envelopeCardColor?: string;
   ogCoverType?: string;
   ogCustomTitle?: string;
   ogCustomImage?: string;

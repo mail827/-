@@ -113,10 +113,12 @@ interface EnvelopeIntroProps {
   weddingDate: string;
   style?: string;
   cardText?: string;
+  fontFamily?: string;
+  cardColor?: string;
   onComplete: () => void;
 }
 
-export default function EnvelopeIntro({ groomName, brideName, weddingDate, style = 'black_ribbon', cardText, onComplete }: EnvelopeIntroProps) {
+export default function EnvelopeIntro({ groomName, brideName, weddingDate, style = 'black_ribbon', cardText, fontFamily, cardColor, onComplete }: EnvelopeIntroProps) {
   const [phase, setPhase] = useState<'sealed' | 'open' | 'card' | 'done'>('sealed');
   const [envHeight, setEnvHeight] = useState(0);
   const env = ENVELOPES[style] || ENVELOPES.black_ribbon;
@@ -145,6 +147,8 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
     setTimeout(() => setPhase('done'), 5000);
   };
 
+  const cardFont = fontFamily ? `'${fontFamily}', 'Noto Serif KR', Georgia, serif` : "'Noto Serif KR', Georgia, serif";
+  const finalCardColor = cardColor || env.cardTextColor;
   const displayText = cardText || `${groomName} & ${brideName}의\n결혼식에 초대합니다`;
   const cardSlide = envHeight ? -(envHeight * 0.55) : -200;
 
@@ -200,32 +204,32 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
                 <p style={{
                   fontSize: 8,
                   letterSpacing: '0.35em',
-                  color: env.cardTextColor,
+                  color: finalCardColor,
                   opacity: 0.5,
                   marginBottom: 16,
                   textTransform: 'uppercase',
-                  fontFamily: "'Noto Serif KR', Georgia, serif",
+                  fontFamily: cardFont,
                 }}>
                   Wedding Invitation
                 </p>
                 <p style={{
                   fontSize: 15,
                   fontWeight: 300,
-                  color: env.cardTextColor,
+                  color: finalCardColor,
                   lineHeight: 2,
                   textAlign: 'center',
                   whiteSpace: 'pre-wrap',
-                  fontFamily: "'Noto Serif KR', Georgia, serif",
+                  fontFamily: cardFont,
                 }}>
                   {displayText}
                 </p>
-                <div style={{ width: 20, height: 1, background: env.cardTextColor, opacity: 0.12, margin: '14px auto' }} />
+                <div style={{ width: 20, height: 1, background: finalCardColor, opacity: 0.12, margin: '14px auto' }} />
                 <p style={{
                   fontSize: 10,
-                  color: env.cardTextColor,
+                  color: finalCardColor,
                   opacity: 0.4,
                   letterSpacing: '0.2em',
-                  fontFamily: "'Noto Serif KR', Georgia, serif",
+                  fontFamily: cardFont,
                 }}>
                   {dateStr}
                 </p>
@@ -274,7 +278,7 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
                 opacity: 0.3,
                 marginTop: '2rem',
                 letterSpacing: '0.2em',
-                fontFamily: "'Noto Serif KR', Georgia, serif",
+                fontFamily: cardFont,
               }}
             >
               초대장을 열어보세요
