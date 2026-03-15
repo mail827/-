@@ -229,6 +229,9 @@ export default function WeddingPage() {
   const galleryAspectStyle = (() => {
     const ratio = weddingToUse.galleryRatio || '1:1';
     if (ratio === '1:1') return '';
+    if (ratio === 'original') {
+      return '#gallery-section .grid > div { aspect-ratio: auto !important; } #gallery-section .grid > div img { object-fit: contain !important; height: auto !important; }';
+    }
     const cssRatio = ratio === '3:4' ? '3/4' : ratio === '4:3' ? '4/3' : 'auto';
     return '#gallery-section .grid > div { aspect-ratio: ' + cssRatio + ' !important; }';
   })();
