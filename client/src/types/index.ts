@@ -108,6 +108,9 @@ export interface Wedding {
   groomLetterImage?: string;
   brideLetterImage?: string;
   showLetter?: boolean;
+  ogCoverType?: string;
+  ogCustomTitle?: string;
+  ogCustomImage?: string;
   guestPhotoEnabled?: boolean;
   createdAt: string;
   updatedAt: string;

@@ -838,6 +838,61 @@ export default function EditWedding() {
           </>
         )}
 
+        {tab === 'basic' && (
+          <Section title="카톡 공유 설정">
+            <p className="text-sm text-stone-500 mb-4">카카오톡으로 공유할 때 보여지는 이미지와 문구를 설정해요</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {[
+                { value: 'default', label: '기본 (대표사진)' },
+                { value: 'envelope', label: '봉투형' },
+                { value: 'custom', label: '직접 업로드' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => updateField('ogCoverType', opt.value)}
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
+                    (wedding.ogCoverType || 'default') === opt.value
+                      ? 'bg-stone-800 text-white'
+                      : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            {(wedding.ogCoverType === 'custom' || wedding.ogCoverType === 'envelope') && (
+              <div className="mb-4">
+                <label className="block text-xs text-stone-500 mb-2">
+                  {wedding.ogCoverType === 'envelope' ? '봉투 이미지 (선택 — 미선택 시 기본 봉투)' : 'OG 이미지 업로드'}
+                </label>
+                <label className="px-3 py-1.5 text-xs rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 cursor-pointer transition-all">
+                  이미지 선택
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    uploadToCloudinary(file, 'ogImage', (url) => updateField('ogCustomImage', url), () => {});
+                  }} />
+                </label>
+                {wedding.ogCustomImage && (
+                  <div className="mt-2 relative inline-block">
+                    <img src={wedding.ogCustomImage} alt="" className="w-48 h-24 object-cover rounded-lg" />
+                    <button onClick={() => updateField('ogCustomImage', '')} className="absolute -top-1 -right-1 w-5 h-5 bg-red-400 text-white rounded-full text-xs flex items-center justify-center">x</button>
+                  </div>
+                )}
+              </div>
+            )}
+            <div>
+              <label className="block text-xs text-stone-500 mb-2">공유 문구 (미입력 시 기본 문구)</label>
+              <input
+                value={wedding.ogCustomTitle || ''}
+                onChange={(e) => updateField('ogCustomTitle', e.target.value)}
+                placeholder={`${wedding.groomName || '신랑'} ♥ ${wedding.brideName || '신부'} 결혼식에 초대합니다`}
+                className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none"
+              />
+            </div>
+          </Section>
+        )}
+
         {tab === 'greeting' && (
           <Section title="서로에게 쓰는 편지">
             <div className="flex items-center gap-2 mb-4">
