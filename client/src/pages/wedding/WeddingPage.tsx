@@ -229,7 +229,9 @@ export default function WeddingPage() {
   const heroPositionStyle = (() => {
     const pos = Number(weddingToUse.heroTextPosition);
     if (!pos || pos === 50) return '';
-    return '.min-h-screen > div:last-child, .min-h-screen > .absolute:not([class*="music"]):not([class*="share"]) { top: ' + pos + '% !important; bottom: auto !important; transform: translateY(-50%) !important; }';
+    const targetThemes = ['ROMANTIC_CLASSIC', 'CRUISE_DAY', 'CRUISE_SUNSET'];
+    if (!targetThemes.includes(theme)) return '';
+    return 'section[style] > .absolute.z-20 { justify-content: flex-start !important; padding-top: ' + (pos * 0.75) + 'vh !important; gap: 1.5rem !important; }';
   })();
 
   const galleryAspectStyle = (() => {
