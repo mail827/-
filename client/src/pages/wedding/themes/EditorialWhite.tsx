@@ -126,9 +126,9 @@ export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGu
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.4 }} style={{ display: 'flex' }}>
               <div style={{ flex: 1 }}>
                 {wedding.heroMediaType === 'VIDEO' ? (
-                  <video src={wedding.heroMedia ? heroUrl(wedding.heroMedia) : ''} autoPlay muted loop playsInline style={{ width: '100%', height: 380, objectFit: 'cover', objectPosition: wedding.heroImagePosition || '50% 50%', display: 'block' }} />
+                  <video src={wedding.heroMedia ? heroUrl(wedding.heroMedia) : ''} autoPlay muted loop playsInline style={{ width: '100%', height: '50vh', minHeight: 320, maxHeight: 600, objectFit: 'cover', objectPosition: wedding.heroImagePosition || '50% 50%', display: 'block' }} />
                 ) : (
-                  <img src={heroUrl(wedding.heroMedia || wedding.galleries?.[0]?.mediaUrl || '')} alt="" style={{ width: '100%', height: 380, objectFit: 'cover', objectPosition: wedding.heroImagePosition || '50% 50%', display: 'block' }} />
+                  <img src={heroUrl(wedding.heroMedia || wedding.galleries?.[0]?.mediaUrl || '')} alt="" style={{ width: '100%', height: '50vh', minHeight: 320, maxHeight: 600, objectFit: 'cover', objectPosition: wedding.heroImagePosition || '50% 50%', display: 'block' }} />
                 )}
               </div>
               <div className="ew-bodoni" style={{ width: 48, borderLeft: `1px solid ${C.lineLight}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '1rem 0' }}>
