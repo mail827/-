@@ -1220,6 +1220,30 @@ export default function EditWedding() {
                     className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
                     rows={4}
                   />
+                  <div className="mt-2 flex items-center gap-3">
+                    <label className="px-3 py-1.5 text-xs rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 cursor-pointer transition-all">
+                      사진 추가
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        uploadToCloudinary(file, 'venueTab' + i, (url) => {
+                          const tabs = [...((wedding.venueDetailTabs as any[]) || [])];
+                          tabs[i] = { ...tabs[i], image: url };
+                          updateField('venueDetailTabs', tabs);
+                        }, () => {});
+                      }} />
+                    </label>
+                    {tab.image && (
+                      <div className="relative inline-block">
+                        <img src={tab.image} alt="" className="w-20 h-20 object-cover rounded-lg" />
+                        <button onClick={() => {
+                          const tabs = [...((wedding.venueDetailTabs as any[]) || [])];
+                          tabs[i] = { ...tabs[i], image: '' };
+                          updateField('venueDetailTabs', tabs);
+                        }} className="absolute -top-1 -right-1 w-5 h-5 bg-red-400 text-white rounded-full text-xs flex items-center justify-center">x</button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </Section>
