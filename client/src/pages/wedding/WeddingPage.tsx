@@ -134,7 +134,7 @@ export default function WeddingPage() {
   });
 
   
-  const sectionRef = useSectionOrder(data?.wedding?.sectionOrder as string[] | undefined);
+  const sectionRef = useSectionOrder(data?.wedding?.sectionOrder as string[] | undefined, data?.wedding?.hiddenSections as string[] | undefined);
 
   const guestbookMutation = useMutation({
     mutationFn: submitGuestbook,
@@ -289,6 +289,7 @@ export default function WeddingPage() {
           groomLetterImage={weddingToUse.groomLetterImage}
           brideLetterImage={weddingToUse.brideLetterImage}
           theme={theme}
+          letterFromVisible={weddingToUse.letterFromVisible !== false}
         />
       )}
       {weddingToUse.venueDetailTabs && (weddingToUse.venueDetailTabs as any[])?.length > 0 && !isPreview && (

@@ -69,7 +69,7 @@ function findContainerByIds(root: HTMLElement): HTMLElement | null {
   return best;
 }
 
-function applyOrder(root: HTMLElement, order: string[]) {
+function applyOrder(root: HTMLElement, order: string[], hiddenSections: string[] = []) {
   const container = findContainerByIds(root);
   if (!container) return false;
 
@@ -121,6 +121,13 @@ function applyOrder(root: HTMLElement, order: string[]) {
     if (key && !assigned.has(key)) {
       const idx = order.indexOf(key);
       child.style.order = idx !== -1 ? String(idx + 1) : '50';
+
+      if (hiddenSections.includes(key)) {
+        child.style.display = 'none';
+      } else {
+        child.style.display = '';
+      }
+
       assigned.add(key);
       return;
     }
@@ -139,11 +146,10 @@ function applyOrder(root: HTMLElement, order: string[]) {
     child.style.order = '50';
   });
 
-  console.log('[SectionOrder] container:', container.tagName + '.' + container.className.substring(0, 30), 'children:', children.length, 'assigned:', Array.from(assigned));
   return assigned.size >= 2;
 }
 
-export function useSectionOrder(sectionOrder?: string[]) {
+export function useSectionOrder(sectionOrder?: string[], hiddenSections?: string[]) {
   const containerRef = useRef<HTMLDivElement>(null);
   const appliedRef = useRef(false);
 
@@ -151,14 +157,48 @@ export function useSectionOrder(sectionOrder?: string[]) {
     ? sectionOrder
     : null;
 
+  const hidden = Array.isArray(hiddenSections) ? hiddenSections : [];
+
   useEffect(() => {
     appliedRef.current = false;
     const root = containerRef.current;
-    if (!root || !order) return;
+    if (!root || !order) {
+      if (root && hidden.length > 0) {
+        const tryHide = () => {
+          const container = findContainerByIds(root);
+          if (!container) return false;
+          const children = Array.from(container.children) as HTMLElement[];
+          children.forEach((child) => {
+            let key: string | null = null;
+            if (child.id && SECTION_ID_MAP[child.id]) key = SECTION_ID_MAP[child.id];
+            if (!key) {
+              const inner = child.querySelector(KNOWN_IDS.map(id => '#' + id).join(','));
+              if (inner?.id && SECTION_ID_MAP[inner.id]) key = SECTION_ID_MAP[inner.id];
+            }
+            if (!key) key = detectKeyByContent(child);
+            if (key && hidden.includes(key)) {
+              child.style.display = 'none';
+            } else if (key) {
+              child.style.display = '';
+            }
+          });
+          return true;
+        };
+        if (!tryHide()) {
+          const observer = new MutationObserver(() => {
+            if (tryHide()) observer.disconnect();
+          });
+          observer.observe(root, { childList: true, subtree: true });
+          const fallback = setTimeout(() => tryHide(), 1500);
+          return () => { observer.disconnect(); clearTimeout(fallback); };
+        }
+      }
+      return;
+    }
 
     const tryApply = () => {
       if (appliedRef.current) return true;
-      if (applyOrder(root, order)) {
+      if (applyOrder(root, order, hidden)) {
         appliedRef.current = true;
         return true;
       }
@@ -178,7 +218,7 @@ export function useSectionOrder(sectionOrder?: string[]) {
     }, 1500);
 
     return () => { observer.disconnect(); clearTimeout(fallback); };
-  }, [order ? order.join(',') : null]);
+  }, [order ? order.join(',') : null, hidden.join(',')]);
 
   return containerRef;
 }

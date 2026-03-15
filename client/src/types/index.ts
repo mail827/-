@@ -95,6 +95,7 @@ export interface Wedding {
   aiTransportInfo?: AiTransportInfo;
   aiCustomQna?: AiQna[];
   sectionOrder?: string[];
+  hiddenSections?: string[];
   galleryRatio?: string;
   galleryLayout?: string;
   venueDetailTabs?: { title: string; image?: string; content: string }[];
@@ -108,6 +109,7 @@ export interface Wedding {
   groomLetterImage?: string;
   brideLetterImage?: string;
   showLetter?: boolean;
+  letterFromVisible?: boolean;
   envelopeEnabled?: boolean;
   envelopeStyle?: string;
   envelopeCardText?: string;

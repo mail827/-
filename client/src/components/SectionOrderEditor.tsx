@@ -15,7 +15,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, RotateCcw } from 'lucide-react';
+import { GripVertical, RotateCcw, Eye, EyeOff } from 'lucide-react';
 
 const SECTION_META: Record<string, { label: string; desc: string }> = {
   greeting: { label: '인사말', desc: '초대 문구와 부모님 성함' },
@@ -34,16 +34,18 @@ const DEFAULT_ORDER = ['greeting', 'calendar', 'loveStory', 'gallery', 'location
 interface Props {
   value: string[] | null | undefined;
   onChange: (order: string[]) => void;
+  hiddenSections?: string[];
+  onHiddenChange?: (hidden: string[]) => void;
 }
 
-function SortableItem({ id }: { id: string }) {
+function SortableItem({ id, isHidden, onToggle }: { id: string; isHidden: boolean; onToggle: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const meta = SECTION_META[id];
 
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isHidden ? 0.45 : 1 }}
       className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-all ${
         isDragging
           ? 'bg-stone-100 border-stone-400 shadow-lg z-10 scale-[1.02]'
@@ -54,17 +56,20 @@ function SortableItem({ id }: { id: string }) {
         <GripVertical className="w-5 h-5" />
       </button>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-stone-800">{meta?.label || id}</p>
+        <p className={`text-sm font-medium ${isHidden ? 'text-stone-400 line-through' : 'text-stone-800'}`}>{meta?.label || id}</p>
         <p className="text-xs text-stone-400 truncate">{meta?.desc || ''}</p>
       </div>
-      <span className="text-xs text-stone-300 font-mono w-5 text-center">
-        {(DEFAULT_ORDER.indexOf(id) !== -1 ? DEFAULT_ORDER.indexOf(id) : 0) + 1}
-      </span>
+      <button
+        onClick={(e) => { e.stopPropagation(); onToggle(); }}
+        className={`p-1.5 rounded-lg transition-colors ${isHidden ? 'text-stone-300 hover:text-stone-500 hover:bg-stone-100' : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100'}`}
+      >
+        {isHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
     </div>
   );
 }
 
-export default function SectionOrderEditor({ value, onChange }: Props) {
+export default function SectionOrderEditor({ value, onChange, hiddenSections = [], onHiddenChange }: Props) {
   const [items, setItems] = useState<string[]>(
     Array.isArray(value) && value.length > 0 ? value : [...DEFAULT_ORDER]
   );
@@ -87,6 +92,15 @@ export default function SectionOrderEditor({ value, onChange }: Props) {
   const handleReset = () => {
     setItems([...DEFAULT_ORDER]);
     onChange([...DEFAULT_ORDER]);
+    onHiddenChange?.([]);
+  };
+
+  const toggleSection = (id: string) => {
+    if (!onHiddenChange) return;
+    const next = hiddenSections.includes(id)
+      ? hiddenSections.filter(s => s !== id)
+      : [...hiddenSections, id];
+    onHiddenChange(next);
   };
 
   return (
@@ -94,7 +108,7 @@ export default function SectionOrderEditor({ value, onChange }: Props) {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-stone-500">드래그해서 순서를 변경하세요</p>
-          <p className="text-xs text-stone-400 mt-0.5">히어로(상단)와 공유/푸터(하단)는 고정입니다</p>
+          <p className="text-xs text-stone-400 mt-0.5">눈 아이콘을 눌러 섹션을 숨기거나 보일 수 있어요</p>
         </div>
         <button
           onClick={handleReset}
@@ -113,7 +127,12 @@ export default function SectionOrderEditor({ value, onChange }: Props) {
         <SortableContext items={items} strategy={verticalListSortingStrategy}>
           <div className="space-y-2">
             {items.map((id) => (
-              <SortableItem key={id} id={id} />
+              <SortableItem
+                key={id}
+                id={id}
+                isHidden={hiddenSections.includes(id)}
+                onToggle={() => toggleSection(id)}
+              />
             ))}
           </div>
         </SortableContext>

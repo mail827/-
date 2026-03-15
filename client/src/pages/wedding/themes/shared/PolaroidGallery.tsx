@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { galleryThumbUrl } from '../../../../utils/image';
 import GalleryModal from './GalleryModal';
 import { getThemeConfig } from './themeConfig';
@@ -25,7 +25,7 @@ function getFrameStyle(theme: string) {
     return {
       frame: '#1a1a1a',
       border: 'rgba(255,255,255,0.06)',
-      shadow: '0 2px 12px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.2)',
+      shadow: '0 1px 8px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.2)',
       caption: 'rgba(255,255,255,0.12)',
       imgBg: '#111',
     };
@@ -38,7 +38,7 @@ function getFrameStyle(theme: string) {
     return {
       frame: '#FFFDF8',
       border: 'rgba(0,0,0,0.04)',
-      shadow: '0 2px 8px rgba(139,111,71,0.08), 0 8px 24px rgba(139,111,71,0.04)',
+      shadow: '0 1px 6px rgba(139,111,71,0.08), 0 4px 16px rgba(139,111,71,0.04)',
       caption: 'rgba(139,111,71,0.15)',
       imgBg: '#f5f0e8',
     };
@@ -48,7 +48,7 @@ function getFrameStyle(theme: string) {
     return {
       frame: '#FAFCFD',
       border: 'rgba(0,0,0,0.03)',
-      shadow: '0 2px 8px rgba(91,143,168,0.08), 0 8px 24px rgba(91,143,168,0.04)',
+      shadow: '0 1px 6px rgba(91,143,168,0.08), 0 4px 16px rgba(91,143,168,0.04)',
       caption: 'rgba(91,143,168,0.15)',
       imgBg: '#f0f4f7',
     };
@@ -57,7 +57,7 @@ function getFrameStyle(theme: string) {
   return {
     frame: '#fff',
     border: 'rgba(0,0,0,0.04)',
-    shadow: '0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04)',
+    shadow: '0 1px 6px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)',
     caption: 'rgba(0,0,0,0.12)',
     imgBg: '#f5f5f3',
   };
@@ -80,12 +80,30 @@ function getWarmth(hex: string): number {
   return r / (r + b + 1);
 }
 
-const ROTATIONS = [-2.8, 1.5, -1.2, 2.4, -0.8, 1.9, -2.1, 0.6, -1.7, 2.8, -0.4, 1.1, -2.5, 0.9, -1.4, 2.2, -0.6, 1.7, -2.3, 0.3];
+function seededRandom(seed: number) {
+  let s = seed;
+  return () => {
+    s = (s * 16807 + 0) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
 
 export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', usePhotoFilter = true }: PolaroidGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const images = galleries.filter(g => g.mediaType === 'IMAGE');
+
+  const transforms = useMemo(() => {
+    return images.map((item, i) => {
+      const rng = seededRandom(item.id.charCodeAt(0) * 1000 + i * 137);
+      const rotation = (rng() - 0.5) * 16;
+      const tx = (rng() - 0.5) * 12;
+      const ty = (rng() - 0.5) * 8;
+      const scale = 0.92 + rng() * 0.08;
+      return { rotation, tx, ty, scale };
+    });
+  }, [images.length]);
+
   if (!images.length) return null;
 
   const style = getFrameStyle(theme);
@@ -96,36 +114,37 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '20px 12px',
-          padding: '4px 8px',
+          gap: '12px 8px',
+          padding: '4px 12px',
         }}
       >
         {images.map((item, i) => {
-          const rotation = ROTATIONS[i % ROTATIONS.length];
+          const t = transforms[i];
+          const baseTransform = `rotate(${t.rotation}deg) translate(${t.tx}px, ${t.ty}px) scale(${t.scale})`;
           return (
             <div
               key={item.id}
               onClick={() => setSelectedIndex(i)}
               style={{
                 cursor: 'pointer',
-                transform: `rotate(${rotation}deg)`,
+                transform: baseTransform,
                 transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                 transformOrigin: 'center center',
                 position: 'relative',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'rotate(0deg) scale(1.03)';
+                e.currentTarget.style.transform = 'rotate(0deg) translate(0,0) scale(1.04)';
                 e.currentTarget.style.zIndex = '10';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = `rotate(${rotation}deg) scale(1)`;
+                e.currentTarget.style.transform = baseTransform;
                 e.currentTarget.style.zIndex = '0';
               }}
             >
               <div
                 style={{
                   background: style.frame,
-                  padding: '6px 6px 28px 6px',
+                  padding: '4px 4px 22px 4px',
                   boxShadow: style.shadow,
                   borderRadius: '1px',
                   border: `1px solid ${style.border}`,
@@ -146,7 +165,7 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
                 </div>
                 <div
                   style={{
-                    height: '22px',
+                    height: '18px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -154,7 +173,7 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
                 >
                   <span
                     style={{
-                      fontSize: '8px',
+                      fontSize: '7px',
                       letterSpacing: '0.15em',
                       color: style.caption,
                       userSelect: 'none',

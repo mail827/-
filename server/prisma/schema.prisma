@@ -178,6 +178,7 @@ model Wedding {
   reportSentAt             DateTime?
   expiresAt                DateTime?
   sectionOrder             Json?
+  hiddenSections           Json?
   galleryRatio             String?          @default("1:1")
   guestPhotoEnabled        Boolean          @default(true)
   galleryLayout        String?          @default("grid")
@@ -195,6 +196,7 @@ model Wedding {
   groomLetterImage   String?
   brideLetterImage   String?
   showLetter         Boolean          @default(false)
+  letterFromVisible  Boolean          @default(true)
   envelopeEnabled      Boolean          @default(false)
   envelopeStyle        String?          @default("ivory")
   envelopeCardText     String?

@@ -9,12 +9,11 @@ interface LetterSectionProps {
   groomLetterImage?: string;
   brideLetterImage?: string;
   theme?: string;
+  letterFromVisible?: boolean;
 }
 
-export default function LetterSection({ groomName, brideName, groomLetter, brideLetter, groomLetterImage, brideLetterImage, theme = 'MODERN_MINIMAL' }: LetterSectionProps) {
+export default function LetterSection({ groomName, brideName, groomLetter, brideLetter, groomLetterImage, brideLetterImage, theme = 'MODERN_MINIMAL', letterFromVisible = true }: LetterSectionProps) {
   const [active, setActive] = useState<'groom' | 'bride'>('groom');
-
-  if (!groomLetter && !brideLetter) return null;
 
   const config = getThemeConfig(theme);
   const c = config.colors;
@@ -29,7 +28,7 @@ export default function LetterSection({ groomName, brideName, groomLetter, bride
   const tabs = [
     { key: 'groom' as const, label: `FROM. ${groomName}`, letter: groomLetter, image: groomLetterImage },
     { key: 'bride' as const, label: `FROM. ${brideName}`, letter: brideLetter, image: brideLetterImage },
-  ].filter(t => t.letter);
+  ].filter(t => t.letter || t.image);
 
   if (!tabs.length) return null;
 
@@ -68,7 +67,7 @@ export default function LetterSection({ groomName, brideName, groomLetter, bride
                 minHeight: 40,
               }}
             >
-              {t.label}
+              {letterFromVisible ? t.label : (t.key === 'groom' ? groomName : brideName)}
             </button>
           ))}
         </div>
@@ -82,32 +81,36 @@ export default function LetterSection({ groomName, brideName, groomLetter, bride
       }}>
         {current.image && (
           <div style={{
-            marginBottom: '1rem',
+            marginBottom: current.letter ? '1rem' : 0,
             borderRadius: '8px',
             overflow: 'hidden',
           }}>
             <img src={current.image} alt="" style={{ width: '100%', display: 'block', borderRadius: '8px' }} />
           </div>
         )}
-        <p style={{
-          fontSize: 14,
-          lineHeight: 2,
-          color: textColor,
-          whiteSpace: 'pre-wrap',
-          textAlign: 'center',
-          fontStyle: 'italic',
-        }}>
-          {current.letter}
-        </p>
-        <p style={{
-          fontSize: 11,
-          color: mutedColor,
-          textAlign: 'right',
-          marginTop: '1rem',
-          fontStyle: 'italic',
-        }}>
-          {current.label}
-        </p>
+        {current.letter && (
+          <p style={{
+            fontSize: 14,
+            lineHeight: 2,
+            color: textColor,
+            whiteSpace: 'pre-wrap',
+            textAlign: 'center',
+            fontStyle: 'italic',
+          }}>
+            {current.letter}
+          </p>
+        )}
+        {letterFromVisible && (
+          <p style={{
+            fontSize: 11,
+            color: mutedColor,
+            textAlign: 'right',
+            marginTop: '1rem',
+            fontStyle: 'italic',
+          }}>
+            {current.label}
+          </p>
+        )}
       </div>
     </div>
   );

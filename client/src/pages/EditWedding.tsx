@@ -1030,6 +1030,15 @@ export default function EditWedding() {
             </div>
             {wedding.showLetter && (
               <div className="space-y-6">
+                <label className="flex items-center gap-2 px-3 py-2 rounded-lg bg-stone-50 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={wedding.letterFromVisible !== false}
+                    onChange={(e) => updateField('letterFromVisible', e.target.checked)}
+                    className="rounded border-stone-300"
+                  />
+                  <span className="text-xs text-stone-500">FROM. 이름 표시</span>
+                </label>
                 <div>
                   <label className="block text-xs text-stone-500 mb-2">신랑이 신부에게</label>
                   <textarea
@@ -2125,6 +2134,8 @@ export default function EditWedding() {
             <SectionOrderEditor
               value={wedding.sectionOrder}
               onChange={(order) => updateField('sectionOrder', order)}
+              hiddenSections={(wedding.hiddenSections as string[]) || []}
+              onHiddenChange={(hidden) => updateField('hiddenSections', hidden)}
             />
           </Section>
         )}

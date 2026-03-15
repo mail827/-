@@ -10,6 +10,7 @@ interface LetterOverrideProps {
   groomLetterImage?: string;
   brideLetterImage?: string;
   theme: string;
+  letterFromVisible?: boolean;
 }
 
 export default function LetterOverride(props: LetterOverrideProps) {
@@ -43,7 +44,7 @@ export default function LetterOverride(props: LetterOverrideProps) {
   }, [setup]);
 
   if (!target) return null;
-  if (!props.groomLetter && !props.brideLetter) return null;
+  if (!props.groomLetter && !props.brideLetter && !props.groomLetterImage && !props.brideLetterImage) return null;
 
   return createPortal(<LetterSection {...props} />, target);
 }
