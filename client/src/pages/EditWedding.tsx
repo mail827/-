@@ -839,6 +839,45 @@ export default function EditWedding() {
         )}
 
         {tab === 'basic' && (
+          <Section title="글꼴 설정">
+            <p className="text-sm text-stone-500 mb-4">청첩장 전체에 적용되는 글꼴을 선택해요</p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { value: '', label: '기본 (테마 글꼴)' },
+                { value: 'Noto Serif KR', label: 'Noto Serif (명조)' },
+                { value: 'Gowun Batang', label: '고운 바탕' },
+                { value: 'Nanum Myeongjo', label: '나눔 명조' },
+                { value: 'BM DoHyeon', label: '배민 도현' },
+                { value: 'BM Hanna Pro', label: '배민 한나 Pro' },
+                { value: 'BM Hanna Air', label: '배민 한나 Air' },
+                { value: 'BM Hanna 11yrs', label: '배민 한나 11살' },
+                { value: 'BM Jua', label: '배민 주아' },
+                { value: 'BM Yeonsung', label: '배민 연성' },
+                { value: 'BM Kkubulim', label: '배민 꾸불림' },
+                { value: 'BM Euljiro', label: '배민 을지로' },
+                { value: 'BM Euljiro 10years', label: '배민 을지로 10년후' },
+                { value: 'BM Euljiro Oraeorae', label: '배민 을지로 오래오래' },
+                { value: 'BM Kiranghaerang', label: '배민 기랑해랑' },
+                { value: 'Zen Serif', label: 'Zen Serif' },
+              ].map((font) => (
+                <button
+                  key={font.value}
+                  onClick={() => updateField('fontFamily', font.value || null)}
+                  className={`px-4 py-3 text-sm rounded-lg border-2 transition-all text-left ${
+                    (wedding.fontFamily || '') === font.value
+                      ? 'border-stone-800 bg-stone-50'
+                      : 'border-stone-200 hover:border-stone-300'
+                  }`}
+                  style={{ fontFamily: font.value ? `'${font.value}', sans-serif` : 'inherit' }}
+                >
+                  {font.label}
+                </button>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {tab === 'basic' && (
           <Section title="봉투 인트로">
             <p className="text-sm text-stone-500 mb-4">청첩장에 접속하면 봉투가 먼저 보이고, 터치하면 열리는 애니메이션이에요</p>
             <div className="flex items-center gap-2 mb-4">
@@ -853,18 +892,18 @@ export default function EditWedding() {
             {wedding.envelopeEnabled && (
               <><div className="grid grid-cols-4 gap-3">
                 {[
-                  { value: 'black_ribbon', label: '블랙 레드리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551431/1-Photoroom_foq0wz.png' },
-                  { value: 'white_ribbon', label: '화이트 금리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/3-Photoroom_zftkad.png' },
-                  { value: 'navy_seal', label: '네이비 엔봉', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/2-Photoroom_wmyxia.png' },
-                  { value: 'black_silver', label: '블랙 은리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/4-Photoroom_lnyaib.png' },
-                  { value: 'olive_ribbon_a', label: '올리브 리봄A', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/5-Photoroom_b3ap27.png' },
-                  { value: 'olive_ribbon_b', label: '올리브 리봄B', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/6-Photoroom_zopodw.png' },
-                  { value: 'pink_ribbon', label: '핑크 리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/7-Photoroom_y9bijv.png' },
-                  { value: 'white_bow', label: '화이트 리봄', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/8-Photoroom_akpnjh.png' },
-                  { value: 'white_seal', label: '화이트 씨링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/9-Photoroom_vrwsw2.png' },
-                  { value: 'black_seal', label: '블랙 씨링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/10-Photoroom_ufpw7v.png' },
-                  { value: 'pink_seal', label: '핑크 씨링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551434/11-Photoroom_yitcbl.png' },
-                  { value: 'olive_seal', label: '올리브 씨링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551436/13-Photoroom_gevewd.png' },
+                  { value: 'black_ribbon', label: '블랙 레드리본', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551431/1-Photoroom_foq0wz.png' },
+                  { value: 'white_ribbon', label: '화이트 금리본', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/3-Photoroom_zftkad.png' },
+                  { value: 'navy_seal', label: '네이비 씰링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/2-Photoroom_wmyxia.png' },
+                  { value: 'black_silver', label: '블랙 은리본', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551432/4-Photoroom_lnyaib.png' },
+                  { value: 'olive_ribbon_a', label: '올리브 리본A', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/5-Photoroom_b3ap27.png' },
+                  { value: 'olive_ribbon_b', label: '올리브 리본B', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/6-Photoroom_zopodw.png' },
+                  { value: 'pink_ribbon', label: '핑크 리본', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/7-Photoroom_y9bijv.png' },
+                  { value: 'white_bow', label: '화이트 리본', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/8-Photoroom_akpnjh.png' },
+                  { value: 'white_seal', label: '화이트 씰링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/9-Photoroom_vrwsw2.png' },
+                  { value: 'black_seal', label: '블랙 씰링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551433/10-Photoroom_ufpw7v.png' },
+                  { value: 'pink_seal', label: '핑크 씰링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551434/11-Photoroom_yitcbl.png' },
+                  { value: 'olive_seal', label: '올리브 씰링', preview: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551436/13-Photoroom_gevewd.png' },
                 ].map((env) => (
                   <button
                     key={env.value}

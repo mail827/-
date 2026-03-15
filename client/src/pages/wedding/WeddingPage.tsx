@@ -108,6 +108,7 @@ export default function WeddingPage() {
   const isPreview = searchParams.get("preview") === "1";
   const [previewApplied, setPreviewApplied] = useState(false);
   const [envelopeDismissed, setEnvelopeDismissed] = useState(false);
+
   const [wedding, setWedding] = useState<Wedding | null>(null);
 
   const { data, isLoading, error } = useQuery({
@@ -210,6 +211,14 @@ export default function WeddingPage() {
 
   const weddingToUse = wedding ?? data.wedding;
 
+  useEffect(() => {
+    if (weddingToUse?.fontFamily) {
+      document.documentElement.style.setProperty('--wedding-font', weddingToUse.fontFamily);
+      document.body.style.fontFamily = `'${weddingToUse.fontFamily}', 'Noto Sans KR', sans-serif`;
+      return () => { document.body.style.fontFamily = ''; };
+    }
+  }, [weddingToUse?.fontFamily]);
+
   const urlTheme = searchParams.get('theme') as Theme | null;
   const theme = urlTheme || weddingToUse.theme || 'ROMANTIC_CLASSIC';
   const ThemeComponent = themeComponents[theme] || RomanticClassic;
@@ -230,7 +239,6 @@ export default function WeddingPage() {
           weddingDate={weddingToUse.weddingDate}
           style={weddingToUse.envelopeStyle || 'ivory'}
           cardText={weddingToUse.envelopeCardText}
-          theme={theme}
           onComplete={() => setEnvelopeDismissed(true)}
         />
       )}
