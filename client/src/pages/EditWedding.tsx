@@ -2199,6 +2199,23 @@ export default function EditWedding() {
               </label>
             </Section>
 
+            <Section title="히어로 텍스트 위치">
+              <p className="text-sm text-stone-500 mb-3">슬라이더로 대표 사진 위 텍스트 위치를 조정하세요</p>
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-stone-400 w-6">상단</span>
+                <input
+                  type="range"
+                  min={5}
+                  max={90}
+                  value={Number(wedding.heroTextPosition) || 50}
+                  onChange={(e) => updateField('heroTextPosition', String(e.target.value))}
+                  className="flex-1 accent-stone-800"
+                />
+                <span className="text-xs text-stone-400 w-6">하단</span>
+              </div>
+              <p className="text-xs text-stone-400 text-center mt-2">{Number(wedding.heroTextPosition) || 50}%</p>
+            </Section>
+
             <Section title="글씨 색상">
               <p className="text-sm text-stone-500 mb-4">헤더 영역의 글씨 색상을 선택하세요</p>
               <div className="flex flex-wrap gap-3">
