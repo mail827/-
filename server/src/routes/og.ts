@@ -6,11 +6,20 @@ const router = Router();
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-const ENVELOPE_TEMPLATES = [
-  'https://res.cloudinary.com/duzlquvxj/image/upload/v1/wedding/og-envelope-ivory.png',
-  'https://res.cloudinary.com/duzlquvxj/image/upload/v1/wedding/og-envelope-dark.png',
-  'https://res.cloudinary.com/duzlquvxj/image/upload/v1/wedding/og-envelope-gold.png',
-];
+const ENVELOPE_TEMPLATES: Record<string, string> = {
+  black_ribbon: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png',
+  white_ribbon: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png',
+  navy_seal: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png',
+  black_silver: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png',
+  olive_ribbon_a: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png',
+  olive_ribbon_b: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png',
+  pink_ribbon: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png',
+  white_bow: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png',
+  white_seal: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png',
+  black_seal: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png',
+  pink_seal: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png',
+  olive_seal: 'https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png',
+};
 
 function getEnvelopeOgImage(baseUrl: string, groomName: string, brideName: string, dateStr: string): string {
   if (!baseUrl.includes('cloudinary.com')) return baseUrl;
@@ -52,7 +61,8 @@ router.get('/pair/:code', async (req: Request, res: Response) => {
 <meta http-equiv="refresh" content="0;url=${url}">
 </head><body><h1>${title}</h1><p>${desc}</p><a href="${url}">초대 수락하기</a></body></html>`;
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
     res.status(200).send(html);
   } catch (e) {
     res.redirect(302, `https://weddingshop.cloud/pair/accept?code=${code}`);
@@ -83,11 +93,8 @@ router.get('/:slug', async (req: Request, res: Response) => {
     if (ogType === 'custom' && ogCustomImage) {
       image = ogCustomImage;
     } else if (ogType === 'envelope') {
-      const envelopeBase = ogCustomImage || ENVELOPE_TEMPLATES[0];
-      const dateFormatted = w.weddingDate
-        ? new Date(w.weddingDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
-        : '';
-      image = getEnvelopeOgImage(envelopeBase, w.groomName, w.brideName, dateFormatted);
+      const envelopeStyle = (w as any).envelopeStyle || 'black_ribbon';
+      image = ogCustomImage || ENVELOPE_TEMPLATES[envelopeStyle] || ENVELOPE_TEMPLATES.black_ribbon;
     } else {
       image = w.heroMedia || 'https://weddingshop.cloud/og-image.png';
     }
@@ -137,7 +144,8 @@ ${JSON.stringify({
 </html>`;
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
     res.status(200).send(html);
   } catch (e) {
     res.redirect(302, `https://weddingshop.cloud/w/${slug}`);
