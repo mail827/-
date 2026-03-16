@@ -1,14 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Parisienne&family=Alex+Brush&family=Sacramento&family=Pinyon+Script&family=Tangerine:wght@400;700&display=swap');
 
-@font-face { font-family: 'BM DoHyeon'; src: url('/fonts/BMDOHYEON_ttf.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'BM Euljiro 10years'; src: url('/fonts/BMEuljiro10yearslater.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'BM Euljiro Oraeorae'; src: url('/fonts/BMEuljirooraeorae.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'BM Euljiro'; src: url('/fonts/BMEULJIROTTF.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'BM Hanna 11yrs'; src: url('/fonts/BMHANNA_11yrs_ttf.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'BM Hanna Air'; src: url('/fonts/BMHANNAAir_ttf.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'BM Hanna Pro'; src: url('/fonts/BMHANNAPro.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'BM Jua'; src: url('/fonts/BMJUA_ttf.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'BM Kiranghaerang'; src: url('/fonts/BMKIRANGHAERANG-TTF.ttf') format('truetype'); font-display: swap; }
 @font-face { font-family: 'BM Kkubulim'; src: url('/fonts/BMKkubulimTTF.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'BM Yeonsung'; src: url('/fonts/BMYEONSUNG_ttf.ttf') format('truetype'); font-display: swap; }
 @font-face { font-family: 'Zen Serif'; src: url('/fonts/ZEN-SERIF-TTF-Regular.woff2') format('woff2'), url('/fonts/ZEN-SERIF-TTF-Regular.woff') format('woff'); font-display: swap; }
+
+@font-face { font-family: 'S-CoreDream'; src: url('/fonts/SCDream3.otf') format('opentype'); font-weight: 300; font-display: swap; }
+@font-face { font-family: 'S-CoreDream'; src: url('/fonts/SCDream5.otf') format('opentype'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'S-CoreDream'; src: url('/fonts/SCDream7.otf') format('opentype'); font-weight: 700; font-display: swap; }
+
+@font-face { font-family: 'ChosunNm'; src: url('/fonts/ChosunNm.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'ChosunGs'; src: url('/fonts/ChosunGs.TTF') format('truetype'); font-display: swap; }
+@font-face { font-family: 'ChosunBg'; src: url('/fonts/ChosunBg.TTF') format('truetype'); font-display: swap; }
+@font-face { font-family: 'ChosunSg'; src: url('/fonts/ChosunSg.TTF') format('truetype'); font-display: swap; }
+@font-face { font-family: 'ChosunSm'; src: url('/fonts/ChosunSm.TTF') format('truetype'); font-display: swap; }
+@font-face { font-family: 'ChosunKm'; src: url('/fonts/ChosunKm.TTF') format('truetype'); font-display: swap; }
+@font-face { font-family: 'ChosunKg'; src: url('/fonts/ChosunKg.TTF') format('truetype'); font-display: swap; }
+@font-face { font-family: 'ChosunLo'; src: url('/fonts/ChosunLo.TTF') format('truetype'); font-display: swap; }
+@font-face { font-family: 'ChosunGu'; src: url('/fonts/ChosunGu 4.TTF') format('truetype'); font-display: swap; }
+@font-face { font-family: 'ChosunCentennial'; src: url('/fonts/ChosunCentennial_otf.otf') format('opentype'); font-display: swap; }
+
+@font-face { font-family: 'Diphylleia'; src: url('/fonts/Diphylleia-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'MyeongjoTtobak'; src: url('/fonts/Griun_Myoeunddobak-Rg.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Museum'; src: url('/fonts/국립박물관문화재단클래식M.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Museum'; src: url('/fonts/국립박물관문화재단클래식L.ttf') format('truetype'); font-weight: 300; font-display: swap; }
+@font-face { font-family: 'Museum'; src: url('/fonts/국립박물관문화재단클래식B.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'HakgyoansimLunchtime'; src: url('/fonts/HakgyoansimJeomsimsiganB.ttf') format('truetype'); font-display: swap; }
+
+@font-face { font-family: 'SanHaYeop'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2206-02@1.0/SanHaYeop.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'HsBombaram30'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.1/HSBombaram3_Thin.woff') format('woff'); font-weight: 100; font-display: swap; }
+@font-face { font-family: 'HsBombaram30'; src: url('https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.1/HSBombaram3_Regular.woff') format('woff'); font-weight: normal; font-display: swap; }
