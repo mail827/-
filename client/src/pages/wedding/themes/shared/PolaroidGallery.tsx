@@ -94,7 +94,6 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
   const style = getFrameStyle(theme);
   const cols = 3;
   const cellW = 100 / cols;
-  const rowH = 58;
 
   return (
     <>
@@ -102,7 +101,7 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
         style={{
           position: 'relative',
           width: '100%',
-          height: Math.ceil(images.length / cols) * rowH + 16 + 'vw',
+          height: Math.ceil(images.length / cols) * 175 + 40,
           minHeight: Math.ceil(images.length / cols) * 160 + 40,
         }}
       >
@@ -121,7 +120,7 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
               style={{
                 position: 'absolute',
                 left: `calc(${col * cellW + cellW * 0.08}% + ${ox}px)`,
-                top: `calc(${row * rowH}vw * 0.85 + ${oy}px + 8px)`,
+                top: row * 175 + oy + 8,
                 width: `${cellW * 0.82}%`,
                 transform: `rotate(${rot}deg)`,
                 zIndex: z,
