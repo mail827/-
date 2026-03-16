@@ -621,9 +621,11 @@ export default function Landing() {
   const openLogin = () => setShowLoginModal(true);
 
   const specs = [
-    { num: "19", label: "테마", desc: "복붙 테마 아닙니다. 전부 개별 설계." },
-    { num: "33", label: "AI 화보 컨셉", desc: "스튜디오 촬영 대체 가능. 한복 · 크루즈 · 셀카." },
-    { num: "10", label: "종이청첩장", desc: "3단 · 2단 · 단일카드. 인쇄 가이드 제공." },
+    { num: "26", label: "테마", desc: "에디토리얼 · 크루즈 · 갤러리 · 어르신용까지." },
+    { num: "33", label: "AI 화보 컨셉", desc: "한복 · 크루즈 · 셀카 · 에디토리얼." },
+    { num: "23", label: "글꼴", desc: "조선체 · 에스코어드림 · 봄바람 · 박물관 클래식." },
+    { num: "12", label: "봉투 인트로", desc: "리본 7종 · 씰링 5종. 카카오톡 공유 연동." },
+    { num: "10", label: "종이청첩장", desc: "3단 · 2단 · 단일카드. 추가비용 0원." },
     { num: "19", label: "QR카드", desc: "테마별 맞춤 디자인. 명함 · 엽서 사이즈." },
   ];
 
@@ -792,6 +794,40 @@ export default function Landing() {
           </div>
         </section>
 
+        <section style={{ padding: "100px 48px", borderTop: "1px solid #E8E5E0" }}>
+          <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: 56 }}>
+              <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Features</p>
+              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>9,900원에 이 모든 것을.</h2>
+              <p style={{ fontSize: 14, color: "#999" }}>Standard 하나면 충분합니다.</p>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+              {[
+                { title: "봉투 인트로", desc: "터치하면 열리는 봉투 애니메이션. 리봄 7종 + 씬링 5종.", tag: "12종" },
+                { title: "폴라로이드 갤러리", desc: "비정형 배치. 터치하면 떠오르는 호버 효과.", tag: "NEW" },
+                { title: "서로에게 쓰는 편지", desc: "신랑, 신부 편지를 각각 작성. 이미지 첨부 가능.", tag: "NEW" },
+                { title: "프로필 소개", desc: "캐릭터 아바타 6종 또는 직접 사진 업로드.", tag: "NEW" },
+                { title: "식사 · 주차 안내", desc: "탭 형태로 추가 안내. 사진 첨부 가능.", tag: "NEW" },
+                { title: "함께 수정하기", desc: "커플이 동시에 편집. 분업 가능.", tag: "커플" },
+                { title: "글꼴 커스터마이징", desc: "23종 글꼴 + 크기 조절 + 영문 글꼴 7종.", tag: "23종" },
+                { title: "섹션 커스텀", desc: "숨기기, 순서 변경 드래그로 자유롭게.", tag: "자유" },
+                { title: "게스트 갤러리", desc: "하객들이 직접 사진과 영상을 업로드.", tag: "참여형" },
+                { title: "히어로 텍스트 조절", desc: "영문, 이름 위치를 슬라이더로 독립 조절.", tag: "커스텀" },
+                { title: "스냅샷 공유", desc: "버전별 다른 링크. 부모님용, 친구용 따로.", tag: "버전" },
+                { title: "종이청첩장 + QR", desc: "10종 + QR카드 19종. 추가비용 0원.", tag: "무료" },
+              ].map((f, i) => (
+                <div key={i} style={{ padding: "28px 24px", borderRadius: 14, border: "1px solid #E8E5E0", background: "#fff" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                    <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a" }}>{f.title}</p>
+                    <span style={{ fontSize: 10, color: "#888", padding: "3px 10px", borderRadius: 100, background: "#F5F4F1", fontWeight: 500 }}>{f.tag}</span>
+                  </div>
+                  <p style={{ fontSize: 13, color: "#888", lineHeight: 1.7 }}>{f.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section ref={chatSectionRef as React.RefObject<HTMLElement>} className="chat-section" style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "100px 48px", gap: 72 }}>
           <div className="chat-text-col" style={{ maxWidth: 440, opacity: chatSectionInView ? 1 : 0, transform: chatSectionInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1)" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 100, border: "1px solid #E0DDD8", marginBottom: 24, background: "#F5F4F1" }}>
@@ -903,7 +939,7 @@ export default function Landing() {
 
         <section ref={specRef as React.RefObject<HTMLElement>} style={{ padding: "80px 0", background: "#1a1a1a" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-            <div className="specs-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1, padding: "0 48px" }}>
+            <div className="specs-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, padding: "0 48px" }}>
               {specs.map((s, i) => (
                 <div key={i} style={{ textAlign: "center", padding: "40px 16px", opacity: specInView ? 1 : 0, transform: specInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 100}ms` }}>
                   <p className="serif" style={{ fontSize: 48, fontWeight: 300, color: "#fff", marginBottom: 8 }}>{s.num}</p>
