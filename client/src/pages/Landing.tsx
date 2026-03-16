@@ -729,7 +729,7 @@ export default function Landing() {
             </div>
             <p style={{ fontSize: 12, color: "#bbb", marginTop: 12 }}>사진이 아직 없어도 시작할 수 있습니다.</p>
             <div className="hero-stats" style={{ display: "flex", gap: 36, paddingTop: 32, borderTop: "1px solid #E8E5E0", marginTop: 32 }}>
-              {[["19", "테마"], ["26", "AI 스냅"], ["10", "종이청첩장"]].map(([n, l]) => (
+              {[["26", "테마"], ["33", "AI 스냅"], ["10", "종이청첩장"]].map(([n, l]) => (
                 <div key={l}>
                   <p className="serif" style={{ fontSize: 28, fontWeight: 200, color: "#1a1a1a" }}>{n}</p>
                   <p style={{ fontSize: 11, color: "#aaa", marginTop: 2, letterSpacing: 0.5 }}>{l}</p>
@@ -845,9 +845,9 @@ export default function Landing() {
               </div>
             </div>
             <div style={{ padding: "16px 20px", borderRadius: 10, background: "#1a1a1a" }}>
-              <p style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>AI Reception 패키지</p>
+              <p style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>Premium 패키지</p>
               <p style={{ fontSize: 14, color: "#fff" }}>자동 응대 시스템에 <span style={{ fontWeight: 600 }}>AI 화보 10컷</span> 포함.</p>
-              <p className="serif" style={{ fontSize: 24, fontWeight: 400, color: "#fff", marginTop: 8 }}>129,000<span style={{ fontSize: 13, color: "#666", fontFamily: "'Noto Sans KR', sans-serif" }}>원</span></p>
+              <p className="serif" style={{ fontSize: 24, fontWeight: 400, color: "#fff", marginTop: 8 }}>29,900<span style={{ fontSize: 13, color: "#666", fontFamily: "'Noto Sans KR', sans-serif" }}>원</span></p>
             </div>
           </div>
           <div style={{ opacity: chatSectionInView ? 1 : 0, transform: chatSectionInView ? "translateY(0)" : "translateY(40px)", transition: "all 1s cubic-bezier(0.22,1,0.36,1) 0.2s" }}>
