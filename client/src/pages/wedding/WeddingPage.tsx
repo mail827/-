@@ -230,7 +230,7 @@ export default function WeddingPage() {
     const scale = weddingToUse.fontScale || 'medium';
     if (scale === 'medium') return '';
     const factor = scale === 'small' ? '0.9' : '1.12';
-    return `body { font-size: calc(16px * ${factor}) !important; } p, span, div, li, td, th, label, button { font-size: inherit; }`;
+    return `body { font-size: calc(16px * ${factor}) !important; }`;
   })();
 
   const accentColorStyle = (() => {
