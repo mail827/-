@@ -114,7 +114,7 @@ export default function AdminPackages() {
           <div key={pkg.id} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-3">
-                {pkg.slug === 'ai-reception' && <Sparkles className="w-5 h-5 text-amber-500" />}
+                {pkg.slug === 'premium' && <Sparkles className="w-5 h-5 text-amber-500" />}
                 <h2 className="text-xl font-semibold text-stone-800">{pkg.name}</h2>
                 <span className="text-sm text-stone-400">({pkg.slug})</span>
               </div>
