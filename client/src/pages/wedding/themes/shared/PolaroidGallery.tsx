@@ -102,8 +102,8 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
         style={{
           position: 'relative',
           width: '100%',
-          height: Math.ceil(images.length / cols) * 175 + 40,
-          
+          height: Math.ceil(images.length / cols) * rowH + 16 + 'vw',
+          minHeight: Math.ceil(images.length / cols) * 160 + 40,
         }}
       >
         {images.map((item, i) => {
@@ -121,7 +121,7 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
               style={{
                 position: 'absolute',
                 left: `calc(${col * cellW + cellW * 0.08}% + ${ox}px)`,
-                top: row * 175 + oy + 8,
+                top: `calc(${row * rowH}vw * 0.85 + ${oy}px + 8px)`,
                 width: `${cellW * 0.82}%`,
                 transform: `rotate(${rot}deg)`,
                 zIndex: z,
