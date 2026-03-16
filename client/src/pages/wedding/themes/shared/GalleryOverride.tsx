@@ -17,21 +17,25 @@ export default function GalleryOverride({ galleries, theme, usePhotoFilter }: Ga
     const section = document.getElementById('gallery-section');
     if (!section) return false;
 
-    const kids = Array.from(section.children) as HTMLElement[];
-    kids.forEach((el) => {
-      if (el.id === 'polaroid-root') return;
-      const tag = el.tagName.toLowerCase();
-      if (tag === 'style' || tag === 'audio') return;
-      const isGrid = el.classList.contains('grid') || el.querySelector('.grid');
-      const hasImages = el.querySelectorAll('img').length >= 2;
-      if (isGrid || hasImages) {
-        el.style.display = 'none';
-      }
-    });
+    const grid = section.querySelector('[style*="grid"]') || section.querySelector('.grid');
+    if (grid) {
+      (grid as HTMLElement).style.display = 'none';
+    }
+
+    const existing = section.querySelector('#polaroid-root');
+    if (existing) {
+      setTarget(existing as HTMLElement);
+      done.current = true;
+      return true;
+    }
 
     const wrapper = document.createElement('div');
     wrapper.id = 'polaroid-root';
-    section.appendChild(wrapper);
+    if (grid) {
+      grid.parentElement?.insertBefore(wrapper, grid);
+    } else {
+      section.appendChild(wrapper);
+    }
     setTarget(wrapper);
     done.current = true;
     return true;
@@ -50,7 +54,7 @@ export default function GalleryOverride({ galleries, theme, usePhotoFilter }: Ga
   if (!target || !images.length) return null;
 
   return createPortal(
-    <div style={{ padding: '2rem 0.5rem' }}>
+    <div style={{ padding: '1rem 0' }}>
       <PolaroidGallery galleries={images} theme={theme} usePhotoFilter={usePhotoFilter} />
     </div>,
     target

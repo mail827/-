@@ -102,8 +102,7 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
         style={{
           position: 'relative',
           width: '100%',
-          height: Math.ceil(images.length / cols) * rowH + 16 + 'vw',
-          minHeight: Math.ceil(images.length / cols) * 160 + 40,
+          minHeight: Math.ceil(images.length / cols) * 180 + 40,
         }}
       >
         {images.map((item, i) => {
