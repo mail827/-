@@ -152,6 +152,7 @@ model Wedding {
   heroImagePosition        String?           @default("50% 50%")
   mainColor                String?
   accentColor              String?
+  fontScale                String?          @default("medium")
   fontFamily               String?
   createdAt                DateTime          @default(now())
   updatedAt                DateTime          @updatedAt

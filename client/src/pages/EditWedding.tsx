@@ -878,6 +878,76 @@ export default function EditWedding() {
         )}
 
         {tab === 'basic' && (
+          <>
+          <Section title="글꼴 크기">
+            <p className="text-sm text-stone-500 mb-3">청첩장 전체 글꼴 크기를 조정해요</p>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { value: 'small', label: '작게', sample: 'Aa', size: '14px' },
+                { value: 'medium', label: '보통', sample: 'Aa', size: '16px' },
+                { value: 'large', label: '크게', sample: 'Aa', size: '19px' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => updateField('fontScale', opt.value)}
+                  className={`py-4 rounded-xl border-2 transition-all ${
+                    (wedding.fontScale || 'medium') === opt.value
+                      ? 'border-stone-800 bg-stone-50'
+                      : 'border-stone-200 hover:border-stone-300'
+                  }`}
+                >
+                  <p className="text-center text-stone-700" style={{ fontSize: opt.size }}>{opt.sample}</p>
+                  <p className="text-[10px] text-stone-400 text-center mt-1">{opt.label}</p>
+                </button>
+              ))}
+            </div>
+          </Section>
+
+          <Section title="포인트 컬러">
+            <p className="text-sm text-stone-500 mb-3">섹션 제목, 구분선 등에 사용되는 포인트 색상이에요</p>
+            <div className="flex flex-wrap gap-3">
+              {[
+                { value: '', label: '기본' },
+                { value: '#B8860B', label: '골드' },
+                { value: '#8B6F47', label: '브라운' },
+                { value: '#708090', label: '슬레이트' },
+                { value: '#556B2F', label: '올리브' },
+                { value: '#800020', label: '버건디' },
+                { value: '#2F4F4F', label: '다크틸' },
+                { value: '#4A4A4A', label: '차콜' },
+                { value: '#CD853F', label: '샌드' },
+                { value: '#BC8F8F', label: '로지' },
+              ].map((color) => (
+                <button
+                  key={color.value}
+                  onClick={() => updateField('accentColor', color.value || null)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 transition-all ${
+                    (wedding.accentColor || '') === color.value
+                      ? 'border-stone-800 bg-stone-50'
+                      : 'border-stone-200 hover:border-stone-300'
+                  }`}
+                >
+                  {color.value ? (
+                    <div className="w-5 h-5 rounded-full border border-stone-200" style={{ backgroundColor: color.value }} />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full border-2 border-dashed border-stone-300" />
+                  )}
+                  <span className="text-xs text-stone-600">{color.label}</span>
+                </button>
+              ))}
+            </div>
+            <div className="mt-3">
+              <label className="block text-xs text-stone-500 mb-1">직접 입력 (HEX)</label>
+              <input
+                type="text"
+                value={wedding.accentColor || ''}
+                onChange={(e) => updateField('accentColor', e.target.value)}
+                placeholder="#B8860B"
+                className="w-32 px-3 py-2 border border-stone-200 rounded-lg text-sm"
+              />
+            </div>
+          </Section>
+
           <Section title="글꼴 설정">
             <p className="text-sm text-stone-500 mb-4">청첩장 전체에 적용되는 글꼴을 선택해요</p>
             <div className="grid grid-cols-2 gap-3">
@@ -914,6 +984,7 @@ export default function EditWedding() {
               ))}
             </div>
           </Section>
+          </>
         )}
 
         {tab === 'basic' && (

@@ -226,6 +226,19 @@ export default function WeddingPage() {
   const theme = urlTheme || weddingToUse.theme || 'ROMANTIC_CLASSIC';
   const ThemeComponent = themeComponents[theme] || RomanticClassic;
 
+  const fontScaleStyle = (() => {
+    const scale = weddingToUse.fontScale || 'medium';
+    if (scale === 'medium') return '';
+    const factor = scale === 'small' ? '0.9' : '1.12';
+    return `body { font-size: calc(16px * ${factor}) !important; } p, span, div, li, td, th, label, button { font-size: inherit; }`;
+  })();
+
+  const accentColorStyle = (() => {
+    const color = weddingToUse.accentColor;
+    if (!color) return '';
+    return `[data-accent] { color: ${color} !important; }`;
+  })();
+
   const galleryAspectStyle = (() => {
     const ratio = weddingToUse.galleryRatio || '1:1';
     if (ratio === '1:1') return '';
@@ -251,6 +264,8 @@ export default function WeddingPage() {
         />
       )}
       <div ref={sectionRef}>
+      {fontScaleStyle && <style>{fontScaleStyle}</style>}
+      {accentColorStyle && <style>{accentColorStyle}</style>}
       {galleryAspectStyle && <style>{galleryAspectStyle}</style>}
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Heart className="w-6 h-6 animate-pulse text-stone-300" /></div>}>
         <ThemeComponent

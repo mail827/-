@@ -79,6 +79,8 @@ export interface WeddingData {
   heroNamePosition?: string;
   heroScriptFont?: string;
   heroLayout?: string;
+  fontScale?: string;
+  accentColor?: string;
   galleryLayout?: string;
   groomIntro?: string;
   brideIntro?: string;
