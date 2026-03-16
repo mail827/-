@@ -89,6 +89,7 @@ router.post('/', authMiddleware, async (req, res) => {
             slug,
             weddingDate: new Date(data.weddingDate),
             orderId: order.id,
+            aiEnabled: gift.package?.slug === 'premium' || gift.package?.slug === 'ai-reception' || gift.package?.slug === 'basic-video',
             expiresAt: new Date(
               Date.now() + (gift.package?.durationDays || 365) * 24 * 60 * 60 * 1000
             ),
@@ -128,6 +129,7 @@ router.post('/', authMiddleware, async (req, res) => {
           slug,
           weddingDate: new Date(data.weddingDate),
           orderId: order.id,
+          aiEnabled: order.package?.slug === 'premium' || order.package?.slug === 'ai-reception' || order.package?.slug === 'basic-video',
           expiresAt: new Date(
             Date.now() + (order.package?.durationDays || 365) * 24 * 60 * 60 * 1000
           ),

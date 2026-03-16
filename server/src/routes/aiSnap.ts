@@ -51,6 +51,8 @@ const PACKAGE_QUOTA: Record<string, number> = {
   basic: 3,
   'ai-reception': 10,
   'basic-video': 3,
+  standard: 1,
+  premium: 20,
 };
 const FREE_TRIAL = 1;
 const EXTRA_PRICE = 1500;
