@@ -199,6 +199,7 @@ model Wedding {
   letterFromVisible  Boolean          @default(true)
   heroTextPosition       String?          @default("50")
   heroScriptFont         String?
+  heroLayout             String?          @default("spread")
   envelopeEnabled      Boolean          @default(false)
   envelopeStyle        String?          @default("ivory")
   envelopeCardText     String?

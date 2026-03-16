@@ -2231,6 +2231,30 @@ export default function EditWedding() {
             </Section>
 
             <Section title="히어로 텍스트 위치">
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => updateField('heroLayout', 'spread')}
+                  className={`flex-1 py-2.5 text-xs rounded-lg transition-all ${
+                    (wedding.heroLayout || 'spread') === 'spread'
+                      ? 'bg-stone-800 text-white'
+                      : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                  }`}
+                >
+                  분리 배치
+                </button>
+                <button
+                  onClick={() => updateField('heroLayout', 'grouped')}
+                  className={`flex-1 py-2.5 text-xs rounded-lg transition-all ${
+                    wedding.heroLayout === 'grouped'
+                      ? 'bg-stone-800 text-white'
+                      : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                  }`}
+                >
+                  묶어서 이동
+                </button>
+              </div>
+              {wedding.heroLayout === 'grouped' && (
+              <>
               <p className="text-sm text-stone-500 mb-3">슬라이더로 텍스트 위치를 조정하세요</p>
               <div className="relative w-full rounded-xl overflow-hidden mb-4" style={{ aspectRatio: '9/16', maxHeight: 360 }}>
                 <img
@@ -2269,6 +2293,8 @@ export default function EditWedding() {
                 />
                 <span className="text-xs text-stone-400 w-6">하단</span>
               </div>
+              </>
+              )}
             </Section>
 
             <Section title="글씨 색상">

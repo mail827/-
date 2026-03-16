@@ -164,7 +164,7 @@ export default function CruiseSunset({ wedding, guestbooks, onRsvpSubmit, onGues
         </div>
         <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(13,11,9,0.6) 100%)' }} />
 
-        <div className="absolute inset-0 z-20 flex flex-col items-center" style={{ padding: '2.5rem 2rem', paddingTop: `${Math.max(3, (Number(wedding.heroTextPosition) || 50) * 0.85)}vh`, gap: '2rem' }}>
+        <div className="absolute inset-0 z-20 flex flex-col" style={{ padding: '2.5rem 2rem', ...(wedding.heroLayout === 'grouped' ? { alignItems: 'center', paddingTop: `${Math.max(3, (Number(wedding.heroTextPosition) || 50) * 0.85)}vh`, gap: '2rem' } : { justifyContent: 'space-between', alignItems: 'center' }) }}>
           <motion.p
             initial={{ opacity: 0, y: -15 }}
             animate={{ opacity: 1, y: 0 }}
