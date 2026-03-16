@@ -801,7 +801,7 @@ export default function Landing() {
               <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>9,900원에 이 모든 것을.</h2>
               <p style={{ fontSize: 14, color: "#999" }}>Standard 하나면 충분합니다.</p>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+            <div style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: "4px 0 16px", scrollbarWidth: "none" }}>
               {[
                 { title: "봉투 인트로", desc: "터치하면 열리는 봉투 애니메이션. 리봄 7종 + 씬링 5종.", tag: "12종" },
                 { title: "폴라로이드 갤러리", desc: "비정형 배치. 터치하면 떠오르는 호버 효과.", tag: "NEW" },
@@ -816,7 +816,7 @@ export default function Landing() {
                 { title: "스냅샷 공유", desc: "버전별 다른 링크. 부모님용, 친구용 따로.", tag: "버전" },
                 { title: "종이청첩장 + QR", desc: "10종 + QR카드 19종. 추가비용 0원.", tag: "무료" },
               ].map((f, i) => (
-                <div key={i} style={{ padding: "28px 24px", borderRadius: 14, border: "1px solid #E8E5E0", background: "#fff" }}>
+                <div key={i} style={{ minWidth: 220, padding: "24px 20px", borderRadius: 14, border: "1px solid #E8E5E0", background: "#fff", scrollSnapAlign: "start", flexShrink: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                     <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a" }}>{f.title}</p>
                     <span style={{ fontSize: 10, color: "#888", padding: "3px 10px", borderRadius: 100, background: "#F5F4F1", fontWeight: 500 }}>{f.tag}</span>
