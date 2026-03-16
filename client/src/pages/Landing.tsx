@@ -810,10 +810,10 @@ export default function Landing() {
                 { title: "식사 · 주차 안내", desc: "탭 형태로 추가 안내. 사진 첨부 가능.", tag: "NEW" },
                 { title: "함께 수정하기", desc: "커플이 동시에 편집. 분업 가능.", tag: "커플" },
                 { title: "글꼴 커스터마이징", desc: "23종 글꼴 + 크기 조절 + 영문 글꼴 7종.", tag: "23종" },
-                { title: "섹션 커스텀", desc: "숨기기, 순서 변경 드래그로 자유롭게.", tag: "자유" },
+                { title: "원하는 구성", desc: "필요 없는 항목은 숨기고, 순서도 자유롭게.", tag: "자유" },
                 { title: "게스트 갤러리", desc: "하객들이 직접 사진과 영상을 업로드.", tag: "참여형" },
-                { title: "히어로 텍스트 조절", desc: "영문, 이름 위치를 슬라이더로 독립 조절.", tag: "커스텀" },
-                { title: "스냅샷 공유", desc: "버전별 다른 링크. 부모님용, 친구용 따로.", tag: "버전" },
+                { title: "대표 사진 글자 위치", desc: "사진 위 글자 위치를 자유롭게 조절.", tag: "커스텀" },
+                { title: "버전별 링크", desc: "부모님용, 친구용 따로 보내기. 수정해도 이미 보낸 링크는 그대로.", tag: "버전" },
                 { title: "종이청첩장 + QR", desc: "10종 + QR카드 19종. 추가비용 0원.", tag: "무료" },
               ].map((f, i) => (
                 <div key={i} style={{ minWidth: 220, padding: "24px 20px", borderRadius: 14, border: "1px solid #E8E5E0", background: "#fff", scrollSnapAlign: "start", flexShrink: 0 }}>
