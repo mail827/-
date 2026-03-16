@@ -162,13 +162,13 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
         <div className="absolute inset-x-0 top-0 z-10" style={{ height: '50%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)' }} />
         <div className="absolute inset-x-0 bottom-0 z-10" style={{ height: '33%', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }} />
 
-        <div className="absolute inset-0 z-20 flex flex-col" style={{ padding: '2.5rem', ...(wedding.heroLayout === 'grouped' ? { alignItems: 'center', paddingTop: `${Math.max(3, (Number(wedding.heroTextPosition) || 50) * 0.85)}vh`, gap: '2rem' } : { justifyContent: 'space-between', alignItems: 'center' }) }}>
+        <div className="absolute inset-0 z-20" style={{ padding: '0 2.5rem' }}>
           <motion.p
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             className="text-center"
-            style={{ fontFamily: F.body, fontWeight: 200, fontSize: 11, letterSpacing: '0.2em', color: C.white, textTransform: 'uppercase' }}
+            style={{ position: 'absolute', top: `${Number(wedding.heroTextPosition) || 20}%`, left: 0, right: 0, fontFamily: F.body, fontWeight: 200, fontSize: 11, letterSpacing: '0.2em', color: C.white, textTransform: 'uppercase' }}
           >
             Happily Ever After
           </motion.p>
@@ -178,7 +178,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
             className="text-center"
-            style={{ marginTop: '0' }}
+            style={{ position: 'absolute', top: `${(Number(wedding.heroTextPosition) || 20) + 5}%`, left: 0, right: 0 }}
           >
             <p className="rc-script" style={{ fontFamily: wedding.heroScriptFont ? `'${wedding.heroScriptFont}', cursive` : "'Great Vibes', cursive", fontSize: 'clamp(56px, 14vw, 80px)', color: C.white, lineHeight: 1.1, opacity: 0.9 }}>
               Dream your<br />Wedding Day
@@ -190,7 +190,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.7 }}
             className="flex flex-col items-center"
-            style={{ gap: '1.5rem' }}
+            style={{ position: 'absolute', bottom: `${100 - (Number(wedding.heroNamePosition) || 85)}%`, left: 0, right: 0, gap: '1.5rem' }}
           >
             <div className="text-center">
               <p style={{ fontFamily: F.body, fontWeight: 200, fontSize: 11, color: C.textLight, letterSpacing: '0.1em', marginBottom: '0.5rem' }}>

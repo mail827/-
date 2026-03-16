@@ -164,13 +164,13 @@ export default function CruiseSunset({ wedding, guestbooks, onRsvpSubmit, onGues
         </div>
         <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(13,11,9,0.6) 100%)' }} />
 
-        <div className="absolute inset-0 z-20 flex flex-col" style={{ padding: '2.5rem 2rem', ...(wedding.heroLayout === 'grouped' ? { alignItems: 'center', paddingTop: `${Math.max(3, (Number(wedding.heroTextPosition) || 50) * 0.85)}vh`, gap: '2rem' } : { justifyContent: 'space-between', alignItems: 'center' }) }}>
+        <div className="absolute inset-0 z-20" style={{ padding: '0 2rem' }}>
           <motion.p
             initial={{ opacity: 0, y: -15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             className="text-center"
-            style={{ fontFamily: F.body, fontWeight: 200, fontSize: 11, letterSpacing: '0.25em', color: C.textMuted, textTransform: 'uppercase' }}
+            style={{ position: 'absolute', top: `${Number(wedding.heroTextPosition) || 20}%`, left: 0, right: 0, fontFamily: F.body, fontWeight: 200, fontSize: 11, letterSpacing: '0.25em', color: C.textMuted, textTransform: 'uppercase' }}
           >
             Happily Ever After
           </motion.p>
@@ -180,7 +180,7 @@ export default function CruiseSunset({ wedding, guestbooks, onRsvpSubmit, onGues
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
             className="text-center"
-            style={{ marginTop: '0' }}
+            style={{ position: 'absolute', top: `${(Number(wedding.heroTextPosition) || 20) + 5}%`, left: 0, right: 0 }}
           >
             <p className="cs-script" style={{ fontFamily: wedding.heroScriptFont ? `'${wedding.heroScriptFont}', cursive` : "'Great Vibes', cursive", fontSize: 'clamp(52px, 13vw, 76px)', color: C.white, lineHeight: 1.15, textShadow: '0 4px 30px rgba(212,160,84,0.15)' }}>
               Dream your<br />Wedding Day
@@ -192,7 +192,7 @@ export default function CruiseSunset({ wedding, guestbooks, onRsvpSubmit, onGues
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.7 }}
             className="flex flex-col items-center"
-            style={{ gap: '1.25rem' }}
+            style={{ position: 'absolute', bottom: `${100 - (Number(wedding.heroNamePosition) || 85)}%`, left: 0, right: 0, gap: '1.25rem' }}
           >
             <div className="text-center">
               <p style={{ fontFamily: F.display, fontWeight: 300, fontSize: 11, color: C.accent, letterSpacing: '0.12em', marginBottom: '0.4rem', opacity: 0.8 }}>

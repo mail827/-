@@ -166,13 +166,13 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
         <div className="absolute inset-x-0 top-0" style={{ height: '40%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)' }} />
         <div className="absolute inset-x-0 bottom-0" style={{ height: '30%', background: 'linear-gradient(to top, rgba(0,0,0,0.35), transparent)' }} />
 
-        <div className="absolute inset-0 z-20 flex flex-col" style={{ padding: '2.5rem 2rem', ...(wedding.heroLayout === 'grouped' ? { alignItems: 'center', paddingTop: `${Math.max(3, (Number(wedding.heroTextPosition) || 50) * 0.85)}vh`, gap: '2rem' } : { justifyContent: 'space-between', alignItems: 'center' }) }}>
+        <div className="absolute inset-0 z-20" style={{ padding: '0 2rem' }}>
           <motion.p
             initial={{ opacity: 0, y: -15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             className="text-center"
-            style={{ fontFamily: F.body, fontWeight: 200, fontSize: 11, letterSpacing: '0.25em', color: C.white, textTransform: 'uppercase', opacity: 0.8 }}
+            style={{ position: 'absolute', top: `${Number(wedding.heroTextPosition) || 20}%`, left: 0, right: 0, fontFamily: F.body, fontWeight: 200, fontSize: 11, letterSpacing: '0.25em', color: C.white, textTransform: 'uppercase', opacity: 0.8 }}
           >
             Happily Ever After
           </motion.p>
@@ -182,7 +182,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
             className="text-center"
-            style={{ marginTop: '0' }}
+            style={{ position: 'absolute', top: `${(Number(wedding.heroTextPosition) || 20) + 5}%`, left: 0, right: 0 }}
           >
             <p className="cd-script" style={{ fontFamily: wedding.heroScriptFont ? `'${wedding.heroScriptFont}', cursive` : "'Great Vibes', cursive", fontSize: 'clamp(52px, 13vw, 76px)', color: C.accent, lineHeight: 1.15, textShadow: '0 2px 20px rgba(59,125,216,0.15)' }}>
               Dream your<br />Wedding Day
@@ -194,7 +194,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.7 }}
             className="flex flex-col items-center"
-            style={{ gap: '1.25rem' }}
+            style={{ position: 'absolute', bottom: `${100 - (Number(wedding.heroNamePosition) || 85)}%`, left: 0, right: 0, gap: '1.25rem' }}
           >
             <div className="text-center">
               <p style={{ fontFamily: F.display, fontWeight: 300, fontSize: 11, color: C.white, letterSpacing: '0.12em', marginBottom: '0.4rem', opacity: 0.8 }}>

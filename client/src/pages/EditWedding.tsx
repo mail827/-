@@ -2231,53 +2231,7 @@ export default function EditWedding() {
             </Section>
 
             <Section title="히어로 텍스트 위치">
-              <p className="text-sm text-stone-500 mb-3">히어로 영역의 텍스트 배치를 선택하세요</p>
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                {[
-                  { value: 'spread', label: '상하 분리' },
-                  { value: 'grouped', label: '위치 조정' },
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => updateField('heroLayout', opt.value)}
-                    className={`rounded-xl border-2 transition-all overflow-hidden ${
-                      (wedding.heroLayout || 'spread') === opt.value
-                        ? 'border-stone-800'
-                        : 'border-stone-200 hover:border-stone-300'
-                    }`}
-                  >
-                    <div className="relative w-full bg-stone-800" style={{ aspectRatio: '9/14' }}>
-                      {opt.value === 'spread' ? (
-                        <>
-                          <div className="absolute top-[10%] left-0 right-0 text-center">
-                            <p className="text-white/50 text-[6px] tracking-[0.2em]">HAPPILY EVER AFTER</p>
-                          </div>
-                          <div className="absolute top-[38%] left-0 right-0 text-center">
-                            <p className="text-white/80 text-[11px] italic" style={{ fontFamily: 'Georgia, serif' }}>Dream your</p>
-                            <p className="text-white/80 text-[11px] italic" style={{ fontFamily: 'Georgia, serif' }}>Wedding Day</p>
-                          </div>
-                          <div className="absolute bottom-[12%] left-0 right-0 text-center">
-                            <p className="text-white/40 text-[5px] tracking-wider">FINALLY 2026.01.20</p>
-                            <p className="text-white/70 text-[7px] mt-0.5">Name & Name</p>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="absolute top-[18%] left-0 right-0 text-center">
-                          <p className="text-white/50 text-[6px] tracking-[0.2em]">HAPPILY EVER AFTER</p>
-                          <p className="text-white/80 text-[11px] italic mt-1" style={{ fontFamily: 'Georgia, serif' }}>Dream your</p>
-                          <p className="text-white/80 text-[11px] italic" style={{ fontFamily: 'Georgia, serif' }}>Wedding Day</p>
-                          <p className="text-white/40 text-[5px] tracking-wider mt-1">FINALLY 2026.01.20</p>
-                          <p className="text-white/70 text-[7px] mt-0.5">Name & Name</p>
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-[11px] py-2 text-stone-600">{opt.label}</p>
-                  </button>
-                ))}
-              </div>
-              {wedding.heroLayout === 'grouped' && (
-              <>
-              <p className="text-sm text-stone-500 mb-3">슬라이더로 텍스트 위치를 조정하세요</p>
+              <p className="text-sm text-stone-500 mb-3">영문 텍스트와 이름/날짜 위치를 각각 조정하세요</p>
               <div className="relative w-full rounded-xl overflow-hidden mb-4" style={{ aspectRatio: '9/16', maxHeight: 360 }}>
                 <img
                   src={wedding.heroMedia || wedding.galleries?.[0]?.mediaUrl || ''}
@@ -2287,36 +2241,43 @@ export default function EditWedding() {
                 <div className="absolute inset-0 bg-black/20" />
                 <div
                   className="absolute left-0 right-0 flex flex-col items-center transition-all duration-200"
-                  style={{ top: `${Math.max(3, (Number(wedding.heroTextPosition) || 50) * 0.85)}%`, gap: '12px' }}
+                  style={{ top: `${Number(wedding.heroTextPosition) || 20}%` }}
                 >
-                  <p className="text-white/60 text-[9px] tracking-[0.25em] uppercase font-light">Happily Ever After</p>
-                  <p className="text-white text-xl italic font-light" style={{ fontFamily: 'Georgia, serif' }}>
+                  <p className="text-white/60 text-[8px] tracking-[0.25em] uppercase font-light">Happily Ever After</p>
+                  <p className="text-white text-xl italic font-light mt-1" style={{ fontFamily: 'Georgia, serif' }}>
                     Dream your<br />Wedding Day
                   </p>
-                  <div className="text-center">
-                    <p className="text-white/50 text-[9px] tracking-[0.15em]">
-                      FINALLY {wedding.weddingDate ? new Date(wedding.weddingDate).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.') : '2026.00.00'}
-                    </p>
-                    <p className="text-white text-sm font-light tracking-wider mt-0.5">
-                      {wedding.groomName || '신랑'} & {wedding.brideName || '신부'}
-                    </p>
+                </div>
+                <div
+                  className="absolute left-0 right-0 flex flex-col items-center transition-all duration-200"
+                  style={{ top: `${Number(wedding.heroNamePosition) || 85}%`, transform: 'translateY(-100%)' }}
+                >
+                  <p className="text-white/50 text-[8px] tracking-[0.15em]">
+                    FINALLY {wedding.weddingDate ? new Date(wedding.weddingDate).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.') : '2026.00.00'}
+                  </p>
+                  <p className="text-white text-sm font-light tracking-wider mt-0.5">
+                    {wedding.groomName || '신랑'} & {wedding.brideName || '신부'}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-stone-500 mb-1">영문 텍스트</p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] text-stone-400">상</span>
+                    <input type="range" min={5} max={60} value={Number(wedding.heroTextPosition) || 20} onChange={(e) => updateField('heroTextPosition', String(e.target.value))} className="flex-1 accent-stone-800" />
+                    <span className="text-[10px] text-stone-400">하</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs text-stone-500 mb-1">이름 / 날짜</p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] text-stone-400">상</span>
+                    <input type="range" min={40} max={95} value={Number(wedding.heroNamePosition) || 85} onChange={(e) => updateField('heroNamePosition', String(e.target.value))} className="flex-1 accent-stone-800" />
+                    <span className="text-[10px] text-stone-400">하</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-xs text-stone-400 w-6">상단</span>
-                <input
-                  type="range"
-                  min={5}
-                  max={90}
-                  value={Number(wedding.heroTextPosition) || 50}
-                  onChange={(e) => updateField('heroTextPosition', String(e.target.value))}
-                  className="flex-1 accent-stone-800"
-                />
-                <span className="text-xs text-stone-400 w-6">하단</span>
-              </div>
-              </>
-              )}
             </Section>
 
             <Section title="글씨 색상">
