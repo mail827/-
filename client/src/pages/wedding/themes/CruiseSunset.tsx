@@ -14,7 +14,7 @@ import {
 const fontStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500&display=swap');
-  @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Parisienne&family=Alex+Brush&family=Sacramento&family=Pinyon+Script&family=Tangerine:wght@400;700&display=swap');
 `;
 
 const themeStyles = `
@@ -30,7 +30,7 @@ const themeStyles = `
   @keyframes cs-heroZoom{from{transform:scale(1.06)}to{transform:scale(1)}}
   .cs-hero-img{animation:cs-heroZoom 4s ease-out forwards;opacity:.7}
   .cs-vertical{writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg)}
-  .cs-script{font-family:'Great Vibes',cursive}
+
 `;
 
 const sectionAnim = {
@@ -182,7 +182,7 @@ export default function CruiseSunset({ wedding, guestbooks, onRsvpSubmit, onGues
             className="text-center"
             style={{ marginTop: '0' }}
           >
-            <p className="cs-script" style={{ fontSize: 'clamp(52px, 13vw, 76px)', color: C.white, lineHeight: 1.15, textShadow: '0 4px 30px rgba(212,160,84,0.15)' }}>
+            <p className="cs-script" style={{ fontFamily: wedding.heroScriptFont ? `'${wedding.heroScriptFont}', cursive` : "'Great Vibes', cursive", fontSize: 'clamp(52px, 13vw, 76px)', color: C.white, lineHeight: 1.15, textShadow: '0 4px 30px rgba(212,160,84,0.15)' }}>
               Dream your<br />Wedding Day
             </p>
           </motion.div>

@@ -85,6 +85,7 @@ export interface Wedding {
   fontFamily?: string;
   textColor?: string;
   heroTextPosition?: string;
+  heroScriptFont?: string;
   aiEnabled?: boolean;
   aiName?: string;
   aiMode?: string;

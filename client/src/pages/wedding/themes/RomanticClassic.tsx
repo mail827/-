@@ -26,7 +26,7 @@ const themeStyles = `
   @keyframes rc-heroZoom{from{transform:scale(1.08)}to{transform:scale(1)}}
   .rc-hero-img{animation:rc-heroZoom 4s ease-out forwards}
   .rc-vertical{writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg)}
-  .rc-script{font-family:'Great Vibes',cursive}
+
 `;
 
 const sectionAnim = {
@@ -180,7 +180,7 @@ export default function RomanticClassic({ wedding, guestbooks, onRsvpSubmit, onG
             className="text-center"
             style={{ marginTop: '0' }}
           >
-            <p className="rc-script" style={{ fontSize: 'clamp(56px, 14vw, 80px)', color: C.white, lineHeight: 1.1, opacity: 0.9 }}>
+            <p className="rc-script" style={{ fontFamily: wedding.heroScriptFont ? `'${wedding.heroScriptFont}', cursive` : "'Great Vibes', cursive", fontSize: 'clamp(56px, 14vw, 80px)', color: C.white, lineHeight: 1.1, opacity: 0.9 }}>
               Dream your<br />Wedding Day
             </p>
           </motion.div>

@@ -76,6 +76,7 @@ export interface WeddingData {
   sectionOrder?: string[];
   galleryRatio?: string;
   heroTextPosition?: string;
+  heroScriptFont?: string;
   galleryLayout?: string;
   groomIntro?: string;
   brideIntro?: string;
