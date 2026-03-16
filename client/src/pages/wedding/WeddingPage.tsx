@@ -279,7 +279,7 @@ export default function WeddingPage() {
           guestPhotoSlot={!isPreview && weddingToUse.guestPhotoEnabled !== false ? <GuestPhotoGallery slug={weddingToUse.slug} enabled={true} /> : undefined}
         />
       </Suspense>
-      {weddingToUse.galleryLayout === 'polaroid' && weddingToUse.galleries?.length && !isPreview && (
+      {weddingToUse.galleryLayout === 'polaroid' && !theme.startsWith('EDITORIAL') && weddingToUse.galleries?.length && !isPreview && (
         <GalleryOverride
           galleries={weddingToUse.galleries}
           theme={theme}
