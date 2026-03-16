@@ -263,7 +263,9 @@ export default function WeddingPage() {
           onComplete={() => setEnvelopeDismissed(true)}
         />
       )}
-      <div ref={sectionRef}>
+      <div ref={sectionRef} style={{
+        zoom: (weddingToUse.fontScale === 'small' ? 0.92 : weddingToUse.fontScale === 'large' ? 1.08 : 1),
+      }}>
       {fontScaleStyle && <style>{fontScaleStyle}</style>}
       {accentColorStyle && <style>{accentColorStyle}</style>}
       {galleryAspectStyle && <style>{galleryAspectStyle}</style>}
