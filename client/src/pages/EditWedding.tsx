@@ -2231,27 +2231,49 @@ export default function EditWedding() {
             </Section>
 
             <Section title="히어로 텍스트 위치">
-              <div className="flex gap-2 mb-4">
-                <button
-                  onClick={() => updateField('heroLayout', 'spread')}
-                  className={`flex-1 py-2.5 text-xs rounded-lg transition-all ${
-                    (wedding.heroLayout || 'spread') === 'spread'
-                      ? 'bg-stone-800 text-white'
-                      : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
-                  }`}
-                >
-                  분리 배치
-                </button>
-                <button
-                  onClick={() => updateField('heroLayout', 'grouped')}
-                  className={`flex-1 py-2.5 text-xs rounded-lg transition-all ${
-                    wedding.heroLayout === 'grouped'
-                      ? 'bg-stone-800 text-white'
-                      : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
-                  }`}
-                >
-                  묶어서 이동
-                </button>
+              <p className="text-sm text-stone-500 mb-3">히어로 영역의 텍스트 배치를 선택하세요</p>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {[
+                  { value: 'spread', label: '상하 분리' },
+                  { value: 'grouped', label: '위치 조정' },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => updateField('heroLayout', opt.value)}
+                    className={`rounded-xl border-2 transition-all overflow-hidden ${
+                      (wedding.heroLayout || 'spread') === opt.value
+                        ? 'border-stone-800'
+                        : 'border-stone-200 hover:border-stone-300'
+                    }`}
+                  >
+                    <div className="relative w-full bg-stone-800" style={{ aspectRatio: '9/14' }}>
+                      {opt.value === 'spread' ? (
+                        <>
+                          <div className="absolute top-[10%] left-0 right-0 text-center">
+                            <p className="text-white/50 text-[6px] tracking-[0.2em]">HAPPILY EVER AFTER</p>
+                          </div>
+                          <div className="absolute top-[38%] left-0 right-0 text-center">
+                            <p className="text-white/80 text-[11px] italic" style={{ fontFamily: 'Georgia, serif' }}>Dream your</p>
+                            <p className="text-white/80 text-[11px] italic" style={{ fontFamily: 'Georgia, serif' }}>Wedding Day</p>
+                          </div>
+                          <div className="absolute bottom-[12%] left-0 right-0 text-center">
+                            <p className="text-white/40 text-[5px] tracking-wider">FINALLY 2026.01.20</p>
+                            <p className="text-white/70 text-[7px] mt-0.5">Name & Name</p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="absolute top-[18%] left-0 right-0 text-center">
+                          <p className="text-white/50 text-[6px] tracking-[0.2em]">HAPPILY EVER AFTER</p>
+                          <p className="text-white/80 text-[11px] italic mt-1" style={{ fontFamily: 'Georgia, serif' }}>Dream your</p>
+                          <p className="text-white/80 text-[11px] italic" style={{ fontFamily: 'Georgia, serif' }}>Wedding Day</p>
+                          <p className="text-white/40 text-[5px] tracking-wider mt-1">FINALLY 2026.01.20</p>
+                          <p className="text-white/70 text-[7px] mt-0.5">Name & Name</p>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[11px] py-2 text-stone-600">{opt.label}</p>
+                  </button>
+                ))}
               </div>
               {wedding.heroLayout === 'grouped' && (
               <>
