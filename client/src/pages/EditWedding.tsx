@@ -847,6 +847,37 @@ export default function EditWedding() {
         )}
 
         {tab === 'basic' && (
+          <Section title="히어로 영문 글꼴">
+            <p className="text-sm text-stone-500 mb-3">히어로 영문 장식 글꼴을 선택해요</p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { value: '', label: 'Great Vibes', font: 'Great Vibes' },
+                { value: 'Dancing Script', label: 'Dancing Script', font: 'Dancing Script' },
+                { value: 'Parisienne', label: 'Parisienne', font: 'Parisienne' },
+                { value: 'Alex Brush', label: 'Alex Brush', font: 'Alex Brush' },
+                { value: 'Sacramento', label: 'Sacramento', font: 'Sacramento' },
+                { value: 'Pinyon Script', label: 'Pinyon Script', font: 'Pinyon Script' },
+                { value: 'Tangerine', label: 'Tangerine', font: 'Tangerine' },
+              ].map((font) => (
+                <button
+                  key={font.value}
+                  onClick={() => updateField('heroScriptFont', font.value || null)}
+                  className={`px-4 py-4 rounded-lg border-2 transition-all text-center ${
+                    (wedding.heroScriptFont || '') === font.value
+                      ? 'border-stone-800 bg-stone-50'
+                      : 'border-stone-200 hover:border-stone-300'
+                  }`}
+                  style={{ fontFamily: "'"+font.font+"', cursive" }}
+                >
+                  <span className="text-lg">Wedding Day</span>
+                  <p className="text-[10px] text-stone-400 mt-1">{font.label}</p>
+                </button>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {tab === 'basic' && (
           <Section title="글꼴 설정">
             <p className="text-sm text-stone-500 mb-4">청첩장 전체에 적용되는 글꼴을 선택해요</p>
             <div className="grid grid-cols-2 gap-3">
