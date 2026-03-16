@@ -803,7 +803,7 @@ export default function Landing() {
             </div>
             <div style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: "4px 0 16px", scrollbarWidth: "none" }}>
               {[
-                { title: "봉투 인트로", desc: "터치하면 열리는 봉투 애니메이션. 리봄 7종 + 씬링 5종.", tag: "12종" },
+                { title: "봉투 인트로", desc: "터치하면 열리는 봉투 애니메이션. 리본 7종 + 씰링 5종.", tag: "12종" },
                 { title: "폴라로이드 갤러리", desc: "비정형 배치. 터치하면 떠오르는 호버 효과.", tag: "NEW" },
                 { title: "서로에게 쓰는 편지", desc: "신랑, 신부 편지를 각각 작성. 이미지 첨부 가능.", tag: "NEW" },
                 { title: "프로필 소개", desc: "캐릭터 아바타 6종 또는 직접 사진 업로드.", tag: "NEW" },
