@@ -903,7 +903,7 @@ export default function Landing() {
 
         <section ref={specRef as React.RefObject<HTMLElement>} style={{ padding: "80px 0", background: "#1a1a1a" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-            <div className="specs-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 1, padding: "0 48px" }}>
+            <div className="specs-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1, padding: "0 48px" }}>
               {specs.map((s, i) => (
                 <div key={i} style={{ textAlign: "center", padding: "40px 16px", opacity: specInView ? 1 : 0, transform: specInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 100}ms` }}>
                   <p className="serif" style={{ fontSize: 48, fontWeight: 300, color: "#fff", marginBottom: 8 }}>{s.num}</p>
@@ -929,13 +929,12 @@ export default function Landing() {
               </a>
             </div>
             {packages.length > 0 ? (
-              <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
+              <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
                 {packages.map((pkg, i) => {
-                  const isHighlight = pkg.slug === "ai-reception" || pkg.slug === "basic-video";
+                  const isHighlight = pkg.slug === "premium";
                   return (
                     <div key={pkg.id} style={{ padding: "32px 24px", borderRadius: 14, border: isHighlight ? "2px solid #1a1a1a" : "1px solid #E8E5E0", background: isHighlight ? "#FAFAF8" : "#fff", position: "relative", opacity: pricingInView ? 1 : 0, transform: pricingInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 80}ms` }}>
-                      {pkg.slug === "ai-reception" && <div style={{ position: "absolute", top: -1, left: 24, transform: "translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 12px", borderRadius: 100, fontWeight: 500 }}>BEST</div>}
-                      {pkg.slug === "basic-video" && <div style={{ position: "absolute", top: -1, left: 24, transform: "translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 12px", borderRadius: 100, fontWeight: 500 }}>PREMIUM</div>}
+                      {pkg.slug === "premium" && <div style={{ position: "absolute", top: -1, left: 24, transform: "translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 12px", borderRadius: 100, fontWeight: 500 }}>BEST</div>}
                       <p style={{ fontSize: 11, color: "#bbb", marginBottom: 4 }}>{pkg.description}</p>
                       <p style={{ fontSize: 16, fontWeight: 600, color: "#1a1a1a", marginBottom: 16 }}>{pkg.name}</p>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 2, marginBottom: 20 }}>
@@ -969,7 +968,7 @@ export default function Landing() {
               <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 10 }}>AI 웨딩 화보 단독 패키지</h2>
               <p style={{ fontSize: 14, color: "#999" }}>청첩장 없이 AI 웨딩 화보만 이용할 수 있어요</p>
             </div>
-            <div className="snap-pack-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
+            <div className="snap-pack-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 20 }}>
               {[
                 { name: "3장 세트", per: "장당 1,967원", price: "5,900", popular: false },
                 { name: "5장 세트", per: "장당 1,980원", price: "9,900", popular: false },
