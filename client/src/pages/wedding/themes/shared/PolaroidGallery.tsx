@@ -102,6 +102,8 @@ export default function PolaroidGallery({ galleries, theme = 'MODERN_MINIMAL', u
         style={{
           position: 'relative',
           width: '100%',
+          maxWidth: 420,
+          margin: '0 auto',
           minHeight: Math.ceil(images.length / cols) * 180 + 40,
         }}
       >
