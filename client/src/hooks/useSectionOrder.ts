@@ -98,7 +98,10 @@ function applyOrder(root: HTMLElement, order: string[], hiddenSections: string[]
     const pos = getComputedStyle(child).position;
     if (pos === 'fixed') return;
 
-    if (!heroFound && child.classList.contains('min-h-screen')) {
+    if (!heroFound && (
+      child.classList.contains('min-h-screen') ||
+      (child.tagName === 'SECTION' && child.querySelector('video, .rc-hero-img, .cd-hero-img, .cs-hero-img, .mm-hero-img'))
+    )) {
       child.style.order = '0';
       heroFound = true;
       return;
