@@ -17,25 +17,13 @@ export default function GalleryOverride({ galleries, theme, usePhotoFilter }: Ga
     const section = document.getElementById('gallery-section');
     if (!section) return false;
 
-    const grid = section.querySelector('[style*="grid"]') || section.querySelector('.grid');
-    if (grid) {
-      (grid as HTMLElement).style.display = 'none';
-    }
-
-    const existing = section.querySelector('#polaroid-root');
-    if (existing) {
-      setTarget(existing as HTMLElement);
-      done.current = true;
-      return true;
-    }
-
     const wrapper = document.createElement('div');
     wrapper.id = 'polaroid-root';
-    if (grid) {
-      grid.parentElement?.insertBefore(wrapper, grid);
-    } else {
-      section.appendChild(wrapper);
-    }
+
+    const kids = Array.from(section.children) as HTMLElement[];
+    kids.forEach((el) => { el.style.display = 'none'; });
+
+    section.appendChild(wrapper);
     setTarget(wrapper);
     done.current = true;
     return true;
@@ -43,10 +31,12 @@ export default function GalleryOverride({ galleries, theme, usePhotoFilter }: Ga
 
   useEffect(() => {
     if (setup()) return;
+
     const observer = new MutationObserver(() => {
       if (setup()) observer.disconnect();
     });
     observer.observe(document.body, { childList: true, subtree: true });
+
     return () => observer.disconnect();
   }, [setup]);
 
@@ -54,7 +44,16 @@ export default function GalleryOverride({ galleries, theme, usePhotoFilter }: Ga
   if (!target || !images.length) return null;
 
   return createPortal(
-    <div style={{ padding: '1rem 0' }}>
+    <div style={{ padding: '2rem 0.5rem' }}>
+      <p style={{
+        fontSize: '10px',
+        letterSpacing: '0.4em',
+        textAlign: 'center',
+        opacity: 0.3,
+        marginBottom: '2rem',
+      }}>
+        GALLERY
+      </p>
       <PolaroidGallery galleries={images} theme={theme} usePhotoFilter={usePhotoFilter} />
     </div>,
     target
