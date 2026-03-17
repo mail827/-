@@ -35,6 +35,7 @@ import AdminPackages from './pages/admin/AdminPackages';
 import AdminCoupon from './pages/admin/AdminCoupon';
 import AdminSettlement from './pages/admin/AdminSettlement';
 import AdminReconciliation from './pages/admin/AdminReconciliation';
+import AdminWeddingLifecycle from './pages/admin/AdminWeddingLifecycle';
 import AdminRevenueSplit from './pages/admin/AdminRevenueSplit';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminInquiries from './pages/admin/AdminInquiries';
@@ -127,7 +128,8 @@ export default function App() {
         <Route path="packages" element={<AdminPackages />} />
         <Route path="coupons" element={<AdminCoupon />} />
         <Route path="settlement" element={<AdminSettlement />} />
-        <Route path="reconciliation" element={<AdminReconciliation />} />
+        <Route path="lifecycle" element={<AdminWeddingLifecycle />} />
+            <Route path="reconciliation" element={<AdminReconciliation />} />
         <Route path="revenue-split" element={<AdminRevenueSplit />} />
         <Route path="inquiries" element={<AdminInquiries />} />
         <Route path="guides" element={<AdminGuides />} />

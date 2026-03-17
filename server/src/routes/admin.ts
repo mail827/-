@@ -361,4 +361,21 @@ router.delete('/snap-samples/:id', authMiddleware, adminMiddleware, async (req, 
   res.json({ success: true });
 });
 
+
+router.get('/wedding-lifecycle', authMiddleware, adminMiddleware, async (req: any, res) => {
+  try {
+    const weddings = await prisma.wedding.findMany({
+      select: {
+        id: true, slug: true, groomName: true, brideName: true,
+        weddingDate: true, expiresAt: true, createdAt: true,
+        user: { select: { name: true, email: true } },
+      },
+      orderBy: { weddingDate: 'asc' },
+    });
+    res.json(weddings);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export const adminRouter = router;

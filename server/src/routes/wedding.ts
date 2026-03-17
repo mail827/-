@@ -90,9 +90,7 @@ router.post('/', authMiddleware, async (req, res) => {
             weddingDate: new Date(data.weddingDate),
             orderId: order.id,
             aiEnabled: gift.package?.slug === 'premium' || gift.package?.slug === 'ai-reception' || gift.package?.slug === 'basic-video',
-            expiresAt: new Date(
-              Date.now() + (gift.package?.durationDays || 365) * 24 * 60 * 60 * 1000
-            ),
+            expiresAt: new Date(new Date(data.weddingDate).getTime() + 90 * 24 * 60 * 60 * 1000),
           },
         });
 
@@ -130,9 +128,7 @@ router.post('/', authMiddleware, async (req, res) => {
           weddingDate: new Date(data.weddingDate),
           orderId: order.id,
           aiEnabled: order.package?.slug === 'premium' || order.package?.slug === 'ai-reception' || order.package?.slug === 'basic-video',
-          expiresAt: new Date(
-            Date.now() + (order.package?.durationDays || 365) * 24 * 60 * 60 * 1000
-          ),
+          expiresAt: new Date(new Date(data.weddingDate).getTime() + 90 * 24 * 60 * 60 * 1000),
         },
       });
 
@@ -150,7 +146,7 @@ router.post('/', authMiddleware, async (req, res) => {
         data: {
           ...data, userId: user.id, slug,
           weddingDate: new Date(data.weddingDate),
-          expiresAt: new Date(Date.now() + (gift.package?.durationDays || 90) * 24 * 60 * 60 * 1000),
+          expiresAt: new Date(new Date(data.weddingDate).getTime() + 90 * 24 * 60 * 60 * 1000),
         },
       });
       return res.status(201).json(wedding);
@@ -166,7 +162,7 @@ router.post('/', authMiddleware, async (req, res) => {
         userId: user.id,
         slug,
         weddingDate: new Date(data.weddingDate),
-        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(new Date(data.weddingDate).getTime() + 90 * 24 * 60 * 60 * 1000),
       },
     });
 
