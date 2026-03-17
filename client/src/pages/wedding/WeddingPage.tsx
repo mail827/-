@@ -205,7 +205,7 @@ export default function WeddingPage() {
           <p className="text-stone-400 text-sm mt-2">9,900원으로 영구 보존할 수 있어요</p>
           <button onClick={async () => {
             try {
-              const res = await fetch(API_BASE + '/archive/payment-request', {
+              const res = await fetch(API_BASE + '/public/archive/payment-request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ weddingId: (data as any)?.wedding?.id }),
@@ -295,14 +295,11 @@ export default function WeddingPage() {
       {galleryAspectStyle && <style>{galleryAspectStyle}</style>}
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Heart className="w-6 h-6 animate-pulse text-stone-300" /></div>}>
         {isArchive && (
-          <>
-            <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 99999, background: "#1a1a1a", padding: "14px 16px", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
-              <p style={{ fontSize: 13, color: "#fff" }}>Our Wedding Archive</p>
-              <div style={{ width: 1, height: 14, background: "#555" }} />
-              <p style={{ fontSize: 11, color: "#999" }}>RSVP and payments are closed</p>
-            </div>
-            <div style={{ height: 48 }} />
-          </>
+          <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 99999, background: "#1a1a1a", padding: "14px 16px", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
+            <p style={{ fontSize: 13, color: "#fff" }}>Our Wedding Archive</p>
+            <div style={{ width: 1, height: 14, background: "#555" }} />
+            <p style={{ fontSize: 11, color: "#999" }}>RSVP and payments are closed</p>
+          </div>
         )}
         <ThemeComponent
           wedding={weddingToUse}

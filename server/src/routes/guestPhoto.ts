@@ -62,7 +62,7 @@ router.get('/:slug', async (req, res) => {
   const wedding = await prisma.wedding.findUnique({ where: { slug: req.params.slug } });
   if (!wedding) return res.status(404).json({ error: '없음' });
   const photos = await prisma.guestPhoto.findMany({
-    where: { weddingId: wedding.id, approved: true },
+    where: { weddingId: wedding.id, approved: true, mediaType: { not: 'AI_PHOTO' } },
     orderBy: { createdAt: 'desc' },
   });
   res.json(photos);
