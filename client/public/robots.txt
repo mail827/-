@@ -4,5 +4,6 @@ Disallow: /admin
 Disallow: /login
 Disallow: /dashboard
 Disallow: /edit/
+Disallow: /archive-success
 
 Sitemap: https://weddingshop.cloud/sitemap.xml
