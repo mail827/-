@@ -1793,6 +1793,18 @@ export default function EditWedding() {
 
             {wedding.aiEnabled && (
               <>
+                <Section title="AI Photo Booth">
+                  <p className="text-sm text-stone-500 mb-4">하객이 셀카를 올리면 AI 웨딩 화보를 만들어줘요</p>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={wedding.aiBoothEnabled || false}
+                      onChange={(e) => updateField('aiBoothEnabled', e.target.checked)}
+                      className="w-6 h-6 rounded border-stone-300"
+                    />
+                    <span className="text-sm font-medium text-stone-700">Photo Booth 활성화</span>
+                  </label>
+                </Section>
                 <Section title="AI 이름 설정">
                   <p className="text-sm text-stone-500 mb-4">우리만의 AI에게 이름을 지어주세요</p>
                   <input

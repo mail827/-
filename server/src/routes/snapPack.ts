@@ -799,30 +799,21 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     await prisma.snapPack.update({ where: { id: packId }, data: { usedSnaps: pack.usedSnaps + 1 } });
 
-    (async () => {
-      try {
+    try {
         const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
           method: 'POST',
           body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt, strength: getShotStrength(effectiveMode, pack.concept, shotIdx), num_images: 1, image_size: { width: 768, height: 1152 } }),
         });
+
+        console.log('[snapPack fal response]', JSON.stringify(submit).slice(0, 300));
 
         let falUrl: string | null = null;
 
         if (submit.images && submit.images[0]?.url) {
           falUrl = submit.images[0].url;
         } else if (submit.status_url) {
-          const start = Date.now();
-          while (Date.now() - start < 180000) {
-            await new Promise(r => setTimeout(r, 3000));
-            const status = await falFetch(submit.status_url);
-            if (status.status === 'COMPLETED') {
-              const result = await falFetch(submit.response_url);
-              falUrl = result.images?.[0]?.url || null;
-              break;
-            }
-            if (status.status === 'FAILED') throw new Error(status.error || 'Failed');
-          }
-          if (!falUrl) throw new Error('Timeout');
+          await prisma.aiSnap.update({ where: { id: snap.id }, data: { statusUrl: submit.status_url, responseUrl: submit.response_url } });
+          return res.json({ snapId: snap.id, shotIndex: shotIdx, remaining: pack.totalSnaps - pack.usedSnaps - 1, status: 'processing' });
         } else {
           throw new Error('No images or status_url');
         }
@@ -895,13 +886,12 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
             data: { chainRefUrls: chainRefs },
           });
         }
-      } catch (err: any) {
-        await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: err.message?.slice(0, 500) } });
-        await prisma.snapPack.update({ where: { id: packId }, data: { usedSnaps: { decrement: 1 } } });
-      }
-    })();
-
-    res.json({ snapId: snap.id, shotIndex: shotIdx, remaining: pack.totalSnaps - pack.usedSnaps - 1 });
+    } catch (err: any) {
+      console.error('[snapPack generate] FAILED:', err.message);
+      await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: err.message?.slice(0, 500) } });
+      await prisma.snapPack.update({ where: { id: packId }, data: { usedSnaps: { decrement: 1 } } });
+      return res.json({ snapId: snap.id, shotIndex: shotIdx, remaining: pack.totalSnaps - pack.usedSnaps - 1, failed: true });
+    }
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
@@ -958,7 +948,91 @@ router.get('/snap/:id', authMiddleware, async (req, res) => {
   try {
     const snap = await prisma.aiSnap.findUnique({ where: { id: req.params.id } });
     if (!snap) return res.status(404).json({ error: 'Not found' });
+
+    if (snap.status === 'processing' && snap.statusUrl) {
+      try {
+        const status = await falFetch(snap.statusUrl);
+        console.log('[snap poll]', snap.id, 'fal status:', status.status);
+        if (status.status === 'COMPLETED' && snap.responseUrl) {
+          const result = await falFetch(snap.responseUrl);
+          console.log('[snap poll]', snap.id, 'response keys:', Object.keys(result), JSON.stringify(result).slice(0, 400));
+          if (result.detail) {
+            const errMsg = typeof result.detail === 'string' ? result.detail : JSON.stringify(result.detail).slice(0, 300);
+            if (errMsg.includes('unavailable') || errMsg.includes('timeout')) {
+              console.log('[snap poll]', snap.id, 'fal temp error, retrying submit...');
+              try {
+                const retryPack = await prisma.snapPack.findUnique({ where: { id: snap.snapPackId! } });
+                const retrySubmit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
+                  method: 'POST',
+                  body: JSON.stringify({ prompt: snap.prompt, image_urls: snap.inputUrls as string[], negative_prompt: 'nsfw, nude, deformed, ugly, bad anatomy, watermark, text, logo, cartoon, anime, illustration, painting, drawing, double eyelid surgery, plastic surgery, cosmetic surgery, jaw reduction, v-line surgery, face slimming', strength: 0.20, num_images: 1, image_size: { width: 768, height: 1152 } }),
+                });
+                if (retrySubmit.status_url) {
+                  await prisma.aiSnap.update({ where: { id: snap.id }, data: { statusUrl: retrySubmit.status_url, responseUrl: retrySubmit.response_url } });
+                  console.log('[snap poll]', snap.id, 'retry submitted');
+                  return res.json({ ...snap, status: 'processing' });
+                }
+              } catch (retryErr: any) {
+                console.error('[snap poll]', snap.id, 'retry also failed:', retryErr.message);
+              }
+            }
+            console.error('[snap poll]', snap.id, 'fal error detail:', errMsg);
+            await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: errMsg, statusUrl: null, responseUrl: null } });
+            if (snap.snapPackId) await prisma.snapPack.update({ where: { id: snap.snapPackId }, data: { usedSnaps: { decrement: 1 } } }).catch(() => {});
+            const updated = await prisma.aiSnap.findUnique({ where: { id: snap.id } });
+            return res.json(updated);
+          }
+          const falUrl = result.images?.[0]?.url || result.output?.images?.[0]?.url || result.image?.url || result.output?.image?.url;
+          console.log('[snap poll]', snap.id, 'falUrl:', falUrl?.slice(0, 80));
+          if (falUrl) {
+            const validateRes = await fetch(falUrl, { method: 'HEAD' });
+            const cType = validateRes.headers.get('content-type') || '';
+            const cLen = parseInt(validateRes.headers.get('content-length') || '0', 10);
+            console.log('[snap poll]', snap.id, 'validate:', cType, cLen);
+            if (cType.startsWith('image/') && cLen > 10000) {
+              console.log('[snap poll]', snap.id, 'uploading to cloudinary...');
+              const permanentUrl = await uploadToCloudinary(falUrl, snap.id);
+              console.log('[snap poll]', snap.id, 'done:', permanentUrl?.slice(0, 60));
+              await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: permanentUrl, statusUrl: null, responseUrl: null } });
+
+              if (snap.snapPackId) {
+                const pack = await prisma.snapPack.findUnique({ where: { id: snap.snapPackId } });
+                if (pack) {
+                  const chainRefs = (pack.chainRefUrls || {}) as Record<string, string>;
+                  if (snap.mode && !chainRefs[snap.mode]) {
+                    chainRefs[snap.mode] = permanentUrl;
+                    await prisma.snapPack.update({ where: { id: snap.snapPackId }, data: { chainRefUrls: chainRefs } });
+                  }
+                }
+              }
+
+              const updated = await prisma.aiSnap.findUnique({ where: { id: snap.id } });
+              return res.json(updated);
+            }
+          }
+        } else if (status.status === 'FAILED') {
+          await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: status.error || 'fal.ai failed', statusUrl: null, responseUrl: null } });
+          await prisma.snapPack.update({ where: { id: snap.snapPackId! }, data: { usedSnaps: { decrement: 1 } } }).catch(() => {});
+          const updated = await prisma.aiSnap.findUnique({ where: { id: snap.id } });
+          return res.json(updated);
+        }
+      } catch (pollErr: any) {
+        console.error('[snap poll] Error:', snap.id, pollErr.message, pollErr.stack?.slice(0, 300));
+      }
+    }
+
     res.json(snap);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed' });
+  }
+});
+
+router.delete('/snap/:id', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const snap = await prisma.aiSnap.findUnique({ where: { id: req.params.id } });
+    if (!snap) return res.status(404).json({ error: 'Not found' });
+    if (snap.userId !== req.user?.id) return res.status(403).json({ error: 'Forbidden' });
+    await prisma.aiSnap.delete({ where: { id: req.params.id } });
+    res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'Failed' });
   }

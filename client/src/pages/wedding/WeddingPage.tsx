@@ -36,6 +36,7 @@ import AiChat from '../../components/AiChat';
 import { GalleryOverride, VenueTabsOverride, ProfileOverride, LetterOverride } from './themes/shared';
 import EnvelopeIntro from './themes/shared/EnvelopeIntro';
 import GuestPhotoGallery from './themes/shared/GuestPhotoGallery';
+import GuestAiPhotoBooth from './themes/shared/GuestAiPhotoBooth';
 import { useSectionOrder } from '../../hooks/useSectionOrder';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -193,6 +194,8 @@ export default function WeddingPage() {
     );
   }
 
+  const isArchive = (data as any)?.status === "archive";
+
   if ((data as any)?.status === "expired") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
@@ -200,6 +203,7 @@ export default function WeddingPage() {
           <Heart className="w-12 h-12 text-stone-300 mx-auto mb-4" />
           <p className="text-stone-600 font-medium">청첩장 유효기간이 만료되었습니다</p>
           <p className="text-stone-400 text-sm mt-2">이 청첩장은 더 이상 열람할 수 없습니다</p>
+          <a href="/create" style={{ display: "inline-block", marginTop: 24, padding: "12px 24px", background: "#1a1a1a", color: "#fff", borderRadius: 8, fontSize: 14, fontWeight: 500, textDecoration: "none" }}>영구 아카이브로 보존하기</a>
         </div>
       </div>
     );
@@ -270,17 +274,39 @@ export default function WeddingPage() {
       {accentColorStyle && <style>{accentColorStyle}</style>}
       {galleryAspectStyle && <style>{galleryAspectStyle}</style>}
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Heart className="w-6 h-6 animate-pulse text-stone-300" /></div>}>
+        {isArchive && (
+          <>
+            <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 99999, background: "#1a1a1a", padding: "14px 16px", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
+              <p style={{ fontSize: 13, color: "#fff" }}>Our Wedding Archive</p>
+              <div style={{ width: 1, height: 14, background: "#555" }} />
+              <p style={{ fontSize: 11, color: "#999" }}>RSVP and payments are closed</p>
+            </div>
+            <div style={{ height: 48 }} />
+          </>
+        )}
         <ThemeComponent
           wedding={weddingToUse}
           guestbooks={guestbookData?.guestbooks || []}
-          onRsvpSubmit={(data: any) => rsvpMutation.mutate(data)}
-          onGuestbookSubmit={(data: any) => guestbookMutation.mutate(data)}
+          onRsvpSubmit={isArchive ? (() => {}) : ((data: any) => rsvpMutation.mutate(data))}
+          onGuestbookSubmit={isArchive ? (() => {}) : ((data: any) => guestbookMutation.mutate(data))}
           isRsvpLoading={rsvpMutation.isPending}
           isGuestbookLoading={guestbookMutation.isPending}
           refetchGuestbook={refetchGuestbook}
-          guestPhotoSlot={!isPreview && weddingToUse.guestPhotoEnabled !== false ? <GuestPhotoGallery slug={weddingToUse.slug} enabled={true} /> : undefined}
+          isArchive={isArchive}
+          guestPhotoSlot={!isPreview ? (
+            <>
+              {!isArchive && weddingToUse.aiBoothEnabled && (
+                <GuestAiPhotoBooth slug={weddingToUse.slug} groomName={weddingToUse.groomName} brideName={weddingToUse.brideName} />
+              )}
+              {weddingToUse.guestPhotoEnabled !== false && (
+                <GuestPhotoGallery slug={weddingToUse.slug} enabled={true} />
+              )}
+            </>
+          ) : undefined}
+
         />
       </Suspense>
+
       {weddingToUse.galleryLayout === 'polaroid' && !theme.startsWith('EDITORIAL') && weddingToUse.galleries?.length && !isPreview && (
         <GalleryOverride
           galleries={weddingToUse.galleries}
@@ -318,7 +344,7 @@ export default function WeddingPage() {
           theme={theme}
         />
       )}
-      {weddingToUse.aiEnabled && !isPreview && (
+      {weddingToUse.aiBoothEnabled && !isPreview && !isArchive && (
         <AiChat
           slug={weddingToUse.slug}
           groomName={weddingToUse.groomName}

@@ -102,7 +102,7 @@ export default function App() {
       <Route path="/admin/login" element={<AdminLogin />} />
       
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/create" element={<ProtectedRoute><CreateWedding /></ProtectedRoute>} />
+      <Route path="/create" element={<CreateWedding />} />
       <Route path="/edit/:id" element={<ProtectedRoute><EditWedding /></ProtectedRoute>} />
       <Route path="/my" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
       <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />

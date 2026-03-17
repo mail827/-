@@ -67,7 +67,7 @@ export default function AiSnapFree() {
   useEffect(() => {
     if (!token) {
       setChecking(false);
-      setStep(0);
+      setStep(1);
       return;
     }
     setIsLoggedIn(true);
@@ -80,7 +80,21 @@ export default function AiSnapFree() {
           setAlreadyUsed(true);
           setStep(5);
         } else {
-          setStep(1);
+          const saved = localStorage.getItem('pendingSnapState');
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              if (parsed.mode) setMode(parsed.mode);
+              if (parsed.concept) setConcept(parsed.concept);
+              if (parsed.groomPhoto) setGroomPhoto(parsed.groomPhoto);
+              if (parsed.bridePhoto) setBridePhoto(parsed.bridePhoto);
+              if (parsed.couplePhoto) setCouplePhoto(parsed.couplePhoto);
+              localStorage.removeItem('pendingSnapState');
+              setStep(parsed.step || 3);
+            } catch (e) { setStep(1); }
+          } else {
+            setStep(1);
+          }
         }
       })
       .catch(() => setStep(1))
@@ -120,6 +134,13 @@ export default function AiSnapFree() {
 
   const generate = async () => {
     if (!canProceed()) return;
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) {
+      localStorage.setItem('pendingSnapState', JSON.stringify({ mode, concept, groomPhoto, bridePhoto, couplePhoto, step: 3 }));
+      localStorage.setItem('returnTo', '/ai-snap');
+      window.location.href = '/?login=true';
+      return;
+    }
     setGenerating(true);
     setStep(4);
     setProgress(0);
@@ -127,7 +148,7 @@ export default function AiSnapFree() {
     try {
       const res = await fetch(`${API}/ai-snap/free/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentToken}` },
         body: JSON.stringify({ concept, imageUrls: getUrls(), mode }),
       });
       const data = await res.json();

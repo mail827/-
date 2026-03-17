@@ -129,6 +129,16 @@ export default function CreateWedding() {
         setUser(payload);
       } catch (e) {}
     }
+    const saved = localStorage.getItem('pendingWeddingForm');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.formData) setFormData(prev => ({ ...prev, ...parsed.formData }));
+        if (parsed.selectedPackageId) setSelectedPackageId(parsed.selectedPackageId);
+        if (parsed.step !== undefined) setStep(parsed.step);
+        localStorage.removeItem('pendingWeddingForm');
+      } catch (e) {}
+    }
   }, []);
 
   useEffect(() => {
@@ -193,6 +203,12 @@ export default function CreateWedding() {
   const handleCreateWedding = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        localStorage.setItem('pendingWeddingForm', JSON.stringify({ formData, selectedPackageId, step }));
+        localStorage.setItem('returnTo', '/create');
+        window.location.href = '/?login=true';
+        return;
+      }
       const body: any = { ...formData };
       
       if (giftId) {
@@ -262,6 +278,13 @@ export default function CreateWedding() {
   };
 
   const handlePayment = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      localStorage.setItem('pendingWeddingForm', JSON.stringify({ formData, selectedPackageId, step }));
+      localStorage.setItem('returnTo', '/create');
+      window.location.href = '/?login=true';
+      return;
+    }
     setShowPaymentModal(true);
     setPaymentStatus('processing');
     

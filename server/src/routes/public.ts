@@ -51,6 +51,13 @@ router.get('/wedding/:slug', async (req: Request, res: Response) => {
 
 
     if (wedding?.expiresAt && new Date() > new Date(wedding.expiresAt)) {
+      const weddingDate = new Date(wedding.weddingDate);
+      const archiveDeadline = new Date(weddingDate.getTime() + 90 * 24 * 60 * 60 * 1000);
+      const order = await prisma.order.findFirst({ where: { id: wedding.orderId || '' }, include: { package: true } });
+      const isPremium = order?.package?.slug === 'premium';
+      if (isPremium || new Date() <= archiveDeadline) {
+        return res.json({ wedding, status: "archive" });
+      }
       return res.json({ wedding, status: "expired" });
     }
 

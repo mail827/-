@@ -802,6 +802,14 @@ export default function AdminWeddingEdit() {
 
           {wedding.aiEnabled && (
             <>
+              <label className="flex items-center gap-3 cursor-pointer p-4 bg-white/10 rounded-xl">
+                <input type="checkbox" checked={wedding.aiBoothEnabled || false} onChange={(e) => updateField('aiBoothEnabled', e.target.checked)} className="w-6 h-6 rounded bg-white/20 border-0" />
+                <div>
+                  <span className="font-medium">AI Photo Booth</span>
+                  <p className="text-sm opacity-60">하객이 셀카로 AI 웨딩 화보를 만들 수 있어요</p>
+                </div>
+              </label>
+
               <Link to={`/admin/weddings/${id}/ai-report`} className="block p-4 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl text-white hover:opacity-90">
                 <div className="flex items-center justify-between">
                   <div>

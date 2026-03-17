@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowRight, Check, Sparkles, ChevronRight, Heart, MapPin, Calendar,
+  ArrowRight, Check, Sparkles, Heart, MapPin, Calendar,
   Send, Copy, CreditCard, Camera, ChevronDown, MessageCircle, Zap, X,
   Mail, Loader2, Gift
 } from "lucide-react";
@@ -370,9 +370,9 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px", textAlign: "center" }}>
           <div style={{ opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
             <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Themes</p>
-            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>19개의 테마, 직접 확인하세요.</h2>
+            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>26개의 테마, 직접 확인하세요.</h2>
             <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 32 }}>디자인은 기본입니다. 기능이 다릅니다.</p>
-            <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>전체 19개 테마 보기 <ArrowRight size={14} /></button>
+            <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>전체 26개 테마 보기 <ArrowRight size={14} /></button>
           </div>
         </div>
       </section>
@@ -458,7 +458,7 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
           </div>
         </div>
         <div style={{ textAlign: "center", marginTop: 64 }}>
-          <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>전체 19개 테마 보기 <ArrowRight size={14} /></button>
+          <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>전체 26개 테마 보기 <ArrowRight size={14} /></button>
         </div>
       </div>
     </section>
@@ -613,12 +613,21 @@ export default function Landing() {
     try {
       const res = await fetch(`${API}/email-auth/register`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: emailInput, password: passwordInput }) });
       const data = await res.json();
-      if (res.ok) { localStorage.setItem("token", data.token); window.location.href = "/dashboard"; }
+      if (res.ok) { localStorage.setItem("token", data.token);
+          const returnTo = localStorage.getItem("returnTo"); if (returnTo) { localStorage.removeItem("returnTo"); window.location.href = returnTo; return; } window.location.href = "/dashboard"; }
       else setEmailError(data.error || "회원가입 실패");
     } catch { setEmailError("네트워크 오류"); } finally { setEmailLoading(false); }
   };
 
   const openLogin = () => setShowLoginModal(true);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('login') === 'true') {
+      setShowLoginModal(true);
+      window.history.replaceState({}, '', '/');
+    }
+  }, []);
 
   const specs = [
     { num: "26", label: "테마", desc: "에디토리얼 · 크루즈 · 갤러리 · 어르신용까지." },
@@ -717,17 +726,17 @@ export default function Landing() {
               모바일 청첩장부터 하객 응대, AI 화보 제작까지.<br />
               결혼 준비를 자동화하는 웨딩 엔진.
             </p>
-            <div className="hero-btns" style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 48 }}>
-              <button onClick={openLogin} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#fff", background: "#1a1a1a", padding: "14px 28px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 500 }}>
-                자동화 시작하기
+            <div className="hero-btns" style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 48, flexWrap: "wrap" }}>
+              <a href="/create" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#fff", background: "#1a1a1a", padding: "14px 28px", borderRadius: 8, textDecoration: "none", fontWeight: 500 }}>
+                청첩장 만들기
                 <ArrowRight size={16} />
-              </button>
-              <a href="#engine" style={{ fontSize: 13, color: "#999", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>
-                엔진 구조 보기
-                <ChevronRight size={14} />
+              </a>
+              <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#1a1a1a", background: "#fff", padding: "14px 28px", borderRadius: 8, border: "1px solid #E0DDD8", textDecoration: "none", fontWeight: 500 }}>
+                <Camera size={16} />
+                AI 화보 무료 체험
               </a>
             </div>
-            <p style={{ fontSize: 12, color: "#bbb", marginTop: 12 }}>사진이 아직 없어도 시작할 수 있습니다.</p>
+            <p style={{ fontSize: 12, color: "#bbb", marginTop: 12 }}>로그인 없이 바로 체험할 수 있습니다.</p>
             <div className="hero-stats" style={{ display: "flex", gap: 36, paddingTop: 32, borderTop: "1px solid #E8E5E0", marginTop: 32 }}>
               {[["26", "테마"], ["33", "AI 스냅"], ["10", "종이청첩장"]].map(([n, l]) => (
                 <div key={l}>
@@ -965,11 +974,11 @@ export default function Landing() {
               </a>
             </div>
             {packages.length > 0 ? (
-              <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
+              <div className="pricing-grid snap-pill" style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: "14px 0 16px", scrollbarWidth: "none", maxWidth: 1100, margin: "0 auto", justifyContent: "center" }}>
                 {packages.map((pkg, i) => {
                   const isHighlight = pkg.slug === "premium";
                   return (
-                    <div key={pkg.id} style={{ padding: "32px 24px", borderRadius: 14, border: isHighlight ? "2px solid #1a1a1a" : "1px solid #E8E5E0", background: isHighlight ? "#FAFAF8" : "#fff", position: "relative", opacity: pricingInView ? 1 : 0, transform: pricingInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 80}ms` }}>
+                    <div key={pkg.id} style={{ minWidth: 280, flex: "0 0 280px", scrollSnapAlign: "start", padding: "32px 24px", borderRadius: 14, border: isHighlight ? "2px solid #1a1a1a" : "1px solid #E8E5E0", background: isHighlight ? "#FAFAF8" : "#fff", position: "relative", opacity: pricingInView ? 1 : 0, transform: pricingInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 80}ms` }}>
                       {pkg.slug === "premium" && <div style={{ position: "absolute", top: -1, left: 24, transform: "translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 12px", borderRadius: 100, fontWeight: 500 }}>BEST</div>}
                       <p style={{ fontSize: 11, color: "#bbb", marginBottom: 4 }}>{pkg.description}</p>
                       <p style={{ fontSize: 16, fontWeight: 600, color: "#1a1a1a", marginBottom: 16 }}>{pkg.name}</p>
@@ -986,7 +995,7 @@ export default function Landing() {
                         ))}
                         {pkg.features.length > 6 && <p style={{ fontSize: 12, color: "#bbb", paddingLeft: 21 }}>+{pkg.features.length - 6}개 더</p>}
                       </div>
-                      <button onClick={openLogin} style={{ display: "block", width: "100%", textAlign: "center", padding: "12px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, background: isHighlight ? "#1a1a1a" : "transparent", color: isHighlight ? "#fff" : "#1a1a1a", border: isHighlight ? "none" : "1px solid #E0DDD8", cursor: "pointer" }}>시작하기</button>
+                      <a href="/create" style={{ display: "block", width: "100%", textAlign: "center", padding: "12px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, textDecoration: "none", background: isHighlight ? "#1a1a1a" : "transparent", color: isHighlight ? "#fff" : "#1a1a1a", border: isHighlight ? "none" : "1px solid #E0DDD8", cursor: "pointer" }}>시작하기</a>
                     </div>
                   );
                 })}
@@ -1004,14 +1013,14 @@ export default function Landing() {
               <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 10 }}>AI 웨딩 화보 단독 패키지</h2>
               <p style={{ fontSize: 14, color: "#999" }}>청첩장 없이 AI 웨딩 화보만 이용할 수 있어요</p>
             </div>
-            <div className="snap-pack-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 20 }}>
+            <div className="snap-pack-grid snap-pill" style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: "14px 0 16px", scrollbarWidth: "none", justifyContent: "center" }}>
               {[
                 { name: "3장 세트", per: "장당 1,967원", price: "5,900", popular: false },
                 { name: "5장 세트", per: "장당 1,980원", price: "9,900", popular: false },
                 { name: "10장 세트", per: "장당 1,490원", price: "14,900", popular: true },
                 { name: "20장 세트", per: "장당 1,245원", price: "24,900", popular: false },
               ].map((pack) => (
-                <div key={pack.name} style={{ padding: "28px 20px", borderRadius: 14, background: "#fff", border: pack.popular ? "2px solid #1a1a1a" : "1px solid #E8E5E0", textAlign: "left", position: "relative" }}>
+                <div key={pack.name} style={{ minWidth: 220, flex: "0 0 220px", scrollSnapAlign: "start", padding: "28px 20px", borderRadius: 14, background: "#fff", border: pack.popular ? "2px solid #1a1a1a" : "1px solid #E8E5E0", textAlign: "left", position: "relative" }}>
                   {pack.popular && <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%) translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 14px", borderRadius: 100, fontWeight: 500 }}>인기</div>}
                   <p style={{ fontSize: 16, fontWeight: 600, color: "#1a1a1a", marginBottom: 4 }}>{pack.name}</p>
                   <p style={{ fontSize: 11, color: "#bbb", marginBottom: 16 }}>{pack.per}</p>

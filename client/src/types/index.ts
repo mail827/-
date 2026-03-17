@@ -90,6 +90,7 @@ export interface Wedding {
   heroLayout?: string;
   fontScale?: string;
   aiEnabled?: boolean;
+  aiBoothEnabled?: boolean;
   aiName?: string;
   aiMode?: string;
   aiToneStyle?: string;

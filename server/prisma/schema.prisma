@@ -181,6 +181,7 @@ model Wedding {
   sectionOrder             Json?
   hiddenSections           Json?
   galleryRatio             String?          @default("1:1")
+  aiBoothEnabled           Boolean          @default(false)
   guestPhotoEnabled        Boolean          @default(true)
   galleryLayout        String?          @default("grid")
   groomIntro           String?
@@ -573,6 +574,8 @@ model AiSnap {
   status      String    @default("pending")
   isFree      Boolean   @default(false)
   errorMsg    String?
+  statusUrl   String?
+  responseUrl String?
   createdAt   DateTime  @default(now())
 }
 

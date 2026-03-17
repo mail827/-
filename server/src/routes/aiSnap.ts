@@ -502,6 +502,8 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
     });
     res.json({ status: 'generating', snapId: snap.id, statusUrl: submit.status_url, responseUrl: submit.response_url });
   } catch (e: any) {
+    console.error('[free/generate] Error:', e.message);
+    await prisma.user.update({ where: { id: userId }, data: { freeSnapUsed: false } }).catch(() => {});
     res.status(500).json({ error: e.message });
   }
 });
@@ -540,7 +542,16 @@ router.get('/free/poll', async (req, res) => {
     const status = await falFetch(statusUrl as string);
     if (status.status === 'COMPLETED') {
       const result = await falFetch(responseUrl as string);
-      const uploaded = await uploadFromUrl(result.images?.[0]?.url, 'ai-snap/free');
+      if (result.detail) {
+        console.error('[free/poll] fal detail error:', JSON.stringify(result.detail).slice(0, 300));
+        return res.json({ status: 'failed', error: 'AI server temporarily unavailable. Please try again.' });
+      }
+      const falUrl = result.images?.[0]?.url;
+      if (!falUrl) {
+        console.error('[free/poll] no image url, keys:', Object.keys(result));
+        return res.json({ status: 'failed', error: 'No image generated' });
+      }
+      const uploaded = await uploadFromUrl(falUrl, 'ai-snap/free');
       const watermarked = getWatermarkedUrl(uploaded.publicId);
       const snapId = req.query.snapId as string;
       if (snapId) {

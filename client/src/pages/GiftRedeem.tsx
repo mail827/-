@@ -27,7 +27,7 @@ export default function GiftRedeem() {
     setError(null);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/snap-gift/redeem`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/gift/redeem`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
