@@ -50,19 +50,27 @@ router.get('/wedding/:slug', async (req: Request, res: Response) => {
     });
 
 
-    if (wedding?.expiresAt && new Date() > new Date(wedding.expiresAt)) {
-      const weddingDate = new Date(wedding.weddingDate);
+    if (!wedding) {
+      return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
+    }
+
+    if (wedding.expiresAt === null) {
+      return res.json({ wedding, status: "active" });
+    }
+
+    const now = new Date();
+    const weddingDate = wedding.weddingDate ? new Date(wedding.weddingDate) : null;
+
+    if (weddingDate && now > weddingDate) {
       const archiveDeadline = new Date(weddingDate.getTime() + 90 * 24 * 60 * 60 * 1000);
-      const order = await prisma.order.findFirst({ where: { id: wedding.orderId || '' }, include: { package: true } });
-      const isPremium = order?.package?.slug === 'premium';
-      if (isPremium || new Date() <= archiveDeadline) {
+      if (now <= archiveDeadline) {
         return res.json({ wedding, status: "archive" });
       }
       return res.json({ wedding, status: "expired" });
     }
 
-    if (!wedding) {
-      return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
+    if (wedding.expiresAt && now > new Date(wedding.expiresAt)) {
+      return res.json({ wedding, status: "expired" });
     }
 
     res.json({ wedding, status: "active" });
@@ -159,6 +167,72 @@ router.get('/reviews', async (req, res) => {
   } catch (error) {
     console.error('Reviews error:', error);
     res.status(500).json({ error: '후기 조회 실패' });
+  }
+});
+
+
+router.get('/archive/toss-key', (_req, res) => {
+  res.json({ clientKey: process.env.TOSS_CLIENT_KEY });
+});
+
+router.post('/archive/payment-request', async (req, res) => {
+  try {
+    const { weddingId } = req.body;
+    if (!weddingId) return res.status(400).json({ error: 'weddingId required' });
+
+    const wedding = await prisma.wedding.findUnique({ where: { id: weddingId } });
+    if (!wedding) return res.status(404).json({ error: 'Not found' });
+
+    const orderId = `ARCHIVE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const amount = 9900;
+
+    res.json({
+      clientKey: process.env.TOSS_CLIENT_KEY,
+      orderId,
+      amount,
+      orderName: '영구 아카이브 업그레이드',
+      weddingId,
+    });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/archive/payment-confirm', async (req, res) => {
+  try {
+    const { paymentKey, orderId, amount, weddingId } = req.body;
+
+    if (amount !== 9900) return res.status(400).json({ error: 'Invalid amount' });
+
+    const secretKey = process.env.TOSS_SECRET_KEY!;
+    const authHeader = Buffer.from(secretKey + ':').toString('base64');
+
+    const tossRes = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
+      method: 'POST',
+      headers: { 'Authorization': 'Basic ' + authHeader, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentKey, orderId, amount }),
+    });
+    const tossData = await tossRes.json();
+
+    if (!tossRes.ok) {
+      console.error('[archive] Toss confirm error:', tossData);
+      return res.status(400).json({ error: tossData.message || 'Payment failed' });
+    }
+
+    const wedding = await prisma.wedding.findUnique({ where: { id: weddingId } });
+    if (!wedding) return res.status(404).json({ error: 'Wedding not found' });
+
+    await prisma.wedding.update({
+      where: { id: weddingId },
+      data: { expiresAt: null },
+    });
+
+    console.log('[archive] Upgraded to permanent:', { weddingId, orderId, paymentKey, amount });
+
+    res.json({ success: true });
+  } catch (e: any) {
+    console.error('[archive] Error:', e.message);
+    res.status(500).json({ error: e.message });
   }
 });
 
