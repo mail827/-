@@ -202,8 +202,28 @@ export default function WeddingPage() {
         <div className="text-center px-6">
           <Heart className="w-12 h-12 text-stone-300 mx-auto mb-4" />
           <p className="text-stone-600 font-medium">청첩장 유효기간이 만료되었습니다</p>
-          <p className="text-stone-400 text-sm mt-2">이 청첩장은 더 이상 열람할 수 없습니다</p>
-          <a href="/create" style={{ display: "inline-block", marginTop: 24, padding: "12px 24px", background: "#1a1a1a", color: "#fff", borderRadius: 8, fontSize: 14, fontWeight: 500, textDecoration: "none" }}>영구 아카이브로 보존하기</a>
+          <p className="text-stone-400 text-sm mt-2">9,900원으로 영구 보존할 수 있어요</p>
+          <button onClick={async () => {
+            try {
+              const res = await fetch(API_BASE + '/archive/payment-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ weddingId: (data as any)?.wedding?.id }),
+              });
+              const info = await res.json();
+              const { loadTossPayments } = await import('@tosspayments/tosspayments-sdk');
+              const toss = await loadTossPayments(info.clientKey);
+              const payment = toss.payment({ customerKey: 'ARCHIVE_' + info.weddingId });
+              await payment.requestPayment({
+                method: 'CARD',
+                amount: { currency: 'KRW', value: info.amount },
+                orderId: info.orderId,
+                orderName: info.orderName,
+                successUrl: window.location.origin + '/archive-success?weddingId=' + info.weddingId,
+                failUrl: window.location.href,
+              });
+            } catch (e) { console.error(e); }
+          }} style={{ display: "inline-block", marginTop: 16, padding: "14px 32px", background: "#1a1a1a", color: "#fff", borderRadius: 10, fontSize: 14, fontWeight: 500, border: "none", cursor: "pointer" }}>9,900원으로 영구 보존하기</button>
         </div>
       </div>
     );
