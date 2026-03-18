@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check, X, Gift } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, X, Gift, Eye } from 'lucide-react';
 import KakaoAddressInput from '../components/KakaoAddressInput';
 import { themeConfigs } from './wedding/themes/shared/themeConfig';
 
@@ -200,12 +200,27 @@ export default function CreateWedding() {
 
   const currentPackage = availableOrder?.package || packages.find(p => p.id === selectedPackageId);
 
+  const handlePreview = () => {
+    localStorage.setItem('previewWeddingData', JSON.stringify({
+      ...formData,
+      weddingDate: formData.weddingDate || new Date().toISOString().split('T')[0],
+      weddingTime: formData.weddingTime || '12:00',
+      groomName: formData.groomName || '신랑',
+      brideName: formData.brideName || '신부',
+      venue: formData.venue || '예식장',
+      venueAddress: formData.venueAddress || '',
+      greeting: formData.greeting || '저희 결혼합니다.',
+      greetingTitle: formData.greetingTitle || '저희 결혼합니다',
+    }));
+    window.open('/w/preview', '_blank');
+  };
+
   const handleCreateWedding = async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         localStorage.setItem('pendingWeddingForm', JSON.stringify({ formData, selectedPackageId, step }));
-        localStorage.setItem('returnTo', '/create');
+        localStorage.setItem('returnTo', '/create'); localStorage.setItem('redirectAfterLogin', '/create');
         window.location.href = '/?login=true';
         return;
       }
@@ -281,7 +296,7 @@ export default function CreateWedding() {
     const token = localStorage.getItem('token');
     if (!token) {
       localStorage.setItem('pendingWeddingForm', JSON.stringify({ formData, selectedPackageId, step }));
-      localStorage.setItem('returnTo', '/create');
+      localStorage.setItem('returnTo', '/create'); localStorage.setItem('redirectAfterLogin', '/create');
       window.location.href = '/?login=true';
       return;
     }
@@ -615,6 +630,10 @@ export default function CreateWedding() {
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-stone-800 mb-6">{isGiftFlow ? '정보 확인' : '결제 정보 확인'}</h2>
                 <div className="bg-stone-50 rounded-lg p-6">
+                  <button onClick={handlePreview} className="w-full py-4 mb-4 border-2 border-stone-800 rounded-xl font-medium text-stone-800 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors">
+                    <Eye className="w-5 h-5" />
+                    내 청첩장 미리보기
+                  </button>
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-stone-600">선택 패키지</span>
                     <span className="font-semibold text-stone-800">{currentPackage?.name}</span>

@@ -33,6 +33,7 @@ import ogRouter from "./routes/og.js";
 import aiSnapRouter from "./routes/aiSnap.js";
 import snapPackRouter from "./routes/snapPack.js";
 import snapGiftRouter from "./routes/snapGift.js";
+import { aiCreateRouter } from "./routes/aiCreate.js";
 import { settlementRouter } from "./routes/settlement.js";
 import guestPhotoRouter from './routes/guestPhoto.js';
 import showcaseRouter from "./routes/showcase.js";
@@ -92,6 +93,7 @@ app.use('/api/pair', pairRouter);
 app.use('/api/map', mapRouter);
 app.use('/api/og', ogRouter);
 app.use('/api/bg-music', bgMusicRouter);
+app.use("/api/ai-create", aiCreateRouter);
 
 seedPackages().catch(e => console.error("Seed error (ignored):", e.message));
 

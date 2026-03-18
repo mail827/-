@@ -112,9 +112,19 @@ export default function WeddingPage() {
 
   const [wedding, setWedding] = useState<Wedding | null>(null);
 
+  const isLocalPreview = slug === 'preview';
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['wedding', slug, version],
     queryFn: async () => {
+      if (isLocalPreview) {
+        const stored = localStorage.getItem('previewWeddingData');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          return { wedding: { ...parsed, id: 'preview', slug: 'preview', isPublished: true, isArchived: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), galleries: parsed.galleries || [], rsvps: [], guestbooks: [], bgMusicAutoPlay: false, showDday: true, loveStoryType: 'PHOTO' as const, heroMediaType: parsed.heroMediaType || 'IMAGE' as const, showParents: parsed.showParents ?? true, _count: { rsvps: 0, guestbooks: 0, galleries: 0 } } as Wedding };
+        }
+        throw new Error('No preview data');
+      }
       if (version) {
         const res = await fetch(`${API_BASE}/snapshot/${slug}/${version}`);
         if (res.ok) return { wedding: await res.json() as Wedding };

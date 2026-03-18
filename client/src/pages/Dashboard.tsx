@@ -90,6 +90,7 @@ function decodeJwtPayload(token: string): any {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [weddings, setWeddings] = useState<Wedding[]>([]);
   const [mySnaps, setMySnaps] = useState<any[]>([]);
@@ -462,7 +463,7 @@ export default function Dashboard() {
           <motion.button
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            onClick={() => navigate('/create')}
+            onClick={() => setShowCreateModal(true)}
             className="p-4 bg-stone-900 text-white rounded-lg flex items-center gap-3 hover:bg-stone-800 transition-colors text-left"
           >
             <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center">
@@ -662,7 +663,7 @@ export default function Dashboard() {
               <Heart className="w-10 h-10 text-stone-300 mx-auto mb-4" />
               <p className="text-stone-500 mb-6">아직 만든 청첩장이 없어요</p>
               <button
-                onClick={() => navigate('/create')}
+                onClick={() => setShowCreateModal(true)}
                 className="px-8 py-3 bg-stone-800 text-white rounded-full text-sm hover:bg-stone-900 transition-colors"
               >
                 청첩장 만들기
@@ -974,7 +975,7 @@ export default function Dashboard() {
                           <button
                             onClick={() => {
                               setShowModal(null);
-                              navigate('/create');
+                              setShowCreateModal(true);
                             }}
                             className="mt-3 w-full py-2 bg-stone-800 text-white text-sm rounded-lg hover:bg-stone-900 transition-colors"
                           >
@@ -1099,6 +1100,66 @@ export default function Dashboard() {
           onClose={() => setQrWedding(null)}
           wedding={qrWedding as any}
         />
+      )}
+      {showCreateModal && (
+        <div onClick={() => setShowCreateModal(false)} className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-5">
+          <div onClick={e => e.stopPropagation()} className="bg-white rounded-2xl max-w-[420px] w-full overflow-hidden">
+            <div className="pt-7 px-6 pb-2 text-center">
+              <p className="text-lg font-semibold text-stone-800 mb-1">청첩장 만들기</p>
+              <p className="text-[13px] text-stone-500">어떤 방식으로 만들까요?</p>
+            </div>
+            <div className="p-5 pt-4 flex flex-col gap-2.5">
+              <button onClick={() => { setShowCreateModal(false); navigate('/ai-create'); }} className="flex items-center gap-3.5 p-4 rounded-xl border-2 border-stone-800 bg-stone-50 text-left hover:bg-stone-100 transition-colors">
+                <div className="w-11 h-11 rounded-xl bg-stone-800 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-[15px] font-semibold text-stone-800 mb-0.5">AI 자동 제작</p>
+                  <p className="text-xs text-stone-500">사진 한 장이면 테마 추천부터 인사말까지</p>
+                </div>
+              </button>
+              <button onClick={() => { setShowCreateModal(false); navigate('/create'); }} className="flex items-center gap-3.5 p-4 rounded-xl border border-stone-200 bg-white text-left hover:bg-stone-50 transition-colors">
+                <div className="w-11 h-11 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
+                  <Plus className="w-5 h-5 text-stone-800" />
+                </div>
+                <div>
+                  <p className="text-[15px] font-semibold text-stone-800 mb-0.5">직접 만들기</p>
+                  <p className="text-xs text-stone-500">테마 선택부터 하나하나 직접 설정</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showCreateModal && (
+        <div onClick={() => setShowCreateModal(false)} className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-5">
+          <div onClick={e => e.stopPropagation()} className="bg-white rounded-2xl max-w-[420px] w-full overflow-hidden">
+            <div className="pt-7 px-6 pb-2 text-center">
+              <p className="text-lg font-semibold text-stone-800 mb-1">청첩장 만들기</p>
+              <p className="text-[13px] text-stone-500">어떤 방식으로 만들까요?</p>
+            </div>
+            <div className="p-5 pt-4 flex flex-col gap-2.5">
+              <button onClick={() => { setShowCreateModal(false); navigate('/ai-create'); }} className="flex items-center gap-3.5 p-4 rounded-xl border-2 border-stone-800 bg-stone-50 text-left hover:bg-stone-100 transition-colors">
+                <div className="w-11 h-11 rounded-xl bg-stone-800 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-[15px] font-semibold text-stone-800 mb-0.5">AI 자동 제작</p>
+                  <p className="text-xs text-stone-500">사진 한 장이면 테마 추천부터 인사말까지</p>
+                </div>
+              </button>
+              <button onClick={() => { setShowCreateModal(false); navigate('/create'); }} className="flex items-center gap-3.5 p-4 rounded-xl border border-stone-200 bg-white text-left hover:bg-stone-50 transition-colors">
+                <div className="w-11 h-11 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
+                  <Plus className="w-5 h-5 text-stone-800" />
+                </div>
+                <div>
+                  <p className="text-[15px] font-semibold text-stone-800 mb-0.5">직접 만들기</p>
+                  <p className="text-xs text-stone-500">테마 선택부터 하나하나 직접 설정</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       <ChatWidget isLoggedIn={true} userEmail={user?.email || ""} userName={user?.name || ""} />
     </div>

@@ -14,6 +14,7 @@ import AdminSnapSample from './pages/admin/AdminSnapSample';
 import OAuthCallback from './pages/OAuthCallback';
 import Dashboard from './pages/Dashboard';
 import CreateWedding from './pages/CreateWedding';
+import AiCreateWedding from "./pages/AiCreateWedding";
 import EditWedding from './pages/EditWedding';
 import WeddingPage from './pages/wedding/WeddingPage';
 import RsvpCheck from './pages/RsvpCheck';
@@ -105,6 +106,7 @@ export default function App() {
       
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/create" element={<CreateWedding />} />
+      <Route path="/ai-create" element={<AiCreateWedding />} />
       <Route path="/edit/:id" element={<ProtectedRoute><EditWedding /></ProtectedRoute>} />
       <Route path="/my" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
       <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />

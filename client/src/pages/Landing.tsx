@@ -500,6 +500,7 @@ export default function Landing() {
     try { return localStorage.getItem("heroShowcaseUrl") || undefined; } catch { return undefined; }
   });
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const isLoggedIn = !!localStorage.getItem("token");
 
   const [heroRef, heroInView] = useInView(0.05);
@@ -727,10 +728,10 @@ export default function Landing() {
               결혼 준비를 자동화하는 웨딩 엔진.
             </p>
             <div className="hero-btns" style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 48, flexWrap: "wrap" }}>
-              <a href="/create" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#fff", background: "#1a1a1a", padding: "14px 28px", borderRadius: 8, textDecoration: "none", fontWeight: 500 }}>
+              <button onClick={() => setShowCreateModal(true)} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#fff", background: "#1a1a1a", padding: "14px 28px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 500 }}>
                 청첩장 만들기
                 <ArrowRight size={16} />
-              </a>
+              </button>
               <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#1a1a1a", background: "#fff", padding: "14px 28px", borderRadius: 8, border: "1px solid #E0DDD8", textDecoration: "none", fontWeight: 500 }}>
                 <Camera size={16} />
                 AI 화보 무료 체험
@@ -995,7 +996,7 @@ export default function Landing() {
                         ))}
                         {pkg.features.length > 6 && <p style={{ fontSize: 12, color: "#bbb", paddingLeft: 21 }}>+{pkg.features.length - 6}개 더</p>}
                       </div>
-                      <a href="/create" style={{ display: "block", width: "100%", textAlign: "center", padding: "12px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, textDecoration: "none", background: isHighlight ? "#1a1a1a" : "transparent", color: isHighlight ? "#fff" : "#1a1a1a", border: isHighlight ? "none" : "1px solid #E0DDD8", cursor: "pointer" }}>시작하기</a>
+                      <button onClick={() => setShowCreateModal(true)} style={{ display: "block", width: "100%", textAlign: "center", padding: "12px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, background: isHighlight ? "#1a1a1a" : "transparent", color: isHighlight ? "#fff" : "#1a1a1a", border: isHighlight ? "none" : "1px solid #E0DDD8", cursor: "pointer" }}>시작하기</button>
                     </div>
                   );
                 })}
@@ -1160,7 +1161,7 @@ export default function Landing() {
           <div style={{ opacity: ctaInView ? 1 : 0, transform: ctaInView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
             <h2 className="serif" style={{ fontSize: 38, fontWeight: 400, color: "#1a1a1a", marginBottom: 16 }}>결혼 준비,<br />자동화하세요.</h2>
             <p style={{ fontSize: 14, color: "#999", marginBottom: 36, lineHeight: 1.8 }}>모바일 청첩장 · 종이청첩장 · QR카드 · AI 화보 · AI 하객 응대<br />하나의 플랫폼에서 전부 해결됩니다.</p>
-            <button onClick={openLogin} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 15, color: "#fff", background: "#1a1a1a", padding: "16px 36px", borderRadius: 10, border: "none", cursor: "pointer", fontWeight: 500 }}>
+            <button onClick={() => setShowCreateModal(true)} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 15, color: "#fff", background: "#1a1a1a", padding: "16px 36px", borderRadius: 10, border: "none", cursor: "pointer", fontWeight: 500 }}>
               자동화 시작하기
               <ArrowRight size={18} />
             </button>
@@ -1428,6 +1429,38 @@ export default function Landing() {
           </motion.div>
         )}
       </AnimatePresence>
+
+
+      {showCreateModal && (
+        <div onClick={() => setShowCreateModal(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: 20 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 16, maxWidth: 420, width: "100%", overflow: "hidden" }}>
+            <div style={{ padding: "28px 24px 8px", textAlign: "center" }}>
+              <p style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 4 }}>청첩장 만들기</p>
+              <p style={{ fontSize: 13, color: "#999" }}>어떤 방식으로 만들까요?</p>
+            </div>
+            <div style={{ padding: "16px 20px 24px", display: "flex", flexDirection: "column", gap: 10 }}>
+              <a href="/ai-create" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 20px", borderRadius: 12, border: "2px solid #1a1a1a", background: "#fafaf9", textDecoration: "none", transition: "all 0.15s" }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "#1a1a1a", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Sparkles size={20} color="#fff" />
+                </div>
+                <div>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 2 }}>AI 자동 제작</p>
+                  <p style={{ fontSize: 12, color: "#888", lineHeight: 1.5 }}>사진 한 장이면 테마 추천부터 인사말까지</p>
+                </div>
+              </a>
+              <a href="/create" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 20px", borderRadius: 12, border: "1px solid #e5e2dd", background: "#fff", textDecoration: "none", transition: "all 0.15s" }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "#f5f4f2", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <ArrowRight size={20} color="#1a1a1a" />
+                </div>
+                <div>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 2 }}>직접 만들기</p>
+                  <p style={{ fontSize: 12, color: "#888", lineHeight: 1.5 }}>테마 선택부터 하나하나 직접 설정</p>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ThemeShowcaseModal isOpen={showThemeShowcase} onClose={() => setShowThemeShowcase(false)} />
     </>
