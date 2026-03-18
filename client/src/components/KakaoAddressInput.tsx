@@ -63,11 +63,11 @@ export default function KakaoAddressInput({ value, onChange, label, placeholder 
         <button
           type="button"
           onClick={openSearch}
-          className="flex items-center gap-1.5 px-3 py-3 bg-stone-800 text-white rounded-xl text-sm whitespace-nowrap hover:bg-stone-700 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-3 shrink-0 bg-stone-800 text-white rounded-xl text-sm whitespace-nowrap hover:bg-stone-700 transition-colors"
         >
           <MapPin className="w-4 h-4" />
           <span className="hidden sm:inline">주소 검색</span>
-          <span className="sm:hidden"></span>
+          
         </button>
       </div>
     </div>
