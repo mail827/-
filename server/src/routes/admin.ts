@@ -19,10 +19,36 @@ router.get('/users', authMiddleware, adminMiddleware, async (req, res) => {
   const users = await prisma.user.findMany({
     include: {
       _count: { select: { weddings: true, orders: true } },
+      weddings: { select: { id: true, expiresAt: true } },
+      snapPacks: { select: { id: true, totalSnaps: true, usedSnaps: true } },
     },
     orderBy: { createdAt: 'desc' },
   });
-  res.json(users);
+  const enriched = users.map(u => {
+    const archiveCount = u.weddings.filter((w: any) => w.expiresAt === null).length;
+    const totalSnaps = u.snapPacks?.reduce((sum: number, p: any) => sum + (p.totalSnaps - p.usedSnaps), 0) || 0;
+    const { weddings: _w, snapPacks: _s, ...rest } = u as any;
+    return { ...rest, archiveCount, snapRemaining: totalSnaps };
+  });
+  res.json(enriched);
+});
+
+router.post('/users/:id/grant-archive', authMiddleware, adminMiddleware, async (req, res) => {
+  const { id: userId } = req.params;
+  const { weddingId } = req.body;
+  try {
+    if (weddingId) {
+      await prisma.wedding.update({ where: { id: weddingId }, data: { expiresAt: null } });
+      return res.json({ success: true, message: '해당 청첩장 영구 아카이브 적용' });
+    }
+    const weddings = await prisma.wedding.findMany({ where: { userId } });
+    if (weddings.length === 0) return res.status(400).json({ error: '청첩장이 없습니다' });
+    await prisma.wedding.updateMany({ where: { userId }, data: { expiresAt: null } });
+    res.json({ success: true, message: `${weddings.length}개 청첩장 영구 아카이브 적용` });
+  } catch (e) {
+    console.error('Grant archive error:', e);
+    res.status(500).json({ error: '영구 아카이브 적용 실패' });
+  }
 });
 
 router.delete('/users/:id', authMiddleware, adminMiddleware, async (req, res) => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Trash2, Mail, Calendar, Crown } from 'lucide-react';
+import { Search, Trash2, Mail, Calendar, Crown, ShieldCheck } from 'lucide-react';
 
 interface User {
   id: string;
@@ -9,6 +9,8 @@ interface User {
   role: string;
   createdAt: string;
   _count?: { weddings: number; orders: number };
+  archiveCount?: number;
+  snapRemaining?: number;
 }
 
 export default function AdminUsers() {
@@ -50,6 +52,25 @@ export default function AdminUsers() {
     } catch (e) {
       console.error('Failed to delete user:', e);
     }
+  };
+
+  const handleGrantShieldCheck = async (userId: string) => {
+    if (!confirm('이 회원의 모든 청첩장에 영구 아카이브를 적용할까요?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/users/${userId}/grant-archive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        fetchUsers();
+      } else {
+        alert(data.error || '실패');
+      }
+    } catch { alert('네트워크 오류'); }
   };
 
   const filteredUsers = users.filter(u => 
@@ -115,16 +136,20 @@ export default function AdminUsers() {
                   </div>
                 </div>
                 {user.role !== 'ADMIN' && (
-                  <button
-                    onClick={() => setDeleteConfirm(user.id)}
-                    className="p-2 text-stone-400 hover:text-red-500 shrink-0"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => handleGrantShieldCheck(user.id)} className="p-2 text-stone-400 hover:text-emerald-600">
+                      <ShieldCheck className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setDeleteConfirm(user.id)} className="p-2 text-stone-400 hover:text-red-500">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
               </div>
               <div className="flex items-center gap-4 mt-3 text-xs text-stone-500">
                 <span>청첩장 {user._count?.weddings || 0}</span>
+                <span>영구 {user.archiveCount || 0}</span>
+                <span>스냅 {user.snapRemaining || 0}장</span>
                 <span>주문 {user._count?.orders || 0}</span>
                 <span>{new Date(user.createdAt).toLocaleDateString('ko-KR')}</span>
               </div>
@@ -149,6 +174,8 @@ export default function AdminUsers() {
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">회원</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">가입방법</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">청첩장</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">영구</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">AI스냅</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">주문</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">가입일</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">관리</th>
@@ -176,6 +203,18 @@ export default function AdminUsers() {
                   </td>
                   <td className="px-4 py-4">{getProviderBadge(user.provider)}</td>
                   <td className="px-4 py-4 text-stone-600">{user._count?.weddings || 0}개</td>
+                  <td className="px-4 py-4">
+                    {(user.archiveCount || 0) > 0
+                      ? <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs rounded-full">{user.archiveCount}개</span>
+                      : <span className="text-stone-400 text-sm">0</span>
+                    }
+                  </td>
+                  <td className="px-4 py-4">
+                    {(user.snapRemaining || 0) > 0
+                      ? <span className="text-stone-600 text-sm">{user.snapRemaining}장</span>
+                      : <span className="text-stone-400 text-sm">0</span>
+                    }
+                  </td>
                   <td className="px-4 py-4 text-stone-600">{user._count?.orders || 0}개</td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-1 text-sm text-stone-500">
@@ -191,9 +230,14 @@ export default function AdminUsers() {
                           <button onClick={() => setDeleteConfirm(null)} className="px-2 py-1 bg-stone-200 text-stone-600 text-xs rounded">취소</button>
                         </div>
                       ) : (
-                        <button onClick={() => setDeleteConfirm(user.id)} className="p-2 text-stone-400 hover:text-red-500 rounded-lg hover:bg-red-50">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => handleGrantShieldCheck(user.id)} title="영구 아카이브 선물" className="p-2 text-stone-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-50">
+                            <ShieldCheck className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => setDeleteConfirm(user.id)} className="p-2 text-stone-400 hover:text-red-500 rounded-lg hover:bg-red-50">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       )
                     ) : (
                       <span className="text-xs text-stone-400">-</span>
