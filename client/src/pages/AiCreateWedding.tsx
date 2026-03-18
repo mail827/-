@@ -615,7 +615,7 @@ export default function AiCreateWedding() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm text-stone-600 mb-2">날짜 *</label>
-                      <input type="date" value={formData.weddingDate} onChange={e => updateForm('weddingDate', e.target.value)} className="w-full px-4 py-3 border border-stone-200 rounded-lg" />
+                      <input type="date" value={formData.weddingDate} onChange={e => updateForm('weddingDate', e.target.value)} className="w-full px-4 py-3 border border-stone-200 rounded-lg text-sm appearance-none bg-white" style={{ colorScheme: "light" }} />
                     </div>
                     <div>
                       <label className="block text-sm text-stone-600 mb-2">시간 *</label>
