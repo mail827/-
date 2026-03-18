@@ -680,17 +680,21 @@ export default function AiCreateWedding() {
                 <h2 className="text-lg font-semibold text-stone-800 mb-6">계좌 정보를 입력해주세요</h2>
                 <p className="text-sm text-stone-500 -mt-4 mb-6">나중에 수정할 수 있어요</p>
                 <Section title="신랑 계좌">
-                  <div className="grid grid-cols-3 gap-3">
-                    <Input label="은행" value={formData.groomBank} onChange={v => updateForm('groomBank', v)} />
-                    <Input label="계좌번호" value={formData.groomAccount} onChange={v => updateForm('groomAccount', v)} />
-                    <Input label="예금주" value={formData.groomAccountHolder} onChange={v => updateForm('groomAccountHolder', v)} />
+                  <div className="space-y-3">
+                    <BankSelect label="은행" value={formData.groomBank} onChange={v => updateForm('groomBank', v)} />
+                    <div className="grid grid-cols-2 gap-3">
+                      <Input label="계좌번호" value={formData.groomAccount} onChange={v => updateForm('groomAccount', v)} />
+                      <Input label="예금주" value={formData.groomAccountHolder} onChange={v => updateForm('groomAccountHolder', v)} />
+                    </div>
                   </div>
                 </Section>
                 <Section title="신부 계좌">
-                  <div className="grid grid-cols-3 gap-3">
-                    <Input label="은행" value={formData.brideBank} onChange={v => updateForm('brideBank', v)} />
-                    <Input label="계좌번호" value={formData.brideAccount} onChange={v => updateForm('brideAccount', v)} />
-                    <Input label="예금주" value={formData.brideAccountHolder} onChange={v => updateForm('brideAccountHolder', v)} />
+                  <div className="space-y-3">
+                    <BankSelect label="은행" value={formData.brideBank} onChange={v => updateForm('brideBank', v)} />
+                    <div className="grid grid-cols-2 gap-3">
+                      <Input label="계좌번호" value={formData.brideAccount} onChange={v => updateForm('brideAccount', v)} />
+                      <Input label="예금주" value={formData.brideAccountHolder} onChange={v => updateForm('brideAccountHolder', v)} />
+                    </div>
                   </div>
                 </Section>
               </div>
@@ -843,6 +847,61 @@ export default function AiCreateWedding() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+
+const POPULAR_BANKS = [
+  { name: 'KB국민', bg: '#FFB300', text: '#fff' },
+  { name: '신한', bg: '#0046FF', text: '#fff' },
+  { name: '하나', bg: '#009B8D', text: '#fff' },
+  { name: '우리', bg: '#0066B3', text: '#fff' },
+  { name: 'NH농협', bg: '#00AB4E', text: '#fff' },
+  { name: 'IBK기업', bg: '#0066B3', text: '#fff' },
+  { name: '카카오뱅크', bg: '#FEE500', text: '#3A1D1D' },
+  { name: '토스뱅크', bg: '#0064FF', text: '#fff' },
+  { name: 'SC제일', bg: '#009A44', text: '#fff' },
+  { name: '새마을', bg: '#0066CC', text: '#fff' },
+  { name: '우체국', bg: '#EF4123', text: '#fff' },
+  { name: '수협', bg: '#0072CE', text: '#fff' },
+];
+
+function BankSelect({ label, value, onChange }: { label: string; value?: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className="block text-sm text-stone-600 mb-1.5">{label}</label>
+      <style>{'.bank-scroll::-webkit-scrollbar{display:none}'}</style>
+      <div className="bank-scroll flex gap-1.5 mb-2 overflow-x-auto pb-0.5" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+        {POPULAR_BANKS.map(b => {
+          const selected = value === b.name;
+          return (
+            <button
+              key={b.name}
+              type="button"
+              onClick={() => onChange(b.name)}
+              className="shrink-0 transition-all"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '5px 10px', borderRadius: 16, fontSize: 11, fontWeight: 600,
+                background: selected ? b.bg : '#f5f5f4',
+                color: selected ? b.text : '#78716c',
+                border: selected ? `1.5px solid ${b.bg}` : '1.5px solid transparent',
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: selected ? b.text : b.bg, flexShrink: 0 }} />
+              {b.name}
+            </button>
+          );
+        })}
+      </div>
+      <input
+        type="text"
+        value={value || ''}
+        onChange={e => onChange(e.target.value)}
+        placeholder="기타 은행 직접 입력"
+        className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-300 text-sm"
+      />
     </div>
   );
 }

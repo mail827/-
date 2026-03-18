@@ -2488,47 +2488,54 @@ export default function EditWedding() {
 
 
 const POPULAR_BANKS = [
-  { name: 'KB국민', color: '#FFB300' },
-  { name: '신한', color: '#0046FF' },
-  { name: '하나', color: '#009B8D' },
-  { name: '우리', color: '#0066B3' },
-  { name: 'NH농협', color: '#00AB4E' },
-  { name: 'IBK기업', color: '#0066B3' },
-  { name: '카카오뱅크', color: '#FEE500' },
-  { name: '토스뱅크', color: '#0064FF' },
-  { name: 'SC제일', color: '#009A44' },
-  { name: '새마을', color: '#0066CC' },
-  { name: '우체국', color: '#EF4123' },
-  { name: '수협', color: '#0072CE' },
+  { name: 'KB국민', bg: '#FFB300', text: '#fff' },
+  { name: '신한', bg: '#0046FF', text: '#fff' },
+  { name: '하나', bg: '#009B8D', text: '#fff' },
+  { name: '우리', bg: '#0066B3', text: '#fff' },
+  { name: 'NH농협', bg: '#00AB4E', text: '#fff' },
+  { name: 'IBK기업', bg: '#2B4A83', text: '#fff' },
+  { name: '카카오뱅크', bg: '#FEE500', text: '#1a1a1a' },
+  { name: '토스뱅크', bg: '#0064FF', text: '#fff' },
+  { name: 'SC제일', bg: '#009A44', text: '#fff' },
+  { name: '새마을', bg: '#0066CC', text: '#fff' },
+  { name: '우체국', bg: '#EF4123', text: '#fff' },
+  { name: '수협', bg: '#0072CE', text: '#fff' },
 ];
 
 function BankSelect({ label, value, onChange }: { label: string; value?: string; onChange: (v: string) => void }) {
   return (
     <div>
       <label className="block text-sm text-stone-600 mb-1.5">{label}</label>
-      <div className="flex flex-wrap gap-1.5 mb-2">
-        {POPULAR_BANKS.map(b => (
-          <button
-            key={b.name}
-            type="button"
-            onClick={() => onChange(b.name)}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all border ${
-              value === b.name
-                ? 'border-stone-800 bg-stone-800 text-white'
-                : 'border-stone-200 bg-white text-stone-600 hover:border-stone-400'
-            }`}
-          >
-            <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle" style={{ background: b.color }} />
-            {b.name}
-          </button>
-        ))}
+      <style>{'.bank-scroll::-webkit-scrollbar{display:none}'}</style>
+      <div className="bank-scroll flex gap-1.5 mb-2 overflow-x-auto pb-0.5" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+        {POPULAR_BANKS.map(b => {
+          const selected = value === b.name;
+          return (
+            <button
+              key={b.name}
+              type="button"
+              onClick={() => onChange(b.name)}
+              className="shrink-0 transition-all"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '5px 10px', borderRadius: 16, fontSize: 11, fontWeight: 600,
+                background: selected ? b.bg : '#f5f5f4',
+                color: selected ? b.text : '#78716c',
+                border: selected ? `1.5px solid ${b.bg}` : '1.5px solid transparent',
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: selected ? b.text : b.bg, flexShrink: 0 }} />
+              {b.name}
+            </button>
+          );
+        })}
       </div>
       <input
         type="text"
         value={value || ''}
         onChange={e => onChange(e.target.value)}
-        placeholder="직접 입력"
-        className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-300 text-sm"
+        placeholder="기타 은행 직접 입력"
+        className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-300 text-sm"
       />
     </div>
   );
