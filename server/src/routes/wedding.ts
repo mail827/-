@@ -5,6 +5,22 @@ import { authMiddleware } from '../middleware/auth.js';
 const router = Router();
 const prisma = new PrismaClient();
 
+
+const clearKakaoOgCache = async (slug: string) => {
+  try {
+    const url = `https://weddingshop.cloud/w/${slug}`;
+    await fetch('https://kapi.kakao.com/v2/util/scrape/flush', {
+      method: 'POST',
+      headers: {
+        'Authorization': `KakaoAK ${process.env.KAKAO_CLIENT_ID}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `target_url=${encodeURIComponent(url)}`,
+    });
+  } catch (e) {
+    console.error('Kakao OG cache clear failed:', e);
+  }
+};
 const canAccess = (user: any, wedding: any) =>
   user.role === 'ADMIN' || wedding.userId === user.id || wedding.pairUserId === user.id;
 
@@ -221,6 +237,8 @@ router.put('/:id', authMiddleware, async (req, res) => {
         editCount: user.role !== 'ADMIN' ? { increment: 1 } : undefined,
       },
     });
+
+    clearKakaoOgCache(wedding.slug);
 
     res.json(wedding);
   } catch (error) {

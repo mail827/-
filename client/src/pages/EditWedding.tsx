@@ -1062,11 +1062,12 @@ export default function EditWedding() {
                   {wedding.ogCoverType === 'envelope' ? '봉투 이미지 (선택 — 미선택 시 기본 봉투)' : 'OG 이미지 업로드'}
                 </label>
                 <label className="px-3 py-1.5 text-xs rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 cursor-pointer transition-all">
-                  이미지 선택
+                  {uploadProgress['ogImage'] !== undefined && uploadProgress['ogImage'] < 100 ? `업로드 중 ${uploadProgress['ogImage']}%` : '이미지 선택'}
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    uploadToCloudinary(file, 'ogImage', (url) => updateField('ogCustomImage', url), () => {});
+                    if (file.size > 10 * 1024 * 1024) { alert('10MB 이하의 이미지만 업로드할 수 있어요'); return; }
+                    uploadToCloudinary(file, 'ogImage', (url) => updateField('ogCustomImage', url), (_err) => alert('이미지 업로드에 실패했어요. 다른 이미지로 시도해주세요.'));
                   }} />
                 </label>
                 {wedding.ogCustomImage && (
