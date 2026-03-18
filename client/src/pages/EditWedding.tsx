@@ -925,7 +925,7 @@ export default function EditWedding() {
                 { value: 'ChosunCentennial', label: '조선 100주년' },
                 { value: 'MyeongjoTtobak', label: '묘은또박체' },
                 { value: 'Museum', label: '박물관 클래식' },
-                { value: 'SanHaYeop', label: '산하엽' },
+                
                 { value: 'HakgyoansimLunchtime', label: '학교안심 점심시간' },
                 { value: 'HsBombaram30', label: '봄바람' },
                 { value: 'BM Kkubulim', label: '배민 꾸불림' },
@@ -1326,57 +1326,91 @@ export default function EditWedding() {
         {tab === 'account' && (
           <>
             <Section title="신랑 계좌">
-              <div className="grid sm:grid-cols-3 gap-4">
-                <Input label="은행" value={wedding.groomBank} onChange={v => updateField('groomBank', v)} />
-                <Input label="계좌번호" value={wedding.groomAccount} onChange={v => updateField('groomAccount', v)} />
-                <Input label="예금주" value={wedding.groomAccountHolder} onChange={v => updateField('groomAccountHolder', v)} />
+              <div className="space-y-3">
+                <BankSelect label="은행" value={wedding.groomBank} onChange={v => updateField('groomBank', v)} />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input label="계좌번호" value={wedding.groomAccount} onChange={v => updateField('groomAccount', v)} />
+                  <Input label="예금주" value={wedding.groomAccountHolder} onChange={v => updateField('groomAccountHolder', v)} />
+                </div>
               </div>
             </Section>
 
             <Section title="신부 계좌">
-              <div className="grid sm:grid-cols-3 gap-4">
-                <Input label="은행" value={wedding.brideBank} onChange={v => updateField('brideBank', v)} />
-                <Input label="계좌번호" value={wedding.brideAccount} onChange={v => updateField('brideAccount', v)} />
-                <Input label="예금주" value={wedding.brideAccountHolder} onChange={v => updateField('brideAccountHolder', v)} />
+              <div className="space-y-3">
+                <BankSelect label="은행" value={wedding.brideBank} onChange={v => updateField('brideBank', v)} />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input label="계좌번호" value={wedding.brideAccount} onChange={v => updateField('brideAccount', v)} />
+                  <Input label="예금주" value={wedding.brideAccountHolder} onChange={v => updateField('brideAccountHolder', v)} />
+                </div>
               </div>
             </Section>
 
             <Section title="신랑측 부모님 계좌">
-              <div className="space-y-4">
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <Input label="아버지 은행" value={wedding.groomFatherBank} onChange={v => updateField('groomFatherBank', v)} />
-                  <Input label="계좌번호" value={wedding.groomFatherAccount} onChange={v => updateField('groomFatherAccount', v)} />
-                  <Input label="예금주" value={wedding.groomFatherAccountHolder} onChange={v => updateField('groomFatherAccountHolder', v)} />
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <p className="text-xs font-medium text-stone-500">아버지</p>
+                  <BankSelect label="은행" value={wedding.groomFatherBank} onChange={v => updateField('groomFatherBank', v)} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input label="계좌번호" value={wedding.groomFatherAccount} onChange={v => updateField('groomFatherAccount', v)} />
+                    <Input label="예금주" value={wedding.groomFatherAccountHolder} onChange={v => updateField('groomFatherAccountHolder', v)} />
+                  </div>
                 </div>
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <Input label="어머니 은행" value={wedding.groomMotherBank} onChange={v => updateField('groomMotherBank', v)} />
-                  <Input label="계좌번호" value={wedding.groomMotherAccount} onChange={v => updateField('groomMotherAccount', v)} />
-                  <Input label="예금주" value={wedding.groomMotherAccountHolder} onChange={v => updateField('groomMotherAccountHolder', v)} />
+                <div className="space-y-3">
+                  <p className="text-xs font-medium text-stone-500">어머니</p>
+                  <BankSelect label="은행" value={wedding.groomMotherBank} onChange={v => updateField('groomMotherBank', v)} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input label="계좌번호" value={wedding.groomMotherAccount} onChange={v => updateField('groomMotherAccount', v)} />
+                    <Input label="예금주" value={wedding.groomMotherAccountHolder} onChange={v => updateField('groomMotherAccountHolder', v)} />
+                  </div>
                 </div>
               </div>
             </Section>
 
             <Section title="신부측 부모님 계좌">
-              <div className="space-y-4">
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <Input label="아버지 은행" value={wedding.brideFatherBank} onChange={v => updateField('brideFatherBank', v)} />
-                  <Input label="계좌번호" value={wedding.brideFatherAccount} onChange={v => updateField('brideFatherAccount', v)} />
-                  <Input label="예금주" value={wedding.brideFatherAccountHolder} onChange={v => updateField('brideFatherAccountHolder', v)} />
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <p className="text-xs font-medium text-stone-500">아버지</p>
+                  <BankSelect label="은행" value={wedding.brideFatherBank} onChange={v => updateField('brideFatherBank', v)} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input label="계좌번호" value={wedding.brideFatherAccount} onChange={v => updateField('brideFatherAccount', v)} />
+                    <Input label="예금주" value={wedding.brideFatherAccountHolder} onChange={v => updateField('brideFatherAccountHolder', v)} />
+                  </div>
                 </div>
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <Input label="어머니 은행" value={wedding.brideMotherBank} onChange={v => updateField('brideMotherBank', v)} />
-                  <Input label="계좌번호" value={wedding.brideMotherAccount} onChange={v => updateField('brideMotherAccount', v)} />
-                  <Input label="예금주" value={wedding.brideMotherAccountHolder} onChange={v => updateField('brideMotherAccountHolder', v)} />
+                <div className="space-y-3">
+                  <p className="text-xs font-medium text-stone-500">어머니</p>
+                  <BankSelect label="은행" value={wedding.brideMotherBank} onChange={v => updateField('brideMotherBank', v)} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input label="계좌번호" value={wedding.brideMotherAccount} onChange={v => updateField('brideMotherAccount', v)} />
+                    <Input label="예금주" value={wedding.brideMotherAccountHolder} onChange={v => updateField('brideMotherAccountHolder', v)} />
+                  </div>
                 </div>
               </div>
             </Section>
 
-            <Section title="간편 송금">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <Input label="토스 송금 링크" value={wedding.tossLink} onChange={v => updateField('tossLink', v)} placeholder="https://toss.me/..." />
-                <Input label="카카오페이 링크" value={wedding.kakaoPayLink} onChange={v => updateField('kakaoPayLink', v)} placeholder="https://qr.kakaopay.com/..." />
+            <div className="bg-gradient-to-b from-stone-50 to-white border border-stone-200 rounded-lg p-5">
+              <h3 className="font-medium text-stone-800 mb-1">간편 송금</h3>
+              <p className="text-xs text-stone-400 mb-4">링크를 등록하면 하객이 바로 송금할 수 있어요</p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 rounded-lg border border-stone-200 bg-white">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#0064FF' }}>
+                    <span className="text-white text-xs font-bold">T</span>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs text-stone-500 mb-1">토스 송금 링크</label>
+                    <input type="text" value={wedding.tossLink || ''} onChange={e => updateField('tossLink', e.target.value)} placeholder="토스 앱 > 송금 > 송금링크 복사" className="w-full text-sm border-none outline-none bg-transparent placeholder:text-stone-300" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg border border-stone-200 bg-white">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#FEE500' }}>
+                    <span className="text-stone-800 text-xs font-bold">K</span>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs text-stone-500 mb-1">카카오페이 링크</label>
+                    <input type="text" value={wedding.kakaoPayLink || ''} onChange={e => updateField('kakaoPayLink', e.target.value)} placeholder="https://qr.kakaopay.com/..." className="w-full text-sm border-none outline-none bg-transparent placeholder:text-stone-300" />
+                  </div>
+                </div>
               </div>
-            </Section>
+            </div>
           </>
         )}
 
@@ -2448,6 +2482,54 @@ export default function EditWedding() {
           wedding={wedding}
         />
       )}
+    </div>
+  );
+}
+
+
+const POPULAR_BANKS = [
+  { name: 'KB국민', color: '#FFB300' },
+  { name: '신한', color: '#0046FF' },
+  { name: '하나', color: '#009B8D' },
+  { name: '우리', color: '#0066B3' },
+  { name: 'NH농협', color: '#00AB4E' },
+  { name: 'IBK기업', color: '#0066B3' },
+  { name: '카카오뱅크', color: '#FEE500' },
+  { name: '토스뱅크', color: '#0064FF' },
+  { name: 'SC제일', color: '#009A44' },
+  { name: '새마을', color: '#0066CC' },
+  { name: '우체국', color: '#EF4123' },
+  { name: '수협', color: '#0072CE' },
+];
+
+function BankSelect({ label, value, onChange }: { label: string; value?: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className="block text-sm text-stone-600 mb-1.5">{label}</label>
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {POPULAR_BANKS.map(b => (
+          <button
+            key={b.name}
+            type="button"
+            onClick={() => onChange(b.name)}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+              value === b.name
+                ? 'border-stone-800 bg-stone-800 text-white'
+                : 'border-stone-200 bg-white text-stone-600 hover:border-stone-400'
+            }`}
+          >
+            <span className="inline-block w-2 h-2 rounded-full mr-1 align-middle" style={{ background: b.color }} />
+            {b.name}
+          </button>
+        ))}
+      </div>
+      <input
+        type="text"
+        value={value || ''}
+        onChange={e => onChange(e.target.value)}
+        placeholder="직접 입력"
+        className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-300 text-sm"
+      />
     </div>
   );
 }

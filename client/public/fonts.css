@@ -25,6 +25,5 @@
 @font-face { font-family: 'Museum'; src: url('/fonts/국립박물관문화재단클래식B.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 @font-face { font-family: 'HakgyoansimLunchtime'; src: url('/fonts/HakgyoansimJeomsimsiganB.ttf') format('truetype'); font-display: swap; }
 
-@font-face { font-family: 'SanHaYeop'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2206-02@1.0/SanHaYeop.woff2') format('woff2'); font-display: swap; }
 @font-face { font-family: 'HsBombaram30'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.1/HSBombaram3_Thin.woff') format('woff'); font-weight: 100; font-display: swap; }
 @font-face { font-family: 'HsBombaram30'; src: url('https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.1/HSBombaram3_Regular.woff') format('woff'); font-weight: normal; font-display: swap; }
