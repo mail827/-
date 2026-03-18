@@ -124,7 +124,7 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName }: Props)
 
   return (
     <div style={{ padding: '48px 0', textAlign: 'center', color: 'inherit' }}>
-      <input ref={inputRef} type="file" accept="image/*" capture="user" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPhoto(f); e.target.value = ''; }} />
+      <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPhoto(f); e.target.value = ''; }} />
 
       <AnimatePresence mode="wait">
         {step === 'intro' && (

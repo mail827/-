@@ -590,6 +590,15 @@ router.get('/tiers', (_req, res) => {
   res.json(Object.entries(TIERS).map(([id, t]) => ({ id, ...t })));
 });
 
+router.post('/reset-chain/:packId', authMiddleware, async (req: AuthRequest, res) => {
+  const user = req.user!;
+  if (user.role !== 'ADMIN') return res.status(403).json({ error: 'admin only' });
+  try {
+    await prisma.snapPack.update({ where: { id: req.params.packId }, data: { chainRefUrls: {} } });
+    res.json({ success: true, message: 'chainRef 초기화 완료' });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
 router.get('/concepts', (_req, res) => {
   const studio = Object.entries(STUDIO_CONCEPTS).map(([id, c]) => ({ id, label: c.label, category: 'studio' }));
   const cinematic = Object.entries(CINEMATIC_CONCEPTS).map(([id, c]) => ({ id, label: c.label, category: 'cinematic' }));

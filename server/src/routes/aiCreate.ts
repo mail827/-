@@ -51,7 +51,7 @@ router.post('/recommend-theme', async (req, res) => {
 테마 목록:
 ${themeList}
 
-JSON만 응답 (다른 텍스트 없이):
+반드시 JSON 배열만 응답하라. 사과문구, 설명, 마크다운 절대 금지. 이미지를 분석할 수 없어도 색감/분위기를 최대한 추정하여 JSON으로 응답하라:
 [
   { "themeId": "ID", "reason": "추천이유 1~2문장 한국어", "matchScore": 95 },
   { "themeId": "ID", "reason": "추천이유", "matchScore": 88 },
@@ -76,7 +76,23 @@ JSON만 응답 (다른 텍스트 없이):
 
     const text = response.choices[0]?.message?.content || '';
     const cleaned = text.replace(/```json|```/g, '').trim();
-    const recommendations = JSON.parse(cleaned);
+
+    let recommendations;
+    try {
+      recommendations = JSON.parse(cleaned);
+    } catch {
+      console.error('GPT response not JSON:', text.substring(0, 200));
+      const fallback = [
+        { themeId: 'EDITORIAL_WHITE', reason: '깔끔하고 세련된 분위기에 잘 어울려요', matchScore: 90 },
+        { themeId: 'MODERN_MINIMAL', reason: '모던하고 미니멀한 감성이 돋보여요', matchScore: 85 },
+        { themeId: 'ROMANTIC_CLASSIC', reason: '우아하고 클래식한 느낌이에요', matchScore: 80 },
+      ];
+      const enriched = fallback.map(rec => {
+        const meta = THEME_META.find(t => t.id === rec.themeId);
+        return { ...rec, name: meta?.name || rec.themeId, mood: meta?.mood || '', colors: meta?.colors || '' };
+      });
+      return res.json({ recommendations: enriched });
+    }
 
     const enriched = recommendations.map((rec: any) => {
       const meta = THEME_META.find(t => t.id === rec.themeId);
@@ -85,8 +101,18 @@ JSON만 응답 (다른 텍스트 없이):
 
     res.json({ recommendations: enriched });
   } catch (error: any) {
-    console.error('Theme recommend error:', error);
-    res.status(500).json({ error: '테마 추천 중 오류가 발생했습니다' });
+    console.error('Theme recommend error:', error?.message || error);
+    const fallback = [
+      { themeId: 'EDITORIAL_WHITE', reason: '깔끔하고 세련된 분위기에 잘 어울려요', matchScore: 90 },
+      { themeId: 'MODERN_MINIMAL', reason: '모던하고 미니멀한 감성이 돋보여요', matchScore: 85 },
+      { themeId: 'ROMANTIC_CLASSIC', reason: '우아하고 클래식한 느낌이에요', matchScore: 80 },
+    ];
+    const THEME_META_LOCAL = THEME_META;
+    const enriched = fallback.map(rec => {
+      const meta = THEME_META_LOCAL.find(t => t.id === rec.themeId);
+      return { ...rec, name: meta?.name || rec.themeId, mood: meta?.mood || '', colors: meta?.colors || '' };
+    });
+    res.json({ recommendations: enriched, isFallback: true });
   }
 });
 
