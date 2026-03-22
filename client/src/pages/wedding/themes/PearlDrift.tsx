@@ -2,9 +2,9 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale, getCalendarData, type ThemeProps } from './shared';
 
-export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -52,7 +52,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} ♥ ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'korean'), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
+      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDateLocale(wedding.weddingDate, 'full', locale), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') {
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.');
@@ -98,7 +98,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
                   <span className="text-[0.9rem]" style={{ color: 'rgba(227, 235, 243, 0.3)' }}>&</span>
                   <span className="text-[1.6rem]" style={{ ...pearlFont, color: '#E8EEF2' }}>{wedding.brideName}</span>
                 </div>
-                <p className="text-[0.75rem] tracking-[0.2em]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.5)' }}>{formatDate(wedding.weddingDate, 'dots')}</p>
+                <p className="text-[0.75rem] tracking-[0.2em]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.5)' }}>{formatDateLocale(wedding.weddingDate, 'dots', locale)}</p>
                 {wedding.showDday && <p className="mt-3 text-[0.65rem] tracking-widest" style={{ ...pearlFont, color: 'rgba(200, 216, 232, 0.4)' }}>{getDday(wedding.weddingDate)}</p>}
               </div>
             </div>
@@ -111,7 +111,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
               <span className="text-[1rem]" style={{ color: 'rgba(227, 235, 243, 0.3)' }}>&</span>
               <span className="text-[2rem]" style={{ ...pearlFont, color: '#E8EEF2' }}>{wedding.brideName}</span>
             </div>
-            <p className="text-[0.8rem] tracking-[0.2em]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.5)' }}>{formatDate(wedding.weddingDate, 'dots')}</p>
+            <p className="text-[0.8rem] tracking-[0.2em]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.5)' }}>{formatDateLocale(wedding.weddingDate, 'dots', locale)}</p>
           </motion.div>
         )}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }} className="absolute bottom-10">
@@ -129,12 +129,12 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
                 <div className="space-y-4" style={pearlFont}>
                   <p className="text-[0.75rem]" style={{ color: 'rgba(227, 235, 243, 0.5)' }}>
                     <span style={{ color: 'rgba(227, 235, 243, 0.35)' }}>{wedding.groomFatherName} · {wedding.groomMotherName}</span>
-                    <span className="mx-3" style={{ color: 'rgba(227, 235, 243, 0.15)' }}>의 아들</span>
+                    <span className="mx-3" style={{ color: 'rgba(227, 235, 243, 0.15)' }}>{locale === 'en' ? 'Son of' : '의 아들'}</span>
                     <span style={{ color: '#E8EEF2' }}>{wedding.groomName}</span>
                   </p>
                   <p className="text-[0.75rem]" style={{ color: 'rgba(227, 235, 243, 0.5)' }}>
                     <span style={{ color: 'rgba(227, 235, 243, 0.35)' }}>{wedding.brideFatherName} · {wedding.brideMotherName}</span>
-                    <span className="mx-3" style={{ color: 'rgba(227, 235, 243, 0.15)' }}>의 딸</span>
+                    <span className="mx-3" style={{ color: 'rgba(227, 235, 243, 0.15)' }}>{locale === 'en' ? 'Daughter of' : '의 딸'}</span>
                     <span style={{ color: '#E8EEF2' }}>{wedding.brideName}</span>
                   </p>
                 </div>
@@ -186,8 +186,8 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
             ))}
           </div>
           <div className="mt-12 text-center">
-            <p className="text-[0.8rem]" style={{ ...pearlFont, color: '#E8EEF2' }}>{formatDate(wedding.weddingDate, 'korean')}</p>
-            {wedding.weddingTime && <p className="text-[0.7rem] mt-2" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.5)' }}>{formatTime(wedding.weddingTime)}</p>}
+            <p className="text-[0.8rem]" style={{ ...pearlFont, color: '#E8EEF2' }}>{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+            {wedding.weddingTime && <p className="text-[0.7rem] mt-2" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.5)' }}>{formatTimeLocale(wedding.weddingTime, locale)}</p>}
           </div>
         </motion.div>
       </section>
@@ -202,12 +202,12 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
           </div>
           {wedding.venueAddress && (
             <div className="aspect-[4/3] mb-10 overflow-hidden" style={{ border: '1px solid rgba(227, 235, 243, 0.1)' }}>
-              <KakaoMap address={wedding.venueAddress} className="w-full h-full" />
+              <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} className="w-full h-full" />
             </div>
           )}
           <div className="flex justify-center gap-3">
             {wedding.venueNaverMap && <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.65rem] tracking-wider transition-all" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.7)', background: 'rgba(227, 235, 243, 0.05)', border: '1px solid rgba(227, 235, 243, 0.1)' }}>네이버지도</a>}
-            {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.65rem] tracking-wider transition-all" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.7)', background: 'rgba(227, 235, 243, 0.05)', border: '1px solid rgba(227, 235, 243, 0.1)' }}>카카오맵</a>}
+            {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.65rem] tracking-wider transition-all" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.7)', background: 'rgba(227, 235, 243, 0.05)', border: '1px solid rgba(227, 235, 243, 0.1)' }}>{locale === 'en' ? 'Kakao Map' : '카카오맵'}</a>}
           </div>
           {wedding.venuePhone && <a href={`tel:${wedding.venuePhone}`} className="flex items-center justify-center gap-2 mt-10 text-[0.7rem]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.5)' }}><Phone className="w-3.5 h-3.5" /> {wedding.venuePhone}</a>}
         </motion.div>
@@ -221,7 +221,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
               {wedding.groomAccount && (
                 <div style={{ background: 'rgba(227, 235, 243, 0.03)', border: '1px solid rgba(227, 235, 243, 0.08)' }}>
                   <button onClick={() => setOpenAccount(openAccount === 'groom' ? null : 'groom')} className="w-full px-6 py-5 flex items-center justify-between">
-                    <span className="text-[0.8rem] tracking-wider" style={{ ...pearlFont, color: '#E8EEF2' }}>신랑측</span>
+                    <span className="text-[0.8rem] tracking-wider" style={{ ...pearlFont, color: '#E8EEF2' }}>{locale === 'en' ? "Groom's Side" : '신랑측'}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform duration-500 ${openAccount === 'groom' ? 'rotate-180' : ''}`} style={{ color: 'rgba(227, 235, 243, 0.3)' }} />
                   </button>
                   <AnimatePresence>
@@ -247,7 +247,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
               {wedding.brideAccount && (
                 <div style={{ background: 'rgba(227, 235, 243, 0.03)', border: '1px solid rgba(227, 235, 243, 0.08)' }}>
                   <button onClick={() => setOpenAccount(openAccount === 'bride' ? null : 'bride')} className="w-full px-6 py-5 flex items-center justify-between">
-                    <span className="text-[0.8rem] tracking-wider" style={{ ...pearlFont, color: '#E8EEF2' }}>신부측</span>
+                    <span className="text-[0.8rem] tracking-wider" style={{ ...pearlFont, color: '#E8EEF2' }}>{locale === 'en' ? "Bride's Side" : '신부측'}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform duration-500 ${openAccount === 'bride' ? 'rotate-180' : ''}`} style={{ color: 'rgba(227, 235, 243, 0.3)' }} />
                   </button>
                   <AnimatePresence>
@@ -273,8 +273,8 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
             </div>
             {(wedding.tossLink || wedding.kakaoPayLink) && (
               <div className="flex justify-center gap-3 mt-10">
-                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] text-white tracking-wider" style={{ background: '#0064FF' }}>토스</a>}
-                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] tracking-wider" style={{ background: '#FEE500', color: '#3C1E1E' }}>카카오페이</a>}
+                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] text-white tracking-wider" style={{ background: '#0064FF' }}>{locale === 'en' ? 'Toss' : '토스'}</a>}
+                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] tracking-wider" style={{ background: '#FEE500', color: '#3C1E1E' }}>{locale === 'en' ? 'KakaoPay' : '카카오페이'}</a>}
               </div>
             )}
           </motion.div>
@@ -284,15 +284,15 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
       <section id="rsvp-section" className="py-32 px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-md mx-auto">
           <p className="text-[0.8rem] text-center mb-14 tracking-[0.3em]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.4)' }}>RSVP</p>
-          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="pearl" />
+          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="pearl" locale={locale} />
         </motion.div>
       </section>
 
       <section id="guestbook-section" className="py-32 px-8" style={{ background: '#0A0A0A' }}>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-md mx-auto">
           <p className="text-[0.8rem] text-center mb-14 tracking-[0.3em]" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.4)' }}>MESSAGE</p>
-          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="pearl" />
-          {localGuestbooks.length > 0 && <div className="mt-14"><GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="pearl" /></div>}
+          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="pearl" locale={locale} />
+          {localGuestbooks.length > 0 && <div className="mt-14"><GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="pearl" locale={locale} /></div>}
         </motion.div>
       </section>
 
@@ -325,7 +325,7 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
 
       <footer className="py-14 text-center" style={{ background: '#0A0A0A' }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.25em] hover:opacity-70 transition-opacity" style={{ ...pearlFont, color: 'rgba(227, 235, 243, 0.25)' }}>
-          Made by 청첩장 작업실 ›
+          Made by Wedding Studio Lab ›
         </a>
       </footer>
 

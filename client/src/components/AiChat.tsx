@@ -17,13 +17,14 @@ interface Action {
 }
 
 interface AiChatProps {
+  locale?: string;
   slug: string;
   groomName: string;
   brideName: string;
   wedding: any;
 }
 
-export default function AiChat({ slug, groomName, brideName, wedding }: AiChatProps) {
+export default function AiChat({ slug, groomName, brideName, wedding, locale = 'ko' }: AiChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -49,7 +50,16 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
     `뷔페 뭐가 맛있어?`,
   ];
 
+  const EN_TOASTS = {
+    gallery: ['Want to see how it all unfolds?', 'Their story, in frames.', 'Every photo holds a moment.'],
+    venue: ['Finding your way here?', 'Let me help you get there.', 'Almost there. Need directions?'],
+    account: ['A small gesture goes a long way.', 'Send your warmth.', 'Your blessing means the world.'],
+    guestbook: ['Leave a word they will remember.', 'Say something from the heart.', 'Your words stay forever.'],
+    rsvp: ['They are waiting to hear from you.', 'Will you be there?', 'Let them know you are coming.'],
+  };
+
   const getToastMessages = useCallback(() => {
+    if (locale === 'en') return EN_TOASTS;
     if (aiToneStyle === 'sheriff') {
       return {
         gallery: [
@@ -240,7 +250,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
         `안 쓰고 가시면 안 돼요~`,
       ],
     };
-  }, [aiToneStyle]);
+  }, [aiToneStyle, locale]);
 
   const visitorId = useRef(
     localStorage.getItem(`visitor_${slug}`) || 
@@ -312,7 +322,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      const greeting = `${aiName}입니다. 무엇을 도와드릴까요?`;
+      const greeting = locale === 'en' ? `Welcome. I'm here to help you with anything about today.` : `${aiName}입니다. 무엇을 도와드릴까요?`;
       setMessages([{ id: '1', role: 'assistant', content: greeting }]);
     }
   }, [isOpen]);
@@ -344,7 +354,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
           id: Date.now().toString(),
           role: 'assistant',
           content: `${dateStr}\n${wedding.weddingTime}\n${wedding.venue}${wedding.venueHall ? ` ${wedding.venueHall}` : ''}\n${wedding.venueAddress}`,
-          actions: [{ type: 'map', label: '길찾기' }]
+          actions: [{ type: 'map', label: locale === 'en' ? 'Directions' : '길찾기' }]
         }]);
         break;
 
@@ -381,12 +391,12 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
           window.location.href = `tel:${action.data}`;
         } else {
           const callActions: Action[] = [];
-          if (wedding.groomPhone) callActions.push({ type: 'call', label: `신랑 ${groomName}`, data: wedding.groomPhone });
-          if (wedding.bridePhone) callActions.push({ type: 'call', label: `신부 ${brideName}`, data: wedding.bridePhone });
+          if (wedding.groomPhone) callActions.push({ type: 'call', label: locale === 'en' ? `Groom ${groomName}` : `신랑 ${groomName}`, data: wedding.groomPhone });
+          if (wedding.bridePhone) callActions.push({ type: 'call', label: locale === 'en' ? `Bride ${brideName}` : `신부 ${brideName}`, data: wedding.bridePhone });
           setMessages(prev => [...prev, {
             id: Date.now().toString(),
             role: 'assistant',
-            content: '누구에게 연락할까요?',
+            content: locale === 'en' ? 'Who would you like to reach?' : '누구에게 연락할까요?',
             actions: callActions
           }]);
         }
@@ -470,7 +480,7 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
         body: JSON.stringify({
           message: currentInput,
           visitorId: visitorId.current,
-          persona: selectedPersona,
+          persona: selectedPersona, locale,
         })
       });
 
@@ -494,17 +504,17 @@ export default function AiChat({ slug, groomName, brideName, wedding }: AiChatPr
 
   const quickActions = aiMode === 'classic' 
     ? [
-        { type: 'date' as const, label: '일시·장소', icon: Calendar },
-        { type: 'map' as const, label: '길찾기', icon: MapPin },
-        { type: 'account' as const, label: '축의금', icon: CreditCard },
-        { type: 'call' as const, label: '연락하기', icon: Phone },
+        { type: 'date' as const, label: locale === 'en' ? 'Date & Venue' : '일시·장소', icon: Calendar },
+        { type: 'map' as const, label: locale === 'en' ? 'Directions' : '길찾기', icon: MapPin },
+        { type: 'account' as const, label: locale === 'en' ? 'Gift' : '축의금', icon: CreditCard },
+        { type: 'call' as const, label: locale === 'en' ? 'Contact' : '연락하기', icon: Phone },
       ]
     : [
-        { type: 'date' as const, label: '일시·장소', icon: Calendar },
-        { type: 'map' as const, label: '길찾기', icon: MapPin },
-        { type: 'account' as const, label: '축의금', icon: CreditCard },
-        { type: 'call' as const, label: '연락하기', icon: Phone },
-        { type: 'secret' as const, label: '비밀', icon: Lock },
+        { type: 'date' as const, label: locale === 'en' ? 'Date & Venue' : '일시·장소', icon: Calendar },
+        { type: 'map' as const, label: locale === 'en' ? 'Directions' : '길찾기', icon: MapPin },
+        { type: 'account' as const, label: locale === 'en' ? 'Gift' : '축의금', icon: CreditCard },
+        { type: 'call' as const, label: locale === 'en' ? 'Contact' : '연락하기', icon: Phone },
+        { type: 'secret' as const, label: locale === 'en' ? 'Secret' : '비밀', icon: Lock },
       ];
 
   const showPersonaSelect = aiMode === 'variety' && !selectedPersona && messages.length === 1;

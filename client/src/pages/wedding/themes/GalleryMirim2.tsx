@@ -2,9 +2,9 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale, getCalendarData, type ThemeProps } from './shared';
 
-export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -53,7 +53,7 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} ♥ ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'korean'), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
+      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDateLocale(wedding.weddingDate, 'full', locale), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') {
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.');
@@ -113,7 +113,7 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
               <span className="text-[1.4rem]" style={{ ...titleFont, color: '#D4E0D8' }}>{wedding.brideName}</span>
             </div>
             <div className="w-16 h-px mx-auto mb-5" style={{ background: 'linear-gradient(90deg, transparent, #4A5B50, transparent)' }} />
-            <p className="text-[0.7rem] tracking-[0.3em]" style={{ ...serifFont, color: '#788C80' }}>{formatDate(wedding.weddingDate, 'dots')}</p>
+            <p className="text-[0.7rem] tracking-[0.3em]" style={{ ...serifFont, color: '#788C80' }}>{formatDateLocale(wedding.weddingDate, 'dots', locale)}</p>
             {wedding.showDday && <p className="mt-4 text-[0.6rem]" style={{ ...serifFont, color: '#4A5B50' }}>{getDday(wedding.weddingDate)}</p>}
           </motion.div>
         </motion.div>
@@ -130,8 +130,8 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
             {wedding.showParents && (
               <div className="mt-12 pt-10" style={{ borderTop: '1px solid rgba(100, 130, 110, 0.15)' }}>
                 <div className="space-y-3" style={serifFont}>
-                  <p className="text-[0.7rem]" style={{ color: '#6A7B70' }}><span style={{ color: '#5A6B60' }}>{wedding.groomFatherName} · {wedding.groomMotherName}</span><span className="mx-2" style={{ color: '#4A5B50' }}>의 아들</span><span style={{ color: '#A8BFB0' }}>{wedding.groomName}</span></p>
-                  <p className="text-[0.7rem]" style={{ color: '#6A7B70' }}><span style={{ color: '#5A6B60' }}>{wedding.brideFatherName} · {wedding.brideMotherName}</span><span className="mx-2" style={{ color: '#4A5B50' }}>의 딸</span><span style={{ color: '#A8BFB0' }}>{wedding.brideName}</span></p>
+                  <p className="text-[0.7rem]" style={{ color: '#6A7B70' }}><span style={{ color: '#5A6B60' }}>{wedding.groomFatherName} · {wedding.groomMotherName}</span><span className="mx-2" style={{ color: '#4A5B50' }}>{locale === 'en' ? 'Son of' : '의 아들'}</span><span style={{ color: '#A8BFB0' }}>{wedding.groomName}</span></p>
+                  <p className="text-[0.7rem]" style={{ color: '#6A7B70' }}><span style={{ color: '#5A6B60' }}>{wedding.brideFatherName} · {wedding.brideMotherName}</span><span className="mx-2" style={{ color: '#4A5B50' }}>{locale === 'en' ? 'Daughter of' : '의 딸'}</span><span style={{ color: '#A8BFB0' }}>{wedding.brideName}</span></p>
                 </div>
               </div>
             )}
@@ -191,8 +191,8 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
               {calendarData.weeks.flat().map((day, i) => <span key={i} className="py-2.5 flex items-center justify-center" style={{ color: day === calendarData.targetDay ? '#1A1D1C' : day ? '#8A9B90' : 'transparent', background: day === calendarData.targetDay ? '#A8BFB0' : 'transparent', borderRadius: '50%', width: day === calendarData.targetDay ? '1.8rem' : 'auto', height: day === calendarData.targetDay ? '1.8rem' : 'auto', margin: day === calendarData.targetDay ? '0 auto' : '0' }}>{day || ''}</span>)}
             </div>
             <div className="mt-8 text-center">
-              <p className="text-[0.75rem]" style={{ ...titleFont, color: '#D4E0D8' }}>{formatDate(wedding.weddingDate, 'korean')}</p>
-              <p className="text-[0.65rem] mt-2" style={{ ...serifFont, color: '#6A7B70' }}>{formatTime(wedding.weddingTime)}</p>
+              <p className="text-[0.75rem]" style={{ ...titleFont, color: '#D4E0D8' }}>{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+              <p className="text-[0.65rem] mt-2" style={{ ...serifFont, color: '#6A7B70' }}>{formatTimeLocale(wedding.weddingTime, locale)}</p>
             </div>
           </div>
         </motion.div>
@@ -208,7 +208,7 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
           </div>
           {wedding.venueAddress && (
             <div className="aspect-[4/3] mb-8" style={{ border: '1px solid rgba(100, 130, 110, 0.15)' }}>
-              <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} className="w-full h-full" />
+              <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} className="w-full h-full" />
             </div>
           )}
           <div className="flex justify-center gap-3">
@@ -227,7 +227,7 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
               {wedding.groomAccount && (
                 <div style={{ background: 'rgba(20, 25, 22, 0.8)', border: '1px solid rgba(100, 130, 110, 0.1)' }}>
                   <button onClick={() => setOpenAccount(openAccount === 'groom' ? null : 'groom')} className="w-full px-5 py-4 flex items-center justify-between">
-                    <span className="text-[0.75rem]" style={{ ...titleFont, color: '#A8BFB0' }}>신랑측</span>
+                    <span className="text-[0.75rem]" style={{ ...titleFont, color: '#A8BFB0' }}>{locale === 'en' ? "Groom's Side" : '신랑측'}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform ${openAccount === 'groom' ? 'rotate-180' : ''}`} style={{ color: '#5A6B60' }} />
                   </button>
                   <AnimatePresence>
@@ -247,7 +247,7 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
               {wedding.brideAccount && (
                 <div style={{ background: 'rgba(20, 25, 22, 0.8)', border: '1px solid rgba(100, 130, 110, 0.1)' }}>
                   <button onClick={() => setOpenAccount(openAccount === 'bride' ? null : 'bride')} className="w-full px-5 py-4 flex items-center justify-between">
-                    <span className="text-[0.75rem]" style={{ ...titleFont, color: '#A8BFB0' }}>신부측</span>
+                    <span className="text-[0.75rem]" style={{ ...titleFont, color: '#A8BFB0' }}>{locale === 'en' ? "Bride's Side" : '신부측'}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform ${openAccount === 'bride' ? 'rotate-180' : ''}`} style={{ color: '#5A6B60' }} />
                   </button>
                   <AnimatePresence>
@@ -278,15 +278,15 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
       <section id="rsvp-section" className="py-24 px-6" style={{ background: '#161918' }}>
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-sm mx-auto">
           <p className="text-[1rem] text-center mb-10" style={{ ...titleFont, color: '#A8BFB0' }}>RSVP</p>
-          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="mirim2" />
+          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="mirim2" locale={locale} />
         </motion.div>
       </section>
 
       <section id="guestbook-section" className="py-24 px-6" style={{ background: '#1A1D1C' }}>
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-sm mx-auto">
           <p className="text-[1rem] text-center mb-10" style={{ ...titleFont, color: '#A8BFB0' }}>Guestbook</p>
-          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="mirim2" />
-          {localGuestbooks.length > 0 && <div className="mt-10"><GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="mirim2" /></div>}
+          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="mirim2" locale={locale} />
+          {localGuestbooks.length > 0 && <div className="mt-10"><GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="mirim2" locale={locale} /></div>}
         </motion.div>
       </section>
 
@@ -301,7 +301,7 @@ export default function GalleryMirim2({ wedding, guestbooks, onRsvpSubmit, onGue
         </motion.div>
       </section>
 
-      <footer className="py-12 text-center" style={{ background: "#0F1210" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.3em] hover:opacity-70 transition-opacity" style={{ ...serifFont, color: "#2A3B30" }}>Made by 청첩장 작업실 ›</a></footer>
+      <footer className="py-12 text-center" style={{ background: "#0F1210" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.3em] hover:opacity-70 transition-opacity" style={{ ...serifFont, color: "#2A3B30" }}>Made by Wedding Studio Lab ›</a></footer>
 
       {galleryIndex !== null && galleries.length > 0 && <GalleryModal galleries={galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="GALLERY_MIRIM_2" usePhotoFilter={wedding.usePhotoFilter ?? true} />}
       <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="dark" />

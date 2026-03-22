@@ -2,6 +2,8 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
+import LocaleSwitch from './themes/shared/LocaleSwitch';
+import type { Locale } from './themes/shared/i18n';
 import type { Wedding, Theme, Guestbook } from '../../types';
 import { lazy, Suspense, useState, useEffect } from 'react';
 
@@ -109,6 +111,7 @@ export default function WeddingPage() {
   const isPreview = searchParams.get("preview") === "1";
   const [previewApplied, setPreviewApplied] = useState(false);
   const [envelopeDismissed, setEnvelopeDismissed] = useState(false);
+  const [locale, setLocale] = useState<Locale>('ko');
 
   const [wedding, setWedding] = useState<Wedding | null>(null);
 
@@ -191,6 +194,8 @@ export default function WeddingPage() {
     }
   }, [wedding?.fontFamily, data?.wedding?.fontFamily]);
 
+  useEffect(() => { const w = wedding ?? data?.wedding; if (w?.locale) setLocale(w.locale as Locale); }, [wedding, data]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 to-amber-50">
@@ -252,12 +257,30 @@ export default function WeddingPage() {
     );
   }
 
-  const weddingToUse = wedding ?? data.wedding;
-
-
+  const rawWedding = wedding ?? data.wedding;
+  const weddingToUse = (() => {
+    if (locale !== 'en' || !rawWedding?.translationsEn) return rawWedding;
+    const tr = rawWedding.translationsEn as Record<string, string>;
+    const merged = { ...rawWedding } as any;
+    merged.mapAddress = rawWedding.venueAddress;
+    merged.mapVenue = rawWedding.venue;
+    if (tr.greeting) (merged as any).greeting = tr.greeting;
+    if (tr.greetingTitle) (merged as any).greetingTitle = tr.greetingTitle;
+    if (tr.closingMessage) (merged as any).closingMessage = tr.closingMessage;
+    if (tr.venue) (merged as any).venue = tr.venue;
+    if (tr.venueHall) (merged as any).venueHall = tr.venueHall;
+    if (tr.venueAddress) (merged as any).venueAddress = tr.venueAddress;
+    if (tr.transportInfo) (merged as any).transportInfo = tr.transportInfo;
+    if (tr.parkingInfo) (merged as any).parkingInfo = tr.parkingInfo;
+    if (tr.envelopeCardText) (merged as any).envelopeCardText = tr.envelopeCardText;
+    if (tr.venueDetailTabs) {
+      try { (merged as any).venueDetailTabs = JSON.parse(tr.venueDetailTabs); } catch {}
+    }
+    return merged;
+  })();
 
   const urlTheme = searchParams.get('theme') as Theme | null;
-  const theme = urlTheme || weddingToUse.theme || 'ROMANTIC_CLASSIC';
+  const theme = (urlTheme || weddingToUse.theme || 'ROMANTIC_CLASSIC') as Theme;
   const ThemeComponent = themeComponents[theme] || RomanticClassic;
 
   const fontScaleStyle = (() => {
@@ -294,6 +317,7 @@ export default function WeddingPage() {
           cardText={weddingToUse.envelopeCardText}
           fontFamily={weddingToUse.fontFamily}
           cardColor={weddingToUse.envelopeCardColor}
+          locale={locale}
           onComplete={() => setEnvelopeDismissed(true)}
         />
       )}
@@ -311,8 +335,10 @@ export default function WeddingPage() {
             <p style={{ fontSize: 11, color: "#999" }}>RSVP and payments are closed</p>
           </div>
         )}
+        {weddingToUse.showLocaleSwitch !== false && <LocaleSwitch locale={locale} onChange={setLocale} />}
         <ThemeComponent
           wedding={weddingToUse}
+          locale={locale}
           guestbooks={guestbookData?.guestbooks || []}
           onRsvpSubmit={isArchive ? (() => {}) : ((data: any) => rsvpMutation.mutate(data))}
           onGuestbookSubmit={isArchive ? (() => {}) : ((data: any) => guestbookMutation.mutate(data))}
@@ -323,10 +349,10 @@ export default function WeddingPage() {
           guestPhotoSlot={!isPreview ? (
             <>
               {!isArchive && weddingToUse.aiBoothEnabled && (
-                <GuestAiPhotoBooth slug={weddingToUse.slug} groomName={weddingToUse.groomName} brideName={weddingToUse.brideName} />
+                <GuestAiPhotoBooth slug={weddingToUse.slug} groomName={weddingToUse.groomName} brideName={weddingToUse.brideName} locale={locale} />
               )}
               {weddingToUse.guestPhotoEnabled !== false && (
-                <GuestPhotoGallery slug={weddingToUse.slug} enabled={true} />
+                <GuestPhotoGallery slug={weddingToUse.slug} enabled={true} locale={locale} />
               )}
             </>
           ) : undefined}
@@ -377,6 +403,7 @@ export default function WeddingPage() {
           groomName={weddingToUse.groomName}
           brideName={weddingToUse.brideName}
           wedding={weddingToUse}
+          locale={locale}
         />
       )}
     </>

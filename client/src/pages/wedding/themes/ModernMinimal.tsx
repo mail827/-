@@ -2,13 +2,13 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale, getCalendarData, type ThemeProps } from './shared';
 
 const fontStyles = `
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 `;
 
-export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -46,7 +46,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} · ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'dots'), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
+      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDateLocale(wedding.weddingDate, 'dots', locale), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') {
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.');
@@ -96,8 +96,8 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
             <div className="w-8 h-px bg-black/20 mx-auto" />
             
             <div className="space-y-1">
-              <p className="text-[13px] font-light text-black/60">{formatDate(wedding.weddingDate, 'korean')}</p>
-              <p className="text-[12px] font-light text-black/40">{formatTime(wedding.weddingTime)}</p>
+              <p className="text-[13px] font-light text-black/60">{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+              <p className="text-[12px] font-light text-black/40">{formatTimeLocale(wedding.weddingTime, locale)}</p>
             </div>
 
             {wedding.showDday && (
@@ -126,14 +126,14 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
                     {wedding.groomFatherName && <span>{wedding.groomFatherName}</span>}
                     {wedding.groomFatherName && wedding.groomMotherName && <span> · </span>}
                     {wedding.groomMotherName && <span>{wedding.groomMotherName}</span>}
-                    <span className="text-black/30 ml-2">의 아들</span>
+                    <span className="text-black/30 ml-2">{locale === 'en' ? 'Son of' : '의 아들'}</span>
                     <span className="text-black/70 ml-2">{wedding.groomName}</span>
                   </p>
                   <p>
                     {wedding.brideFatherName && <span>{wedding.brideFatherName}</span>}
                     {wedding.brideFatherName && wedding.brideMotherName && <span> · </span>}
                     {wedding.brideMotherName && <span>{wedding.brideMotherName}</span>}
-                    <span className="text-black/30 ml-2">의 딸</span>
+                    <span className="text-black/30 ml-2">{locale === 'en' ? 'Daughter of' : '의 딸'}</span>
                     <span className="text-black/70 ml-2">{wedding.brideName}</span>
                   </p>
                 </div>
@@ -208,8 +208,8 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
           </div>
 
           <div className="mt-8 text-center space-y-1">
-            <p className="text-[13px] font-light text-black/70">{formatDate(wedding.weddingDate, 'korean')}</p>
-            <p className="text-[12px] font-light text-black/40">{formatTime(wedding.weddingTime)}</p>
+            <p className="text-[13px] font-light text-black/70">{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+            <p className="text-[12px] font-light text-black/40">{formatTimeLocale(wedding.weddingTime, locale)}</p>
           </div>
         </motion.div>
       </section>
@@ -226,7 +226,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
 
           {wedding.venueAddress && (
             <div className="aspect-[4/3] bg-black/5 mb-6 overflow-hidden">
-              <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
+              <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             </div>
           )}
 
@@ -321,10 +321,10 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
             {(wedding.tossLink || wedding.kakaoPayLink) && (
               <div className="flex justify-center gap-3 mt-8">
                 {wedding.tossLink && (
-                  <a href={wedding.tossLink} target="_blank" className="px-6 py-2.5 text-[11px] font-light bg-[#0064FF] text-white">토스</a>
+                  <a href={wedding.tossLink} target="_blank" className="px-6 py-2.5 text-[11px] font-light bg-[#0064FF] text-white">{locale === 'en' ? 'Toss' : '토스'}</a>
                 )}
                 {wedding.kakaoPayLink && (
-                  <a href={wedding.kakaoPayLink} target="_blank" className="px-6 py-2.5 text-[11px] font-light bg-[#FEE500] text-black/80">카카오페이</a>
+                  <a href={wedding.kakaoPayLink} target="_blank" className="px-6 py-2.5 text-[11px] font-light bg-[#FEE500] text-black/80">{locale === 'en' ? 'KakaoPay' : '카카오페이'}</a>
                 )}
               </div>
             )}
@@ -337,7 +337,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
           <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-4">RSVP</p>
           <p className="text-[13px] font-light text-black/50 text-center mb-10">참석 여부를 알려주세요</p>
           
-          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="minimal" />
+          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="minimal" locale={locale} />
         </motion.div>
       </section>
 
@@ -346,11 +346,11 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
           <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-4">GUESTBOOK</p>
           <p className="text-[13px] font-light text-black/50 text-center mb-10">축하 메시지를 남겨주세요</p>
           
-          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="minimal" />
+          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="minimal" locale={locale} />
           
           {localGuestbooks.length > 0 && (
             <div className="mt-10">
-              <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="minimal" />
+              <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="minimal" locale={locale} />
             </div>
           )}
         </motion.div>
@@ -385,7 +385,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
       </section>
 
       <footer className="py-8 text-center" style={{ background: "#F8F8F8" }}>
-        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.2em] text-black/30 hover:text-black/40 transition-colors">Made by 청첩장 작업실 ›</a>
+        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.2em] text-black/30 hover:text-black/40 transition-colors">Made by Wedding Studio Lab ›</a>
       </footer>
 
       {galleryIndex !== null && wedding.galleries && (

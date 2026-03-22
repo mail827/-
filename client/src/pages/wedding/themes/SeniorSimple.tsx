@@ -2,9 +2,9 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Volume2, VolumeX, MapPin, Calendar, Clock } from 'lucide-react';
-import { KakaoMap, GuestbookList, GalleryModal, ShareModal, formatDate, formatTime, getDday, type ThemeProps } from './shared';
+import { KakaoMap, GuestbookList, GalleryModal, ShareModal, formatDate, getDday, formatDateLocale, formatTimeLocale, type ThemeProps } from './shared';
 
-export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [rsvpData, setRsvpData] = useState({ name: '', contact: '', attendance: true, guestCount: 1 });
   const [rsvpSubmitted, setRsvpSubmitted] = useState(false);
@@ -34,7 +34,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
     if (type === "kakao" && window.Kakao) {
       window.Kakao.Share.sendDefault({
         objectType: "feed",
-        content: { title, description: `${formatDate(wedding.weddingDate, "korean")} ${formatTime(wedding.weddingTime)}`, imageUrl: wedding.heroMedia || "", link: { mobileWebUrl: url, webUrl: url } },
+        content: { title, description: `${formatDate(wedding.weddingDate, "korean")} ${formatTimeLocale(wedding.weddingTime, locale)}`, imageUrl: wedding.heroMedia || "", link: { mobileWebUrl: url, webUrl: url } },
         buttons: [{ title: "청첩장 보기", link: { mobileWebUrl: url, webUrl: url } }]
       });
     } else if (type === "instagram") {
@@ -104,8 +104,8 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
           </h1>
           
           <div className="text-xl text-gray-600 space-y-2">
-            <p className="font-medium">{formatDate(wedding.weddingDate, 'korean')}</p>
-            <p>{formatTime(wedding.weddingTime)}</p>
+            <p className="font-medium">{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+            <p>{formatTimeLocale(wedding.weddingTime, locale)}</p>
             <p className="text-gray-500">{wedding.venue} {wedding.venueHall}</p>
           </div>
           
@@ -127,13 +127,13 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
               <div className="mt-10 pt-8" style={{ borderTopWidth: 2, borderTopColor: C_light }}>
                 <div className="grid grid-cols-1 gap-6 text-lg text-center">
                   <div>
-                    <p className="mb-2" style={{ color: C }}>신랑측</p>
-                    <p className="text-gray-500">{wedding.groomFatherName} · {wedding.groomMotherName}의 아들</p>
+                    <p className="mb-2" style={{ color: C }}>{locale === 'en' ? "Groom's Side" : '신랑측'}</p>
+                    <p className="text-gray-500">{wedding.groomFatherName} · {wedding.groomMotherName}{locale === 'en' ? 'Son of' : '의 아들'}</p>
                     <p className="text-gray-800 text-xl font-medium mt-1">{wedding.groomName}</p>
                   </div>
                   <div>
-                    <p className="mb-2" style={{ color: C }}>신부측</p>
-                    <p className="text-gray-500">{wedding.brideFatherName} · {wedding.brideMotherName}의 딸</p>
+                    <p className="mb-2" style={{ color: C }}>{locale === 'en' ? "Bride's Side" : '신부측'}</p>
+                    <p className="text-gray-500">{wedding.brideFatherName} · {wedding.brideMotherName}{locale === 'en' ? 'Daughter of' : '의 딸'}</p>
                     <p className="text-gray-800 text-xl font-medium mt-1">{wedding.brideName}</p>
                   </div>
                 </div>
@@ -147,11 +147,11 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
         <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
           <div className="flex items-center justify-center gap-3 text-xl text-gray-700 mb-4">
             <Calendar className="w-6 h-6" style={{ color: C }} />
-            <span className="font-medium">{formatDate(wedding.weddingDate, 'korean')}</span>
+            <span className="font-medium">{formatDateLocale(wedding.weddingDate, 'full', locale)}</span>
           </div>
           <div className="flex items-center justify-center gap-3 text-xl text-gray-700">
             <Clock className="w-6 h-6" style={{ color: C }} />
-            <span className="font-medium">{formatTime(wedding.weddingTime)}</span>
+            <span className="font-medium">{formatTimeLocale(wedding.weddingTime, locale)}</span>
           </div>
         </div>
       </Section>
@@ -193,7 +193,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
 
       <Section title="오시는 길" color={C} bgColor={C_light}>
         <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-          <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
+          <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
           <div className="p-6 text-center">
             <p className="flex items-center justify-center gap-2 text-xl text-gray-800 font-medium">
               <MapPin className="w-6 h-6" style={{ color: C }} />
@@ -207,9 +207,9 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
               </a>
             )}
             <div className="flex flex-col gap-3 mt-6">
-              {wedding.venueNaverMap && <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer" className="w-full py-4 bg-[#03C75A] text-white rounded-xl text-lg font-medium">네이버 지도</a>}
+              {wedding.venueNaverMap && <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer" className="w-full py-4 bg-[#03C75A] text-white rounded-xl text-lg font-medium">{locale === 'en' ? 'Naver Map' : '네이버 지도'}</a>}
               {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="w-full py-4 bg-[#FEE500] text-gray-800 rounded-xl text-lg font-medium">카카오 지도</a>}
-              {wedding.venueTmap && <a href={wedding.venueTmap} target="_blank" rel="noopener noreferrer" className="w-full py-4 bg-[#EF4123] text-white rounded-xl text-lg font-medium">티맵</a>}
+              {wedding.venueTmap && <a href={wedding.venueTmap} target="_blank" rel="noopener noreferrer" className="w-full py-4 bg-[#EF4123] text-white rounded-xl text-lg font-medium">{locale === 'en' ? 'T-map' : '티맵'}</a>}
             </div>
           </div>
         </div>
@@ -232,7 +232,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
               </div>
               {rsvpData.attendance && (
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-lg text-gray-600">동반 인원</span>
+                  <span className="text-lg text-gray-600">{locale === 'en' ? 'Guests' : '동반 인원'}</span>
                   <div className="flex items-center gap-4">
                     <button onClick={() => setRsvpData({ ...rsvpData, guestCount: Math.max(1, rsvpData.guestCount - 1) })} className="w-12 h-12 rounded-full text-2xl font-medium" style={{ backgroundColor: C_light, color: C }}>-</button>
                     <span className="text-xl w-8 text-center">{rsvpData.guestCount}</span>
@@ -254,7 +254,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
                 <p className="text-lg font-medium mb-3" style={{ color: C }}>신랑측 계좌</p>
                 <p className="text-xl text-gray-800">{wedding.groomAccountHolder || wedding.groomName}</p>
                 <p className="text-lg text-gray-500 mt-1">{wedding.groomBank} {wedding.groomAccount}</p>
-                <button onClick={() => copyAccount(`${wedding.groomBank} ${wedding.groomAccount}`)} className="w-full mt-4 py-3 rounded-xl text-lg font-medium" style={{ backgroundColor: C_light, color: C }}>계좌번호 복사</button>
+                <button onClick={() => copyAccount(`${wedding.groomBank} ${wedding.groomAccount}`)} className="w-full mt-4 py-3 rounded-xl text-lg font-medium" style={{ backgroundColor: C_light, color: C }}>{locale === 'en' ? 'Copy Account' : '계좌번호 복사'}</button>
               </div>
             )}
             {wedding.brideAccount && (
@@ -262,13 +262,13 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
                 <p className="text-lg font-medium mb-3" style={{ color: C }}>신부측 계좌</p>
                 <p className="text-xl text-gray-800">{wedding.brideAccountHolder || wedding.brideName}</p>
                 <p className="text-lg text-gray-500 mt-1">{wedding.brideBank} {wedding.brideAccount}</p>
-                <button onClick={() => copyAccount(`${wedding.brideBank} ${wedding.brideAccount}`)} className="w-full mt-4 py-3 rounded-xl text-lg font-medium" style={{ backgroundColor: C_light, color: C }}>계좌번호 복사</button>
+                <button onClick={() => copyAccount(`${wedding.brideBank} ${wedding.brideAccount}`)} className="w-full mt-4 py-3 rounded-xl text-lg font-medium" style={{ backgroundColor: C_light, color: C }}>{locale === 'en' ? 'Copy Account' : '계좌번호 복사'}</button>
               </div>
             )}
             {(wedding.tossLink || wedding.kakaoPayLink) && (
               <div className="flex flex-col sm:flex-row gap-3">
-                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" className="flex-1 py-4 bg-[#0064FF] text-white rounded-xl text-lg font-medium text-center">토스</a>}
-                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" className="flex-1 py-4 bg-[#FEE500] text-gray-800 rounded-xl text-lg font-medium text-center">카카오페이</a>}
+                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" className="flex-1 py-4 bg-[#0064FF] text-white rounded-xl text-lg font-medium text-center">{locale === 'en' ? 'Toss' : '토스'}</a>}
+                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" className="flex-1 py-4 bg-[#FEE500] text-gray-800 rounded-xl text-lg font-medium text-center">{locale === 'en' ? 'KakaoPay' : '카카오페이'}</a>}
               </div>
             )}
           </div>
@@ -287,7 +287,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
             <button onClick={handleGuestbookSubmit} disabled={isGuestbookLoading || !guestbookData.name || !guestbookData.password || !guestbookData.message} className="w-full py-4 text-white rounded-xl text-lg font-medium disabled:opacity-50" style={{ backgroundColor: C }}>{isGuestbookLoading ? '등록 중...' : '메시지 남기기'}</button>
           </div>
           <div className="mt-6">
-            <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="senior" />
+            <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="senior" locale={locale} />
           </div>
         </div>
       </Section>
@@ -329,7 +329,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
 
       <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="light" />
 
-      <footer className="py-8 text-center" style={{ background: "#F5F5F5" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-600 transition-colors text-sm">Made by 청첩장 작업실 ›</a></footer>
+      <footer className="py-8 text-center" style={{ background: "#F5F5F5" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-600 transition-colors text-sm">Made by Wedding Studio Lab ›</a></footer>
 
       {galleryIndex !== null && wedding.galleries && (
         <GalleryModal 

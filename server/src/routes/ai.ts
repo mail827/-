@@ -164,7 +164,7 @@ ${smartFallbacks}
 router.post('/:slug/chat', async (req, res) => {
   try {
     const { slug } = req.params;
-    const { message, visitorId, persona } = req.body;
+    const { message, visitorId, persona, locale } = req.body;
 
     const wedding = await prisma.wedding.findUnique({
       where: { slug },
@@ -220,7 +220,7 @@ router.post('/:slug/chat', async (req, res) => {
     });
 
     const intent = classifyIntent(message);
-    const systemPrompt = buildSystemPrompt(wedding, persona, intent.funChance);
+    const systemPrompt = buildSystemPrompt(wedding, persona, intent.funChance) + (locale === 'en' ? '\n\nCRITICAL: The guest is viewing the invitation in English. You MUST respond ONLY in English. Be warm, friendly, and helpful. Never use Korean.' : '');
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

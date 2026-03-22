@@ -1608,6 +1608,7 @@ export default function EditWedding() {
                 />
               </label>
             </div>
+
           </Section>
         )}
 
@@ -2308,6 +2309,79 @@ export default function EditWedding() {
                 />
                 <span className="text-stone-600">D-Day 카운트 표시</span>
               </label>
+            </Section>
+
+            <Section title="International Mode">
+              <div className="space-y-4">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={wedding.locale === 'en'}
+                    onChange={async (e) => {
+                      const isEn = e.target.checked;
+                      updateField('locale', isEn ? 'en' : 'ko');
+                      if (isEn && !wedding.translationsEn) {
+                        try {
+                          const token = localStorage.getItem('token');
+                          const res = await fetch(`${import.meta.env.VITE_API_URL}/weddings/${wedding.id}/translate`, {
+                            method: 'POST',
+                            headers: { Authorization: `Bearer ${token}` },
+                          });
+                          if (res.ok) {
+                            const data = await res.json();
+                            updateField('translationsEn', data.translationsEn);
+                          }
+                        } catch (err) {
+                          console.error('Translation failed:', err);
+                        }
+                      }
+                    }}
+                    className="w-5 h-5 rounded"
+                  />
+                  <div>
+                    <span className="text-stone-600">기본 언어 영어</span>
+                    <p className="text-xs text-stone-400">청첩장이 영어로 먼저 표시됩니다 (AI 자동 번역)</p>
+                  </div>
+                </label>
+                {wedding.locale === 'en' && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const token = localStorage.getItem('token');
+                        const res = await fetch(`${import.meta.env.VITE_API_URL}/weddings/${wedding.id}/translate`, {
+                          method: 'POST',
+                          headers: { Authorization: `Bearer ${token}` },
+                        });
+                        if (res.ok) {
+                          const data = await res.json();
+                          updateField('translationsEn', data.translationsEn);
+                          alert('Translation complete!');
+                        } else {
+                          alert('Translation failed');
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        alert('Translation error');
+                      }
+                    }}
+                    className="mt-3 w-full py-2.5 text-sm rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors"
+                  >
+                    {wedding.translationsEn ? 'Re-translate to English' : 'Translate to English'}
+                  </button>
+                )}
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={wedding.showLocaleSwitch !== false}
+                    onChange={(e) => updateField('showLocaleSwitch', e.target.checked)}
+                    className="w-5 h-5 rounded"
+                  />
+                  <div>
+                    <span className="text-stone-600">하객 언어 전환 허용</span>
+                    <p className="text-xs text-stone-400">청첩장에 KO/EN 스위치가 표시됩니다</p>
+                  </div>
+                </label>
+              </div>
             </Section>
 
             <Section title="히어로 텍스트 위치">

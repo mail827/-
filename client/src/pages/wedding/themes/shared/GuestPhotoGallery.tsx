@@ -17,10 +17,11 @@ interface GuestPhoto {
 
 interface Props {
   slug: string;
+  locale?: string;
   enabled?: boolean;
 }
 
-export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
+export default function GuestPhotoGallery({ slug, enabled = true, locale = 'ko' }: Props) {
   const [photos, setPhotos] = useState<GuestPhoto[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -59,7 +60,7 @@ export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 100 * 1024 * 1024) {
-      alert('영상은 100MB 이하만 업로드 가능합니다.');
+      alert(locale === 'en' ? 'Video must be under 100MB' : '영상은 100MB 이하만 업로드 가능합니다.');
       return;
     }
     setFiles([file]);
@@ -143,7 +144,7 @@ export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
     <div className="py-12 px-4">
       <div className="text-center mb-8">
         <h3 className="text-lg tracking-[0.15em] mb-6">GUEST GALLERY</h3>
-        <p className="text-sm mt-2 opacity-60">우리의 순간을 함께 채워주세요</p>
+        <p className="text-sm mt-2 opacity-60">{locale === 'en' ? 'Help us remember this day.' : '우리의 순간을 함께 채워주세요'}</p>
       </div>
 
       {photos.length > 0 && (
@@ -174,7 +175,7 @@ export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
       {photos.length === 0 && (
         <div className="text-center py-8 mb-6">
           <Camera className="w-8 h-8 mx-auto mb-2 opacity-30" />
-          <p className="text-sm opacity-40">첫 번째 사진을 올려주세요</p>
+          <p className="text-sm opacity-40">{locale === 'en' ? 'Be the first to capture a memory.' : '첫 번째 사진을 올려주세요'}</p>
         </div>
       )}
 
@@ -185,15 +186,15 @@ export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
           <button onClick={() => inputRef.current?.click()}
             className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm border border-current opacity-70">
             <Camera className="w-4 h-4" />
-            사진
+            {locale === 'en' ? 'Photo' : '사진'}
           </button>
           <button onClick={() => videoInputRef.current?.click()}
             className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm border border-current opacity-70">
             <Film className="w-4 h-4" />
-            영상
+            {locale === 'en' ? 'Video' : '영상'}
           </button>
         </div>
-        <p className="text-xs mt-2 opacity-50">사진 최대 10장 · 영상 최대 100MB</p>
+        <p className="text-xs mt-2 opacity-50">{locale === 'en' ? 'Max 10 photos · Max 100MB video' : '사진 최대 10장 · 영상 최대 100MB'}</p>
         <AnimatePresence>
           {uploaded && (
             <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -210,7 +211,7 @@ export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
               className="bg-white w-full max-w-md rounded-t-3xl p-6 space-y-4" onClick={e => e.stopPropagation()}>
               <div className="flex justify-between items-center">
                 <p className="text-sm font-semibold text-stone-800">
-                  {uploadMode === 'video' ? '영상 올리기' : '사진 올리기'}
+                  {uploadMode === 'video' ? (locale === 'en' ? 'Upload Video' : '영상 올리기') : (locale === 'en' ? 'Upload Photo' : '사진 올리기')}
                 </p>
                 <button onClick={() => { setShowUpload(false); setPreviews([]); setFiles([]); }}><X className="w-5 h-5 text-stone-400" /></button>
               </div>
@@ -242,10 +243,10 @@ export default function GuestPhotoGallery({ slug, enabled = true }: Props) {
                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 {uploading
                   ? uploadMode === 'video'
-                    ? '영상 업로드 중...'
+                    ? locale === 'en' ? 'Uploading video...' : '영상 업로드 중...'
                     : `${uploadedCount}/${files.length} 업로드 중...`
                   : uploadMode === 'video'
-                    ? '영상 올리기'
+                    ? (locale === 'en' ? 'Upload Video' : '영상 올리기')
                     : `${files.length}장 올리기`
                 }
               </button>

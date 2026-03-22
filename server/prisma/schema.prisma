@@ -86,6 +86,9 @@ model Wedding {
   orderId                  String?           @unique
   slug                     String            @unique
   theme                    Theme             @default(ROMANTIC_CLASSIC)
+  locale                   String            @default("ko")
+  showLocaleSwitch         Boolean           @default(true)
+  translationsEn           Json?
   isPublished              Boolean           @default(false)
   isArchived               Boolean           @default(false)
   weddingDate              DateTime

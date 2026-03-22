@@ -2,9 +2,9 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale, getCalendarData, type ThemeProps } from './shared';
 
-export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -52,7 +52,7 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} ♥ ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'korean'), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
+      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDateLocale(wedding.weddingDate, 'full', locale), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') {
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.');
@@ -117,7 +117,7 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
               <span className="text-[1.6rem] tracking-widest" style={{ ...dacapoFont, color: '#5A6A74', fontWeight: 300 }}>{wedding.brideName}</span>
             </div>
             <div className="w-12 h-px mx-auto mb-8" style={{ background: 'linear-gradient(90deg, transparent, #D0DFE8, transparent)' }} />
-            <p className="text-[0.75rem] tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>{formatDate(wedding.weddingDate, 'dots')}</p>
+            <p className="text-[0.75rem] tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>{formatDateLocale(wedding.weddingDate, 'dots', locale)}</p>
             {wedding.showDday && <p className="mt-6 text-[0.65rem] tracking-[0.3em]" style={{ ...dacapoFont, color: '#B8C8D4' }}>{getDday(wedding.weddingDate)}</p>}
           </motion.div>
         </motion.div>
@@ -136,12 +136,12 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
                 <div className="space-y-5" style={dacapoFont}>
                   <p className="text-[0.75rem]" style={{ color: '#7A8A94' }}>
                     <span style={{ color: '#9AABB8' }}>{wedding.groomFatherName} · {wedding.groomMotherName}</span>
-                    <span className="mx-4" style={{ color: '#D0DFE8' }}>의 아들</span>
+                    <span className="mx-4" style={{ color: '#D0DFE8' }}>{locale === 'en' ? 'Son of' : '의 아들'}</span>
                     <span style={{ color: '#5A6A74' }}>{wedding.groomName}</span>
                   </p>
                   <p className="text-[0.75rem]" style={{ color: '#7A8A94' }}>
                     <span style={{ color: '#9AABB8' }}>{wedding.brideFatherName} · {wedding.brideMotherName}</span>
-                    <span className="mx-4" style={{ color: '#D0DFE8' }}>의 딸</span>
+                    <span className="mx-4" style={{ color: '#D0DFE8' }}>{locale === 'en' ? 'Daughter of' : '의 딸'}</span>
                     <span style={{ color: '#5A6A74' }}>{wedding.brideName}</span>
                   </p>
                 </div>
@@ -193,10 +193,10 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
             ))}
           </div>
           <div className="mt-14 text-center">
-            <p className="text-[0.8rem]" style={{ ...dacapoFont, color: '#5A6A74' }}>{formatDate(wedding.weddingDate, 'korean')}</p>
-            {wedding.weddingTime && formatTime(wedding.weddingTime) && (
+            <p className="text-[0.8rem]" style={{ ...dacapoFont, color: '#5A6A74' }}>{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+            {wedding.weddingTime && formatTimeLocale(wedding.weddingTime, locale) && (
   <p className="text-[0.7rem] mt-3" style={{ ...dacapoFont, color: '#9AABB8' }}>
-    {formatTime(wedding.weddingTime)}
+    {formatTimeLocale(wedding.weddingTime, locale)}
   </p>
 )}
           </div>
@@ -213,12 +213,12 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
           </div>
           {wedding.venueAddress && (
             <div className="aspect-[4/3] mb-10 overflow-hidden" style={{ border: '1px solid rgba(200, 215, 225, 0.4)' }}>
-              <KakaoMap address={wedding.venueAddress} className="w-full h-full" />
+              <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} className="w-full h-full" />
             </div>
           )}
           <div className="flex justify-center gap-4">
             {wedding.venueNaverMap && <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.65rem] tracking-[0.15em] transition-all duration-500" style={{ ...dacapoFont, color: '#6A7A84', background: 'transparent', border: '1px solid rgba(200, 215, 225, 0.5)' }}>네이버지도</a>}
-            {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.65rem] tracking-[0.15em] transition-all duration-500" style={{ ...dacapoFont, color: '#6A7A84', background: 'transparent', border: '1px solid rgba(200, 215, 225, 0.5)' }}>카카오맵</a>}
+            {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.65rem] tracking-[0.15em] transition-all duration-500" style={{ ...dacapoFont, color: '#6A7A84', background: 'transparent', border: '1px solid rgba(200, 215, 225, 0.5)' }}>{locale === 'en' ? 'Kakao Map' : '카카오맵'}</a>}
           </div>
           {wedding.venuePhone && <a href={`tel:${wedding.venuePhone}`} className="flex items-center justify-center gap-2 mt-10 text-[0.7rem]" style={{ ...dacapoFont, color: '#9AABB8' }}><Phone className="w-3 h-3" /> {wedding.venuePhone}</a>}
         </motion.div>
@@ -232,7 +232,7 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
               {wedding.groomAccount && (
                 <div style={{ background: 'transparent', border: '1px solid rgba(200, 215, 225, 0.4)' }}>
                   <button onClick={() => setOpenAccount(openAccount === 'groom' ? null : 'groom')} className="w-full px-6 py-5 flex items-center justify-between">
-                    <span className="text-[0.8rem] tracking-[0.2em]" style={{ ...dacapoFont, color: '#5A6A74' }}>신랑측</span>
+                    <span className="text-[0.8rem] tracking-[0.2em]" style={{ ...dacapoFont, color: '#5A6A74' }}>{locale === 'en' ? "Groom's Side" : '신랑측'}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform duration-700 ${openAccount === 'groom' ? 'rotate-180' : ''}`} style={{ color: '#D0DFE8' }} />
                   </button>
                   <AnimatePresence>
@@ -258,7 +258,7 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
               {wedding.brideAccount && (
                 <div style={{ background: 'transparent', border: '1px solid rgba(200, 215, 225, 0.4)' }}>
                   <button onClick={() => setOpenAccount(openAccount === 'bride' ? null : 'bride')} className="w-full px-6 py-5 flex items-center justify-between">
-                    <span className="text-[0.8rem] tracking-[0.2em]" style={{ ...dacapoFont, color: '#5A6A74' }}>신부측</span>
+                    <span className="text-[0.8rem] tracking-[0.2em]" style={{ ...dacapoFont, color: '#5A6A74' }}>{locale === 'en' ? "Bride's Side" : '신부측'}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform duration-700 ${openAccount === 'bride' ? 'rotate-180' : ''}`} style={{ color: '#D0DFE8' }} />
                   </button>
                   <AnimatePresence>
@@ -284,8 +284,8 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
             </div>
             {(wedding.tossLink || wedding.kakaoPayLink) && (
               <div className="flex justify-center gap-4 mt-10">
-                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] text-white tracking-[0.15em]" style={{ background: '#0064FF' }}>토스</a>}
-                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] tracking-[0.15em]" style={{ background: '#FEE500', color: '#3C1E1E' }}>카카오페이</a>}
+                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] text-white tracking-[0.15em]" style={{ background: '#0064FF' }}>{locale === 'en' ? 'Toss' : '토스'}</a>}
+                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] tracking-[0.15em]" style={{ background: '#FEE500', color: '#3C1E1E' }}>{locale === 'en' ? 'KakaoPay' : '카카오페이'}</a>}
               </div>
             )}
           </motion.div>
@@ -295,15 +295,15 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
       <section id="rsvp-section" className="py-32 px-10">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto">
           <p className="text-[0.85rem] text-center mb-16 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>RSVP</p>
-          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="luna" />
+          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="luna" locale={locale} />
         </motion.div>
       </section>
 
       <section id="guestbook-section" className="py-32 px-10">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="max-w-sm mx-auto">
           <p className="text-[0.85rem] text-center mb-16 tracking-[0.4em]" style={{ ...dacapoFont, color: '#9AABB8' }}>MESSAGE</p>
-          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="luna" />
-          {localGuestbooks.length > 0 && <div className="mt-16"><GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="luna" /></div>}
+          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="luna" locale={locale} />
+          {localGuestbooks.length > 0 && <div className="mt-16"><GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="luna" locale={locale} /></div>}
         </motion.div>
       </section>
 
@@ -336,7 +336,7 @@ export default function LunaHalfmoon({ wedding, guestbooks, onRsvpSubmit, onGues
 
       <footer className="py-16 text-center">
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.3em] hover:opacity-70 transition-opacity duration-500" style={{ ...dacapoFont, color: '#C8D7E0' }}>
-          Made by 청첩장 작업실 ›
+          Made by Wedding Studio Lab ›
         </a>
       </footer>
 

@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import {
   RsvpForm, GuestbookForm, GalleryModal, GuestbookList,
-  KakaoMap, ShareModal, formatDate, formatTime, getDday,
+  KakaoMap, ShareModal, formatDate, getDday, formatDateLocale, formatTimeLocale,
   getCalendarData, type ThemeProps
 } from './shared';
 
@@ -55,7 +55,7 @@ const C = {
   border: '#DDD5C8',
 };
 
-export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -88,9 +88,9 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} & ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: `${formatDate(wedding.weddingDate, 'korean')} ${formatTime(wedding.weddingTime)}`, imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
+      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: `${formatDateLocale(wedding.weddingDate, 'full', locale)} ${formatTimeLocale(wedding.weddingTime, locale)}`, imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') { await navigator.clipboard.writeText(url); alert('링크가 복사되었습니다.\n인스타그램 스토리에 공유해보세요!'); }
-    else if (type === 'sms') { window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDate(wedding.weddingDate, 'korean')}\n${url}`)}`; }
+    else if (type === 'sms') { window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDateLocale(wedding.weddingDate, 'full', locale)}\n${url}`)}`; }
     setShowShareModal(false);
   };
 
@@ -145,7 +145,7 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
         <motion.div {...delayAnim(0.15)} style={{ textAlign: 'right', marginBottom: '3.5rem' }}>
           <p className="ebr-label" style={{ marginBottom: 15 }}>The Date</p>
           <p className="ebr-display">{mo}.{dy}</p>
-          <p style={{ fontWeight: 500, marginTop: 10, fontSize: 15 }}>{formatDate(wedding.weddingDate, 'korean')} / {formatTime(wedding.weddingTime)}</p>
+          <p style={{ fontWeight: 500, marginTop: 10, fontSize: 15 }}>{formatDateLocale(wedding.weddingDate, 'full', locale)} / {formatTimeLocale(wedding.weddingTime, locale)}</p>
         </motion.div>
 
         <motion.div {...delayAnim(0.3)}>
@@ -172,14 +172,14 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
                 <p style={{ fontWeight: 300, fontSize: 12, color: C.muted }}>
                   {wedding.groomFatherName}{wedding.groomFatherName && wedding.groomMotherName && ' · '}{wedding.groomMotherName}
                 </p>
-                <p style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>의 아들 {wedding.groomName}</p>
+                <p style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>{locale === 'en' ? 'Son of' : '의 아들'} {wedding.groomName}</p>
               </div>
               <div>
                 <p className="ebr-label" style={{ marginBottom: 8 }}>Bride</p>
                 <p style={{ fontWeight: 300, fontSize: 12, color: C.muted }}>
                   {wedding.brideFatherName}{wedding.brideFatherName && wedding.brideMotherName && ' · '}{wedding.brideMotherName}
                 </p>
-                <p style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>의 딸 {wedding.brideName}</p>
+                <p style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>{locale === 'en' ? 'Daughter of' : '의 딸'} {wedding.brideName}</p>
               </div>
             </motion.div>
           )}
@@ -217,7 +217,7 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
       <section id="venue-section" style={{ background: C.dark, color: C.bg, padding: '4rem 1.25rem' }}>
         <motion.div {...sectionAnim} className="text-center" style={{ marginBottom: '2rem' }}>
           <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.3em", opacity: 0.4, marginBottom: "0.75rem" }}>WHEN & WHERE</p>
-          <p style={{ fontSize: 18, fontWeight: 800, marginBottom: "0.25rem" }}>{formatDate(wedding.weddingDate, "korean")} {formatTime(wedding.weddingTime)}</p>
+          <p style={{ fontSize: 18, fontWeight: 800, marginBottom: "0.25rem" }}>{formatDate(wedding.weddingDate, "korean")} {formatTimeLocale(wedding.weddingTime, locale)}</p>
           <p style={{ fontSize: 14, fontWeight: 500, opacity: 0.7, marginBottom: "2rem" }}>{wedding.venue}{wedding.venueHall ? ` ${wedding.venueHall}` : ""}</p>
           <div className="max-w-[300px] mx-auto">
             <div className="grid grid-cols-7">
@@ -248,7 +248,7 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
         </motion.div>
 
         <motion.div {...delayAnim(0.3)} style={{ marginTop: '2rem' }}>
-          <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
+          <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
         </motion.div>
       </section>
 
@@ -257,7 +257,7 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
           <p className="ebr-label" style={{ marginBottom: '2rem' }}>Attendance</p>
         </motion.div>
         <motion.div {...delayAnim(0.15)}>
-          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="editorial" />
+          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="editorial" locale={locale} />
         </motion.div>
       </section>
 
@@ -294,8 +294,8 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
           <p className="ebr-label" style={{ marginBottom: '2rem' }}>Guestbook</p>
         </motion.div>
         <motion.div {...delayAnim(0.15)}>
-          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="editorial" />
-          <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="classic" />
+          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="editorial-brown" locale={locale} />
+          <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="editorial-brown" locale={locale} />
         </motion.div>
       </section>
 
@@ -322,7 +322,7 @@ export default function EditorialBrown({ wedding, guestbooks, onRsvpSubmit, onGu
           <h2 style={{ fontSize: 'clamp(4rem,15vw,10rem)', fontWeight: 900, lineHeight: 0.85 }}>STAY<br />GOLD.</h2>
         </motion.div>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity inline-block"
-          style={{ fontWeight: 300, fontSize: 10, color: C.dim, textDecoration: 'none', marginTop: '3rem' }}>Made by 청첩장 작업실 ›</a>
+          style={{ fontWeight: 300, fontSize: 10, color: C.dim, textDecoration: 'none', marginTop: '3rem' }}>Made by Wedding Studio Lab ›</a>
       </footer>
 
       <AnimatePresence>

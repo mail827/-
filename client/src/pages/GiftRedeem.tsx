@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Gift, Check, Sparkles, AlertCircle } from 'lucide-react';
+import { Gift, Check, Sparkles, AlertCircle, Wand2, PenTool } from 'lucide-react';
 
 export default function GiftRedeem() {
   const [searchParams] = useSearchParams();
@@ -14,7 +14,7 @@ export default function GiftRedeem() {
 
   const handleRedeem = useCallback(async (giftCode: string) => {
     if (!giftCode.trim()) return;
-    
+
     const token = localStorage.getItem('token');
     if (!token) {
       localStorage.setItem('pendingGiftCode', giftCode);
@@ -39,9 +39,9 @@ export default function GiftRedeem() {
       const data = await res.json();
 
       if (res.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.setItem("pendingGiftCode", giftCode);
-        localStorage.setItem("redirectAfterLogin", "/gift/redeem");
+        localStorage.removeItem('token');
+        localStorage.setItem('pendingGiftCode', giftCode);
+        localStorage.setItem('redirectAfterLogin', '/gift/redeem');
         window.location.href = `${import.meta.env.VITE_API_URL}/oauth/kakao`;
         return;
       }
@@ -62,7 +62,7 @@ export default function GiftRedeem() {
   useEffect(() => {
     const pendingCode = localStorage.getItem('pendingGiftCode');
     const token = localStorage.getItem('token');
-    
+
     if (pendingCode && token && !autoRedeemTriggered) {
       setCode(pendingCode);
       localStorage.removeItem('pendingGiftCode');
@@ -72,10 +72,6 @@ export default function GiftRedeem() {
     }
   }, [handleRedeem, autoRedeemTriggered]);
 
-  const goToCreate = () => {
-    navigate('/create');
-  };
-
   if (success) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex items-center justify-center px-4">
@@ -84,30 +80,56 @@ export default function GiftRedeem() {
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl"
         >
-          <motion.div 
+          <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ type: "spring", delay: 0.2 }}
+            transition={{ type: 'spring', delay: 0.2 }}
             className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"
           >
             <Check className="w-10 h-10 text-white" />
           </motion.div>
-          <h1 className="text-2xl font-medium text-stone-800 mb-2">선물 사용 완료! 🎉</h1>
-          <p className="text-stone-500 mb-6">
+          <h1 className="text-2xl font-medium text-stone-800 mb-2">선물 사용 완료!</h1>
+          <p className="text-stone-500 mb-8">
             <span className="font-semibold text-stone-800">{success.packageName}</span> 패키지가<br />
             계정에 추가되었습니다
           </p>
-          <button
-            onClick={goToCreate}
-            className="w-full py-4 bg-stone-800 text-white rounded-xl hover:bg-stone-900 transition-colors font-medium text-lg"
-          >
-            청첩장 만들러 가기 →
-          </button>
+
+          <p className="text-sm text-stone-400 mb-4">어떤 방식으로 청첩장을 만드시겠어요?</p>
+
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={() => navigate('/ai-create')}
+              className="relative group p-5 rounded-xl border-2 border-stone-200 hover:border-stone-800 transition-all duration-200 text-left"
+            >
+              <div className="w-10 h-10 rounded-lg bg-stone-900 flex items-center justify-center mb-3">
+                <Wand2 className="w-5 h-5 text-white" />
+              </div>
+              <p className="text-sm font-semibold text-stone-800 mb-1">AI 자동 제작</p>
+              <p className="text-[11px] text-stone-400 leading-snug">사진 한 장이면 끝,<br/>AI가 알아서 완성</p>
+              <div className="absolute top-3 right-3">
+                <span className="text-[10px] font-medium text-white bg-stone-800 px-1.5 py-0.5 rounded">NEW</span>
+              </div>
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={() => navigate('/create')}
+              className="group p-5 rounded-xl border-2 border-stone-200 hover:border-stone-400 transition-all duration-200 text-left"
+            >
+              <div className="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center mb-3">
+                <PenTool className="w-5 h-5 text-stone-600" />
+              </div>
+              <p className="text-sm font-semibold text-stone-800 mb-1">직접 만들기</p>
+              <p className="text-[11px] text-stone-400 leading-snug">테마 선택부터<br/>하나하나 직접 설정</p>
+            </motion.button>
+          </div>
+
           <button
             onClick={() => navigate('/dashboard')}
-            className="w-full py-3 text-stone-500 hover:text-stone-700 transition-colors mt-3"
+            className="w-full py-3 text-stone-400 hover:text-stone-600 transition-colors text-sm"
           >
-            대시보드로 이동
+            나중에 만들기
           </button>
         </motion.div>
       </div>
@@ -142,7 +164,7 @@ export default function GiftRedeem() {
         />
 
         {error && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mb-4"

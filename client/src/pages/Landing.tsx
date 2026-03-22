@@ -7,6 +7,48 @@ import {
   Mail, Loader2, Gift
 } from "lucide-react";
 import ThemeShowcaseModal from "../components/ThemeShowcaseModal";
+import { lt } from "./landingI18n";
+import type { LandingLocale } from "./landingI18n";
+const FEATURE_EN: Record<string, string> = {
+  '청첩장 전 기능': 'All invitation features',
+  '전 테마 19종': 'All 19 themes',
+  '전 테마 27종': 'All 27 themes',
+  '무제한 수정': 'Unlimited edits',
+  'RSVP · 축의금 · 방명록': 'RSVP · Gift · Guestbook',
+  '갤러리 · 폴라로이드': 'Gallery · Polaroid',
+  '봉투 인트로 12종': '12 envelope intros',
+  '프로필 · 편지 섹션': 'Profile · Letter sections',
+  'Standard 전체 포함': 'Everything in Standard',
+  'AI 웨딩스냅 33컨셉': 'AI Snap 33 concepts',
+  'AI Reception (AI 비서)': 'AI Guest Reception',
+  '커플 · 솔로 · 스튜디오 촬영': 'Couple · Solo · Studio shoots',
+  '고화질 다운로드': 'HD download',
+  'Standard + AI': 'Standard + AI',
+  '게스트 갤러리': 'Guest gallery',
+  '배경음악': 'Background music',
+  'D-Day 카운트': 'D-Day countdown',
+  '종이청첩장 10종': '10 paper invitations',
+  'QR카드 19종': '19 QR card designs',
+  '글꼴 23종': '23 fonts',
+  '함께 수정하기': 'Co-editing',
+  '버전별 공유 링크': 'Versioned share links',
+  '하객 AI 포토부스': 'Guest AI Photo Booth',
+};
+
+function trFeature(text: string, locale: string): string {
+  if (locale !== 'en') return text;
+  return FEATURE_EN[text] || text;
+}
+
+function trPkgDesc(text: string, locale: string): string {
+  if (locale !== 'en') return text;
+  const map: Record<string, string> = {
+    '청첩장 전 기능': 'Full invitation features',
+    'Standard + AI': 'Standard + AI',
+  };
+  return map[text] || text;
+}
+
 import HighlightVideoSection from "../components/HighlightVideoSection";
 
 const API = import.meta.env.VITE_API_URL;
@@ -36,10 +78,18 @@ interface ChatMessage {
   content: string;
 }
 
-const CHAT_SEQUENCE = [
+const CHAT_SEQUENCE_KO = [
   { q: "주차 어디로 가면 되나요?", a: "그랜드컨벤션 지하 2층 무료 주차장 이용 가능합니다. 만차 시 인근 공영주차장도 도보 2분 거리에 있어요.", delay: 800 },
   { q: "식사는 몇 시부터 가능한가요?", a: "2시 30분부터 식사 가능합니다. 뷔페식으로 준비되어 있으며 예식 후에도 여유롭게 이용하실 수 있어요.", delay: 400 },
   { q: "축의금 계좌 알려주세요", a: "신랑 측 카카오뱅크 3333-12-XXXXXX (김현우)입니다. 아래 카카오페이 송금 버튼으로 바로 보내실 수도 있어요.", delay: 400 },
+];
+
+let CHAT_SEQUENCE = CHAT_SEQUENCE_KO;
+
+const CHAT_SEQUENCE_EN = [
+  { q: "Where should I park?", a: "Free parking is available at Grand Convention B2. If it's full, there's a public lot within a 2-minute walk.", delay: 800 },
+  { q: "When does the meal start?", a: "Meal service begins at 2:30 PM. It's a buffet, so you can enjoy it even after the ceremony.", delay: 400 },
+  { q: "Can I get the gift account?", a: "Groom's side: KakaoBank 3333-12-XXXXXX (Hyunwoo Kim). You can also send via KakaoPay below.", delay: 400 },
 ];
 
 
@@ -180,7 +230,7 @@ function HeroPhone({ url }: { url?: string }) {
   );
 }
 
-function AiChatDemo() {
+function AiChatDemo({ landingLocale }: { landingLocale: LandingLocale }) {
   const [step, setStep] = useState(0);
   const [typing, setTyping] = useState(false);
   const [messages, setMessages] = useState<{ type: string; text: string }[]>([]);
@@ -222,14 +272,14 @@ function AiChatDemo() {
             <Sparkles size={14} color="#fff" />
           </div>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>AI 웨딩 비서</p>
-            <p style={{ fontSize: 10, color: "#7C8C6E" }}>현우 · 수빈 결혼식</p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>{landingLocale === 'en' ? 'AI Wedding Concierge' : 'AI 웨딩 비서'}</p>
+            <p style={{ fontSize: 10, color: "#7C8C6E" }}>{landingLocale === 'en' ? 'Hyunwoo & Subin Wedding' : '현우 · 수빈 결혼식'}</p>
           </div>
           <div style={{ marginLeft: "auto", width: 6, height: 6, borderRadius: "50%", background: "#7C8C6E" }} />
         </div>
         <div ref={chatRef} style={{ flex: 1, overflow: "auto", padding: "16px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ alignSelf: "flex-start", maxWidth: "82%", padding: "10px 14px", borderRadius: "4px 16px 16px 16px", background: "#fff", border: "1px solid #E8E5E0" }}>
-            <p style={{ fontSize: 12, color: "#555", lineHeight: 1.6 }}>안녕하세요! 현우 · 수빈 결혼식에 대해 궁금한 점이 있으시면 편하게 물어보세요.</p>
+            <p style={{ fontSize: 12, color: "#555", lineHeight: 1.6 }}>{landingLocale === 'en' ? "Hi! Feel free to ask anything about Hyunwoo & Subin's wedding." : '안녕하세요! 현우 · 수빈 결혼식에 대해 궁금한 점이 있으시면 편하게 물어보세요.'}</p>
           </div>
           {messages.map((msg, i) => (
             msg.type === "user" ? (
@@ -252,7 +302,7 @@ function AiChatDemo() {
         </div>
         <div style={{ padding: "10px 14px 24px", borderTop: "1px solid #E8E5E0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 24, border: "1px solid #E0DDD8", background: "#fff" }}>
-            <p style={{ flex: 1, fontSize: 12, color: "#bbb" }}>메시지를 입력하세요</p>
+            <p style={{ flex: 1, fontSize: 12, color: "#bbb" }}>{landingLocale === 'en' ? 'Type a message' : '메시지를 입력하세요'}</p>
             <Send size={16} color="#ccc" />
           </div>
         </div>
@@ -301,7 +351,7 @@ function ScenarioCard({ item, index, parentInView }: { item: { q: string; a: str
 }
 
 
-function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
+function ThemeShowcase({ onLogin, landingLocale }: { onLogin: () => void; landingLocale: LandingLocale }) {
   const [ref, inView] = useInView(0.08);
   const [showcases, setShowcases] = useState<{ name: string; url: string; description?: string }[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -370,9 +420,9 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px", textAlign: "center" }}>
           <div style={{ opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
             <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Themes</p>
-            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>26개의 테마, 직접 확인하세요.</h2>
-            <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 32 }}>디자인은 기본입니다. 기능이 다릅니다.</p>
-            <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>전체 26개 테마 보기 <ArrowRight size={14} /></button>
+            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>{lt('themeShowcase','noShowH2',landingLocale)}</h2>
+            <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 32 }}>{lt('themeShowcase','noShowDesc',landingLocale)}</p>
+            <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>{lt('themeShowcase','allThemes',landingLocale)} <ArrowRight size={14} /></button>
           </div>
         </div>
       </section>
@@ -389,26 +439,26 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px" }}>
         <div style={{ textAlign: "center", marginBottom: 56, opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
           <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Themes</p>
-          <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>내 청첩장, 미리 만들어 보세요.</h2>
-          <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8 }}>이름과 날짜를 넣으면 실시간으로 반영됩니다.</p>
+          <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>{lt('themeShowcase','h2',landingLocale)}</h2>
+          <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8 }}>{lt('themeShowcase','desc',landingLocale)}</p>
         </div>
         <div className="theme-builder-grid" style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 56, opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(20px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1) 0.15s" }}>
           <div style={{ width: 340, flexShrink: 0 }}>
             <button onClick={() => setFormOpen(p => !p)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", background: "none", border: "none", borderBottom: "1px solid #E8E5E0", cursor: "pointer", marginBottom: formOpen ? 16 : 20 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <p style={{ fontSize: 13, color: "#1a1a1a", fontWeight: 600, letterSpacing: 0.3 }}>내 정보 입력</p>
-                {filledCount > 0 && !formOpen && <span style={{ fontSize: 10, color: "#fff", background: "#1a1a1a", borderRadius: 10, padding: "2px 8px", fontWeight: 500 }}>{filledCount}개 입력됨</span>}
+                <p style={{ fontSize: 13, color: "#1a1a1a", fontWeight: 600, letterSpacing: 0.3 }}>{lt('themeShowcase','inputLabel',landingLocale)}</p>
+                {filledCount > 0 && !formOpen && <span style={{ fontSize: 10, color: "#fff", background: "#1a1a1a", borderRadius: 10, padding: "2px 8px", fontWeight: 500 }}>{filledCount}{lt('themeShowcase','inputCount',landingLocale)}</span>}
               </div>
               <ChevronDown size={16} color="#999" style={{ transform: formOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s" }} />
             </button>
             <div style={{ maxHeight: formOpen ? 500 : 0, overflow: "hidden", transition: "max-height 0.4s cubic-bezier(0.22,1,0.36,1)", opacity: formOpen ? 1 : 0 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20, paddingBottom: 20, borderBottom: "1px solid #E8E5E0" }}>
                 <div className="showcase-name-row" style={{ display: "flex", gap: 10 }}>
-                  <input type="text" placeholder="신랑 이름" value={formData.groom} onChange={e => updateForm("groom", e.target.value)} style={{ flex: 1, padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none" }} />
-                  <input type="text" placeholder="신부 이름" value={formData.bride} onChange={e => updateForm("bride", e.target.value)} style={{ flex: 1, padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none" }} />
+                  <input type="text" placeholder={lt("themeShowcase","groomPh",landingLocale)} value={formData.groom} onChange={e => updateForm("groom", e.target.value)} style={{ flex: 1, padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none" }} />
+                  <input type="text" placeholder={lt("themeShowcase","bridePh",landingLocale)} value={formData.bride} onChange={e => updateForm("bride", e.target.value)} style={{ flex: 1, padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none" }} />
                 </div>
                 <input type="date" value={formData.date} onChange={e => updateForm("date", e.target.value)} style={{ width: "100%", padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: formData.date ? "#1a1a1a" : "#bbb", outline: "none" }} />
-                <input type="text" placeholder="예식장 (예: 더채플하우스 3층 그랜드홀)" value={formData.venue} onChange={e => updateForm("venue", e.target.value)} style={{ width: "100%", padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none" }} />
+                <input type="text" placeholder={lt("themeShowcase","venuePh",landingLocale)} value={formData.venue} onChange={e => updateForm("venue", e.target.value)} style={{ width: "100%", padding: "12px 14px", borderRadius: 8, border: "1px solid #E0DDD8", background: "#fff", fontSize: 13, color: "#1a1a1a", outline: "none" }} />
                 <div>
                   <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: "none" }} id="showcase-photo" />
                   {photoPreview ? (
@@ -420,13 +470,13 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
                   ) : (
                     <label htmlFor="showcase-photo" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px", borderRadius: 8, border: "1px dashed #D0CCC6", background: "#FAFAF8", cursor: "pointer" }}>
                       <Camera size={16} color="#bbb" />
-                      <span style={{ fontSize: 12, color: "#aaa" }}>대표 사진 추가 (선택)</span>
+                      <span style={{ fontSize: 12, color: "#aaa" }}>{lt('themeShowcase','photoPh',landingLocale)}</span>
                     </label>
                   )}
                 </div>
               </div>
             </div>
-            <p style={{ fontSize: 12, color: "#999", marginBottom: 12, fontWeight: 500, letterSpacing: 0.5 }}>테마 선택</p>
+            <p style={{ fontSize: 12, color: "#999", marginBottom: 12, fontWeight: 500, letterSpacing: 0.5 }}>{lt('themeShowcase','themeLabel',landingLocale)}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 24, maxHeight: 240, overflowY: "auto" }}>
               {showcases.map((s, i) => (
                 <button key={i} onClick={() => setActiveIdx(i)} style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: activeIdx === i ? "2px solid #1a1a1a" : "1px solid #E0DDD8", background: activeIdx === i ? "#F5F4F1" : "#fff", cursor: "pointer", textAlign: "left", transition: "all 0.25s", display: "flex", alignItems: "center", gap: 10 }}>
@@ -439,16 +489,16 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
               ))}
             </div>
             {hasInput ? (
-              <button onClick={onLogin} className="chat-msg-enter" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", padding: "14px 0", borderRadius: 10, background: "#1a1a1a", color: "#fff", fontSize: 14, fontWeight: 500, border: "none", cursor: "pointer" }}>이 디자인으로 시작하기 <ArrowRight size={16} /></button>
+              <button onClick={onLogin} className="chat-msg-enter" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", padding: "14px 0", borderRadius: 10, background: "#1a1a1a", color: "#fff", fontSize: 14, fontWeight: 500, border: "none", cursor: "pointer" }}>{lt('themeShowcase','startBtn',landingLocale)} <ArrowRight size={16} /></button>
             ) : (
-              <p style={{ fontSize: 12, color: "#ccc", textAlign: "center" }}>정보를 입력하면 실시간으로 반영됩니다.</p>
+              <p style={{ fontSize: 12, color: "#ccc", textAlign: "center" }}>{lt('themeShowcase','infoHint',landingLocale)}</p>
             )}
           </div>
           <div style={{ position: "relative" }}>
             <div style={{ width: 280, height: 580, borderRadius: 40, border: "6px solid #1a1a1a", background: "#000", padding: 2, boxShadow: "0 25px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.08)" }}>
               <div style={{ width: "100%", height: "100%", borderRadius: 34, overflow: "hidden", position: "relative", background: "#FAF9F7" }}>
                 <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 100, height: 28, background: "#1a1a1a", borderBottomLeftRadius: 16, borderBottomRightRadius: 16, zIndex: 10 }} />
-                {!iframeLoaded && <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, zIndex: 5 }}><Loader2 size={20} color="#bbb" style={{ animation: "spin 1s linear infinite" }} /><p style={{ fontSize: 11, color: "#bbb" }}>불러오는 중...</p></div>}
+                {!iframeLoaded && <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, zIndex: 5 }}><Loader2 size={20} color="#bbb" style={{ animation: "spin 1s linear infinite" }} /><p style={{ fontSize: 11, color: "#bbb" }}>{lt('themeShowcase','loadingLabel',landingLocale)}</p></div>}
                 <iframe key={`${activeIdx}-${iframeKey}`} src={previewUrl} onLoad={() => setIframeLoaded(true)} style={{ width: "100%", height: "100%", border: "none", opacity: iframeLoaded ? 1 : 0, transition: "opacity 0.4s" }} title={`${current.name} 미리보기`} />
               </div>
             </div>
@@ -458,7 +508,7 @@ function ThemeShowcase({ onLogin }: { onLogin: () => void }) {
           </div>
         </div>
         <div style={{ textAlign: "center", marginTop: 64 }}>
-          <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>전체 26개 테마 보기 <ArrowRight size={14} /></button>
+          <button onClick={onLogin} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#888", padding: "10px 24px", borderRadius: 8, border: "1px solid #E0DDD8", background: "transparent", cursor: "pointer" }}>{lt('themeShowcase','allThemes',landingLocale)} <ArrowRight size={14} /></button>
         </div>
       </div>
     </section>
@@ -487,6 +537,10 @@ export default function Landing() {
   const [inquiryForm, setInquiryForm] = useState({ name: "", email: "", phone: "", type: "general", message: "" });
   const [inquirySending, setInquirySending] = useState(false);
   const [inquirySuccess, setInquirySuccess] = useState(false);
+  const [landingLocale, setLandingLocale] = useState<LandingLocale>(() => {
+    try { return (localStorage.getItem("landingLocale") as LandingLocale) || "ko"; } catch { return "ko"; }
+  });
+  CHAT_SEQUENCE = landingLocale === 'en' ? CHAT_SEQUENCE_EN : CHAT_SEQUENCE_KO;
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{ role: "assistant", content: "안녕하세요! 청첩장 작업실 웨딩이예요.\n\n결혼 준비하시나요? 축하드려요!\n궁금한 거 있으시면 편하게 물어보세요~" }]);
   const [chatInput, setChatInput] = useState("");
@@ -531,6 +585,7 @@ export default function Landing() {
 
   }, []);
 
+  useEffect(() => { try { localStorage.setItem("landingLocale", landingLocale); } catch {} }, [landingLocale]);
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
   useEffect(() => { document.body.style.overflow = chatOpen ? "hidden" : ""; }, [chatOpen]);
   useEffect(() => {
@@ -631,12 +686,12 @@ export default function Landing() {
   }, []);
 
   const specs = [
-    { num: "26", label: "테마", desc: "에디토리얼 · 크루즈 · 갤러리 · 어르신용까지." },
-    { num: "33", label: "AI 화보 컨셉", desc: "한복 · 크루즈 · 셀카 · 에디토리얼." },
-    { num: "23", label: "글꼴", desc: "조선체 · 에스코어드림 · 봄바람 · 박물관 클래식." },
-    { num: "12", label: "봉투 인트로", desc: "리본 7종 · 씰링 5종. 카카오톡 공유 연동." },
-    { num: "10", label: "종이청첩장", desc: "3단 · 2단 · 단일카드. 추가비용 0원." },
-    { num: "19", label: "QR카드", desc: "테마별 맞춤 디자인. 명함 · 엽서 사이즈." },
+    { num: lt('spec','s1num',landingLocale), label: lt('spec','s1label',landingLocale), desc: lt('spec','s1desc',landingLocale) },
+    { num: lt('spec','s2num',landingLocale), label: lt('spec','s2label',landingLocale), desc: lt('spec','s2desc',landingLocale) },
+    { num: lt('spec','s3num',landingLocale), label: lt('spec','s3label',landingLocale), desc: lt('spec','s3desc',landingLocale) },
+    { num: lt('spec','s4num',landingLocale), label: lt('spec','s4label',landingLocale), desc: lt('spec','s4desc',landingLocale) },
+    { num: lt('spec','s5num',landingLocale), label: lt('spec','s5label',landingLocale), desc: lt('spec','s5desc',landingLocale) },
+    { num: lt('spec','s6num',landingLocale), label: lt('spec','s6label',landingLocale), desc: lt('spec','s6desc',landingLocale) },
   ];
 
   return (
@@ -702,13 +757,14 @@ export default function Landing() {
         <nav className="nav-blur" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(250,249,247,0.85)", borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", padding: "14px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-              <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", letterSpacing: -0.3 }}>청첩장 작업실</p>
-              <p style={{ fontSize: 10, color: "#bbb", letterSpacing: 1 }}>WEDDING ENGINE</p>
+              <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", letterSpacing: -0.3 }}>{lt('nav','brand',landingLocale)}</p>
+              <p style={{ fontSize: 10, color: "#bbb", letterSpacing: 1 }}>{lt('nav','sub',landingLocale)}</p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-              <a href="#themes" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>테마</a>
-              <a href="#pricing" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>요금</a>
-              <button onClick={openLogin} style={{ fontSize: 12, color: "#fff", background: "#1a1a1a", padding: "8px 20px", borderRadius: 6, border: "none", cursor: "pointer", fontWeight: 500 }}>시작하기</button>
+              <a href="#themes" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>{lt('nav','themes',landingLocale)}</a>
+              <a href="#pricing" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>{lt('nav','pricing',landingLocale)}</a>
+              <button onClick={() => setLandingLocale(p => p === 'ko' ? 'en' : 'ko')} style={{ fontSize: 11, color: "#888", background: "none", border: "1px solid #E0DDD8", padding: "6px 12px", borderRadius: 6, cursor: "pointer", fontWeight: 500 }}>{landingLocale === 'ko' ? 'EN' : 'KO'}</button>
+              <button onClick={openLogin} style={{ fontSize: 12, color: "#fff", background: "#1a1a1a", padding: "8px 20px", borderRadius: 6, border: "none", cursor: "pointer", fontWeight: 500 }}>{lt('nav','start',landingLocale)}</button>
             </div>
           </div>
         </nav>
@@ -717,29 +773,29 @@ export default function Landing() {
           <div className="hero-text" style={{ maxWidth: 540, opacity: heroInView ? 1 : 0, transform: heroInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1)" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 100, border: "1px solid #E0DDD8", marginBottom: 28, background: "#fff" }}>
               <Zap size={11} color="#999" />
-              <p style={{ fontSize: 11, color: "#888", letterSpacing: 0.3 }}>Wedding Automation Platform</p>
+              <p style={{ fontSize: 11, color: "#888", letterSpacing: 0.3 }}>{lt('hero','badge',landingLocale)}</p>
             </div>
-            <h1 className="serif" style={{ fontSize: 42, fontWeight: 400, lineHeight: 1.35, color: "#1a1a1a", marginBottom: 24, letterSpacing: -0.5 }}>
-              모바일 청첩장은 많습니다.<br />
-              <span style={{ color: "#999" }}>하객 응대까지 자동인<br />청첩장은,</span> 거의 없습니다.
+            <h1 className="serif" style={{ fontSize: landingLocale === 'en' ? 46 : 42, fontWeight: 400, lineHeight: landingLocale === 'en' ? 1.2 : 1.35, color: "#1a1a1a", marginBottom: 24, letterSpacing: landingLocale === 'en' ? -1.5 : -0.5 }}>
+              {lt('hero','h1_1',landingLocale)}<br />
+              <span style={{ color: "#999" }}>{lt('hero','h1_2',landingLocale)}<br />{lt('hero','h1_3',landingLocale)}</span> {lt('hero','h1_4',landingLocale)}
             </h1>
             <p style={{ fontSize: 15, color: "#777", lineHeight: 1.8, marginBottom: 36 }}>
-              모바일 청첩장부터 하객 응대, AI 화보 제작까지.<br />
-              결혼 준비를 자동화하는 웨딩 엔진.
+              {lt('hero','desc1',landingLocale)}<br />
+              {lt('hero','desc2',landingLocale)}
             </p>
             <div className="hero-btns" style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 48, flexWrap: "wrap" }}>
               <button onClick={() => setShowCreateModal(true)} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#fff", background: "#1a1a1a", padding: "14px 28px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 500 }}>
-                청첩장 만들기
+                {lt('hero','btnCreate',landingLocale)}
                 <ArrowRight size={16} />
               </button>
               <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#1a1a1a", background: "#fff", padding: "14px 28px", borderRadius: 8, border: "1px solid #E0DDD8", textDecoration: "none", fontWeight: 500 }}>
                 <Camera size={16} />
-                AI 화보 무료 체험
+                {lt('hero','btnSnap',landingLocale)}
               </a>
             </div>
-            <p style={{ fontSize: 12, color: "#bbb", marginTop: 12 }}>로그인 없이 바로 체험할 수 있습니다.</p>
+            <p style={{ fontSize: 12, color: "#bbb", marginTop: 12 }}>{lt('hero','noLogin',landingLocale)}</p>
             <div className="hero-stats" style={{ display: "flex", gap: 36, paddingTop: 32, borderTop: "1px solid #E8E5E0", marginTop: 32 }}>
-              {[["26", "테마"], ["33", "AI 스냅"], ["10", "종이청첩장"]].map(([n, l]) => (
+              {[["26", lt('hero','statTheme',landingLocale)], ["33", lt('hero','statSnap',landingLocale)], ["10", lt('hero','statPaper',landingLocale)]].map(([n, l]) => (
                 <div key={l}>
                   <p className="serif" style={{ fontSize: 28, fontWeight: 200, color: "#1a1a1a" }}>{n}</p>
                   <p style={{ fontSize: 11, color: "#aaa", marginTop: 2, letterSpacing: 0.5 }}>{l}</p>
@@ -754,14 +810,14 @@ export default function Landing() {
 
         <section ref={problemRef as React.RefObject<HTMLElement>} style={{ padding: "80px 48px", borderTop: "1px solid #E8E5E0" }}>
           <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center", opacity: problemInView ? 1 : 0, transform: problemInView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
-            <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1, marginBottom: 20, textTransform: "uppercase" }}>The Problem</p>
-            <h2 className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a", lineHeight: 1.5, marginBottom: 20 }}>청첩장 보내고 나면,<br />같은 질문이 반복됩니다.</h2>
-            <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 40 }}>주차장 어디야? 식사 몇 시부터야? 계좌 다시 보내줘.<br />하객 100명이면 같은 질문 100번입니다.</p>
+            <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1, marginBottom: 20, textTransform: "uppercase" }}>{lt('problem','tag',landingLocale)}</p>
+            <h2 className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a", lineHeight: 1.5, marginBottom: 20 }}>{lt('problem','h2_1',landingLocale)}<br />{lt('problem','h2_2',landingLocale)}</h2>
+            <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 40 }}>{lt('problem','desc1',landingLocale)}<br />{lt('problem','desc2',landingLocale)}</p>
             <div className="problem-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, textAlign: "left" }}>
               {[
-                { icon: <MessageCircle size={18} />, title: "같은 질문 반복", desc: "하객 100명이면 같은 질문 100번" },
-                { icon: <Copy size={18} />, title: "계좌 안내", desc: "카톡으로 일일이 보내는 계좌번호" },
-                { icon: <MapPin size={18} />, title: "위치 · 주차 안내", desc: "지도 캡처 돌리는 비효율" },
+                { icon: <MessageCircle size={18} />, title: lt("problem","card1Title",landingLocale), desc: lt("problem","card1Desc",landingLocale) },
+                { icon: <Copy size={18} />, title: lt("problem","card2Title",landingLocale), desc: lt("problem","card2Desc",landingLocale) },
+                { icon: <MapPin size={18} />, title: lt("problem","card3Title",landingLocale), desc: lt("problem","card3Desc",landingLocale) },
               ].map((item, i) => (
                 <div key={i} style={{ padding: 24, borderRadius: 12, border: "1px solid #E8E5E0", background: "#fff", opacity: problemInView ? 1 : 0, transform: problemInView ? "translateY(0)" : "translateY(15px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${200 + i * 100}ms` }}>
                   <div style={{ color: "#bbb", marginBottom: 12 }}>{item.icon}</div>
@@ -776,14 +832,14 @@ export default function Landing() {
         <section id="engine" ref={engineRef as React.RefObject<HTMLElement>} style={{ padding: "80px 48px", background: "#F5F4F1", borderTop: "1px solid #E8E5E0", borderBottom: "1px solid #E8E5E0" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto" }}>
             <div style={{ textAlign: "center", marginBottom: 48, opacity: engineInView ? 1 : 0, transform: engineInView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
-              <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1, marginBottom: 16, textTransform: "uppercase" }}>Wedding Engine</p>
-              <h2 className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>우리는 두 가지를 자동화합니다.</h2>
-              <p style={{ fontSize: 14, color: "#999" }}>청첩장 너머의 문제를 해결하는 두 개의 엔진.</p>
+              <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1, marginBottom: 16, textTransform: "uppercase" }}>{lt('engine','tag',landingLocale)}</p>
+              <h2 className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>{lt('engine','h2',landingLocale)}</h2>
+              <p style={{ fontSize: 14, color: "#999" }}>{lt('engine','desc',landingLocale)}</p>
             </div>
             <div className="engine-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
               {[
-                { icon: <MessageCircle size={20} color="#1a1a1a" />, tag: "Engine 01", title: "하객 응대 자동화", desc: "반복 질문 80% 제거.\nAI 비서가 청첩장 정보를 기반으로\n하객에게 즉시 응답합니다.", features: ["듀얼 페르소나 (신랑 · 신부)", "3가지 응답 모드", "실시간 방명록 답장", "하객 질문 분석 리포트"], delay: 0.15 },
-                { icon: <Camera size={20} color="#1a1a1a" />, tag: "Engine 02", title: "촬영 없는 AI 화보", desc: "33개 컨셉 자동 생성.\n한복, 크루즈, 셀카 스냅까지\n스튜디오 없이 완성합니다.", features: ["한복 5종 (궁중혼례 · 당의 · 모던)", "크루즈 · 셀카 · 시네마틱", "커플 사진 체이닝", "무료 체험 1장 제공"], delay: 0.3 },
+                { icon: <MessageCircle size={20} color="#1a1a1a" />, tag: lt("engine","e1Tag",landingLocale), title: lt("engine","e1Title",landingLocale), desc: lt("engine","e1Desc",landingLocale), features: [lt("engine","e1f1",landingLocale), lt("engine","e1f2",landingLocale), lt("engine","e1f3",landingLocale), lt("engine","e1f4",landingLocale)], delay: 0.15 },
+                { icon: <Camera size={20} color="#1a1a1a" />, tag: lt("engine","e2Tag",landingLocale), title: lt("engine","e2Title",landingLocale), desc: lt("engine","e2Desc",landingLocale), features: [lt("engine","e2f1",landingLocale), lt("engine","e2f2",landingLocale), lt("engine","e2f3",landingLocale), lt("engine","e2f4",landingLocale)], delay: 0.3 },
               ].map((e, i) => (
                 <div key={i} style={{ padding: "40px 36px", borderRadius: 16, background: "#fff", border: "1px solid #E8E5E0", opacity: engineInView ? 1 : 0, transform: engineInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.7s cubic-bezier(0.22,1,0.36,1) ${e.delay}s` }}>
                   <div style={{ width: 44, height: 44, borderRadius: 12, background: "#F5F4F1", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>{e.icon}</div>
@@ -807,24 +863,24 @@ export default function Landing() {
         <section style={{ padding: "100px 48px", borderTop: "1px solid #E8E5E0" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto" }}>
             <div style={{ textAlign: "center", marginBottom: 56 }}>
-              <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Features</p>
-              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>9,900원에 이 모든 것을.</h2>
-              <p style={{ fontSize: 14, color: "#999" }}>Standard 하나면 충분합니다.</p>
+              <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>{lt('features','tag',landingLocale)}</p>
+              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>{lt('features','h2',landingLocale)}</h2>
+              <p style={{ fontSize: 14, color: "#999" }}>{lt('features','desc',landingLocale)}</p>
             </div>
             <div style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: "4px 0 16px", scrollbarWidth: "none" }}>
               {[
-                { title: "봉투 인트로", desc: "터치하면 열리는 봉투 애니메이션. 리본 7종 + 씰링 5종.", tag: "12종" },
-                { title: "폴라로이드 갤러리", desc: "비정형 배치. 터치하면 떠오르는 호버 효과.", tag: "NEW" },
-                { title: "서로에게 쓰는 편지", desc: "신랑, 신부 편지를 각각 작성. 이미지 첨부 가능.", tag: "NEW" },
-                { title: "프로필 소개", desc: "캐릭터 아바타 6종 또는 직접 사진 업로드.", tag: "NEW" },
-                { title: "식사 · 주차 안내", desc: "탭 형태로 추가 안내. 사진 첨부 가능.", tag: "NEW" },
-                { title: "함께 수정하기", desc: "커플이 동시에 편집. 분업 가능.", tag: "커플" },
-                { title: "글꼴 커스터마이징", desc: "23종 글꼴 + 크기 조절 + 영문 글꼴 7종.", tag: "23종" },
-                { title: "원하는 구성", desc: "필요 없는 항목은 숨기고, 순서도 자유롭게.", tag: "자유" },
-                { title: "게스트 갤러리", desc: "하객들이 직접 사진과 영상을 업로드.", tag: "참여형" },
-                { title: "대표 사진 글자 위치", desc: "사진 위 글자 위치를 자유롭게 조절.", tag: "커스텀" },
-                { title: "버전별 링크", desc: "부모님용, 친구용 따로 보내기. 수정해도 이미 보낸 링크는 그대로.", tag: "버전" },
-                { title: "종이청첩장 + QR", desc: "10종 + QR카드 19종. 추가비용 0원.", tag: "무료" },
+                { title: lt('featureCards','f1t',landingLocale), desc: lt('featureCards','f1d',landingLocale), tag: lt('featureCards','tag1',landingLocale) },
+                { title: lt('featureCards','f2t',landingLocale), desc: lt('featureCards','f2d',landingLocale), tag: lt('featureCards','tag2',landingLocale) },
+                { title: lt('featureCards','f3t',landingLocale), desc: lt('featureCards','f3d',landingLocale), tag: lt('featureCards','tag3',landingLocale) },
+                { title: lt('featureCards','f4t',landingLocale), desc: lt('featureCards','f4d',landingLocale), tag: lt('featureCards','tag4',landingLocale) },
+                { title: lt('featureCards','f5t',landingLocale), desc: lt('featureCards','f5d',landingLocale), tag: lt('featureCards','tag5',landingLocale) },
+                { title: lt('featureCards','f6t',landingLocale), desc: lt('featureCards','f6d',landingLocale), tag: lt('featureCards','tag6',landingLocale) },
+                { title: lt('featureCards','f7t',landingLocale), desc: lt('featureCards','f7d',landingLocale), tag: lt('featureCards','tag7',landingLocale) },
+                { title: lt('featureCards','f8t',landingLocale), desc: lt('featureCards','f8d',landingLocale), tag: lt('featureCards','tag8',landingLocale) },
+                { title: lt('featureCards','f9t',landingLocale), desc: lt('featureCards','f9d',landingLocale), tag: lt('featureCards','tag9',landingLocale) },
+                { title: lt('featureCards','f10t',landingLocale), desc: lt('featureCards','f10d',landingLocale), tag: lt('featureCards','tag10',landingLocale) },
+                { title: lt('featureCards','f11t',landingLocale), desc: lt('featureCards','f11d',landingLocale), tag: lt('featureCards','tag11',landingLocale) },
+                { title: lt('featureCards','f12t',landingLocale), desc: lt('featureCards','f12d',landingLocale), tag: lt('featureCards','tag12',landingLocale) },
               ].map((f, i) => (
                 <div key={i} style={{ minWidth: 220, padding: "24px 20px", borderRadius: 14, border: "1px solid #E8E5E0", background: "#fff", scrollSnapAlign: "start", flexShrink: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -844,24 +900,24 @@ export default function Landing() {
               <Sparkles size={11} color="#999" />
               <p style={{ fontSize: 11, color: "#888" }}>AI Reception</p>
             </div>
-            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.4, color: "#1a1a1a", marginBottom: 16 }}>하객이 물으면,<br />AI가 답합니다.</h2>
-            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 32 }}>주차장 위치, 축의금 계좌, 식사 시간.<br />반복되는 질문에 신랑신부가 답할 필요 없습니다.</p>
+            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.4, color: "#1a1a1a", marginBottom: 16 }}>{lt('chat','h2_1',landingLocale)}<br />{lt('chat','h2_2',landingLocale)}</h2>
+            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 32 }}>{lt('chat','desc1',landingLocale)}<br />{lt('chat','desc2',landingLocale)}</p>
             <div style={{ marginBottom: 32 }}>
-              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 1, marginBottom: 16, textTransform: "uppercase" }}>실제 시나리오</p>
+              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 1, marginBottom: 16, textTransform: "uppercase" }}>{lt('chat','scenario',landingLocale)}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {CHAT_SEQUENCE.map((item, i) => (
+                {(landingLocale === 'en' ? CHAT_SEQUENCE_EN : CHAT_SEQUENCE_KO).map((item, i) => (
                   <ScenarioCard key={i} item={item} index={i} parentInView={chatSectionInView} />
                 ))}
               </div>
             </div>
             <div style={{ padding: "16px 20px", borderRadius: 10, background: "#1a1a1a" }}>
-              <p style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>Premium 패키지</p>
-              <p style={{ fontSize: 14, color: "#fff" }}>자동 응대 시스템에 <span style={{ fontWeight: 600 }}>AI 화보 10컷</span> 포함.</p>
+              <p style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>{lt('chat','premiumLabel',landingLocale)}</p>
+              <p style={{ fontSize: 14, color: "#fff" }}>{lt('chat','premiumDesc',landingLocale)}<span style={{ fontWeight: 600 }}>{lt('chat','premiumBold',landingLocale)}</span>{lt('chat','premiumIncl',landingLocale)}</p>
               <p className="serif" style={{ fontSize: 24, fontWeight: 400, color: "#fff", marginTop: 8 }}>29,900<span style={{ fontSize: 13, color: "#666", fontFamily: "'Noto Sans KR', sans-serif" }}>원</span></p>
             </div>
           </div>
           <div style={{ opacity: chatSectionInView ? 1 : 0, transform: chatSectionInView ? "translateY(0)" : "translateY(40px)", transition: "all 1s cubic-bezier(0.22,1,0.36,1) 0.2s" }}>
-            <AiChatDemo />
+            <AiChatDemo landingLocale={landingLocale} />
           </div>
         </section>
 
@@ -924,13 +980,13 @@ export default function Landing() {
               <Camera size={11} color="#999" />
               <p style={{ fontSize: 11, color: "#888" }}>AI Wedding Snap</p>
             </div>
-            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.4, color: "#1a1a1a", marginBottom: 8 }}>얼굴 사진 한 장이면<br />충분합니다.</h2>
-            <p className="serif" style={{ fontSize: 20, fontWeight: 300, color: "#aaa", marginBottom: 20 }}>촬영 없이, 화보를 만듭니다.</p>
-            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 24 }}>33가지 컨셉의 웨딩 화보를 자동 생성합니다.<br />한복, 크루즈, 셀카, 시네마틱 — 스튜디오 촬영을 대체합니다.</p>
+            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.4, color: "#1a1a1a", marginBottom: 8 }}>{lt('snap','h2_1',landingLocale)}<br />{lt('snap','h2_2',landingLocale)}</h2>
+            <p className="serif" style={{ fontSize: 20, fontWeight: 300, color: "#aaa", marginBottom: 20 }}>{lt('snap','sub',landingLocale)}</p>
+            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 24 }}>{lt('snap','desc1',landingLocale)}<br />{lt('snap','desc2',landingLocale)}</p>
             <div style={{ padding: "16px 18px", borderRadius: 10, border: "1px solid #E8E5E0", background: "#FAFAF8", marginBottom: 24 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>아직 촬영 전이신가요?</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>{lt('snap','boxTitle',landingLocale)}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {["얼굴 사진 한 장으로 미리 화보 제작", "촬영 콘셉트 미리 테스트 가능", "청첩장 제작까지 바로 연결"].map((t, i) => (
+                {[lt("snap","boxF1",landingLocale), lt("snap","boxF2",landingLocale), lt("snap","boxF3",landingLocale)].map((t, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <Check size={11} color="#bbb" strokeWidth={2.5} />
                     <p style={{ fontSize: 12, color: "#666" }}>{t}</p>
@@ -939,13 +995,13 @@ export default function Landing() {
               </div>
             </div>
             <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#1a1a1a", textDecoration: "none", fontWeight: 500, padding: "10px 20px", borderRadius: 8, border: "1px solid #E0DDD8" }}>
-              촬영 전에 미리 체험하기
+              {lt('snap','cta',landingLocale)}
               <ArrowRight size={14} />
             </a>
           </div>
         </section>
 
-        <ThemeShowcase onLogin={openLogin} />
+        <ThemeShowcase onLogin={openLogin} landingLocale={landingLocale} />
 
         <section ref={specRef as React.RefObject<HTMLElement>} style={{ padding: "80px 0", background: "#1a1a1a" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto" }}>
@@ -965,13 +1021,13 @@ export default function Landing() {
           <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px" }}>
             <div style={{ textAlign: "center", marginBottom: 56 }}>
               <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Pricing</p>
-              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>간단한 요금제</h2>
-              <p style={{ fontSize: 14, color: "#999" }}>숨은 비용 없습니다. 종이청첩장 · QR카드 디자인 무료 포함.</p>
+              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>{lt('pricing','h2',landingLocale)}</h2>
+              <p style={{ fontSize: 14, color: "#999" }}>{lt('pricing','desc',landingLocale)}</p>
             </div>
             <div style={{ textAlign: "center", marginBottom: 24 }}>
               <a href="/gift/redeem" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 20px", borderRadius: 100, border: "1px solid #E0DDD8", fontSize: 13, color: "#888", textDecoration: "none" }}>
                 <Gift size={14} />
-                선물 코드가 있으신가요?
+                {lt('pricing','giftCode',landingLocale)}
               </a>
             </div>
             {packages.length > 0 ? (
@@ -981,22 +1037,22 @@ export default function Landing() {
                   return (
                     <div key={pkg.id} style={{ minWidth: 280, flex: "0 0 280px", scrollSnapAlign: "start", padding: "32px 24px", borderRadius: 14, border: isHighlight ? "2px solid #1a1a1a" : "1px solid #E8E5E0", background: isHighlight ? "#FAFAF8" : "#fff", position: "relative", opacity: pricingInView ? 1 : 0, transform: pricingInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 80}ms` }}>
                       {pkg.slug === "premium" && <div style={{ position: "absolute", top: -1, left: 24, transform: "translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 12px", borderRadius: 100, fontWeight: 500 }}>BEST</div>}
-                      <p style={{ fontSize: 11, color: "#bbb", marginBottom: 4 }}>{pkg.description}</p>
+                      <p style={{ fontSize: 11, color: "#bbb", marginBottom: 4 }}>{trPkgDesc(pkg.description, landingLocale)}</p>
                       <p style={{ fontSize: 16, fontWeight: 600, color: "#1a1a1a", marginBottom: 16 }}>{pkg.name}</p>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 2, marginBottom: 20 }}>
                         <p className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a" }}>{pkg.price.toLocaleString()}</p>
-                        <p style={{ fontSize: 13, color: "#999" }}>원</p>
+                        <p style={{ fontSize: 13, color: "#999" }}>{landingLocale === 'en' ? 'KRW' : '원'}</p>
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
                         {pkg.features.slice(0, 6).map((f, j) => (
                           <div key={j} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <Check size={13} color={isHighlight ? "#1a1a1a" : "#ccc"} strokeWidth={2} />
-                            <p style={{ fontSize: 13, color: "#666" }}>{f}</p>
+                            <p style={{ fontSize: 13, color: "#666" }}>{trFeature(f, landingLocale)}</p>
                           </div>
                         ))}
-                        {pkg.features.length > 6 && <p style={{ fontSize: 12, color: "#bbb", paddingLeft: 21 }}>+{pkg.features.length - 6}개 더</p>}
+                        {pkg.features.length > 6 && <p style={{ fontSize: 12, color: "#bbb", paddingLeft: 21 }}>+{pkg.features.length - 6}{landingLocale === 'en' ? ' more' : '개 더'}</p>}
                       </div>
-                      <button onClick={() => setShowCreateModal(true)} style={{ display: "block", width: "100%", textAlign: "center", padding: "12px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, background: isHighlight ? "#1a1a1a" : "transparent", color: isHighlight ? "#fff" : "#1a1a1a", border: isHighlight ? "none" : "1px solid #E0DDD8", cursor: "pointer" }}>시작하기</button>
+                      <button onClick={() => setShowCreateModal(true)} style={{ display: "block", width: "100%", textAlign: "center", padding: "12px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, background: isHighlight ? "#1a1a1a" : "transparent", color: isHighlight ? "#fff" : "#1a1a1a", border: isHighlight ? "none" : "1px solid #E0DDD8", cursor: "pointer" }}>{lt('pricing','startBtn',landingLocale)}</button>
                     </div>
                   );
                 })}
@@ -1010,40 +1066,40 @@ export default function Landing() {
         <section id="ai-snap-pricing" style={{ padding: "100px 0", background: "#F5F4F1", borderTop: "1px solid #E8E5E0", borderBottom: "1px solid #E8E5E0" }}>
           <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 48px" }}>
             <div style={{ textAlign: "center", marginBottom: 48 }}>
-              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>AI WEDDING SNAP</p>
-              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 10 }}>AI 웨딩 화보 단독 패키지</h2>
-              <p style={{ fontSize: 14, color: "#999" }}>청첩장 없이 AI 웨딩 화보만 이용할 수 있어요</p>
+              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>{lt('snapPricing','tag',landingLocale)}</p>
+              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 10 }}>{lt('snapPricing','h2',landingLocale)}</h2>
+              <p style={{ fontSize: 14, color: "#999" }}>{lt('snapPricing','desc',landingLocale)}</p>
             </div>
             <div className="snap-pack-grid snap-pill" style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: "14px 0 16px", scrollbarWidth: "none", justifyContent: "center" }}>
               {[
-                { name: "3장 세트", per: "장당 1,967원", price: "5,900", popular: false },
-                { name: "5장 세트", per: "장당 1,980원", price: "9,900", popular: false },
-                { name: "10장 세트", per: "장당 1,490원", price: "14,900", popular: true },
-                { name: "20장 세트", per: "장당 1,245원", price: "24,900", popular: false },
+                { name: landingLocale === 'en' ? '3-Photo Pack' : '3장 세트', per: landingLocale === 'en' ? '$1.97/shot' : '장당 1,967원', price: '5,900', popular: false },
+                { name: landingLocale === 'en' ? '5-Photo Pack' : '5장 세트', per: landingLocale === 'en' ? '$1.98/shot' : '장당 1,980원', price: '9,900', popular: false },
+                { name: landingLocale === 'en' ? '10-Photo Pack' : '10장 세트', per: landingLocale === 'en' ? '$1.49/shot' : '장당 1,490원', price: '14,900', popular: true },
+                { name: landingLocale === 'en' ? '20-Photo Pack' : '20장 세트', per: landingLocale === 'en' ? '$1.25/shot' : '장당 1,245원', price: '24,900', popular: false },
               ].map((pack) => (
                 <div key={pack.name} style={{ minWidth: 220, flex: "0 0 220px", scrollSnapAlign: "start", padding: "28px 20px", borderRadius: 14, background: "#fff", border: pack.popular ? "2px solid #1a1a1a" : "1px solid #E8E5E0", textAlign: "left", position: "relative" }}>
-                  {pack.popular && <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%) translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 14px", borderRadius: 100, fontWeight: 500 }}>인기</div>}
+                  {pack.popular && <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%) translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 14px", borderRadius: 100, fontWeight: 500 }}>{lt('snapPricing','popular',landingLocale)}</div>}
                   <p style={{ fontSize: 16, fontWeight: 600, color: "#1a1a1a", marginBottom: 4 }}>{pack.name}</p>
                   <p style={{ fontSize: 11, color: "#bbb", marginBottom: 16 }}>{pack.per}</p>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 2, marginBottom: 20 }}>
                     <p className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a" }}>{pack.price}</p>
-                    <p style={{ fontSize: 12, color: "#999" }}>원</p>
+                    <p style={{ fontSize: 12, color: "#999" }}>{landingLocale === 'en' ? 'KRW' : '원'}</p>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
-                    {["스튜디오 / 시네마틱 선택", "33가지 컨셉", "고화질 원본 다운로드"].map((f, j) => (
+                    {[lt("snapPricing","f1",landingLocale), lt("snapPricing","f2",landingLocale), lt("snapPricing","f3",landingLocale)].map((f, j) => (
                       <div key={j} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         <Check size={12} color={pack.popular ? "#1a1a1a" : "#ccc"} strokeWidth={2} />
                         <p style={{ fontSize: 12, color: "#666" }}>{f}</p>
                       </div>
                     ))}
                   </div>
-                  <a href="/ai-snap/studio" style={{ display: "block", textAlign: "center", padding: "11px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, textDecoration: "none", background: pack.popular ? "#1a1a1a" : "transparent", color: pack.popular ? "#fff" : "#1a1a1a", border: pack.popular ? "none" : "1px solid #E0DDD8" }}>시작하기</a>
+                  <a href="/ai-snap/studio" style={{ display: "block", textAlign: "center", padding: "11px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, textDecoration: "none", background: pack.popular ? "#1a1a1a" : "transparent", color: pack.popular ? "#fff" : "#1a1a1a", border: pack.popular ? "none" : "1px solid #E0DDD8" }}>{lt('pricing','startBtn',landingLocale)}</a>
                 </div>
               ))}
             </div>
             <div style={{ textAlign: "center", marginTop: 16 }}>
               <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#fff", background: "#1a1a1a", padding: "14px 28px", borderRadius: 10, textDecoration: "none", fontWeight: 500 }}>
-                무료 1장 체험하기
+                {lt('snapPricing','freeCta',landingLocale)}
                 <Camera size={16} />
               </a>
             </div>
@@ -1053,9 +1109,9 @@ export default function Landing() {
         <section style={{ padding: "80px 48px", background: "#FAF9F7" }}>
           <div style={{ maxWidth: 900, margin: "0 auto" }}>
             <div style={{ textAlign: "center", marginBottom: 36 }}>
-              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>PREMIUM ADD-ON</p>
-              <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>식전 · 식중 영상 제작</h3>
-              <p style={{ fontSize: 13, color: "#999", lineHeight: 1.8 }}>자동화 엔진 위에 얹는 수제 옵션. 미술감독이 1:1로 편집합니다.</p>
+              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>{lt('video','tag',landingLocale)}</p>
+              <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>{lt('video','h3',landingLocale)}</h3>
+              <p style={{ fontSize: 13, color: "#999", lineHeight: 1.8 }}>{lt('video','desc',landingLocale)}</p>
             </div>
               <HighlightVideoSection />
           </div>
@@ -1065,8 +1121,8 @@ export default function Landing() {
           <section style={{ padding: "80px 48px", background: "#F5F4F1", borderTop: "1px solid #E8E5E0" }}>
             <div style={{ maxWidth: 1000, margin: "0 auto" }}>
               <div style={{ textAlign: "center", marginBottom: 40 }}>
-                <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>HOW TO USE</p>
-                <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>이용 방법</h3>
+                <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>{lt('guide','tag',landingLocale)}</p>
+                <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>{lt('guide','h3',landingLocale)}</h3>
               </div>
               <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 16 }} className="snap-pill">
                 {guides.map((g) => (
@@ -1098,8 +1154,8 @@ export default function Landing() {
           <section style={{ padding: "80px 48px", borderTop: "1px solid #E8E5E0" }}>
             <div style={{ maxWidth: 1000, margin: "0 auto" }}>
               <div style={{ textAlign: "center", marginBottom: 40 }}>
-                <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>REVIEWS</p>
-                <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>고객님들의 후기</h3>
+                <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>{lt('review','tag',landingLocale)}</p>
+                <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>{lt('review','h3',landingLocale)}</h3>
               </div>
               <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 16 }} className="snap-pill">
                 {reviews.map((r) => (
@@ -1124,33 +1180,33 @@ export default function Landing() {
         <section style={{ padding: "100px 48px", borderTop: "1px solid #E8E5E0" }}>
           <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", alignItems: "center", gap: 56 }} className="weddingai-grid">
             <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>WEDDING ENGINE ASSISTANT</p>
-              <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8, lineHeight: 1.4 }}>웨딩이</h3>
-              <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 28 }}>설명서를 읽지 않아도 됩니다.<br />웨딩이가 대신 안내합니다.</p>
+              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>{lt('weddingAi','tag',landingLocale)}</p>
+              <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8, lineHeight: 1.4 }}>{lt('weddingAi','h3',landingLocale)}</h3>
+              <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 28 }}>{lt('weddingAi','desc1',landingLocale)}<br />{lt('weddingAi','desc2',landingLocale)}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
-                {["서비스 · 테마 · 요금 안내", "청첩장 기능 상세 설명", "제휴 · 할인 정보 안내"].map((f, i) => (
+                {[lt("weddingAi","f1",landingLocale), lt("weddingAi","f2",landingLocale), lt("weddingAi","f3",landingLocale)].map((f, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <Check size={12} color="#bbb" strokeWidth={2.5} />
                     <p style={{ fontSize: 13, color: "#666" }}>{f}</p>
                   </div>
                 ))}
               </div>
-              <p style={{ fontSize: 11, color: "#ccc" }}>우측 하단에서 바로 대화할 수 있어요.</p>
+              <p style={{ fontSize: 11, color: "#ccc" }}>{lt('weddingAi','tip',landingLocale)}</p>
             </div>
             <div style={{ width: 300, flexShrink: 0 }}>
               <div style={{ borderRadius: 16, border: "1px solid #E8E5E0", background: "#fff", overflow: "hidden", boxShadow: "0 8px 30px rgba(0,0,0,0.06)" }}>
                 <div style={{ padding: "14px 16px", borderBottom: "1px solid #F0EFEC", display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#1a1a1a", display: "flex", alignItems: "center", justifyContent: "center" }}><Sparkles size={12} color="#fff" /></div>
                   <div>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: "#1a1a1a" }}>웨딩이</p>
-                    <p style={{ fontSize: 9, color: "#7C8C6E" }}>온라인</p>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: "#1a1a1a" }}>{landingLocale === 'en' ? 'Wedding AI' : '웨딩이'}</p>
+                    <p style={{ fontSize: 9, color: "#7C8C6E" }}>{landingLocale === 'en' ? 'Online' : '온라인'}</p>
                   </div>
                 </div>
                 <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-                  <div style={{ alignSelf: "flex-end", maxWidth: "80%", padding: "9px 13px", borderRadius: "14px 4px 14px 14px", background: "#2C2C2C" }}><p style={{ fontSize: 11, color: "#fff" }}>테마 추천해주세요</p></div>
-                  <div style={{ alignSelf: "flex-start", maxWidth: "85%", padding: "9px 13px", borderRadius: "4px 14px 14px 14px", background: "#F5F4F1" }}><p style={{ fontSize: 11, color: "#555", lineHeight: 1.6 }}>어떤 분위기를 좋아하세요? 내추럴, 모던, 클래식 중 골라주시면 딱 맞는 테마를 추천해드릴게요.</p></div>
-                  <div style={{ alignSelf: "flex-end", maxWidth: "80%", padding: "9px 13px", borderRadius: "14px 4px 14px 14px", background: "#2C2C2C" }}><p style={{ fontSize: 11, color: "#fff" }}>내추럴이요!</p></div>
-                  <div style={{ alignSelf: "flex-start", maxWidth: "85%", padding: "9px 13px", borderRadius: "4px 14px 14px 14px", background: "#F5F4F1" }}><p style={{ fontSize: 11, color: "#555", lineHeight: 1.6 }}>Botanical 테마 추천드려요! 세이지그린 톤에 자연스러운 느낌이에요.</p></div>
+                  <div style={{ alignSelf: "flex-end", maxWidth: "80%", padding: "9px 13px", borderRadius: "14px 4px 14px 14px", background: "#2C2C2C" }}><p style={{ fontSize: 11, color: "#fff" }}>{landingLocale === 'en' ? 'Recommend a theme' : '테마 추천해주세요'}</p></div>
+                  <div style={{ alignSelf: "flex-start", maxWidth: "85%", padding: "9px 13px", borderRadius: "4px 14px 14px 14px", background: "#F5F4F1" }}><p style={{ fontSize: 11, color: "#555", lineHeight: 1.6 }}>{landingLocale === 'en' ? 'What vibe do you prefer? Natural, modern, or classic? Pick one and I\'ll find the perfect theme.' : '어떤 분위기를 좋아하세요? 내추럴, 모던, 클래식 중 골라주시면 딱 맞는 테마를 추천해드릴게요.'}</p></div>
+                  <div style={{ alignSelf: "flex-end", maxWidth: "80%", padding: "9px 13px", borderRadius: "14px 4px 14px 14px", background: "#2C2C2C" }}><p style={{ fontSize: 11, color: "#fff" }}>{landingLocale === 'en' ? 'Natural!' : '내추럴이요!'}</p></div>
+                  <div style={{ alignSelf: "flex-start", maxWidth: "85%", padding: "9px 13px", borderRadius: "4px 14px 14px 14px", background: "#F5F4F1" }}><p style={{ fontSize: 11, color: "#555", lineHeight: 1.6 }}>{landingLocale === 'en' ? 'I recommend the Botanical theme! Sage green tones with a natural feel.' : 'Botanical 테마 추천드려요! 세이지그린 톤에 자연스러운 느낌이에요.'}</p></div>
                 </div>
               </div>
             </div>
@@ -1159,10 +1215,10 @@ export default function Landing() {
 
         <section ref={ctaRef as React.RefObject<HTMLElement>} style={{ padding: "100px 48px", textAlign: "center" }}>
           <div style={{ opacity: ctaInView ? 1 : 0, transform: ctaInView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
-            <h2 className="serif" style={{ fontSize: 38, fontWeight: 400, color: "#1a1a1a", marginBottom: 16 }}>결혼 준비,<br />자동화하세요.</h2>
-            <p style={{ fontSize: 14, color: "#999", marginBottom: 36, lineHeight: 1.8 }}>모바일 청첩장 · 종이청첩장 · QR카드 · AI 화보 · AI 하객 응대<br />하나의 플랫폼에서 전부 해결됩니다.</p>
+            <h2 className="serif" style={{ fontSize: 38, fontWeight: 400, color: "#1a1a1a", marginBottom: 16 }}>{lt('cta','h2_1',landingLocale)}<br />{lt('cta','h2_2',landingLocale)}</h2>
+            <p style={{ fontSize: 14, color: "#999", marginBottom: 36, lineHeight: 1.8 }}>{lt('cta','desc1',landingLocale)}<br />{lt('cta','desc2',landingLocale)}</p>
             <button onClick={() => setShowCreateModal(true)} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 15, color: "#fff", background: "#1a1a1a", padding: "16px 36px", borderRadius: 10, border: "none", cursor: "pointer", fontWeight: 500 }}>
-              자동화 시작하기
+              {lt('cta','btn',landingLocale)}
               <ArrowRight size={18} />
             </button>
           </div>
@@ -1175,7 +1231,7 @@ export default function Landing() {
               <p style={{ fontSize: 10, color: "#ccc", letterSpacing: 1 }}>WEDDING ENGINE</p>
             </div>
             <div style={{ display: "flex", gap: 24, marginBottom: 28, flexWrap: "wrap" }}>
-              {[{ l: "공지사항", h: "/notice" }, { l: "자주 묻는 질문", h: "/faq" }, { l: "이용약관", h: "/terms" }, { l: "개인정보처리방침", h: "/privacy" }, { l: "환불정책", h: "/refund-policy" }].map((link) => (
+              {[{ l: lt("footer","notice",landingLocale), h: "/notice" }, { l: lt("footer","faq",landingLocale), h: "/faq" }, { l: lt("footer","terms",landingLocale), h: "/terms" }, { l: lt("footer","privacy",landingLocale), h: "/privacy" }, { l: lt("footer","refund",landingLocale), h: "/refund-policy" }].map((link) => (
                 <a key={link.l} href={link.h} style={{ fontSize: 12, color: "#888", textDecoration: "none" }}>{link.l}</a>
               ))}
             </div>
@@ -1193,7 +1249,7 @@ export default function Landing() {
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 20, borderTop: "1px solid #F0EFEC" }}>
-              <p style={{ fontSize: 11, color: "#ccc" }}>Made with love by 청첩장 작업실</p>
+              <p style={{ fontSize: 11, color: "#ccc" }}>{lt('footer','made',landingLocale)}</p>
               <div style={{ display: "flex", gap: 20 }}>
                 <a href="https://instagram.com/weddingstudiolab" target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "#bbb", textDecoration: "none" }}>Instagram</a>
                 <a href="https://pf.kakao.com/_xkaQxon" target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "#bbb", textDecoration: "none" }}>KakaoTalk</a>
@@ -1208,7 +1264,7 @@ export default function Landing() {
         {greeting && !greetingDismissed && !chatOpen && (
           <div className="chat-msg-enter" style={{ padding: "10px 16px", borderRadius: "14px 14px 4px 14px", background: "#fff", border: "1px solid #E8E5E0", boxShadow: "0 4px 20px rgba(0,0,0,0.08)", maxWidth: 220, position: "relative" }}>
             <button onClick={() => setGreetingDismissed(true)} style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", background: "#eee", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><X size={10} color="#999" /></button>
-            <p style={{ fontSize: 12, color: "#555" }}>안녕하세요, 결혼 준비 도와드릴까요?</p>
+            <p style={{ fontSize: 12, color: "#555" }}>{lt('chatBot','greeting',landingLocale)}</p>
           </div>
         )}
         <button onClick={() => { setChatOpen(true); setGreetingDismissed(true); }} style={{ width: 52, height: 52, borderRadius: "50%", background: "#1a1a1a", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.15)" }}>
@@ -1264,10 +1320,10 @@ export default function Landing() {
               <div style={{ padding: 16, borderTop: "1px solid #E8E5E0", flexShrink: 0 }}>
                 <button onClick={() => { if (!isLoggedIn) { if (confirm("로그인이 필요한 서비스입니다. 로그인 하시겠습니까?")) window.location.href = "/dashboard"; } else setShowInquiryForm(true); }} style={{ width: "100%", marginBottom: 10, padding: "8px 0", fontSize: 12, color: "#999", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                   <MessageCircle size={13} />
-                  1:1 문의하기
+                  {lt('chatBot','inquiry',landingLocale)}
                 </button>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendChat()} onFocus={() => window.scrollTo(0, 0)} placeholder="메시지를 입력하세요..." style={{ flex: 1, padding: "12px 16px", borderRadius: 24, border: "1px solid #E0DDD8", background: "#F5F4F1", fontSize: 13, outline: "none" }} />
+                  <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendChat()} onFocus={() => window.scrollTo(0, 0)} placeholder={landingLocale === "en" ? "Type a message..." : "메시지를 입력하세요..."} style={{ flex: 1, padding: "12px 16px", borderRadius: 24, border: "1px solid #E0DDD8", background: "#F5F4F1", fontSize: 13, outline: "none" }} />
                   <button onClick={sendChat} disabled={chatLoading || !chatInput.trim()} style={{ width: 44, height: 44, borderRadius: "50%", background: "#1a1a1a", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: chatLoading || !chatInput.trim() ? 0.4 : 1 }}><Send size={16} color="#fff" /></button>
                 </div>
               </div>
@@ -1281,16 +1337,16 @@ export default function Landing() {
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }} onClick={() => setShowLoginModal(false)} />
           <div style={{ position: "relative", background: "#fff", borderRadius: 16, padding: "36px 32px", width: "100%", maxWidth: 380, margin: "0 16px", boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}>
             <button onClick={() => setShowLoginModal(false)} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", cursor: "pointer", color: "#bbb" }}><X size={20} /></button>
-            <h3 style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 6, textAlign: "center" }}>로그인</h3>
-            <p style={{ fontSize: 13, color: "#999", marginBottom: 24, textAlign: "center" }}>청첩장 제작을 시작해보세요</p>
+            <h3 style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 6, textAlign: "center" }}>{lt('modal','loginTitle',landingLocale)}</h3>
+            <p style={{ fontSize: 13, color: "#999", marginBottom: 24, textAlign: "center" }}>{lt('modal','loginDesc',landingLocale)}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <button onClick={() => { setShowLoginModal(false); handleLogin("kakao"); }} style={{ width: "100%", padding: "13px 0", background: "#FEE500", color: "#3C1E1E", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                 <svg style={{ width: 18, height: 18 }} viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.48 3 2 6.58 2 11c0 2.83 1.82 5.3 4.54 6.7-.2.74-.73 2.64-.84 3.05-.13.5.18.5.39.36.16-.1 2.59-1.76 3.63-2.47.74.1 1.5.16 2.28.16 5.52 0 10-3.58 10-8s-4.48-8-10-8z" /></svg>
-                카카오로 시작하기
+                {lt('modal','kakao',landingLocale)}
               </button>
               <button onClick={() => { setShowLoginModal(false); handleLogin("google"); }} style={{ width: "100%", padding: "13px 0", background: "#fff", color: "#555", borderRadius: 10, border: "1px solid #E0DDD8", fontWeight: 500, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                 <svg style={{ width: 18, height: 18 }} viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
-                Google로 시작하기
+                {lt('modal','google',landingLocale)}
               </button>
               <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "8px 0" }}>
                 <div style={{ flex: 1, height: 1, background: "#E8E5E0" }} />
@@ -1435,8 +1491,8 @@ export default function Landing() {
         <div onClick={() => setShowCreateModal(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: 20 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 16, maxWidth: 420, width: "100%", overflow: "hidden" }}>
             <div style={{ padding: "28px 24px 8px", textAlign: "center" }}>
-              <p style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 4 }}>청첩장 만들기</p>
-              <p style={{ fontSize: 13, color: "#999" }}>어떤 방식으로 만들까요?</p>
+              <p style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a", marginBottom: 4 }}>{lt('modal','createTitle',landingLocale)}</p>
+              <p style={{ fontSize: 13, color: "#999" }}>{lt('modal','createDesc',landingLocale)}</p>
             </div>
             <div style={{ padding: "16px 20px 24px", display: "flex", flexDirection: "column", gap: 10 }}>
               <a href="/ai-create" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 20px", borderRadius: 12, border: "2px solid #1a1a1a", background: "#fafaf9", textDecoration: "none", transition: "all 0.15s" }}>
@@ -1444,8 +1500,8 @@ export default function Landing() {
                   <Sparkles size={20} color="#fff" />
                 </div>
                 <div>
-                  <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 2 }}>AI 자동 제작</p>
-                  <p style={{ fontSize: 12, color: "#888", lineHeight: 1.5 }}>사진 한 장이면 테마 추천부터 인사말까지</p>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 2 }}>{lt('modal','aiCreate',landingLocale)}</p>
+                  <p style={{ fontSize: 12, color: "#888", lineHeight: 1.5 }}>{lt('modal','aiCreateDesc',landingLocale)}</p>
                 </div>
               </a>
               <a href="/create" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 20px", borderRadius: 12, border: "1px solid #e5e2dd", background: "#fff", textDecoration: "none", transition: "all 0.15s" }}>
@@ -1453,8 +1509,8 @@ export default function Landing() {
                   <ArrowRight size={20} color="#1a1a1a" />
                 </div>
                 <div>
-                  <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 2 }}>직접 만들기</p>
-                  <p style={{ fontSize: 12, color: "#888", lineHeight: 1.5 }}>테마 선택부터 하나하나 직접 설정</p>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 2 }}>{lt('modal','manual',landingLocale)}</p>
+                  <p style={{ fontSize: 12, color: "#888", lineHeight: 1.5 }}>{lt('modal','manualDesc',landingLocale)}</p>
                 </div>
               </a>
             </div>

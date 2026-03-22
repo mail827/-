@@ -5,7 +5,7 @@ import {
   Calendar, Clock, MapPin, Phone, Copy, Check, 
   Volume2, VolumeX, Share2, ChevronDown
 } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale, getCalendarData, type ThemeProps } from './shared';
 
 const fontStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500&display=swap');
@@ -17,7 +17,7 @@ const fontStyles = `
   }
 `;
 
-export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -61,7 +61,7 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
         objectType: 'feed',
         content: {
           title,
-          description: `${formatDate(wedding.weddingDate, 'korean')} ${formatTime(wedding.weddingTime)}`,
+          description: `${formatDateLocale(wedding.weddingDate, 'full', locale)} ${formatTimeLocale(wedding.weddingTime, locale)}`,
           imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''),
           link: { mobileWebUrl: url, webUrl: url }
         },
@@ -71,7 +71,7 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.\n인스타그램 스토리에 공유해보세요!');
     } else if (type === 'sms') {
-      window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDate(wedding.weddingDate, 'korean')}\n${url}`)}`;
+      window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDateLocale(wedding.weddingDate, 'full', locale)}\n${url}`)}`;
     }
     setShowShareModal(false);
   };
@@ -156,8 +156,8 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
             </h1>
             
             <div className="space-y-1.5 text-[14px]" style={{ color: '#8B7EB0' }}>
-              <p>{formatDate(wedding.weddingDate, 'korean')}</p>
-              <p className="text-[13px]" style={{ color: '#A89ED0' }}>{formatTime(wedding.weddingTime)}</p>
+              <p>{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+              <p className="text-[13px]" style={{ color: '#A89ED0' }}>{formatTimeLocale(wedding.weddingTime, locale)}</p>
               <p className="text-[13px] pt-1" style={{ color: '#B8B0D0' }}>{wedding.venue}</p>
             </div>
             
@@ -192,22 +192,22 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
                 <div className="mt-8 pt-6" style={{ borderTop: '1px solid rgba(200,190,230,0.3)' }}>
                   <div className="grid grid-cols-2 gap-6">
                     <div className="text-center">
-                      <p className="text-[11px] tracking-[0.15em] mb-2" style={{ color: '#B8B0D0', fontFamily: 'ChangwonDangamRounded, sans-serif' }}>신랑측</p>
+                      <p className="text-[11px] tracking-[0.15em] mb-2" style={{ color: '#B8B0D0', fontFamily: 'ChangwonDangamRounded, sans-serif' }}>{locale === 'en' ? "Groom's Side" : '신랑측'}</p>
                       <p className="text-[12px]" style={{ color: '#9B8EC2' }}>
                         {wedding.groomFatherName && <span>{wedding.groomFatherName}</span>}
                         {wedding.groomFatherName && wedding.groomMotherName && <span> · </span>}
                         {wedding.groomMotherName && <span>{wedding.groomMotherName}</span>}
                       </p>
-                      <p className="text-[14px] mt-1.5" style={{ color: '#6B5B8C' }}>의 아들 <span style={{ fontFamily: 'ChangwonDangamRounded, sans-serif' }}>{wedding.groomName}</span></p>
+                      <p className="text-[14px] mt-1.5" style={{ color: '#6B5B8C' }}>{locale === 'en' ? 'Son of' : '의 아들'} <span style={{ fontFamily: 'ChangwonDangamRounded, sans-serif' }}>{wedding.groomName}</span></p>
                     </div>
                     <div className="text-center">
-                      <p className="text-[11px] tracking-[0.15em] mb-2" style={{ color: '#B8B0D0', fontFamily: 'ChangwonDangamRounded, sans-serif' }}>신부측</p>
+                      <p className="text-[11px] tracking-[0.15em] mb-2" style={{ color: '#B8B0D0', fontFamily: 'ChangwonDangamRounded, sans-serif' }}>{locale === 'en' ? "Bride's Side" : '신부측'}</p>
                       <p className="text-[12px]" style={{ color: '#9B8EC2' }}>
                         {wedding.brideFatherName && <span>{wedding.brideFatherName}</span>}
                         {wedding.brideFatherName && wedding.brideMotherName && <span> · </span>}
                         {wedding.brideMotherName && <span>{wedding.brideMotherName}</span>}
                       </p>
-                      <p className="text-[14px] mt-1.5" style={{ color: '#6B5B8C' }}>의 딸 <span style={{ fontFamily: 'ChangwonDangamRounded, sans-serif' }}>{wedding.brideName}</span></p>
+                      <p className="text-[14px] mt-1.5" style={{ color: '#6B5B8C' }}>{locale === 'en' ? 'Daughter of' : '의 딸'} <span style={{ fontFamily: 'ChangwonDangamRounded, sans-serif' }}>{wedding.brideName}</span></p>
                     </div>
                   </div>
                 </div>
@@ -243,11 +243,11 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
             <div className="mt-5 pt-5 flex justify-center gap-5" style={{ borderTop: '1px solid rgba(200,190,230,0.2)' }}>
               <span className="flex items-center gap-2 text-[12px]" style={{ color: '#8B7EB0' }}>
                 <Calendar className="w-4 h-4" style={{ color: '#B8B0E8' }} />
-                {formatDate(wedding.weddingDate, 'short')}
+                {formatDateLocale(wedding.weddingDate, 'short', locale)}
               </span>
               <span className="flex items-center gap-2 text-[12px]" style={{ color: '#8B7EB0' }}>
                 <Clock className="w-4 h-4" style={{ color: '#B8B0E8' }} />
-                {formatTime(wedding.weddingTime)}
+                {formatTimeLocale(wedding.weddingTime, locale)}
               </span>
             </div>
           </GlassCard>
@@ -308,7 +308,7 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-center">
           <SectionTitle>오시는 길</SectionTitle>
           <GlassCard className="overflow-hidden p-0">
-            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
+            <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             <div className="p-6 text-center">
               <p className="flex items-center justify-center gap-2 text-[15px]" style={{ color: '#6B5B8C', fontFamily: 'ChangwonDangamRounded, sans-serif' }}>
                 <MapPin className="w-4 h-4" style={{ color: '#B8B0E8' }} />
@@ -329,7 +329,7 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
                   <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-4 py-2.5 rounded-full text-[11px] tracking-wide" style={{ background: '#FEE500', color: '#3C1E1E' }}>카카오</a>
                 )}
                 {wedding.venueTmap && (
-                  <a href={wedding.venueTmap} target="_blank" rel="noopener noreferrer" className="px-4 py-2.5 rounded-full text-white text-[11px] tracking-wide" style={{ background: '#EF4123' }}>티맵</a>
+                  <a href={wedding.venueTmap} target="_blank" rel="noopener noreferrer" className="px-4 py-2.5 rounded-full text-white text-[11px] tracking-wide" style={{ background: '#EF4123' }}>{locale === 'en' ? 'T-map' : '티맵'}</a>
                 )}
               </div>
             </div>
@@ -340,7 +340,7 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
       <Section id="rsvp-section">
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-center">
           <SectionTitle>참석 여부</SectionTitle>
-          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="glass" />
+          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="glass" locale={locale} />
         </motion.div>
       </Section>
 
@@ -377,10 +377,10 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
             {(wedding.tossLink || wedding.kakaoPayLink) && (
               <div className="flex justify-center gap-3 mt-5">
                 {wedding.tossLink && (
-                  <a href={wedding.tossLink} target="_blank" className="px-6 py-3 rounded-full text-white text-[12px] tracking-wide" style={{ background: '#0064FF' }}>토스</a>
+                  <a href={wedding.tossLink} target="_blank" className="px-6 py-3 rounded-full text-white text-[12px] tracking-wide" style={{ background: '#0064FF' }}>{locale === 'en' ? 'Toss' : '토스'}</a>
                 )}
                 {wedding.kakaoPayLink && (
-                  <a href={wedding.kakaoPayLink} target="_blank" className="px-6 py-3 rounded-full text-[12px] tracking-wide" style={{ background: '#FEE500', color: '#3C1E1E' }}>카카오페이</a>
+                  <a href={wedding.kakaoPayLink} target="_blank" className="px-6 py-3 rounded-full text-[12px] tracking-wide" style={{ background: '#FEE500', color: '#3C1E1E' }}>{locale === 'en' ? 'KakaoPay' : '카카오페이'}</a>
                 )}
               </div>
             )}
@@ -391,12 +391,12 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
       <Section id="guestbook-section">
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
           <SectionTitle className="text-center">방명록</SectionTitle>
-          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="glass" />
+          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="glass" locale={locale} />
           <GuestbookList 
             guestbooks={localGuestbooks} 
             weddingSlug={wedding.slug} 
             onDelete={handleGuestbookDelete}
-            variant="glass"
+            variant="glass" locale={locale}
           />
         </motion.div>
       </Section>
@@ -458,7 +458,7 @@ export default function GlassBubble({ wedding, guestbooks, onRsvpSubmit, onGuest
       </Section>
 
       <footer className="py-10 text-center relative z-10" style={{ background: "rgba(180,170,200,0.15)" }}>
-        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.3em] hover:opacity-70 transition-opacity" style={{ color: '#8A80A0', fontFamily: 'ChangwonDangamRounded, sans-serif' }}>Made by 청첩장 작업실 ›</a>
+        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.3em] hover:opacity-70 transition-opacity" style={{ color: '#8A80A0', fontFamily: 'ChangwonDangamRounded, sans-serif' }}>Made by Wedding Studio Lab ›</a>
       </footer>
 
       <AnimatePresence>

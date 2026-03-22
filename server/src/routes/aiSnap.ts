@@ -326,7 +326,15 @@ const waitForResult = async (statusUrl: string, responseUrl: string, maxWait = 1
   while (Date.now() - start < maxWait * 1000) {
     await new Promise(r => setTimeout(r, 3000));
     const status = await falFetch(statusUrl);
-    if (status.status === 'COMPLETED') return falFetch(responseUrl);
+    if (status.status === 'COMPLETED') {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const result = await falFetch(responseUrl);
+        if (!result.detail) return result;
+        console.log('[waitForResult] response_url returned error, retry', attempt + 1, ':', JSON.stringify(result.detail).slice(0, 200));
+        await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+      }
+      return falFetch(responseUrl);
+    }
     if (status.status === 'FAILED') throw new Error(status.error || 'Generation failed');
   }
   throw new Error('Timeout');
@@ -541,9 +549,15 @@ router.get('/free/poll', async (req, res) => {
   try {
     const status = await falFetch(statusUrl as string);
     if (status.status === 'COMPLETED') {
-      const result = await falFetch(responseUrl as string);
+      let result: any = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        result = await falFetch(responseUrl as string);
+        if (!result.detail) break;
+        console.log('[free/poll] response_url error, retry', attempt + 1, ':', JSON.stringify(result.detail).slice(0, 200));
+        await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+      }
       if (result.detail) {
-        console.error('[free/poll] fal detail error:', JSON.stringify(result.detail).slice(0, 300));
+        console.error('[free/poll] fal detail error after retries:', JSON.stringify(result.detail).slice(0, 300));
         return res.json({ status: 'failed', error: 'AI server temporarily unavailable. Please try again.' });
       }
       const falUrl = result.images?.[0]?.url;
@@ -778,7 +792,13 @@ router.get('/admin/poll', async (req, res) => {
   try {
     const status = await falFetch(statusUrl as string);
     if (status.status === 'COMPLETED') {
-      const result = await falFetch(responseUrl as string);
+      let result: any = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        result = await falFetch(responseUrl as string);
+        if (!result.detail) break;
+        console.log('[admin/poll] response_url error, retry', attempt + 1);
+        await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+      }
       const falUrl = result.images?.[0]?.url;
       if (falUrl) {
         const swappedUrl = falUrl;

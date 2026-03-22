@@ -7,24 +7,25 @@ const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'wedding_guide';
 
 const CONCEPTS = [
-  { id: 'classic', label: 'Classic', desc: 'Studio Portrait' },
-  { id: 'garden', label: 'Garden', desc: 'Romantic Garden' },
-  { id: 'hanbok', label: 'Hanbok', desc: 'Korean Traditional' },
-  { id: 'cinema', label: 'Cinema', desc: 'Cinematic Mood' },
-  { id: 'magazine', label: 'Magazine', desc: 'Editorial Style' },
-  { id: 'cruise', label: 'Cruise', desc: 'Golden Sunset' },
+  { id: 'gala', label: 'Gala', desc: 'Evening Party' },
+  { id: 'flower', label: 'Flower', desc: 'Bouquet Portrait' },
+  { id: 'hanbok', label: 'Hanbok', desc: 'Modern Hanbok' },
+  { id: 'redcarpet', label: 'Red Carpet', desc: 'Celebrity Mood' },
+  { id: 'magazine', label: 'Magazine', desc: 'Fashion Editorial' },
+  { id: 'champagne', label: 'Champagne', desc: 'Golden Toast' },
 ];
 
 interface Props {
   slug: string;
   groomName: string;
   brideName: string;
+  locale?: string;
 }
 
-export default function GuestAiPhotoBooth({ slug, groomName, brideName }: Props) {
+export default function GuestAiPhotoBooth({ slug, groomName, brideName, locale = 'ko' }: Props) {
   const [step, setStep] = useState<'intro' | 'upload' | 'concept' | 'generating' | 'result'>('intro');
   const [photo, setPhoto] = useState('');
-  const [concept, setConcept] = useState('classic');
+  const [concept, setConcept] = useState('gala');
   const [gender, setGender] = useState<'male' | 'female'>('female');
   const [guestName, setGuestName] = useState('');
   const [resultUrl, setResultUrl] = useState('');
@@ -130,30 +131,30 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName }: Props)
         {step === 'intro' && (
           <motion.div key="intro" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} style={{ maxWidth: 360, margin: '0 auto', padding: '0 20px' }}>
             <div style={{ width: 1, height: 40, background: 'currentColor', opacity: 0.15, margin: '0 auto 24px' }} />
-            <p style={{ fontSize: 10, letterSpacing: 3, opacity: 0.4, marginBottom: 14 }}>AI PHOTO BOOTH</p>
+            <p style={{ fontSize: 10, letterSpacing: 3, opacity: 0.4, marginBottom: 14 }}>AI CELEBRATION SNAP</p>
             <p style={{ fontSize: 15, opacity: 0.7, lineHeight: 1.8, marginBottom: 6 }}>
               {groomName} & {brideName}
             </p>
             <p style={{ fontSize: 12, opacity: 0.4, marginBottom: 28 }}>
-              Take a selfie & get your AI wedding portrait
+              {locale === 'en' ? 'Step into their moment. Become part of the memory.' : '셀카 한 장으로 특별한 축하 사진을 만들어보세요'}
             </p>
             <button onClick={() => setStep('upload')} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 28px', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', color: 'inherit', borderRadius: 100, border: '1px solid rgba(255,255,255,0.15)', fontSize: 13, fontWeight: 400, cursor: 'pointer', letterSpacing: 0.5 }}>
               <Camera size={15} />
-              Start Photo Booth
+              {locale === 'en' ? 'Join the memory' : '축하 한 장 남기기'}
             </button>
           </motion.div>
         )}
 
         {step === 'upload' && (
           <motion.div key="upload" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} style={{ maxWidth: 360, margin: '0 auto', padding: '0 20px' }}>
-            <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Selfie Upload</p>
-            <p style={{ fontSize: 13, opacity: 0.5, marginBottom: 16 }}>Upload your face photo</p><div style={{ display: 'flex', gap: 8, marginBottom: 12 }}><button onClick={() => setGender('male')} style={{ flex: 1, padding: '10px', borderRadius: 8, border: gender === 'male' ? '2px solid currentColor' : '1px solid rgba(128,128,128,0.3)', background: gender === 'male' ? 'rgba(128,128,128,0.1)' : 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: gender === 'male' ? 600 : 400, color: 'inherit' }}>Male</button><button onClick={() => setGender('female')} style={{ flex: 1, padding: '10px', borderRadius: 8, border: gender === 'female' ? '2px solid currentColor' : '1px solid rgba(128,128,128,0.3)', background: gender === 'female' ? 'rgba(128,128,128,0.1)' : 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: gender === 'female' ? 600 : 400, color: 'inherit' }}>Female</button></div>
-            <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Your name" style={{ width: '100%', padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(128,128,128,0.3)', fontSize: 14, marginBottom: 12, boxSizing: 'border-box', outline: 'none', background: 'rgba(255,255,255,0.08)', color: 'inherit' }} />
+            <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>{locale === 'en' ? 'Upload Selfie' : '셀카 업로드'}</p>
+            <p style={{ fontSize: 13, opacity: 0.5, marginBottom: 16 }}>{locale === 'en' ? 'Upload a clear front-facing photo' : '정면이 잘 보이는 사진을 올려주세요'}</p><div style={{ display: 'flex', gap: 8, marginBottom: 12 }}><button onClick={() => setGender('male')} style={{ flex: 1, padding: '10px', borderRadius: 8, border: gender === 'male' ? '2px solid currentColor' : '1px solid rgba(128,128,128,0.3)', background: gender === 'male' ? 'rgba(128,128,128,0.1)' : 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: gender === 'male' ? 600 : 400, color: 'inherit' }}>{locale === 'en' ? 'Male' : '남성'}</button><button onClick={() => setGender('female')} style={{ flex: 1, padding: '10px', borderRadius: 8, border: gender === 'female' ? '2px solid currentColor' : '1px solid rgba(128,128,128,0.3)', background: gender === 'female' ? 'rgba(128,128,128,0.1)' : 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: gender === 'female' ? 600 : 400, color: 'inherit' }}>{locale === 'en' ? 'Female' : '여성'}</button></div>
+            <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="이름" style={{ width: '100%', padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(128,128,128,0.3)', fontSize: 14, marginBottom: 12, boxSizing: 'border-box', outline: 'none', background: 'rgba(255,255,255,0.08)', color: 'inherit' }} />
             <button onClick={() => inputRef.current?.click()} disabled={uploading} style={{ width: '100%', padding: '14px', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', color: 'inherit', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 14, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               {uploading ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
-              {uploading ? 'Uploading...' : 'Upload Photo'}
+              {uploading ? (locale === 'en' ? 'Uploading...' : '업로드 중...') : (locale === 'en' ? 'Upload Photo' : '사진 올리기')}
             </button>
-            <button onClick={reset} style={{ marginTop: 12, background: 'none', border: 'none', fontSize: 12, opacity: 0.4, color: 'inherit', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={reset} style={{ marginTop: 12, background: 'none', border: 'none', fontSize: 12, opacity: 0.4, color: 'inherit', cursor: 'pointer' }}>{locale === 'en' ? 'Cancel' : '취소'}</button>
           </motion.div>
         )}
 
@@ -162,8 +163,8 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName }: Props)
             <div style={{ width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', margin: '0 auto 16px', border: '2px solid rgba(128,128,128,0.3)' }}>
               <img src={photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-            <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Choose Concept</p>
-            <p style={{ fontSize: 12, opacity: 0.5, marginBottom: 20 }}>Select a style for your portrait</p>
+            <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>{locale === 'en' ? 'Pick your vibe' : '컨셉 선택'}</p>
+            <p style={{ fontSize: 12, opacity: 0.5, marginBottom: 20 }}>{locale === 'en' ? 'How do you want to remember today?' : '원하는 스타일을 골라주세요'}</p>
             {error && <p style={{ fontSize: 12, color: '#e55', marginBottom: 12, opacity: 0.9 }}>{error}</p>}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 20 }}>
               {CONCEPTS.map(c => (
@@ -175,16 +176,16 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName }: Props)
             </div>
             <button onClick={generate} style={{ width: '100%', padding: '14px', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', color: 'inherit', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 14, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <Sparkles size={16} />
-              Generate
+              생성하기
             </button>
-            <button onClick={reset} style={{ marginTop: 12, background: 'none', border: 'none', fontSize: 12, opacity: 0.4, color: 'inherit', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={reset} style={{ marginTop: 12, background: 'none', border: 'none', fontSize: 12, opacity: 0.4, color: 'inherit', cursor: 'pointer' }}>{locale === 'en' ? 'Cancel' : '취소'}</button>
           </motion.div>
         )}
 
         {step === 'generating' && (
           <motion.div key="gen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ maxWidth: 320, margin: '0 auto', padding: '40px 20px' }}>
             <Loader2 size={32} className="animate-spin" style={{ color: 'inherit', margin: '0 auto 20px', display: 'block' }} />
-            <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>AI generating your portrait...</p>
+            <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>{locale === 'en' ? 'Crafting your moment...' : 'AI가 축하 사진을 만들고 있어요...'}</p>
             <div style={{ width: '100%', height: 4, background: 'rgba(128,128,128,0.2)', borderRadius: 2, overflow: 'hidden' }}>
               <div style={{ width: `${progress}%`, height: '100%', background: 'currentColor', borderRadius: 2, transition: 'width 0.5s ease' }} />
             </div>
@@ -195,20 +196,20 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName }: Props)
         {step === 'result' && (
           <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} style={{ maxWidth: 360, margin: '0 auto', padding: '0 20px' }}>
             <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(128,128,128,0.3)', marginBottom: 16, position: 'relative' }}>
-              <img src={resultUrl} alt="AI Photo" style={{ width: '100%', display: 'block' }} />
+              <img src={resultUrl} alt="AI Celebration" style={{ width: '100%', display: 'block' }} />
             </div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
               <button onClick={shareToInstagram} style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.12)', color: 'inherit', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 <Download size={16} />
-                Save
+                저장
               </button>
-              <button onClick={() => { if (navigator.share) navigator.share({ title: `${groomName} & ${brideName} Wedding`, url: resultUrl }); }} style={{ flex: 1, padding: '12px', background: 'transparent', color: 'inherit', borderRadius: 10, border: '1px solid rgba(128,128,128,0.3)', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <button onClick={() => { if (navigator.share) navigator.share({ title: `${groomName} & ${brideName} 결혼을 축하합니다`, url: resultUrl }); }} style={{ flex: 1, padding: '12px', background: 'transparent', color: 'inherit', borderRadius: 10, border: '1px solid rgba(128,128,128,0.3)', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 <Share2 size={16} />
-                Share
+                공유
               </button>
             </div>
             <button onClick={reset} style={{ width: '100%', padding: '12px', background: 'none', border: '1px solid rgba(128,128,128,0.3)', borderRadius: 10, fontSize: 13, color: 'inherit', opacity: 0.5, cursor: 'pointer' }}>
-              Try another concept
+              {locale === 'en' ? 'Create another moment' : '다른 컨셉으로 다시 만들기'}
             </button>
           </motion.div>
         )}

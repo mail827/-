@@ -2,7 +2,7 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown, MapPin, Calendar, Clock } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, getDday, formatTimeLocale, getCalendarData, type ThemeProps } from './shared';
 
 const W = {
   bg: '#FAF5EE', sand: '#F0E8DA', warm: '#A08060', deep: '#7A5E42',
@@ -91,7 +91,7 @@ function CopyBtn({ bank, account, holder }: { bank?: string; account?: string; h
   );
 }
 
-export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const w = wedding;
   const galleries = (w.galleries || []).filter((g: any) => g.mediaUrl);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -106,7 +106,7 @@ export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestb
         objectType: 'feed',
         content: {
           title,
-          description: formatDate(w.weddingDate) + ' ' + formatTime(w.weddingTime),
+          description: formatDate(w.weddingDate) + ' ' + formatTimeLocale(w.weddingTime, locale),
           imageUrl: w.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[w.envelopeStyle || 'black_ribbon'] || w.heroMedia || '') : (w.heroMedia || ''),
           link: { mobileWebUrl: url, webUrl: url }
         },
@@ -185,8 +185,8 @@ export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestb
           <p className="text-[10px] tracking-[0.5em] mb-8" style={{ color: W.wave, ...fl, fontStyle: 'italic' }}>Invitation</p>
           {w.showParents && (w.groomFatherName || w.groomMotherName || w.brideFatherName || w.brideMotherName) && (
             <div className="text-[13px] mb-8 space-y-1.5" style={{ color: W.textM, ...fk }}>
-              {(w.groomFatherName || w.groomMotherName) && <p>{[w.groomFatherName, w.groomMotherName].filter(Boolean).join(' · ')}의 아들 <span style={{ color: W.text }}>{w.groomName}</span></p>}
-              {(w.brideFatherName || w.brideMotherName) && <p>{[w.brideFatherName, w.brideMotherName].filter(Boolean).join(' · ')}의 딸 <span style={{ color: W.text }}>{w.brideName}</span></p>}
+              {(w.groomFatherName || w.groomMotherName) && <p>{[w.groomFatherName, w.groomMotherName].filter(Boolean).join(' · ')}{locale === 'en' ? 'Son of' : '의 아들'} <span style={{ color: W.text }}>{w.groomName}</span></p>}
+              {(w.brideFatherName || w.brideMotherName) && <p>{[w.brideFatherName, w.brideMotherName].filter(Boolean).join(' · ')}{locale === 'en' ? 'Daughter of' : '의 딸'} <span style={{ color: W.text }}>{w.brideName}</span></p>}
             </div>
           )}
           {w.greeting && <p className="text-[13px] leading-[2.4] whitespace-pre-line" style={{ color: W.text, ...fk }}>{w.greeting}</p>}
@@ -207,7 +207,7 @@ export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestb
           <p className="text-[10px] tracking-[0.5em] mb-10" style={{ color: W.wave, ...fl, fontStyle: 'italic' }}>Ceremony</p>
           <div className="space-y-3 mb-8">
             <div className="flex items-center justify-center gap-2.5"><Calendar size={14} style={{ color: W.wave }} /><p className="text-sm" style={{ color: W.text, ...fk }}>{formatDate(w.weddingDate)}</p></div>
-            <div className="flex items-center justify-center gap-2.5"><Clock size={14} style={{ color: W.wave }} /><p className="text-sm" style={{ color: W.text, ...fk }}>{formatTime(w.weddingTime)}</p></div>
+            <div className="flex items-center justify-center gap-2.5"><Clock size={14} style={{ color: W.wave }} /><p className="text-sm" style={{ color: W.text, ...fk }}>{formatTimeLocale(w.weddingTime, locale)}</p></div>
             <div className="flex items-center justify-center gap-2.5"><MapPin size={14} style={{ color: W.wave }} /><p className="text-sm" style={{ color: W.text, ...fk }}>{w.venue}{w.venueHall ? ' ' + w.venueHall : ''}</p></div>
             <p className="text-xs" style={{ color: W.textL }}>{w.venueAddress}</p>
           </div>
@@ -222,9 +222,9 @@ export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestb
           <p className="text-xs mb-6" style={{ color: W.textL }}>{w.venueAddress}</p>
           <div className="overflow-hidden mb-4" style={{ border: '1px solid ' + W.line }}><KakaoMap address={w.venueAddress} venue={w.venue} /></div>
           <div className="flex flex-wrap justify-center gap-2">
-            {w.venueNaverMap && <a href={w.venueNaverMap} target="_blank" rel="noreferrer" className="px-4 py-2.5 text-xs" style={{ background: W.cream, color: W.warm, border: '1px solid ' + W.line, ...fk }}>네이버 지도</a>}
-            {w.venueKakaoMap && <a href={w.venueKakaoMap} target="_blank" rel="noreferrer" className="px-4 py-2.5 text-xs" style={{ background: W.cream, color: W.warm, border: '1px solid ' + W.line, ...fk }}>카카오맵</a>}
-            {w.venueTmap && <a href={w.venueTmap} target="_blank" rel="noreferrer" className="px-4 py-2.5 text-xs" style={{ background: W.cream, color: W.warm, border: '1px solid ' + W.line, ...fk }}>티맵</a>}
+            {w.venueNaverMap && <a href={w.venueNaverMap} target="_blank" rel="noreferrer" className="px-4 py-2.5 text-xs" style={{ background: W.cream, color: W.warm, border: '1px solid ' + W.line, ...fk }}>{locale === 'en' ? 'Naver Map' : '네이버 지도'}</a>}
+            {w.venueKakaoMap && <a href={w.venueKakaoMap} target="_blank" rel="noreferrer" className="px-4 py-2.5 text-xs" style={{ background: W.cream, color: W.warm, border: '1px solid ' + W.line, ...fk }}>{locale === 'en' ? 'Kakao Map' : '카카오맵'}</a>}
+            {w.venueTmap && <a href={w.venueTmap} target="_blank" rel="noreferrer" className="px-4 py-2.5 text-xs" style={{ background: W.cream, color: W.warm, border: '1px solid ' + W.line, ...fk }}>{locale === 'en' ? 'T-map' : '티맵'}</a>}
           </div>
         </motion.section>
 
@@ -232,7 +232,7 @@ export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestb
 
         <motion.section id="rsvp-section" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="px-10 py-14" style={{ background: W.sand }}>
           <p className="text-[10px] tracking-[0.5em] text-center mb-8" style={{ color: W.wave, ...fl, fontStyle: 'italic' }}>Attendance</p>
-          <div className="p-5" style={{ background: W.cream, border: '1px solid ' + W.line }}><RsvpForm onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} weddingId={w.id} variant="wave" /></div>
+          <div className="p-5" style={{ background: W.cream, border: '1px solid ' + W.line }}><RsvpForm onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} weddingId={w.id} variant="wave" locale={locale} /></div>
         </motion.section>
 
         <WaveTransition from={W.sand} to={W.bg} />
@@ -244,7 +244,7 @@ export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestb
             {(w.brideAccount || w.brideFatherAccount || w.brideMotherAccount) && <AccordionGift title="신부측 축의금"><CopyBtn bank={w.brideBank} account={w.brideAccount} holder={w.brideAccountHolder} /><CopyBtn bank={w.brideFatherBank} account={w.brideFatherAccount} holder={w.brideFatherAccountHolder} /><CopyBtn bank={w.brideMotherBank} account={w.brideMotherAccount} holder={w.brideMotherAccountHolder} /></AccordionGift>}
             <div className="flex gap-2 pt-1">
               {w.tossLink && <a href={w.tossLink} target="_blank" rel="noreferrer" className="flex-1 py-3 text-sm text-center" style={{ background: W.cream, color: W.warm, border: '1px solid ' + W.line }}>토스로 송금</a>}
-              {w.kakaoPayLink && <a href={w.kakaoPayLink} target="_blank" rel="noreferrer" className="flex-1 py-3 text-sm text-center" style={{ background: W.cream, color: W.warm, border: '1px solid ' + W.line }}>카카오페이</a>}
+              {w.kakaoPayLink && <a href={w.kakaoPayLink} target="_blank" rel="noreferrer" className="flex-1 py-3 text-sm text-center" style={{ background: W.cream, color: W.warm, border: '1px solid ' + W.line }}>{locale === 'en' ? 'KakaoPay' : '카카오페이'}</a>}
             </div>
           </div>
         </motion.section>
@@ -264,8 +264,8 @@ export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestb
         <motion.section id="guestbook-section" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="px-10 py-14" style={{ background: W.bg }}>
           <p className="text-[10px] tracking-[0.5em] text-center mb-8" style={{ color: W.wave, ...fl, fontStyle: 'italic' }}>Guestbook</p>
           <div className="space-y-4">
-            <div className="p-5" style={{ background: W.cream, border: '1px solid ' + W.line }}><GuestbookForm onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} weddingId={w.id} variant="wave" /></div>
-            {(localGuestbooks || []).length > 0 && <GuestbookList guestbooks={localGuestbooks || []} weddingSlug={w.slug} onDelete={handleGuestbookDelete} />}
+            <div className="p-5" style={{ background: W.cream, border: '1px solid ' + W.line }}><GuestbookForm onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} weddingId={w.id} variant="wave" locale={locale} /></div>
+            {(localGuestbooks || []).length > 0 && <GuestbookList guestbooks={localGuestbooks || []} weddingSlug={w.slug} onDelete={handleGuestbookDelete} variant="wave" locale={locale} />}
           </div>
         </motion.section>
 
@@ -281,7 +281,7 @@ export default function WaveBorder({ wedding, guestbooks, onRsvpSubmit, onGuestb
           <button onClick={() => setShowShare(true)} className="inline-flex items-center gap-2 px-6 py-3 text-sm" style={{ background: W.warm, color: '#fff' }}><Share2 size={14} /> 공유하기</button>
         </section>
         <WaveTransition from={W.sand} to={W.bg} />
-        <footer className="pb-8 text-center" style={{ background: W.bg }}><a href="https://weddingshop.cloud" target="_blank" rel="noreferrer" className="text-[10px] tracking-wider" style={{ color: W.textL }}>Made by 청첩장 작업실 ›</a></footer>
+        <footer className="pb-8 text-center" style={{ background: W.bg }}><a href="https://weddingshop.cloud" target="_blank" rel="noreferrer" className="text-[10px] tracking-wider" style={{ color: W.textL }}>Made by Wedding Studio Lab ›</a></footer>
       </div>
       <ShareModal isOpen={showShare} onClose={() => setShowShare(false)} onShare={handleShare} variant="light" weddingId={w.id} />
     </div>

@@ -100,6 +100,9 @@ export interface WeddingData {
   ogCoverType?: string;
   ogCustomTitle?: string;
   ogCustomImage?: string;
+  locale?: string;
+  showLocaleSwitch?: boolean;
+  translationsEn?: Record<string, string>;
 }
 
 export interface GuestbookData {
@@ -132,6 +135,7 @@ export interface ThemeProps {
   isRsvpLoading: boolean;
   isGuestbookLoading: boolean;
   guestPhotoSlot?: React.ReactNode;
+  locale?: "ko" | "en";
   gallerySlot?: React.ReactNode;
 }
 
@@ -196,3 +200,5 @@ export const SENIOR_COLORS = [
   { name: '브라운', value: '#78350F' },
 ];
 export * from './themeConfig';
+export * from "./i18n";
+export { default as LocaleSwitch } from "./LocaleSwitch";

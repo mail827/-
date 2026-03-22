@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { t, type Locale } from './i18n';
+
+type RsvpVariant = 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2' | 'luna' | 'pearl' | 'botanical' | 'heart' | 'wave' | 'editorial';
 
 interface RsvpFormProps {
   weddingId: string;
   onSubmit: (data: { weddingId: string; name: string; phone: string; side: 'GROOM' | 'BRIDE'; attending: boolean; guestCount: number; message?: string }) => Promise<void>;
   isLoading: boolean;
-  variant?: 'classic' | 'minimal' | 'bohemian' | 'luxury' | 'playful' | 'forest' | 'ocean' | 'poetic' | 'glass' | 'spring' | 'mirim1' | 'mirim2' | 'luna' | 'pearl' | 'botanical' | 'heart' | 'wave' | 'editorial';
+  variant?: RsvpVariant;
+  locale?: Locale;
 }
 
-export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, variant = 'classic' }: RsvpFormProps) {
+export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, variant = 'classic', locale = 'ko' }: RsvpFormProps) {
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [side, setSide] = useState<'GROOM' | 'BRIDE' | null>(null);
@@ -26,13 +30,13 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
   if (submitted) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-8">
-        <p className="text-stone-600">참석 여부가 전달되었습니다</p>
-        <p className="text-stone-400 text-sm mt-2">감사합니다</p>
+        <p className="text-stone-600">{t('rsvp', 'submitted', locale)}</p>
+        <p className="text-stone-400 text-sm mt-2">{t('rsvp', 'thanks', locale)}</p>
       </motion.div>
     );
   }
 
-  const styles = {
+  const styles: Record<RsvpVariant, { input: string; button: string; active: string; inactive: string }> = {
     classic: { input: 'bg-white/60 border-[#E8E2DA] focus:border-[#B8A088]', button: 'bg-[#2C2620] hover:bg-[#1A1714]', active: 'bg-[#2C2620] text-[#FFFDF9]', inactive: 'bg-white border-[#E8E2DA] text-[#8A7E72]' },
     minimal: { input: 'bg-stone-50 border-stone-200 focus:border-stone-400', button: 'bg-stone-800 hover:bg-stone-700', active: 'bg-stone-800 text-white', inactive: 'bg-white border-stone-200 text-stone-600' },
     bohemian: { input: 'bg-white border-[#5C6B54]/20 focus:border-[#5C6B54]', button: 'bg-[#5C6B54] hover:bg-[#4A5944]', active: 'bg-[#5C6B54] text-white', inactive: 'bg-white border-[#5C6B54]/20 text-[#5D5D5D]' },
@@ -57,22 +61,22 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
 
   return (
     <div className="space-y-4">
-      <input type="text" placeholder="이름" value={name} onChange={e => setName(e.target.value)} className={`w-full px-4 py-3 rounded-lg border text-sm outline-none transition-colors ${s.input}`} />
-      <input type="tel" placeholder="연락처" value={contact} onChange={e => setContact(e.target.value)} className={`w-full px-4 py-3 rounded-lg border text-sm outline-none transition-colors ${s.input}`} />
-      
+      <input type="text" placeholder={t('rsvp', 'name', locale)} value={name} onChange={e => setName(e.target.value)} className={`w-full px-4 py-3 rounded-lg border text-sm outline-none transition-colors ${s.input}`} />
+      <input type="tel" placeholder={t('rsvp', 'phone', locale)} value={contact} onChange={e => setContact(e.target.value)} className={`w-full px-4 py-3 rounded-lg border text-sm outline-none transition-colors ${s.input}`} />
+
       <div className="flex gap-2">
-        <button onClick={() => setSide('GROOM')} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${side === 'GROOM' ? s.active : s.inactive}`}>신랑측</button>
-        <button onClick={() => setSide('BRIDE')} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${side === 'BRIDE' ? s.active : s.inactive}`}>신부측</button>
+        <button onClick={() => setSide('GROOM')} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${side === 'GROOM' ? s.active : s.inactive}`}>{t('rsvp', 'groomSide', locale)}</button>
+        <button onClick={() => setSide('BRIDE')} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${side === 'BRIDE' ? s.active : s.inactive}`}>{t('rsvp', 'brideSide', locale)}</button>
       </div>
 
       <div className="flex gap-2">
-        <button onClick={() => setAttendance(true)} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${attendance === true ? s.active : s.inactive}`}>참석</button>
-        <button onClick={() => setAttendance(false)} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${attendance === false ? s.active : s.inactive}`}>불참</button>
+        <button onClick={() => setAttendance(true)} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${attendance === true ? s.active : s.inactive}`}>{t('rsvp', 'attend', locale)}</button>
+        <button onClick={() => setAttendance(false)} className={`flex-1 py-3 rounded-lg text-sm border transition-all ${attendance === false ? s.active : s.inactive}`}>{t('rsvp', 'notAttend', locale)}</button>
       </div>
-      
+
       {attendance && (
         <div className="flex items-center gap-3">
-          <span className={`text-sm ${variant === 'pearl' ? 'text-[rgba(227,235,243,0.5)]' : variant === 'luna' ? 'text-[#8A9AA4]' : 'text-stone-500'}`}>동반 인원</span>
+          <span className={`text-sm ${variant === 'pearl' ? 'text-[rgba(227,235,243,0.5)]' : variant === 'luna' ? 'text-[#8A9AA4]' : 'text-stone-500'}`}>{t('rsvp', 'guestCount', locale)}</span>
           <div className="flex items-center gap-2">
             <button onClick={() => setGuestCount(Math.max(1, guestCount - 1))} className={`w-8 h-8 rounded border ${s.inactive}`}>-</button>
             <span className={`w-8 text-center ${variant === 'pearl' ? 'text-[#E8EEF2]' : variant === 'luna' ? 'text-[#5A6A74]' : ''}`}>{guestCount}</span>
@@ -80,11 +84,11 @@ export default function RsvpForm({ weddingId: _weddingId, onSubmit, isLoading, v
           </div>
         </div>
       )}
-      
-      <textarea placeholder="메시지 (선택)" value={message} onChange={e => setMessage(e.target.value)} rows={3} className={`w-full px-4 py-3 rounded-lg border text-sm outline-none transition-colors resize-none ${s.input}`} />
-      
+
+      <textarea placeholder={t('rsvp', 'message', locale)} value={message} onChange={e => setMessage(e.target.value)} rows={3} className={`w-full px-4 py-3 rounded-lg border text-sm outline-none transition-colors resize-none ${s.input}`} />
+
       <button onClick={handleSubmit} disabled={isLoading || !name || !contact || !side || attendance === null} className={`w-full py-3 rounded-lg text-white text-sm transition-colors disabled:opacity-50 ${s.button}`}>
-        {isLoading ? '전송 중...' : '참석 여부 전달하기'}
+        {isLoading ? (locale === 'en' ? 'Submitting...' : '전송 중...') : t('rsvp', 'submit', locale)}
       </button>
     </div>
   );

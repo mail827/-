@@ -2,9 +2,9 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, KakaoMap, ShareModal, GuestbookList, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, KakaoMap, ShareModal, GuestbookList, getDday, formatDateLocale, formatTimeLocale, getCalendarData, type ThemeProps } from './shared';
 
-export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -42,7 +42,7 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} & ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'korean'), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
+      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDateLocale(wedding.weddingDate, 'full', locale), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') {
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.\n인스타그램 스토리에 공유해보세요!');
@@ -87,8 +87,8 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
           <h1 className="text-2xl tracking-[0.1em] text-[#3D3D3D]">{wedding.groomName} <span className="text-[#5C6B54]/40 mx-2">&</span> {wedding.brideName}</h1>
           <div className="w-12 h-px bg-[#5C6B54]/20 mx-auto my-4" />
           <div className="text-sm text-[#7D7D7D] space-y-1">
-            <p>{formatDate(wedding.weddingDate, 'korean')}</p>
-            <p>{formatTime(wedding.weddingTime)}</p>
+            <p>{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+            <p>{formatTimeLocale(wedding.weddingTime, locale)}</p>
             <p className="text-[#9D9D9D]">{wedding.venue}</p>
           </div>
           {wedding.showDday && <p className="text-xs text-[#5C6B54] tracking-wider mt-4">{getDday(wedding.weddingDate)}</p>}
@@ -105,8 +105,8 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
               <p className="text-sm text-[#6D6D6D] leading-[2.2] whitespace-pre-line">{wedding.greeting}</p>
               {wedding.showParents && (
                 <div className="mt-10 pt-8 border-t border-[#5C6B54]/10 grid grid-cols-2 gap-6 text-sm">
-                  <div className="text-center"><p className="text-[#5C6B54]/50 text-xs mb-2">신랑측</p><p className="text-[#9D9D9D] text-xs">{wedding.groomFatherName} · {wedding.groomMotherName}</p><p className="text-[#5D5D5D] mt-1">의 아들 <span className="text-[#5C6B54]">{wedding.groomName}</span></p></div>
-                  <div className="text-center"><p className="text-[#5C6B54]/50 text-xs mb-2">신부측</p><p className="text-[#9D9D9D] text-xs">{wedding.brideFatherName} · {wedding.brideMotherName}</p><p className="text-[#5D5D5D] mt-1">의 딸 <span className="text-[#5C6B54]">{wedding.brideName}</span></p></div>
+                  <div className="text-center"><p className="text-[#5C6B54]/50 text-xs mb-2">{locale === 'en' ? "Groom's Side" : '신랑측'}</p><p className="text-[#9D9D9D] text-xs">{wedding.groomFatherName} · {wedding.groomMotherName}</p><p className="text-[#5D5D5D] mt-1">{locale === 'en' ? 'Son of' : '의 아들'} <span className="text-[#5C6B54]">{wedding.groomName}</span></p></div>
+                  <div className="text-center"><p className="text-[#5C6B54]/50 text-xs mb-2">{locale === 'en' ? "Bride's Side" : '신부측'}</p><p className="text-[#9D9D9D] text-xs">{wedding.brideFatherName} · {wedding.brideMotherName}</p><p className="text-[#5D5D5D] mt-1">{locale === 'en' ? 'Daughter of' : '의 딸'} <span className="text-[#5C6B54]">{wedding.brideName}</span></p></div>
                 </div>
               )}
             </div>
@@ -124,8 +124,8 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
               {calendarData.weeks.flat().map((day, i) => (<div key={i} className={`py-1.5 ${day === calendarData.targetDay ? 'bg-[#5C6B54] text-white rounded-full' : day ? 'text-[#6D6D6D]' : ''}`}>{day}</div>))}
             </div>
             <div className="mt-4 pt-4 border-t border-[#5C6B54]/10 flex justify-center gap-4 text-xs text-[#7D7D7D]">
-              <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-[#5C6B54]" />{formatDate(wedding.weddingDate, 'short')}</span>
-              <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-[#5C6B54]" />{formatTime(wedding.weddingTime)}</span>
+              <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-[#5C6B54]" />{formatDateLocale(wedding.weddingDate, 'short', locale)}</span>
+              <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-[#5C6B54]" />{formatTimeLocale(wedding.weddingTime, locale)}</span>
             </div>
           </div>
         </motion.div>
@@ -165,7 +165,7 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center">
           <LeafDivider /><p className="text-xs tracking-[0.2em] text-[#5C6B54]/60 mt-6 mb-6">LOCATION</p>
           <div className="bg-white rounded-lg overflow-hidden shadow-sm">
-            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
+            <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             <div className="p-6 text-center">
               <p className="text-[#5D5D5D] flex items-center justify-center gap-1"><MapPin className="w-4 h-4 text-[#5C6B54]" />{wedding.venue}</p>
               {wedding.venueHall && <p className="text-[#5C6B54] text-sm mt-1">{wedding.venueHall}</p>}
@@ -174,7 +174,7 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
               <div className="flex justify-center gap-2 mt-4">
                 {wedding.venueNaverMap && <a href={wedding.venueNaverMap} target="_blank" className="px-4 py-2 bg-[#03C75A] text-white rounded text-xs">네이버</a>}
                 {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" className="px-4 py-2 bg-[#FEE500] text-stone-800 rounded text-xs">카카오</a>}
-                {wedding.venueTmap && <a href={wedding.venueTmap} target="_blank" className="px-4 py-2 bg-[#EF4123] text-white rounded text-xs">티맵</a>}
+                {wedding.venueTmap && <a href={wedding.venueTmap} target="_blank" className="px-4 py-2 bg-[#EF4123] text-white rounded text-xs">{locale === 'en' ? 'T-map' : '티맵'}</a>}
               </div>
             </div>
           </div>
@@ -184,7 +184,7 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
       <Section id="rsvp-section">
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
           <LeafDivider /><p className="text-xs tracking-[0.2em] text-[#5C6B54]/60 mt-6 mb-6">RSVP</p>
-          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="bohemian" />
+          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="bohemian" locale={locale} />
         </motion.div>
       </Section>
 
@@ -198,8 +198,8 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
             </div>
             {(wedding.tossLink || wedding.kakaoPayLink) && (
               <div className="flex justify-center gap-2 mt-4">
-                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" className="px-5 py-2.5 bg-[#0064FF] text-white rounded text-sm">토스</a>}
-                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" className="px-5 py-2.5 bg-[#FEE500] text-stone-800 rounded text-sm">카카오페이</a>}
+                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" className="px-5 py-2.5 bg-[#0064FF] text-white rounded text-sm">{locale === 'en' ? 'Toss' : '토스'}</a>}
+                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" className="px-5 py-2.5 bg-[#FEE500] text-stone-800 rounded text-sm">{locale === 'en' ? 'KakaoPay' : '카카오페이'}</a>}
               </div>
             )}
           </motion.div>
@@ -209,12 +209,12 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
       <Section id="guestbook-section">
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
           <LeafDivider /><p className="text-xs tracking-[0.2em] text-[#5C6B54]/60 mt-6 mb-6 text-center">GUESTBOOK</p>
-          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="bohemian" />
+          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="bohemian" locale={locale} />
           <GuestbookList 
             guestbooks={localGuestbooks} 
             weddingSlug={wedding.slug} 
             onDelete={handleGuestbookDelete}
-            variant="bohemian"
+            variant="bohemian" locale={locale}
           />
         </motion.div>
       </Section>
@@ -238,7 +238,7 @@ export default function BohemianDream({ wedding, guestbooks, onRsvpSubmit, onGue
         </div>
       </Section>
 
-      <footer className="py-8 text-center text-[10px] tracking-widest" style={{ background: "#F5EDE0" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[#8B7355] hover:text-[#6B5540] transition-colors">Made by 청첩장 작업실 ›</a></footer>
+      <footer className="py-8 text-center text-[10px] tracking-widest" style={{ background: "#F5EDE0" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[#8B7355] hover:text-[#6B5540] transition-colors">Made by Wedding Studio Lab ›</a></footer>
 
       <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="BOHEMIAN_DREAM" usePhotoFilter={wedding.usePhotoFilter ?? true} />}</AnimatePresence>
       <AnimatePresence><ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="light" /></AnimatePresence>

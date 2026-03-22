@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { getThemeConfig } from './themeConfig';
 
 interface TabItem {
@@ -10,19 +10,38 @@ interface TabItem {
 interface VenueDetailTabsProps {
   tabs: TabItem[];
   theme?: string;
+  locale?: string;
 }
 
-export default function VenueDetailTabs({ tabs, theme = 'MODERN_MINIMAL' }: VenueDetailTabsProps) {
+export default function VenueDetailTabs({ tabs, theme = 'MODERN_MINIMAL'}: VenueDetailTabsProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-
-  if (!tabs || !tabs.length) return null;
+  const [parentDark, setParentDark] = useState<boolean | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const config = getThemeConfig(theme);
   const c = config.colors;
-  const isDark = isColorDark(c.background);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const venueSection = containerRef.current.closest('#venue-section') || containerRef.current.parentElement;
+    if (!venueSection) return;
+
+    const computed = window.getComputedStyle(venueSection);
+    const bg = computed.backgroundColor;
+    const match = bg.match(/\d+/g);
+    if (match && match.length >= 3) {
+      const [r, g, b] = match.map(Number);
+      const lum = (r * 299 + g * 587 + b * 114) / 1000;
+      setParentDark(lum < 128);
+    }
+  }, []);
+
+  if (!tabs || !tabs.length) return null;
+
+  const isDark = parentDark !== null ? parentDark : isColorDark(c.background);
 
   const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
-  const activeBorder = isDark ? c.primary : c.primary;
+  const activeBorder = c.primary;
   const textColor = isDark ? 'rgba(255,255,255,0.9)' : c.text;
   const mutedColor = isDark ? 'rgba(255,255,255,0.4)' : c.textMuted;
   const contentBg = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)';
@@ -30,7 +49,7 @@ export default function VenueDetailTabs({ tabs, theme = 'MODERN_MINIMAL' }: Venu
   const active = tabs[activeIndex];
 
   return (
-    <div style={{ marginTop: '2rem' }}>
+    <div ref={containerRef} style={{ marginTop: '2rem' }}>
       <div
         style={{
           display: 'flex',

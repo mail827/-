@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import {
   RsvpForm, GuestbookForm, GalleryModal, GuestbookList,
-  KakaoMap, ShareModal, formatDate, formatTime, getDday,
+  KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale,
   getCalendarData, type ThemeProps
 } from './shared';
 
@@ -58,7 +58,7 @@ const C = {
   borderLight: '#444444',
 };
 
-export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -102,7 +102,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
         objectType: 'feed',
         content: {
           title,
-          description: `${formatDate(wedding.weddingDate, 'korean')} ${formatTime(wedding.weddingTime)}`,
+          description: `${formatDateLocale(wedding.weddingDate, 'full', locale)} ${formatTimeLocale(wedding.weddingTime, locale)}`,
           imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''),
           link: { mobileWebUrl: url, webUrl: url }
         },
@@ -112,7 +112,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.\n인스타그램 스토리에 공유해보세요!');
     } else if (type === 'sms') {
-      window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDate(wedding.weddingDate, 'korean')}\n${url}`)}`;
+      window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDateLocale(wedding.weddingDate, 'full', locale)}\n${url}`)}`;
     }
     setShowShareModal(false);
   };
@@ -205,7 +205,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
             className="ed-vertical"
             style={{ fontSize: 11, borderLeft: `1px solid ${C.point}`, paddingLeft: 12, color: C.muted }}
           >
-            {formatDate(wedding.weddingDate, 'dots').replace(/\./g, ' / ')} ISSUE
+            {formatDateLocale(wedding.weddingDate, 'dots', locale).replace(/\./g, ' / ')} ISSUE
           </motion.div>
         </div>
       </section>
@@ -222,7 +222,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
                   {wedding.groomMotherName && <span>{wedding.groomMotherName}</span>}
                 </p>
                 <p className="ed-pre" style={{ fontWeight: 500, fontSize: 15, color: C.point, marginTop: '0.25rem' }}>
-                  의 아들 {wedding.groomName}
+                  {locale === 'en' ? 'Son of' : '의 아들'} {wedding.groomName}
                 </p>
               </div>
               <div className="text-right">
@@ -233,7 +233,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
                   {wedding.brideMotherName && <span>{wedding.brideMotherName}</span>}
                 </p>
                 <p className="ed-pre" style={{ fontWeight: 500, fontSize: 15, color: C.point, marginTop: '0.25rem' }}>
-                  의 딸 {wedding.brideName}
+                  {locale === 'en' ? 'Daughter of' : '의 딸'} {wedding.brideName}
                 </p>
               </div>
             </motion.div>
@@ -304,7 +304,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
                 <div style={{ marginTop: '2rem' }}>
                   <p className="ed-pre" style={{ fontSize: 9, letterSpacing: '0.3em', color: C.muted, marginBottom: '0.75rem' }}>TIME</p>
                   <p className="ed-serif" style={{ fontStyle: 'italic', fontSize: 20, color: C.point }}>
-                    {formatDate(wedding.weddingDate, 'dots')} / {formatTime(wedding.weddingTime)}
+                    {formatDateLocale(wedding.weddingDate, 'dots', locale)} / {formatTimeLocale(wedding.weddingTime, locale)}
                   </p>
                 </div>
               </div>
@@ -370,7 +370,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
           </motion.div>
 
           <motion.div {...delayAnim(0.45)} style={{ marginTop: '2.5rem' }}>
-            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
+            <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
           </motion.div>
         </div>
       </section>
@@ -381,7 +381,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
             <p className="ed-syne" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', color: C.muted, marginBottom: '2.5rem' }}>ATTENDANCE</p>
           </motion.div>
           <motion.div {...delayAnim(0.15)}>
-            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="pearl" />
+            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="pearl" locale={locale} />
           </motion.div>
         </div>
       </section>
@@ -448,12 +448,12 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
             <p className="ed-syne" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', color: C.muted, marginBottom: '2.5rem' }}>GUESTBOOK</p>
           </motion.div>
           <motion.div {...delayAnim(0.15)}>
-            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="pearl" />
+            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="editorial" locale={locale} />
             <GuestbookList
               guestbooks={localGuestbooks}
               weddingSlug={wedding.slug}
               onDelete={handleGuestbookDelete}
-              variant="classic"
+              variant="editorial" locale={locale}
             />
           </motion.div>
         </div>
@@ -507,7 +507,7 @@ export default function Editorial({ wedding, guestbooks, onRsvpSubmit, onGuestbo
       <footer style={{ padding: '2rem', textAlign: 'center', background: C.bg }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity ed-pre"
           style={{ fontWeight: 300, fontSize: 11, color: C.dim, textDecoration: 'none', letterSpacing: '0.05em' }}>
-          Made by 청첩장 작업실 ›
+          Made by Wedding Studio Lab ›
         </a>
       </footer>
 

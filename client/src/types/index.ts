@@ -123,6 +123,9 @@ export interface Wedding {
   ogCoverType?: string;
   ogCustomTitle?: string;
   ogCustomImage?: string;
+  locale?: string;
+  showLocaleSwitch?: boolean;
+  translationsEn?: Record<string, string>;
   guestPhotoEnabled?: boolean;
   createdAt: string;
   updatedAt: string;

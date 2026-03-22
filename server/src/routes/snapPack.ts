@@ -967,7 +967,7 @@ router.get('/snap/:id', authMiddleware, async (req, res) => {
           console.log('[snap poll]', snap.id, 'response keys:', Object.keys(result), JSON.stringify(result).slice(0, 400));
           if (result.detail) {
             const errMsg = typeof result.detail === 'string' ? result.detail : JSON.stringify(result.detail).slice(0, 300);
-            if (errMsg.includes('unavailable') || errMsg.includes('timeout')) {
+            if (errMsg.includes('unavailable') || errMsg.includes('timeout') || errMsg.includes('Internal Server Error') || errMsg.includes('internal')) {
               console.log('[snap poll]', snap.id, 'fal temp error, retrying submit...');
               try {
                 const retryPack = await prisma.snapPack.findUnique({ where: { id: snap.snapPackId! } });

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, ChevronDown, Share2, Copy, Check, Music, VolumeX } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, getDday, formatDateLocale, formatTimeLocale, type ThemeProps } from './shared';
 import { applyPhotoFilter } from './shared/themeConfig';
 
 function AquaHeroDustCanvas() {
@@ -359,7 +359,7 @@ function AccordionSection({ title, children, isOpen, onToggle }: { title: string
   );
 }
 
-export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot, isPreview }: ThemeProps & { isPreview?: boolean }) {
+export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot, locale, isPreview }: ThemeProps & { isPreview?: boolean }) {
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
@@ -402,7 +402,7 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} & ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao?.Share) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'korean'), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
+      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDateLocale(wedding.weddingDate, 'full', locale), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') {
       await navigator.clipboard.writeText(url);
       window.open('https://www.instagram.com/', '_blank');
@@ -463,8 +463,8 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
               <p className="text-sm leading-[2.4] whitespace-pre-line" style={{ ...f, color: c.text }}>{wedding.greeting}</p>
             {wedding.showParents && (
               <div className="mt-12 text-xs leading-loose" style={{ ...f, color: c.textSoft }}>
-                <p><span style={{ color: c.textFaint }}>{wedding.groomFatherName} · {wedding.groomMotherName}</span>의 아들 <span style={{ color: c.text }}>{wedding.groomName}</span></p>
-                <p><span style={{ color: c.textFaint }}>{wedding.brideFatherName} · {wedding.brideMotherName}</span>의 딸 <span style={{ color: c.text }}>{wedding.brideName}</span></p>
+                <p><span style={{ color: c.textFaint }}>{wedding.groomFatherName} · {wedding.groomMotherName}</span>{locale === 'en' ? 'Son of' : '의 아들'} <span style={{ color: c.text }}>{wedding.groomName}</span></p>
+                <p><span style={{ color: c.textFaint }}>{wedding.brideFatherName} · {wedding.brideMotherName}</span>{locale === 'en' ? 'Daughter of' : '의 딸'} <span style={{ color: c.text }}>{wedding.brideName}</span></p>
               </div>
             )}
             </div>
@@ -513,20 +513,20 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-lg mx-auto text-center">
           <p className="text-[0.75rem] tracking-[0.3em] mb-12" style={{ ...f, color: c.textFaint }}>LOCATION</p>
           <div className="py-10 px-6 rounded-3xl" style={{ background: c.card, backdropFilter: 'blur(20px)', border: '1px solid ' + c.cardBorder }}>
-            <p className="text-sm" style={{ ...f, color: c.text }}>{formatDate(wedding.weddingDate, 'korean')}</p>
-            {wedding.weddingTime && <p className="text-xs mt-2" style={{ ...f, color: c.textSoft }}>{formatTime(wedding.weddingTime)}</p>}
+            <p className="text-sm" style={{ ...f, color: c.text }}>{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+            {wedding.weddingTime && <p className="text-xs mt-2" style={{ ...f, color: c.textSoft }}>{formatTimeLocale(wedding.weddingTime, locale)}</p>}
             <div className="my-8 h-px" style={{ background: 'rgba(44,95,124,0.08)' }} />
             <p className="text-lg mb-2" style={{ ...f, color: c.text }}>{wedding.venue}</p>
             {wedding.venueHall && <p className="text-sm mt-2" style={{ ...f, color: c.textSoft }}>{wedding.venueHall}</p>}
             {wedding.venueAddress && <p className="text-xs mt-3 mb-8" style={{ ...f, color: c.textFaint }}>{wedding.venueAddress}</p>}
             {wedding.venueAddress && (
               <div className="rounded-2xl overflow-hidden mb-6" style={{ height: 200 }}>
-                <KakaoMap address={wedding.venueAddress} className="w-full h-full" />
+                <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} className="w-full h-full" />
               </div>
             )}
             <div className="flex gap-3 justify-center">
               {wedding.venueNaverMap && <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer" className="px-5 py-3 rounded-full text-xs transition-all hover:opacity-80" style={{ ...f, background: 'rgba(44,95,124,0.08)', color: c.text, border: '1px solid rgba(44,95,124,0.1)' }}>네이버지도</a>}
-              {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-5 py-3 rounded-full text-xs transition-all hover:opacity-80" style={{ ...f, background: 'rgba(44,95,124,0.08)', color: c.text, border: '1px solid rgba(44,95,124,0.1)' }}>카카오맵</a>}
+              {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-5 py-3 rounded-full text-xs transition-all hover:opacity-80" style={{ ...f, background: 'rgba(44,95,124,0.08)', color: c.text, border: '1px solid rgba(44,95,124,0.1)' }}>{locale === 'en' ? 'Kakao Map' : '카카오맵'}</a>}
             </div>
           </div>
         </motion.div>
@@ -571,7 +571,7 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
       <section id="rsvp-section" className="py-28 px-8 relative" style={{ zIndex: 1 }}>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-lg mx-auto">
           <AccordionSection title="참석 여부" isOpen={openSection === 'rsvp'} onToggle={() => setOpenSection(openSection === 'rsvp' ? null : 'rsvp')}>
-            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="glass" />
+            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="glass" locale={locale} />
           </AccordionSection>
         </motion.div>
       </section>
@@ -580,10 +580,10 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-lg mx-auto">
           <p className="text-center text-[0.75rem] tracking-[0.3em] mb-12" style={{ ...f, color: c.textFaint }}>MESSAGE</p>
           <AccordionSection title="마음을 남겨주세요" isOpen={openSection === 'guestbook'} onToggle={() => setOpenSection(openSection === 'guestbook' ? null : 'guestbook')}>
-            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="glass" />
+            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="aqua-globe" locale={locale} />
           </AccordionSection>
           {localGuestbooks.length > 0 && (
-            <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="glass" />
+            <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="aqua-globe" locale={locale} />
           )}
         </motion.div>
       </section>
@@ -625,7 +625,7 @@ export default function AquaGlobe({ wedding, guestbooks, onRsvpSubmit, onGuestbo
       </section>
 
       <footer className="py-10 text-center relative" style={{ zIndex: 1 }}>
-        <p className="text-[0.65rem] tracking-wider" style={{ ...f, color: c.textFaint }}>Made by 청첩장 작업실 ›</p>
+        <p className="text-[0.65rem] tracking-wider" style={{ ...f, color: c.textFaint }}>Made by Wedding Studio Lab ›</p>
       </footer>
 
       {galleryIndex !== null && galleries.length > 0 && <GalleryModal galleries={galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="AQUA_GLOBE" usePhotoFilter={wedding.usePhotoFilter ?? true} />}

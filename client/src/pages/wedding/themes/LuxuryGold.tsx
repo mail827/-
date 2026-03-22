@@ -2,9 +2,9 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale, getCalendarData, type ThemeProps } from './shared';
 
-export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -42,7 +42,7 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} & ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'dots'), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
+      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDateLocale(wedding.weddingDate, 'dots', locale), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') {
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.\n인스타그램 스토리에 공유해보세요!');
@@ -87,8 +87,8 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
             <div className="w-12 h-px bg-[#C9A96E]/30" /><div className="w-1.5 h-1.5 bg-[#C9A96E] rotate-45" /><div className="w-12 h-px bg-[#C9A96E]/30" />
           </div>
           <div className="text-sm text-[#888] space-y-1">
-            <p>{formatDate(wedding.weddingDate, 'dots')}</p>
-            <p>{formatTime(wedding.weddingTime)}</p>
+            <p>{formatDateLocale(wedding.weddingDate, 'dots', locale)}</p>
+            <p>{formatTimeLocale(wedding.weddingTime, locale)}</p>
             <p className="text-[#666]">{wedding.venue}</p>
           </div>
           {wedding.showDday && <p className="text-xs text-[#C9A96E]/60 tracking-wider mt-4">{getDday(wedding.weddingDate)}</p>}
@@ -124,8 +124,8 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
               {calendarData.weeks.flat().map((day, i) => (<div key={i} className={`py-1.5 ${day === calendarData.targetDay ? 'bg-[#C9A96E] text-black' : day ? 'text-[#888]' : ''}`}>{day}</div>))}
             </div>
             <div className="mt-4 pt-4 border-t border-[#C9A96E]/10 flex justify-center gap-4 text-xs text-[#888]">
-              <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-[#C9A96E]/60" />{formatDate(wedding.weddingDate, 'short')}</span>
-              <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-[#C9A96E]/60" />{formatTime(wedding.weddingTime)}</span>
+              <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-[#C9A96E]/60" />{formatDateLocale(wedding.weddingDate, 'short', locale)}</span>
+              <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-[#C9A96E]/60" />{formatTimeLocale(wedding.weddingTime, locale)}</span>
             </div>
           </div>
         </motion.div>
@@ -166,7 +166,7 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center">
           <GoldDivider /><p className="text-[10px] tracking-[0.4em] text-[#C9A96E]/60 mt-6 mb-6">LOCATION</p>
           <div className="border border-[#C9A96E]/20 overflow-hidden">
-            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
+            <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             <div className="p-6 text-center">
               <p className="text-[#ccc] flex items-center justify-center gap-1"><MapPin className="w-4 h-4 text-[#C9A96E]" />{wedding.venue}</p>
               {wedding.venueHall && <p className="text-[#C9A96E]/80 text-sm mt-1">{wedding.venueHall}</p>}
@@ -174,7 +174,7 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
               <div className="flex justify-center gap-2 mt-4">
                 {wedding.venueNaverMap && <a href={wedding.venueNaverMap} target="_blank" className="px-4 py-2 border border-[#C9A96E]/30 text-[#C9A96E] text-xs hover:bg-[#C9A96E] hover:text-black transition-all">네이버</a>}
                 {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" className="px-4 py-2 border border-[#C9A96E]/30 text-[#C9A96E] text-xs hover:bg-[#C9A96E] hover:text-black transition-all">카카오</a>}
-                {wedding.venueTmap && <a href={wedding.venueTmap} target="_blank" className="px-4 py-2 border border-[#C9A96E]/30 text-[#C9A96E] text-xs hover:bg-[#C9A96E] hover:text-black transition-all">티맵</a>}
+                {wedding.venueTmap && <a href={wedding.venueTmap} target="_blank" className="px-4 py-2 border border-[#C9A96E]/30 text-[#C9A96E] text-xs hover:bg-[#C9A96E] hover:text-black transition-all">{locale === 'en' ? 'T-map' : '티맵'}</a>}
               </div>
             </div>
           </div>
@@ -184,7 +184,7 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
       <Section id="rsvp-section">
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
           <GoldDivider /><p className="text-[10px] tracking-[0.4em] text-[#C9A96E]/60 mt-6 mb-6">RSVP</p>
-          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="luxury" />
+          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="luxury" locale={locale} />
         </motion.div>
       </Section>
 
@@ -209,12 +209,12 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
       <Section id="guestbook-section">
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
           <GoldDivider /><p className="text-[10px] tracking-[0.4em] text-[#C9A96E]/60 mt-6 mb-6 text-center">GUESTBOOK</p>
-          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="luxury" />
+          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="luxury" locale={locale} />
           <GuestbookList 
             guestbooks={localGuestbooks} 
             weddingSlug={wedding.slug} 
             onDelete={handleGuestbookDelete}
-            variant="luxury"
+            variant="luxury" locale={locale}
           />
         </motion.div>
       </Section>
@@ -238,7 +238,7 @@ export default function LuxuryGold({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </div>
       </Section>
 
-      <footer className="py-8 text-center text-[10px] tracking-[0.3em]" style={{ background: "#1A1A1A" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[#666] hover:text-[#888] transition-colors">Made by 청첩장 작업실 ›</a></footer>
+      <footer className="py-8 text-center text-[10px] tracking-[0.3em]" style={{ background: "#1A1A1A" }}><a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[#666] hover:text-[#888] transition-colors">Made by Wedding Studio Lab ›</a></footer>
 
       <AnimatePresence>{galleryIndex !== null && wedding.galleries && <GalleryModal galleries={wedding.galleries} currentIndex={galleryIndex} onClose={() => setGalleryIndex(null)} onNavigate={setGalleryIndex} theme="LUXURY_GOLD" usePhotoFilter={wedding.usePhotoFilter ?? true} />}</AnimatePresence>
       <AnimatePresence><ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} onShare={handleShare} weddingId={wedding.id} variant="dark" /></AnimatePresence>

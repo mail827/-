@@ -115,10 +115,11 @@ interface EnvelopeIntroProps {
   cardText?: string;
   fontFamily?: string;
   cardColor?: string;
+  locale?: string;
   onComplete: () => void;
 }
 
-export default function EnvelopeIntro({ groomName, brideName, weddingDate, style = 'black_ribbon', cardText, fontFamily, cardColor, onComplete }: EnvelopeIntroProps) {
+export default function EnvelopeIntro({ groomName, brideName, weddingDate, style = 'black_ribbon', cardText, fontFamily, cardColor, locale = 'ko', onComplete }: EnvelopeIntroProps) {
   const [phase, setPhase] = useState<'sealed' | 'drop' | 'card' | 'done'>('sealed');
   const env = ENVELOPES[style] || ENVELOPES.black_ribbon;
 
@@ -145,7 +146,7 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
     setTimeout(() => setPhase('done'), 4500);
   };
 
-  const displayText = cardText || `${groomName} & ${brideName}의\n결혼식에 초대합니다`;
+  const displayText = cardText ? cardText : locale === 'en' ? `${groomName} & ${brideName}\nrequest the pleasure of your company` : `${groomName} & ${brideName}의\n결혼식에 초대합니다`;
   const cardFont = fontFamily ? `'${fontFamily}', 'Noto Serif KR', Georgia, serif` : "'Noto Serif KR', Georgia, serif";
   const finalCardColor = cardColor || env.cardTextColor;
 
@@ -277,7 +278,7 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
                 fontFamily: cardFont,
               }}
             >
-              초대장을 열어보세요
+              {locale === 'en' ? 'Something begins when you open this.' : '초대장을 열어보세요'}
             </motion.p>
           )}
         </motion.div>

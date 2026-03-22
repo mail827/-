@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import {
   RsvpForm, GuestbookForm, GalleryModal, GuestbookList,
-  KakaoMap, ShareModal, formatDate, formatTime, getDday,
+  KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale,
   getCalendarData, type ThemeProps
 } from './shared';
 
@@ -54,7 +54,7 @@ const C = {
   lineLight: '#e0e0e0',
 };
 
-export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -86,9 +86,9 @@ export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGu
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} & ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: `${formatDate(wedding.weddingDate, 'korean')} ${formatTime(wedding.weddingTime)}`, imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
+      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: `${formatDateLocale(wedding.weddingDate, 'full', locale)} ${formatTimeLocale(wedding.weddingTime, locale)}`, imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') { await navigator.clipboard.writeText(url); alert('링크가 복사되었습니다.\n인스타그램 스토리에 공유해보세요!'); }
-    else if (type === 'sms') { window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDate(wedding.weddingDate, 'korean')}\n${url}`)}`; }
+    else if (type === 'sms') { window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDateLocale(wedding.weddingDate, 'full', locale)}\n${url}`)}`; }
     setShowShareModal(false);
   };
 
@@ -167,14 +167,14 @@ export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGu
                   <p className="ew-pre" style={{ fontWeight: 300, fontSize: 12, color: C.muted }}>
                     {wedding.groomFatherName}{wedding.groomFatherName && wedding.groomMotherName && ' · '}{wedding.groomMotherName}
                   </p>
-                  <p className="ew-pre" style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>의 아들 {wedding.groomName}</p>
+                  <p className="ew-pre" style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>{locale === 'en' ? 'Son of' : '의 아들'} {wedding.groomName}</p>
                 </div>
                 <div>
                   <p className="ew-pre" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', color: C.muted, marginBottom: 8 }}>BRIDE</p>
                   <p className="ew-pre" style={{ fontWeight: 300, fontSize: 12, color: C.muted }}>
                     {wedding.brideFatherName}{wedding.brideFatherName && wedding.brideMotherName && ' · '}{wedding.brideMotherName}
                   </p>
-                  <p className="ew-pre" style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>의 딸 {wedding.brideName}</p>
+                  <p className="ew-pre" style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>{locale === 'en' ? 'Daughter of' : '의 딸'} {wedding.brideName}</p>
                 </div>
               </motion.div>
             )}
@@ -214,11 +214,11 @@ export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGu
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
               <div>
                 <p className="ew-pre" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', color: C.muted, marginBottom: 10 }}>DATE</p>
-                <p className="ew-bodoni" style={{ fontStyle: 'italic', fontSize: 20 }}>{formatDate(wedding.weddingDate, 'dots')}</p>
+                <p className="ew-bodoni" style={{ fontStyle: 'italic', fontSize: 20 }}>{formatDateLocale(wedding.weddingDate, 'dots', locale)}</p>
               </div>
               <div>
                 <p className="ew-pre" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', color: C.muted, marginBottom: 10 }}>TIME</p>
-                <p className="ew-bodoni" style={{ fontStyle: 'italic', fontSize: 20 }}>{formatTime(wedding.weddingTime)}</p>
+                <p className="ew-bodoni" style={{ fontStyle: 'italic', fontSize: 20 }}>{formatTimeLocale(wedding.weddingTime, locale)}</p>
               </div>
             </div>
             <div>
@@ -254,13 +254,13 @@ export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGu
           </motion.div>
           <motion.div {...delayAnim(0.3)}>
             <div className="flex justify-center gap-3" style={{ marginTop: '2rem' }}>
-              {wedding.venueNaverMap && ( <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center transition-colors duration-300 hover:bg-black hover:text-white ew-pre" style={{ border: `1px solid ${C.text}`, padding: '12px 20px', fontWeight: 500, fontSize: 11, minHeight: 48 }}>네이버 지도</a> )}
-              {wedding.venueKakaoMap && ( <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center transition-colors duration-300 hover:bg-black hover:text-white ew-pre" style={{ border: `1px solid ${C.text}`, padding: '12px 20px', fontWeight: 500, fontSize: 11, minHeight: 48 }}>카카오맵</a> )}
-              {wedding.venueTmap && ( <a href={wedding.venueTmap} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center transition-colors duration-300 hover:bg-black hover:text-white ew-pre" style={{ border: `1px solid ${C.text}`, padding: '12px 20px', fontWeight: 500, fontSize: 11, minHeight: 48 }}>티맵</a> )}
+              {wedding.venueNaverMap && ( <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center transition-colors duration-300 hover:bg-black hover:text-white ew-pre" style={{ border: `1px solid ${C.text}`, padding: '12px 20px', fontWeight: 500, fontSize: 11, minHeight: 48 }}>{locale === 'en' ? 'Naver Map' : '네이버 지도'}</a> )}
+              {wedding.venueKakaoMap && ( <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center transition-colors duration-300 hover:bg-black hover:text-white ew-pre" style={{ border: `1px solid ${C.text}`, padding: '12px 20px', fontWeight: 500, fontSize: 11, minHeight: 48 }}>{locale === 'en' ? 'Kakao Map' : '카카오맵'}</a> )}
+              {wedding.venueTmap && ( <a href={wedding.venueTmap} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center transition-colors duration-300 hover:bg-black hover:text-white ew-pre" style={{ border: `1px solid ${C.text}`, padding: '12px 20px', fontWeight: 500, fontSize: 11, minHeight: 48 }}>{locale === 'en' ? 'T-map' : '티맵'}</a> )}
             </div>
           </motion.div>
           <motion.div {...delayAnim(0.4)} style={{ marginTop: '2rem' }}>
-            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
+            <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
           </motion.div>
         </section>
 
@@ -269,7 +269,7 @@ export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGu
             <p className="ew-pre" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', color: C.muted, textTransform: 'uppercase', marginBottom: '2rem' }}>Attendance</p>
           </motion.div>
           <motion.div {...delayAnim(0.15)}>
-            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="editorial" />
+            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="editorial" locale={locale} />
           </motion.div>
         </section>
 
@@ -294,8 +294,8 @@ export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGu
             </motion.div>
             {(wedding.tossLink || wedding.kakaoPayLink) && (
               <div className="flex justify-center gap-3" style={{ marginTop: '2rem' }}>
-                {wedding.tossLink && ( <a href={wedding.tossLink} target="_blank" className="flex items-center justify-center transition-colors duration-300 hover:bg-black hover:text-white ew-pre" style={{ border: `1px solid ${C.text}`, padding: '12px 24px', fontWeight: 500, fontSize: 11, minHeight: 48 }}>토스</a> )}
-                {wedding.kakaoPayLink && ( <a href={wedding.kakaoPayLink} target="_blank" className="flex items-center justify-center transition-colors duration-300 hover:bg-black hover:text-white ew-pre" style={{ border: `1px solid ${C.text}`, padding: '12px 24px', fontWeight: 500, fontSize: 11, minHeight: 48 }}>카카오페이</a> )}
+                {wedding.tossLink && ( <a href={wedding.tossLink} target="_blank" className="flex items-center justify-center transition-colors duration-300 hover:bg-black hover:text-white ew-pre" style={{ border: `1px solid ${C.text}`, padding: '12px 24px', fontWeight: 500, fontSize: 11, minHeight: 48 }}>{locale === 'en' ? 'Toss' : '토스'}</a> )}
+                {wedding.kakaoPayLink && ( <a href={wedding.kakaoPayLink} target="_blank" className="flex items-center justify-center transition-colors duration-300 hover:bg-black hover:text-white ew-pre" style={{ border: `1px solid ${C.text}`, padding: '12px 24px', fontWeight: 500, fontSize: 11, minHeight: 48 }}>{locale === 'en' ? 'KakaoPay' : '카카오페이'}</a> )}
               </div>
             )}
           </section>
@@ -306,8 +306,8 @@ export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGu
             <p className="ew-pre" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', color: C.muted, textTransform: 'uppercase', marginBottom: '2rem' }}>Guestbook</p>
           </motion.div>
           <motion.div {...delayAnim(0.15)}>
-            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="editorial" />
-            <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="classic" />
+            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="editorial-white" locale={locale} />
+            <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="editorial-white" locale={locale} />
           </motion.div>
         </section>
 
@@ -333,7 +333,7 @@ export default function EditorialWhite({ wedding, guestbooks, onRsvpSubmit, onGu
       </div>
 
       <div style={{ padding: '1.25rem', textAlign: 'center' }}>
-        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity ew-pre" style={{ fontWeight: 300, fontSize: 10, color: C.dim, textDecoration: 'none' }}>Made by 청첩장 작업실 ›</a>
+        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity ew-pre" style={{ fontWeight: 300, fontSize: 10, color: C.dim, textDecoration: 'none' }}>Made by Wedding Studio Lab ›</a>
       </div>
 
       <AnimatePresence>

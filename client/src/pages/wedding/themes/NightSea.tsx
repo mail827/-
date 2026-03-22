@@ -2,7 +2,7 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale, getCalendarData, type ThemeProps } from './shared';
 
 
 function HeroDustCanvas() {
@@ -334,7 +334,7 @@ function NightSeaCanvas() {
   return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} />;
 }
 
-export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot, isPreview }: ThemeProps & { isPreview?: boolean }) {
+export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot, locale, isPreview }: ThemeProps & { isPreview?: boolean }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -386,7 +386,7 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} & ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'korean'), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
+      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDateLocale(wedding.weddingDate, 'full', locale), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') {
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.');
@@ -463,7 +463,7 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
                   <span className="text-[0.85rem]" style={{ color: 'rgba(160, 190, 220, 0.4)' }}>&</span>
                   <span className="text-[1.5rem]" style={{ ...f, color: '#E0EAF4' }}>{wedding.brideName}</span>
                 </div>
-                <p className="text-[0.72rem] tracking-[0.2em]" style={{ ...f, color: 'rgba(180, 200, 224, 0.6)' }}>{formatDate(wedding.weddingDate, 'dots')}</p>
+                <p className="text-[0.72rem] tracking-[0.2em]" style={{ ...f, color: 'rgba(180, 200, 224, 0.6)' }}>{formatDateLocale(wedding.weddingDate, 'dots', locale)}</p>
                 {wedding.showDday && <p className="mt-3 text-[0.62rem] tracking-widest" style={{ ...f, color: 'rgba(140, 170, 200, 0.4)' }}>{getDday(wedding.weddingDate)}</p>}
               </div>
             </div>
@@ -476,7 +476,7 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
               <span className="text-[1rem]" style={{ color: 'rgba(160, 190, 220, 0.4)' }}>&</span>
               <span className="text-[2rem]" style={{ ...f, color: '#E0EAF4' }}>{wedding.brideName}</span>
             </div>
-            <p className="text-[0.8rem] tracking-[0.2em]" style={{ ...f, color: 'rgba(180, 200, 224, 0.6)' }}>{formatDate(wedding.weddingDate, 'dots')}</p>
+            <p className="text-[0.8rem] tracking-[0.2em]" style={{ ...f, color: 'rgba(180, 200, 224, 0.6)' }}>{formatDateLocale(wedding.weddingDate, 'dots', locale)}</p>
           </motion.div>
         )}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }} className="absolute bottom-10">
@@ -494,12 +494,12 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
                 <div className="space-y-3.5" style={f}>
                   <p className="text-[0.72rem]" style={{ color: c.textSoft }}>
                     <span style={{ color: c.textFaint }}>{wedding.groomFatherName} · {wedding.groomMotherName}</span>
-                    <span className="mx-3" style={{ color: 'rgba(140, 170, 200, 0.2)' }}>의 아들</span>
+                    <span className="mx-3" style={{ color: 'rgba(140, 170, 200, 0.2)' }}>{locale === 'en' ? 'Son of' : '의 아들'}</span>
                     <span style={{ color: c.text }}>{wedding.groomName}</span>
                   </p>
                   <p className="text-[0.72rem]" style={{ color: c.textSoft }}>
                     <span style={{ color: c.textFaint }}>{wedding.brideFatherName} · {wedding.brideMotherName}</span>
-                    <span className="mx-3" style={{ color: 'rgba(140, 170, 200, 0.2)' }}>의 딸</span>
+                    <span className="mx-3" style={{ color: 'rgba(140, 170, 200, 0.2)' }}>{locale === 'en' ? 'Daughter of' : '의 딸'}</span>
                     <span style={{ color: c.text }}>{wedding.brideName}</span>
                   </p>
                 </div>
@@ -571,8 +571,8 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
             </div>
           </div>
           <div className="mt-10 text-center">
-            <p className="text-[0.8rem]" style={{ ...f, color: c.text }}>{formatDate(wedding.weddingDate, 'korean')}</p>
-            {wedding.weddingTime && <p className="text-[0.68rem] mt-2" style={{ ...f, color: c.textSoft }}>{formatTime(wedding.weddingTime)}</p>}
+            <p className="text-[0.8rem]" style={{ ...f, color: c.text }}>{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+            {wedding.weddingTime && <p className="text-[0.68rem] mt-2" style={{ ...f, color: c.textSoft }}>{formatTimeLocale(wedding.weddingTime, locale)}</p>}
           </div>
         </motion.div>
       </section>
@@ -587,12 +587,12 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
           </div>
           {wedding.venueAddress && (
             <div className="aspect-[4/3] mb-8 overflow-hidden" style={{ borderRadius: '12px', border: `1px solid ${c.border}` }}>
-              <KakaoMap address={wedding.venueAddress} className="w-full h-full" />
+              <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} className="w-full h-full" />
             </div>
           )}
           <div className="flex justify-center gap-3">
             {wedding.venueNaverMap && <a href={wedding.venueNaverMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.65rem] tracking-wider transition-all hover:scale-[1.02]" style={{ ...f, color: c.textSoft, background: c.accent, border: `1px solid ${c.border}`, borderRadius: '8px' }}>네이버지도</a>}
-            {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.65rem] tracking-wider transition-all hover:scale-[1.02]" style={{ ...f, color: c.textSoft, background: c.accent, border: `1px solid ${c.border}`, borderRadius: '8px' }}>카카오맵</a>}
+            {wedding.venueKakaoMap && <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-6 py-3 text-[0.65rem] tracking-wider transition-all hover:scale-[1.02]" style={{ ...f, color: c.textSoft, background: c.accent, border: `1px solid ${c.border}`, borderRadius: '8px' }}>{locale === 'en' ? 'Kakao Map' : '카카오맵'}</a>}
           </div>
           {wedding.venuePhone && <a href={`tel:${wedding.venuePhone}`} className="flex items-center justify-center gap-2 mt-8 text-[0.68rem]" style={{ ...f, color: c.textSoft }}><Phone className="w-3.5 h-3.5" /> {wedding.venuePhone}</a>}
         </motion.div>
@@ -634,8 +634,8 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
             </div>
             {(wedding.tossLink || wedding.kakaoPayLink) && (
               <div className="flex justify-center gap-3 mt-8">
-                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] text-white tracking-wider" style={{ background: '#0064FF', borderRadius: '8px' }}>토스</a>}
-                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] tracking-wider" style={{ background: '#FEE500', color: '#3C1E1E', borderRadius: '8px' }}>카카오페이</a>}
+                {wedding.tossLink && <a href={wedding.tossLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] text-white tracking-wider" style={{ background: '#0064FF', borderRadius: '8px' }}>{locale === 'en' ? 'Toss' : '토스'}</a>}
+                {wedding.kakaoPayLink && <a href={wedding.kakaoPayLink} target="_blank" rel="noopener noreferrer" className="px-8 py-3 text-[0.65rem] tracking-wider" style={{ background: '#FEE500', color: '#3C1E1E', borderRadius: '8px' }}>{locale === 'en' ? 'KakaoPay' : '카카오페이'}</a>}
               </div>
             )}
           </motion.div>
@@ -646,7 +646,7 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-md mx-auto">
           <p className="text-[0.8rem] text-center mb-12 tracking-[0.3em]" style={{ ...f, color: c.textFaint }}>RSVP</p>
           <AccordionSection title="참석 여부 알려주기" isOpen={openRsvp} onToggle={() => setOpenRsvp(!openRsvp)}>
-            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="pearl" />
+            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="pearl" locale={locale} />
           </AccordionSection>
         </motion.div>
       </section>
@@ -655,11 +655,11 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="max-w-md mx-auto">
           <p className="text-[0.8rem] text-center mb-12 tracking-[0.3em]" style={{ ...f, color: c.textFaint }}>MESSAGE</p>
           <AccordionSection title="마음을 남겨주세요" isOpen={openGuestbook} onToggle={() => setOpenGuestbook(!openGuestbook)}>
-            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="pearl" />
+            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="night-sea" locale={locale} />
           </AccordionSection>
           {localGuestbooks.length > 0 && (
             <div className="mt-6 p-6" style={{ background: c.card, backdropFilter: 'blur(20px)', borderRadius: '16px', border: `1px solid ${c.border}` }}>
-              <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="pearl" />
+              <GuestbookList guestbooks={localGuestbooks} weddingSlug={wedding.slug} onDelete={handleGuestbookDelete} variant="night-sea" locale={locale} />
             </div>
           )}
         </motion.div>
@@ -697,7 +697,7 @@ export default function NightSea({ wedding, guestbooks, onRsvpSubmit, onGuestboo
 
       <footer className="py-12 text-center relative" style={{ zIndex: 1 }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[0.5rem] tracking-[0.25em] hover:opacity-70 transition-opacity" style={{ ...f, color: 'rgba(140, 170, 200, 0.2)' }}>
-          Made by 청첩장 작업실 ›
+          Made by Wedding Studio Lab ›
         </a>
       </footer>
 

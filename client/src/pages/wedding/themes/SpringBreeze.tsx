@@ -5,7 +5,7 @@ import {
   Calendar, Clock, MapPin, Phone, Copy, Check, 
   Volume2, VolumeX, Share2, ChevronDown
 } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale, getCalendarData, type ThemeProps } from './shared';
 
 const fontStyles = `
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -17,7 +17,7 @@ const fontStyles = `
   }
 `;
 
-export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -61,7 +61,7 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
         objectType: 'feed',
         content: {
           title,
-          description: `${formatDate(wedding.weddingDate, 'korean')} ${formatTime(wedding.weddingTime)}`,
+          description: `${formatDateLocale(wedding.weddingDate, 'full', locale)} ${formatTimeLocale(wedding.weddingTime, locale)}`,
           imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''),
           link: { mobileWebUrl: url, webUrl: url }
         },
@@ -71,7 +71,7 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.\n인스타그램 스토리에 공유해보세요!');
     } else if (type === 'sms') {
-      window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDate(wedding.weddingDate, 'korean')}\n${url}`)}`;
+      window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDateLocale(wedding.weddingDate, 'full', locale)}\n${url}`)}`;
     }
     setShowShareModal(false);
   };
@@ -171,8 +171,8 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
             </div>
             
             <div className="space-y-1 text-[14px]" style={{ color: '#9B7B8B' }}>
-              <p>{formatDate(wedding.weddingDate, 'korean')}</p>
-              <p className="text-[13px]" style={{ color: '#B8A0B0' }}>{formatTime(wedding.weddingTime)}</p>
+              <p>{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+              <p className="text-[13px]" style={{ color: '#B8A0B0' }}>{formatTimeLocale(wedding.weddingTime, locale)}</p>
               <p className="text-[13px] pt-1" style={{ color: '#C8B0C0' }}>{wedding.venue}</p>
             </div>
             
@@ -201,22 +201,22 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
                 <div className="mt-8 pt-6 text-center" style={{ borderTop: '1px solid rgba(220,180,200,0.3)' }}>
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <p className="text-[11px] tracking-[0.1em] mb-2" style={{ color: '#C8A0B8' }}>신랑측</p>
+                      <p className="text-[11px] tracking-[0.1em] mb-2" style={{ color: '#C8A0B8' }}>{locale === 'en' ? "Groom's Side" : '신랑측'}</p>
                       <p className="text-[12px]" style={{ color: '#A08090' }}>
                         {wedding.groomFatherName && <span>{wedding.groomFatherName}</span>}
                         {wedding.groomFatherName && wedding.groomMotherName && <span> · </span>}
                         {wedding.groomMotherName && <span>{wedding.groomMotherName}</span>}
                       </p>
-                      <p className="text-[14px] mt-1" style={{ color: '#7B5B6B' }}>의 아들 <span style={{ fontFamily: 'HsBombaram, serif' }}>{wedding.groomName}</span></p>
+                      <p className="text-[14px] mt-1" style={{ color: '#7B5B6B' }}>{locale === 'en' ? 'Son of' : '의 아들'} <span style={{ fontFamily: 'HsBombaram, serif' }}>{wedding.groomName}</span></p>
                     </div>
                     <div>
-                      <p className="text-[11px] tracking-[0.1em] mb-2" style={{ color: '#C8A0B8' }}>신부측</p>
+                      <p className="text-[11px] tracking-[0.1em] mb-2" style={{ color: '#C8A0B8' }}>{locale === 'en' ? "Bride's Side" : '신부측'}</p>
                       <p className="text-[12px]" style={{ color: '#A08090' }}>
                         {wedding.brideFatherName && <span>{wedding.brideFatherName}</span>}
                         {wedding.brideFatherName && wedding.brideMotherName && <span> · </span>}
                         {wedding.brideMotherName && <span>{wedding.brideMotherName}</span>}
                       </p>
-                      <p className="text-[14px] mt-1" style={{ color: '#7B5B6B' }}>의 딸 <span style={{ fontFamily: 'HsBombaram, serif' }}>{wedding.brideName}</span></p>
+                      <p className="text-[14px] mt-1" style={{ color: '#7B5B6B' }}>{locale === 'en' ? 'Daughter of' : '의 딸'} <span style={{ fontFamily: 'HsBombaram, serif' }}>{wedding.brideName}</span></p>
                     </div>
                   </div>
                 </div>
@@ -249,11 +249,11 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
             <div className="mt-4 pt-4 flex justify-center gap-5" style={{ borderTop: '1px solid rgba(220,180,200,0.2)' }}>
               <span className="flex items-center gap-1.5 text-[12px]" style={{ color: '#9B8090' }}>
                 <Calendar className="w-3.5 h-3.5" style={{ color: '#D4A0B0' }} />
-                {formatDate(wedding.weddingDate, 'short')}
+                {formatDateLocale(wedding.weddingDate, 'short', locale)}
               </span>
               <span className="flex items-center gap-1.5 text-[12px]" style={{ color: '#9B8090' }}>
                 <Clock className="w-3.5 h-3.5" style={{ color: '#D4A0B0' }} />
-                {formatTime(wedding.weddingTime)}
+                {formatTimeLocale(wedding.weddingTime, locale)}
               </span>
             </div>
           </Card>
@@ -311,7 +311,7 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
           <SectionTitle>오시는 길</SectionTitle>
           <Card className="overflow-hidden p-0">
-            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
+            <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             <div className="p-6 text-center">
               <p className="flex items-center justify-center gap-2 text-[15px]" style={{ color: '#7B5B6B', fontFamily: 'HsBombaram, serif' }}>
                 <MapPin className="w-4 h-4" style={{ color: '#D4A0B0' }} />
@@ -332,7 +332,7 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
                   <a href={wedding.venueKakaoMap} target="_blank" rel="noopener noreferrer" className="px-4 py-2.5 rounded-full text-[11px]" style={{ background: '#FEE500', color: '#3C1E1E' }}>카카오</a>
                 )}
                 {wedding.venueTmap && (
-                  <a href={wedding.venueTmap} target="_blank" rel="noopener noreferrer" className="px-4 py-2.5 rounded-full text-white text-[11px]" style={{ background: '#EF4123' }}>티맵</a>
+                  <a href={wedding.venueTmap} target="_blank" rel="noopener noreferrer" className="px-4 py-2.5 rounded-full text-white text-[11px]" style={{ background: '#EF4123' }}>{locale === 'en' ? 'T-map' : '티맵'}</a>
                 )}
               </div>
             </div>
@@ -343,7 +343,7 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
       <Section id="rsvp-section">
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
           <SectionTitle>참석 여부</SectionTitle>
-          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="spring" />
+          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="spring" locale={locale} />
         </motion.div>
       </Section>
 
@@ -380,10 +380,10 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
             {(wedding.tossLink || wedding.kakaoPayLink) && (
               <div className="flex justify-center gap-3 mt-5">
                 {wedding.tossLink && (
-                  <a href={wedding.tossLink} target="_blank" className="px-6 py-3 rounded-full text-white text-[12px]" style={{ background: '#0064FF' }}>토스</a>
+                  <a href={wedding.tossLink} target="_blank" className="px-6 py-3 rounded-full text-white text-[12px]" style={{ background: '#0064FF' }}>{locale === 'en' ? 'Toss' : '토스'}</a>
                 )}
                 {wedding.kakaoPayLink && (
-                  <a href={wedding.kakaoPayLink} target="_blank" className="px-6 py-3 rounded-full text-[12px]" style={{ background: '#FEE500', color: '#3C1E1E' }}>카카오페이</a>
+                  <a href={wedding.kakaoPayLink} target="_blank" className="px-6 py-3 rounded-full text-[12px]" style={{ background: '#FEE500', color: '#3C1E1E' }}>{locale === 'en' ? 'KakaoPay' : '카카오페이'}</a>
                 )}
               </div>
             )}
@@ -394,12 +394,12 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
       <Section id="guestbook-section">
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
           <SectionTitle>방명록</SectionTitle>
-          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="spring" />
+          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="spring" locale={locale} />
           <GuestbookList 
             guestbooks={localGuestbooks} 
             weddingSlug={wedding.slug} 
             onDelete={handleGuestbookDelete}
-            variant="spring"
+            variant="spring" locale={locale}
           />
         </motion.div>
       </Section>
@@ -459,7 +459,7 @@ export default function SpringBreeze({ wedding, guestbooks, onRsvpSubmit, onGues
       </Section>
 
       <footer className="py-10 text-center relative z-10" style={{ background: "rgba(220,190,200,0.2)" }}>
-        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.25em] hover:opacity-70 transition-opacity" style={{ color: '#B4A0A8', fontFamily: 'HsBombaram, serif' }}>Made by 청첩장 작업실 ›</a>
+        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.25em] hover:opacity-70 transition-opacity" style={{ color: '#B4A0A8', fontFamily: 'HsBombaram, serif' }}>Made by Wedding Studio Lab ›</a>
       </footer>
 
       <AnimatePresence>

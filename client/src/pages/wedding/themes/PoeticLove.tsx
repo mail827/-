@@ -2,9 +2,9 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, MapPin, Phone, Copy, Check, Volume2, VolumeX, Share2, ChevronDown } from 'lucide-react';
-import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, formatDate, formatTime, getDday, getCalendarData, type ThemeProps } from './shared';
+import { RsvpForm, GuestbookForm, GalleryModal, GuestbookList, KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale, getCalendarData, type ThemeProps } from './shared';
 
-export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -42,7 +42,7 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
     const url = version ? `${baseUrl}?v=${version}` : baseUrl;
     const title = `${wedding.groomName} ♥ ${wedding.brideName}`;
     if (type === 'kakao' && window.Kakao) {
-      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDate(wedding.weddingDate, 'korean'), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
+      window.Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: formatDateLocale(wedding.weddingDate, 'full', locale), imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''), link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: '청첩장 보기', link: { mobileWebUrl: url, webUrl: url } }] });
     } else if (type === 'instagram') {
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.\n인스타그램 스토리에 공유해보세요!');
@@ -118,8 +118,8 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
             transition={{ duration: 0.8, delay: 0.9 }}
             className="mt-12 space-y-2"
           >
-            <p className="text-sm text-[#666] tracking-wider">{formatDate(wedding.weddingDate, 'korean')}</p>
-            <p className="text-sm text-[#888]">{formatTime(wedding.weddingTime)}</p>
+            <p className="text-sm text-[#666] tracking-wider">{formatDateLocale(wedding.weddingDate, 'full', locale)}</p>
+            <p className="text-sm text-[#888]">{formatTimeLocale(wedding.weddingTime, locale)}</p>
             <p className="text-xs text-[#A393D3] mt-4">{wedding.venue}</p>
           </motion.div>
           
@@ -162,12 +162,12 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
                 <div className="space-y-6 text-sm text-[#666]">
                   <div className="flex justify-center items-center gap-4">
                     <span className="text-[#999]">{wedding.groomFatherName} · {wedding.groomMotherName}</span>
-                    <span className="text-[#A393D3]">의 아들</span>
+                    <span className="text-[#A393D3]">{locale === 'en' ? 'Son of' : '의 아들'}</span>
                     <span className="text-[#2A2A2A]">{wedding.groomName}</span>
                   </div>
                   <div className="flex justify-center items-center gap-4">
                     <span className="text-[#999]">{wedding.brideFatherName} · {wedding.brideMotherName}</span>
-                    <span className="text-[#A393D3]">의 딸</span>
+                    <span className="text-[#A393D3]">{locale === 'en' ? 'Daughter of' : '의 딸'}</span>
                     <span className="text-[#2A2A2A]">{wedding.brideName}</span>
                   </div>
                 </div>
@@ -212,11 +212,11 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
             <div className="mt-10 flex justify-center gap-8 text-xs text-[#888]">
               <span className="flex items-center gap-2">
                 <Calendar className="w-3 h-3 text-[#C9B7E8]" />
-                {formatDate(wedding.weddingDate, 'short')}
+                {formatDateLocale(wedding.weddingDate, 'short', locale)}
               </span>
               <span className="flex items-center gap-2">
                 <Clock className="w-3 h-3 text-[#C9B7E8]" />
-                {formatTime(wedding.weddingTime)}
+                {formatTimeLocale(wedding.weddingTime, locale)}
               </span>
             </div>
           </div>
@@ -298,7 +298,7 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
         >
           <p className="text-xs tracking-[0.3em] text-[#C9B7E8] mb-12">오시는 길</p>
           <div className="rounded-sm overflow-hidden shadow-sm bg-white">
-            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
+            <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
             <div className="p-8 text-center">
               <p className="text-[#2A2A2A] flex items-center justify-center gap-2 text-lg">
                 <MapPin className="w-4 h-4 text-[#C9B7E8]" />
@@ -315,7 +315,7 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
                   <a href={wedding.venueKakaoMap} target="_blank" className="px-5 py-2 bg-[#FEE500] text-[#333] rounded-sm text-xs tracking-wide">카카오</a>
                 )}
                 {wedding.venueTmap && (
-                  <a href={wedding.venueTmap} target="_blank" className="px-5 py-2 bg-[#EF4123] text-white rounded-sm text-xs tracking-wide">티맵</a>
+                  <a href={wedding.venueTmap} target="_blank" className="px-5 py-2 bg-[#EF4123] text-white rounded-sm text-xs tracking-wide">{locale === 'en' ? 'T-map' : '티맵'}</a>
                 )}
               </div>
             </div>
@@ -333,7 +333,7 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
           className="text-center"
         >
           <p className="text-xs tracking-[0.3em] text-[#C9B7E8] mb-12">참석 여부</p>
-          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="poetic" />
+          <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="poetic" locale={locale} />
         </motion.div>
       </Section>
 
@@ -373,10 +373,10 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
               {(wedding.tossLink || wedding.kakaoPayLink) && (
                 <div className="flex justify-center gap-3 mt-8">
                   {wedding.tossLink && (
-                    <a href={wedding.tossLink} target="_blank" className="px-6 py-2.5 bg-[#0064FF] text-white rounded-sm text-xs tracking-wide">토스로 보내기</a>
+                    <a href={wedding.tossLink} target="_blank" className="px-6 py-2.5 bg-[#0064FF] text-white rounded-sm text-xs tracking-wide">{locale === 'en' ? 'Send via Toss' : '토스로 보내기'}</a>
                   )}
                   {wedding.kakaoPayLink && (
-                    <a href={wedding.kakaoPayLink} target="_blank" className="px-6 py-2.5 bg-[#FEE500] text-[#333] rounded-sm text-xs tracking-wide">카카오페이</a>
+                    <a href={wedding.kakaoPayLink} target="_blank" className="px-6 py-2.5 bg-[#FEE500] text-[#333] rounded-sm text-xs tracking-wide">{locale === 'en' ? 'KakaoPay' : '카카오페이'}</a>
                   )}
                 </div>
               )}
@@ -393,12 +393,12 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
           viewport={{ once: true }}
         >
           <p className="text-xs tracking-[0.3em] text-[#C9B7E8] mb-12 text-center">방명록</p>
-          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="poetic" />
+          <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="poetic" locale={locale} />
           <GuestbookList 
             guestbooks={localGuestbooks} 
             weddingSlug={wedding.slug} 
             onDelete={handleGuestbookDelete}
-            variant="poetic"
+            variant="poetic" locale={locale}
           />
         </motion.div>
       </Section>
@@ -456,7 +456,7 @@ export default function PoeticLove({ wedding, guestbooks, onRsvpSubmit, onGuestb
       </Section>
 
       <footer className="py-12 text-center" style={{ background: "#F0EAF5" }}>
-        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#9A88C0] tracking-[0.2em] hover:text-[#7A68A0] transition-colors">Made by 청첩장 작업실 ›</a>
+        <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#9A88C0] tracking-[0.2em] hover:text-[#7A68A0] transition-colors">Made by Wedding Studio Lab ›</a>
       </footer>
 
       <AnimatePresence>

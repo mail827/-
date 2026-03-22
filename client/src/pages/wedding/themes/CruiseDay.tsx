@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import {
   RsvpForm, GuestbookForm, GalleryModal, GuestbookList,
-  KakaoMap, ShareModal, formatDate, formatTime, getDday,
+  KakaoMap, ShareModal, getDday, formatDateLocale, formatTimeLocale,
   getCalendarData, type ThemeProps
 } from './shared';
 
@@ -74,7 +74,7 @@ const C = {
   dividerDark: '#2A3D50',
 };
 
-export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot }: ThemeProps) {
+export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
@@ -118,7 +118,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
         objectType: 'feed',
         content: {
           title,
-          description: `${formatDate(wedding.weddingDate, 'korean')} ${formatTime(wedding.weddingTime)}`,
+          description: `${formatDateLocale(wedding.weddingDate, 'full', locale)} ${formatTimeLocale(wedding.weddingTime, locale)}`,
           imageUrl: wedding.ogCoverType === 'envelope' ? ({"black_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/7_errq8w.png", "white_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "navy_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/1_zdaupp.png", "black_silver": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "olive_ribbon_a": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/3_wdfeio.png", "olive_ribbon_b": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png", "pink_ribbon": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551595/5_pzmfwy.png", "white_bow": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/11_o3gnaj.png", "white_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551598/10_quisxm.png", "black_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551609/9_jvys7z.png", "pink_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551604/6_akrfek.png", "olive_seal": "https://res.cloudinary.com/duzlquvxj/image/upload/v1773551605/4_cjucaz.png"}[wedding.envelopeStyle || 'black_ribbon'] || wedding.heroMedia || '') : (wedding.heroMedia || ''),
           link: { mobileWebUrl: url, webUrl: url }
         },
@@ -128,7 +128,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.\n인스타그램 스토리에 공유해보세요!');
     } else if (type === 'sms') {
-      window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDate(wedding.weddingDate, 'korean')}\n${url}`)}`;
+      window.location.href = `sms:?&body=${encodeURIComponent(`${title}\n${formatDateLocale(wedding.weddingDate, 'full', locale)}\n${url}`)}`;
     }
     setShowShareModal(false);
   };
@@ -198,7 +198,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
           >
             <div className="text-center">
               <p style={{ fontFamily: F.display, fontWeight: 300, fontSize: 11, color: C.white, letterSpacing: '0.12em', marginBottom: '0.4rem', opacity: 0.8 }}>
-                FINALLY {formatDate(wedding.weddingDate, 'dots')}
+                FINALLY {formatDateLocale(wedding.weddingDate, 'dots', locale)}
               </p>
               <p style={{ fontWeight: 400, fontSize: 20, color: C.white, letterSpacing: '0.08em' }}>
                 {wedding.groomName} & {wedding.brideName}
@@ -258,7 +258,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
                       {wedding.groomMotherName && <span>{wedding.groomMotherName}</span>}
                     </p>
                     <p style={{ fontWeight: 400, fontSize: 14, color: C.text, marginTop: '0.25rem' }}>
-                      의 아들 {wedding.groomName}
+                      {locale === 'en' ? 'Son of' : '의 아들'} {wedding.groomName}
                     </p>
                   </div>
                   <div>
@@ -269,7 +269,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
                       {wedding.brideMotherName && <span>{wedding.brideMotherName}</span>}
                     </p>
                     <p style={{ fontWeight: 400, fontSize: 14, color: C.text, marginTop: '0.25rem' }}>
-                      의 딸 {wedding.brideName}
+                      {locale === 'en' ? 'Daughter of' : '의 딸'} {wedding.brideName}
                     </p>
                   </div>
                 </div>
@@ -369,7 +369,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
           <motion.div {...delayAnim(0.3)} className="text-center">
             <div style={{ width: 48, height: 1, background: C.dividerDark, margin: '2.5rem auto' }} />
             <p style={{ fontWeight: 300, fontSize: 15, color: C.white }}>
-              {formatDate(wedding.weddingDate, 'korean')} {formatTime(wedding.weddingTime)}
+              {formatDateLocale(wedding.weddingDate, 'full', locale)} {formatTimeLocale(wedding.weddingTime, locale)}
             </p>
             <p style={{ fontWeight: 400, fontSize: 16, color: C.white, marginTop: '1rem' }}>{wedding.venue}</p>
             {wedding.venueHall && <p style={{ fontWeight: 200, fontSize: 13, color: C.textLight, marginTop: '0.25rem' }}>{wedding.venueHall}</p>}
@@ -412,7 +412,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
           </motion.div>
 
           <motion.div {...delayAnim(0.45)} style={{ marginTop: '2.5rem' }}>
-            <KakaoMap address={wedding.venueAddress} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
+            <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
           </motion.div>
         </div>
       </section>
@@ -426,7 +426,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
             <div style={{ width: 1, height: 40, background: C.divider, margin: '0 auto 2.5rem' }} />
           </motion.div>
           <motion.div {...delayAnim(0.15)}>
-            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="minimal" />
+            <RsvpForm weddingId={wedding.id} onSubmit={onRsvpSubmit} isLoading={isRsvpLoading} variant="minimal" locale={locale} />
           </motion.div>
         </div>
       </section>
@@ -499,12 +499,12 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
             <div style={{ width: 1, height: 40, background: C.dividerDark, margin: '0 auto 2.5rem' }} />
           </motion.div>
           <motion.div {...delayAnim(0.15)}>
-            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="luna" />
+            <GuestbookForm weddingId={wedding.id} onSubmit={onGuestbookSubmit} isLoading={isGuestbookLoading} variant="cruise-day" locale={locale} />
             <GuestbookList
               guestbooks={localGuestbooks}
               weddingSlug={wedding.slug}
               onDelete={handleGuestbookDelete}
-              variant="classic"
+              variant="cruise-day" locale={locale}
             />
           </motion.div>
         </div>
@@ -564,7 +564,7 @@ export default function CruiseDay({ wedding, guestbooks, onRsvpSubmit, onGuestbo
       <footer style={{ padding: '2rem', textAlign: 'center' }}>
         <a href="https://weddingshop.cloud" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity"
           style={{ fontWeight: 200, fontSize: 11, color: C.textLight, textDecoration: 'none', letterSpacing: '0.05em' }}>
-          Made by 청첩장 작업실 ›
+          Made by Wedding Studio Lab ›
         </a>
       </footer>
 

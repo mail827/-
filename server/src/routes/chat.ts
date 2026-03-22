@@ -71,7 +71,7 @@ interface ChatAction {
 }
 
 router.post('/', async (req, res) => {
-  const { message, visitorId, userId } = req.body;
+  const { message, visitorId, userId, locale } = req.body;
   
   try {
     const history = await prisma.chatLog.findMany({
@@ -83,7 +83,7 @@ router.post('/', async (req, res) => {
     const systemPrompt = await getSystemPrompt();
     
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: systemPrompt + (locale === 'en' ? '\n\nIMPORTANT: The user is viewing the invitation in English. You MUST respond in English only. Be warm, friendly and helpful in English.' : '') },
       ...history.map(h => ({
         role: h.role.toLowerCase() as 'user' | 'assistant',
         content: h.content,
