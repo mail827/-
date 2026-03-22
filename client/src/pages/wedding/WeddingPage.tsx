@@ -273,6 +273,10 @@ export default function WeddingPage() {
     if (tr.transportInfo) (merged as any).transportInfo = tr.transportInfo;
     if (tr.parkingInfo) (merged as any).parkingInfo = tr.parkingInfo;
     if (tr.envelopeCardText) (merged as any).envelopeCardText = tr.envelopeCardText;
+    if (tr.groomLetter) (merged as any).groomLetter = tr.groomLetter;
+    if (tr.brideLetter) (merged as any).brideLetter = tr.brideLetter;
+    if (tr.groomIntro) (merged as any).groomIntro = tr.groomIntro;
+    if (tr.brideIntro) (merged as any).brideIntro = tr.brideIntro;
     if (tr.venueDetailTabs) {
       try { (merged as any).venueDetailTabs = JSON.parse(tr.venueDetailTabs); } catch {}
     }

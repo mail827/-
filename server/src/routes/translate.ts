@@ -27,6 +27,10 @@ router.post('/:id/translate', authMiddleware, async (req: any, res) => {
   if (wedding.transportInfo) fields.transportInfo = wedding.transportInfo;
   if (wedding.parkingInfo) fields.parkingInfo = wedding.parkingInfo;
   if ((wedding as any).envelopeCardText) fields.envelopeCardText = (wedding as any).envelopeCardText;
+  if ((wedding as any).groomLetter) fields.groomLetter = (wedding as any).groomLetter;
+  if ((wedding as any).brideLetter) fields.brideLetter = (wedding as any).brideLetter;
+  if ((wedding as any).groomIntro) fields.groomIntro = (wedding as any).groomIntro;
+  if ((wedding as any).brideIntro) fields.brideIntro = (wedding as any).brideIntro;
 
   const tabs = (wedding as any).venueDetailTabs as { title: string; content: string; image?: string }[] | null;
   if (tabs && tabs.length > 0) {

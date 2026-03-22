@@ -253,6 +253,14 @@ export default function EditWedding() {
       });
       if (res.ok) {
         alert('저장되었습니다!');
+        if (wedding.showLocaleSwitch) {
+          fetch(`${import.meta.env.VITE_API_URL}/weddings/${id}/translate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          }).then(r => r.json()).then(d => {
+            if (d.translationsEn) setWedding((prev: any) => ({ ...prev, translationsEn: d.translationsEn }));
+          }).catch(() => {});
+        }
       }
     } catch (e) {
       alert('저장 실패');

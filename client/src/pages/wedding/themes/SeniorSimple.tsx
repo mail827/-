@@ -2,7 +2,7 @@ import { heroUrl, galleryThumbUrl } from '../../../utils/image';
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Volume2, VolumeX, MapPin, Calendar, Clock } from 'lucide-react';
-import { KakaoMap, GuestbookList, GalleryModal, ShareModal, formatDate, getDday, formatDateLocale, formatTimeLocale, type ThemeProps } from './shared';
+import { KakaoMap, GuestbookList, GalleryModal, ShareModal, getDday, formatDateLocale, formatTimeLocale, type ThemeProps } from './shared';
 
 export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGuestbookSubmit, isRsvpLoading, isGuestbookLoading, guestPhotoSlot , locale}: ThemeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -34,7 +34,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
     if (type === "kakao" && window.Kakao) {
       window.Kakao.Share.sendDefault({
         objectType: "feed",
-        content: { title, description: `${formatDate(wedding.weddingDate, "korean")} ${formatTimeLocale(wedding.weddingTime, locale)}`, imageUrl: wedding.heroMedia || "", link: { mobileWebUrl: url, webUrl: url } },
+        content: { title, description: `${formatDateLocale(wedding.weddingDate, "full", locale)} ${formatTimeLocale(wedding.weddingTime, locale)}`, imageUrl: wedding.heroMedia || "", link: { mobileWebUrl: url, webUrl: url } },
         buttons: [{ title: "청첩장 보기", link: { mobileWebUrl: url, webUrl: url } }]
       });
     } else if (type === "instagram") {
