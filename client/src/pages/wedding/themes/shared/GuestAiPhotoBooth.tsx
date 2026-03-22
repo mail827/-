@@ -32,16 +32,22 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName, locale =
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [unlimited, setUnlimited] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval>>();
   const progressRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
+    fetch(`${API}/guest-photo/${slug}/booth-credits`)
+      .then(r => r.json())
+      .then(d => { setCredits(d.credits); setUnlimited(d.unlimited || false); })
+      .catch(() => {});
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
       if (progressRef.current) clearInterval(progressRef.current);
     };
-  }, []);
+  }, [slug]);
 
   const uploadPhoto = async (file: File) => {
     setUploading(true);
@@ -73,7 +79,17 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName, locale =
         body: JSON.stringify({ guestName: guestName || 'Guest', imageUrl: photo, concept, gender }),
       });
       const data = await res.json();
+
+      if (data.code === 'NO_CREDITS') {
+        clearInterval(progressRef.current);
+        setCredits(0);
+        setError(locale === 'en' ? locale === 'en' ? 'The photo booth has closed!' : '포토부스가 마감되었어요!' : 'AI credits exhausted');
+        setStep('concept');
+        return;
+      }
+
       if (data.status === 'processing' && data.statusUrl) {
+        if (!unlimited) setCredits(prev => prev !== null ? prev - 1 : prev);
         pollRef.current = setInterval(async () => {
           try {
             const pRes = await fetch(`${API}/guest-photo/${slug}/ai-booth/poll/${data.photoId}?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}`);
@@ -87,6 +103,7 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName, locale =
             } else if (pData.status === 'failed') {
               clearInterval(pollRef.current);
               clearInterval(progressRef.current);
+              if (!unlimited) setCredits(prev => prev !== null ? prev + 1 : prev);
               setError(pData.error || 'Generation failed');
               setStep('concept');
             }
@@ -116,12 +133,14 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName, locale =
   const reset = () => {
     setStep('intro');
     setPhoto('');
-    setConcept('classic');
+    setConcept('gala');
     setResultUrl('');
     setProgress(0);
     setError('');
     setGuestName('');
   };
+
+  const exhausted = credits !== null && credits <= 0 && !unlimited;
 
   return (
     <div style={{ padding: '48px 0', textAlign: 'center', color: 'inherit' }}>
@@ -136,25 +155,40 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName, locale =
               {groomName} & {brideName}
             </p>
             <p style={{ fontSize: 12, opacity: 0.4, marginBottom: 28 }}>
-              {locale === 'en' ? 'Step into their moment. Become part of the memory.' : '셀카 한 장으로 특별한 축하 사진을 만들어보세요'}
+              {locale === 'en' ? 'Step into their moment. Become part of the memory.' : 'AI celebration snap'}
             </p>
-            <button onClick={() => setStep('upload')} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 28px', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', color: 'inherit', borderRadius: 100, border: '1px solid rgba(255,255,255,0.15)', fontSize: 13, fontWeight: 400, cursor: 'pointer', letterSpacing: 0.5 }}>
-              <Camera size={15} />
-              {locale === 'en' ? 'Join the memory' : '축하 한 장 남기기'}
-            </button>
+            {exhausted ? (
+              <p style={{ fontSize: 13, opacity: 0.45, padding: '12px 20px', border: '1px solid rgba(128,128,128,0.2)', borderRadius: 10, display: 'inline-block' }}>
+                {locale === 'en' ? 'Photo booth is currently unavailable' : 'AI credits exhausted'}
+              </p>
+            ) : (
+              <>
+                <button onClick={() => setStep('upload')} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 28px', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', color: 'inherit', borderRadius: 100, border: '1px solid rgba(255,255,255,0.15)', fontSize: 13, fontWeight: 400, cursor: 'pointer', letterSpacing: 0.5 }}>
+                  <Camera size={15} />
+                  {locale === 'en' ? 'Join the memory' : 'AI snap'}
+                </button>
+                {credits !== null && !unlimited && (
+                  <p style={{ fontSize: 11, opacity: 0.3, marginTop: 12 }}>{credits}{locale === 'en' ? ' remaining' : '장 남음'}</p>
+                )}
+              </>
+            )}
           </motion.div>
         )}
 
         {step === 'upload' && (
           <motion.div key="upload" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} style={{ maxWidth: 360, margin: '0 auto', padding: '0 20px' }}>
-            <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>{locale === 'en' ? 'Upload Selfie' : '셀카 업로드'}</p>
-            <p style={{ fontSize: 13, opacity: 0.5, marginBottom: 16 }}>{locale === 'en' ? 'Upload a clear front-facing photo' : '정면이 잘 보이는 사진을 올려주세요'}</p><div style={{ display: 'flex', gap: 8, marginBottom: 12 }}><button onClick={() => setGender('male')} style={{ flex: 1, padding: '10px', borderRadius: 8, border: gender === 'male' ? '2px solid currentColor' : '1px solid rgba(128,128,128,0.3)', background: gender === 'male' ? 'rgba(128,128,128,0.1)' : 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: gender === 'male' ? 600 : 400, color: 'inherit' }}>{locale === 'en' ? 'Male' : '남성'}</button><button onClick={() => setGender('female')} style={{ flex: 1, padding: '10px', borderRadius: 8, border: gender === 'female' ? '2px solid currentColor' : '1px solid rgba(128,128,128,0.3)', background: gender === 'female' ? 'rgba(128,128,128,0.1)' : 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: gender === 'female' ? 600 : 400, color: 'inherit' }}>{locale === 'en' ? 'Female' : '여성'}</button></div>
-            <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="이름" style={{ width: '100%', padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(128,128,128,0.3)', fontSize: 14, marginBottom: 12, boxSizing: 'border-box', outline: 'none', background: 'rgba(255,255,255,0.08)', color: 'inherit' }} />
+            <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>{locale === 'en' ? 'Upload Selfie' : 'Upload selfie'}</p>
+            <p style={{ fontSize: 13, opacity: 0.5, marginBottom: 16 }}>{locale === 'en' ? 'Upload a clear front-facing photo' : 'Clear selfie needed'}</p>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <button onClick={() => setGender('male')} style={{ flex: 1, padding: '10px', borderRadius: 8, border: gender === 'male' ? '2px solid currentColor' : '1px solid rgba(128,128,128,0.3)', background: gender === 'male' ? 'rgba(128,128,128,0.1)' : 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: gender === 'male' ? 600 : 400, color: 'inherit' }}>{locale === 'en' ? 'Male' : 'Male'}</button>
+              <button onClick={() => setGender('female')} style={{ flex: 1, padding: '10px', borderRadius: 8, border: gender === 'female' ? '2px solid currentColor' : '1px solid rgba(128,128,128,0.3)', background: gender === 'female' ? 'rgba(128,128,128,0.1)' : 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: gender === 'female' ? 600 : 400, color: 'inherit' }}>{locale === 'en' ? 'Female' : 'Female'}</button>
+            </div>
+            <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder={locale === 'en' ? 'Name' : 'Name'} style={{ width: '100%', padding: '12px 16px', borderRadius: 8, border: '1px solid rgba(128,128,128,0.3)', fontSize: 14, marginBottom: 12, boxSizing: 'border-box', outline: 'none', background: 'rgba(255,255,255,0.08)', color: 'inherit' }} />
             <button onClick={() => inputRef.current?.click()} disabled={uploading} style={{ width: '100%', padding: '14px', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', color: 'inherit', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 14, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               {uploading ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
-              {uploading ? (locale === 'en' ? 'Uploading...' : '업로드 중...') : (locale === 'en' ? 'Upload Photo' : '사진 올리기')}
+              {uploading ? (locale === 'en' ? 'Uploading...' : 'Uploading...') : (locale === 'en' ? 'Upload Photo' : 'Upload photo')}
             </button>
-            <button onClick={reset} style={{ marginTop: 12, background: 'none', border: 'none', fontSize: 12, opacity: 0.4, color: 'inherit', cursor: 'pointer' }}>{locale === 'en' ? 'Cancel' : '취소'}</button>
+            <button onClick={reset} style={{ marginTop: 12, background: 'none', border: 'none', fontSize: 12, opacity: 0.4, color: 'inherit', cursor: 'pointer' }}>{locale === 'en' ? 'Cancel' : 'Cancel'}</button>
           </motion.div>
         )}
 
@@ -163,8 +197,8 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName, locale =
             <div style={{ width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', margin: '0 auto 16px', border: '2px solid rgba(128,128,128,0.3)' }}>
               <img src={photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-            <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>{locale === 'en' ? 'Pick your vibe' : '컨셉 선택'}</p>
-            <p style={{ fontSize: 12, opacity: 0.5, marginBottom: 20 }}>{locale === 'en' ? 'How do you want to remember today?' : '원하는 스타일을 골라주세요'}</p>
+            <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>{locale === 'en' ? 'Pick your vibe' : 'Pick your vibe'}</p>
+            <p style={{ fontSize: 12, opacity: 0.5, marginBottom: 20 }}>{locale === 'en' ? 'How do you want to remember today?' : 'Select concept'}</p>
             {error && <p style={{ fontSize: 12, color: '#e55', marginBottom: 12, opacity: 0.9 }}>{error}</p>}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 20 }}>
               {CONCEPTS.map(c => (
@@ -174,18 +208,21 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName, locale =
                 </button>
               ))}
             </div>
-            <button onClick={generate} style={{ width: '100%', padding: '14px', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', color: 'inherit', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 14, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            {credits !== null && !unlimited && (
+              <p style={{ fontSize: 11, opacity: 0.35, marginBottom: 10 }}>{locale === 'en' ? `${credits} credits remaining` : `${credits}장 남음`}</p>
+            )}
+            <button onClick={generate} disabled={exhausted} style={{ width: '100%', padding: '14px', background: exhausted ? 'rgba(128,128,128,0.1)' : 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', color: 'inherit', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 14, fontWeight: 500, cursor: exhausted ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: exhausted ? 0.4 : 1 }}>
               <Sparkles size={16} />
-              생성하기
+              {exhausted ? (locale === 'en' ? 'No credits' : 'No credits') : (locale === 'en' ? 'Generate' : 'Generate')}
             </button>
-            <button onClick={reset} style={{ marginTop: 12, background: 'none', border: 'none', fontSize: 12, opacity: 0.4, color: 'inherit', cursor: 'pointer' }}>{locale === 'en' ? 'Cancel' : '취소'}</button>
+            <button onClick={reset} style={{ marginTop: 12, background: 'none', border: 'none', fontSize: 12, opacity: 0.4, color: 'inherit', cursor: 'pointer' }}>{locale === 'en' ? 'Cancel' : 'Cancel'}</button>
           </motion.div>
         )}
 
         {step === 'generating' && (
           <motion.div key="gen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ maxWidth: 320, margin: '0 auto', padding: '40px 20px' }}>
             <Loader2 size={32} className="animate-spin" style={{ color: 'inherit', margin: '0 auto 20px', display: 'block' }} />
-            <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>{locale === 'en' ? 'Crafting your moment...' : 'AI가 축하 사진을 만들고 있어요...'}</p>
+            <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 8 }}>{locale === 'en' ? 'Crafting your moment...' : 'Crafting your moment...'}</p>
             <div style={{ width: '100%', height: 4, background: 'rgba(128,128,128,0.2)', borderRadius: 2, overflow: 'hidden' }}>
               <div style={{ width: `${progress}%`, height: '100%', background: 'currentColor', borderRadius: 2, transition: 'width 0.5s ease' }} />
             </div>
@@ -201,15 +238,15 @@ export default function GuestAiPhotoBooth({ slug, groomName, brideName, locale =
             <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
               <button onClick={shareToInstagram} style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.12)', color: 'inherit', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 <Download size={16} />
-                저장
+                {locale === 'en' ? 'Save' : 'Save'}
               </button>
-              <button onClick={() => { if (navigator.share) navigator.share({ title: `${groomName} & ${brideName} 결혼을 축하합니다`, url: resultUrl }); }} style={{ flex: 1, padding: '12px', background: 'transparent', color: 'inherit', borderRadius: 10, border: '1px solid rgba(128,128,128,0.3)', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <button onClick={() => { if (navigator.share) navigator.share({ title: `${groomName} & ${brideName}`, url: resultUrl }); }} style={{ flex: 1, padding: '12px', background: 'transparent', color: 'inherit', borderRadius: 10, border: '1px solid rgba(128,128,128,0.3)', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 <Share2 size={16} />
-                공유
+                {locale === 'en' ? 'Share' : 'Share'}
               </button>
             </div>
             <button onClick={reset} style={{ width: '100%', padding: '12px', background: 'none', border: '1px solid rgba(128,128,128,0.3)', borderRadius: 10, fontSize: 13, color: 'inherit', opacity: 0.5, cursor: 'pointer' }}>
-              {locale === 'en' ? 'Create another moment' : '다른 컨셉으로 다시 만들기'}
+              {locale === 'en' ? 'Create another moment' : 'Try another concept'}
             </button>
           </motion.div>
         )}

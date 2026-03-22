@@ -185,6 +185,7 @@ model Wedding {
   hiddenSections           Json?
   galleryRatio             String?          @default("1:1")
   aiBoothEnabled           Boolean          @default(false)
+  boothCredits             Int              @default(10)
   guestPhotoEnabled        Boolean          @default(true)
   galleryLayout        String?          @default("grid")
   groomIntro           String?
@@ -223,6 +224,7 @@ model Wedding {
   pairInvites              PairInvite[]
   snapshots                WeddingSnapshot[]
   guestPhotos              GuestPhoto[]
+  boothCreditOrders        BoothCreditOrder[]
 }
 
 model WeddingSnapshot {
@@ -592,4 +594,20 @@ model AiSnapSample {
   createdAt DateTime @default(now())
 
   @@index([concept])
+}
+
+
+model BoothCreditOrder {
+  id         String   @id @default(cuid())
+  weddingId  String
+  wedding    Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  userId     String
+  tier       String
+  credits    Int
+  amount     Int
+  orderId    String   @unique
+  paymentKey String?
+  status     String   @default("PENDING")
+  paidAt     DateTime?
+  createdAt  DateTime @default(now())
 }

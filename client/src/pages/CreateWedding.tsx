@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useLocaleStore } from '../store/useLocaleStore';
+import { at } from '../utils/appI18n';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, X, Gift, Eye } from 'lucide-react';
@@ -51,8 +53,8 @@ interface AvailableOrder {
   type?: string;
 }
 
-const STEPS_WITH_PAYMENT = ['패키지 선택', '테마 선택', '기본 정보', '예식 정보', '계좌 정보', '결제'];
-const STEPS_WITHOUT_PAYMENT = ['테마 선택', '기본 정보', '예식 정보', '계좌 정보', '확인'];
+const STEPS_WITH_PAYMENT = (al: string) => [at('stepPackage',al as any),at('stepTheme',al as any),at('stepBasic',al as any),at('stepVenue',al as any),at('stepAccount',al as any),at('stepPayment',al as any)];
+const STEPS_WITHOUT_PAYMENT = (al: string) => [at('stepTheme',al as any),at('stepBasic',al as any),at('stepVenue',al as any),at('stepAccount',al as any),at('stepConfirm',al as any)];
 
 declare global {
   interface Window {
@@ -62,6 +64,7 @@ declare global {
 
 export default function CreateWedding() {
   const navigate = useNavigate();
+  const { locale: al } = useLocaleStore();
   const [step, setStep] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [availableOrder, setAvailableOrder] = useState<AvailableOrder | null>(null);
@@ -79,6 +82,7 @@ export default function CreateWedding() {
   
   const [formData, setFormData] = useState({
     theme: 'ROMANTIC_CLASSIC',
+    locale: 'ko',
     groomName: '',
     groomNameEn: '',
     groomPhone: '',
@@ -90,7 +94,7 @@ export default function CreateWedding() {
     brideFatherName: '',
     brideMotherName: '',
     showParents: true,
-    greetingTitle: '저희 결혼합니다',
+    greetingTitle: '',
     greeting: '서로 다른 두 사람이 만나\n사랑으로 하나가 되려 합니다.\n\n저희의 새로운 시작을\n함께 축복해 주세요.',
     weddingDate: '',
     weddingTime: '',
@@ -118,7 +122,7 @@ export default function CreateWedding() {
     brideMotherAccountHolder: '',
   });
 
-  const STEPS = availableOrder ? STEPS_WITHOUT_PAYMENT : STEPS_WITH_PAYMENT;
+  const STEPS = availableOrder ? STEPS_WITHOUT_PAYMENT(al) : STEPS_WITH_PAYMENT(al);
   const isGiftFlow = !!availableOrder;
 
   useEffect(() => {
@@ -246,11 +250,11 @@ export default function CreateWedding() {
         navigate(`/edit/${wedding.id}`);
       } else {
         const err = await res.json();
-        alert(err.error || '청첩장 생성에 실패했습니다');
+        alert(err.error || at('createFailed', al));
       }
     } catch (error) {
       console.error('Create error:', error);
-      alert('청첩장 생성에 실패했습니다');
+      alert(at('createFailed', al));
     }
   };
 
@@ -271,14 +275,14 @@ export default function CreateWedding() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setCouponError(data.error || '쿠폰 확인 실패');
+        setCouponError(data.error || at('couponCheckFail', al));
         setAppliedCoupon(null);
       } else {
         setAppliedCoupon(data.coupon);
         setCouponError('');
       }
     } catch (e) {
-      setCouponError('네트워크 오류');
+      setCouponError(at('networkError', al));
     } finally {
       setCouponLoading(false);
     }
@@ -390,7 +394,7 @@ export default function CreateWedding() {
           <button onClick={handleBack} className="flex items-center gap-2 text-stone-600">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <span className="text-[15px] font-semibold text-stone-800">청첩장 만들기</span>
+          <span className="text-[15px] font-semibold text-stone-800">{at('createWedding', al)}</span>
           <div className="w-10" />
         </div>
       </header>
@@ -402,8 +406,8 @@ export default function CreateWedding() {
               <Gift className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <p className="font-medium text-emerald-800">선물받은 패키지로 제작</p>
-              <p className="text-sm text-emerald-600">{currentPackage?.name} · 결제 없이 바로 제작</p>
+              <p className="font-medium text-emerald-800">{at('giftPackage', al)}</p>
+              <p className="text-sm text-emerald-600">{currentPackage?.name} · {at('giftFreeCreate', al)}</p>
             </div>
           </div>
         </div>
@@ -438,7 +442,7 @@ export default function CreateWedding() {
           >
             {!isGiftFlow && step === 0 && (
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-stone-800 mb-6">패키지를 선택해주세요</h2>
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{at('selectPackage', al)}</h2>
                 {packages.map(pkg => (
                   <button
                     key={pkg.id}
@@ -454,7 +458,7 @@ export default function CreateWedding() {
                       </div>
                       <div className="text-right">
                         <p className="text-xl font-bold text-stone-800">{pkg.price.toLocaleString()}원</p>
-                        {pkg.slug === 'basic-video' && <span className="text-xs text-rose-500 font-medium">런칭특가</span>}
+                        {pkg.slug === 'basic-video' && <span className="text-xs text-rose-500 font-medium">{at('launchSpecial', al)}</span>}
                       </div>
                     </div>
                     <ul className="mt-4 space-y-1">
@@ -471,7 +475,7 @@ export default function CreateWedding() {
 
             {((isGiftFlow && step === 0) || (!isGiftFlow && step === 1)) && (
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-stone-800 mb-6">테마를 선택해주세요</h2>
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{at('selectTheme', al)}</h2>
                 <div className="grid grid-cols-2 gap-4">
                   {THEMES.filter(t => !themeConfigs[t.id]?.hidden).map(theme => (
                     <button
@@ -492,43 +496,58 @@ export default function CreateWedding() {
 
             {((isGiftFlow && step === 1) || (!isGiftFlow && step === 2)) && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-stone-800 mb-6">기본 정보를 입력해주세요</h2>
-                <Section title="신랑 정보">
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{at('enterBasicInfo', al)}</h2>
+                <Section title={at("groomInfo", al)}>
                   <div className="grid grid-cols-2 gap-4">
-                    <Input label="이름 *" value={formData.groomName} onChange={v => updateForm('groomName', v)} />
-                    <Input label="영문 이름" value={formData.groomNameEn} onChange={v => updateForm('groomNameEn', v)} />
+                    <Input label={at("nameRequired", al)} value={formData.groomName} onChange={v => updateForm('groomName', v)} />
+                    <Input label={at("nameEn", al)} value={formData.groomNameEn} onChange={v => updateForm('groomNameEn', v)} />
                   </div>
-                  <Input label="연락처" value={formData.groomPhone} onChange={v => updateForm('groomPhone', v)} placeholder="010-0000-0000" />
+                  <Input label={at("phone", al)} value={formData.groomPhone} onChange={v => updateForm('groomPhone', v)} placeholder="010-0000-0000" />
                 </Section>
-                <Section title="신부 정보">
+                <Section title={at("brideInfo", al)}>
                   <div className="grid grid-cols-2 gap-4">
-                    <Input label="이름 *" value={formData.brideName} onChange={v => updateForm('brideName', v)} />
-                    <Input label="영문 이름" value={formData.brideNameEn} onChange={v => updateForm('brideNameEn', v)} />
+                    <Input label={at("nameRequired", al)} value={formData.brideName} onChange={v => updateForm('brideName', v)} />
+                    <Input label={at("nameEn", al)} value={formData.brideNameEn} onChange={v => updateForm('brideNameEn', v)} />
                   </div>
-                  <Input label="연락처" value={formData.bridePhone} onChange={v => updateForm('bridePhone', v)} placeholder="010-0000-0000" />
+                  <Input label={at("phone", al)} value={formData.bridePhone} onChange={v => updateForm('bridePhone', v)} placeholder="010-0000-0000" />
                 </Section>
-                <Section title="부모님 정보">
-                  <label className="flex items-center gap-3 mb-4 cursor-pointer">
+                <Section title={al === "en" ? "Parents" : "부모님 정보"}>
+                  <div className="mb-6 p-4 bg-stone-50 rounded-xl border border-stone-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-stone-700">International Mode</p>
+                            <p className="text-xs text-stone-400 mt-1">{at(formData.locale === 'en' ? 'internationalEn' : 'internationalKo', al)}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => updateForm('locale', formData.locale === 'ko' ? 'en' : 'ko')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${formData.locale === 'en' ? 'bg-stone-800 text-white border-stone-800' : 'bg-white text-stone-500 border-stone-300'}`}
+                          >
+                            {formData.locale === 'en' ? 'EN' : 'KO'}
+                          </button>
+                        </div>
+                      </div>
+                      <label className="flex items-center gap-3 mb-4 cursor-pointer">
                     <input type="checkbox" checked={formData.showParents} onChange={e => updateForm('showParents', e.target.checked)} className="w-5 h-5 rounded" />
-                    <span className="text-stone-600">부모님 성함 표시</span>
+                    <span className="text-stone-600">{at("showParents", al)}</span>
                   </label>
                   {formData.showParents && (
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-3">
-                        <p className="text-sm font-medium text-stone-600">신랑측</p>
-                        <Input label="아버지" value={formData.groomFatherName} onChange={v => updateForm('groomFatherName', v)} />
-                        <Input label="어머니" value={formData.groomMotherName} onChange={v => updateForm('groomMotherName', v)} />
+                        <p className="text-sm font-medium text-stone-600">{at("groomSide", al)}</p>
+                        <Input label={al === "en" ? "Father" : "아버지"} value={formData.groomFatherName} onChange={v => updateForm('groomFatherName', v)} />
+                        <Input label={al === "en" ? "Mother" : "어머니"} value={formData.groomMotherName} onChange={v => updateForm('groomMotherName', v)} />
                       </div>
                       <div className="space-y-3">
-                        <p className="text-sm font-medium text-stone-600">신부측</p>
-                        <Input label="아버지" value={formData.brideFatherName} onChange={v => updateForm('brideFatherName', v)} />
-                        <Input label="어머니" value={formData.brideMotherName} onChange={v => updateForm('brideMotherName', v)} />
+                        <p className="text-sm font-medium text-stone-600">{at("brideSide", al)}</p>
+                        <Input label={al === "en" ? "Father" : "아버지"} value={formData.brideFatherName} onChange={v => updateForm('brideFatherName', v)} />
+                        <Input label={al === "en" ? "Mother" : "어머니"} value={formData.brideMotherName} onChange={v => updateForm('brideMotherName', v)} />
                       </div>
                     </div>
                   )}
                 </Section>
-                <Section title="인사말">
-                  <Input label="제목" value={formData.greetingTitle} onChange={v => updateForm('greetingTitle', v)} />
+                <Section title={al === "en" ? "Greeting" : "인사말"}>
+                  <Input label={al === "en" ? "Title" : "제목"} value={formData.greetingTitle} onChange={v => updateForm('greetingTitle', v)} />
                   <textarea value={formData.greeting} onChange={e => updateForm('greeting', e.target.value)} rows={4} className="w-full mt-3 px-4 py-3 border border-stone-200 rounded-lg resize-none" />
                 </Section>
               </div>
@@ -536,15 +555,15 @@ export default function CreateWedding() {
 
             {((isGiftFlow && step === 2) || (!isGiftFlow && step === 3)) && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-stone-800 mb-6">예식 정보를 입력해주세요</h2>
-                <Section title="예식 일시">
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{at('enterVenueInfo', al)}</h2>
+                <Section title={al === "en" ? "Date & Time" : "예식 일시"}>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">날짜 *</label>
+                      <label className="block text-sm text-stone-600 mb-2">{at('dateRequired', al)}</label>
                       <input type="date" value={formData.weddingDate} onChange={e => updateForm('weddingDate', e.target.value)} className="w-full px-4 py-3 border border-stone-200 rounded-lg" />
                     </div>
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">시간 *</label>
+                      <label className="block text-sm text-stone-600 mb-2">{at('timeRequired', al)}</label>
                       <div className="flex gap-2">
                         <select
                           value={formData.weddingTime ? (parseInt(formData.weddingTime.split(':')[0]) >= 12 ? 'PM' : 'AM') : ''}
@@ -559,8 +578,8 @@ export default function CreateWedding() {
                           className="flex-1 px-3 py-3 border border-stone-200 rounded-lg text-center appearance-none bg-white"
                         >
                           <option value="">-</option>
-                          <option value="AM">오전</option>
-                          <option value="PM">오후</option>
+                          <option value="AM">{at('amLabel', al)}</option>
+                          <option value="PM">{at('pmLabel', al)}</option>
                         </select>
                         <select
                           value={formData.weddingTime ? (() => { const h = parseInt(formData.weddingTime.split(':')[0]); return h === 0 ? '12' : h > 12 ? String(h - 12) : String(h); })() : ''}
@@ -592,38 +611,38 @@ export default function CreateWedding() {
                     </div>
                   </div>
                 </Section>
-                <Section title="예식장 정보">
-                  <Input label="예식장명 *" value={formData.venue} onChange={v => updateForm('venue', v)} />
-                  <Input label="홀 이름" value={formData.venueHall} onChange={v => updateForm('venueHall', v)} />
+                <Section title={al === "en" ? "Venue Info" : "예식장 정보"}>
+                  <Input label={al === "en" ? "Venue *" : "예식장명 *"} value={formData.venue} onChange={v => updateForm('venue', v)} />
+                  <Input label={at("venueHall", al)} value={formData.venueHall} onChange={v => updateForm('venueHall', v)} />
                   <KakaoAddressInput
                     value={formData.venueAddress}
                     onChange={v => updateForm('venueAddress', v)}
-                    label="주소 *"
+                    label={al === "en" ? "Address *" : "주소 *"}
                   />
-                  <Input label="연락처" value={formData.venuePhone} onChange={v => updateForm('venuePhone', v)} />
+                  <Input label={at("phone", al)} value={formData.venuePhone} onChange={v => updateForm('venuePhone', v)} />
                 </Section>
               </div>
             )}
 
             {((isGiftFlow && step === 3) || (!isGiftFlow && step === 4)) && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-stone-800 mb-6">계좌 정보를 입력해주세요</h2>
-                <p className="text-sm text-stone-500 -mt-4 mb-6">* 나중에 수정할 수 있어요</p>
-                <Section title="신랑 계좌">
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{at('enterAccountInfo', al)}</h2>
+                <p className="text-sm text-stone-500 -mt-4 mb-6">{at('editLater', al)}</p>
+                <Section title={al === "en" ? "Groom Account" : "신랑 계좌"}>
                   <div className="space-y-3">
-                    <BankSelect label="은행" value={formData.groomBank} onChange={v => updateForm('groomBank', v)} />
+                    <BankSelect label={at("bank", al)} value={formData.groomBank} onChange={v => updateForm('groomBank', v)} />
                     <div className="grid grid-cols-2 gap-3">
-                      <Input label="계좌번호" value={formData.groomAccount} onChange={v => updateForm('groomAccount', v)} />
-                      <Input label="예금주" value={formData.groomAccountHolder} onChange={v => updateForm('groomAccountHolder', v)} />
+                      <Input label={at("accountNumber", al)} value={formData.groomAccount} onChange={v => updateForm('groomAccount', v)} />
+                      <Input label={at("accountHolder", al)} value={formData.groomAccountHolder} onChange={v => updateForm('groomAccountHolder', v)} />
                     </div>
                   </div>
                 </Section>
-                <Section title="신부 계좌">
+                <Section title={al === "en" ? "Bride Account" : "신부 계좌"}>
                   <div className="space-y-3">
-                    <BankSelect label="은행" value={formData.brideBank} onChange={v => updateForm('brideBank', v)} />
+                    <BankSelect label={at("bank", al)} value={formData.brideBank} onChange={v => updateForm('brideBank', v)} />
                     <div className="grid grid-cols-2 gap-3">
-                      <Input label="계좌번호" value={formData.brideAccount} onChange={v => updateForm('brideAccount', v)} />
-                      <Input label="예금주" value={formData.brideAccountHolder} onChange={v => updateForm('brideAccountHolder', v)} />
+                      <Input label={at("accountNumber", al)} value={formData.brideAccount} onChange={v => updateForm('brideAccount', v)} />
+                      <Input label={at("accountHolder", al)} value={formData.brideAccountHolder} onChange={v => updateForm('brideAccountHolder', v)} />
                     </div>
                   </div>
                 </Section>
@@ -632,35 +651,35 @@ export default function CreateWedding() {
 
             {((isGiftFlow && step === 4) || (!isGiftFlow && step === 5)) && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-stone-800 mb-6">{isGiftFlow ? '정보 확인' : '결제 정보 확인'}</h2>
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{isGiftFlow ? at('reviewInfo', al) : at('reviewPayment', al)}</h2>
                 <div className="bg-stone-50 rounded-lg p-6">
                   <button onClick={handlePreview} className="w-full py-4 mb-4 border-2 border-stone-800 rounded-xl font-medium text-stone-800 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors">
                     <Eye className="w-5 h-5" />
                     내 청첩장 미리보기
                   </button>
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-stone-600">선택 패키지</span>
+                    <span className="text-stone-600">{at('selectedPackageLabel', al)}</span>
                     <span className="font-semibold text-stone-800">{currentPackage?.name}</span>
                   </div>
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-stone-600">신랑 · 신부</span>
+                    <span className="text-stone-600">{at('groomBrideLabel', al)}</span>
                     <span className="font-semibold text-stone-800">{formData.groomName} · {formData.brideName}</span>
                   </div>
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-stone-600">예식일</span>
+                    <span className="text-stone-600">{at('weddingDateLabel', al)}</span>
                     <span className="font-semibold text-stone-800">{formData.weddingDate}</span>
                   </div>
                   {!isGiftFlow && (
                     <>
                       <div className="border-t border-stone-200 my-4" />
                       <div className="mb-4">
-                        <label className="text-sm text-stone-600 mb-2 block">쿠폰 코드</label>
+                        <label className="text-sm text-stone-600 mb-2 block">{at('couponLabel', al)}</label>
                         <div className="flex gap-2">
                           <input
                             type="text"
                             value={couponCode}
                             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                            placeholder="쿠폰 코드 입력"
+                            placeholder={at('couponPlaceholder', al)}
                             className="flex-1 px-4 py-2 border border-stone-200 rounded-lg text-sm"
                           />
                           <button
@@ -668,7 +687,7 @@ export default function CreateWedding() {
                             disabled={couponLoading || !couponCode.trim()}
                             className="px-4 py-2 bg-stone-800 text-white rounded-lg text-sm disabled:opacity-50"
                           >
-                            {couponLoading ? "확인중..." : "적용"}
+                            {couponLoading ? at('couponChecking', al) : at('couponApply', al)}
                           </button>
                         </div>
                         {couponError && <p className="text-red-500 text-xs mt-1">{couponError}</p>}
@@ -682,7 +701,7 @@ export default function CreateWedding() {
                         )}
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-lg font-medium text-stone-800">결제 금액</span>
+                        <span className="text-lg font-medium text-stone-800">{at('paymentAmount', al)}</span>
                         <span className="text-2xl font-bold text-stone-800">{appliedCoupon ? getDiscountedPrice().toLocaleString() : currentPackage?.price.toLocaleString()}원</span>
                       </div>
                     </>
@@ -691,8 +710,8 @@ export default function CreateWedding() {
                     <>
                       <div className="border-t border-stone-200 my-4" />
                       <div className="flex justify-between items-center">
-                        <span className="text-lg font-medium text-emerald-700">🎁 선물 패키지</span>
-                        <span className="text-lg font-bold text-emerald-700">무료</span>
+                        <span className="text-lg font-medium text-emerald-700">{at('giftPackageLabel', al)}</span>
+                        <span className="text-lg font-bold text-emerald-700">{at('giftFree', al)}</span>
                       </div>
                     </>
                   )}
@@ -706,7 +725,7 @@ export default function CreateWedding() {
       {!isLastStep && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4">
           <div className="max-w-2xl mx-auto flex gap-3">
-            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-lg font-medium text-stone-600 hover:bg-stone-50">이전</button>
+            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-lg font-medium text-stone-600 hover:bg-stone-50">{at("prev", al)}</button>
             <button onClick={handleNext} disabled={!canNext()} className="flex-1 py-4 bg-stone-800 text-white rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
               다음 <ArrowRight className="w-4 h-4" />
             </button>
@@ -717,11 +736,11 @@ export default function CreateWedding() {
       {isLastStep && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4">
           <div className="max-w-2xl mx-auto flex gap-3">
-            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-lg font-medium text-stone-600 hover:bg-stone-50">이전</button>
+            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-lg font-medium text-stone-600 hover:bg-stone-50">{at("prev", al)}</button>
             {isGiftFlow ? (
               <button onClick={handleCreateWedding} className="flex-1 py-4 bg-emerald-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-emerald-700">
                 <Gift className="w-5 h-5" />
-                청첩장 만들기
+                {at('createWedding', al)}
               </button>
             ) : user?.role === 'ADMIN' ? (
               <button onClick={handleAdminCreate} className="flex-1 py-4 bg-stone-800 text-white rounded-lg font-medium flex items-center justify-center gap-2">
@@ -743,8 +762,8 @@ export default function CreateWedding() {
               {paymentStatus === 'processing' && (
                 <div className="text-center">
                   <div className="w-16 h-16 border-4 border-stone-200 border-t-stone-800 rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-lg font-medium text-stone-800">결제 진행 중...</p>
-                  <p className="text-sm text-stone-500 mt-2">잠시만 기다려주세요</p>
+                  <p className="text-lg font-medium text-stone-800">{at('paymentProcessing', al)}</p>
+                  <p className="text-sm text-stone-500 mt-2">{at('paymentWait', al)}</p>
                 </div>
               )}
               {paymentStatus === 'failed' && (
@@ -752,9 +771,9 @@ export default function CreateWedding() {
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <X className="w-8 h-8 text-red-600" />
                   </div>
-                  <p className="text-lg font-medium text-stone-800">결제 실패</p>
-                  <p className="text-sm text-stone-500 mt-2">다시 시도해주세요</p>
-                  <button onClick={() => { setShowPaymentModal(false); setPaymentStatus('idle'); }} className="mt-6 w-full py-3 bg-stone-800 text-white rounded-lg">닫기</button>
+                  <p className="text-lg font-medium text-stone-800">{at('paymentFailed', al)}</p>
+                  <p className="text-sm text-stone-500 mt-2">{at('paymentRetry', al)}</p>
+                  <button onClick={() => { setShowPaymentModal(false); setPaymentStatus('idle'); }} className="mt-6 w-full py-3 bg-stone-800 text-white rounded-lg">{at('close', al)}</button>
                 </div>
               )}
             </motion.div>
@@ -813,7 +832,7 @@ function BankSelect({ label, value, onChange }: { label: string; value?: string;
         type="text"
         value={value || ''}
         onChange={e => onChange(e.target.value)}
-        placeholder="기타 은행 직접 입력"
+        placeholder="기타 은행 / Other bank"
         className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-300 text-sm"
       />
     </div>

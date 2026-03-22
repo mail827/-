@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useLocaleStore } from '../store/useLocaleStore';
+import { at } from '../utils/appI18n';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, X, Gift, Upload, Sparkles, RefreshCw, Eye } from 'lucide-react';
@@ -36,16 +38,18 @@ declare global {
   }
 }
 
-const TONES = [
-  { id: 'formal', label: '격식', desc: '정중하고 어른스러운' },
-  { id: 'casual', label: '캐주얼', desc: '친근하고 편안한' },
-  { id: 'romantic', label: '로맨틱', desc: '감성적이고 시적인' },
-  { id: 'witty', label: '위트', desc: '센스있고 유머러스한' },
-];
+
 
 export default function AiCreateWedding() {
   const navigate = useNavigate();
+  const { locale: al } = useLocaleStore();
   const API = import.meta.env.VITE_API_URL;
+  const TONES = [
+    { id: 'formal', label: at('toneFormal', al), desc: at('toneFormalDesc', al) },
+    { id: 'casual', label: at('toneCasual', al), desc: at('toneCasualDesc', al) },
+    { id: 'romantic', label: at('toneRomanticShort', al), desc: at('toneRomanticDesc', al) },
+    { id: 'witty', label: at('toneWitty', al), desc: at('toneWittyDesc', al) },
+  ];
   const [step, setStep] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [availableOrder, setAvailableOrder] = useState<AvailableOrder | null>(null);
@@ -73,6 +77,7 @@ export default function AiCreateWedding() {
 
   const [formData, setFormData] = useState({
     theme: '',
+    locale: 'ko',
     groomName: '',
     groomNameEn: '',
     groomPhone: '',
@@ -114,8 +119,8 @@ export default function AiCreateWedding() {
 
   const isGiftFlow = !!availableOrder;
   const STEPS = isGiftFlow
-    ? ['AI 테마 추천', '기본 정보', '예식 정보', '계좌 정보', '확인']
-    : ['AI 테마 추천', '기본 정보', '예식 정보', '계좌 정보', '패키지 선택', '결제'];
+    ? [at('stepAiTheme',al),at('stepBasic',al),at('stepVenue',al),at('stepAccount',al),at('stepConfirm',al)]
+    : [at('stepAiTheme',al),at('stepBasic',al),at('stepVenue',al),at('stepAccount',al),at('stepPackage',al),at('stepPayment',al)];
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -186,7 +191,7 @@ export default function AiCreateWedding() {
       `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
       { method: 'POST', body: fd }
     );
-    if (!res.ok) throw new Error('업로드 실패');
+    if (!res.ok) throw new Error(al === 'en' ? 'Upload failed' : '업로드 실패');
     const data = await res.json();
     return data.secure_url;
   };
@@ -210,11 +215,11 @@ export default function AiCreateWedding() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageUrl: url }),
       });
-      if (!res.ok) throw new Error('분석 실패');
+      if (!res.ok) throw new Error(al === 'en' ? 'Analysis failed' : '분석 실패');
       const data = await res.json();
       setRecommendations(data.recommendations || []);
     } catch (e: any) {
-      setAnalyzeError(e.message || '분석 중 오류');
+      setAnalyzeError(e.message || al === 'en' ? 'Analysis error' : '분석 중 오류');
     } finally {
       setUploading(false);
       setAnalyzing(false);
@@ -249,7 +254,7 @@ export default function AiCreateWedding() {
         greeting: data.greeting || prev.greeting,
       }));
     } catch {
-      alert('인사말 생성에 실패했습니다. 다시 시도해주세요.');
+      alert(al === 'en' ? 'Greeting generation failed. Please retry.' : '인사말 생성에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setGeneratingGreeting(false);
     }
@@ -261,12 +266,12 @@ export default function AiCreateWedding() {
       heroMedia: photoUrl || undefined,
       weddingDate: formData.weddingDate || new Date().toISOString().split('T')[0],
       weddingTime: formData.weddingTime || '12:00',
-      groomName: formData.groomName || '신랑',
-      brideName: formData.brideName || '신부',
-      venue: formData.venue || '예식장',
+      groomName: formData.groomName || al === 'en' ? 'Groom' : '신랑',
+      brideName: formData.brideName || al === 'en' ? 'Bride' : '신부',
+      venue: formData.venue || al === 'en' ? 'Venue' : '예식장',
       venueAddress: formData.venueAddress || '',
-      greeting: formData.greeting || '저희 결혼합니다.',
-      greetingTitle: formData.greetingTitle || '저희 결혼합니다',
+      greeting: formData.greeting || al === 'en' ? 'We are getting married.' : '저희 결혼합니다.',
+      greetingTitle: formData.greetingTitle || al === 'en' ? 'We are getting married' : '저희 결혼합니다',
     }));
     window.open('/w/preview', '_blank');
   };
@@ -294,9 +299,9 @@ export default function AiCreateWedding() {
         navigate(`/edit/${wedding.id}`);
       } else {
         const err = await res.json();
-        alert(err.error || '생성에 실패했습니다');
+        alert(err.error || al === 'en' ? 'Creation failed' : '생성에 실패했습니다');
       }
-    } catch { alert('생성에 실패했습니다'); }
+    } catch { alert(al === 'en' ? 'Creation failed' : '생성에 실패했습니다'); }
   };
 
   const handlePayment = async () => {
@@ -315,21 +320,21 @@ export default function AiCreateWedding() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ packageId: selectedPackageId, couponCode: appliedCoupon?.code }),
       });
-      if (!orderRes.ok) throw new Error((await orderRes.json()).error || '주문 실패');
+      if (!orderRes.ok) throw new Error((await orderRes.json()).error || al === 'en' ? 'Order failed' : '주문 실패');
       const { order, clientKey } = await orderRes.json();
-      if (!window.TossPayments) throw new Error('결제 모듈 로딩 실패');
+      if (!window.TossPayments) throw new Error(al === 'en' ? 'Payment module load failed' : '결제 모듈 로딩 실패');
       const toss = window.TossPayments(clientKey);
       const wd = encodeURIComponent(JSON.stringify({ ...formData, heroMedia: photoUrl || undefined }));
-      await toss.requestPayment('카드', {
+      await toss.requestPayment('Card', {
         amount: order.amount,
         orderId: order.orderId,
         orderName: order.package.name,
-        customerName: user?.name || '고객',
+        customerName: user?.name || al === 'en' ? 'Customer' : '고객',
         successUrl: `${window.location.origin}/payment/success?weddingData=${wd}`,
         failUrl: `${window.location.origin}/payment/fail`,
       });
     } catch (e: any) {
-      if (e.code === 'USER_CANCEL' || e.message?.includes('취소')) {
+      if (e.code === 'USER_CANCEL' || e.message?.includes(al === 'en' ? 'Cancelled' : '취소')) {
         setPaymentStatus('idle');
         setShowPaymentModal(false);
       } else {
@@ -349,9 +354,9 @@ export default function AiCreateWedding() {
         body: JSON.stringify({ code: couponCode.trim() }),
       });
       const data = await res.json();
-      if (!res.ok) { setCouponError(data.error || '쿠폰 확인 실패'); setAppliedCoupon(null); }
+      if (!res.ok) { setCouponError(data.error || al === 'en' ? 'Coupon check failed' : '쿠폰 확인 실패'); setAppliedCoupon(null); }
       else { setAppliedCoupon(data.coupon); setCouponError(''); }
-    } catch { setCouponError('네트워크 오류'); }
+    } catch { setCouponError(al === 'en' ? 'Network error' : '네트워크 오류'); }
     finally { setCouponLoading(false); }
   };
 
@@ -393,7 +398,7 @@ export default function AiCreateWedding() {
           </button>
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-stone-400" />
-            <span className="text-[15px] font-semibold text-stone-800">AI 자동 제작</span>
+            <span className="text-[15px] font-semibold text-stone-800">{at('aiAutoCreateHeader', al)}</span>
           </div>
           <div className="w-10" />
         </div>
@@ -406,7 +411,7 @@ export default function AiCreateWedding() {
               <Gift className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <p className="font-medium text-emerald-800">선물받은 패키지로 제작</p>
+              <p className="font-medium text-emerald-800">{at('giftPackage', al)}</p>
               <p className="text-sm text-emerald-600">{currentPackage?.name}</p>
             </div>
           </div>
@@ -438,8 +443,8 @@ export default function AiCreateWedding() {
             {step === 0 && (
               <div className="space-y-6">
                 <div className="text-center mb-2">
-                  <h2 className="text-xl font-semibold text-stone-800">사진 한 장으로 시작하세요</h2>
-                  <p className="text-sm text-stone-500 mt-1">AI가 사진을 분석해서 어울리는 테마를 추천합니다</p>
+                  <h2 className="text-xl font-semibold text-stone-800">{at('aiStartPhoto', al)}</h2>
+                  <p className="text-sm text-stone-500 mt-1">{at('aiAnalyzeDesc', al)}</p>
                 </div>
 
                 {!photoPreview ? (
@@ -452,8 +457,8 @@ export default function AiCreateWedding() {
                     <div className="w-16 h-16 mx-auto mb-4 bg-stone-100 rounded-2xl flex items-center justify-center">
                       <Upload className="w-7 h-7 text-stone-400" />
                     </div>
-                    <p className="text-stone-600 font-medium">대표 사진을 올려주세요</p>
-                    <p className="text-xs text-stone-400 mt-2">웨딩 촬영 사진, 커플 사진 등</p>
+                    <p className="text-stone-600 font-medium">{at('uploadPhoto', al)}</p>
+                    <p className="text-xs text-stone-400 mt-2">{at('uploadPhotoDesc', al)}</p>
                   </label>
                 ) : (
                   <div className="space-y-4">
@@ -463,7 +468,7 @@ export default function AiCreateWedding() {
                         <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-3">
                           <div className="w-10 h-10 border-3 border-white/30 border-t-white rounded-full animate-spin" />
                           <p className="text-white text-sm font-medium">
-                            {uploading ? '사진 업로드 중...' : 'AI가 분석하고 있어요...'}
+                            {uploading ? at('aiUploading', al) : at('aiAnalyzing', al)}
                           </p>
                         </div>
                       )}
@@ -480,7 +485,7 @@ export default function AiCreateWedding() {
                     {analyzeError && (
                       <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
                         <p className="text-sm text-red-600">{analyzeError}</p>
-                        <button onClick={() => { if (photoFile) handlePhotoSelect(photoFile); }} className="mt-2 text-sm text-red-700 underline">다시 시도</button>
+                        <button onClick={() => { if (photoFile) handlePhotoSelect(photoFile); }} className="mt-2 text-sm text-red-700 underline">{at('aiRetry', al)}</button>
                       </div>
                     )}
 
@@ -531,42 +536,57 @@ export default function AiCreateWedding() {
 
             {step === 1 && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-stone-800 mb-6">기본 정보를 입력해주세요</h2>
-                <Section title="신랑 정보">
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{at('enterBasicInfo', al)}</h2>
+                <Section title={at('sectionGroom', al)}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input label="이름 *" value={formData.groomName} onChange={v => updateForm('groomName', v)} />
-                    <Input label="영문 이름" value={formData.groomNameEn} onChange={v => updateForm('groomNameEn', v)} />
+                    <Input label={at('nameRequired', al)} value={formData.groomName} onChange={v => updateForm('groomName', v)} />
+                    <Input label={at('nameEn', al)} value={formData.groomNameEn} onChange={v => updateForm('groomNameEn', v)} />
                   </div>
-                  <Input label="연락처" value={formData.groomPhone} onChange={v => updateForm('groomPhone', v)} placeholder="010-0000-0000" />
+                  <Input label={at('phone', al)} value={formData.groomPhone} onChange={v => updateForm('groomPhone', v)} placeholder="010-0000-0000" />
                 </Section>
-                <Section title="신부 정보">
+                <Section title={at('sectionBride', al)}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input label="이름 *" value={formData.brideName} onChange={v => updateForm('brideName', v)} />
-                    <Input label="영문 이름" value={formData.brideNameEn} onChange={v => updateForm('brideNameEn', v)} />
+                    <Input label={at('nameRequired', al)} value={formData.brideName} onChange={v => updateForm('brideName', v)} />
+                    <Input label={at('nameEn', al)} value={formData.brideNameEn} onChange={v => updateForm('brideNameEn', v)} />
                   </div>
-                  <Input label="연락처" value={formData.bridePhone} onChange={v => updateForm('bridePhone', v)} placeholder="010-0000-0000" />
+                  <Input label={at('phone', al)} value={formData.bridePhone} onChange={v => updateForm('bridePhone', v)} placeholder="010-0000-0000" />
                 </Section>
-                <Section title="부모님 정보">
-                  <label className="flex items-center gap-3 mb-4 cursor-pointer">
+                <Section title={at('parentInfo', al)}>
+                  <div className="mb-4 p-4 bg-stone-50 rounded-xl border border-stone-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-stone-700">International Mode</p>
+                            <p className="text-xs text-stone-400 mt-1">{at(formData.locale === 'en' ? 'internationalEn' : 'internationalKo', al)}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => updateForm('locale', formData.locale === 'ko' ? 'en' : 'ko')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${formData.locale === 'en' ? 'bg-stone-800 text-white border-stone-800' : 'bg-white text-stone-500 border-stone-300'}`}
+                          >
+                            {formData.locale === 'en' ? 'EN' : 'KO'}
+                          </button>
+                        </div>
+                      </div>
+                      <label className="flex items-center gap-3 mb-4 cursor-pointer">
                     <input type="checkbox" checked={formData.showParents} onChange={e => updateForm('showParents', e.target.checked)} className="w-5 h-5 rounded" />
-                    <span className="text-stone-600">부모님 성함 표시</span>
+                    <span className="text-stone-600">{at('showParents', al)}</span>
                   </label>
                   {formData.showParents && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-3">
-                        <p className="text-sm font-medium text-stone-600">신랑측</p>
-                        <Input label="아버지" value={formData.groomFatherName} onChange={v => updateForm('groomFatherName', v)} />
-                        <Input label="어머니" value={formData.groomMotherName} onChange={v => updateForm('groomMotherName', v)} />
+                        <p className="text-sm font-medium text-stone-600">{at('groomSide', al)}</p>
+                        <Input label={at('father', al)} value={formData.groomFatherName} onChange={v => updateForm('groomFatherName', v)} />
+                        <Input label={at('mother', al)} value={formData.groomMotherName} onChange={v => updateForm('groomMotherName', v)} />
                       </div>
                       <div className="space-y-3">
-                        <p className="text-sm font-medium text-stone-600">신부측</p>
-                        <Input label="아버지" value={formData.brideFatherName} onChange={v => updateForm('brideFatherName', v)} />
-                        <Input label="어머니" value={formData.brideMotherName} onChange={v => updateForm('brideMotherName', v)} />
+                        <p className="text-sm font-medium text-stone-600">{at('brideSide', al)}</p>
+                        <Input label={at('father', al)} value={formData.brideFatherName} onChange={v => updateForm('brideFatherName', v)} />
+                        <Input label={at('mother', al)} value={formData.brideMotherName} onChange={v => updateForm('brideMotherName', v)} />
                       </div>
                     </div>
                   )}
                 </Section>
-                <Section title="인사말">
+                <Section title={at('greetingSection', al)}>
                   <div className="flex gap-2 mb-3">
                     {TONES.map(t => (
                       <button
@@ -586,17 +606,17 @@ export default function AiCreateWedding() {
                     className="w-full mb-4 py-3 border border-stone-300 rounded-lg text-sm font-medium text-stone-700 flex items-center justify-center gap-2 hover:bg-stone-50 disabled:opacity-50 transition-colors"
                   >
                     {generatingGreeting ? (
-                      <><div className="w-4 h-4 border-2 border-stone-300 border-t-stone-700 rounded-full animate-spin" /> AI가 작성하는 중...</>
+                      <><div className="w-4 h-4 border-2 border-stone-300 border-t-stone-700 rounded-full animate-spin" /> {at('aiWriting', al)}</>
                     ) : (
-                      <><Sparkles className="w-4 h-4" /> AI로 인사말 작성하기</>
+                      <><Sparkles className="w-4 h-4" /> {at('aiWriteGreeting', al)}</>
                     )}
                   </button>
-                  <Input label="제목" value={formData.greetingTitle} onChange={v => updateForm('greetingTitle', v)} placeholder="저희 결혼합니다" />
+                  <Input label={at('greetingTitleLabel', al)} value={formData.greetingTitle} onChange={v => updateForm('greetingTitle', v)} placeholder={at('weMarry', al)} />
                   <textarea
                     value={formData.greeting}
                     onChange={e => updateForm('greeting', e.target.value)}
                     rows={5}
-                    placeholder="인사말을 입력하거나 AI로 자동 작성해보세요"
+                    placeholder={at('greetingPlaceholder', al)}
                     className="w-full mt-3 px-4 py-3 border border-stone-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-stone-300"
                   />
                   {formData.greeting && (
@@ -610,15 +630,15 @@ export default function AiCreateWedding() {
 
             {step === 2 && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-stone-800 mb-6">예식 정보를 입력해주세요</h2>
-                <Section title="예식 일시">
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{at('enterVenueInfo', al)}</h2>
+                <Section title={at('dateTimeSection', al)}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">날짜 *</label>
+                      <label className="block text-sm text-stone-600 mb-2">{at('dateRequired', al)}</label>
                       <input type="date" value={formData.weddingDate} onChange={e => updateForm('weddingDate', e.target.value)} className="w-full px-4 py-3 border border-stone-200 rounded-lg text-sm appearance-none bg-white" style={{ colorScheme: "light" }} />
                     </div>
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">시간 *</label>
+                      <label className="block text-sm text-stone-600 mb-2">{at('timeRequired', al)}</label>
                       <div className="flex gap-2">
                         <select
                           value={formData.weddingTime ? (parseInt(formData.weddingTime.split(':')[0]) >= 12 ? 'PM' : 'AM') : ''}
@@ -633,8 +653,8 @@ export default function AiCreateWedding() {
                           className="flex-1 px-3 py-3 border border-stone-200 rounded-lg text-center appearance-none bg-white"
                         >
                           <option value="">-</option>
-                          <option value="AM">오전</option>
-                          <option value="PM">오후</option>
+                          <option value="AM">{at('amLabel', al)}</option>
+                          <option value="PM">{at('pmLabel', al)}</option>
                         </select>
                         <select
                           value={formData.weddingTime ? (() => { const h = parseInt(formData.weddingTime.split(':')[0]); return h === 0 ? '12' : h > 12 ? String(h - 12) : String(h); })() : ''}
@@ -666,34 +686,34 @@ export default function AiCreateWedding() {
                     </div>
                   </div>
                 </Section>
-                <Section title="예식장 정보">
-                  <Input label="예식장명 *" value={formData.venue} onChange={v => updateForm('venue', v)} />
-                  <Input label="홀 이름" value={formData.venueHall} onChange={v => updateForm('venueHall', v)} />
-                  <KakaoAddressInput value={formData.venueAddress} onChange={v => updateForm('venueAddress', v)} label="주소 *" />
-                  <Input label="연락처" value={formData.venuePhone} onChange={v => updateForm('venuePhone', v)} />
+                <Section title={at('venueInfoSection', al)}>
+                  <Input label={at('venueRequired', al)} value={formData.venue} onChange={v => updateForm('venue', v)} />
+                  <Input label={at('hallName', al)} value={formData.venueHall} onChange={v => updateForm('venueHall', v)} />
+                  <KakaoAddressInput value={formData.venueAddress} onChange={v => updateForm('venueAddress', v)} label={at('addressRequired', al)} />
+                  <Input label={at('phone', al)} value={formData.venuePhone} onChange={v => updateForm('venuePhone', v)} />
                 </Section>
               </div>
             )}
 
             {step === 3 && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-stone-800 mb-6">계좌 정보를 입력해주세요</h2>
-                <p className="text-sm text-stone-500 -mt-4 mb-6">나중에 수정할 수 있어요</p>
-                <Section title="신랑 계좌">
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{at('enterAccountInfo', al)}</h2>
+                <p className="text-sm text-stone-500 -mt-4 mb-6">{at('editLaterShort', al)}</p>
+                <Section title={at('groomAccountLabel', al)}>
                   <div className="space-y-3">
-                    <BankSelect label="은행" value={formData.groomBank} onChange={v => updateForm('groomBank', v)} />
+                    <BankSelect label={at('bank', al)} value={formData.groomBank} onChange={v => updateForm('groomBank', v)} />
                     <div className="grid grid-cols-2 gap-3">
-                      <Input label="계좌번호" value={formData.groomAccount} onChange={v => updateForm('groomAccount', v)} />
-                      <Input label="예금주" value={formData.groomAccountHolder} onChange={v => updateForm('groomAccountHolder', v)} />
+                      <Input label={at('accountNumber', al)} value={formData.groomAccount} onChange={v => updateForm('groomAccount', v)} />
+                      <Input label={at('accountHolder', al)} value={formData.groomAccountHolder} onChange={v => updateForm('groomAccountHolder', v)} />
                     </div>
                   </div>
                 </Section>
-                <Section title="신부 계좌">
+                <Section title={at('brideAccountLabel', al)}>
                   <div className="space-y-3">
-                    <BankSelect label="은행" value={formData.brideBank} onChange={v => updateForm('brideBank', v)} />
+                    <BankSelect label={at('bank', al)} value={formData.brideBank} onChange={v => updateForm('brideBank', v)} />
                     <div className="grid grid-cols-2 gap-3">
-                      <Input label="계좌번호" value={formData.brideAccount} onChange={v => updateForm('brideAccount', v)} />
-                      <Input label="예금주" value={formData.brideAccountHolder} onChange={v => updateForm('brideAccountHolder', v)} />
+                      <Input label={at('accountNumber', al)} value={formData.brideAccount} onChange={v => updateForm('brideAccount', v)} />
+                      <Input label={at('accountHolder', al)} value={formData.brideAccountHolder} onChange={v => updateForm('brideAccountHolder', v)} />
                     </div>
                   </div>
                 </Section>
@@ -702,7 +722,7 @@ export default function AiCreateWedding() {
 
             {!isGiftFlow && step === 4 && (
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-stone-800 mb-6">패키지를 선택해주세요</h2>
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{at('selectPackage', al)}</h2>
                 {packages.map(pkg => (
                   <button
                     key={pkg.id}
@@ -732,7 +752,7 @@ export default function AiCreateWedding() {
 
             {((isGiftFlow && step === 4) || (!isGiftFlow && step === 5)) && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-stone-800 mb-6">{isGiftFlow ? '정보 확인' : '결제 정보 확인'}</h2>
+                <h2 className="text-lg font-semibold text-stone-800 mb-6">{isGiftFlow ? at('reviewInfo', al) : at('reviewPayment', al)}</h2>
                 <div className="bg-stone-50 rounded-lg p-6 space-y-4">
                   {photoPreview && (
                     <div className="w-full h-40 rounded-lg overflow-hidden mb-2">
@@ -743,20 +763,20 @@ export default function AiCreateWedding() {
                     <Eye className="w-5 h-5" />
                     내 청첩장 미리보기
                   </button>
-                  <Row label="선택 테마" value={formData.theme ? (recommendations.find(r => r.themeId === formData.theme)?.name || formData.theme) : '-'} />
-                  <Row label="신랑 · 신부" value={`${formData.groomName} · ${formData.brideName}`} />
-                  <Row label="예식일" value={formData.weddingDate || '-'} />
-                  <Row label="예식장" value={formData.venue || '-'} />
+                  <Row label={at('selectedTheme', al)} value={formData.theme ? (recommendations.find(r => r.themeId === formData.theme)?.name || formData.theme) : '-'} />
+                  <Row label={at('groomBrideLabel', al)} value={`${formData.groomName} · ${formData.brideName}`} />
+                  <Row label={at('weddingDateLabel', al)} value={formData.weddingDate || '-'} />
+                  <Row label={at('venueLabel', al)} value={formData.venue || '-'} />
                   {!isGiftFlow && (
                     <>
                       <div className="border-t border-stone-200 my-2" />
-                      <Row label="패키지" value={currentPackage?.name || '-'} />
+                      <Row label={at('packageLabel', al)} value={currentPackage?.name || '-'} />
                       <div className="mb-4">
-                        <label className="text-sm text-stone-600 mb-2 block">쿠폰 코드</label>
+                        <label className="text-sm text-stone-600 mb-2 block">{at('couponLabel', al)}</label>
                         <div className="flex gap-2">
-                          <input type="text" value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())} placeholder="쿠폰 코드 입력" className="flex-1 px-4 py-2 border border-stone-200 rounded-lg text-sm" />
+                          <input type="text" value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())} placeholder={at('couponPlaceholder', al)} className="flex-1 px-4 py-2 border border-stone-200 rounded-lg text-sm" />
                           <button onClick={validateCoupon} disabled={couponLoading || !couponCode.trim()} className="px-4 py-2 bg-stone-800 text-white rounded-lg text-sm disabled:opacity-50">
-                            {couponLoading ? '확인중...' : '적용'}
+                            {couponLoading ? at('couponChecking', al) : at('couponApply', al)}
                           </button>
                         </div>
                         {couponError && <p className="text-red-500 text-xs mt-1">{couponError}</p>}
@@ -768,7 +788,7 @@ export default function AiCreateWedding() {
                         )}
                       </div>
                       <div className="flex justify-between items-center pt-2">
-                        <span className="text-lg font-medium text-stone-800">결제 금액</span>
+                        <span className="text-lg font-medium text-stone-800">{at('paymentAmount', al)}</span>
                         <span className="text-2xl font-bold text-stone-800">
                           {appliedCoupon ? getDiscountedPrice().toLocaleString() : currentPackage?.price.toLocaleString()}원
                         </span>
@@ -779,8 +799,8 @@ export default function AiCreateWedding() {
                     <>
                       <div className="border-t border-stone-200 my-2" />
                       <div className="flex justify-between items-center">
-                        <span className="text-lg font-medium text-emerald-700">선물 패키지</span>
-                        <span className="text-lg font-bold text-emerald-700">무료</span>
+                        <span className="text-lg font-medium text-emerald-700">{at('giftPackageLabel', al)}</span>
+                        <span className="text-lg font-bold text-emerald-700">{at('giftFree', al)}</span>
                       </div>
                     </>
                   )}
@@ -795,7 +815,7 @@ export default function AiCreateWedding() {
       {!isLastStep && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4">
           <div className="max-w-2xl mx-auto flex gap-3">
-            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-lg font-medium text-stone-600 hover:bg-stone-50">이전</button>
+            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-lg font-medium text-stone-600 hover:bg-stone-50">{at('prev', al)}</button>
             <button onClick={handleNext} disabled={!canNext()} className="flex-1 py-4 bg-stone-800 text-white rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
               다음 <ArrowRight className="w-4 h-4" />
             </button>
@@ -806,13 +826,13 @@ export default function AiCreateWedding() {
       {isLastStep && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4">
           <div className="max-w-2xl mx-auto flex gap-3">
-            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-lg font-medium text-stone-600 hover:bg-stone-50">이전</button>
+            <button onClick={handleBack} className="flex-1 py-4 border border-stone-300 rounded-lg font-medium text-stone-600 hover:bg-stone-50">{at('prev', al)}</button>
             {isGiftFlow ? (
               <button onClick={handleCreateWedding} className="flex-1 py-4 bg-emerald-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-emerald-700">
                 <Gift className="w-5 h-5" /> 청첩장 만들기
               </button>
             ) : user?.role === 'ADMIN' ? (
-              <button onClick={handleCreateWedding} className="flex-1 py-4 bg-stone-800 text-white rounded-lg font-medium">무료로 생성하기</button>
+              <button onClick={handleCreateWedding} className="flex-1 py-4 bg-stone-800 text-white rounded-lg font-medium">{at('adminFreeCreate', al)}</button>
             ) : (
               <button onClick={handlePayment} className="flex-1 py-4 bg-stone-800 text-white rounded-lg font-medium">
                 {appliedCoupon ? getDiscountedPrice().toLocaleString() : currentPackage?.price.toLocaleString()}원 결제하기
@@ -829,8 +849,8 @@ export default function AiCreateWedding() {
               {paymentStatus === 'processing' && (
                 <>
                   <div className="w-16 h-16 border-4 border-stone-200 border-t-stone-800 rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-lg font-medium text-stone-800">결제 진행 중...</p>
-                  <p className="text-sm text-stone-500 mt-2">잠시만 기다려주세요</p>
+                  <p className="text-lg font-medium text-stone-800">{at('paymentProcessing', al)}</p>
+                  <p className="text-sm text-stone-500 mt-2">{at('paymentWait', al)}</p>
                 </>
               )}
               {paymentStatus === 'failed' && (
@@ -838,9 +858,9 @@ export default function AiCreateWedding() {
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <X className="w-8 h-8 text-red-600" />
                   </div>
-                  <p className="text-lg font-medium text-stone-800">결제 실패</p>
-                  <p className="text-sm text-stone-500 mt-2">다시 시도해주세요</p>
-                  <button onClick={() => { setShowPaymentModal(false); setPaymentStatus('idle'); }} className="mt-6 w-full py-3 bg-stone-800 text-white rounded-lg">닫기</button>
+                  <p className="text-lg font-medium text-stone-800">{at('paymentFailed', al)}</p>
+                  <p className="text-sm text-stone-500 mt-2">{at('paymentRetry', al)}</p>
+                  <button onClick={() => { setShowPaymentModal(false); setPaymentStatus('idle'); }} className="mt-6 w-full py-3 bg-stone-800 text-white rounded-lg">{at('close', al)}</button>
                 </>
               )}
             </motion.div>
@@ -899,7 +919,7 @@ function BankSelect({ label, value, onChange }: { label: string; value?: string;
         type="text"
         value={value || ''}
         onChange={e => onChange(e.target.value)}
-        placeholder="기타 은행 직접 입력"
+        placeholder="기타 은행 / Other bank"
         className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-300 text-sm"
       />
     </div>

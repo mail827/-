@@ -39,6 +39,7 @@ import { GalleryOverride, VenueTabsOverride, ProfileOverride, LetterOverride } f
 import EnvelopeIntro from './themes/shared/EnvelopeIntro';
 import GuestPhotoGallery from './themes/shared/GuestPhotoGallery';
 import GuestAiPhotoBooth from './themes/shared/GuestAiPhotoBooth';
+import BoothGallery from './themes/shared/BoothGallery';
 import { useSectionOrder } from '../../hooks/useSectionOrder';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -354,6 +355,9 @@ export default function WeddingPage() {
             <>
               {!isArchive && weddingToUse.aiBoothEnabled && (
                 <GuestAiPhotoBooth slug={weddingToUse.slug} groomName={weddingToUse.groomName} brideName={weddingToUse.brideName} locale={locale} />
+              )}
+              {weddingToUse.aiBoothEnabled && (
+                <BoothGallery slug={weddingToUse.slug} locale={locale} />
               )}
               {weddingToUse.guestPhotoEnabled !== false && (
                 <GuestPhotoGallery slug={weddingToUse.slug} enabled={true} locale={locale} />

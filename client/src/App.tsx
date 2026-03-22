@@ -57,6 +57,7 @@ import FAQ from './pages/info/FAQ';
 import Notice from './pages/info/Notice';
 import RefundPolicy from './pages/info/RefundPolicy';
 import PaymentSuccess from './pages/PaymentSuccess';
+import BoothCreditSuccess from './pages/BoothCreditSuccess';
 import AdminLogin from './pages/AdminLogin';
 import PairAccept from './pages/PairAccept';
 
@@ -102,6 +103,7 @@ export default function App() {
       <Route path="/w/:slug" element={<WeddingPage />} />
         <Route path="/w/:slug/rsvp" element={<RsvpCheck />} />
       <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
+      <Route path="/booth-credit/success" element={<ProtectedRoute><BoothCreditSuccess /></ProtectedRoute>} />
       <Route path="/admin/login" element={<AdminLogin />} />
       
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

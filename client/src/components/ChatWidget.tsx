@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, MessageCircle } from 'lucide-react';
+import { at } from '../utils/appI18n';
+import { useLocaleStore } from '../store/useLocaleStore';
 
 interface ChatAction {
   label: string;
@@ -22,6 +24,7 @@ interface Props {
 }
 
 export default function ChatWidget({ isLoggedIn = false, userEmail = "", userName = "" }: Props) {
+  const { locale: cl } = useLocaleStore();
   const [visitorId] = useState(() => {
     const stored = localStorage.getItem("chatVisitorId");
     if (stored) return stored;
@@ -31,7 +34,7 @@ export default function ChatWidget({ isLoggedIn = false, userEmail = "", userNam
   });
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: '안녕하세요! 💕\n청첩장 작업실 상담 AI 웨딩이예요.\n\n궁금한 점이 있으시면 편하게 물어봐주세요!' }
+    { role: 'assistant', content: at('chatBotGreeting', cl).replace(/\\n/g, '\n') }
   ]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
@@ -90,7 +93,7 @@ export default function ChatWidget({ isLoggedIn = false, userEmail = "", userNam
         actions: data.actions 
       }]);
     } catch {
-      setChatMessages(prev => [...prev, { role: 'assistant', content: '죄송해요, 일시적인 오류가 발생했어요. 다시 시도해주세요!' }]);
+      setChatMessages(prev => [...prev, { role: 'assistant', content: at('chatError', cl) }]);
     } finally {
       setChatLoading(false);
     }
@@ -128,8 +131,8 @@ export default function ChatWidget({ isLoggedIn = false, userEmail = "", userNam
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-lg">💕</div>
                   <div>
-                    <p className="font-medium">웨딩이</p>
-                    <p className="text-xs text-stone-400">청첩장 상담 AI</p>
+                    <p className="font-medium">{at('chatBotName', cl)}</p>
+                    <p className="text-xs text-stone-400">{at('chatBotSub', cl)}</p>
                   </div>
                 </div>
                 <button onClick={() => setChatOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
@@ -189,7 +192,7 @@ export default function ChatWidget({ isLoggedIn = false, userEmail = "", userNam
                 <button
                   onClick={() => {
                     if (!isLoggedIn) {
-                      if (confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) {
+                      if (confirm(at('chatLoginRequired', cl))) {
                         window.location.href = '/dashboard';
                       }
                     } else {
@@ -207,7 +210,7 @@ export default function ChatWidget({ isLoggedIn = false, userEmail = "", userNam
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendChat()}
-                    placeholder="메시지를 입력하세요..."
+                    placeholder={at('chatInputPh', cl)}
                     className="flex-1 px-4 py-3 bg-stone-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-stone-300"
                   />
                   <button
@@ -236,20 +239,20 @@ export default function ChatWidget({ isLoggedIn = false, userEmail = "", userNam
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">✓</span>
                 </div>
-                <h3 className="text-xl font-bold text-stone-800 mb-2">문의가 접수되었습니다</h3>
-                <p className="text-stone-500">빠른 시일 내에 답변 드릴게요!</p>
+                <h3 className="text-xl font-bold text-stone-800 mb-2">{at('inquirySuccess', cl)}</h3>
+                <p className="text-stone-500">{at('inquirySuccessDesc', cl)}</p>
               </div>
             ) : (
               <>
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-stone-800">1:1 문의</h3>
+                  <h3 className="text-xl font-bold text-stone-800">{at('inquiryTitle', cl)}</h3>
                   <button onClick={() => setShowInquiryForm(false)} className="p-2 hover:bg-stone-100 rounded-full">
                     <X className="w-5 h-5 text-stone-500" />
                   </button>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">이름 *</label>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">{at('inquiryName', cl)}</label>
                     <input
                       type="text"
                       value={inquiryForm.name}
@@ -259,7 +262,7 @@ export default function ChatWidget({ isLoggedIn = false, userEmail = "", userNam
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">이메일 *</label>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">{at('inquiryEmail', cl)}</label>
                     <input
                       type="email"
                       value={inquiryForm.email}
@@ -269,7 +272,7 @@ export default function ChatWidget({ isLoggedIn = false, userEmail = "", userNam
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">연락처</label>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">{at('inquiryPhone', cl)}</label>
                     <input
                       type="tel"
                       value={inquiryForm.phone}
@@ -279,25 +282,25 @@ export default function ChatWidget({ isLoggedIn = false, userEmail = "", userNam
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">문의 유형</label>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">{at('inquiryType', cl)}</label>
                     <select
                       value={inquiryForm.type}
                       onChange={(e) => setInquiryForm({...inquiryForm, type: e.target.value})}
                       className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800"
                     >
-                      <option value="general">일반 문의</option>
-                      <option value="custom">커스텀 청첩장</option>
-                      <option value="video">영상 문의</option>
-                      <option value="payment">결제 문의</option>
+                      <option value="general">{at('inquiryTypeGeneral', cl)}</option>
+                      <option value="custom">{at('inquiryTypeCustom', cl)}</option>
+                      <option value="video">{at('inquiryTypeVideo', cl)}</option>
+                      <option value="payment">{at('inquiryTypePayment', cl)}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-1">문의 내용 *</label>
+                    <label className="block text-sm font-medium text-stone-700 mb-1">{at('inquiryContent', cl)}</label>
                     <textarea
                       value={inquiryForm.message}
                       onChange={(e) => setInquiryForm({...inquiryForm, message: e.target.value})}
                       className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-800 h-32 resize-none"
-                      placeholder="문의하실 내용을 자세히 적어주세요"
+                      placeholder={at('inquiryContentPh', cl)}
                     />
                   </div>
                   <button
@@ -305,7 +308,7 @@ export default function ChatWidget({ isLoggedIn = false, userEmail = "", userNam
                     disabled={inquirySending || !inquiryForm.name || !inquiryForm.email || !inquiryForm.message}
                     className="w-full py-3 bg-stone-800 text-white rounded-xl font-medium hover:bg-stone-900 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {inquirySending ? '전송 중...' : '문의하기'}
+                    {inquirySending ? at('inquirySending', cl) : at('inquirySubmit', cl)}
                   </button>
                 </div>
               </>

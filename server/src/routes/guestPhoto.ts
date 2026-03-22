@@ -13,9 +13,9 @@ router.post('/:slug/upload', upload.single('photo'), async (req, res) => {
     const { slug } = req.params;
     const { guestName, message } = req.body;
     const wedding = await prisma.wedding.findUnique({ where: { slug } });
-    if (!wedding) return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
-    if (!wedding.guestPhotoEnabled) return res.status(403).json({ error: '하객 포토 업로드가 비활성화되어 있습니다' });
-    if (!req.file) return res.status(400).json({ error: '사진을 선택해주세요' });
+    if (!wedding) return res.status(404).json({ error: 'Not found' });
+    if (!wedding.guestPhotoEnabled) return res.status(403).json({ error: 'Disabled' });
+    if (!req.file) return res.status(400).json({ error: 'No file' });
 
     const result: any = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
@@ -25,7 +25,7 @@ router.post('/:slug/upload', upload.single('photo'), async (req, res) => {
     });
 
     const photo = await prisma.guestPhoto.create({
-      data: { weddingId: wedding.id, guestName: guestName || '익명', imageUrl: result.secure_url, publicId: result.public_id, message, mediaType: 'IMAGE' },
+      data: { weddingId: wedding.id, guestName: guestName || 'Guest', imageUrl: result.secure_url, publicId: result.public_id, message, mediaType: 'IMAGE' },
     });
     res.json(photo);
   } catch (e: any) {
@@ -38,19 +38,12 @@ router.post('/:slug/upload-video', async (req, res) => {
     const { slug } = req.params;
     const { guestName, message, videoUrl, publicId } = req.body;
     const wedding = await prisma.wedding.findUnique({ where: { slug } });
-    if (!wedding) return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
-    if (!wedding.guestPhotoEnabled) return res.status(403).json({ error: '업로드가 비활성화되어 있습니다' });
-    if (!videoUrl) return res.status(400).json({ error: '영상 URL이 필요합니다' });
+    if (!wedding) return res.status(404).json({ error: 'Not found' });
+    if (!wedding.guestPhotoEnabled) return res.status(403).json({ error: 'Disabled' });
+    if (!videoUrl) return res.status(400).json({ error: 'No videoUrl' });
 
     const photo = await prisma.guestPhoto.create({
-      data: {
-        weddingId: wedding.id,
-        guestName: guestName || '익명',
-        imageUrl: videoUrl,
-        publicId: publicId || null,
-        message,
-        mediaType: 'VIDEO'
-      },
+      data: { weddingId: wedding.id, guestName: guestName || 'Guest', imageUrl: videoUrl, publicId: publicId || null, message, mediaType: 'VIDEO' },
     });
     res.json(photo);
   } catch (e: any) {
@@ -60,7 +53,7 @@ router.post('/:slug/upload-video', async (req, res) => {
 
 router.get('/:slug', async (req, res) => {
   const wedding = await prisma.wedding.findUnique({ where: { slug: req.params.slug } });
-  if (!wedding) return res.status(404).json({ error: '없음' });
+  if (!wedding) return res.status(404).json({ error: 'Not found' });
   const photos = await prisma.guestPhoto.findMany({
     where: { weddingId: wedding.id, approved: true, mediaType: { not: 'AI_PHOTO' } },
     orderBy: { createdAt: 'desc' },
@@ -71,8 +64,8 @@ router.get('/:slug', async (req, res) => {
 router.delete('/:id', authMiddleware, async (req: any, res) => {
   try {
     const photo = await prisma.guestPhoto.findUnique({ where: { id: req.params.id }, include: { wedding: true } });
-    if (!photo) return res.status(404).json({ error: '없음' });
-    if (photo.wedding.userId !== req.user.id && req.user.role !== 'ADMIN') return res.status(403).json({ error: '권한 없음' });
+    if (!photo) return res.status(404).json({ error: 'Not found' });
+    if (photo.wedding.userId !== req.user.id && req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
     if (photo.publicId) {
       if (photo.mediaType === 'VIDEO') {
         await cloudinary.uploader.destroy(photo.publicId, { resource_type: 'video' });
@@ -87,6 +80,35 @@ router.delete('/:id', authMiddleware, async (req: any, res) => {
   }
 });
 
+router.get('/:slug/booth-credits', async (req, res) => {
+  try {
+    const wedding = await prisma.wedding.findUnique({
+      where: { slug: req.params.slug },
+      select: { boothCredits: true, user: { select: { role: true } } },
+    });
+    if (!wedding) return res.status(404).json({ error: 'Not found' });
+    const isAdmin = wedding.user.role === 'ADMIN';
+    res.json({ credits: isAdmin ? 9999 : wedding.boothCredits, unlimited: isAdmin });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+router.get('/:slug/ai-booth/gallery', async (req, res) => {
+  try {
+    const wedding = await prisma.wedding.findUnique({ where: { slug: req.params.slug } });
+    if (!wedding) return res.status(404).json({ error: 'Not found' });
+    const photos = await prisma.guestPhoto.findMany({
+      where: { weddingId: wedding.id, approved: true, mediaType: 'AI_PHOTO', imageUrl: { not: '' } },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+    res.json(photos);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 router.post('/:slug/ai-booth', async (req, res) => {
   try {
@@ -94,9 +116,18 @@ router.post('/:slug/ai-booth', async (req, res) => {
     const { guestName, imageUrl, concept } = req.body;
     if (!imageUrl || !concept) return res.status(400).json({ error: 'imageUrl, concept required' });
 
-    const wedding = await prisma.wedding.findUnique({ where: { slug } });
+    const wedding = await prisma.wedding.findUnique({ where: { slug }, include: { user: true } });
     if (!wedding) return res.status(404).json({ error: 'Not found' });
     if (!wedding.aiEnabled) return res.status(403).json({ error: 'AI not enabled' });
+
+    const isAdmin = wedding.user.role === 'ADMIN';
+    if (!isAdmin && wedding.boothCredits <= 0) {
+      return res.status(403).json({ error: 'Credits exhausted', code: 'NO_CREDITS' });
+    }
+
+    if (!isAdmin) {
+      await prisma.wedding.update({ where: { id: wedding.id }, data: { boothCredits: { decrement: 1 } } });
+    }
 
     const FAL_API_KEY = process.env.FAL_API_KEY;
     const NEGATIVE = 'distorted face, deformed nose, asymmetric eyes, blurry face, smoothed skin, plastic face, bumpy skin, uneven skin texture, cartoon face, ugly face, merged faces, elongated face, enhanced jawline, square jaw, chiseled face, narrow face, long chin, protruding jaw, swollen face, inflated cheeks, inhuman proportions, uncanny valley face, alien features, double eyelid surgery, beautified face, cartoon, anime, illustration, painting, drawing, nsfw, nude, watermark, text, logo';
@@ -133,16 +164,15 @@ router.post('/:slug/ai-booth', async (req, res) => {
     });
     const falData = await falRes.json();
 
-    if (!falData.status_url) return res.status(500).json({ error: 'AI generation failed' });
+    if (!falData.status_url) {
+      if (!isAdmin) {
+        await prisma.wedding.update({ where: { id: wedding.id }, data: { boothCredits: { increment: 1 } } });
+      }
+      return res.status(500).json({ error: 'AI generation failed' });
+    }
 
     const photo = await prisma.guestPhoto.create({
-      data: {
-        weddingId: wedding.id,
-        guestName: guestName || 'Guest',
-        imageUrl: '',
-        mediaType: 'AI_PHOTO',
-        message: concept,
-      },
+      data: { weddingId: wedding.id, guestName: guestName || 'Guest', imageUrl: '', mediaType: 'AI_PHOTO', message: concept },
     });
 
     res.json({ photoId: photo.id, statusUrl: falData.status_url, responseUrl: falData.response_url, status: 'processing' });
@@ -165,10 +195,13 @@ router.get('/:slug/ai-booth/poll/:photoId', async (req, res) => {
     const status = await statusRes.json();
 
     if (status.status === 'COMPLETED') {
-      const resultRes = await fetch(responseUrl as string, {
-        headers: { Authorization: 'Key ' + FAL_API_KEY },
-      });
-      const result = await resultRes.json();
+      let resultRes: Response;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        resultRes = await fetch(responseUrl as string, { headers: { Authorization: 'Key ' + FAL_API_KEY } });
+        if (resultRes!.ok) break;
+        await new Promise(r => setTimeout(r, 1000));
+      }
+      const result = await resultRes!.json();
 
       if (result.detail) return res.json({ status: 'failed', error: 'AI server temporarily unavailable' });
 
@@ -192,7 +225,11 @@ router.get('/:slug/ai-booth/poll/:photoId', async (req, res) => {
       return res.json({ status: 'done', resultUrl: uploadRes.secure_url });
     }
 
-    if (status.status === 'FAILED') {
+    if (status.status === 'FAILED' || status.status === 'IN_PROGRESS' && Date.now() > Date.parse(status.created_at) + 120000) {
+      const photo = await prisma.guestPhoto.findUnique({ where: { id: photoId }, include: { wedding: { include: { user: true } } } });
+      if (photo && photo.wedding.user.role !== 'ADMIN') {
+        await prisma.wedding.update({ where: { id: photo.weddingId }, data: { boothCredits: { increment: 1 } } });
+      }
       await prisma.guestPhoto.delete({ where: { id: photoId } }).catch(() => {});
       return res.json({ status: 'failed', error: status.error || 'Generation failed' });
     }

@@ -4,6 +4,8 @@ import {
   Sparkles, Camera, X, Download,
   Loader2, Trash2, ChevronRight, Image, Users, User, Zap, ImagePlus, RefreshCw
 } from 'lucide-react';
+import { at } from '../utils/appI18n';
+import { useLocaleStore } from '../store/useLocaleStore';
 
 interface Concept { id: string; label: string; }
 interface AiSnap {
@@ -45,24 +47,25 @@ const CONCEPT_META: Record<string, { emoji: string; sub: string }> = {
 
 type Mode = 'couple' | 'groom' | 'bride';
 const MODE_CONFIG = {
-  couple: { label: '커플 화보', icon: Users, desc: '둘이 함께' },
-  groom: { label: '신랑 단독', icon: User, desc: '신랑만' },
-  bride: { label: '신부 단독', icon: User, desc: '신부만' },
+  couple: { label: '', icon: Users, desc: '' },
+  groom: { label: '', icon: User, desc: '' },
+  bride: { label: '', icon: User, desc: '' },
 };
 
 const PACKAGE_NAMES: Record<string, string> = {
-  free: '무료 체험',
+  free: at('snapPkgFree', 'ko'),
   lite: 'Lite',
   basic: 'Basic',
   'ai-reception': 'AI Reception',
   'basic-video': 'Basic+영상',
-  admin: '관리자',
+  admin: at('snapPkgAdmin', 'ko'),
 };
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 export default function AiSnapStudio({ weddingId }: Props) {
+  const { locale: sl } = useLocaleStore();
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [selectedConcept, setSelectedConcept] = useState('');
   const [mode, setMode] = useState<Mode>('couple');
@@ -222,7 +225,7 @@ export default function AiSnapStudio({ weddingId }: Props) {
 
   return (
     <div className="space-y-8">
-      <p className="text-xs text-stone-400">사진으로 다양한 컨셉의 웨딩 화보를 만들어보세요</p>
+      <p className="text-xs text-stone-400">{at('snapDesc', sl)}</p>
 
       {quota && (
         <div className={`rounded-2xl border p-4 flex items-center justify-between ${isQuotaExhausted ? 'border-red-200 bg-red-50/50' : 'border-stone-200 bg-stone-50/50'}`}>
@@ -235,16 +238,16 @@ export default function AiSnapStudio({ weddingId }: Props) {
                 {PACKAGE_NAMES[quota.packageSlug] || quota.packageSlug}
               </p>
               <p className="text-xs text-stone-400">
-                {quota.isAdmin ? '무제한 생성' : `${quota.used}/${quota.max}장 사용`}
+                {quota.isAdmin ? at('snapUnlimited', sl) : `${quota.used}/${quota.max}${at('snapUsed', sl)}`}
               </p>
             </div>
           </div>
           {!quota.isAdmin && (
             <div className="text-right">
               {quota.remaining > 0 ? (
-                <span className="text-sm font-bold text-stone-800">{quota.remaining}장 남음</span>
+                <span className="text-sm font-bold text-stone-800">{quota.remaining}{at('snapRemaining', sl)}</span>
               ) : (
-                <span className="text-sm font-bold text-red-500">소진 완료</span>
+                <span className="text-sm font-bold text-red-500">{at('snapExhausted', sl)}</span>
               )}
             </div>
           )}
@@ -252,7 +255,7 @@ export default function AiSnapStudio({ weddingId }: Props) {
       )}
 
       <div>
-        <StepLabel num={1} text="모드 선택" sub="커플 또는 단독을 선택하세요" />
+        <StepLabel num={1} text={at('snapModeSelect', sl)} sub={at('snapModeDesc', sl)} />
         <div className="grid grid-cols-3 gap-2 mt-3">
           {(Object.keys(MODE_CONFIG) as Mode[]).map(m => {
             const cfg = MODE_CONFIG[m];
@@ -262,8 +265,8 @@ export default function AiSnapStudio({ weddingId }: Props) {
               <button key={m} onClick={() => setMode(m)}
                 className={`py-3 px-2 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 ${sel ? 'border-stone-800 bg-stone-50' : 'border-stone-200 hover:border-stone-300'}`}>
                 <Icon className={`w-5 h-5 ${sel ? 'text-stone-800' : 'text-stone-400'}`} />
-                <span className={`text-xs font-semibold ${sel ? 'text-stone-800' : 'text-stone-500'}`}>{cfg.label}</span>
-                <span className="text-[10px] text-stone-400">{cfg.desc}</span>
+                <span className={`text-xs font-semibold ${sel ? 'text-stone-800' : 'text-stone-500'}`}>{m === 'couple' ? at('snapModeCouple', sl) : m === 'groom' ? at('snapModeGroom', sl) : at('snapModeBride', sl)}</span>
+                <span className="text-[10px] text-stone-400">{m === 'couple' ? at('snapModeCoupleDesc', sl) : m === 'groom' ? at('snapModeGroomDesc', sl) : at('snapModeBrideDesc', sl)}</span>
               </button>
             );
           })}
@@ -271,16 +274,16 @@ export default function AiSnapStudio({ weddingId }: Props) {
       </div>
 
       <div>
-        <StepLabel num={2} text="사진 업로드" sub={mode === 'couple' ? '둘이 함께 찍은 사진 1장' : '정면 얼굴이 잘 보이는 사진이 좋아요'} />
+        <StepLabel num={2} text={at('snapPhotoUpload', sl)} sub={mode === 'couple' ? at('snapPhotoCouple', sl) : at('snapPhotoSolo', sl)} />
         <div className="grid gap-3 mt-3 grid-cols-1 max-w-[200px]">
-          {needsCouple && <PhotoUpload label="커플 사진" photo={couplePhoto} uploading={uploading === 'couple'} onUpload={f => uploadPhoto(f, 'couple')} onClear={() => setCouplePhoto('')} onGalleryPick={() => setPickFor('couple')} hasGallery={galleryPhotos.length > 0} />}
-          {needsGroom && <PhotoUpload label="신랑" photo={groomPhoto} uploading={uploading === 'groom'} onUpload={f => uploadPhoto(f, 'groom')} onClear={() => setGroomPhoto('')} onGalleryPick={() => setPickFor('groom')} hasGallery={galleryPhotos.length > 0} />}
-          {needsBride && <PhotoUpload label="신부" photo={bridePhoto} uploading={uploading === 'bride'} onUpload={f => uploadPhoto(f, 'bride')} onClear={() => setBridePhoto('')} onGalleryPick={() => setPickFor('bride')} hasGallery={galleryPhotos.length > 0} />}
+          {needsCouple && <PhotoUpload label={at('snapModeCouple', sl)} photo={couplePhoto} uploading={uploading === 'couple'} onUpload={f => uploadPhoto(f, 'couple')} onClear={() => setCouplePhoto('')} onGalleryPick={() => setPickFor('couple')} hasGallery={galleryPhotos.length > 0} sl={sl} />}
+          {needsGroom && <PhotoUpload label={at('groom', sl)} photo={groomPhoto} uploading={uploading === 'groom'} onUpload={f => uploadPhoto(f, 'groom')} onClear={() => setGroomPhoto('')} onGalleryPick={() => setPickFor('groom')} hasGallery={galleryPhotos.length > 0} sl={sl} />}
+          {needsBride && <PhotoUpload label={at('bride', sl)} photo={bridePhoto} uploading={uploading === 'bride'} onUpload={f => uploadPhoto(f, 'bride')} onClear={() => setBridePhoto('')} onGalleryPick={() => setPickFor('bride')} hasGallery={galleryPhotos.length > 0} sl={sl} />}
         </div>
       </div>
 
       <div>
-        <StepLabel num={3} text="웨딩 컨셉" sub="원하는 분위기를 골라주세요" />
+        <StepLabel num={3} text={at('snapConcept', sl)} sub={at('snapConceptDesc', sl)} />
         <div className="grid grid-cols-2 gap-2 mt-3">
           {concepts.map(c => {
             const meta = CONCEPT_META[c.id] || { emoji: '?', sub: '' };
@@ -305,8 +308,8 @@ export default function AiSnapStudio({ weddingId }: Props) {
 
       {isQuotaExhausted ? (
         <div className="rounded-2xl bg-red-50 border border-red-200 p-5 text-center">
-          <p className="text-sm font-semibold text-red-600">생성 가능 횟수를 모두 사용했어요</p>
-          <p className="text-xs text-red-400 mt-1">패키지를 업그레이드하면 더 많은 웨딩스냅을 만들 수 있어요</p>
+          <p className="text-sm font-semibold text-red-600">{at('snapExhaustedTitle', sl)}</p>
+          <p className="text-xs text-red-400 mt-1">{at('snapExhaustedDesc', sl)}</p>
         </div>
       ) : generating ? (
         <div className="rounded-2xl bg-stone-50 border border-stone-200 p-6">
@@ -315,8 +318,8 @@ export default function AiSnapStudio({ weddingId }: Props) {
               <Loader2 className="w-5 h-5 text-white animate-spin" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-stone-800">AI가 웨딩스냅을 만들고 있어요</p>
-              <p className="text-xs text-stone-400 mt-0.5">보통 30초~1분 정도 소요돼요</p>
+              <p className="text-sm font-semibold text-stone-800">{at('snapGenerating', sl)}</p>
+              <p className="text-xs text-stone-400 mt-0.5">{at('snapGeneratingTime', sl)}</p>
             </div>
           </div>
           <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden">
@@ -329,8 +332,8 @@ export default function AiSnapStudio({ weddingId }: Props) {
           className="w-full py-4 rounded-2xl text-white font-semibold flex items-center justify-center gap-2.5 transition-all duration-200 disabled:opacity-30 active:scale-[0.98]"
           style={{ background: canGenerate() ? 'linear-gradient(135deg, #1c1917 0%, #44403c 100%)' : '#d6d3d1' }}>
           <Sparkles className="w-5 h-5" />
-          <span>웨딩스냅 생성하기</span>
-          {quota && !quota.isAdmin && <span className="text-xs opacity-60 ml-1">({quota.remaining}장 남음)</span>}
+          <span>{at('snapGenerateBtn', sl)}</span>
+          {quota && !quota.isAdmin && <span className="text-xs opacity-60 ml-1">({quota.remaining}{at('snapRemaining', sl)})</span>}
           <ChevronRight className="w-4 h-4 opacity-60" />
         </button>
       )}
@@ -339,7 +342,7 @@ export default function AiSnapStudio({ weddingId }: Props) {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Image className="w-4 h-4 text-stone-500" />
-            <p className="text-sm font-semibold text-stone-700">생성된 웨딩스냅</p>
+            <p className="text-sm font-semibold text-stone-700">{at('snapGenerated', sl)}</p>
             <span className="text-xs text-stone-400 ml-auto">{snaps.filter(s => s.status === 'done').length}장</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -352,12 +355,12 @@ export default function AiSnapStudio({ weddingId }: Props) {
                 ) : snap.status === 'failed' ? (
                   <div onClick={() => { if (generating) return; handleRegenerate(snap); }} className="aspect-[3/4] rounded-2xl border border-red-100 flex flex-col items-center justify-center bg-red-50/50 cursor-pointer hover:bg-red-100/50 transition-colors">
                     {generating ? <Loader2 className="w-5 h-5 text-red-300 animate-spin mb-1" /> : <RefreshCw className="w-5 h-5 text-red-300 mb-1" />}
-                    <p className="text-[11px] text-red-400">{generating ? '재생성 중...' : '탭하여 재생성'}</p>
+                    <p className="text-[11px] text-red-400">{generating ? at('snapRegenerating', sl) : at('snapTapRegenerate', sl)}</p>
                   </div>
                 ) : (
                   <div className="aspect-[3/4] rounded-2xl border border-stone-200 flex flex-col items-center justify-center bg-stone-50/50">
                     <Loader2 className="w-5 h-5 text-stone-400 animate-spin mb-2" />
-                    <p className="text-[11px] text-stone-400">생성 중...</p>
+                    <p className="text-[11px] text-stone-400">{at('snapGeneratingShort', sl)}</p>
                   </div>
                 )}
                 <div className="absolute top-2 left-2">
@@ -382,7 +385,7 @@ export default function AiSnapStudio({ weddingId }: Props) {
             <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }}
               className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
               <div className="sticky top-0 bg-white border-b border-stone-100 px-5 py-4 flex items-center justify-between">
-                <p className="text-sm font-semibold text-stone-800">갤러리에서 {pickFor === 'groom' ? '신랑' : pickFor === 'bride' ? '신부' : '커플'} 사진 선택</p>
+                <p className="text-sm font-semibold text-stone-800">{at('snapGalleryTitle', sl)} {pickFor === 'groom' ? at('groom', sl) : pickFor === 'bride' ? at('bride', sl) : at('couple', sl)} {at('snapGalleryTitleSuffix', sl)}</p>
                 <button onClick={() => setPickFor(null)} className="p-1 hover:bg-stone-100 rounded-lg">
                   <X className="w-5 h-5 text-stone-400" />
                 </button>
@@ -443,8 +446,8 @@ function StepLabel({ num, text, sub }: { num: number; text: string; sub: string 
   );
 }
 
-function PhotoUpload({ label, photo, uploading, onUpload, onClear, onGalleryPick, hasGallery }: {
-  label: string; photo: string; uploading: boolean; onUpload: (f: File) => void; onClear: () => void; onGalleryPick?: () => void; hasGallery?: boolean;
+function PhotoUpload({ label, photo, uploading, onUpload, onClear, onGalleryPick, hasGallery, sl }: {
+  label: string; photo: string; uploading: boolean; onUpload: (f: File) => void; onClear: () => void; onGalleryPick?: () => void; hasGallery?: boolean; sl?: 'ko' | 'en';
 }) {
   return (
     <div className="relative">
@@ -465,19 +468,19 @@ function PhotoUpload({ label, photo, uploading, onUpload, onClear, onGalleryPick
           ) : (
             <>
               <Camera className="w-7 h-7 text-stone-400 mb-2" />
-              <span className="text-xs font-medium text-stone-500">{label} 사진</span>
-              <span className="text-[10px] text-stone-400 mt-0.5 mb-3">얼굴이 잘 보이게</span>
+              <span className="text-xs font-medium text-stone-500">{label} {at('snapPhotoLabel', sl || 'ko')}</span>
+              <span className="text-[10px] text-stone-400 mt-0.5 mb-3">{at('snapFaceVisible', (sl || 'ko') as 'ko' | 'en')}</span>
               <div className="flex flex-col gap-1.5 w-full px-2" onClick={e => e.stopPropagation()}>
                 <label className="flex items-center justify-center gap-1 px-3 py-2 bg-stone-800 hover:bg-stone-900 text-white rounded-lg transition-colors cursor-pointer">
                   <Camera className="w-3 h-3" />
-                  <span className="text-[10px] font-medium">사진 업로드</span>
+                  <span className="text-[10px] font-medium">{at('snapUploadBtn', (sl || 'ko') as 'ko' | 'en')}</span>
                   <input type="file" accept="image/*" onChange={e => e.target.files?.[0] && onUpload(e.target.files[0])} className="hidden" disabled={uploading} />
                 </label>
                 {hasGallery && onGalleryPick && (
                   <button type="button" onClick={onGalleryPick}
                     className="flex items-center justify-center gap-1 px-3 py-2 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors">
                     <ImagePlus className="w-3 h-3 text-stone-500" />
-                    <span className="text-[10px] font-medium text-stone-500">갤러리에서 선택</span>
+                    <span className="text-[10px] font-medium text-stone-500">{at('snapGalleryPick', (sl || 'ko') as 'ko' | 'en')}</span>
                   </button>
                 )}
               </div>

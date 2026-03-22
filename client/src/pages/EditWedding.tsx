@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import BoothCreditPanel from '../components/BoothCreditPanel';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { at } from '../utils/appI18n';
+import { useLocaleStore } from '../store/useLocaleStore';
 import { ArrowLeft, Save, Eye, X, Plus, Music, Film, Image, Sparkles, Loader2, QrCode, FileText } from 'lucide-react';
 import AiWritingAssistant from '../components/AiWritingAssistant';
 import PairManager from '../components/admin/PairManager';
@@ -102,6 +105,7 @@ function validateFile(file: File, type: 'image' | 'video' | 'audio'): string | n
 export default function EditWedding() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { locale } = useLocaleStore();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showQR, setShowQR] = useState(false);
@@ -252,7 +256,7 @@ export default function EditWedding() {
         body: JSON.stringify(wedding)
       });
       if (res.ok) {
-        alert('저장되었습니다!');
+        alert(at('savedSuccess', locale));
         if (wedding.showLocaleSwitch) {
           fetch(`${import.meta.env.VITE_API_URL}/weddings/${id}/translate`, {
             method: 'POST',
@@ -263,7 +267,7 @@ export default function EditWedding() {
         }
       }
     } catch (e) {
-      alert('저장 실패');
+      alert(at('saveFailed', locale));
     } finally {
       setSaving(false);
     }
@@ -462,7 +466,7 @@ export default function EditWedding() {
   };
 
   const handleDeleteGallery = async (galleryId: string) => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
+    if (!confirm(at('deleteConfirm', locale))) return;
     
     const token = localStorage.getItem('token');
     try {
@@ -474,7 +478,7 @@ export default function EditWedding() {
         setGalleries(prev => prev.filter(g => g.id !== galleryId));
       }
     } catch (e) {
-      alert('삭제 실패');
+      alert(at('deleteFailed', locale));
     }
   };
 
@@ -487,7 +491,7 @@ export default function EditWedding() {
         <div className="flex items-center justify-between text-sm text-stone-600 mb-1">
           <span className="flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
-            업로드 중...
+            {at('uploading', locale)}
           </span>
           <span>{progress}%</span>
         </div>
@@ -518,25 +522,25 @@ export default function EditWedding() {
   if (!wedding) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fefefe]">
-        <p className="text-stone-500">청첩장을 찾을 수 없습니다</p>
+        <p className="text-stone-500">{at('notFound', locale)}</p>
       </div>
     );
   }
 
   const tabs = [
-    { id: 'basic', name: '기본 정보' },
-    { id: 'greeting', name: '인사말' },
-    { id: 'venue', name: '예식 정보' },
-    { id: 'account', name: '계좌 정보' },
-    { id: 'media', name: '대표 미디어' },
-    { id: 'gallery', name: '갤러리' },
-    { id: 'video', name: '영상' },
-    { id: 'music', name: '배경음악' },
+    { id: 'basic', name: at('tabBasic', locale) },
+    { id: 'greeting', name: at('tabGreeting', locale) },
+    { id: 'venue', name: at('tabVenue', locale) },
+    { id: 'account', name: at('tabAccount', locale) },
+    { id: 'media', name: at('tabMedia', locale) },
+    { id: 'gallery', name: at('tabGallery', locale) },
+    { id: 'video', name: at('tabVideo', locale) },
+    { id: 'music', name: at('tabMusic', locale) },
     { id: 'ai', name: '🤖 AI', highlight: wedding.aiEnabled },
-    { id: 'ai-snap', name: 'AI 웨딩스냅' },
-    { id: 'sections', name: '섹션 순서' },
-    { id: 'settings', name: '설정' },
-    { id: 'pair', name: '함께 수정' },
+    { id: 'ai-snap', name: at('tabAiSnap', locale) },
+    { id: 'sections', name: at('tabSections', locale) },
+    { id: 'settings', name: at('tabSettings', locale) },
+    { id: 'pair', name: at('tabPair', locale) },
     { id: 'rsvp', name: 'RSVP' },
   ];
 
@@ -546,9 +550,9 @@ export default function EditWedding() {
         <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 flex items-center justify-between">
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-stone-600">
             <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm hidden sm:block">대시보드</span>
+            <span className="text-sm hidden sm:block">{at('dashboard', locale)}</span>
           </button>
-          <span className="font-serif text-lg text-stone-800">청첩장 수정</span>
+          <span className="font-serif text-lg text-stone-800">{at('editTitle', locale)}</span>
           <div className="flex gap-2">
             <button
               onClick={() => window.open(`/w/${wedding.slug}`, '_blank')}
@@ -576,7 +580,7 @@ export default function EditWedding() {
               className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-lg text-sm disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              {saving ? '저장 중...' : '저장'}
+              {saving ? at('saving', locale) : at('save', locale)}
             </button>
           </div>
         </div>
@@ -603,7 +607,7 @@ export default function EditWedding() {
       <main className="max-w-4xl mx-auto px-3 sm:px-4 pb-8 space-y-6">
         {tab === 'basic' && (
           <>
-            <Section title="테마">
+            <Section title={at('sectionTheme', locale)}>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {THEMES.filter(t => !themeConfigs[t.id]?.hidden).map(theme => (
                   <button
@@ -631,8 +635,8 @@ export default function EditWedding() {
 
               {wedding.theme === 'SENIOR_SIMPLE' && (
                 <div className="mt-6 pt-6 border-t border-stone-200">
-                  <p className="text-sm font-medium text-stone-700 mb-2">테마 색상</p>
-                  <p className="text-xs text-stone-500 mb-4">선물하시는 분의 취향에 맞게 색상을 선택해주세요</p>
+                  <p className="text-sm font-medium text-stone-700 mb-2">{at('themeColor', locale)}</p>
+                  <p className="text-xs text-stone-500 mb-4">{at('themeColorDesc', locale)}</p>
                   <div className="flex flex-wrap gap-3">
                     {SENIOR_COLORS.map((color) => (
                       <button
@@ -657,23 +661,23 @@ export default function EditWedding() {
               )}
             </Section>
 
-            <Section title="신랑 정보">
+            <Section title={at('sectionGroom', locale)}>
               <div className="grid sm:grid-cols-3 gap-4">
-                <Input label="이름" value={wedding.groomName} onChange={v => updateField('groomName', v)} />
-                <Input label="영문 이름" value={wedding.groomNameEn} onChange={v => updateField('groomNameEn', v)} />
-                <Input label="연락처" value={wedding.groomPhone} onChange={v => updateField('groomPhone', v)} />
+                <Input label={at('name', locale)} value={wedding.groomName} onChange={v => updateField('groomName', v)} />
+                <Input label={at('nameEn', locale)} value={wedding.groomNameEn} onChange={v => updateField('groomNameEn', v)} />
+                <Input label={at('phone', locale)} value={wedding.groomPhone} onChange={v => updateField('groomPhone', v)} />
               </div>
             </Section>
 
-            <Section title="신부 정보">
+            <Section title={at('sectionBride', locale)}>
               <div className="grid sm:grid-cols-3 gap-4">
-                <Input label="이름" value={wedding.brideName} onChange={v => updateField('brideName', v)} />
-                <Input label="영문 이름" value={wedding.brideNameEn} onChange={v => updateField('brideNameEn', v)} />
-                <Input label="연락처" value={wedding.bridePhone} onChange={v => updateField('bridePhone', v)} />
+                <Input label={at('name', locale)} value={wedding.brideName} onChange={v => updateField('brideName', v)} />
+                <Input label={at('nameEn', locale)} value={wedding.brideNameEn} onChange={v => updateField('brideNameEn', v)} />
+                <Input label={at('phone', locale)} value={wedding.bridePhone} onChange={v => updateField('bridePhone', v)} />
               </div>
             </Section>
 
-            <Section title="부모님 정보">
+            <Section title={at('sectionParents', locale)}>
               <label className="flex items-center gap-3 mb-4 cursor-pointer">
                 <input
                   type="checkbox"
@@ -681,19 +685,19 @@ export default function EditWedding() {
                   onChange={(e) => updateField('showParents', e.target.checked)}
                   className="w-5 h-5 rounded"
                 />
-                <span className="text-stone-600">부모님 성함 표시</span>
+                <span className="text-stone-600">{at('showParents', locale)}</span>
               </label>
               {wedding.showParents && (
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div className="space-y-3">
                     <p className="text-sm font-medium text-stone-600">신랑측</p>
-                    <Input label="아버지 성함" value={wedding.groomFatherName} onChange={v => updateField('groomFatherName', v)} />
-                    <Input label="어머니 성함" value={wedding.groomMotherName} onChange={v => updateField('groomMotherName', v)} />
+                    <Input label={at('fatherName', locale)} value={wedding.groomFatherName} onChange={v => updateField('groomFatherName', v)} />
+                    <Input label={at('motherName', locale)} value={wedding.groomMotherName} onChange={v => updateField('groomMotherName', v)} />
                   </div>
                   <div className="space-y-3">
                     <p className="text-sm font-medium text-stone-600">신부측</p>
-                    <Input label="아버지 성함" value={wedding.brideFatherName} onChange={v => updateField('brideFatherName', v)} />
-                    <Input label="어머니 성함" value={wedding.brideMotherName} onChange={v => updateField('brideMotherName', v)} />
+                    <Input label={at('fatherName', locale)} value={wedding.brideFatherName} onChange={v => updateField('brideFatherName', v)} />
+                    <Input label={at('motherName', locale)} value={wedding.brideMotherName} onChange={v => updateField('brideMotherName', v)} />
                   </div>
                 </div>
               )}
@@ -702,7 +706,7 @@ export default function EditWedding() {
         )}
 
         {tab === 'basic' && (
-          <Section title="프로필 소개">
+          <Section title={at('sectionProfile', locale)}>
             <div className="flex items-center gap-2 mb-4">
               <input
                 type="checkbox"
@@ -710,12 +714,12 @@ export default function EditWedding() {
                 onChange={(e) => updateField('showProfile', e.target.checked)}
                 className="rounded border-stone-300"
               />
-              <span className="text-sm text-stone-600">신랑신부 프로필 소개 표시</span>
+              <span className="text-sm text-stone-600">{at('showProfileLabel', locale)}</span>
             </div>
             {wedding.showProfile && (
               <div className="grid sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs text-stone-500 mb-2">신랑 프로필</label>
+                  <label className="block text-xs text-stone-500 mb-2">{at('groomProfile', locale)}</label>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-16 h-16 rounded-full overflow-hidden border border-stone-200 bg-stone-50 flex items-center justify-center flex-shrink-0">
                       {wedding.groomProfileUrl ? (
@@ -761,7 +765,7 @@ export default function EditWedding() {
                   <p className="text-xs text-stone-400 mt-1 text-right">{(wedding.groomIntro || '').length}/100</p>
                 </div>
                 <div>
-                  <label className="block text-xs text-stone-500 mb-2">신부 프로필</label>
+                  <label className="block text-xs text-stone-500 mb-2">{at('brideProfile', locale)}</label>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-16 h-16 rounded-full overflow-hidden border border-stone-200 bg-stone-50 flex items-center justify-center flex-shrink-0">
                       {wedding.brideProfileUrl ? (
@@ -813,8 +817,8 @@ export default function EditWedding() {
 
         {tab === 'greeting' && (
           <>
-            <Section title="인사말">
-              <Input label="인사말 제목" value={wedding.greetingTitle} onChange={v => updateField('greetingTitle', v)} />
+            <Section title={at('sectionGreeting', locale)}>
+              <Input label={at('greetingTitle', locale)} value={wedding.greetingTitle} onChange={v => updateField('greetingTitle', v)} />
               <textarea
                 placeholder="인사말 내용"
                 value={wedding.greeting || ''}
@@ -834,7 +838,7 @@ export default function EditWedding() {
               />
             </Section>
 
-            <Section title="마무리 인사">
+            <Section title={at('closingMsg', locale)}>
               <textarea
                 placeholder="마무리 메시지 (선택)"
                 value={wedding.closingMessage || ''}
@@ -855,8 +859,8 @@ export default function EditWedding() {
         )}
 
         {tab === 'basic' && (
-          <Section title="히어로 영문 글꼴">
-            <p className="text-sm text-stone-500 mb-3">히어로 영문 장식 글꼴을 선택해요</p>
+          <Section title={at('heroScriptFont', locale)}>
+            <p className="text-sm text-stone-500 mb-3">{at('heroScriptFontDesc', locale)}</p>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { value: '', label: 'Great Vibes', font: 'Great Vibes' },
@@ -887,13 +891,13 @@ export default function EditWedding() {
 
         {tab === 'basic' && (
           <>
-          <Section title="글꼴 크기">
-            <p className="text-sm text-stone-500 mb-3">청첩장 전체 글꼴 크기를 조정해요</p>
+          <Section title={at('fontScale', locale)}>
+            <p className="text-sm text-stone-500 mb-3">{at('fontScaleDesc', locale)}</p>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { value: 'small', label: '작게', sample: 'Aa', size: '14px' },
-                { value: 'medium', label: '보통', sample: 'Aa', size: '16px' },
-                { value: 'large', label: '크게', sample: 'Aa', size: '19px' },
+                { value: 'small', label: at('fontSmall', locale), sample: 'Aa', size: '14px' },
+                { value: 'medium', label: at('fontMedium', locale), sample: 'Aa', size: '16px' },
+                { value: 'large', label: at('fontLarge', locale), sample: 'Aa', size: '19px' },
               ].map((opt) => (
                 <button
                   key={opt.value}
@@ -911,8 +915,8 @@ export default function EditWedding() {
             </div>
           </Section>
 
-          <Section title="글꼴 설정">
-            <p className="text-sm text-stone-500 mb-4">청첩장 전체에 적용되는 글꼴을 선택해요</p>
+          <Section title={at('fontFamily', locale)}>
+            <p className="text-sm text-stone-500 mb-4">{at('fontFamilyDesc', locale)}</p>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { value: '', label: '기본 (테마 글꼴)' },
@@ -958,8 +962,8 @@ export default function EditWedding() {
         )}
 
         {tab === 'basic' && (
-          <Section title="봉투 인트로">
-            <p className="text-sm text-stone-500 mb-4">청첩장에 접속하면 봉투가 먼저 보이고, 터치하면 열리는 애니메이션이에요</p>
+          <Section title={at('envelope', locale)}>
+            <p className="text-sm text-stone-500 mb-4">{at('envelopeDesc', locale)}</p>
             <div className="flex items-center gap-2 mb-4">
               <input
                 type="checkbox"
@@ -967,7 +971,7 @@ export default function EditWedding() {
                 onChange={(e) => updateField('envelopeEnabled', e.target.checked)}
                 className="rounded border-stone-300"
               />
-              <span className="text-sm text-stone-600">봉투 인트로 사용</span>
+              <span className="text-sm text-stone-600">{at('envelopeUse', locale)}</span>
             </div>
             {wedding.envelopeEnabled && (
               <><div className="grid grid-cols-4 gap-3">
@@ -1000,7 +1004,7 @@ export default function EditWedding() {
                 ))}
               </div>
               <div className="mt-4">
-                <label className="block text-xs text-stone-500 mb-2">카드 문구 (미입력 시 기본 문구)</label>
+                <label className="block text-xs text-stone-500 mb-2">{at('envelopeCardText', locale)}</label>
                 <textarea
                   value={wedding.envelopeCardText || ''}
                   onChange={(e) => updateField('envelopeCardText', e.target.value)}
@@ -1011,16 +1015,16 @@ export default function EditWedding() {
                 />
               </div>
               <div className="mt-4">
-                <label className="block text-xs text-stone-500 mb-2">카드 글씨 색상</label>
+                <label className="block text-xs text-stone-500 mb-2">{at('envelopeCardColor', locale)}</label>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { value: '', label: '기본' },
                     { value: '#1a1a1a', label: '블랙' },
                     { value: '#4a4038', label: '브라운' },
-                    { value: '#2a3a4a', label: '네이비' },
+                    { value: '#2a3a4a', label: at('colorNavy', locale) },
                     { value: '#3a4a3a', label: '올리브' },
-                    { value: '#5a3a4a', label: '와인' },
-                    { value: '#C9A96E', label: '골드' },
+                    { value: '#5a3a4a', label: at('colorWine', locale) },
+                    { value: '#C9A96E', label: at('colorGold', locale) },
                     { value: '#e8dfd4', label: '아이보리' },
                     { value: '#ffffff', label: '화이트' },
                   ].map((c) => (
@@ -1043,13 +1047,13 @@ export default function EditWedding() {
         )}
 
         {tab === 'basic' && (
-          <Section title="카톡 공유 설정">
-            <p className="text-sm text-stone-500 mb-4">카카오톡으로 공유할 때 보여지는 이미지와 문구를 설정해요</p>
+          <Section title={at('kakaoShare', locale)}>
+            <p className="text-sm text-stone-500 mb-4">{at('kakaoShareDesc', locale)}</p>
             <div className="flex flex-wrap gap-2 mb-4">
               {[
-                { value: 'default', label: '기본 (대표사진)' },
-                { value: 'envelope', label: '봉투형' },
-                { value: 'custom', label: '직접 업로드' },
+                { value: 'default', label: at('ogDefault', locale) },
+                { value: 'envelope', label: at('ogEnvelope', locale) },
+                { value: 'custom', label: at('ogCustom', locale) },
               ].map((opt) => (
                 <button
                   key={opt.value}
@@ -1087,7 +1091,7 @@ export default function EditWedding() {
               </div>
             )}
             <div>
-              <label className="block text-xs text-stone-500 mb-2">공유 문구 (미입력 시 기본 문구)</label>
+              <label className="block text-xs text-stone-500 mb-2">{at('ogCustomTitle', locale)}</label>
               <input
                 value={wedding.ogCustomTitle || ''}
                 onChange={(e) => updateField('ogCustomTitle', e.target.value)}
@@ -1099,7 +1103,7 @@ export default function EditWedding() {
         )}
 
         {tab === 'greeting' && (
-          <Section title="서로에게 쓰는 편지">
+          <Section title={at('letterSection', locale)}>
             <div className="flex items-center gap-2 mb-4">
               <input
                 type="checkbox"
@@ -1107,7 +1111,7 @@ export default function EditWedding() {
                 onChange={(e) => updateField('showLetter', e.target.checked)}
                 className="rounded border-stone-300"
               />
-              <span className="text-sm text-stone-600">편지 섹션 표시</span>
+              <span className="text-sm text-stone-600">{at('showLetter', locale)}</span>
             </div>
             {wedding.showLetter && (
               <div className="space-y-6">
@@ -1121,7 +1125,7 @@ export default function EditWedding() {
                   <span className="text-xs text-stone-500">FROM. 이름 표시</span>
                 </label>
                 <div>
-                  <label className="block text-xs text-stone-500 mb-2">신랑이 신부에게</label>
+                  <label className="block text-xs text-stone-500 mb-2">{at('groomToBride', locale)}</label>
                   <textarea
                     value={wedding.groomLetter || ''}
                     onChange={(e) => updateField('groomLetter', e.target.value)}
@@ -1147,7 +1151,7 @@ export default function EditWedding() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-stone-500 mb-2">신부가 신랑에게</label>
+                  <label className="block text-xs text-stone-500 mb-2">{at('brideToGroom', locale)}</label>
                   <textarea
                     value={wedding.brideLetter || ''}
                     onChange={(e) => updateField('brideLetter', e.target.value)}
@@ -1179,10 +1183,10 @@ export default function EditWedding() {
 
         {tab === 'venue' && (
           <>
-            <Section title="예식 일시">
+            <Section title={at('sectionDateTime', locale)}>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-stone-600 mb-2">예식 날짜</label>
+                  <label className="block text-sm text-stone-600 mb-2">{at('weddingDate', locale)}</label>
                   <input
                     type="date"
                     value={wedding.weddingDate?.split('T')[0] || ''}
@@ -1191,7 +1195,7 @@ export default function EditWedding() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-stone-600 mb-2">예식 시간</label>
+                  <label className="block text-sm text-stone-600 mb-2">{at('weddingTime', locale)}</label>
                   <input
                     type="time"
                     value={wedding.weddingTime || ''}
@@ -1202,20 +1206,20 @@ export default function EditWedding() {
               </div>
             </Section>
 
-            <Section title="예식장 정보">
+            <Section title={at('sectionVenue', locale)}>
               <div className="space-y-4">
-                <Input label="예식장명" value={wedding.venue} onChange={v => updateField('venue', v)} />
-                <Input label="홀 이름" value={wedding.venueHall} onChange={v => updateField('venueHall', v)} />
+                <Input label={at('venueName', locale)} value={wedding.venue} onChange={v => updateField('venue', v)} />
+                <Input label={at('hallName', locale)} value={wedding.venueHall} onChange={v => updateField('venueHall', v)} />
                 <KakaoAddressInput
                   value={wedding.venueAddress}
                   onChange={v => updateField('venueAddress', v)}
                   label="주소"
                 />
-                <Input label="예식장 연락처" value={wedding.venuePhone} onChange={v => updateField('venuePhone', v)} />
+                <Input label={at('venuePhone', locale)} value={wedding.venuePhone} onChange={v => updateField('venuePhone', v)} />
               </div>
             </Section>
 
-            <Section title="지도 링크">
+            <Section title={at('sectionMap', locale)}>
               <div className="space-y-4">
                 <Input label="네이버 지도" value={wedding.venueNaverMap} onChange={v => updateField('venueNaverMap', v)} placeholder="https://naver.me/..." />
                 <Input label="카카오맵" value={wedding.venueKakaoMap} onChange={v => updateField('venueKakaoMap', v)} placeholder="https://kko.to/..." />
@@ -1223,11 +1227,11 @@ export default function EditWedding() {
               </div>
             </Section>
 
-            <Section title="교통·주차 안내">
-              <p className="text-xs text-stone-400 mb-3">종이청첩장에 인쇄됩니다</p>
+            <Section title={at('sectionTransport', locale)}>
+              <p className="text-xs text-stone-400 mb-3">{at('printNote', locale)}</p>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-stone-600 mb-2">교통 안내</label>
+                  <label className="block text-sm text-stone-600 mb-2">{at('transportGuide', locale)}</label>
                   <textarea
                     value={wedding.transportInfo || ''}
                     onChange={(e) => updateField('transportInfo', e.target.value)}
@@ -1237,7 +1241,7 @@ export default function EditWedding() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-stone-600 mb-2">주차 안내</label>
+                  <label className="block text-sm text-stone-600 mb-2">{at('aiParking', locale)}</label>
                   <textarea
                     value={wedding.parkingInfo || ''}
                     onChange={(e) => updateField('parkingInfo', e.target.value)}
@@ -1249,8 +1253,8 @@ export default function EditWedding() {
               </div>
             </Section>
 
-            <Section title="상세 안내 탭">
-              <p className="text-sm text-stone-500 mb-4">식사, 주차, 교통 등 추가 안내를 탭 형태로 보여줄 수 있어요</p>
+            <Section title={at('detailTabs', locale)}>
+              <p className="text-sm text-stone-500 mb-4">{at('detailTabsDesc', locale)}</p>
               <div className="flex flex-wrap gap-2 mb-4">
                 {['식사안내', '주차안내', '전세버스', '숙소안내'].map((preset) => (
                   <button
@@ -1333,71 +1337,71 @@ export default function EditWedding() {
 
         {tab === 'account' && (
           <>
-            <Section title="신랑 계좌">
+            <Section title={at('groomAccountSection', locale)}>
               <div className="space-y-3">
-                <BankSelect label="은행" value={wedding.groomBank} onChange={v => updateField('groomBank', v)} />
+                <BankSelect label={at('bank', locale)} value={wedding.groomBank} onChange={v => updateField('groomBank', v)} />
                 <div className="grid grid-cols-2 gap-3">
-                  <Input label="계좌번호" value={wedding.groomAccount} onChange={v => updateField('groomAccount', v)} />
-                  <Input label="예금주" value={wedding.groomAccountHolder} onChange={v => updateField('groomAccountHolder', v)} />
+                  <Input label={at('accountNumber', locale)} value={wedding.groomAccount} onChange={v => updateField('groomAccount', v)} />
+                  <Input label={at('accountHolder', locale)} value={wedding.groomAccountHolder} onChange={v => updateField('groomAccountHolder', v)} />
                 </div>
               </div>
             </Section>
 
-            <Section title="신부 계좌">
+            <Section title={at('brideAccountSection', locale)}>
               <div className="space-y-3">
-                <BankSelect label="은행" value={wedding.brideBank} onChange={v => updateField('brideBank', v)} />
+                <BankSelect label={at('bank', locale)} value={wedding.brideBank} onChange={v => updateField('brideBank', v)} />
                 <div className="grid grid-cols-2 gap-3">
-                  <Input label="계좌번호" value={wedding.brideAccount} onChange={v => updateField('brideAccount', v)} />
-                  <Input label="예금주" value={wedding.brideAccountHolder} onChange={v => updateField('brideAccountHolder', v)} />
+                  <Input label={at('accountNumber', locale)} value={wedding.brideAccount} onChange={v => updateField('brideAccount', v)} />
+                  <Input label={at('accountHolder', locale)} value={wedding.brideAccountHolder} onChange={v => updateField('brideAccountHolder', v)} />
                 </div>
               </div>
             </Section>
 
-            <Section title="신랑측 부모님 계좌">
+            <Section title={at('groomParentAccount', locale)}>
               <div className="space-y-6">
                 <div className="space-y-3">
                   <p className="text-xs font-medium text-stone-500">아버지</p>
-                  <BankSelect label="은행" value={wedding.groomFatherBank} onChange={v => updateField('groomFatherBank', v)} />
+                  <BankSelect label={at('bank', locale)} value={wedding.groomFatherBank} onChange={v => updateField('groomFatherBank', v)} />
                   <div className="grid grid-cols-2 gap-3">
-                    <Input label="계좌번호" value={wedding.groomFatherAccount} onChange={v => updateField('groomFatherAccount', v)} />
-                    <Input label="예금주" value={wedding.groomFatherAccountHolder} onChange={v => updateField('groomFatherAccountHolder', v)} />
+                    <Input label={at('accountNumber', locale)} value={wedding.groomFatherAccount} onChange={v => updateField('groomFatherAccount', v)} />
+                    <Input label={at('accountHolder', locale)} value={wedding.groomFatherAccountHolder} onChange={v => updateField('groomFatherAccountHolder', v)} />
                   </div>
                 </div>
                 <div className="space-y-3">
                   <p className="text-xs font-medium text-stone-500">어머니</p>
-                  <BankSelect label="은행" value={wedding.groomMotherBank} onChange={v => updateField('groomMotherBank', v)} />
+                  <BankSelect label={at('bank', locale)} value={wedding.groomMotherBank} onChange={v => updateField('groomMotherBank', v)} />
                   <div className="grid grid-cols-2 gap-3">
-                    <Input label="계좌번호" value={wedding.groomMotherAccount} onChange={v => updateField('groomMotherAccount', v)} />
-                    <Input label="예금주" value={wedding.groomMotherAccountHolder} onChange={v => updateField('groomMotherAccountHolder', v)} />
+                    <Input label={at('accountNumber', locale)} value={wedding.groomMotherAccount} onChange={v => updateField('groomMotherAccount', v)} />
+                    <Input label={at('accountHolder', locale)} value={wedding.groomMotherAccountHolder} onChange={v => updateField('groomMotherAccountHolder', v)} />
                   </div>
                 </div>
               </div>
             </Section>
 
-            <Section title="신부측 부모님 계좌">
+            <Section title={at('brideParentAccount', locale)}>
               <div className="space-y-6">
                 <div className="space-y-3">
                   <p className="text-xs font-medium text-stone-500">아버지</p>
-                  <BankSelect label="은행" value={wedding.brideFatherBank} onChange={v => updateField('brideFatherBank', v)} />
+                  <BankSelect label={at('bank', locale)} value={wedding.brideFatherBank} onChange={v => updateField('brideFatherBank', v)} />
                   <div className="grid grid-cols-2 gap-3">
-                    <Input label="계좌번호" value={wedding.brideFatherAccount} onChange={v => updateField('brideFatherAccount', v)} />
-                    <Input label="예금주" value={wedding.brideFatherAccountHolder} onChange={v => updateField('brideFatherAccountHolder', v)} />
+                    <Input label={at('accountNumber', locale)} value={wedding.brideFatherAccount} onChange={v => updateField('brideFatherAccount', v)} />
+                    <Input label={at('accountHolder', locale)} value={wedding.brideFatherAccountHolder} onChange={v => updateField('brideFatherAccountHolder', v)} />
                   </div>
                 </div>
                 <div className="space-y-3">
                   <p className="text-xs font-medium text-stone-500">어머니</p>
-                  <BankSelect label="은행" value={wedding.brideMotherBank} onChange={v => updateField('brideMotherBank', v)} />
+                  <BankSelect label={at('bank', locale)} value={wedding.brideMotherBank} onChange={v => updateField('brideMotherBank', v)} />
                   <div className="grid grid-cols-2 gap-3">
-                    <Input label="계좌번호" value={wedding.brideMotherAccount} onChange={v => updateField('brideMotherAccount', v)} />
-                    <Input label="예금주" value={wedding.brideMotherAccountHolder} onChange={v => updateField('brideMotherAccountHolder', v)} />
+                    <Input label={at('accountNumber', locale)} value={wedding.brideMotherAccount} onChange={v => updateField('brideMotherAccount', v)} />
+                    <Input label={at('accountHolder', locale)} value={wedding.brideMotherAccountHolder} onChange={v => updateField('brideMotherAccountHolder', v)} />
                   </div>
                 </div>
               </div>
             </Section>
 
             <div className="bg-gradient-to-b from-stone-50 to-white border border-stone-200 rounded-lg p-5">
-              <h3 className="font-medium text-stone-800 mb-1">간편 송금</h3>
-              <p className="text-xs text-stone-400 mb-4">링크를 등록하면 하객이 바로 송금할 수 있어요</p>
+              <h3 className="font-medium text-stone-800 mb-1">{at('easyTransfer', locale)}</h3>
+              <p className="text-xs text-stone-400 mb-4">{at('easyTransferDesc', locale)}</p>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 p-3 rounded-lg border border-stone-200 bg-white">
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#0064FF' }}>
@@ -1423,8 +1427,8 @@ export default function EditWedding() {
         )}
 
         {tab === 'media' && (
-          <Section title="대표 이미지/영상">
-            <p className="text-sm text-stone-500 mb-4">청첩장 상단에 표시될 대표 이미지나 영상을 설정하세요</p>
+          <Section title={at('heroMediaSection', locale)}>
+            <p className="text-sm text-stone-500 mb-4">{at('heroMediaDesc', locale)}</p>
             
             {wedding.heroMedia ? (
               <div className="relative">
@@ -1456,8 +1460,8 @@ export default function EditWedding() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-stone-400">
                     <Image className="w-8 h-8 text-stone-400 mb-2" />
-                    <span className="text-stone-500 text-sm">이미지 업로드</span>
-                    <span className="text-stone-400 text-xs mt-1">최대 20MB</span>
+                    <span className="text-stone-500 text-sm">{at('uploadImage', locale)}</span>
+                    <span className="text-stone-400 text-xs mt-1">{at('max20mb', locale)}</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -1468,8 +1472,8 @@ export default function EditWedding() {
                   </label>
                   <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-stone-400">
                     <Film className="w-8 h-8 text-stone-400 mb-2" />
-                    <span className="text-stone-500 text-sm">영상 업로드</span>
-                    <span className="text-stone-400 text-xs mt-1">최대 200MB</span>
+                    <span className="text-stone-500 text-sm">{at('uploadVideo', locale)}</span>
+                    <span className="text-stone-400 text-xs mt-1">{at('max200mb', locale)}</span>
                     <input
                       type="file"
                       accept="video/*"
@@ -1480,7 +1484,7 @@ export default function EditWedding() {
                   </label>
                 </div>
                 <UploadProgressBar progressKey="heroMedia" />
-                <div className="text-center text-stone-400 text-sm">또는</div>
+                <div className="text-center text-stone-400 text-sm">{at('orDivider', locale)}</div>
                 <Input 
                   label="YouTube URL" 
                   value="" 
@@ -1496,14 +1500,14 @@ export default function EditWedding() {
         )}
 
         {tab === 'gallery' && (
-          <Section title="갤러리">
-            <p className="text-sm text-stone-500 mb-4">웨딩 사진이나 영상을 여러 장 추가할 수 있어요</p>
+          <Section title={at('gallerySection', locale)}>
+            <p className="text-sm text-stone-500 mb-4">{at('galleryDesc', locale)}</p>
             
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-xs text-stone-500">레이아웃</span>
+              <span className="text-xs text-stone-500">{at('layoutLabel', locale)}</span>
               {[
-                { value: 'grid', label: '그리드' },
-                { value: 'polaroid', label: '폴라로이드' },
+                { value: 'grid', label: at('gridLayout', locale) },
+                { value: 'polaroid', label: at('polaroidLayout', locale) },
               ].map((layout) => (
                 <button
                   key={layout.value}
@@ -1520,7 +1524,7 @@ export default function EditWedding() {
             </div>
 
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-xs text-stone-500">갤러리 비율</span>
+              <span className="text-xs text-stone-500">{at('galleryRatio', locale)}</span>
               {['1:1', '3:4', '4:3', 'original'].map((ratio) => (
                 <button
                   key={ratio}
@@ -1531,7 +1535,7 @@ export default function EditWedding() {
                       : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
                   }`}
                 >
-                  {ratio === 'original' ? '원본' : ratio}
+                  {ratio === 'original' ? at('originalRatio', locale) : ratio}
                 </button>
               ))}
             </div>
@@ -1570,7 +1574,7 @@ export default function EditWedding() {
                   'aspect-square'
                 } flex flex-col items-center justify-center border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                 <Plus className="w-8 h-8 text-stone-400 mb-2" />
-                <span className="text-stone-500 text-sm">추가</span>
+                <span className="text-stone-500 text-sm">{at('addBtn', locale)}</span>
                 <input
                   type="file"
                   accept="image/*,video/*"
@@ -1586,7 +1590,7 @@ export default function EditWedding() {
               <UploadProgressBar key={key} progressKey={key} />
             ))}
             
-            <p className="text-xs text-stone-400 mt-2">* 이미지(최대 20MB), 영상(최대 200MB)</p>
+            <p className="text-xs text-stone-400 mt-2">{at('galleryNote', locale)}</p>
             
             {currentCropFile && (
               <ImageCropModal
@@ -1606,7 +1610,7 @@ export default function EditWedding() {
               <label className="flex items-center justify-between cursor-pointer">
                 <div>
                   <p className="font-medium text-stone-700">테마 포토필터 적용</p>
-                  <p className="text-sm text-stone-500">테마 분위기에 맞는 색감을 사진에 자동 적용</p>
+                  <p className="text-sm text-stone-500">{at('photoFilterDesc', locale)}</p>
                 </div>
                 <input
                   type="checkbox"
@@ -1621,8 +1625,8 @@ export default function EditWedding() {
         )}
 
         {tab === 'video' && (
-          <Section title="러브스토리 영상">
-            <p className="text-sm text-stone-500 mb-4">두 분의 이야기를 담은 영상을 추가하세요</p>
+          <Section title={at('loveStoryVideo', locale)}>
+            <p className="text-sm text-stone-500 mb-4">{at('loveStoryDesc', locale)}</p>
             
             {wedding.loveStoryVideo ? (
               <div className="relative">
@@ -1646,8 +1650,8 @@ export default function EditWedding() {
               <div className="space-y-4">
                 <label className={`flex flex-col items-center justify-center h-48 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                   <Film className="w-8 h-8 text-stone-400 mb-2" />
-                  <span className="text-stone-500 text-sm">영상 파일 업로드</span>
-                  <span className="text-stone-400 text-xs mt-1">최대 200MB</span>
+                  <span className="text-stone-500 text-sm">{at('uploadVideoFile', locale)}</span>
+                  <span className="text-stone-400 text-xs mt-1">{at('max200mb', locale)}</span>
                   <input
                     type="file"
                     accept="video/*"
@@ -1657,7 +1661,7 @@ export default function EditWedding() {
                   />
                 </label>
                 <UploadProgressBar progressKey="loveStoryVideo" />
-                <div className="text-center text-stone-400 text-sm">또는</div>
+                <div className="text-center text-stone-400 text-sm">{at('orDivider', locale)}</div>
                 <Input 
                   label="YouTube URL" 
                   value={wedding.loveStoryVideo} 
@@ -1670,11 +1674,11 @@ export default function EditWedding() {
         )}
 
         {tab === 'music' && (
-          <Section title="배경음악">
-            <p className="text-sm text-stone-500 mb-4">청첩장에 배경음악을 설정할 수 있어요</p>
+          <Section title={at('bgMusic', locale)}>
+            <p className="text-sm text-stone-500 mb-4">{at('bgMusicDesc', locale)}</p>
 
             <div className="mb-6">
-              <p className="text-sm font-medium text-stone-700 mb-3">기본 제공 음원</p>
+              <p className="text-sm font-medium text-stone-700 mb-3">{at('defaultTracks', locale)}</p>
               <audio ref={previewAudioRef} onEnded={() => setPreviewMusicId(null)} />
               {bgMusics.length > 0 ? (
                 <div className="space-y-1.5 max-h-64 overflow-y-auto">
@@ -1715,18 +1719,18 @@ export default function EditWedding() {
                         <p className="text-xs text-stone-400">{m.artist}{m.duration > 0 ? ` · ${Math.floor(m.duration / 60)}:${String(m.duration % 60).padStart(2, '0')}` : ''}</p>
                       </div>
                       {wedding.bgMusicUrl === m.url && (
-                        <span className="text-xs text-stone-500 bg-stone-200 px-2 py-0.5 rounded-full flex-shrink-0">선택됨</span>
+                        <span className="text-xs text-stone-500 bg-stone-200 px-2 py-0.5 rounded-full flex-shrink-0">{at('selectedLabel', locale)}</span>
                       )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-stone-400 py-4 text-center">기본 제공 음원이 없어요</p>
+                <p className="text-sm text-stone-400 py-4 text-center">{at('noDefaultTracks', locale)}</p>
               )}
             </div>
 
             <div className="border-t border-stone-100 pt-5">
-              <p className="text-sm font-medium text-stone-700 mb-3">직접 업로드</p>
+              <p className="text-sm font-medium text-stone-700 mb-3">{at('directUpload', locale)}</p>
             </div>
             
             {wedding.bgMusicUrl ? (
@@ -1761,8 +1765,8 @@ export default function EditWedding() {
               <div className="space-y-4">
                 <label className={`flex flex-col items-center justify-center h-32 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-stone-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                   <Music className="w-8 h-8 text-stone-400 mb-2" />
-                  <span className="text-stone-500 text-sm">음악 파일 업로드</span>
-                  <span className="text-stone-400 text-xs mt-1">MP3, WAV (최대 20MB)</span>
+                  <span className="text-stone-500 text-sm">{at('uploadMusicFile', locale)}</span>
+                  <span className="text-stone-400 text-xs mt-1">{at('mp3Wav', locale)}</span>
                   <input
                     type="file"
                     accept="audio/*"
@@ -1772,9 +1776,9 @@ export default function EditWedding() {
                   />
                 </label>
                 <UploadProgressBar progressKey="bgMusicUrl" />
-                <div className="text-center text-stone-400 text-sm">또는</div>
+                <div className="text-center text-stone-400 text-sm">{at('orDivider', locale)}</div>
                 <Input 
-                  label="음악 URL (직접 재생 가능한 URL)" 
+                  label={at('musicUrlLabel', locale)} 
                   value={wedding.bgMusicUrl} 
                   onChange={v => updateField('bgMusicUrl', v)} 
                   placeholder="https://example.com/music.mp3" 
@@ -1790,9 +1794,9 @@ export default function EditWedding() {
                 onChange={(e) => updateField('bgMusicAutoPlay', e.target.checked)}
                 className="w-5 h-5 rounded"
               />
-              <span className="text-stone-600">자동 재생</span>
+              <span className="text-stone-600">{at('autoPlay', locale)}</span>
             </label>
-            <p className="text-xs text-stone-400 mt-2">* 모바일에서는 사용자 상호작용 후 자동재생이 가능해요</p>
+            <p className="text-xs text-stone-400 mt-2">{at('autoPlayNote', locale)}</p>
           </Section>
         )}
 
@@ -1804,13 +1808,13 @@ export default function EditWedding() {
                   <Sparkles className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">AI 웨딩 컨시어지</h2>
-                  <p className="text-sm opacity-80">하객과 대화하는 특별한 청첩장</p>
+                  <h2 className="text-xl font-bold">{at('aiConcierge', locale)}</h2>
+                  <p className="text-sm opacity-80">{at('aiConciergeDesc', locale)}</p>
                 </div>
               </div>
               <p className="text-sm opacity-90 mb-4">
-                "읽고 닫는 청첩장은 이제 그만!<br />
-                하객과 대화하고, 기억에 남는 'AI 리셉션'을 시작하세요." 🎉
+                "{at('aiPromo1', locale)}<br />
+                {at('aiPromo2', locale)}" 🎉
               </p>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -1819,7 +1823,7 @@ export default function EditWedding() {
                   onChange={(e) => updateField('aiEnabled', e.target.checked)}
                   className="w-6 h-6 rounded bg-white/20 border-0"
                 />
-                <span className="font-medium">AI 기능 활성화</span>
+                <span className="font-medium">{at('aiEnable', locale)}</span>
               </label>
             </div>
             
@@ -1827,8 +1831,8 @@ export default function EditWedding() {
               <Link to={`/admin/weddings/${id}/ai-report`} className="block mb-6 p-4 bg-gradient-to-r from-violet-500 to-purple-600 rounded-lg text-white hover:opacity-90 transition-opacity">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">AI 리포트 보기</p>
-                    <p className="text-sm opacity-80">하객들이 AI에게 몰래 물어본 질문들</p>
+                    <p className="font-medium">{at('aiReport', locale)}</p>
+                    <p className="text-sm opacity-80">{at('aiReportDesc', locale)}</p>
                   </div>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </div>
@@ -1837,20 +1841,23 @@ export default function EditWedding() {
 
             {wedding.aiEnabled && (
               <>
-                <Section title="AI Photo Booth">
-                  <p className="text-sm text-stone-500 mb-4">하객이 셀카를 올리면 AI 웨딩 화보를 만들어줘요</p>
-                  <label className="flex items-center gap-3 cursor-pointer">
+                <Section title={at('aiBooth', locale)}>
+                  <p className="text-sm text-stone-500 mb-4">{at('aiBoothDesc', locale)}</p>
+                  <label className="flex items-center gap-3 cursor-pointer mb-4">
                     <input
                       type="checkbox"
                       checked={wedding.aiBoothEnabled || false}
                       onChange={(e) => updateField('aiBoothEnabled', e.target.checked)}
                       className="w-6 h-6 rounded border-stone-300"
                     />
-                    <span className="text-sm font-medium text-stone-700">Photo Booth 활성화</span>
+                    <span className="text-sm font-medium text-stone-700">{at('aiBoothEnable', locale)}</span>
                   </label>
+                  {wedding.aiBoothEnabled && (
+                    <BoothCreditPanel weddingId={wedding.id} slug={wedding.slug} />
+                  )}
                 </Section>
-                <Section title="AI 이름 설정">
-                  <p className="text-sm text-stone-500 mb-4">우리만의 AI에게 이름을 지어주세요</p>
+                <Section title={at('aiNameSection', locale)}>
+                  <p className="text-sm text-stone-500 mb-4">{at('aiNameDesc', locale)}</p>
                   <input
                     type="text"
                     value={wedding.aiName || ""}
@@ -1859,34 +1866,34 @@ export default function EditWedding() {
                     className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-800"
                   />
                 </Section>
-                <Section title="AI 인터랙션 스타일">
-                  <p className="text-sm text-stone-500 mb-4">AI가 하객과 소통하는 방식을 선택하세요</p>
+                <Section title={at('aiStyleSection', locale)}>
+                  <p className="text-sm text-stone-500 mb-4">{at('aiStyleDesc', locale)}</p>
                   <div className="space-y-3">
                     <label className="flex items-start gap-3 p-4 border border-stone-200 rounded-lg cursor-pointer hover:bg-stone-50 transition-colors">
                       <input type="radio" name="aiMode" value="classic" checked={wedding.aiMode === "classic" || !wedding.aiMode} onChange={(e) => updateField("aiMode", e.target.value)} className="mt-1" />
                       <div>
-                        <p className="font-medium text-stone-800">클래식 모드</p>
-                        <p className="text-sm text-stone-500">정중하고 친절한 안내. 어르신 하객이 많은 예식에 추천</p>
+                        <p className="font-medium text-stone-800">{at('aiClassic', locale)}</p>
+                        <p className="text-sm text-stone-500">{at('aiClassicDesc', locale)}</p>
                       </div>
                     </label>
                     <label className="flex items-start gap-3 p-4 border border-stone-200 rounded-lg cursor-pointer hover:bg-stone-50 transition-colors">
                       <input type="radio" name="aiMode" value="variety" checked={wedding.aiMode === "variety"} onChange={(e) => updateField("aiMode", e.target.value)} className="mt-1" />
                       <div>
-                        <p className="font-medium text-stone-800">버라이어티 모드</p>
-                        <p className="text-sm text-stone-500">신랑/신부 선택 + 비밀 폭로전. 친구들이 많은 힙한 결혼식에 추천</p>
+                        <p className="font-medium text-stone-800">{at('aiVariety', locale)}</p>
+                        <p className="text-sm text-stone-500">{at('aiVarietyDesc', locale)}</p>
                       </div>
                     </label>
                     <label className="flex items-start gap-3 p-4 border border-stone-200 rounded-lg cursor-pointer hover:bg-stone-50 transition-colors">
                       <input type="radio" name="aiMode" value="active" checked={wedding.aiMode === "active"} onChange={(e) => updateField("aiMode", e.target.value)} className="mt-1" />
                       <div>
-                        <p className="font-medium text-stone-800">액티브 모드</p>
-                        <p className="text-sm text-stone-500">스크롤에 따라 AI가 먼저 말 걸어요. 정보 전달이 중요한 커플에게 추천</p>
+                        <p className="font-medium text-stone-800">{at('aiActive', locale)}</p>
+                        <p className="text-sm text-stone-500">{at('aiActiveDesc', locale)}</p>
                       </div>
                     </label>
                   </div>
 
                   <div className="mt-4">
-                    <label className="block text-sm text-stone-600 mb-2">세부 성격 스타일</label>
+                    <label className="block text-sm text-stone-600 mb-2">{at('aiToneLabel', locale)}</label>
                     <select
                       value={wedding.aiToneStyle || "default"}
                       onChange={(e) => updateField("aiToneStyle", e.target.value)}
@@ -1894,30 +1901,30 @@ export default function EditWedding() {
                     >
                       {(wedding.aiMode === "classic" || !wedding.aiMode) && (
                         <>
-                          <option value="default">정석 호텔 지배인 - 품격있고 예의바름</option>
-                          <option value="romantic">감성 시인 - 문학적이고 부드러움</option>
-                          <option value="smart">똑똑한 비서 - 명료하고 또박또박</option>
+                          <option value="default">{at('toneDefault', locale)}</option>
+                          <option value="romantic">{at('toneRomantic', locale)}</option>
+                          <option value="smart">{at('toneSmart', locale)}</option>
                         </>
                       )}
                       {wedding.aiMode === "variety" && (
                         <>
-                          <option value="bestie">10년지기 찐친 - 살짝 선넘는 TMI</option>
-                          <option value="fanclub">주접킹 팬클럽 회장 - 하이텐션 칭찬</option>
-                          <option value="siri">시크한 AI - 무미건조한데 웃김</option>
+                          <option value="bestie">{at('toneBestie', locale)}</option>
+                          <option value="fanclub">{at('toneFanclub', locale)}</option>
+                          <option value="siri">{at('toneSiri', locale)}</option>
                         </>
                       )}
                       {wedding.aiMode === "active" && (
                         <>
-                          <option value="planner">열정적인 웨딩 플래너 - 꼼꼼하게 리드</option>
-                          <option value="sheriff">동네 보안관 - 듬직한 편의 안내</option>
-                          <option value="reporter">라이브 리포터 - 생동감 넘치는 중계</option>
+                          <option value="planner">{at('tonePlanner', locale)}</option>
+                          <option value="sheriff">{at('toneSheriff', locale)}</option>
+                          <option value="reporter">{at('toneReporter', locale)}</option>
                         </>
                       )}
                     </select>
                   </div>
                 </Section>
-                <Section title="신랑신부 성격·말투">
-                  <p className="text-sm text-stone-500 mb-4">AI가 두 분의 말투를 흉내낼 수 있도록 성격과 말투를 알려주세요</p>
+                <Section title={at('aiPersonality', locale)}>
+                  <p className="text-sm text-stone-500 mb-4">{at('aiPersonalityDesc', locale)}</p>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm text-stone-600 mb-2">신랑 {wedding.groomName}의 말투</label>
@@ -1952,11 +1959,11 @@ export default function EditWedding() {
                   </div>
                 </Section>
 
-              <Section title="비밀 에피소드">
-                <p className="text-sm text-stone-500 mb-4">하객들이 물어보면 AI가 재밌게 풀어줄 비밀 이야기들!</p>
+              <Section title={at('aiSecrets', locale)}>
+                <p className="text-sm text-stone-500 mb-4">{at('aiSecretsDesc', locale)}</p>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-stone-600 mb-2">신랑의 비밀</label>
+                    <label className="block text-sm text-stone-600 mb-2">{at('groomSecret', locale)}</label>
                     <textarea
                       value={wedding.aiSecrets?.groomSecret || ''}
                       onChange={(e) => updateAiSecrets('groomSecret', e.target.value)}
@@ -1975,7 +1982,7 @@ export default function EditWedding() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-stone-600 mb-2">신부의 비밀</label>
+                    <label className="block text-sm text-stone-600 mb-2">{at('brideSecret', locale)}</label>
                     <textarea
                       value={wedding.aiSecrets?.brideSecret || ''}
                       onChange={(e) => updateAiSecrets('brideSecret', e.target.value)}
@@ -1994,7 +2001,7 @@ export default function EditWedding() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-stone-600 mb-2">첫만남 에피소드</label>
+                    <label className="block text-sm text-stone-600 mb-2">{at('firstMeet', locale)}</label>
                     <textarea
                       value={wedding.aiSecrets?.firstMeetStory || ''}
                       onChange={(e) => updateAiSecrets('firstMeetStory', e.target.value)}
@@ -2013,7 +2020,7 @@ export default function EditWedding() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-stone-600 mb-2">프로포즈 비하인드</label>
+                    <label className="block text-sm text-stone-600 mb-2">{at('proposeBehind', locale)}</label>
                     <textarea
                       value={wedding.aiSecrets?.proposeStory || ''}
                       onChange={(e) => updateAiSecrets('proposeStory', e.target.value)}
@@ -2032,7 +2039,7 @@ export default function EditWedding() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-stone-600 mb-2">웃긴 에피소드</label>
+                    <label className="block text-sm text-stone-600 mb-2">{at('funnyEpisode', locale)}</label>
                     <textarea
                       value={wedding.aiSecrets?.funnyStory || ''}
                       onChange={(e) => updateAiSecrets('funnyStory', e.target.value)}
@@ -2051,7 +2058,7 @@ export default function EditWedding() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-stone-600 mb-2">서로의 첫인상</label>
+                    <label className="block text-sm text-stone-600 mb-2">{at('firstImpression', locale)}</label>
                     <textarea
                       value={wedding.aiSecrets?.firstImpression || ''}
                       onChange={(e) => updateAiSecrets('firstImpression', e.target.value)}
@@ -2072,11 +2079,11 @@ export default function EditWedding() {
                 </div>
               </Section>
 
-                <Section title="뷔페·메뉴 정보">
-                  <p className="text-sm text-stone-500 mb-4">하객들에게 뭐 먹을지 추천해줄 수 있어요!</p>
+                <Section title={at('aiMenu', locale)}>
+                  <p className="text-sm text-stone-500 mb-4">{at('aiMenuDesc', locale)}</p>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">메뉴 리스트</label>
+                      <label className="block text-sm text-stone-600 mb-2">{at('menuList', locale)}</label>
                       <textarea
                         value={wedding.aiMenuInfo?.menuList || ''}
                         onChange={(e) => updateAiMenu('menuList', e.target.value)}
@@ -2086,7 +2093,7 @@ export default function EditWedding() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">추천 메뉴</label>
+                      <label className="block text-sm text-stone-600 mb-2">{at('menuRecommend', locale)}</label>
                       <textarea
                         value={wedding.aiMenuInfo?.recommendation || ''}
                         onChange={(e) => updateAiMenu('recommendation', e.target.value)}
@@ -2096,7 +2103,7 @@ export default function EditWedding() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">특이사항</label>
+                      <label className="block text-sm text-stone-600 mb-2">{at('menuSpecial', locale)}</label>
                       <textarea
                         value={wedding.aiMenuInfo?.specialNote || ''}
                         onChange={(e) => updateAiMenu('specialNote', e.target.value)}
@@ -2108,11 +2115,11 @@ export default function EditWedding() {
                   </div>
                 </Section>
 
-                <Section title="교통·주차 정보">
-                  <p className="text-sm text-stone-500 mb-4">정확한 교통 정보를 입력하면 AI가 친절하게 안내해줘요</p>
+                <Section title={at('aiTransport', locale)}>
+                  <p className="text-sm text-stone-500 mb-4">{at('aiTransportDesc', locale)}</p>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">주차 안내</label>
+                      <label className="block text-sm text-stone-600 mb-2">{at('aiParking', locale)}</label>
                       <textarea
                         value={wedding.aiTransportInfo?.parking || ''}
                         onChange={(e) => updateAiTransport('parking', e.target.value)}
@@ -2122,7 +2129,7 @@ export default function EditWedding() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">대중교통</label>
+                      <label className="block text-sm text-stone-600 mb-2">{at('aiPublicTransport', locale)}</label>
                       <textarea
                         value={wedding.aiTransportInfo?.publicTransport || ''}
                         onChange={(e) => updateAiTransport('publicTransport', e.target.value)}
@@ -2132,7 +2139,7 @@ export default function EditWedding() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-stone-600 mb-2">택시/차량</label>
+                      <label className="block text-sm text-stone-600 mb-2">{at('aiTaxi', locale)}</label>
                       <textarea
                         value={wedding.aiTransportInfo?.taxi || ''}
                         onChange={(e) => updateAiTransport('taxi', e.target.value)}
@@ -2144,8 +2151,8 @@ export default function EditWedding() {
                   </div>
                 </Section>
 
-                <Section title="커스텀 Q&A">
-                  <p className="text-sm text-stone-500 mb-4">자주 받는 질문과 답변을 미리 등록해두세요</p>
+                <Section title={at('aiQna', locale)}>
+                  <p className="text-sm text-stone-500 mb-4">{at('aiQnaDesc', locale)}</p>
                   <div className="space-y-4">
                     {(wedding.aiCustomQna || []).map((qna: any, index: number) => (
                       <div key={index} className="p-4 bg-stone-50 rounded-lg space-y-3">
@@ -2198,11 +2205,11 @@ export default function EditWedding() {
         )}
 
         {tab === 'pair' && (
-          <Section title="함께 수정하기">
+          <Section title={at('pairSection', locale)}>
             <div className="mb-4">
               <p className="text-sm text-stone-500 leading-relaxed">
-                예비 배우자를 초대하면 함께 청첩장을 수정할 수 있어요.<br />
-                초대 코드를 생성해서 카톡이나 문자로 공유해주세요.
+                {at('pairDesc1', locale)}<br />
+                {at('pairDesc2', locale)}
               </p>
             </div>
             <PairManager weddingId={id!} groomName={wedding.groomName} brideName={wedding.brideName} heroMedia={wedding.heroMedia} />
@@ -2212,7 +2219,7 @@ export default function EditWedding() {
         {tab === 'rsvp' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-stone-800">참석 여부 응답</h3>
+              <h3 className="text-lg font-medium text-stone-800">{at('rsvpTitle', locale)}</h3>
               <span className="text-sm text-stone-500">총 {rsvpList.length}명</span>
             </div>
             
@@ -2222,22 +2229,22 @@ export default function EditWedding() {
               </div>
             ) : rsvpList.length === 0 ? (
               <div className="text-center py-12 bg-stone-50 rounded-lg">
-                <p className="text-stone-500">아직 응답이 없습니다</p>
+                <p className="text-stone-500">{at('rsvpNoData', locale)}</p>
               </div>
             ) : (
               <div className="space-y-3">
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
                     <p className="text-2xl font-bold text-green-700">{rsvpList.filter(r => r.attending === true).length}</p>
-                    <p className="text-sm text-green-600">참석</p>
+                    <p className="text-sm text-green-600">{at('rsvpAttend', locale)}</p>
                   </div>
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
                     <p className="text-2xl font-bold text-red-700">{rsvpList.filter(r => r.attending === false).length}</p>
-                    <p className="text-sm text-red-600">불참</p>
+                    <p className="text-sm text-red-600">{at('rsvpNotAttend', locale)}</p>
                   </div>
                   <div className="bg-stone-50 border border-stone-200 rounded-lg p-4 text-center">
                     <p className="text-2xl font-bold text-stone-700">{rsvpList.reduce((sum, r) => sum + (r.guestCount || 1), 0)}</p>
-                    <p className="text-sm text-stone-600">총 인원</p>
+                    <p className="text-sm text-stone-600">{at('rsvpTotalGuests', locale)}</p>
                   </div>
                 </div>
                 
@@ -2245,11 +2252,11 @@ export default function EditWedding() {
                   <table className="w-full">
                     <thead className="bg-stone-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">이름</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">참석</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">인원</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">측</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">메시지</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">{at('colName', locale)}</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">{at('colAttend', locale)}</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">{at('colCount', locale)}</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">{at('colSide', locale)}</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">{at('colMessage', locale)}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-stone-100">
@@ -2258,11 +2265,11 @@ export default function EditWedding() {
                           <td className="px-4 py-3 text-stone-800">{rsvp.name}</td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 text-xs rounded-full ${rsvp.attending ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                              {rsvp.attending ? '참석' : '불참'}
+                              {rsvp.attending ? at('rsvpAttend', locale) : at('rsvpNotAttend', locale)}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-stone-600">{rsvp.guestCount || 1}명</td>
-                          <td className="px-4 py-3 text-stone-600">{rsvp.side === 'groom' ? '신랑' : '신부'}</td>
+                          <td className="px-4 py-3 text-stone-600">{rsvp.side === 'groom' ? at('colGroom', locale) : at('colBride', locale)}</td>
                           <td className="px-4 py-3 text-stone-500 text-sm truncate max-w-[200px]">{rsvp.message || '-'}</td>
                         </tr>
                       ))}
@@ -2276,13 +2283,13 @@ export default function EditWedding() {
 
 
         {tab === 'ai-snap' && (
-          <Section title="AI 웨딩스냅 스튜디오">
+          <Section title={at('aiSnapStudio', locale)}>
             <AiSnapStudio weddingId={id || ''} />
           </Section>
         )}
 
         {tab === 'sections' && (
-          <Section title="섹션 배치 순서">
+          <Section title={at('sectionOrder', locale)}>
             <SectionOrderEditor
               value={wedding.sectionOrder}
               onChange={(order) => updateField('sectionOrder', order)}
@@ -2294,7 +2301,7 @@ export default function EditWedding() {
 
         {tab === 'settings' && (
           <>
-            <Section title="공개 설정">
+            <Section title={at('publishSetting', locale)}>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -2302,12 +2309,12 @@ export default function EditWedding() {
                   onChange={(e) => updateField('isPublished', e.target.checked)}
                   className="w-5 h-5 rounded"
                 />
-                <span className="text-stone-600">청첩장 공개</span>
+                <span className="text-stone-600">{at('publishLabel', locale)}</span>
               </label>
-              <p className="text-xs text-stone-400 mt-2">* 공개하면 누구나 링크로 볼 수 있어요</p>
+              <p className="text-xs text-stone-400 mt-2">{at('publishNote', locale)}</p>
             </Section>
 
-            <Section title="디데이 표시">
+            <Section title={at('ddaySetting', locale)}>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -2315,11 +2322,11 @@ export default function EditWedding() {
                   onChange={(e) => updateField('showDday', e.target.checked)}
                   className="w-5 h-5 rounded"
                 />
-                <span className="text-stone-600">D-Day 카운트 표시</span>
+                <span className="text-stone-600">{at('ddayLabel', locale)}</span>
               </label>
             </Section>
 
-            <Section title="International Mode">
+            <Section title={at('internationalMode', locale)}>
               <div className="space-y-4">
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
@@ -2347,8 +2354,8 @@ export default function EditWedding() {
                     className="w-5 h-5 rounded"
                   />
                   <div>
-                    <span className="text-stone-600">기본 언어 영어</span>
-                    <p className="text-xs text-stone-400">청첩장이 영어로 먼저 표시됩니다 (AI 자동 번역)</p>
+                    <span className="text-stone-600">{at('defaultEnLabel', locale)}</span>
+                    <p className="text-xs text-stone-400">{at('defaultEnDesc', locale)}</p>
                   </div>
                 </label>
                 {wedding.locale === 'en' && (
@@ -2363,18 +2370,18 @@ export default function EditWedding() {
                         if (res.ok) {
                           const data = await res.json();
                           updateField('translationsEn', data.translationsEn);
-                          alert('Translation complete!');
+                          alert(at('translateDone', locale));
                         } else {
-                          alert('Translation failed');
+                          alert(at('translateFail', locale));
                         }
                       } catch (err) {
                         console.error(err);
-                        alert('Translation error');
+                        alert(at('translateFail', locale));
                       }
                     }}
                     className="mt-3 w-full py-2.5 text-sm rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors"
                   >
-                    {wedding.translationsEn ? 'Re-translate to English' : 'Translate to English'}
+                    {wedding.translationsEn ? at('retranslate', locale) : at('translateBtn', locale)}
                   </button>
                 )}
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -2385,15 +2392,15 @@ export default function EditWedding() {
                     className="w-5 h-5 rounded"
                   />
                   <div>
-                    <span className="text-stone-600">하객 언어 전환 허용</span>
-                    <p className="text-xs text-stone-400">청첩장에 KO/EN 스위치가 표시됩니다</p>
+                    <span className="text-stone-600">{at('localeSwitchLabel', locale)}</span>
+                    <p className="text-xs text-stone-400">{at('localeSwitchDesc', locale)}</p>
                   </div>
                 </label>
               </div>
             </Section>
 
-            <Section title="히어로 텍스트 위치">
-              <p className="text-sm text-stone-500 mb-3">영문 텍스트와 이름/날짜 위치를 각각 조정하세요</p>
+            <Section title={at('heroPosition', locale)}>
+              <p className="text-sm text-stone-500 mb-3">{at('heroPositionDesc', locale)}</p>
               <div className="relative w-full rounded-xl overflow-hidden mb-4" style={{ aspectRatio: '9/16', maxHeight: 360 }}>
                 <img
                   src={wedding.heroMedia || wedding.galleries?.[0]?.mediaUrl || ''}
@@ -2424,34 +2431,34 @@ export default function EditWedding() {
               </div>
               <div className="space-y-3">
                 <div>
-                  <p className="text-xs text-stone-500 mb-1">영문 텍스트</p>
+                  <p className="text-xs text-stone-500 mb-1">{at('heroEngText', locale)}</p>
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-stone-400">상</span>
+                    <span className="text-[10px] text-stone-400">{at('upLabel', locale)}</span>
                     <input type="range" min={5} max={60} value={Number(wedding.heroTextPosition) || 20} onChange={(e) => updateField('heroTextPosition', String(e.target.value))} className="flex-1 accent-stone-800" />
-                    <span className="text-[10px] text-stone-400">하</span>
+                    <span className="text-[10px] text-stone-400">{at('downLabel', locale)}</span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500 mb-1">이름 / 날짜</p>
+                  <p className="text-xs text-stone-500 mb-1">{at('heroNameDate', locale)}</p>
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-stone-400">상</span>
+                    <span className="text-[10px] text-stone-400">{at('upLabel', locale)}</span>
                     <input type="range" min={40} max={95} value={Number(wedding.heroNamePosition) || 85} onChange={(e) => updateField('heroNamePosition', String(e.target.value))} className="flex-1 accent-stone-800" />
-                    <span className="text-[10px] text-stone-400">하</span>
+                    <span className="text-[10px] text-stone-400">{at('downLabel', locale)}</span>
                   </div>
                 </div>
               </div>
             </Section>
 
-            <Section title="글씨 색상">
-              <p className="text-sm text-stone-500 mb-4">헤더 영역의 글씨 색상을 선택하세요</p>
+            <Section title={at('textColorSection', locale)}>
+              <p className="text-sm text-stone-500 mb-4">{at('textColorDesc', locale)}</p>
               <div className="flex flex-wrap gap-3">
                 {[
-                  { value: '#ffffff', label: '흰색' },
-                  { value: '#1c1917', label: '검정' },
-                  { value: '#78716c', label: '회색' },
-                  { value: '#a16207', label: '골드' },
-                  { value: '#991b1b', label: '와인' },
-                  { value: '#1e3a5f', label: '네이비' },
+                  { value: '#ffffff', label: at('colorWhite', locale) },
+                  { value: '#1c1917', label: at('colorBlack', locale) },
+                  { value: '#78716c', label: at('colorGray', locale) },
+                  { value: '#a16207', label: at('colorGold', locale) },
+                  { value: '#991b1b', label: at('colorWine', locale) },
+                  { value: '#1e3a5f', label: at('colorNavy', locale) },
                 ].map(color => (
                   <button
                     key={color.value}
@@ -2471,7 +2478,7 @@ export default function EditWedding() {
                 ))}
               </div>
               <div className="mt-4">
-                <label className="block text-sm text-stone-600 mb-2">직접 입력 (HEX)</label>
+                <label className="block text-sm text-stone-600 mb-2">{at('directInputHex', locale)}</label>
                 <input
                   type="text"
                   value={wedding.textColor || '#ffffff'}
@@ -2483,8 +2490,8 @@ export default function EditWedding() {
             </Section>
 
 
-            <Section title="알림 설정">
-              <p className="text-sm text-stone-500 mb-4">카카오 알림톡 수신 설정</p>
+            <Section title={at('notifSetting', locale)}>
+              <p className="text-sm text-stone-500 mb-4">{at('notifDesc', locale)}</p>
               <div className="space-y-4">
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
@@ -2494,8 +2501,8 @@ export default function EditWedding() {
                     className="w-5 h-5 rounded"
                   />
                   <div>
-                    <span className="text-stone-600">RSVP 알림</span>
-                    <p className="text-xs text-stone-400">하객이 참석 여부를 등록하면 알림을 받아요</p>
+                    <span className="text-stone-600">{at('rsvpNotif', locale)}</span>
+                    <p className="text-xs text-stone-400">{at('rsvpNotifDesc', locale)}</p>
                   </div>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -2506,8 +2513,8 @@ export default function EditWedding() {
                     className="w-5 h-5 rounded"
                   />
                   <div>
-                    <span className="text-stone-600">선물 도착 알림</span>
-                    <p className="text-xs text-stone-400">새로운 선물이 도착하면 알림을 받아요</p>
+                    <span className="text-stone-600">{at('giftNotif', locale)}</span>
+                    <p className="text-xs text-stone-400">{at('giftNotifDesc', locale)}</p>
                   </div>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -2518,14 +2525,14 @@ export default function EditWedding() {
                     className="w-5 h-5 rounded"
                   />
                   <div>
-                    <span className="text-stone-600">리마인더 알림</span>
-                    <p className="text-xs text-stone-400">결혼식 D-7, D-3, D-1에 하객에게 리마인더를 보내요</p>
+                    <span className="text-stone-600">{at('reminderNotif', locale)}</span>
+                    <p className="text-xs text-stone-400">{at('reminderNotifDesc', locale)}</p>
                   </div>
                 </label>
               </div>
             </Section>
 
-            <Section title="청첩장 주소">
+            <Section title={at('slugSetting', locale)}>
               <div className="space-y-2">
                 <p className="text-stone-500 text-sm break-all">{window.location.origin}/w/</p>
                 <input
@@ -2535,7 +2542,7 @@ export default function EditWedding() {
                   className="w-full px-4 py-3 border border-stone-200 rounded-lg"
                 />
               </div>
-              <p className="text-xs text-stone-400 mt-2">* 영문, 숫자, 하이픈만 사용 가능해요</p>
+              <p className="text-xs text-stone-400 mt-2">{at('slugNote', locale)}</p>
             </Section>
           </>
         )}

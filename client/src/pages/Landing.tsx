@@ -1,3 +1,4 @@
+import { useLocaleStore } from '../store/useLocaleStore';
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -537,9 +538,9 @@ export default function Landing() {
   const [inquiryForm, setInquiryForm] = useState({ name: "", email: "", phone: "", type: "general", message: "" });
   const [inquirySending, setInquirySending] = useState(false);
   const [inquirySuccess, setInquirySuccess] = useState(false);
-  const [landingLocale, setLandingLocale] = useState<LandingLocale>(() => {
-    try { return (localStorage.getItem("landingLocale") as LandingLocale) || "ko"; } catch { return "ko"; }
-  });
+  const { locale: appLocale, setLocale: setAppLocale } = useLocaleStore();
+  const [landingLocale, setLandingLocale] = useState<LandingLocale>(appLocale as LandingLocale);
+  useEffect(() => { setLandingLocale(appLocale as LandingLocale); }, [appLocale]);
   CHAT_SEQUENCE = landingLocale === 'en' ? CHAT_SEQUENCE_EN : CHAT_SEQUENCE_KO;
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{ role: "assistant", content: "안녕하세요! 청첩장 작업실 웨딩이예요.\n\n결혼 준비하시나요? 축하드려요!\n궁금한 거 있으시면 편하게 물어보세요~" }]);
@@ -709,10 +710,18 @@ export default function Landing() {
         @keyframes chatEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .chat-msg-enter { animation: chatEnter 0.3s ease-out; }
         .nav-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-          @media (max-width: 480px) {
-            .nav-blur > div { padding: 12px 16px !important; }
-            .nav-blur > div > div:last-child { gap: 12px !important; }
+          @media (max-width: 640px) {
+            .nav-blur > div { padding: 10px 14px !important; }
+            .nav-blur > div > div:first-child p:first-child { font-size: 13px !important; max-width: 120px; }
+            .nav-blur > div > div:first-child p:last-child { display: none !important; }
+            .nav-blur > div > div:last-child { gap: 8px !important; }
             .nav-blur > div > div:last-child a { display: none !important; }
+            .nav-blur > div > div:last-child button:last-child { padding: 7px 14px !important; font-size: 11px !important; }
+          }
+          @media (max-width: 640px) {
+            .hero-btns { flex-direction: column !important; width: 100%; }
+            .hero-btns button, .hero-btns a { width: 100% !important; justify-content: center !important; padding: 14px 20px !important; font-size: 14px !important; box-sizing: border-box; }
+            .hero-stats { gap: 20px !important; }
           }
         .landing-body ::-webkit-scrollbar { display: none; }
         .snap-pill::-webkit-scrollbar { display: none; }
@@ -763,7 +772,7 @@ export default function Landing() {
             <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
               <a href="#themes" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>{lt('nav','themes',landingLocale)}</a>
               <a href="#pricing" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>{lt('nav','pricing',landingLocale)}</a>
-              <button onClick={() => setLandingLocale(p => p === 'ko' ? 'en' : 'ko')} style={{ fontSize: 11, color: "#888", background: "none", border: "1px solid #E0DDD8", padding: "6px 12px", borderRadius: 6, cursor: "pointer", fontWeight: 500 }}>{landingLocale === 'ko' ? 'EN' : 'KO'}</button>
+              <button onClick={() => (() => { const next = landingLocale === 'ko' ? 'en' : 'ko'; setLandingLocale(next); setAppLocale(next); })()} style={{ fontSize: 11, color: "#888", background: "none", border: "1px solid #E0DDD8", padding: "6px 12px", borderRadius: 6, cursor: "pointer", fontWeight: 500 }}>{landingLocale === 'ko' ? 'EN' : 'KO'}</button>
               <button onClick={openLogin} style={{ fontSize: 12, color: "#fff", background: "#1a1a1a", padding: "8px 20px", borderRadius: 6, border: "none", cursor: "pointer", fontWeight: 500 }}>{lt('nav','start',landingLocale)}</button>
             </div>
           </div>
@@ -1350,12 +1359,12 @@ export default function Landing() {
               </button>
               <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "8px 0" }}>
                 <div style={{ flex: 1, height: 1, background: "#E8E5E0" }} />
-                <span style={{ fontSize: 12, color: "#bbb" }}>또는</span>
+                <span style={{ fontSize: 12, color: "#bbb" }}>{lt("modal","or",landingLocale)}</span>
                 <div style={{ flex: 1, height: 1, background: "#E8E5E0" }} />
               </div>
               <button onClick={() => { setShowLoginModal(false); setShowEmailLogin(true); }} style={{ width: "100%", padding: "13px 0", background: "#fff", color: "#555", borderRadius: 10, border: "1px solid #E0DDD8", fontWeight: 500, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                 <Mail size={18} />
-                이메일로 시작하기
+                {lt("modal","email",landingLocale)}
               </button>
             </div>
           </div>

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Heart, Copy, Check, Link2, X, UserPlus, Unlink, Send } from 'lucide-react';
 import type { PairStatus } from '../../types';
+import { at } from '../../utils/appI18n';
+import { useLocaleStore } from '../../store/useLocaleStore';
 
 const API = import.meta.env.VITE_API_URL || '';
 
@@ -18,6 +20,7 @@ interface Props {
 }
 
 export default function PairManager({ weddingId, groomName, brideName, heroMedia }: Props) {
+  const { locale } = useLocaleStore();
   const [status, setStatus] = useState<PairStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
@@ -62,7 +65,7 @@ export default function PairManager({ weddingId, groomName, brideName, heroMedia
       }
       await fetchStatus();
     } catch {
-      setError('초대 코드 생성에 실패했습니다');
+      setError(at('pairFailed', locale));
     } finally {
       setActing(false);
     }
@@ -135,10 +138,10 @@ export default function PairManager({ weddingId, groomName, brideName, heroMedia
 
   const getTimeLeft = (expiresAt: string) => {
     const diff = new Date(expiresAt).getTime() - Date.now();
-    if (diff <= 0) return '만료됨';
+    if (diff <= 0) return at('pairExpired', locale);
     const h = Math.floor(diff / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
-    return `${h}시간 ${m}분 남음`;
+    return `${h}${at('pairHour', locale)} ${m}${at('pairMin', locale)} ${at('pairTimeLeft', locale)}`;
   };
 
   if (loading) {
@@ -172,7 +175,7 @@ export default function PairManager({ weddingId, groomName, brideName, heroMedia
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-stone-800 truncate">
-                {status.pairUser.name || '이름 없음'}
+                {status.pairUser.name || at('pairNoName', locale)}
               </p>
               <p className="text-xs text-stone-400 truncate">{status.pairUser.email}</p>
             </div>
@@ -199,7 +202,7 @@ export default function PairManager({ weddingId, groomName, brideName, heroMedia
                     disabled={acting}
                     className="flex-1 py-2.5 bg-red-500 text-white text-sm font-medium rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50"
                   >
-                    {acting ? '해제 중...' : '정말 해제할래요'}
+                    {acting ? at('pairRemoving', locale) : at('pairConfirmRemove', locale)}
                   </button>
                   <button
                     onClick={() => setConfirmRemove(false)}
@@ -223,7 +226,7 @@ export default function PairManager({ weddingId, groomName, brideName, heroMedia
       {!status.paired && status.pendingInvite && (
         <div>
           <div className="text-center mb-5">
-            <p className="text-sm text-stone-500 mb-4">상대방에게 아래 방법으로 공유해주세요</p>
+            <p className="text-sm text-stone-500 mb-4">{at('pairShareDesc', locale)}</p>
             <div className="inline-flex items-center gap-3 px-6 py-3.5 bg-stone-50 rounded-2xl border border-stone-200">
               <span className="text-2xl font-mono font-bold tracking-[0.25em] text-stone-800">
                 {status.pendingInvite.code}
@@ -274,9 +277,9 @@ export default function PairManager({ weddingId, groomName, brideName, heroMedia
                 className="flex items-center justify-center gap-1.5 py-3 bg-stone-800 text-white text-sm font-medium rounded-xl hover:bg-stone-900 transition-colors"
               >
                 {linkCopied ? (
-                  <><Check className="w-3.5 h-3.5" /> 복사됨</>
+                  <><Check className="w-3.5 h-3.5" /> {at('pairLinkCopied', locale)}</>
                 ) : (
-                  <><Link2 className="w-3.5 h-3.5" /> 링크 복사</>
+                  <><Link2 className="w-3.5 h-3.5" /> {at('pairCopyLink', locale)}</>
                 )}
               </button>
               <button
@@ -298,15 +301,14 @@ export default function PairManager({ weddingId, groomName, brideName, heroMedia
             <UserPlus className="w-6 h-6 text-stone-400" />
           </div>
           <p className="text-sm text-stone-400 mb-5 leading-relaxed">
-            초대 코드를 생성하고 카톡이나 문자로<br />
-            공유하면 함께 수정할 수 있어요
+            {at('pairCreateDesc', locale).split('\\n').map((line: string, i: number) => <span key={i}>{line}{i === 0 && <br />}</span>)}
           </p>
           <button
             onClick={createInvite}
             disabled={acting}
             className="w-full py-3 bg-stone-800 text-white text-sm font-semibold rounded-xl hover:bg-stone-900 transition-colors disabled:opacity-50"
           >
-            {acting ? '생성 중...' : '초대 코드 생성하기'}
+            {acting ? at('pairCreating', locale) : at('pairCreateBtn', locale)}
           </button>
         </div>
       )}

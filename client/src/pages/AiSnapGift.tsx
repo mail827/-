@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Gift, ArrowRight, ArrowLeft, Phone, Mail, MessageSquare, CreditCard, Loader2 } from 'lucide-react';
+import { at } from '../utils/appI18n';
+import { useLocaleStore } from '../store/useLocaleStore';
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -25,6 +27,7 @@ const TIERS: Tier[] = [
 type SendMethod = 'phone' | 'email';
 
 export default function AiSnapGift() {
+  const { locale: gl } = useLocaleStore();
   const token = localStorage.getItem('token');
   const [step, setStep] = useState(token ? 1 : 0);
 
@@ -102,17 +105,17 @@ export default function AiSnapGift() {
               <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center mx-auto mb-6">
                 <Gift className="w-7 h-7 text-white" />
               </div>
-              <h1 className="font-serif text-2xl text-stone-800 mb-2">AI 웨딩스냅 선물하기</h1>
-              <p className="text-sm text-stone-500">소중한 분에게 웨딩 화보를 선물하세요</p>
+              <h1 className="font-serif text-2xl text-stone-800 mb-2">{at('giftTitle', gl)}</h1>
+              <p className="text-sm text-stone-500">{at('giftDesc', gl)}</p>
             </div>
             <div className="space-y-3 max-w-xs mx-auto">
               <button onClick={() => handleLogin('kakao')} className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-lg hover:opacity-90 transition-all" style={{ background: '#FEE500' }}>
                 <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.722 1.755 5.108 4.396 6.462-.148.536-.954 3.442-.984 3.66 0 0-.02.163.086.226.105.063.23.03.23.03.303-.042 3.514-2.313 4.07-2.707.717.1 1.457.153 2.202.153 5.523 0 10-3.463 10-7.824C22 6.463 17.523 3 12 3" fill="#3C1E1E"/></svg>
-                <span className="text-sm font-medium" style={{ color: '#3C1E1E' }}>카카오로 시작하기</span>
+                <span className="text-sm font-medium" style={{ color: '#3C1E1E' }}>{at('snapKakaoLogin', gl)}</span>
               </button>
               <button onClick={() => handleLogin('google')} className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white border-2 border-stone-200 rounded-lg hover:border-stone-400 transition-all">
                 <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                <span className="text-sm font-medium text-stone-700">Google로 시작하기</span>
+                <span className="text-sm font-medium text-stone-700">{at('snapGoogleLogin', gl)}</span>
               </button>
             </div>
           </div>
@@ -121,8 +124,8 @@ export default function AiSnapGift() {
         {step === 1 && (
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="font-serif text-2xl text-stone-800 mb-2">패키지 선택</h2>
-              <p className="text-sm text-stone-500">선물할 화보 세트를 골라주세요</p>
+              <h2 className="font-serif text-2xl text-stone-800 mb-2">{at('giftSelectPkg', gl)}</h2>
+              <p className="text-sm text-stone-500">{at('giftSelectPkgDesc', gl)}</p>
             </div>
             <div className="space-y-3">
               {TIERS.map(t => {
@@ -157,8 +160,8 @@ export default function AiSnapGift() {
         {step === 2 && (
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="font-serif text-2xl text-stone-800 mb-2">받는 분 정보</h2>
-              <p className="text-sm text-stone-500">선물받을 분의 연락처를 입력해주세요</p>
+              <h2 className="font-serif text-2xl text-stone-800 mb-2">{at('giftRecipient', gl)}</h2>
+              <p className="text-sm text-stone-500">{at('giftRecipientDesc', gl)}</p>
             </div>
 
             <div className="flex bg-stone-100 rounded-lg p-1">
@@ -174,7 +177,7 @@ export default function AiSnapGift() {
 
             {sendMethod === 'phone' ? (
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">전화번호</label>
+                <label className="block text-sm font-medium text-stone-700 mb-2">{at('giftPhone', gl)}</label>
                 <input
                   type="tel"
                   value={phone}
@@ -182,11 +185,11 @@ export default function AiSnapGift() {
                   placeholder="010-1234-5678"
                   className="w-full px-4 py-3.5 border-2 border-stone-200 rounded-lg text-center text-lg tracking-wider focus:outline-none focus:border-stone-800 transition-all"
                 />
-                <p className="text-[11px] text-stone-400 mt-2 text-center">솔라피 문자로 선물 코드가 전송돼요</p>
+                <p className="text-[11px] text-stone-400 mt-2 text-center">{at('giftPhoneNote', gl)}</p>
               </div>
             ) : (
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">이메일</label>
+                <label className="block text-sm font-medium text-stone-700 mb-2">{at('giftEmail', gl)}</label>
                 <input
                   type="email"
                   value={email}
@@ -194,7 +197,7 @@ export default function AiSnapGift() {
                   placeholder="friend@email.com"
                   className="w-full px-4 py-3.5 border-2 border-stone-200 rounded-lg text-center text-lg focus:outline-none focus:border-stone-800 transition-all"
                 />
-                <p className="text-[11px] text-stone-400 mt-2 text-center">이메일로 선물 코드가 전송돼요</p>
+                <p className="text-[11px] text-stone-400 mt-2 text-center">{at('giftEmailNote', gl)}</p>
               </div>
             )}
 
@@ -228,35 +231,35 @@ export default function AiSnapGift() {
         {step === 3 && selectedTier && (
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="font-serif text-2xl text-stone-800 mb-2">선물 확인</h2>
-              <p className="text-sm text-stone-500">결제 후 바로 선물 코드가 전송돼요</p>
+              <h2 className="font-serif text-2xl text-stone-800 mb-2">{at('giftConfirmTitle', gl)}</h2>
+              <p className="text-sm text-stone-500">{at('giftConfirmDesc', gl)}</p>
             </div>
 
             <div className="bg-stone-50 rounded-lg border border-stone-200 p-5 space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <Gift className="w-4 h-4 text-amber-600" />
-                <span className="text-xs text-amber-600 font-semibold">선물 내용</span>
+                <span className="text-xs text-amber-600 font-semibold">{at('giftContent', gl)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-stone-400">패키지</span>
+                <span className="text-stone-400">{at('packageLabel', gl)}</span>
                 <span className="text-stone-800 font-medium">{selectedTier.label}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-stone-400">생성 장수</span>
+                <span className="text-stone-400">{at('giftSnapCount', gl)}</span>
                 <span className="text-stone-800 font-medium">{selectedTier.snaps}장</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-stone-400">받는 분</span>
+                <span className="text-stone-400">{at('giftRecipientLabel', gl)}</span>
                 <span className="text-stone-800 font-medium">{sendMethod === 'phone' ? phone : email}</span>
               </div>
               {message && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-stone-400">메시지</span>
+                  <span className="text-stone-400">{at('giftMessage', gl)}</span>
                   <span className="text-stone-800 font-medium text-right max-w-[60%] break-words">{message}</span>
                 </div>
               )}
               <div className="border-t border-stone-200 pt-3 flex justify-between">
-                <span className="font-semibold text-stone-800">결제 금액</span>
+                <span className="font-semibold text-stone-800">{at('paymentAmount', gl)}</span>
                 <span className="text-xl font-light text-stone-800">{selectedTier.price.toLocaleString()}<span className="text-xs text-stone-400">원</span></span>
               </div>
             </div>

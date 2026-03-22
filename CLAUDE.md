@@ -27,10 +27,12 @@ client/src/pages/AiSnapFree.tsx
 client/src/pages/AiSnapStudio.tsx
 client/src/pages/GiftRedeem.tsx
 client/src/pages/ArchiveSuccess.tsx
+client/src/pages/BoothCreditSuccess.tsx
 client/src/pages/Dashboard.tsx
 client/src/pages/wedding/WeddingPage.tsx
 client/src/pages/wedding/themes/shared/GuestAiPhotoBooth.tsx
 client/src/pages/wedding/themes/shared/GuestPhotoGallery.tsx
+client/src/pages/wedding/themes/shared/BoothGallery.tsx
 client/src/pages/wedding/themes/shared/GuestbookForm.tsx
 client/src/pages/wedding/themes/shared/GuestbookList.tsx
 client/src/pages/wedding/themes/shared/RsvpForm.tsx
@@ -42,6 +44,7 @@ client/src/pages/wedding/themes/shared/i18n.ts
 client/src/pages/wedding/themes/shared/themeConfig.ts
 client/src/pages/wedding/themes/shared/index.ts
 client/src/components/AiChat.tsx
+client/src/components/BoothCreditPanel.tsx
 client/src/pages/admin/AdminWeddingLifecycle.tsx
 client/src/pages/admin/AdminWeddingEdit.tsx
 client/src/pages/admin/AdminUsers.tsx
@@ -50,6 +53,7 @@ client/src/types/index.ts
 server/src/routes/aiCreate.ts
 server/src/routes/aiSnap.ts
 server/src/routes/snapPack.ts
+server/src/routes/boothCredit.ts
 server/src/routes/public.ts
 server/src/routes/gift.ts
 server/src/routes/guestPhoto.ts
@@ -70,9 +74,8 @@ server/prisma/schema.prisma
 - macOS: sed -i '' 필수
 - JSX 안 특수문자 사용 금지
 - 기본 이모지 절대 금지 -> lucide-react SVG만
-- 테마 푸터: "Made by Wedding Studio Lab"
+- 테마 푸터: "Made by 청첩장 작업실 >"
 - Fly.io 반드시 1대만 운영 (fly scale count 1)
-- Fly.io deploy 안 될 때: `--buildkit` 플래그로 우회
 
 ## 배포
 ```bash
@@ -80,13 +83,10 @@ server/prisma/schema.prisma
 cd client && npm run build && npx vercel --prod
 
 # 서버
-cd server && npm run build && fly deploy -a wedding-api-bitter-butterfly-7766
+cd server && npm run build && fly deploy -a wedding-api-bitter-butterfly-7766 --buildkit
 
 # 서버 (새 DB 필드 시)
-cd server && fly deploy --no-cache -a wedding-api-bitter-butterfly-7766
-
-# Fly.io depot 빌더 안 될 때
-cd server && fly deploy -a wedding-api-bitter-butterfly-7766 --buildkit
+cd server && fly deploy --no-cache -a wedding-api-bitter-butterfly-7766 --buildkit
 ```
 
 ## 가격 체계
@@ -94,6 +94,7 @@ cd server && fly deploy -a wedding-api-bitter-butterfly-7766 --buildkit
 - Premium: 29,900원 (Standard 전체 + AI 컨시어지 + AI 웨딩스냅 33컨셉 + 하객 AI 포토부스)
 - Basic+영상: 40만원
 - AI 스냅: 3장 5,900 / 5장 9,900 / 10장 14,900 / 20장 24,900
+- AI 포토부스 크레딧: 10장 2,900 / 30장 6,900 / 50장 9,900 / 100장 14,900
 - 영구 아카이브: 9,900원
 - 선물코드 시스템 active
 
@@ -130,7 +131,28 @@ CruiseDay, CruiseSunset, VoyageBlue, Editorial, EditorialWhite, EditorialGreen, 
 - 하객 AI 포토부스 (GuestAiPhotoBooth.tsx): 6컨셉 (Gala/Flower/Hanbok/RedCarpet/Magazine/Champagne)
   - 파티/축하 컨셉으로 리브랜딩 완료 (웨딩의상 제거)
   - 한글/영어 전체 전환 지원
+  - 크레딧 시스템: 청첩장당 10장 무료 (모든 게스트 합산), 관리자 무제한
+  - 크레딧 소진 시 게스트에게 "크레딧 소진" 안내, 버튼 비활성화
+  - 실패/타임아웃 시 크레딧 자동 환불
 - AI 컨시어지 (AiChat.tsx): 듀얼 페르소나, locale 전달 -> GPT 영어 응답
+
+### AI 포토부스 크레딧 구매 시스템
+- 구매 주체: 웨딩 커플 (청첩장 주인이 EditWedding에서 구매)
+- DB: Wedding.boothCredits (Int, default 10) + BoothCreditOrder 모델
+- 서버: boothCredit.ts (tiers/status/order/confirm 엔드포인트)
+- 클라이언트: BoothCreditPanel.tsx (EditWedding AI Photo Booth 섹션 내)
+- 결제: TossPayments v1 SDK (js.tosspayments.com/v1/payment)
+- 콜백: /booth-credit/success -> BoothCreditSuccess.tsx
+- 크레딧 차감: guestPhoto.ts ai-booth 엔드포인트에서 generate 시 -1, 실패 시 +1 환불
+- 잔여 조회: GET /:slug/booth-credits (게스트용, 로그인 불필요)
+
+### 하객 포토부스 갤러리 (BoothGallery.tsx)
+- AI_PHOTO mediaType만 필터링하여 전용 갤러리 노출
+- 3열 그리드, 2:3 비율, 게스트이름 + 컨셉 라벨 오버레이
+- 풀스크린 뷰어 (좌우 내비게이션 + 다운로드)
+- WeddingPage guestPhotoSlot: 부스 -> 부스갤러리 -> 게스트갤러리 순서
+- 사진 없으면 자동 숨김 (return null)
+- 서버: GET /:slug/ai-booth/gallery (imageUrl 비어있지 않은 것만)
 
 ### 기타 기능
 - 함께만들기, 버전관리(공유링크), 포토필터, 갤러리, 배경음악, D-Day
@@ -157,7 +179,7 @@ CruiseDay, CruiseSunset, VoyageBlue, Editorial, EditorialWhite, EditorialGreen, 
 - 공통: 결혼식 초대/의 아들/의 딸/전화하기/문자하기
 - 봉투: "Something begins when you open this." / "request the pleasure of your company"
 - 갤러리: "Help us remember this day." / Photo/Video 전환
-- AI 포토부스: "Step into their moment." / "Join the memory" / "Pick your vibe"
+- AI 포토부스: 전체 한영 전환 지원
 - AI 컨시어지: 감성 토스트 (EN_TOASTS), 퀵버튼 영어, locale -> 서버 GPT 영어 응답
 
 **GPT 자동 번역 (유저 입력 커스텀 텍스트):**
@@ -172,9 +194,7 @@ CruiseDay, CruiseSunset, VoyageBlue, Editorial, EditorialWhite, EditorialGreen, 
 - AquaGlobe/NightSea는 isPreview 추가 타입이라 별도 처리
 
 ### 아직 미적용
-- 각 테마 내부 섹션 타이틀 일부 (INVITATION, CEREMONY 등은 이미 영어)
-- KakaoMap "지도를 불러오는 중..." 텍스트
-- 랜딩 페이지 영어 전환
+- 각 테마 내부 남은 한글 하드코딩 (KakaoMap 로딩, placeholder 등)
 - AI 컨시어지 placeholder 텍스트 (한국어 하드코딩)
 
 ---
@@ -214,15 +234,6 @@ snapPack.ts, aiSnap.ts, AiSnapFree.tsx, AdminAiSnap.tsx (+ AdminSnapSample.tsx)
 
 ---
 
-## 하객 AI 포토부스 (2026-03-22)
-- 6컨셉: Gala / Flower / Hanbok / Red Carpet / Magazine / Champagne
-- 웨딩 의상 완전 제거 -> 파티/축하 컨셉으로 리브랜딩
-- "AI CELEBRATION SNAP" / "축하 한 장 남기기"
-- 전체 한글 UI + locale 영어 전환 지원
-- 서버: guestPhoto.ts BOOTH_MALE/BOOTH_FEMALE 프롬프트 교체
-
----
-
 ## 선물 리딤 (GiftRedeem.tsx)
 - 리딤 성공 후: AI 자동 제작(/ai-create) + 직접 만들기(/create) 2칸 카드 선택지
 - AI 쪽 NEW 뱃지, "나중에 만들기" -> 대시보드 이동
@@ -232,7 +243,7 @@ snapPack.ts, aiSnap.ts, AiSnapFree.tsx, AdminAiSnap.tsx (+ AdminSnapSample.tsx)
 ## 다음 세션 TODO
 
 ### 긴급
-1. 랜딩 페이지 영어 전환 (KO/EN 스위치 또는 /en 경로)
+1. /en 별도 랜딩 경로 (SEO, Product Hunt)
 2. 각 테마 내부 남은 한글 하드코딩 (KakaoMap 로딩, placeholder 등)
 3. AI 컨시어지 placeholder 한국어 -> locale 대응
 
@@ -248,4 +259,4 @@ snapPack.ts, aiSnap.ts, AiSnapFree.tsx, AdminAiSnap.tsx (+ AdminSnapSample.tsx)
 
 ### 성장 전략
 10. 랜딩 영문 버전 -> Product Hunt / IndieHackers 런칭
-11. "경험형 콘텐츠" 포지셔닝 (덩국박사 피드백 반영)
+11. "경험형 콘텐츠" 포지셔닝
