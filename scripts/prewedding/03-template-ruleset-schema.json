@@ -1,0 +1,416 @@
+{
+  "$schema": "Template Ruleset Schema v1.0 — 청첩장 작업실 식전영상",
+  "templates": {
+    "classic_film": {
+      "id": "classic_film",
+      "name": "Classic Film",
+      "nameEn": "Classic Film",
+      "description": "정통 3막 구조. 가장 무난하고 범용적.",
+      "category": "classic",
+      "sceneCount": 9,
+      "totalDuration": 45,
+      "aspectRatio": "9:16",
+      "resolution": "1080p",
+
+      "emotionCurve": [
+        { "scene": 1, "phase": "intro",    "emotion": "distant",  "colorTemp": "cool",    "energy": 0.2 },
+        { "scene": 2, "phase": "rising",   "emotion": "curious",  "colorTemp": "neutral",  "energy": 0.3 },
+        { "scene": 3, "phase": "rising",   "emotion": "warm",     "colorTemp": "neutral",  "energy": 0.4 },
+        { "scene": 4, "phase": "rising",   "emotion": "warm",     "colorTemp": "warm",     "energy": 0.5 },
+        { "scene": 5, "phase": "building", "emotion": "joyful",   "colorTemp": "warm",     "energy": 0.6 },
+        { "scene": 6, "phase": "building", "emotion": "joyful",   "colorTemp": "warm",     "energy": 0.7 },
+        { "scene": 7, "phase": "peak",     "emotion": "intimate", "colorTemp": "hot",      "energy": 0.9 },
+        { "scene": 8, "phase": "climax",   "emotion": "still",    "colorTemp": "hot",      "energy": 1.0 },
+        { "scene": 9, "phase": "ending",   "emotion": "grateful", "colorTemp": "warm",     "energy": 0.4 }
+      ],
+
+      "sceneRules": [
+        {
+          "scene": 1,
+          "title": "도입",
+          "photoPreference": ["nature", "outdoor", "travel"],
+          "camera": "zoom_out",
+          "cameraSpeed": "slow",
+          "transition": "fade_black",
+          "transitionDuration": 3.0,
+          "duration": 6,
+          "holdDuration": 1,
+          "subtitleTone": "시간/장소 소개",
+          "subtitleExample": "2023년 봄, 우연히 만난 우리",
+          "colorGrading": "cool_slate",
+          "colorIntensity": 0.4
+        },
+        {
+          "scene": 2,
+          "title": "전개 1",
+          "photoPreference": ["travel", "outdoor"],
+          "camera": "pan_right",
+          "cameraSpeed": "medium",
+          "transition": "dissolve",
+          "transitionDuration": 1.5,
+          "duration": 5,
+          "holdDuration": 0.5,
+          "subtitleTone": "일상 묘사",
+          "subtitleExample": "함께한 시간이 쌓여갈수록",
+          "colorGrading": "neutral",
+          "colorIntensity": 0.2
+        },
+        {
+          "scene": 3,
+          "title": "전개 2",
+          "photoPreference": ["selfie", "indoor", "casual"],
+          "camera": "zoom_in",
+          "cameraSpeed": "medium",
+          "transition": "dissolve",
+          "transitionDuration": 1.5,
+          "duration": 5,
+          "holdDuration": 0.5,
+          "subtitleTone": "감정 표현",
+          "subtitleExample": "서로의 온도를 알아갈 때",
+          "colorGrading": "warm_amber",
+          "colorIntensity": 0.2
+        },
+        {
+          "scene": 4,
+          "title": "전개 3",
+          "photoPreference": ["travel", "nature", "outdoor"],
+          "camera": "pan_left",
+          "cameraSpeed": "medium",
+          "transition": "cut",
+          "transitionDuration": 0.3,
+          "duration": 4,
+          "holdDuration": 0.5,
+          "subtitleTone": "함께한 추억",
+          "subtitleExample": "웃음이 닿는 곳마다 우리",
+          "colorGrading": "warm_amber",
+          "colorIntensity": 0.3
+        },
+        {
+          "scene": 5,
+          "title": "고조 1",
+          "photoPreference": ["closeup", "formal"],
+          "camera": "zoom_in",
+          "cameraSpeed": "fast",
+          "transition": "cut",
+          "transitionDuration": 0.2,
+          "duration": 4,
+          "holdDuration": 0.3,
+          "subtitleTone": "짧고 임팩트",
+          "subtitleExample": "그래서",
+          "colorGrading": "warm_amber",
+          "colorIntensity": 0.4
+        },
+        {
+          "scene": 6,
+          "title": "고조 2",
+          "photoPreference": ["closeup", "selfie"],
+          "camera": "zoom_in",
+          "cameraSpeed": "fast",
+          "transition": "cut",
+          "transitionDuration": 0.2,
+          "duration": 4,
+          "holdDuration": 0.3,
+          "subtitleTone": "짧고 임팩트",
+          "subtitleExample": "당신과",
+          "colorGrading": "warm_amber",
+          "colorIntensity": 0.5
+        },
+        {
+          "scene": 7,
+          "title": "절정 직전",
+          "photoPreference": ["closeup", "intimate"],
+          "camera": "zoom_in",
+          "cameraSpeed": "slow",
+          "transition": "dissolve",
+          "transitionDuration": 2.0,
+          "duration": 5,
+          "holdDuration": 1,
+          "subtitleTone": "감정 정점",
+          "subtitleExample": "영원히 함께하고 싶습니다",
+          "colorGrading": "warm_amber",
+          "colorIntensity": 0.6
+        },
+        {
+          "scene": 8,
+          "title": "클라이맥스",
+          "photoPreference": ["best_quality"],
+          "camera": "static",
+          "cameraSpeed": "none",
+          "transition": "dissolve",
+          "transitionDuration": 3.0,
+          "duration": 6,
+          "holdDuration": 3,
+          "subtitleTone": "없음 또는 이름만",
+          "subtitleExample": "",
+          "colorGrading": "warm_amber",
+          "colorIntensity": 0.5,
+          "note": "제일 좋은 사진 1장. 풀스크린 정적. BGM 정점."
+        },
+        {
+          "scene": 9,
+          "title": "엔딩",
+          "photoPreference": ["any"],
+          "camera": "static",
+          "cameraSpeed": "none",
+          "transition": "fade_white",
+          "transitionDuration": 3.0,
+          "duration": 6,
+          "holdDuration": 2,
+          "subtitleTone": "이름 + 날짜",
+          "subtitleExample": "{groomName} & {brideName}\n{weddingDate}",
+          "colorGrading": "warm_amber",
+          "colorIntensity": 0.3,
+          "isEnding": true
+        }
+      ],
+
+      "cameraPresets": {
+        "intro":    { "default": "zoom_out",  "speed": "slow" },
+        "rising":   { "default": "pan_right", "speed": "medium" },
+        "building": { "default": "zoom_in",   "speed": "fast" },
+        "peak":     { "default": "zoom_in",   "speed": "slow" },
+        "climax":   { "default": "static",    "speed": "none" },
+        "ending":   { "default": "static",    "speed": "none" }
+      },
+
+      "transitionPresets": {
+        "intro_to_rising":    "dissolve",
+        "rising_to_rising":   "dissolve",
+        "rising_to_building": "cut",
+        "building_to_peak":   "dissolve",
+        "peak_to_climax":     "dissolve",
+        "climax_to_ending":   "fade_white"
+      },
+
+      "colorPreset": "warm_amber",
+      "colorCurve": {
+        "intro":    { "preset": "cool_slate",   "intensity": 0.4 },
+        "rising":   { "preset": "neutral",       "intensity": 0.2 },
+        "building": { "preset": "warm_amber",    "intensity": 0.4 },
+        "peak":     { "preset": "warm_amber",    "intensity": 0.6 },
+        "climax":   { "preset": "warm_amber",    "intensity": 0.5 },
+        "ending":   { "preset": "warm_amber",    "intensity": 0.3 }
+      },
+
+      "subtitleStyle": {
+        "font": "Noto Serif KR",
+        "size": 32,
+        "color": "#ffffff",
+        "shadow": true,
+        "shadowColor": "rgba(0,0,0,0.4)",
+        "position": "bottom_center",
+        "marginBottom": 120,
+        "fadeIn": 0.5,
+        "fadeOut": 0.5,
+        "maxLength": 30
+      },
+
+      "bgmPresets": [
+        {
+          "id": "classic_warm",
+          "name": "Warm Light",
+          "url": "",
+          "bpm": 72,
+          "mood": "warm_gentle",
+          "duration": 60,
+          "peakAt": 35
+        }
+      ],
+
+      "endingStyle": {
+        "type": "fade_white",
+        "textFont": "Noto Serif KR",
+        "textSize": 28,
+        "textColor": "#1a1a1a",
+        "bgColor": "#ffffff",
+        "duration": 6,
+        "template": "{groomName} & {brideName}\n{weddingDate}"
+      }
+    },
+
+    "mood_piece": {
+      "id": "mood_piece",
+      "name": "Mood Piece",
+      "nameEn": "Mood Piece",
+      "description": "대사 없는 단편영화 느낌. 색감과 여백으로만 감정 전달.",
+      "category": "artistic",
+      "sceneCount": 7,
+      "totalDuration": 40,
+      "aspectRatio": "9:16",
+      "resolution": "1080p",
+
+      "emotionCurve": [
+        { "scene": 1, "phase": "opening",  "emotion": "still",    "colorTemp": "cool",    "energy": 0.1 },
+        { "scene": 2, "phase": "breath",   "emotion": "calm",     "colorTemp": "neutral",  "energy": 0.2 },
+        { "scene": 3, "phase": "breath",   "emotion": "warm",     "colorTemp": "neutral",  "energy": 0.3 },
+        { "scene": 4, "phase": "wave",     "emotion": "intimate", "colorTemp": "warm",     "energy": 0.5 },
+        { "scene": 5, "phase": "wave",     "emotion": "intimate", "colorTemp": "warm",     "energy": 0.7 },
+        { "scene": 6, "phase": "hold",     "emotion": "still",    "colorTemp": "hot",      "energy": 0.8 },
+        { "scene": 7, "phase": "fade",     "emotion": "grateful", "colorTemp": "warm",     "energy": 0.3 }
+      ],
+
+      "sceneRules": [
+        {
+          "scene": 1, "title": "오프닝",
+          "photoPreference": ["nature", "abstract", "detail"],
+          "camera": "static", "cameraSpeed": "none",
+          "transition": "fade_black", "transitionDuration": 4.0,
+          "duration": 8, "holdDuration": 4,
+          "subtitleTone": "없음",
+          "colorGrading": "cool_slate", "colorIntensity": 0.5,
+          "note": "긴 홀드. 사진이 아닌 디테일/풍경으로 시작."
+        },
+        {
+          "scene": 2, "title": "호흡 1",
+          "photoPreference": ["outdoor", "travel"],
+          "camera": "pan_right", "cameraSpeed": "very_slow",
+          "transition": "dissolve", "transitionDuration": 3.0,
+          "duration": 6, "holdDuration": 2,
+          "subtitleTone": "없음 또는 한줄",
+          "colorGrading": "film_grain", "colorIntensity": 0.3
+        },
+        {
+          "scene": 3, "title": "호흡 2",
+          "photoPreference": ["selfie", "casual"],
+          "camera": "zoom_in", "cameraSpeed": "very_slow",
+          "transition": "dissolve", "transitionDuration": 3.0,
+          "duration": 6, "holdDuration": 2,
+          "subtitleTone": "없음",
+          "colorGrading": "film_grain", "colorIntensity": 0.3
+        },
+        {
+          "scene": 4, "title": "물결 1",
+          "photoPreference": ["closeup", "intimate"],
+          "camera": "zoom_in", "cameraSpeed": "slow",
+          "transition": "dissolve", "transitionDuration": 2.0,
+          "duration": 5, "holdDuration": 1,
+          "subtitleTone": "짧은 한줄",
+          "subtitleExample": "너의 온도",
+          "colorGrading": "warm_amber", "colorIntensity": 0.4
+        },
+        {
+          "scene": 5, "title": "물결 2",
+          "photoPreference": ["closeup", "formal"],
+          "camera": "static", "cameraSpeed": "none",
+          "transition": "dissolve", "transitionDuration": 2.0,
+          "duration": 5, "holdDuration": 2,
+          "subtitleTone": "없음",
+          "colorGrading": "warm_amber", "colorIntensity": 0.5
+        },
+        {
+          "scene": 6, "title": "정점",
+          "photoPreference": ["best_quality"],
+          "camera": "static", "cameraSpeed": "none",
+          "transition": "dissolve", "transitionDuration": 3.0,
+          "duration": 7, "holdDuration": 4,
+          "subtitleTone": "없음",
+          "colorGrading": "warm_amber", "colorIntensity": 0.4,
+          "note": "무음에 가까운 구간. 사진의 힘으로만."
+        },
+        {
+          "scene": 7, "title": "페이드",
+          "photoPreference": ["any"],
+          "camera": "static", "cameraSpeed": "none",
+          "transition": "fade_white", "transitionDuration": 4.0,
+          "duration": 5, "holdDuration": 2,
+          "subtitleTone": "이름 + 날짜",
+          "colorGrading": "warm_amber", "colorIntensity": 0.2,
+          "isEnding": true
+        }
+      ],
+
+      "subtitleStyle": {
+        "font": "Noto Serif KR",
+        "size": 24,
+        "color": "rgba(255,255,255,0.7)",
+        "shadow": false,
+        "position": "center",
+        "marginBottom": 0,
+        "fadeIn": 1.0,
+        "fadeOut": 1.0,
+        "maxLength": 15
+      },
+
+      "colorPreset": "film_grain",
+      "bgmPresets": [
+        {
+          "id": "mood_ambient",
+          "name": "Ambient Still",
+          "url": "",
+          "bpm": 0,
+          "mood": "ambient_minimal",
+          "duration": 50,
+          "peakAt": 30
+        }
+      ]
+    },
+
+    "montage_rush": {
+      "id": "montage_rush",
+      "name": "Montage Rush",
+      "nameEn": "Montage Rush",
+      "description": "빠른 컷 전환, 에너제틱한 커플용.",
+      "category": "dynamic",
+      "sceneCount": 12,
+      "totalDuration": 35,
+      "aspectRatio": "9:16",
+      "resolution": "1080p",
+      "note": "씬당 2~4초. 빠른 호흡. 리듬감 있는 컷. 가현 레퍼런스 기반으로 세부 룰셋 확정 예정."
+    },
+
+    "one_take": {
+      "id": "one_take",
+      "name": "One Take",
+      "nameEn": "One Take",
+      "description": "하나의 긴 호흡. 고급스럽고 절제된 느낌.",
+      "category": "minimal",
+      "sceneCount": 5,
+      "totalDuration": 40,
+      "aspectRatio": "9:16",
+      "resolution": "1080p",
+      "note": "카메라 무브먼트 최소. 사진이 화면을 지배. 가현 레퍼런스 기반으로 세부 룰셋 확정 예정."
+    },
+
+    "retro_reel": {
+      "id": "retro_reel",
+      "name": "Retro Reel",
+      "nameEn": "Retro Reel",
+      "description": "필름 그레인 + 빈티지 색보정. 옛날 홈비디오 감성.",
+      "category": "vintage",
+      "sceneCount": 8,
+      "totalDuration": 40,
+      "aspectRatio": "9:16",
+      "resolution": "1080p",
+      "note": "film_grain 색보정 강하게. 가현 레퍼런스 기반으로 세부 룰셋 확정 예정."
+    }
+  },
+
+  "colorPresets": {
+    "warm_amber":   { "description": "가을, 골든아워", "lut": "warm_amber.cube",   "promptHint": "warm amber golden hour, soft orange tones" },
+    "cool_slate":   { "description": "모던, 도시적",   "lut": "cool_slate.cube",   "promptHint": "cool blue-grey, modern, clean shadows" },
+    "film_grain":   { "description": "빈티지, 필름",   "lut": "film_grain.cube",   "promptHint": "vintage 35mm film grain, faded warm" },
+    "pastel_bloom": { "description": "봄, 부드러운",   "lut": "pastel_bloom.cube", "promptHint": "soft pastel bloom, dreamy pink" },
+    "noir_contrast":{ "description": "야간, 드라마틱", "lut": "noir_contrast.cube","promptHint": "high contrast noir, deep shadows" }
+  },
+
+  "cameraTypes": {
+    "zoom_in":    { "seedancePrompt": "Slow smooth zoom in toward the subject. Intimate framing." },
+    "zoom_out":   { "seedancePrompt": "Gentle zoom out revealing the environment. Establishing shot." },
+    "pan_left":   { "seedancePrompt": "Smooth horizontal pan from right to left. Subject moves through frame." },
+    "pan_right":  { "seedancePrompt": "Smooth horizontal pan from left to right. Cinematic reveal." },
+    "tilt_up":    { "seedancePrompt": "Camera slowly tilts upward. Dramatic reveal." },
+    "tilt_down":  { "seedancePrompt": "Camera slowly tilts downward. Grounding shot." },
+    "static":     { "seedancePrompt": "Camera completely still. Subject breathes naturally. Minimal movement." },
+    "orbit":      { "seedancePrompt": "Camera slowly orbits around the subject. 360 degree reveal." }
+  },
+
+  "transitionTypes": {
+    "dissolve":    { "ffmpegFilter": "dissolve",   "defaultDuration": 1.5 },
+    "cut":         { "ffmpegFilter": "fade",        "defaultDuration": 0.1 },
+    "fade_white":  { "ffmpegFilter": "fadewhite",   "defaultDuration": 2.0 },
+    "fade_black":  { "ffmpegFilter": "fadeblack",   "defaultDuration": 2.0 },
+    "smash_cut":   { "ffmpegFilter": "fade",        "defaultDuration": 0.05 },
+    "wipe_left":   { "ffmpegFilter": "wipeleft",    "defaultDuration": 1.0 },
+    "wipe_right":  { "ffmpegFilter": "wiperight",   "defaultDuration": 1.0 }
+  }
+}
