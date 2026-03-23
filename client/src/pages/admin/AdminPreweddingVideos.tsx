@@ -36,10 +36,14 @@ export default function AdminPreweddingVideos() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<PreweddingOrder | null>(null);
   const [showFree, setShowFree] = useState(false);
-  const [freeForm, setFreeForm] = useState({ groomName: '', brideName: '', weddingDate: '', metStory: '' });
+  const [freeForm, setFreeForm] = useState({ groomName: '', brideName: '', weddingDate: '', metStory: '', metDate: '' });
   const [freePhotos, setFreePhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [freeFont, setFreeFont] = useState('BMJUA_ttf');
+  const [freeBgm, setFreeBgm] = useState<any>(null);
+  const [freeBgms, setFreeBgms] = useState<any[]>([]);
+  const [freeFonts, setFreeFonts] = useState<any[]>([]);
 
   const uploadPhoto = async (file: File) => {
     setUploading(true);
@@ -59,10 +63,10 @@ export default function AdminPreweddingVideos() {
       const res = await fetch(`${API}/prewedding-video/admin/free-generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify({ ...freeForm, photos: freePhotos, fontId: 'BMJUA_ttf' }),
+        body: JSON.stringify({ ...freeForm, photos: freePhotos, fontId: freeFont, bgmUrl: freeBgm?.url || '' }),
       });
       const data = await res.json();
-      if (data.success) { alert('생성 시작! 목록에서 확인하세요.'); setShowFree(false); setFreeForm({ groomName: '', brideName: '', weddingDate: '', metStory: '' }); setFreePhotos([]); fetchOrders(); }
+      if (data.success) { alert('생성 시작! 목록에서 확인하세요.'); setShowFree(false); setFreeForm({ groomName: '', brideName: '', weddingDate: '', metStory: '', metDate: '' }); setFreePhotos([]); fetchOrders(); }
       else alert(data.error || '실패');
     } catch { alert('실패'); }
     setGenerating(false);
@@ -79,7 +83,18 @@ export default function AdminPreweddingVideos() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchOrders(); }, []);
+  useEffect(() => {
+    fetchOrders();
+    fetch(`${API}/prewedding-video/config`).then(r => r.json()).then(d => {
+      setFreeFonts(d.fonts);
+      d.fonts.forEach((f: any) => {
+        const style = document.createElement('style');
+        style.textContent = `@font-face { font-family: '${f.id}'; src: url('/fonts/${f.file}'); font-display: swap; }`;
+        document.head.appendChild(style);
+      });
+    });
+    fetch(`${API}/prewedding-video/bgm`).then(r => r.json()).then(d => { setFreeBgms(d); if (d.length) setFreeBgm(d[0]); });
+  }, []);
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -93,41 +108,89 @@ export default function AdminPreweddingVideos() {
         <button onClick={fetchOrders} className="p-2 rounded-lg border border-stone-200 hover:bg-stone-50">
           <RefreshCw size={16} className="text-stone-500" />
         </button>
+        <button onClick={() => setShowFree(true)} className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-lg text-sm font-medium hover:bg-stone-900">
+          <Sparkles size={14} /> 무료 생성
+        </button>
       </div>
 
       {showFree && (
-        <div className="bg-white rounded-xl border border-stone-200 p-5 space-y-3">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 space-y-5">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-stone-800 text-sm">무료 생성 (관리자)</h3>
-            <button onClick={() => setShowFree(false)}><X size={16} className="text-stone-400" /></button>
+            <h3 className="text-base font-bold text-stone-800">무료 생성 (관리자)</h3>
+            <button onClick={() => setShowFree(false)} className="p-1 hover:bg-stone-100 rounded-lg"><X size={18} className="text-stone-400" /></button>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <input value={freeForm.groomName} onChange={e => setFreeForm(p => ({ ...p, groomName: e.target.value }))} placeholder="신랑" className="px-3 py-2 rounded-lg border border-stone-200 text-sm" />
-            <input value={freeForm.brideName} onChange={e => setFreeForm(p => ({ ...p, brideName: e.target.value }))} placeholder="신부" className="px-3 py-2 rounded-lg border border-stone-200 text-sm" />
-          </div>
-          <input type="date" value={freeForm.weddingDate} onChange={e => setFreeForm(p => ({ ...p, weddingDate: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm" />
-          <textarea value={freeForm.metStory} onChange={e => setFreeForm(p => ({ ...p, metStory: e.target.value }))} placeholder="이야기 힌트 (선택)" rows={2} className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm resize-none" />
+
           <div>
-            <p className="text-xs text-stone-400 mb-1">사진 ({freePhotos.length}/8)</p>
-            <div className="flex flex-wrap gap-1.5">
+            <p className="text-xs font-semibold text-stone-500 mb-2 uppercase tracking-wider">커플 정보</p>
+            <div className="grid grid-cols-2 gap-3">
+              <input value={freeForm.groomName} onChange={e => setFreeForm(p => ({ ...p, groomName: e.target.value }))} placeholder="신랑 이름" className="px-4 py-2.5 rounded-lg border border-stone-200 text-sm focus:border-stone-400 outline-none" />
+              <input value={freeForm.brideName} onChange={e => setFreeForm(p => ({ ...p, brideName: e.target.value }))} placeholder="신부 이름" className="px-4 py-2.5 rounded-lg border border-stone-200 text-sm focus:border-stone-400 outline-none" />
+            </div>
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div>
+                <label className="text-xs text-stone-400 mb-1 block">결혼식 날짜</label>
+                <input type="date" value={freeForm.weddingDate} onChange={e => setFreeForm(p => ({ ...p, weddingDate: e.target.value }))} className="w-full px-4 py-2.5 rounded-lg border border-stone-200 text-sm focus:border-stone-400 outline-none" />
+              </div>
+              <div>
+                <label className="text-xs text-stone-400 mb-1 block">처음 만난 날 (선택)</label>
+                <input type="date" value={freeForm.metDate || ''} onChange={e => setFreeForm(p => ({ ...p, metDate: e.target.value }))} className="w-full px-4 py-2.5 rounded-lg border border-stone-200 text-sm focus:border-stone-400 outline-none" />
+              </div>
+            </div>
+            <textarea value={freeForm.metStory} onChange={e => setFreeForm(p => ({ ...p, metStory: e.target.value }))} placeholder="우리의 이야기 힌트 (선택) — AI가 자막을 생성할 때 참고합니다" rows={2} className="w-full mt-3 px-4 py-2.5 rounded-lg border border-stone-200 text-sm resize-none focus:border-stone-400 outline-none" />
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-stone-500 mb-2 uppercase tracking-wider">사진 ({freePhotos.length}/8)</p>
+            <div className="grid grid-cols-4 gap-2">
               {freePhotos.map((url, i) => (
-                <div key={i} className="relative w-14 h-18 rounded-lg overflow-hidden">
+                <div key={i} className="relative aspect-[3/4] rounded-lg overflow-hidden border border-stone-100">
                   <img src={url} className="w-full h-full object-cover" />
-                  <button onClick={() => setFreePhotos(p => p.filter((_, j) => j !== i))} className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 rounded-full flex items-center justify-center"><X size={8} className="text-white" /></button>
+                  <button onClick={() => setFreePhotos(p => p.filter((_, j) => j !== i))} className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center hover:bg-black/80"><X size={10} className="text-white" /></button>
                 </div>
               ))}
               {freePhotos.length < 8 && (
-                <label className="w-14 h-18 rounded-lg border-2 border-dashed border-stone-200 flex items-center justify-center cursor-pointer">
-                  {uploading ? <Loader2 size={14} className="animate-spin text-stone-400" /> : <Upload size={14} className="text-stone-400" />}
+                <label className="aspect-[3/4] rounded-lg border-2 border-dashed border-stone-200 flex flex-col items-center justify-center cursor-pointer hover:bg-stone-50 transition-colors">
+                  {uploading ? <Loader2 size={18} className="animate-spin text-stone-400" /> : <Upload size={18} className="text-stone-400" />}
+                  <span className="text-[10px] text-stone-300 mt-1">업로드</span>
                   <input type="file" accept="image/*" multiple hidden onChange={e => { if (e.target.files) Array.from(e.target.files).forEach(uploadPhoto); }} />
                 </label>
               )}
             </div>
           </div>
-          <button onClick={startFree} disabled={generating || freePhotos.length < 3} className="w-full py-2 bg-stone-800 text-white rounded-lg text-sm font-medium disabled:opacity-40 flex items-center justify-center gap-2">
-            {generating ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-            {generating ? '생성 중...' : '무료 생성 시작'}
+
+          <div>
+            <p className="text-xs font-semibold text-stone-500 mb-2 uppercase tracking-wider">글꼴</p>
+            <div className="grid grid-cols-3 gap-2">
+              {freeFonts.map(f => (
+                <button key={f.id} onClick={() => setFreeFont(f.id)} className={`p-3 rounded-lg border text-left transition-all ${freeFont === f.id ? 'border-stone-800 bg-stone-50' : 'border-stone-200 hover:border-stone-300'}`}>
+                  <p className="text-[10px] text-stone-400">{f.name}</p>
+                  <p style={{ fontFamily: `'${f.id}', sans-serif`, fontSize: 14 }} className="text-stone-800 mt-0.5">{f.id === 'GreatVibes-Regular' ? 'Love Story' : '사랑해요'}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-stone-500 mb-2 uppercase tracking-wider">배경음악</p>
+            {freeBgms.length === 0 ? (
+              <p className="text-xs text-stone-300">관리자 BGM에서 식전영상 카테고리로 등록하세요</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                {freeBgms.map(b => (
+                  <button key={b.id} onClick={() => setFreeBgm(b)} className={`p-3 rounded-lg border text-left transition-all ${freeBgm?.id === b.id ? 'border-stone-800 bg-stone-50' : 'border-stone-200 hover:border-stone-300'}`}>
+                    <p className="text-sm font-medium text-stone-800 truncate">{b.title}</p>
+                    <p className="text-[10px] text-stone-400">{b.artist}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button onClick={startFree} disabled={generating || freePhotos.length < 3 || !freeForm.groomName || !freeForm.brideName} className="w-full py-3 bg-stone-800 text-white rounded-xl text-sm font-semibold disabled:opacity-30 flex items-center justify-center gap-2 hover:bg-stone-900 transition-colors">
+            {generating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+            {generating ? '생성 중... (약 8분 소요)' : '무료 생성 시작'}
           </button>
+          <p className="text-[10px] text-stone-300 text-center">Kling + Seedance 하이브리드 엔진 · fal.ai 크레딧 소모됩니다</p>
         </div>
       )}
 
