@@ -24,7 +24,7 @@ const FONTS = [
   { id: 'ChosunBg', name: '조선 붓글씨', file: 'ChosunBg.TTF' },
   { id: 'Diphylleia-Regular', name: '디필레이아', file: 'Diphylleia-Regular.ttf' },
   { id: 'GreatVibes-Regular', name: 'Great Vibes', file: 'GreatVibes-Regular.ttf' },
-  { id: 'DXMSUBTITLESM', name: 'DX 자막체', file: 'DXMSUBTITLESM.TTF' },
+  { id: 'DXMSUBTITLESM', name: 'DX 자막체', file: 'DXMSubtitlesM-KSCpc-EUC-H.woff2' },
 ];
 
 const adminOnly = (req: AuthRequest, res: Response, next: Function) => {
@@ -77,7 +77,7 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res) => {
       },
     });
 
-    res.json({ id: video.id, orderId, amount: pricing.amount, label: pricing.label });
+    res.json({ id: video.id, orderId, amount: pricing.amount, label: pricing.label, clientKey: process.env.TOSS_CLIENT_KEY });
   } catch (e: any) {
     console.error('PreweddingVideo create error:', e);
     res.status(500).json({ error: '주문 생성 실패' });

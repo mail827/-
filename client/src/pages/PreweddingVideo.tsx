@@ -58,7 +58,7 @@ export default function PreweddingVideo() {
       setFonts(d.fonts);
       d.fonts.forEach((f: FontOption) => {
         const style = document.createElement('style');
-        style.textContent = `@font-face { font-family: '${f.id}'; src: url('/fonts/${f.file}') format('truetype'); font-display: swap; }`;
+        style.textContent = `@font-face { font-family: '${f.id}'; src: url('/fonts/${f.file}') format('woff2'); font-display: swap; }`;
         document.head.appendChild(style);
       });
     });
@@ -87,6 +87,16 @@ export default function PreweddingVideo() {
     setPlayingBgm(bgm.id);
   };
 
+  const loadTossScript = () => {
+    return new Promise<void>((resolve) => {
+      if (document.querySelector('script[src*="tosspayments"]')) return resolve();
+      const script = document.createElement('script');
+      script.src = 'https://js.tosspayments.com/v1/payment';
+      script.onload = () => resolve();
+      document.head.appendChild(script);
+    });
+  };
+
   const startPayment = async () => {
     const token = localStorage.getItem('token');
     if (!token) { alert('로그인이 필요합니다'); return; }
@@ -104,20 +114,21 @@ export default function PreweddingVideo() {
       });
       const order = await res.json();
 
-      const { loadTossPayments } = await import('@tosspayments/tosspayments-sdk');
-      const toss = await loadTossPayments(import.meta.env.VITE_TOSS_CLIENT_KEY);
-      const payment = toss.payment({ customerKey: `PV-${Date.now()}` });
-      await payment.requestPayment({
-        method: 'CARD',
-        amount: { currency: 'KRW', value: order.amount },
+      await loadTossScript();
+      const clientKey = order.clientKey;
+      const tossPayments = (window as any).TossPayments(clientKey);
+
+      await tossPayments.requestPayment('카드', {
+        amount: order.amount,
         orderId: order.orderId,
         orderName: order.label,
-        successUrl: `${window.location.origin}/prewedding-video/success`,
+        customerName: `${groomName} & ${brideName}`,
+        successUrl: `${window.location.origin}/prewedding-video/success?orderId=${order.orderId}`,
         failUrl: `${window.location.origin}/prewedding-video/fail`,
       });
     } catch (e: any) {
       console.error('Payment error:', e);
-      alert('결제 오류가 발생했습니다');
+      if (e.code !== 'USER_CANCEL') alert('결제 오류가 발생했습니다');
     }
     setProcessing(false);
   };
@@ -242,7 +253,7 @@ export default function PreweddingVideo() {
               {fonts.map(f => (
                 <button key={f.id} onClick={() => setSelectedFont(f.id)} style={{ padding: '16px', borderRadius: 10, border: selectedFont === f.id ? '2px solid #1a1a1a' : '1px solid #E0DDD8', background: selectedFont === f.id ? '#F5F3F0' : '#fff', cursor: 'pointer', textAlign: 'left' }}>
                   <p style={{ fontSize: 13, color: '#999', marginBottom: 4 }}>{f.name}</p>
-                  <p style={{ fontSize: 18, color: '#1a1a1a', fontFamily: `'${f.id}', sans-serif` }}>처음 만난 그 날부터</p>
+                  <p style={{ fontSize: 18, color: '#1a1a1a', fontFamily: `'${f.id}', sans-serif` }}>{f.id === 'GreatVibes-Regular' ? 'The day we first met' : '처음 만난 그 날부터'}</p>
                 </button>
               ))}
             </div>
