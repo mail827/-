@@ -18,22 +18,13 @@ const PRICING: Record<string, { amount: number; label: string }> = {
 
 const FONTS = [
   { id: 'BMJUA_ttf', name: '주아체', file: 'BMJUA_ttf.ttf' },
-  { id: 'BMDOHYEON_ttf', name: '도현체', file: 'BMDOHYEON_ttf.ttf' },
-  { id: 'BMHANNAPro', name: '한나체 Pro', file: 'BMHANNAPro.ttf' },
-  { id: 'BMHANNAAir_ttf', name: '한나체 Air', file: 'BMHANNAAir_ttf.ttf' },
-  { id: 'BMYEONSUNG_ttf', name: '연성체', file: 'BMYEONSUNG_ttf.ttf' },
-  { id: 'BMEULJIROTTF', name: '을지로체', file: 'BMEULJIROTTF.ttf' },
-  { id: 'BMEuljiro10yearslater', name: '을지로 10년 후', file: 'BMEuljiro10yearslater.ttf' },
-  { id: 'BMEuljirooraeorae', name: '을지로 오래오래', file: 'BMEuljirooraeorae.ttf' },
-  { id: 'BMKIRANGHAERANG-TTF', name: '키랑해랑', file: 'BMKIRANGHAERANG-TTF.ttf' },
-  { id: 'BMHANNA_11yrs_ttf', name: '한나 11세', file: 'BMHANNA_11yrs_ttf.ttf' },
-  { id: 'BMKkubulimTTF', name: '꾸불림체', file: 'BMKkubulimTTF.ttf' },
+  { id: 'BMKkubulimTTF', name: '배민 꾸불림', file: 'BMKkubulimTTF.ttf' },
   { id: 'ChosunGs', name: '조선 고딕', file: 'ChosunGs.TTF' },
   { id: 'ChosunNm', name: '조선 명조', file: 'ChosunNm.ttf' },
   { id: 'ChosunBg', name: '조선 붓글씨', file: 'ChosunBg.TTF' },
   { id: 'Diphylleia-Regular', name: '디필레이아', file: 'Diphylleia-Regular.ttf' },
   { id: 'GreatVibes-Regular', name: 'Great Vibes', file: 'GreatVibes-Regular.ttf' },
-  { id: 'DXMSUBTITLESM', name: 'DX 자막체', file: 'DXMSUBTITLESM-KSCPC-EUC-H (1).TTF' },
+  { id: 'DXMSUBTITLESM', name: 'DX 자막체', file: 'DXMSUBTITLESM.TTF' },
 ];
 
 const adminOnly = (req: AuthRequest, res: Response, next: Function) => {

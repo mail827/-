@@ -54,7 +54,14 @@ export default function PreweddingVideo() {
   const [pollInterval, setPollInterval] = useState<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    fetch(`${API}/prewedding-video/config`).then(r => r.json()).then(d => setFonts(d.fonts));
+    fetch(`${API}/prewedding-video/config`).then(r => r.json()).then(d => {
+      setFonts(d.fonts);
+      d.fonts.forEach((f: FontOption) => {
+        const style = document.createElement('style');
+        style.textContent = `@font-face { font-family: '${f.id}'; src: url('/fonts/${f.file}') format('truetype'); font-display: swap; }`;
+        document.head.appendChild(style);
+      });
+    });
     fetch(`${API}/prewedding-video/bgm`).then(r => r.json()).then(d => { setBgms(d); if (d.length) setSelectedBgm(d[0]); });
     return () => { audioRef.pause(); if (pollInterval) clearInterval(pollInterval); };
   }, []);
@@ -63,8 +70,8 @@ export default function PreweddingVideo() {
     setUploading(true);
     const fd = new FormData();
     fd.append('file', file);
-    fd.append('upload_preset', 'wedding_unsigned');
-    const res = await fetch('https://api.cloudinary.com/v1_1/duzlquvxj/image/upload', { method: 'POST', body: fd });
+    fd.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'wedding_guide');
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
     const data = await res.json();
     setPhotos(prev => [...prev, data.secure_url]);
     setUploading(false);
@@ -234,8 +241,8 @@ export default function PreweddingVideo() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24, maxHeight: 400, overflowY: 'auto' }}>
               {fonts.map(f => (
                 <button key={f.id} onClick={() => setSelectedFont(f.id)} style={{ padding: '16px', borderRadius: 10, border: selectedFont === f.id ? '2px solid #1a1a1a' : '1px solid #E0DDD8', background: selectedFont === f.id ? '#F5F3F0' : '#fff', cursor: 'pointer', textAlign: 'left' }}>
-                  <p style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a' }}>{f.name}</p>
-                  <p style={{ fontSize: 12, color: '#999', marginTop: 4 }}>처음 만난 그 날부터</p>
+                  <p style={{ fontSize: 13, color: '#999', marginBottom: 4 }}>{f.name}</p>
+                  <p style={{ fontSize: 18, color: '#1a1a1a', fontFamily: `'${f.id}', sans-serif` }}>처음 만난 그 날부터</p>
                 </button>
               ))}
             </div>
