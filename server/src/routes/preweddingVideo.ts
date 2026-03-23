@@ -383,16 +383,120 @@ async function processVideoAsync(videoId: string) {
     data: { clipUrls, status: 'ASSEMBLING', totalCost },
   });
 
-  // TODO: FFmpeg assembly on Fly.io
-  // For now, store clip URLs and mark as DONE
-  // Full FFmpeg integration requires ffmpeg binary on Fly.io VM
+  const tmpDir = `/tmp/pv-${videoId}`;
+  const { execSync } = await import('child_process');
+  const fs = await import('fs');
+  const path = await import('path');
+
+  fs.mkdirSync(tmpDir, { recursive: true });
+
+  const clipPaths: string[] = [];
+  const validScenes: typeof scenes = [];
+  for (let i = 0; i < clipUrls.length; i++) {
+    if (!clipUrls[i]) continue;
+    const clipPath = path.join(tmpDir, `clip_${i}.mp4`);
+    try {
+      execSync(`curl -sL -o "${clipPath}" "${clipUrls[i]}"`, { timeout: 120000 });
+      clipPaths.push(clipPath);
+      validScenes.push(scenes[i]);
+    } catch {}
+  }
+
+  if (clipPaths.length < 3) {
+    await prisma.preweddingVideo.update({
+      where: { id: videoId },
+      data: { status: 'FAILED', errorMsg: 'Not enough clips downloaded' },
+    });
+    return;
+  }
+
+  let bgmPath = '';
+  if (video.bgmUrl) {
+    bgmPath = path.join(tmpDir, 'bgm.mp3');
+    try { execSync(`curl -sL -o "${bgmPath}" "${video.bgmUrl}"`, { timeout: 60000 }); } catch { bgmPath = ''; }
+  }
+
+  const filters: string[] = [];
+  const n = clipPaths.length;
+
+  for (let i = 0; i < n; i++) {
+    filters.push(`[${i}:v]scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=24[scaled${i}]`);
+    filters.push(`[scaled${i}]crop=1080:1728:0:96[v${i}]`);
+  }
+
+  let currentStream = '[v0]';
+  let runningOffset = validScenes[0].duration;
+
+  for (let i = 1; i < n; i++) {
+    const offset = (runningOffset - 0.1).toFixed(1);
+    const out = `[xf${i}]`;
+    filters.push(`${currentStream}[v${i}]xfade=transition=fade:duration=0.1:offset=${offset}${out}`);
+    currentStream = out;
+    runningOffset = parseFloat(offset) + validScenes[i].duration;
+  }
+
+  const totalDuration = runningOffset;
+  filters.push(`${currentStream}pad=1080:1920:0:96:black[letterbox]`);
+  filters.push(`[letterbox]fade=t=in:st=0:d=2,fade=t=out:st=${(totalDuration - 2).toFixed(1)}:d=2[vfinal]`);
+
+  const inputs = clipPaths.map(p => `-i "${p}"`);
+  const hasAudio = bgmPath && fs.existsSync(bgmPath);
+
+  if (hasAudio) {
+    inputs.push(`-i "${bgmPath}"`);
+    filters.push(`[${n}:a]volume=0.35,afade=t=in:st=0:d=3,afade=t=out:st=${(totalDuration - 4).toFixed(1)}:d=4[afinal]`);
+  }
+
+  const maps = ['-map "[vfinal]"'];
+  if (hasAudio) maps.push('-map "[afinal]"');
+
+  const outputPath = path.join(tmpDir, 'output.mp4');
+  const cmd = [
+    'ffmpeg -y',
+    ...inputs,
+    `-filter_complex "${filters.join(';')}"`,
+    ...maps,
+    '-c:v libx264 -pix_fmt yuv420p -preset fast -crf 21',
+    hasAudio ? '-c:a aac -b:a 192k' : '-an',
+    '-movflags +faststart',
+    `-t ${totalDuration.toFixed(1)}`,
+    `"${outputPath}"`,
+  ].join(' ');
+
+  try {
+    execSync(cmd, { timeout: 300000 });
+  } catch (e: any) {
+    await prisma.preweddingVideo.update({
+      where: { id: videoId },
+      data: { status: 'FAILED', errorMsg: 'FFmpeg assembly failed: ' + e.message?.slice(0, 200) },
+    });
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    return;
+  }
+
+  let outputUrl = '';
+  try {
+    const cloudinary = (await import('cloudinary')).v2;
+    const result = await cloudinary.uploader.upload(outputPath, {
+      resource_type: 'video',
+      folder: 'prewedding-video',
+      public_id: `pv-${videoId}`,
+    });
+    outputUrl = result.secure_url || '';
+  } catch (uploadErr: any) {
+    console.error('Cloudinary upload error:', uploadErr.message);
+    outputUrl = '';
+  }
+
+  fs.rmSync(tmpDir, { recursive: true, force: true });
 
   await prisma.preweddingVideo.update({
     where: { id: videoId },
     data: {
-      status: 'DONE',
-      clipUrls,
-      totalDuration: scenes.reduce((s, sc) => s + sc.duration, 0),
+      status: outputUrl ? 'DONE' : 'FAILED',
+      outputUrl: outputUrl || null,
+      totalDuration,
+      errorMsg: outputUrl ? null : 'Upload failed',
     },
   });
 }
