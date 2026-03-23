@@ -40,6 +40,7 @@ export default function PreweddingVideo() {
   const [groomName, setGroomName] = useState('');
   const [brideName, setBrideName] = useState('');
   const [weddingDate, setWeddingDate] = useState('');
+  const [metDate, setMetDate] = useState('');
   const [metStory, setMetStory] = useState('');
   const [selectedTier, setSelectedTier] = useState('basic');
   const [fonts, setFonts] = useState<FontOption[]>([]);
@@ -90,7 +91,7 @@ export default function PreweddingVideo() {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           groomName, brideName, weddingDate, metStory,
-          photos, bgmId: selectedBgm?.id, bgmUrl: selectedBgm?.url,
+          photos, bgmId: selectedBgm?.id, bgmUrl: selectedBgm?.url, metDate,
           fontId: selectedFont, tier: selectedTier,
         }),
       });
@@ -208,7 +209,14 @@ export default function PreweddingVideo() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
               <input value={groomName} onChange={e => setGroomName(e.target.value)} placeholder="신랑 이름" style={{ padding: '14px 16px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 14, outline: 'none' }} />
               <input value={brideName} onChange={e => setBrideName(e.target.value)} placeholder="신부 이름" style={{ padding: '14px 16px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 14, outline: 'none' }} />
-              <input type="date" value={weddingDate} onChange={e => setWeddingDate(e.target.value)} style={{ padding: '14px 16px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 14, outline: 'none', color: weddingDate ? '#1a1a1a' : '#bbb' }} />
+              <div>
+                <label style={{ fontSize: 12, color: '#888', marginBottom: 4, display: 'block' }}>결혼식 날짜</label>
+                <input type="date" value={weddingDate} onChange={e => setWeddingDate(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 14, outline: 'none', color: weddingDate ? '#1a1a1a' : '#bbb', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: '#888', marginBottom: 4, display: 'block' }}>처음 만난 날 (선택)</label>
+                <input type="date" value={metDate} onChange={e => setMetDate(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 14, outline: 'none', color: metDate ? '#1a1a1a' : '#bbb', boxSizing: 'border-box' }} />
+              </div>
               <textarea value={metStory} onChange={e => setMetStory(e.target.value)} placeholder="우리의 이야기 힌트 (선택)&#10;예: 제주도에서 우연히 만났어요, 5년 연애 끝에..." rows={3} style={{ padding: '14px 16px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 14, outline: 'none', resize: 'none', fontFamily: 'inherit' }} />
             </div>
 
@@ -272,6 +280,10 @@ export default function PreweddingVideo() {
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span style={{ fontSize: 13, color: '#888' }}>커플</span>
                 <span style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a' }}>{groomName} & {brideName}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span style={{ fontSize: 13, color: '#888' }}>결혼식</span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a' }}>{weddingDate || '-'}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span style={{ fontSize: 13, color: '#888' }}>사진</span>
