@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight, Check, Sparkles, Heart, MapPin, Calendar,
-  Send, Copy, CreditCard, Camera, ChevronDown, MessageCircle, Zap, X,
+  Send, Copy, CreditCard, Camera, ChevronDown, Film, MessageCircle, Zap, X,
   Mail, Loader2, Gift
 } from "lucide-react";
 import ThemeShowcaseModal from "../components/ThemeShowcaseModal";
@@ -800,6 +800,10 @@ export default function Landing() {
               <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#1a1a1a", background: "#fff", padding: "14px 28px", borderRadius: 8, border: "1px solid #E0DDD8", textDecoration: "none", fontWeight: 500 }}>
                 <Camera size={16} />
                 {lt('hero','btnSnap',landingLocale)}
+              </a>
+              <a href="/prewedding-video" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#1a1a1a", background: "#fff", padding: "14px 28px", borderRadius: 8, border: "1px solid #E0DDD8", textDecoration: "none", fontWeight: 500 }}>
+                <Film size={16} />
+                {landingLocale === 'ko' ? '식전영상' : 'Pre-ceremony Video'}
               </a>
             </div>
             <p style={{ fontSize: 12, color: "#bbb", marginTop: 12 }}>{lt('hero','noLogin',landingLocale)}</p>

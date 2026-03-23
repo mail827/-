@@ -29,6 +29,7 @@ model User {
   giftsReceived Gift[]    @relation("GiftsReceived")
   orders        Order[]
   reviews       Review[]
+  preweddingVideos PreweddingVideo[]
   weddings      Wedding[]
   pairWeddings  Wedding[] @relation("PairWeddings")
 
@@ -225,6 +226,7 @@ model Wedding {
   snapshots                WeddingSnapshot[]
   guestPhotos              GuestPhoto[]
   boothCreditOrders        BoothCreditOrder[]
+  preweddingVideos         PreweddingVideo[]
 }
 
 model WeddingSnapshot {
@@ -610,4 +612,42 @@ model BoothCreditOrder {
   status     String   @default("PENDING")
   paidAt     DateTime?
   createdAt  DateTime @default(now())
+}
+
+model PreweddingVideo {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  weddingId     String?
+  wedding       Wedding? @relation(fields: [weddingId], references: [id])
+  status        String   @default("PENDING")
+  templateId    String   @default("classic_film")
+  groomName     String
+  brideName     String
+  weddingDate   String?
+  metStory      String?
+  photos        Json     @default("[]")
+  photoAnalysis Json?
+  scenes        Json?
+  bgmId         String?
+  bgmUrl        String?
+  fontId        String   @default("BMJUA_ttf")
+  subtitles     Json?
+  clipUrls      Json?
+  outputUrl     String?
+  resolution    String   @default("1080p")
+  aspectRatio   String   @default("9:16")
+  totalDuration Float?
+  totalCost     Float?
+  amount        Int
+  orderId       String   @unique
+  paymentKey    String?
+  paidAt        DateTime?
+  errorMsg      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([orderId])
 }
