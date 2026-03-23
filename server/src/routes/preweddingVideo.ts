@@ -169,6 +169,49 @@ router.get('/admin/list', authMiddleware, adminOnly, async (_req, res) => {
   }
 });
 
+router.post('/admin/free-generate', authMiddleware, adminOnly, async (req: AuthRequest, res) => {
+  const userId = req.user!.id;
+  const { groomName, brideName, weddingDate, metStory, photos, bgmUrl, fontId } = req.body;
+
+  if (!groomName || !brideName || !photos?.length || photos.length < 3) {
+    return res.status(400).json({ error: '이름, 사진 3장 이상 필요' });
+  }
+
+  const orderId = `PV-FREE-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+  try {
+    const video = await prisma.preweddingVideo.create({
+      data: {
+        userId,
+        groomName,
+        brideName,
+        weddingDate: weddingDate || '',
+        metStory: metStory || '',
+        photos,
+        bgmUrl: bgmUrl || null,
+        fontId: fontId || 'BMJUA_ttf',
+        amount: 0,
+        orderId,
+        paymentKey: 'ADMIN_FREE',
+        paidAt: new Date(),
+        status: 'ANALYZING',
+      },
+    });
+
+    processVideoAsync(video.id).catch(err => {
+      console.error('Free gen pipeline error:', err);
+      prisma.preweddingVideo.update({
+        where: { id: video.id },
+        data: { status: 'FAILED', errorMsg: err.message },
+      });
+    });
+
+    res.json({ success: true, videoId: video.id, orderId });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 async function gptRequest(messages: any[], maxTokens = 1000) {
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Download, RefreshCw, X, Film } from 'lucide-react';
+import { Loader2, Download, RefreshCw, X, Film, Sparkles, Upload } from 'lucide-react';
 
 interface PreweddingOrder {
   id: string;
@@ -35,6 +35,38 @@ export default function AdminPreweddingVideos() {
   const [orders, setOrders] = useState<PreweddingOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<PreweddingOrder | null>(null);
+  const [showFree, setShowFree] = useState(false);
+  const [freeForm, setFreeForm] = useState({ groomName: '', brideName: '', weddingDate: '', metStory: '' });
+  const [freePhotos, setFreePhotos] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+
+  const uploadPhoto = async (file: File) => {
+    setUploading(true);
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', 'wedding_guide');
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dgtxjgdit'}/image/upload`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.secure_url) setFreePhotos(prev => [...prev, data.secure_url]);
+    setUploading(false);
+  };
+
+  const startFree = async () => {
+    if (!freeForm.groomName || !freeForm.brideName || freePhotos.length < 3) return alert('이름 + 사진 3장 이상');
+    setGenerating(true);
+    try {
+      const res = await fetch(`${API}/prewedding-video/admin/free-generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+        body: JSON.stringify({ ...freeForm, photos: freePhotos, fontId: 'BMJUA_ttf' }),
+      });
+      const data = await res.json();
+      if (data.success) { alert('생성 시작! 목록에서 확인하세요.'); setShowFree(false); setFreeForm({ groomName: '', brideName: '', weddingDate: '', metStory: '' }); setFreePhotos([]); fetchOrders(); }
+      else alert(data.error || '실패');
+    } catch { alert('실패'); }
+    setGenerating(false);
+  };
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -62,6 +94,42 @@ export default function AdminPreweddingVideos() {
           <RefreshCw size={16} className="text-stone-500" />
         </button>
       </div>
+
+      {showFree && (
+        <div className="bg-white rounded-xl border border-stone-200 p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-stone-800 text-sm">무료 생성 (관리자)</h3>
+            <button onClick={() => setShowFree(false)}><X size={16} className="text-stone-400" /></button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <input value={freeForm.groomName} onChange={e => setFreeForm(p => ({ ...p, groomName: e.target.value }))} placeholder="신랑" className="px-3 py-2 rounded-lg border border-stone-200 text-sm" />
+            <input value={freeForm.brideName} onChange={e => setFreeForm(p => ({ ...p, brideName: e.target.value }))} placeholder="신부" className="px-3 py-2 rounded-lg border border-stone-200 text-sm" />
+          </div>
+          <input type="date" value={freeForm.weddingDate} onChange={e => setFreeForm(p => ({ ...p, weddingDate: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm" />
+          <textarea value={freeForm.metStory} onChange={e => setFreeForm(p => ({ ...p, metStory: e.target.value }))} placeholder="이야기 힌트 (선택)" rows={2} className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm resize-none" />
+          <div>
+            <p className="text-xs text-stone-400 mb-1">사진 ({freePhotos.length}/8)</p>
+            <div className="flex flex-wrap gap-1.5">
+              {freePhotos.map((url, i) => (
+                <div key={i} className="relative w-14 h-18 rounded-lg overflow-hidden">
+                  <img src={url} className="w-full h-full object-cover" />
+                  <button onClick={() => setFreePhotos(p => p.filter((_, j) => j !== i))} className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 rounded-full flex items-center justify-center"><X size={8} className="text-white" /></button>
+                </div>
+              ))}
+              {freePhotos.length < 8 && (
+                <label className="w-14 h-18 rounded-lg border-2 border-dashed border-stone-200 flex items-center justify-center cursor-pointer">
+                  {uploading ? <Loader2 size={14} className="animate-spin text-stone-400" /> : <Upload size={14} className="text-stone-400" />}
+                  <input type="file" accept="image/*" multiple hidden onChange={e => { if (e.target.files) Array.from(e.target.files).forEach(uploadPhoto); }} />
+                </label>
+              )}
+            </div>
+          </div>
+          <button onClick={startFree} disabled={generating || freePhotos.length < 3} className="w-full py-2 bg-stone-800 text-white rounded-lg text-sm font-medium disabled:opacity-40 flex items-center justify-center gap-2">
+            {generating ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+            {generating ? '생성 중...' : '무료 생성 시작'}
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-12">
