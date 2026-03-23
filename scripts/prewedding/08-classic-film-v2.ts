@@ -120,7 +120,7 @@ function buildPromptForPhoto(analysis: PhotoAnalysis, camera: string, phase: str
     cameraPrompts[camera] || cameraPrompts.static,
     typePrompts[analysis.type] || typePrompts.couple,
     phasePrompts[phase] || '',
-    'Cinematic 35mm anamorphic lens. Shallow depth of field. Film texture.',
+    'Cinematic. Clean sharp image. Shallow depth of field. High quality.',
     'Natural movement only. No morphing. No face distortion. Preserve original appearance exactly.',
   ].join(' ');
 }
@@ -237,10 +237,10 @@ function assembleFFmpeg(clipPaths: string[], scenes: Scene[], outputPath: string
     runningOffset = offset + s.duration;
   }
 
-  filters.push(`${currentStream}copy[grain]`);
+  filters.push(`${currentStream}copy[clean]`);
 
   const totalDuration = runningOffset;
-  filters.push(`[grain]pad=1080:1920:0:96:black[letterbox]`);
+  filters.push(`[clean]pad=1080:1920:0:96:black[letterbox]`);
   filters.push(`[letterbox]fade=t=in:st=0:d=2,fade=t=out:st=${totalDuration - 2}:d=2[vfinal]`);
 
   const inputs = clipPaths.map(p => `-i "${p}"`);
