@@ -9,6 +9,7 @@ const FAL_API_KEY = process.env.FAL_API_KEY;
 const ARK_API_KEY = process.env.ARK_API_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const ARK_BASE = 'https://ark.ap-southeast.bytepluses.com/api/v3';
+const PIAPI_KEY = process.env.PIAPI_KEY;
 
 const SELFIE_CONCEPTS: { id: string; prompt: string; subScenes?: string[] }[] = [
   { id: 'studio_classic', prompt: 'place this person in a modern minimalist white studio with clean white walls and large windows casting soft natural daylight, airy contemporary elegance, photorealistic, 8k' },
@@ -338,7 +339,7 @@ router.get('/bgm', async (_req, res) => {
 
 router.post('/create', authMiddleware, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
-  const { groomName, brideName, weddingDate, metStory, photos, bgmId, bgmUrl, fontId, tier, venueName, groomFather, groomMother, brideFather, brideMother, mode, selfieConcepts, endingMessage } = req.body;
+  const { groomName, brideName, weddingDate, metStory, photos, bgmId, bgmUrl, fontId, tier, venueName, groomFather, groomMother, brideFather, brideMother, mode, selfieConcepts, endingMessage, videoEngine } = req.body;
 
   const minPhotos = mode === 'selfie' ? 1 : 3;
   if (!groomName || !brideName || !photos?.length || photos.length < minPhotos) {
@@ -469,7 +470,7 @@ router.get('/admin/list', authMiddleware, adminOnly, async (_req, res) => {
 
 router.post('/admin/free-generate', authMiddleware, adminOnly, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
-  const { groomName, brideName, weddingDate, metStory, photos, bgmUrl, fontId, venueName, groomFather, groomMother, brideFather, brideMother, mode, selfieConcepts, endingMessage } = req.body;
+  const { groomName, brideName, weddingDate, metStory, photos, bgmUrl, fontId, venueName, groomFather, groomMother, brideFather, brideMother, mode, selfieConcepts, endingMessage, videoEngine } = req.body;
 
   if (!groomName || !brideName || !photos?.length || photos.length < 3) {
     return res.status(400).json({ error: '이름, 사진 3장 이상 필요' });
@@ -505,7 +506,7 @@ router.post('/admin/free-generate', authMiddleware, adminOnly, async (req: AuthR
       },
     });
 
-    processVideoAsync(video.id).catch(err => {
+    processVideoAsync(video.id, videoEngine || 'kling').catch(err => {
       console.error('Free gen pipeline error:', err);
       prisma.preweddingVideo.update({
         where: { id: video.id },
@@ -699,6 +700,45 @@ async function generateKlingClip(photoUrl: string, prompt: string, duration: num
   } catch (e: any) { console.error('[Kling] fatal error:', e.message); return null; }
 }
 
+
+async function generatePiAPISeedance2Clip(photoUrl: string, prompt: string, duration: number, model: string = 'seedance-2-fast-preview') {
+  if (!PIAPI_KEY) { console.error('[SD2] PIAPI_KEY not set'); return null; }
+  try {
+    const res = await fetch('https://api.piapi.ai/api/v1/task', {
+      method: 'POST',
+      headers: { 'X-API-Key': PIAPI_KEY!, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'seedance',
+        task_type: model,
+        input: {
+          prompt: 'The person in @image1 ' + prompt + '. Cinematic shallow depth of field, natural movement, no morphing, no face distortion, preserve original appearance.',
+          image_urls: [photoUrl],
+          duration,
+          aspect_ratio: '16:9',
+        },
+      }),
+    });
+    const data = await res.json();
+    if (data.code !== 200) { console.error('[SD2] submit failed:', data.message); return null; }
+    const taskId = data.data?.task_id;
+    if (!taskId) { console.error('[SD2] no task_id'); return null; }
+    console.log('[SD2] task submitted:', taskId, 'model:', model);
+    for (let i = 0; i < 90; i++) {
+      await new Promise(r => setTimeout(r, 10000));
+      try {
+        const poll = await fetch('https://api.piapi.ai/api/v1/task/' + taskId, { headers: { 'X-API-Key': PIAPI_KEY! } });
+        const pollData = await poll.json();
+        const status = pollData.data?.status;
+        if (i % 3 === 0) console.log('[SD2] poll ' + taskId.slice(0, 8) + ':', status);
+        if (status === 'completed') { const videoUrl = pollData.data?.output?.video || null; console.log('[SD2] done:', videoUrl ? 'got url' : 'no url'); return videoUrl; }
+        if (status === 'failed') { console.error('[SD2] failed:', pollData.data?.error?.message); return null; }
+      } catch (e: any) { console.error('[SD2] poll error:', e.message); continue; }
+    }
+    console.error('[SD2] timeout after 90 polls');
+    return null;
+  } catch (e: any) { console.error('[SD2] fatal:', e.message); return null; }
+}
+
 async function generateSeedanceClip(photoUrl: string, prompt: string, duration: number) {
   try {
 
@@ -813,7 +853,7 @@ function buildEndingCredits(groomName: string, brideName: string, weddingDate: s
   lines.push('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4');
   return lines;
 }
-async function processVideoAsync(videoId: string) {
+async function processVideoAsync(videoId: string, videoEngine: string = 'kling') {
   const video = await prisma.preweddingVideo.findUnique({ where: { id: videoId } });
   if (!video) throw new Error('Video not found');
 
@@ -875,13 +915,22 @@ async function processVideoAsync(videoId: string) {
     const isPremium = scene.tier === 'premium';
     totalCost += isPremium ? 0.56 : 0.005;
 
-    const gen = isPremium
-      ? generateKlingClip(scene.photoUrl, prompt, scene.duration)
-      : generateSeedanceClip(scene.photoUrl, prompt, scene.duration);
+    let gen: Promise<string | null>;
+    if (videoEngine === 'seedance2') {
+      gen = generatePiAPISeedance2Clip(scene.photoUrl, prompt, scene.duration, 'seedance-2-preview');
+      totalCost += 0.75;
+    } else if (videoEngine === 'seedance2-fast') {
+      gen = generatePiAPISeedance2Clip(scene.photoUrl, prompt, scene.duration, 'seedance-2-fast-preview');
+      totalCost += 0.40;
+    } else {
+      gen = isPremium
+        ? generateKlingClip(scene.photoUrl, prompt, scene.duration)
+        : generateSeedanceClip(scene.photoUrl, prompt, scene.duration);
+    }
 
     return gen.then(url => {
       clipResults[si] = url || '';
-      console.log('[Pipeline] clip ' + (si + 1) + '/' + scenes.length + (url ? ' OK (' + (isPremium ? 'Kling' : 'Seedance') + ')' : ' FAILED'));
+      console.log('[Pipeline] clip ' + (si + 1) + '/' + scenes.length + (url ? ' OK (' + (videoEngine.startsWith('seedance2') ? 'SD2.0' : isPremium ? 'Kling' : 'SD1.5') + ')' : ' FAILED'));
       return prisma.preweddingVideo.update({
         where: { id: videoId },
         data: { clipUrls: [...clipResults] },

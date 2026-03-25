@@ -60,6 +60,7 @@ export default function AdminPreweddingVideos() {
   const [playingBgm, setPlayingBgm] = useState<string | null>(null);
   const [audioRef] = useState(new Audio());
   const [freeSubStyle, setFreeSubStyle] = useState('poetic');
+  const [freeEngine, setFreeEngine] = useState<'kling'|'seedance2'|'seedance2-fast'>('kling');
   const [subStyles, setSubStyles] = useState<any[]>([]);
   const [freeBgm, setFreeBgm] = useState<any>(null);
   const [freeBgms, setFreeBgms] = useState<any[]>([]);
@@ -86,7 +87,7 @@ export default function AdminPreweddingVideos() {
       const res = await fetch(API + '/prewedding-video/admin/free-generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getToken() },
-        body: JSON.stringify({ ...freeForm, photos: freePhotos, fontId: freeFont, subtitleStyle: freeSubStyle, bgmUrl: freeBgm?.url || '', venueName: freeVenue, groomFather: freeGroomFather, groomMother: freeGroomMother, brideFather: freeBrideFather, brideMother: freeBrideMother, endingMessage: freeEndingMessage, mode: freeMode, selfieConcepts: freeMode === 'selfie' ? [selectedConcept] : undefined }),
+        body: JSON.stringify({ ...freeForm, photos: freePhotos, fontId: freeFont, subtitleStyle: freeSubStyle, bgmUrl: freeBgm?.url || '', venueName: freeVenue, groomFather: freeGroomFather, groomMother: freeGroomMother, brideFather: freeBrideFather, brideMother: freeBrideMother, endingMessage: freeEndingMessage, mode: freeMode, selfieConcepts: freeMode === 'selfie' ? [selectedConcept] : undefined, videoEngine: freeEngine }),
       });
       const data = await res.json();
       if (data.success) {
@@ -347,9 +348,30 @@ export default function AdminPreweddingVideos() {
               })}
             </div>
           </div>
+          <div>
+            <p className="text-xs font-semibold text-stone-500 mb-2 uppercase tracking-wider">영상 엔진</p>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                { id: 'kling' as const, name: 'Kling 3.0', desc: '현재 기본', cost: '~$0.55/clip' },
+                { id: 'seedance2-fast' as const, name: 'SD 2.0 Fast', desc: '실험용', cost: '~$0.40/clip' },
+                { id: 'seedance2' as const, name: 'SD 2.0 Preview', desc: '실험용 (고퀄)', cost: '~$0.75/clip' },
+              ]).map(e => {
+                const isActive = freeEngine === e.id;
+                return (
+                  <button key={e.id} onClick={() => setFreeEngine(e.id)} className={'p-3 rounded-lg border text-left transition-all ' + (isActive ? e.id.startsWith('seedance') ? 'border-violet-600 bg-violet-50' : 'border-stone-800 bg-stone-50' : 'border-stone-200 hover:border-stone-300')}>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-medium text-stone-800">{e.name}</p>
+                      {e.id.startsWith('seedance') && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-600 font-semibold">NEW</span>}
+                    </div>
+                    <p className="text-[10px] text-stone-400 mt-0.5">{e.desc} {e.cost}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <button onClick={startFree} disabled={generating || freePhotos.length < (freeMode === 'selfie' ? 1 : 3) || !freeForm.groomName || !freeForm.brideName} className="w-full py-3 bg-stone-800 text-white rounded-xl text-sm font-semibold disabled:opacity-30 flex items-center justify-center gap-2 hover:bg-stone-900 transition-colors">
             {generating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-            {generating ? '생성 중... (약 8분 소요)' : '무료 생성 시작'}
+            {generating ? '생성 중...' + (freeEngine.startsWith('seedance') ? ' (SD2.0, 약 12분)' : ' (약 8분)') : freeEngine.startsWith('seedance') ? 'SD 2.0 실험 생성' : '무료 생성 시작'}
           </button>
           <p className="text-[10px] text-stone-300 text-center"></p>
         </div>
