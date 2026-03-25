@@ -10,7 +10,9 @@ const prisma = new PrismaClient();
 const TOSS_SECRET = process.env.TOSS_SECRET_KEY;
 
 const TIERS: Record<string, { amount: number; label: string }> = {
-  basic: { amount: 29000, label: '식전영상 Basic' },
+  photo: { amount: 29000, label: '식전영상' },
+  selfie: { amount: 39000, label: '식전영상 + AI 화보팩' },
+  basic: { amount: 29000, label: '식전영상' },
   premium: { amount: 49000, label: '식전영상 Premium' },
 };
 

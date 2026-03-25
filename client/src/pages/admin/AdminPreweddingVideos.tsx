@@ -60,7 +60,7 @@ export default function AdminPreweddingVideos() {
   const [playingBgm, setPlayingBgm] = useState<string | null>(null);
   const [audioRef] = useState(new Audio());
   const [freeSubStyle, setFreeSubStyle] = useState('poetic');
-  const [freeEngine, setFreeEngine] = useState<'kling'|'seedance2'|'seedance2-fast'|'seedance15-direct'>('kling');
+  const [freeEngine, setFreeEngine] = useState<'seedance15'|'kling'|'seedance2'|'seedance2-fast'>('seedance15');
   const [subStyles, setSubStyles] = useState<any[]>([]);
   const [freeBgm, setFreeBgm] = useState<any>(null);
   const [freeBgms, setFreeBgms] = useState<any[]>([]);
@@ -352,8 +352,8 @@ export default function AdminPreweddingVideos() {
             <p className="text-xs font-semibold text-stone-500 mb-2 uppercase tracking-wider">영상 엔진</p>
             <div className="grid grid-cols-3 gap-2">
               {([
-                { id: 'kling' as const, name: 'Kling 3.0', desc: '현재 기본', cost: '~$0.55/clip' },
-                { id: 'seedance15-direct' as const, name: 'SD 1.5 Direct', desc: '셀카직접 (나노바나나 스킵)', cost: '~$0.005/clip' },
+                { id: 'seedance15' as const, name: 'SD 1.5 Pro', desc: '기본 엔진', cost: '~$0.005/clip' },
+                { id: 'kling' as const, name: 'Kling 3.0', desc: '실험용', cost: '~$0.55/clip' },
               ]).map(e => {
                 const isActive = freeEngine === e.id;
                 return (
@@ -370,7 +370,7 @@ export default function AdminPreweddingVideos() {
           </div>
           <button onClick={startFree} disabled={generating || freePhotos.length < (freeMode === 'selfie' ? 1 : 3) || !freeForm.groomName || !freeForm.brideName} className="w-full py-3 bg-stone-800 text-white rounded-xl text-sm font-semibold disabled:opacity-30 flex items-center justify-center gap-2 hover:bg-stone-900 transition-colors">
             {generating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-            {generating ? '생성 중...' + (freeEngine.startsWith('seedance') ? ' (SD2.0, 약 12분)' : ' (약 8분)') : freeEngine.startsWith('seedance') ? 'SD 2.0 실험 생성' : '무료 생성 시작'}
+            {generating ? '생성 중... (약 ' + (freeEngine === 'kling' ? '8' : '3') + '분)' : '무료 생성 시작'}
           </button>
           <p className="text-[10px] text-stone-300 text-center"></p>
         </div>

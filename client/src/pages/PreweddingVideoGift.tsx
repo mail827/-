@@ -16,8 +16,8 @@ function loadTossV1(): Promise<any> {
 interface Tier { id: string; price: number; label: string; desc: string }
 
 const TIERS: Tier[] = [
-  { id: 'basic', price: 29000, label: '29,000원', desc: 'Basic · 사진 5장 · 30초' },
-  { id: 'premium', price: 49000, label: '49,000원', desc: 'Premium · 사진 8장 · 45초' },
+  { id: 'photo', price: 29000, label: '29,000원', desc: '웨딩사진 모드' },
+  { id: 'selfie', price: 39000, label: '39,000원', desc: 'AI 화보팩 + 식전영상' },
 ];
 
 type SendMethod = 'phone' | 'email';

@@ -275,8 +275,8 @@ const SUBTITLE_STYLES = [
 ];
 
 const PRICING: Record<string, { amount: number; label: string }> = {
-  basic: { amount: 29000, label: '식전영상 Basic' },
-  premium: { amount: 49000, label: '식전영상 Premium' },
+  photo: { amount: 29000, label: '식전영상' },
+  selfie: { amount: 39000, label: '식전영상 + AI 화보팩' },
 };
 
 const FONTS = [
@@ -346,7 +346,7 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res) => {
     return res.status(400).json({ error: mode === 'selfie' ? '셀카 1장 이상 필요' : '사진 3장 이상 필요' });
   }
 
-  const pricing = PRICING[tier] || PRICING.basic;
+  const pricing = PRICING[mode || 'photo'] || PRICING.photo;
   const orderId = `PV-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   try {
@@ -506,7 +506,7 @@ router.post('/admin/free-generate', authMiddleware, adminOnly, async (req: AuthR
       },
     });
 
-    processVideoAsync(video.id, videoEngine || 'kling').catch(err => {
+    processVideoAsync(video.id, videoEngine || 'seedance15').catch(err => {
       console.error('Free gen pipeline error:', err);
       prisma.preweddingVideo.update({
         where: { id: video.id },
@@ -638,7 +638,7 @@ async function generateSubtitles(analyses: any[], groomName: string, brideName: 
 }
 
 function decideTier(photoType: string, phase: string): 'premium' | 'budget' {
-  return 'premium';
+  return 'budget';
 }
 
 async function generateKlingClip(photoUrl: string, prompt: string, duration: number) {
@@ -845,42 +845,40 @@ function buildSD2Prompt(photoType: string, camera: string, phase: string) {
 }
 
 
-function buildSD15DirectPrompt(photoType: string, camera: string, phase: string, conceptId?: string) {
+function buildSD15DirectPrompt(photoType: string, camera: string, phase: string, sceneIndex: number = 0) {
   const groomScenes = [
-    'The man walks forward confidently, adjusting his jacket lapel, warm golden light, cinematic tracking shot, gentle breeze in hair',
-    'Close-up side profile, the man turns his head toward camera with a natural confident smile, soft golden rim lighting, shallow depth of field',
-    'The man stands with one hand in pocket, gazing into the distance, then slowly turns toward camera, cinematic push-in, warm light',
-    'Close-up, the man looks directly at camera with a warm gentle smile, natural eye blinks, soft ambient lighting',
-    'The man walks through the scene with relaxed confident stride, cinematic wide tracking shot, golden hour atmosphere',
-    'Medium close-up, the man adjusts his collar and smiles, soft diffused lighting, intimate cinematic feel',
+    'Wide full body shot, the man walks forward confidently with one hand in pocket, warm golden light, cinematic tracking shot, gentle breeze',
+    'Medium shot, the man stands adjusting his jacket lapel, soft side lighting, calm confident expression, slight head turn',
+    'The man walks through the scene with relaxed stride, looking around naturally, cinematic wide tracking, golden hour',
+    'Medium close-up from low angle, the man gazes into distance then slowly turns toward camera with a warm smile, rim lighting',
+    'Close-up side profile, the man turns his head toward camera with a natural smile, soft golden light, shallow depth of field',
     'The man turns to look over his shoulder with a calm expression, dramatic backlight, cinematic slow motion',
+    'Close-up, the man looks directly at camera with a warm gentle smile, natural eye blinks, soft ambient lighting',
   ];
 
   const brideScenes = [
-    'The woman walks gracefully, dress flowing in gentle breeze, soft backlight creating a halo effect, cinematic slow motion',
-    'Close-up, the woman brushes hair behind her ear and smiles gently, warm morning light, shallow depth of field, natural eye blinks',
-    'The woman turns slowly to face camera with a mysterious gentle smile, dramatic side lighting, hair moving softly in wind',
-    'Close-up profile, the woman looks down shyly then lifts her gaze with a warm expression, soft golden light',
+    'Wide full body shot, the woman walks gracefully, dress flowing in gentle breeze, soft backlight creating halo, cinematic slow motion',
+    'Medium shot, the woman standing elegantly, hand lightly touching her dress, soft warm light, gentle wind in hair',
     'The woman walks slowly through the scene, looking around peacefully, cinematic tracking, dreamy atmosphere',
-    'The woman looks over her shoulder elegantly, soft rim lighting, wind gently moving her hair, cinematic',
-    'Close-up, the woman standing still with gentle wind in her hair, serene peaceful smile, warm diffused lighting',
+    'Medium shot, the woman looks over her shoulder elegantly, soft rim lighting, wind moving her hair, cinematic',
+    'Close-up, the woman brushes hair behind her ear and smiles gently, warm morning light, shallow depth of field',
+    'The woman turns slowly to face camera with a mysterious gentle smile, dramatic side lighting, hair in wind',
+    'Close-up profile, the woman looks down then lifts her gaze with a warm expression, soft golden light',
   ];
 
   const coupleScenes = [
-    'The couple walks hand in hand, looking at each other warmly, soft golden hour light, cinematic tracking shot, gentle breeze',
-    'Close-up two shot, the couple faces each other with warm smiles, foreheads almost touching, intimate shallow depth of field',
+    'Wide shot, the couple walks hand in hand through the scene, warm golden hour light, cinematic tracking, gentle breeze',
+    'Medium shot, the couple stands close, she rests her head on his shoulder, soft warm backlight, peaceful mood',
     'The couple walks arm in arm, she looks up at him and laughs naturally, gentle breeze, cinematic tracking',
-    'Close-up, the man whispers something and the woman smiles shyly, warm soft lighting, intimate moment',
+    'Medium close-up, the couple stands facing each other, he gently holds her hands, warm soft lighting',
     'The couple embraces gently, warm golden backlight, cinematic slow motion, peaceful atmosphere',
-    'The couple stands close together gazing in the same direction then slowly turns to each other and smiles, warm light',
+    'Close-up two shot, foreheads almost touching, warm smiles, intimate shallow depth of field',
     'Wide shot from behind, the couple walks away together hand in hand, warm golden backlight, cinematic ending',
   ];
 
   const type = photoType.startsWith('solo_m') ? 'groom' : photoType.startsWith('solo_f') ? 'bride' : 'couple';
   const list = type === 'groom' ? groomScenes : type === 'bride' ? brideScenes : coupleScenes;
-  const phaseIdx: Record<string, number> = { intro: 0, rising: 1, building: 2, climax: 3, ending: 4 };
-  const idx = phaseIdx[phase] || 0;
-  return list[idx % list.length] + '. Cinematic shallow depth of field, natural body movement.';
+  return list[sceneIndex % list.length] + '. Cinematic shallow depth of field, natural body movement.';
 }
 
 function buildPrompt(photoType: string, camera: string, phase: string) {
@@ -961,7 +959,7 @@ function buildEndingCredits(groomName: string, brideName: string, weddingDate: s
   lines.push('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4');
   return lines;
 }
-async function processVideoAsync(videoId: string, videoEngine: string = 'kling') {
+async function processVideoAsync(videoId: string, videoEngine: string = 'seedance15') {
   const video = await prisma.preweddingVideo.findUnique({ where: { id: videoId } });
   if (!video) throw new Error('Video not found');
 
@@ -976,7 +974,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'kling')
     if (glamourPhotos.length < 3) throw new Error('Glamour photo generation failed: only ' + glamourPhotos.length + ' photos');
     photoUrls = glamourPhotos;
     await prisma.preweddingVideo.update({ where: { id: videoId }, data: { photos: glamourPhotos } });
-    console.log('[Pipeline] Generated ' + glamourPhotos.length + ' glamour photos');
+    console.log('[Pipeline] Generated ' + glamourPhotos.length + ' glamour photos (cost ~$' + (glamourPhotos.length * 0.08).toFixed(2) + ')');
   }
 
   await prisma.preweddingVideo.update({ where: { id: videoId }, data: { status: 'ANALYZING' } });
@@ -1015,36 +1013,38 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'kling')
 
   await prisma.preweddingVideo.update({ where: { id: videoId }, data: { scenes, status: 'GENERATING' } });
 
-  let totalCost = 0;
+  let totalCost = (video as any).mode === 'selfie' ? photoUrls.length * 0.08 : 0;
   const clipResults = new Array(scenes.length).fill('');
 
   const clipPromises = scenes.map((scene, si) => {
-    const prompt = buildPrompt(scene.photoType, scene.camera, scene.phase);
-    const isPremium = scene.tier === 'premium';
-    totalCost += isPremium ? 0.56 : 0.005;
-
     let gen: Promise<string | null>;
-    if (videoEngine === 'seedance2') {
+    let engineLabel = 'SD1.5';
+
+    if (videoEngine === 'kling') {
+      const prompt = buildPrompt(scene.photoType, scene.camera, scene.phase);
+      gen = generateKlingClip(scene.photoUrl, prompt, scene.duration);
+      totalCost += 0.55;
+      engineLabel = 'Kling';
+    } else if (videoEngine === 'seedance2') {
       const sd2prompt = buildSD2Prompt(scene.photoType, scene.camera, scene.phase);
       gen = generatePiAPISeedance2Clip(scene.photoUrl, sd2prompt, scene.duration, 'seedance-2-preview').then(url => url ? removePiAPIWatermark(url) : null);
       totalCost += 0.75;
+      engineLabel = 'SD2.0';
     } else if (videoEngine === 'seedance2-fast') {
       const sd2prompt = buildSD2Prompt(scene.photoType, scene.camera, scene.phase);
       gen = generatePiAPISeedance2Clip(scene.photoUrl, sd2prompt, scene.duration, 'seedance-2-fast-preview').then(url => url ? removePiAPIWatermark(url) : null);
       totalCost += 0.40;
-    } else if (videoEngine === 'seedance15-direct') {
-      const sd15prompt = buildSD15DirectPrompt(scene.photoType, scene.camera, scene.phase);
+      engineLabel = 'SD2.0-fast';
+    } else {
+      const sd15prompt = buildSD15DirectPrompt(scene.photoType, scene.camera, scene.phase, si);
       gen = generateSeedanceClip(scene.photoUrl, sd15prompt, scene.duration);
       totalCost += 0.005;
-    } else {
-      gen = isPremium
-        ? generateKlingClip(scene.photoUrl, prompt, scene.duration)
-        : generateSeedanceClip(scene.photoUrl, prompt, scene.duration);
+      engineLabel = 'SD1.5';
     }
 
     return gen.then(url => {
       clipResults[si] = url || '';
-      console.log('[Pipeline] clip ' + (si + 1) + '/' + scenes.length + (url ? ' OK (' + (videoEngine.startsWith('seedance2') ? 'SD2.0' : isPremium ? 'Kling Pro' : 'SD1.5') + ')' : ' FAILED'));
+      console.log('[Pipeline] clip ' + (si + 1) + '/' + scenes.length + (url ? ' OK (' + engineLabel + ')' : ' FAILED'));
       return prisma.preweddingVideo.update({
         where: { id: videoId },
         data: { clipUrls: [...clipResults] },
