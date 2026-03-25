@@ -4,8 +4,8 @@ import { useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight, Check, Sparkles, Heart, MapPin, Calendar,
-  Send, Copy, CreditCard, Camera, ChevronDown, Film, MessageCircle, Zap, X,
-  Mail, Loader2, Gift
+  Send, Copy, CreditCard, Camera, ChevronDown, Film, Gift, MessageCircle, Zap, X,
+  Mail, Loader2
 } from "lucide-react";
 import ThemeShowcaseModal from "../components/ThemeShowcaseModal";
 import { lt } from "./landingI18n";
@@ -805,6 +805,7 @@ export default function Landing() {
                 <Film size={16} />
                 {landingLocale === 'ko' ? '식전영상' : 'Pre-ceremony Video'}
               </a>
+
             </div>
             <p style={{ fontSize: 12, color: "#bbb", marginTop: 12 }}>{lt('hero','noLogin',landingLocale)}</p>
             <div className="hero-stats" style={{ display: "flex", gap: 36, paddingTop: 32, borderTop: "1px solid #E8E5E0", marginTop: 32 }}>

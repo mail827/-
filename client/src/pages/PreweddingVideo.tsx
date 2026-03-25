@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Upload, Play, Check, Loader2, ArrowRight, ArrowLeft, X, Clock, Sparkles, Film } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Upload, Play, Check, Loader2, ArrowRight, ArrowLeft, X, Clock, Sparkles, Film, Gift, Camera } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -34,6 +34,11 @@ const TIERS = [
 
 export default function PreweddingVideo() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const giftCode = searchParams.get('gift') || '';
+  const [mode, setMode] = useState<'select' | 'create' | 'gift'>(searchParams.get('gift') ? 'create' : 'select');
+  const [giftVerified, setGiftVerified] = useState(false);
+  const [, setGiftTier] = useState('');
   const [step, setStep] = useState(0);
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -42,9 +47,20 @@ export default function PreweddingVideo() {
   const [weddingDate, setWeddingDate] = useState('');
   const [metDate, setMetDate] = useState('');
   const [metStory, setMetStory] = useState('');
+  const [videoMode, setVideoMode] = useState<'photo' | 'selfie'>('photo');
+  const [selectedConcept, setSelectedConcept] = useState('studio_classic');
+  const [selfieConcepts, setSelfieConcepts] = useState<{id:string,name:string}[]>([]);
+  const [venueName, setVenueName] = useState('');
+  const [groomFather, setGroomFather] = useState('');
+  const [groomMother, setGroomMother] = useState('');
+  const [brideFather, setBrideFather] = useState('');
+  const [brideMother, setBrideMother] = useState('');
+  const [endingMessage, setEndingMessage] = useState('');
   const [selectedTier, setSelectedTier] = useState('basic');
   const [fonts, setFonts] = useState<FontOption[]>([]);
   const [selectedFont, setSelectedFont] = useState('BMJUA_ttf');
+  const [subtitleStyles, setSubtitleStyles] = useState<any[]>([]);
+  const [selectedSubStyle, setSelectedSubStyle] = useState('poetic');
   const [bgms, setBgms] = useState<BgmOption[]>([]);
   const [selectedBgm, setSelectedBgm] = useState<BgmOption | null>(null);
   const [playingBgm, setPlayingBgm] = useState<string | null>(null);
@@ -56,15 +72,41 @@ export default function PreweddingVideo() {
   useEffect(() => {
     fetch(`${API}/prewedding-video/config`).then(r => r.json()).then(d => {
       setFonts(d.fonts);
+      if (d.subtitleStyles) setSubtitleStyles(d.subtitleStyles);
+      if (d.selfieConcepts) setSelfieConcepts(d.selfieConcepts);
       d.fonts.forEach((f: FontOption) => {
         const style = document.createElement('style');
         style.textContent = `@font-face { font-family: '${f.id}'; src: url('/fonts/${f.file}') format('woff2'); font-display: swap; }`;
         document.head.appendChild(style);
       });
     });
-    fetch(`${API}/prewedding-video/bgm`).then(r => r.json()).then(d => { setBgms(d); if (d.length) setSelectedBgm(d[0]); });
+    fetch(`${API}/prewedding-video/bgm`).then(r => r.json()).then(d => { setBgms(d); });
     return () => { audioRef.pause(); if (pollInterval) clearInterval(pollInterval); };
   }, []);
+
+  useEffect(() => {
+    if (giftCode && !giftVerified) {
+      fetch(`${API}/video-gift/check/${giftCode}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.tier && !data.isRedeemed && !data.expired) {
+            setGiftVerified(true);
+            setGiftTier(data.tier);
+            setSelectedTier(data.tier);
+            setMode('create');
+            setStep(0);
+          } else if (data.isRedeemed) {
+            setMode('create');
+            setStep(0);
+          } else {
+            alert(data.expired ? '만료된 코드입니다' : '유효하지 않은 코드');
+            setMode('select');
+          }
+        })
+        .catch(() => setMode('select'));
+    }
+  }, []);
+
 
   const uploadPhoto = useCallback(async (file: File) => {
     setUploading(true);
@@ -101,6 +143,33 @@ export default function PreweddingVideo() {
     const token = localStorage.getItem('token');
     if (!token) { alert('로그인이 필요합니다'); return; }
 
+    if (giftVerified && giftCode) {
+      setProcessing(true);
+      try {
+        const res = await fetch(`${API}/prewedding-video/create-with-gift`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            groomName, brideName, weddingDate, metStory,
+            photos, bgmId: selectedBgm?.id, bgmUrl: selectedBgm?.url,
+            fontId: selectedFont, subtitleStyle: selectedSubStyle, giftCode,
+            venueName, groomFather, groomMother, brideFather, brideMother, endingMessage,
+            mode: videoMode, selfieConcepts: videoMode === 'selfie' ? [selectedConcept] : undefined,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setVideoOrder({ id: data.videoId, status: 'ANALYZING' });
+          setStep(5);
+          startPolling(data.videoId);
+        } else {
+          alert(data.error || '실패');
+        }
+      } catch { alert('실패'); }
+      setProcessing(false);
+      return;
+    }
+
     setProcessing(true);
     try {
       const res = await fetch(`${API}/prewedding-video/create`, {
@@ -108,8 +177,10 @@ export default function PreweddingVideo() {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           groomName, brideName, weddingDate, metStory,
-          photos, bgmId: selectedBgm?.id, bgmUrl: selectedBgm?.url, metDate,
+          photos, bgmId: selectedBgm?.id, bgmUrl: selectedBgm?.url, metDate, subtitleStyle: selectedSubStyle,
           fontId: selectedFont, tier: selectedTier,
+          venueName, groomFather, groomMother, brideFather, brideMother, endingMessage,
+          mode: videoMode, selfieConcepts: videoMode === 'selfie' ? [selectedConcept] : undefined,
         }),
       });
       const order = await res.json();
@@ -170,14 +241,84 @@ export default function PreweddingVideo() {
     FAILED: { label: '생성 실패', icon: X, progress: 0 },
   };
 
-  const maxPhotos = selectedTier === 'premium' ? 8 : 5;
+  const maxPhotos = videoMode === 'selfie' ? 3 : (selectedTier === 'premium' ? 8 : 5);
+  const minPhotos = videoMode === 'selfie' ? 1 : 3;
 
   return (
     <div style={{ minHeight: '100vh', background: '#FAF9F7', fontFamily: "'Noto Sans KR', sans-serif" }}>
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 100px' }}>
 
+        {mode === 'select' && (
+          <div style={{ paddingTop: 40 }}>
+            <div style={{ textAlign: 'center', marginBottom: 48 }}>
+              <p style={{ fontSize: 11, letterSpacing: 3, color: '#a8a29e', marginBottom: 12, textTransform: 'uppercase' }}>Pre-Wedding Video</p>
+              <h1 style={{ fontFamily: 'serif', fontSize: 28, color: '#1a1a1a', marginBottom: 10, letterSpacing: -0.5, fontWeight: 400 }}>식전영상</h1>
+              <p style={{ fontSize: 14, color: '#999', lineHeight: 1.7 }}>웨딩 사진이 영상이 되는 순간</p>
+            </div>
+
+            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E5E0', overflow: 'hidden', marginBottom: 16 }}>
+              <button onClick={() => { setMode('create'); setStep(0); }} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '24px 20px', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Sparkles size={22} color="#fff" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 16, fontWeight: 600, color: '#1a1a1a', marginBottom: 4 }}>직접 만들기</p>
+                  <p style={{ fontSize: 12, color: '#a8a29e', lineHeight: 1.5 }}>사진만 올리면 영상이 완성돼요</p>
+                </div>
+                <ArrowRight size={18} color="#d6d3d1" />
+              </button>
+              <div style={{ height: 1, background: '#F0EDE8', margin: '0 20px' }} />
+              <button onClick={() => navigate('/prewedding-video/gift')} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '24px 20px', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Gift size={22} color="#78716c" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 16, fontWeight: 600, color: '#1a1a1a', marginBottom: 4 }}>선물하기</p>
+                  <p style={{ fontSize: 12, color: '#a8a29e', lineHeight: 1.5 }}>소중한 분에게 식전영상을 선물하세요</p>
+                </div>
+                <ArrowRight size={18} color="#d6d3d1" />
+              </button>
+            </div>
+
+            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E5E0', padding: '24px 20px', marginBottom: 16 }}>
+              <p style={{ fontSize: 11, letterSpacing: 2, color: '#a8a29e', marginBottom: 16, textTransform: 'uppercase' }}>How it works</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                {[
+                  ['1', '사진 업로드', '커플 + 솔로 사진 3~8장'],
+                  ['2', 'AI 분석 & 생성', 'GPT가 구성하고 Kling이 영상화'],
+                  ['3', '자막 & BGM', '감성 자막 + 배경음악 자동 합성'],
+                  ['4', '다운로드', '완성된 영상을 바로 받아보세요'],
+                ].map(([num, title, desc]) => (
+                  <div key={num} style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 12, fontWeight: 700, color: '#78716c' }}>{num}</div>
+                    <div>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a', marginBottom: 2 }}>{title}</p>
+                      <p style={{ fontSize: 12, color: '#a8a29e' }}>{desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ flex: 1, background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', padding: '16px', textAlign: 'center' }}>
+                <p style={{ fontSize: 20, fontWeight: 300, color: '#1a1a1a', fontFamily: 'serif' }}>29,000</p>
+                <p style={{ fontSize: 11, color: '#a8a29e', marginTop: 4 }}>Basic</p>
+              </div>
+              <div style={{ flex: 1, background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', padding: '16px', textAlign: 'center' }}>
+                <p style={{ fontSize: 20, fontWeight: 300, color: '#1a1a1a', fontFamily: 'serif' }}>49,000</p>
+                <p style={{ fontSize: 11, color: '#a8a29e', marginTop: 4 }}>Premium</p>
+              </div>
+            </div>
+
+            <p style={{ fontSize: 11, color: '#d6d3d1', textAlign: 'center', marginTop: 24 }}></p>
+          </div>
+        )}
+
+        {mode === 'create' && (
+        <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32, paddingTop: 16 }}>
-          <button onClick={() => step > 0 ? setStep(step - 1) : navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8 }}>
+          <button onClick={() => step > 0 ? setStep(step - 1) : setMode('select')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8 }}>
             <ArrowLeft size={20} color="#1a1a1a" />
           </button>
           <h1 style={{ fontSize: 18, fontWeight: 600, color: '#1a1a1a', letterSpacing: -0.5 }}>식전영상</h1>
@@ -191,29 +332,94 @@ export default function PreweddingVideo() {
 
         {step === 0 && (
           <div>
-            <p style={{ fontSize: 22, fontWeight: 600, color: '#1a1a1a', marginBottom: 8, letterSpacing: -0.5 }}>사진을 올려주세요</p>
-            <p style={{ fontSize: 13, color: '#999', marginBottom: 24 }}>커플 사진 + 솔로 사진 {maxPhotos}장까지</p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 24 }}>
-              {photos.map((url, i) => (
-                <div key={i} style={{ position: 'relative', aspectRatio: '3/4', borderRadius: 12, overflow: 'hidden' }}>
-                  <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <button onClick={() => removePhoto(i)} style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: 12, background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <X size={14} color="#fff" />
-                  </button>
-                </div>
-              ))}
-
-              {photos.length < maxPhotos && (
-                <label style={{ aspectRatio: '3/4', borderRadius: 12, border: '2px dashed #D5D0C8', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#fff' }}>
-                  {uploading ? <Loader2 size={24} className="animate-spin" color="#999" /> : <Upload size={24} color="#999" />}
-                  <span style={{ fontSize: 11, color: '#bbb', marginTop: 6 }}>{photos.length}/{maxPhotos}</span>
-                  <input type="file" accept="image/*" multiple hidden onChange={e => { if (e.target.files) Array.from(e.target.files).forEach(uploadPhoto); }} />
-                </label>
-              )}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+              <button onClick={() => { setVideoMode('photo'); setPhotos([]); }} style={{ flex: 1, padding: '14px 0', borderRadius: 10, border: videoMode === 'photo' ? '2px solid #1a1a1a' : '1px solid #E0DDD8', background: videoMode === 'photo' ? '#F5F3F0' : '#fff', cursor: 'pointer', textAlign: 'center' }}>
+                <Film size={18} color={videoMode === 'photo' ? '#1a1a1a' : '#bbb'} style={{ margin: '0 auto 6px' }} />
+                <p style={{ fontSize: 13, fontWeight: 600, color: videoMode === 'photo' ? '#1a1a1a' : '#999' }}>웨딩사진 모드</p>
+                <p style={{ fontSize: 11, color: '#bbb', marginTop: 2 }}>스냅 사진 3~8장</p>
+              </button>
+              <button onClick={() => { setVideoMode('selfie'); setPhotos([]); }} style={{ flex: 1, padding: '14px 0', borderRadius: 10, border: videoMode === 'selfie' ? '2px solid #1a1a1a' : '1px solid #E0DDD8', background: videoMode === 'selfie' ? '#F5F3F0' : '#fff', cursor: 'pointer', textAlign: 'center' }}>
+                <Camera size={18} color={videoMode === 'selfie' ? '#1a1a1a' : '#bbb'} style={{ margin: '0 auto 6px' }} />
+                <p style={{ fontSize: 13, fontWeight: 600, color: videoMode === 'selfie' ? '#1a1a1a' : '#999' }}>셀카 화보 모드</p>
+                <p style={{ fontSize: 11, color: '#bbb', marginTop: 2 }}>셀카 1~3장으로 화보 생성</p>
+              </button>
             </div>
 
-            <button onClick={() => setStep(1)} disabled={photos.length < 3} style={{ width: '100%', padding: '14px 0', borderRadius: 8, border: 'none', background: photos.length >= 3 ? '#1a1a1a' : '#E8E5E0', color: photos.length >= 3 ? '#fff' : '#bbb', fontSize: 14, fontWeight: 500, cursor: photos.length >= 3 ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            {videoMode === 'selfie' && (
+              <div style={{ marginBottom: 20 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 10 }}>화보 컨셉</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                  {selfieConcepts.map(c => (
+                    <button key={c.id} onClick={() => setSelectedConcept(c.id)} style={{ padding: '10px 6px', borderRadius: 8, border: selectedConcept === c.id ? '2px solid #1a1a1a' : '1px solid #E0DDD8', background: selectedConcept === c.id ? '#F5F3F0' : '#fff', cursor: 'pointer', fontSize: 11, fontWeight: selectedConcept === c.id ? 600 : 400, color: selectedConcept === c.id ? '#1a1a1a' : '#999', textAlign: 'center', lineHeight: 1.3 }}>
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <p style={{ fontSize: 22, fontWeight: 600, color: '#1a1a1a', marginBottom: 8, letterSpacing: -0.5 }}>
+              {videoMode === 'selfie' ? '셀카 또는 사진을 올려주세요' : '사진을 올려주세요'}
+            </p>
+            <p style={{ fontSize: 13, color: '#999', marginBottom: videoMode === 'selfie' ? 12 : 24 }}>
+              {videoMode === 'selfie' ? '정면 사진 1~3장 (신랑, 신부, 커플)' : '커플 사진 + 솔로 사진 ' + maxPhotos + '장까지'}
+            </p>
+            {videoMode === 'selfie' && (
+              <div style={{ background: '#F5F3F0', borderRadius: 10, padding: '12px 14px', marginBottom: 20 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: '#78716c', marginBottom: 6 }}>좋은 결과를 위한 팁</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <p style={{ fontSize: 11, color: '#a8a29e', lineHeight: 1.5 }}>{'\u2022'} 증명사진처럼 정면을 바라보는 사진이 가장 좋아요</p>
+                  <p style={{ fontSize: 11, color: '#a8a29e', lineHeight: 1.5 }}>{'\u2022'} 마스크, 선글라스, 모자, 머리띠 등은 피해주세요</p>
+                  <p style={{ fontSize: 11, color: '#a8a29e', lineHeight: 1.5 }}>{'\u2022'} 고화질 사진일수록 결과가 좋아요</p>
+                  <p style={{ fontSize: 11, color: '#a8a29e', lineHeight: 1.5 }}>{'\u2022'} 갤러리에서 기존 사진을 골라도 됩니다</p>
+                </div>
+              </div>
+            )}
+
+            {videoMode === 'selfie' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 24 }}>
+                {['신랑 사진', '신부 사진', '함께 찍은 사진'].map((label, i) => (
+                  <div key={i}>
+                    {photos[i] ? (
+                      <div style={{ position: 'relative', aspectRatio: '3/4', borderRadius: 12, overflow: 'hidden', border: '1px solid #E0DDD8' }}>
+                        <img src={photos[i]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button onClick={() => setPhotos(p => { const n = [...p]; n.splice(i, 1); return n; })} style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: 12, background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <X size={14} color="#fff" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label style={{ aspectRatio: '3/4', borderRadius: 12, border: '2px dashed #D5D0C8', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#fff' }}>
+                        {uploading ? <Loader2 size={20} className="animate-spin" color="#999" /> : <Upload size={20} color="#999" />}
+                        <span style={{ fontSize: 11, color: '#bbb', marginTop: 6, textAlign: 'center', lineHeight: 1.3, padding: '0 4px' }}>{label}</span>
+                        {i === 2 && <span style={{ fontSize: 10, color: '#d6d3d1', marginTop: 2 }}>(선택)</span>}
+                        <input type="file" accept="image/*" hidden onChange={e => { if (e.target.files?.[0]) uploadPhoto(e.target.files[0]); }} />
+                      </label>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 24 }}>
+                {photos.map((url, i) => (
+                  <div key={i} style={{ position: 'relative', aspectRatio: '3/4', borderRadius: 12, overflow: 'hidden' }}>
+                    <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <button onClick={() => removePhoto(i)} style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: 12, background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <X size={14} color="#fff" />
+                    </button>
+                  </div>
+                ))}
+
+                {photos.length < maxPhotos && (
+                  <label style={{ aspectRatio: '3/4', borderRadius: 12, border: '2px dashed #D5D0C8', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#fff' }}>
+                    {uploading ? <Loader2 size={24} className="animate-spin" color="#999" /> : <Upload size={24} color="#999" />}
+                    <span style={{ fontSize: 11, color: '#bbb', marginTop: 6 }}>{photos.length}/{maxPhotos}</span>
+                    <input type="file" accept="image/*" multiple hidden onChange={e => { if (e.target.files) Array.from(e.target.files).forEach(uploadPhoto); }} />
+                  </label>
+                )}
+              </div>
+            )}
+
+            <button onClick={() => setStep(1)} disabled={photos.length < minPhotos} style={{ width: '100%', padding: '14px 0', borderRadius: 8, border: 'none', background: photos.length >= minPhotos ? '#1a1a1a' : '#E8E5E0', color: photos.length >= minPhotos ? '#fff' : '#bbb', fontSize: 14, fontWeight: 500, cursor: photos.length >= minPhotos ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
               다음 <ArrowRight size={16} />
             </button>
           </div>
@@ -236,6 +442,24 @@ export default function PreweddingVideo() {
                 <input type="date" value={metDate} onChange={e => setMetDate(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 14, outline: 'none', color: metDate ? '#1a1a1a' : '#bbb', boxSizing: 'border-box' }} />
               </div>
               <textarea value={metStory} onChange={e => setMetStory(e.target.value)} placeholder="우리의 이야기 힌트 (선택)&#10;예: 제주도에서 우연히 만났어요, 5년 연애 끝에..." rows={3} style={{ padding: '14px 16px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 14, outline: 'none', resize: 'none', fontFamily: 'inherit' }} />
+              <div>
+                <label style={{ fontSize: 12, color: '#888', marginBottom: 4, display: 'block' }}>예식장 (엔딩 크레딧용)</label>
+                <input value={venueName} onChange={e => setVenueName(e.target.value)} placeholder="예: 더채플하우스 3층 그레이스홀" style={{ width: '100%', padding: '14px 16px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: '#888', marginBottom: 4, display: 'block' }}>양가 부모님 성함 (엔딩 크레딧용, 선택)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <input value={groomFather} onChange={e => setGroomFather(e.target.value)} placeholder="신랑 아버지" style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 13, outline: 'none' }} />
+                  <input value={groomMother} onChange={e => setGroomMother(e.target.value)} placeholder="신랑 어머니" style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 13, outline: 'none' }} />
+                  <input value={brideFather} onChange={e => setBrideFather(e.target.value)} placeholder="신부 아버지" style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 13, outline: 'none' }} />
+                  <input value={brideMother} onChange={e => setBrideMother(e.target.value)} placeholder="신부 어머니" style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 13, outline: 'none' }} />
+                </div>
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <label style={{ fontSize: 12, color: '#888', marginBottom: 4, display: 'block' }}>엔딩 크레딧 메시지 (선택)</label>
+                <input value={endingMessage} onChange={e => setEndingMessage(e.target.value)} placeholder="예: 오늘, 우리의 영원이 시작됩니다" style={{ width: '100%', padding: '14px 16px', borderRadius: 8, border: '1px solid #E0DDD8', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <p style={{ fontSize: 11, color: '#bbb', marginTop: 4 }}>영상 엔딩에 표시될 한 줄 메시지</p>
+              </div>
             </div>
 
             <button onClick={() => setStep(2)} disabled={!groomName || !brideName} style={{ width: '100%', padding: '14px 0', borderRadius: 8, border: 'none', background: groomName && brideName ? '#1a1a1a' : '#E8E5E0', color: groomName && brideName ? '#fff' : '#bbb', fontSize: 14, fontWeight: 500, cursor: groomName && brideName ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
@@ -254,6 +478,16 @@ export default function PreweddingVideo() {
                 <button key={f.id} onClick={() => setSelectedFont(f.id)} style={{ padding: '16px', borderRadius: 10, border: selectedFont === f.id ? '2px solid #1a1a1a' : '1px solid #E0DDD8', background: selectedFont === f.id ? '#F5F3F0' : '#fff', cursor: 'pointer', textAlign: 'left' }}>
                   <p style={{ fontSize: 13, color: '#999', marginBottom: 4 }}>{f.name}</p>
                   <p style={{ fontSize: 18, color: '#1a1a1a', fontFamily: `'${f.id}', sans-serif` }}>{f.id === 'GreatVibes-Regular' ? 'The day we first met' : '처음 만난 그 날부터'}</p>
+                </button>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 16, fontWeight: 600, color: '#1a1a1a', marginTop: 28, marginBottom: 12 }}>자막 스타일</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 24 }}>
+              {subtitleStyles.map(s => (
+                <button key={s.id} onClick={() => setSelectedSubStyle(s.id)} style={{ padding: '14px 12px', borderRadius: 10, border: selectedSubStyle === s.id ? '2px solid #1a1a1a' : '1px solid #E0DDD8', background: selectedSubStyle === s.id ? '#F5F3F0' : '#fff', cursor: 'pointer', textAlign: 'left' }}>
+                  <p style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a' }}>{s.name}</p>
+                  <p style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{s.desc}</p>
                 </button>
               ))}
             </div>
@@ -335,12 +569,15 @@ export default function PreweddingVideo() {
 
             <button onClick={startPayment} disabled={processing} style={{ width: '100%', padding: '16px 0', borderRadius: 8, border: 'none', background: '#1a1a1a', color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               {processing ? <Loader2 size={18} className="animate-spin" /> : null}
-              {processing ? '처리 중...' : `${TIERS.find(t => t.id === selectedTier)?.label} 결제하기`}
+              {processing ? '처리 중...' : giftVerified ? '선물 코드로 시작하기' : `${TIERS.find(t => t.id === selectedTier)?.label} 결제하기`}
             </button>
           </div>
         )}
 
-        {step === 5 && videoOrder && (
+        </div>
+        )}
+
+        {mode === 'create' && step === 5 && videoOrder && (
           <div style={{ textAlign: 'center', paddingTop: 40 }}>
             {videoOrder.status === 'DONE' ? (
               <div>
@@ -379,7 +616,7 @@ export default function PreweddingVideo() {
                 <div style={{ width: '100%', height: 4, background: '#E8E5E0', borderRadius: 2, overflow: 'hidden' }}>
                   <div style={{ width: `${STATUS_LABELS[videoOrder.status]?.progress || 10}%`, height: '100%', background: '#1a1a1a', borderRadius: 2, transition: 'width 1s ease' }} />
                 </div>
-                <p style={{ fontSize: 12, color: '#bbb', marginTop: 12 }}>이 페이지를 닫아도 괜찮아요. 완성되면 알려드릴게요.</p>
+                <p style={{ fontSize: 12, color: '#bbb', marginTop: 12 }}>이 페이지를 닫아도 괜찮아요. 대시보드에서 확인할 수 있어요.</p>
               </div>
             )}
           </div>

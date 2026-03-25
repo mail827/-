@@ -11,6 +11,7 @@ COPY prisma ./prisma
 RUN npx prisma generate
 
 COPY . .
+COPY fonts /app/fonts
 RUN npm run build
 
 RUN npm prune --production

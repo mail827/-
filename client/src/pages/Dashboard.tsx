@@ -4,7 +4,7 @@ import { at } from '../utils/appI18n';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import JSZip from 'jszip';
-import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download, Loader2, ChevronLeft, ChevronRight, ChevronDown, Camera, Play } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download, Loader2, ChevronLeft, ChevronRight, ChevronDown, Camera, Play, Film } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import QRCardModal from '../components/QRCardModal';
 import ImageCropper from '../components/ImageCropper';
@@ -90,6 +90,16 @@ function decodeJwtPayload(token: string): any {
   }
 }
 
+const vStatusMap: Record<string, { label: string; color: string; progress: number }> = {
+      PENDING: { label: '대기', color: '#a8a29e', progress: 0 },
+      ANALYZING: { label: '분석 중', color: '#f59e0b', progress: 20 },
+      GENERATING: { label: '영상 생성 중', color: '#3b82f6', progress: 55 },
+      ASSEMBLING: { label: '조립 중', color: '#8b5cf6', progress: 85 },
+      DONE: { label: '완성', color: '#22c55e', progress: 100 },
+      FAILED: { label: '실패', color: '#ef4444', progress: 0 },
+    };
+    const vActive = ['ANALYZING', 'GENERATING', 'ASSEMBLING'];
+    
 export default function Dashboard() {
   const navigate = useNavigate();
   const { locale: al } = useLocaleStore();
@@ -110,12 +120,35 @@ export default function Dashboard() {
   const [guestPhotoViewIndex, setGuestPhotoViewIndex] = useState<number | null>(null);
   const [deleteConfirmPhoto, setDeleteConfirmPhoto] = useState<GuestPhoto | null>(null);
   const [zipLoading, setZipLoading] = useState(false);
+  const [myVideos, setMyVideos] = useState<any[]>([]);
+  const videoPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [heroCropWedding, setHeroCropWedding] = useState<Wedding | null>(null);
   const [heroCropSrc, setHeroCropSrc] = useState('');
   const [heroCropFile, setHeroCropFile] = useState<File | null>(null);
   const [heroUploading, setHeroUploading] = useState(false);
   const [heroPendingWedding, setHeroPendingWedding] = useState<Wedding | null>(null);
   const heroFileInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchMyVideos = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const res = await fetch(import.meta.env.VITE_API_URL + '/prewedding-video/my', {
+        headers: { Authorization: 'Bearer ' + token },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMyVideos(data);
+        const hasActive = data.some((v: any) => vActive.includes(v.status));
+        if (hasActive && !videoPollRef.current) {
+          videoPollRef.current = setInterval(fetchMyVideos, 8000);
+        } else if (!hasActive && videoPollRef.current) {
+          clearInterval(videoPollRef.current);
+          videoPollRef.current = null;
+        }
+      }
+    } catch {}
+  };
 
   const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'wedding_guide';
@@ -206,6 +239,7 @@ export default function Dashboard() {
     
     setUser(payload);
     fetchData(token);
+    fetchMyVideos();
   }, [navigate]);
 
   useEffect(() => {
@@ -850,6 +884,61 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
+          </section>
+        )}
+
+
+        {myVideos.length > 0 && (
+          <section className="mt-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-9 h-9 rounded-lg bg-stone-100 flex items-center justify-center">
+                <Film className="w-4 h-4 text-stone-500" />
+              </div>
+              <div>
+                <p className="text-[11px] tracking-[0.15em] text-stone-400">PRE-WEDDING VIDEO</p>
+                <h2 className="font-serif text-lg text-stone-800">식전영상</h2>
+              </div>
+            </div>
+            <div className="space-y-4">
+              {myVideos.map(v => {
+                const vs = vStatusMap[v.status] || vStatusMap.PENDING;
+                const isActive = vActive.includes(v.status);
+                return (
+                  <div key={v.id} className="bg-white rounded-xl border border-stone-200 p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-stone-800">{v.groomName} & {v.brideName}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1" style={{ background: vs.color + '15', color: vs.color }}>
+                          {isActive && <Loader2 size={10} className="animate-spin" />}
+                          {v.status === 'DONE' && <CheckCircle size={10} />}
+                          {vs.label}
+                        </span>
+                      </div>
+                      <span className="text-xs text-stone-400">{new Date(v.createdAt).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
+                    </div>
+                    {isActive && (
+                      <div className="mb-3">
+                        <div className="w-full h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: vs.progress + '%', background: vs.color }} />
+                        </div>
+                        <p className="text-[10px] mt-1 text-stone-400">약 8~10분 소요됩니다</p>
+                      </div>
+                    )}
+                    {v.status === 'DONE' && v.outputUrl && (
+                      <div>
+                        <video src={v.outputUrl} controls playsInline className="w-full rounded-lg mb-3" style={{ maxHeight: 360 }} />
+                        <a href={v.outputUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-2.5 bg-stone-800 text-white rounded-lg text-sm font-medium hover:bg-stone-900 transition-colors">
+                          <Download size={14} /> 다운로드
+                        </a>
+                      </div>
+                    )}
+                    {v.status === 'FAILED' && (
+                      <p className="text-xs text-red-400">{v.errorMsg || '생성에 실패했어요'}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </section>
         )}
 

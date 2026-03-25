@@ -491,7 +491,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const shot = variants[shotIdx % variants.length];
   const isDetail = DETAIL_SHOTS.has(shot.id);
 
-  const face = 'keep the exact same face, facial features, face shape, eyes, nose, lips unchanged. maintain exact facial proportions face shape eye spacing nose size lip shape. preserve original facial identity exactly, do not alter or beautify the face, photorealistic, 8k, no text no logos no watermarks, no face elongation no jaw enhancement no face slimming';
+  const face = 'CRITICAL INSTRUCTION: preserve the EXACT original face from the reference photo. Do NOT modify eyes, do NOT add double eyelids, do NOT change eye shape or eye size. Keep the exact same nose, lips, jaw shape, face proportions unchanged. Do NOT beautify, do NOT slim the face, do NOT enhance jawline. The face must be identical to the input photo. photorealistic 8k quality. Do NOT add any text, logos, or watermarks. Do NOT create deformed hands or extra fingers. Keep clean elegant clothing with no distortion or melting textures';
 
   const outfitLock = DYNAMIC_CONCEPTS.has(concept) ? 'MUST keep absolutely identical outfit from first shot, same fabric same color same accessories same shoes same hairstyle, do not change any clothing detail' : 'keep identical outfit, hairstyle, accessories from first shot';
 
@@ -770,7 +770,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     const rawInputUrls = pack.inputUrls as string[];
     const inputUrlsArr = rawInputUrls.map((url: string) => {
       if (url.includes('cloudinary.com') && url.includes('/upload/')) {
-        return url.replace('/upload/', '/upload/c_fill,ar_2:3,g_face,w_768,h_1152/');
+        return url.replace('/upload/', '/upload/c_fill,ar_3:4,g_face,w_900,h_1200/');
       }
       return url;
     });
@@ -811,7 +811,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
           method: 'POST',
-          body: JSON.stringify({ prompt, image_urls: imageUrls, negative_prompt: negativePrompt, strength: getShotStrength(effectiveMode, pack.concept, shotIdx), num_images: 1, image_size: { width: 768, height: 1152 } }),
+          body: JSON.stringify({ prompt, image_urls: imageUrls, num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
         });
 
         console.log('[snapPack fal response]', JSON.stringify(submit).slice(0, 300));
@@ -973,7 +973,7 @@ router.get('/snap/:id', authMiddleware, async (req, res) => {
                 const retryPack = await prisma.snapPack.findUnique({ where: { id: snap.snapPackId! } });
                 const retrySubmit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
                   method: 'POST',
-                  body: JSON.stringify({ prompt: snap.prompt, image_urls: snap.inputUrls as string[], negative_prompt: 'nsfw, nude, deformed, ugly, bad anatomy, watermark, text, logo, cartoon, anime, illustration, painting, drawing, double eyelid surgery, plastic surgery, cosmetic surgery, jaw reduction, v-line surgery, face slimming', strength: 0.20, num_images: 1, image_size: { width: 768, height: 1152 } }),
+                  body: JSON.stringify({ prompt: snap.prompt, image_urls: snap.inputUrls as string[], num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
                 });
                 if (retrySubmit.status_url) {
                   await prisma.aiSnap.update({ where: { id: snap.id }, data: { statusUrl: retrySubmit.status_url, responseUrl: retrySubmit.response_url } });

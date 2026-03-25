@@ -39,6 +39,7 @@ export default function AdminLayout() {
     { to: '/admin/guides', icon: PlayCircle, label: '가이드', end: false },
     { to: '/admin/highlight-videos', icon: Film, label: '하이라이트', end: false },
     { to: '/admin/prewedding-videos', icon: Film, label: '식전영상 관리', end: false },
+    { to: '/admin/video-gifts', icon: Gift, label: '영상 선물', end: false },
     { to: '/admin/theme-showcase', icon: Palette, label: '테마', end: false },
     { to: '/admin/contents', icon: FileText, label: '콘텐츠', end: false },
     { to: '/admin/inquiries', icon: MessageSquare, label: '문의', end: false },

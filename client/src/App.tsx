@@ -1,4 +1,6 @@
 import PreweddingVideo from './pages/PreweddingVideo';
+import PreweddingVideoGift from './pages/PreweddingVideoGift';
+import PreweddingVideoGiftCallback from './pages/PreweddingVideoGiftCallback';
 import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import usePageTracking from './hooks/usePageTracking';
@@ -25,6 +27,7 @@ import AdminWeddingList from './pages/admin/AdminWeddingList';
 import AdminGuides from "./pages/admin/AdminGuides";
 import AdminHighlightVideos from "./pages/admin/AdminHighlightVideos";
 import AdminPreweddingVideos from "./pages/admin/AdminPreweddingVideos";
+import AdminVideoGifts from "./pages/admin/AdminVideoGifts";
 import AdminThemeShowcase from "./pages/admin/AdminThemeShowcase";
 import AdminShowcase from "./components/admin/AdminShowcase";
 import AdminWeddingCreate from './pages/admin/AdminWeddingCreate';
@@ -103,6 +106,8 @@ export default function App() {
       <Route path="/prewedding-video" element={<PreweddingVideo />} />
       <Route path="/prewedding-video/success" element={<PreweddingVideo />} />
       <Route path="/prewedding-video/fail" element={<PreweddingVideo />} />
+      <Route path="/prewedding-video/gift" element={<PreweddingVideoGift />} />
+      <Route path="/prewedding-video/gift/callback" element={<PreweddingVideoGiftCallback />} />
       <Route path="/ai-snap/gift/callback" element={<AiSnapGiftCallback />} />
       <Route path="/oauth/callback" element={<OAuthCallback />} />
       <Route path="/w/:slug" element={<WeddingPage />} />
@@ -144,6 +149,7 @@ export default function App() {
         <Route path="guides" element={<AdminGuides />} />
             <Route path="highlight-videos" element={<AdminHighlightVideos />} />
             <Route path="prewedding-videos" element={<AdminPreweddingVideos />} />
+            <Route path="video-gifts" element={<AdminVideoGifts />} />
         <Route path="theme-showcase" element={<AdminThemeShowcase />} />
         <Route path="showcase" element={<AdminShowcase />} />
               <Route path="bg-music" element={<AdminBgMusic />} />

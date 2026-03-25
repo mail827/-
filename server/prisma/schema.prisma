@@ -20,6 +20,8 @@ model User {
   aiSnaps       AiSnap[]
   snapGiftsSent     SnapGift[] @relation("SnapGiftsSent")
   snapGiftsReceived SnapGift[] @relation("SnapGiftsReceived")
+  videoGiftsSent     VideoGift[] @relation("VideoGiftsSent")
+  videoGiftsReceived VideoGift[] @relation("VideoGiftsReceived")
   phone         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -622,6 +624,7 @@ model PreweddingVideo {
   wedding       Wedding? @relation(fields: [weddingId], references: [id])
   status        String   @default("PENDING")
   templateId    String   @default("classic_film")
+  mode          String   @default("photo")
   groomName     String
   brideName     String
   weddingDate   String?
@@ -632,6 +635,13 @@ model PreweddingVideo {
   bgmId         String?
   bgmUrl        String?
   fontId        String   @default("BMJUA_ttf")
+  subtitleStyle String   @default("poetic")
+  venueName     String   @default("")
+  groomFather   String   @default("")
+  groomMother   String   @default("")
+  brideFather   String   @default("")
+  brideMother   String   @default("")
+  endingMessage  String   @default("")
   subtitles     Json?
   clipUrls      Json?
   outputUrl     String?
@@ -650,4 +660,25 @@ model PreweddingVideo {
   @@index([userId])
   @@index([status])
   @@index([orderId])
+}
+
+model VideoGift {
+  id         String    @id @default(cuid())
+  code       String    @unique
+  tier       String
+  fromUserId String?
+  fromUser   User?     @relation("VideoGiftsSent", fields: [fromUserId], references: [id])
+  toEmail    String?
+  toPhone    String?
+  toUserId   String?
+  toUser     User?     @relation("VideoGiftsReceived", fields: [toUserId], references: [id])
+  message    String?
+  isFree     Boolean   @default(false)
+  isRedeemed Boolean   @default(false)
+  redeemedAt DateTime?
+  expiresAt  DateTime
+  paymentKey String?
+  orderId    String?   @unique
+  amount     Int       @default(0)
+  createdAt  DateTime  @default(now())
 }

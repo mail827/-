@@ -154,13 +154,13 @@ router.post('/:slug/ai-booth', async (req, res) => {
     const prompt = concepts[concept] || concepts.gala;
 
     const cropUrl = imageUrl.includes('cloudinary.com') && imageUrl.includes('/upload/')
-      ? imageUrl.replace('/upload/', '/upload/c_fill,ar_2:3,g_face,w_768,h_1152/')
+      ? imageUrl.replace('/upload/', '/upload/c_fill,ar_3:4,g_face,w_900,h_1200/')
       : imageUrl;
 
     const falRes = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Key ' + FAL_API_KEY },
-      body: JSON.stringify({ prompt, image_urls: [cropUrl], strength: 0.20, num_images: 1, image_size: { width: 768, height: 1152 }, negative_prompt: NEGATIVE }),
+      body: JSON.stringify({ prompt, image_urls: [cropUrl], num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
     });
     const falData = await falRes.json();
 
