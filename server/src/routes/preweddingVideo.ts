@@ -40,7 +40,7 @@ const SELFIE_CONCEPTS: { id: string; prompt: string; subScenes?: string[] }[] = 
   { id: 'cruise_bluesky', prompt: 'place this person on a luxury cruise ship deck under vivid blue sky, crystal clear ocean stretching to horizon, bright natural daylight, clean nautical atmosphere, photorealistic, 8k' },
   { id: 'vintage_record', prompt: 'place this person in a cozy vintage vinyl record shop, surrounded by wooden shelves filled with LP records, warm tungsten incandescent bulb lighting, intimate nostalgic 1970s atmosphere, Kodak Portra 400 warm film tones, photorealistic, 8k' },
   { id: 'retro_hongkong', prompt: 'place this person walking in Hong Kong Mong Kok night market with red lanterns overhead, neon signs with Chinese characters, rain-slicked street reflecting red and amber lights, Wong Kar-wai cinematic grading, Fuji Superia 400 grain, photorealistic, 8k' },
-  { id: 'black_swan', prompt: 'place this person on a grand empty theater stage, vast dark auditorium with rows of empty red velvet seats in deep shadow behind, single harsh overhead spotlight beam cutting through darkness illuminating only the subject, black glossy stage floor reflecting the light, heavy black curtain wings on sides, intense dramatic atmosphere inspired by the film Black Swan, high contrast chiaroscuro, photorealistic, 8k' },
+  { id: 'black_swan', prompt: 'place this person inside a vast dark gothic cathedral with towering pointed arches and deep blue-tinted stained glass windows casting cold blue light, dark stone pillars and vaulted ceiling fading into shadow, polished black marble floor reflecting the subject like a still lake surface creating a mirror image, misty blue atmosphere with faint light rays through windows, ethereal dark romantic mood, photorealistic, 8k' },
   { id: 'velvet_rouge', prompt: 'place this person in a dark opulent colonial-era mansion library inspired by the film The Handmaiden, floor-to-ceiling dark wooden bookshelves filled with leather-bound books, deep crimson red velvet curtains and chaise longue, ornate Victorian-Japanese hybrid interior with dark lacquered wood and brass fixtures, warm dim candlelight casting long dramatic shadows, rich burgundy and dark mahogany color palette with gold accents, decadent mysterious aristocratic atmosphere, photorealistic, 8k', subScenes: ['place this person in a dark grand library with floor-to-ceiling wooden bookshelves and leather-bound books, crimson velvet curtains, warm candlelight, dark mahogany and gold, aristocratic atmosphere, photorealistic, 8k', 'place this person in a dimly lit Victorian-Japanese drawing room with ornate dark lacquered screen panels, deep red velvet sofa, brass candelabra casting warm shadows, rich burgundy and black, photorealistic, 8k', 'place this person standing in a dark hallway of an old mansion, long Persian carpet runner, oil paintings on walls, single warm gas lamp light, mysterious gothic atmosphere, photorealistic, 8k', 'place this person in an opulent bathroom with dark marble and brass fixtures, large ornate mirror, warm candlelight reflecting off dark surfaces, decadent Victorian atmosphere, photorealistic, 8k', 'place this person seated at a dark wooden vanity table with ornate mirror, warm amber lamplight, scattered jewelry and perfume bottles, intimate private chamber atmosphere, photorealistic, 8k', 'place this person in a grand dark staircase of a colonial mansion, ornate wooden banister, warm light from above casting dramatic shadows, mysterious elegant atmosphere, photorealistic, 8k', 'place this person in a moonlit conservatory with dark tropical plants, glass ceiling showing night sky, warm candle glow, mysterious romantic garden room, photorealistic, 8k'] },
   { id: 'water_memory', prompt: 'place this person sitting alone in a dimly lit vintage 1960s movie theater with dark red velvet seats, soft warm projector light on face from screen, empty theater, melancholic romantic mood, photorealistic, 8k', subScenes: ['place this person sitting alone in a dimly lit vintage 1960s movie theater with dark red velvet seats, soft warm projector light on face from screen, empty theater, melancholic romantic mood, photorealistic, 8k', 'place this person standing in the aisle of an empty old movie theater, warm projector beam visible in dusty air, dark red velvet seats on both sides, golden light from screen illuminating silhouette, nostalgic cinematic atmosphere, photorealistic, 8k', 'place this person walking on a rain-soaked city street at night, wet asphalt reflecting green and amber street lights, light drizzle falling, dark moody cinematic atmosphere, photorealistic, 8k', 'place this person standing by a rain-streaked window at night, city lights blurred through wet glass creating bokeh, dark interior with warm amber lamp on face, contemplative mood, photorealistic, 8k', 'place this person in a dimly lit vintage kitchen with turquoise green tile walls, warm pendant light overhead, rain visible through small window, cozy 1960s apartment, photorealistic, 8k', 'place this person fully submerged underwater, hair floating weightlessly, air bubbles rising, caustic light rays from surface above, deep teal water, professional underwater photography, photorealistic, 8k', 'place this person fully submerged underwater close to another person, hair intertwining in water, air bubbles between them, god rays from above, deep teal romantic underwater scene, photorealistic, 8k'] },
   { id: 'blue_hour', prompt: 'place this person during blue hour twilight, deep cobalt sky with last warm light on horizon, city silhouette in background, cinematic blue-orange contrast, photorealistic, 8k' },
@@ -643,7 +643,7 @@ function decideTier(photoType: string, phase: string): 'premium' | 'budget' {
 
 async function generateKlingClip(photoUrl: string, prompt: string, duration: number) {
   try {
-    const result = await fetch('https://queue.fal.run/fal-ai/kling-video/v3/standard/image-to-video', {
+    const result = await fetch('https://queue.fal.run/fal-ai/kling-video/v3/pro/image-to-video', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Key ' + FAL_API_KEY },
       body: JSON.stringify({
@@ -666,8 +666,8 @@ async function generateKlingClip(photoUrl: string, prompt: string, duration: num
     if (!requestId) { console.error('[Kling] no request_id:', JSON.stringify(data).slice(0, 300)); return null; }
     console.log('[Kling] request_id:', requestId, 'status_url:', statusUrl);
 
-    const pollUrl = statusUrl || ('https://queue.fal.run/fal-ai/kling-video/v3/standard/image-to-video/requests/' + requestId + '/status');
-    const resultUrl = responseUrl || ('https://queue.fal.run/fal-ai/kling-video/v3/standard/image-to-video/requests/' + requestId);
+    const pollUrl = statusUrl || ('https://queue.fal.run/fal-ai/kling-video/v3/pro/image-to-video/requests/' + requestId + '/status');
+    const resultUrl = responseUrl || ('https://queue.fal.run/fal-ai/kling-video/v3/pro/image-to-video/requests/' + requestId);
 
     for (let i = 0; i < 60; i++) {
       await new Promise(r => setTimeout(r, 5000));
@@ -711,7 +711,7 @@ async function generatePiAPISeedance2Clip(photoUrl: string, prompt: string, dura
         model: 'seedance',
         task_type: model,
         input: {
-          prompt: 'The person in @image1 ' + prompt + '. Cinematic shallow depth of field, natural movement, no morphing, no face distortion, preserve original appearance.',
+          prompt: prompt,
           image_urls: [photoUrl],
           duration,
           aspect_ratio: '16:9',
@@ -737,6 +737,37 @@ async function generatePiAPISeedance2Clip(photoUrl: string, prompt: string, dura
     console.error('[SD2] timeout after 90 polls');
     return null;
   } catch (e: any) { console.error('[SD2] fatal:', e.message); return null; }
+}
+
+
+async function removePiAPIWatermark(videoUrl: string): Promise<string | null> {
+  if (!PIAPI_KEY) return videoUrl;
+  try {
+    const res = await fetch('https://api.piapi.ai/api/v1/task', {
+      method: 'POST',
+      headers: { 'X-API-Key': PIAPI_KEY!, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'seedance', task_type: 'remove-watermark', input: { video_url: videoUrl } }),
+    });
+    const data = await res.json();
+    if (data.code !== 200) { console.error('[WM] submit failed:', data.message); return videoUrl; }
+    const taskId = data.data?.task_id;
+    if (!taskId) return videoUrl;
+    console.log('[WM] removing watermark:', taskId);
+    for (let i = 0; i < 60; i++) {
+      await new Promise(r => setTimeout(r, 5000));
+      try {
+        const poll = await fetch('https://api.piapi.ai/api/v1/task/' + taskId, { headers: { 'X-API-Key': PIAPI_KEY! } });
+        const pollData = await poll.json();
+        if (pollData.data?.status === 'completed') {
+          const cleanUrl = pollData.data?.output?.video || null;
+          console.log('[WM] done:', cleanUrl ? 'clean' : 'no url');
+          return cleanUrl || videoUrl;
+        }
+        if (pollData.data?.status === 'failed') { console.error('[WM] failed'); return videoUrl; }
+      } catch { continue; }
+    }
+    return videoUrl;
+  } catch (e: any) { console.error('[WM] error:', e.message); return videoUrl; }
 }
 
 async function generateSeedanceClip(photoUrl: string, prompt: string, duration: number) {
@@ -773,6 +804,83 @@ async function generateSeedanceClip(photoUrl: string, prompt: string, duration: 
     }
     return null;
   } catch (e: any) { console.error('[Seedance] fatal error:', e.message); return null; }
+}
+
+
+function buildSD2Prompt(photoType: string, camera: string, phase: string) {
+  const scenes: Record<string, string[]> = {
+    solo_male: [
+      'The man in @image1 walks forward with one hand in pocket, warm golden light, shallow depth of field, dreamy atmosphere',
+      'The man in @image1 standing confidently, gentle breeze in hair, soft side lighting, cinematic',
+      'The man in @image1 gazes into the distance, dramatic rim lighting, calm expression, slow push-in',
+      'The man in @image1 turns toward camera with a warm smile, soft golden backlight, intimate close-up',
+      'The man in @image1 leaning casually, arms crossed, soft ambient lighting, slow zoom out',
+      'The man in @image1 walking through the scene, looking over shoulder, cinematic tracking, warm tones',
+      'The man in @image1 standing still, wind in hair, soft diffused light, gentle slow motion',
+    ],
+    solo_female: [
+      'The woman in @image1 brushes hair behind her ear, warm morning light, soft focus, dreamy',
+      'The woman in @image1 walking gracefully, dress flowing in breeze, soft backlight, slow motion',
+      'The woman in @image1 turns to camera with a gentle smile, dramatic side lighting, intimate',
+      'The woman in @image1 looks down then lifts gaze, soft golden light, shallow depth of field',
+      'The woman in @image1 standing in profile, wind in hair, serene expression, rim lighting',
+      'The woman in @image1 walking slowly, looking over shoulder elegantly, cinematic dolly shot',
+      'The woman in @image1 standing still, gentle breeze, soft diffused light, dreamy atmosphere',
+    ],
+    couple: [
+      'The couple in @image1 walks hand in hand, soft morning light, slow dolly forward, dreamy atmosphere',
+      'The couple in @image1 standing close together, foreheads touching, warm golden hour backlight',
+      'The couple in @image1 walking arm in arm, looking at each other warmly, cinematic tracking shot',
+      'The couple in @image1 embracing gently, soft side lighting, intimate close-up, shallow depth of field',
+      'The couple in @image1 standing together looking into distance, warm backlight, slow zoom out',
+      'The couple in @image1 turns toward each other and smiles, cherry blossom petals falling, golden light',
+      'The couple in @image1 walking forward together toward camera, warm backlight, slow motion',
+    ],
+  };
+  const type = photoType.startsWith('solo_m') ? 'solo_male' : photoType.startsWith('solo_f') ? 'solo_female' : 'couple';
+  const list = scenes[type] || scenes.couple;
+  const phaseIdx: Record<string, number> = { intro: 0, rising: 1, building: 2, climax: 3, ending: 4 };
+  const idx = phaseIdx[phase] || 0;
+  return list[idx % list.length];
+}
+
+
+function buildSD15DirectPrompt(photoType: string, camera: string, phase: string, conceptId?: string) {
+  const groomScenes = [
+    'The man walks forward confidently, adjusting his jacket lapel, warm golden light, cinematic tracking shot, gentle breeze in hair',
+    'Close-up side profile, the man turns his head toward camera with a natural confident smile, soft golden rim lighting, shallow depth of field',
+    'The man stands with one hand in pocket, gazing into the distance, then slowly turns toward camera, cinematic push-in, warm light',
+    'Close-up, the man looks directly at camera with a warm gentle smile, natural eye blinks, soft ambient lighting',
+    'The man walks through the scene with relaxed confident stride, cinematic wide tracking shot, golden hour atmosphere',
+    'Medium close-up, the man adjusts his collar and smiles, soft diffused lighting, intimate cinematic feel',
+    'The man turns to look over his shoulder with a calm expression, dramatic backlight, cinematic slow motion',
+  ];
+
+  const brideScenes = [
+    'The woman walks gracefully, dress flowing in gentle breeze, soft backlight creating a halo effect, cinematic slow motion',
+    'Close-up, the woman brushes hair behind her ear and smiles gently, warm morning light, shallow depth of field, natural eye blinks',
+    'The woman turns slowly to face camera with a mysterious gentle smile, dramatic side lighting, hair moving softly in wind',
+    'Close-up profile, the woman looks down shyly then lifts her gaze with a warm expression, soft golden light',
+    'The woman walks slowly through the scene, looking around peacefully, cinematic tracking, dreamy atmosphere',
+    'The woman looks over her shoulder elegantly, soft rim lighting, wind gently moving her hair, cinematic',
+    'Close-up, the woman standing still with gentle wind in her hair, serene peaceful smile, warm diffused lighting',
+  ];
+
+  const coupleScenes = [
+    'The couple walks hand in hand, looking at each other warmly, soft golden hour light, cinematic tracking shot, gentle breeze',
+    'Close-up two shot, the couple faces each other with warm smiles, foreheads almost touching, intimate shallow depth of field',
+    'The couple walks arm in arm, she looks up at him and laughs naturally, gentle breeze, cinematic tracking',
+    'Close-up, the man whispers something and the woman smiles shyly, warm soft lighting, intimate moment',
+    'The couple embraces gently, warm golden backlight, cinematic slow motion, peaceful atmosphere',
+    'The couple stands close together gazing in the same direction then slowly turns to each other and smiles, warm light',
+    'Wide shot from behind, the couple walks away together hand in hand, warm golden backlight, cinematic ending',
+  ];
+
+  const type = photoType.startsWith('solo_m') ? 'groom' : photoType.startsWith('solo_f') ? 'bride' : 'couple';
+  const list = type === 'groom' ? groomScenes : type === 'bride' ? brideScenes : coupleScenes;
+  const phaseIdx: Record<string, number> = { intro: 0, rising: 1, building: 2, climax: 3, ending: 4 };
+  const idx = phaseIdx[phase] || 0;
+  return list[idx % list.length] + '. Cinematic shallow depth of field, natural body movement.';
 }
 
 function buildPrompt(photoType: string, camera: string, phase: string) {
@@ -917,11 +1025,17 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'kling')
 
     let gen: Promise<string | null>;
     if (videoEngine === 'seedance2') {
-      gen = generatePiAPISeedance2Clip(scene.photoUrl, prompt, scene.duration, 'seedance-2-preview');
+      const sd2prompt = buildSD2Prompt(scene.photoType, scene.camera, scene.phase);
+      gen = generatePiAPISeedance2Clip(scene.photoUrl, sd2prompt, scene.duration, 'seedance-2-preview').then(url => url ? removePiAPIWatermark(url) : null);
       totalCost += 0.75;
     } else if (videoEngine === 'seedance2-fast') {
-      gen = generatePiAPISeedance2Clip(scene.photoUrl, prompt, scene.duration, 'seedance-2-fast-preview');
+      const sd2prompt = buildSD2Prompt(scene.photoType, scene.camera, scene.phase);
+      gen = generatePiAPISeedance2Clip(scene.photoUrl, sd2prompt, scene.duration, 'seedance-2-fast-preview').then(url => url ? removePiAPIWatermark(url) : null);
       totalCost += 0.40;
+    } else if (videoEngine === 'seedance15-direct') {
+      const sd15prompt = buildSD15DirectPrompt(scene.photoType, scene.camera, scene.phase);
+      gen = generateSeedanceClip(scene.photoUrl, sd15prompt, scene.duration);
+      totalCost += 0.005;
     } else {
       gen = isPremium
         ? generateKlingClip(scene.photoUrl, prompt, scene.duration)
@@ -930,7 +1044,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'kling')
 
     return gen.then(url => {
       clipResults[si] = url || '';
-      console.log('[Pipeline] clip ' + (si + 1) + '/' + scenes.length + (url ? ' OK (' + (videoEngine.startsWith('seedance2') ? 'SD2.0' : isPremium ? 'Kling' : 'SD1.5') + ')' : ' FAILED'));
+      console.log('[Pipeline] clip ' + (si + 1) + '/' + scenes.length + (url ? ' OK (' + (videoEngine.startsWith('seedance2') ? 'SD2.0' : isPremium ? 'Kling Pro' : 'SD1.5') + ')' : ' FAILED'));
       return prisma.preweddingVideo.update({
         where: { id: videoId },
         data: { clipUrls: [...clipResults] },

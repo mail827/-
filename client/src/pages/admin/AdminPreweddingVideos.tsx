@@ -60,7 +60,7 @@ export default function AdminPreweddingVideos() {
   const [playingBgm, setPlayingBgm] = useState<string | null>(null);
   const [audioRef] = useState(new Audio());
   const [freeSubStyle, setFreeSubStyle] = useState('poetic');
-  const [freeEngine, setFreeEngine] = useState<'kling'|'seedance2'|'seedance2-fast'>('kling');
+  const [freeEngine, setFreeEngine] = useState<'kling'|'seedance2'|'seedance2-fast'|'seedance15-direct'>('kling');
   const [subStyles, setSubStyles] = useState<any[]>([]);
   const [freeBgm, setFreeBgm] = useState<any>(null);
   const [freeBgms, setFreeBgms] = useState<any[]>([]);
@@ -353,8 +353,7 @@ export default function AdminPreweddingVideos() {
             <div className="grid grid-cols-3 gap-2">
               {([
                 { id: 'kling' as const, name: 'Kling 3.0', desc: '현재 기본', cost: '~$0.55/clip' },
-                { id: 'seedance2-fast' as const, name: 'SD 2.0 Fast', desc: '실험용', cost: '~$0.40/clip' },
-                { id: 'seedance2' as const, name: 'SD 2.0 Preview', desc: '실험용 (고퀄)', cost: '~$0.75/clip' },
+                { id: 'seedance15-direct' as const, name: 'SD 1.5 Direct', desc: '셀카직접 (나노바나나 스킵)', cost: '~$0.005/clip' },
               ]).map(e => {
                 const isActive = freeEngine === e.id;
                 return (
