@@ -106,9 +106,9 @@ const ld = {
     freeCta: { ko: '무료 1장 체험하기', en: 'Try 1 Free Portrait' },
   },
   video: {
-    tag: { ko: 'PREMIUM ADD-ON', en: 'PREMIUM ADD-ON' },
-    h3: { ko: '식전 · 식중 영상 제작', en: 'Pre & Mid-Ceremony Video' },
-    desc: { ko: '자동화 엔진 위에 얹는 수제 옵션. 미술감독이 1:1로 편집합니다.', en: 'Handcrafted add-on. Art director edits 1-on-1.' },
+    tag: { ko: 'AI VIDEO', en: 'AI VIDEO' },
+    h3: { ko: 'AI 식전영상', en: 'AI Pre-Ceremony Video' },
+    desc: { ko: '사진만 올리면 AI가 식전영상을 자동으로 만들어드려요. 29,000원부터.', en: 'Upload photos, AI creates your pre-ceremony video automatically. From 29,000 KRW.' },
   },
   guide: {
     tag: { ko: 'HOW TO USE', en: 'HOW TO USE' },

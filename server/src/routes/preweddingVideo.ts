@@ -472,8 +472,9 @@ router.post('/admin/free-generate', authMiddleware, adminOnly, async (req: AuthR
   const userId = req.user!.id;
   const { groomName, brideName, weddingDate, metStory, photos, bgmUrl, fontId, venueName, groomFather, groomMother, brideFather, brideMother, mode, selfieConcepts, endingMessage, videoEngine } = req.body;
 
-  if (!groomName || !brideName || !photos?.length || photos.length < 3) {
-    return res.status(400).json({ error: '이름, 사진 3장 이상 필요' });
+  const freeMinPhotos = mode === 'selfie' ? 1 : 3;
+  if (!groomName || !brideName || !photos?.length || photos.length < freeMinPhotos) {
+    return res.status(400).json({ error: mode === 'selfie' ? '이름 + 셀카 1장 이상 필요' : '이름 + 사진 3장 이상 필요' });
   }
 
   const orderId = `PV-FREE-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -1258,10 +1259,11 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
 router.post('/create-with-gift', authMiddleware, async (req: any, res) => {
   const userId = req.user.id;
-  const { groomName, brideName, weddingDate, metStory, photos, bgmId, bgmUrl, fontId, subtitleStyle, giftCode, venueName, groomFather, groomMother, brideFather, brideMother, endingMessage } = req.body;
+  const { groomName, brideName, weddingDate, metStory, photos, bgmId, bgmUrl, fontId, subtitleStyle, giftCode, venueName, groomFather, groomMother, brideFather, brideMother, endingMessage, mode } = req.body;
 
-  if (!groomName || !brideName || !photos?.length || photos.length < 3) {
-    return res.status(400).json({ error: '이름, 사진 3장 이상 필요' });
+  const freeMinPhotos = mode === 'selfie' ? 1 : 3;
+  if (!groomName || !brideName || !photos?.length || photos.length < freeMinPhotos) {
+    return res.status(400).json({ error: mode === 'selfie' ? '이름 + 셀카 1장 이상 필요' : '이름 + 사진 3장 이상 필요' });
   }
   if (!giftCode) return res.status(400).json({ error: 'gift code required' });
 
