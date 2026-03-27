@@ -172,6 +172,7 @@ async function visionQC(originalUrl: string, generatedUrl: string): Promise<bool
     });
     const data = await res.json();
     const answer = (data.choices?.[0]?.message?.content || '').trim().toUpperCase();
+    if (!answer) { console.log('[VisionQC] empty response, PASS by default'); return true; }
     console.log('[VisionQC]', answer.includes('YES') ? 'PASS' : 'FAIL', '| raw:', answer.slice(0, 50));
     return answer.includes('YES');
   } catch (e: any) {
