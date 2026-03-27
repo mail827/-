@@ -1046,7 +1046,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
     console.log('[Pipeline] Selfie mode: generating glamour photos...');
     const gender = photoUrls.length >= 2 ? 'couple' as const : 'female' as const;
     const savedConcepts = (video.scenes as string[]) || undefined;
-    const glamourPhotos = await generateGlamourPhotos(photoUrls, gender, 7, savedConcepts);
+    const glamourPhotos = await generateGlamourPhotos(photoUrls, gender, 10, savedConcepts);
     if (glamourPhotos.length < 3) throw new Error('Glamour photo generation failed: only ' + glamourPhotos.length + ' photos');
     photoUrls = glamourPhotos;
     await prisma.preweddingVideo.update({ where: { id: videoId }, data: { photos: glamourPhotos } });
