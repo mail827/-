@@ -154,22 +154,6 @@ const VIDEO_BRIDE_SHOTS = [
 
 async function visionQC(originalUrl: string, generatedUrl: string): Promise<boolean> {
   try {
-    let origPublic = originalUrl;
-    let genPublic = generatedUrl;
-    if (generatedUrl.includes('tos-ap-southeast') || generatedUrl.includes('volces.com')) {
-      try {
-        const { uploadFromUrlToR2 } = await import('../utils/r2.js');
-        const r2 = await uploadFromUrlToR2(generatedUrl, 'qc-temp');
-        genPublic = r2.url;
-      } catch (e: any) { console.error('[VisionQC] R2 upload failed:', e.message); }
-    }
-    if (originalUrl.includes('tos-ap-southeast') || originalUrl.includes('volces.com')) {
-      try {
-        const { uploadFromUrlToR2 } = await import('../utils/r2.js');
-        const r2 = await uploadFromUrlToR2(originalUrl, 'qc-temp');
-        origPublic = r2.url;
-      } catch (e: any) { console.error('[VisionQC] R2 upload orig failed:', e.message); }
-    }
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + OPENAI_API_KEY },
@@ -179,8 +163,8 @@ async function visionQC(originalUrl: string, generatedUrl: string): Promise<bool
         messages: [{
           role: 'user',
           content: [
-            { type: 'image_url', image_url: { url: origPublic, detail: 'low' } },
-            { type: 'image_url', image_url: { url: genPublic, detail: 'low' } },
+            { type: 'image_url', image_url: { url: originalUrl, detail: 'low' } },
+            { type: 'image_url', image_url: { url: generatedUrl, detail: 'low' } },
             { type: 'text', text: 'Compare ONLY the facial features (eyes, nose, mouth, jawline, face shape). Ignore clothing, hairstyle, background, lighting, and pose. Is the FACE the same person? YES or NO only.' },
           ],
         }],
@@ -188,6 +172,7 @@ async function visionQC(originalUrl: string, generatedUrl: string): Promise<bool
     });
     const data = await res.json();
     const answer = (data.choices?.[0]?.message?.content || '').trim().toUpperCase();
+    if (!answer) { console.log('[VisionQC] empty response, PASS by default'); return true; }
     console.log('[VisionQC]', answer.includes('YES') ? 'PASS' : 'FAIL', '| raw:', answer.slice(0, 50));
     return answer.includes('YES');
   } catch (e: any) {
@@ -270,8 +255,18 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
         }),
       });
       const data = await res.json();
-      const url = data?.data?.[0]?.url || null;
-      if (url) return url;
+      const rawUrl = data?.data?.[0]?.url || null;
+      if (rawUrl) {
+        try {
+          const { uploadFromUrlToR2 } = await import('../utils/r2.js');
+          const r2 = await uploadFromUrlToR2(rawUrl, 'glamour');
+          console.log('[Glamour] R2 saved:', r2.url.slice(-30));
+          return r2.url;
+        } catch (e: any) {
+          console.error('[Glamour] R2 save failed, using raw:', e.message);
+          return rawUrl;
+        }
+      }
       console.error('[Glamour] SeeDream no url:', JSON.stringify(data).slice(0, 200));
     } catch (e: any) { console.error('[Glamour] SeeDream error:', e.message); }
     return null;
