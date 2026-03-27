@@ -224,53 +224,34 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
       : p.mode === 'groom' ? groomOutfit : brideOutfit;
 
     const prompt = [
-      'ONE single photograph only, NOT a collage, NOT split screen, NOT multiple frames, NOT diptych, ONE continuous single image',
       GLAMOUR_FACE,
       scene,
       outfitPrompt,
       shot,
+      'ONE single photograph only, NOT a collage, NOT split screen, NOT multiple frames',
       'natural relaxed body language, genuine expression, no kissing, no licking',
-      'MUST keep absolutely identical outfit from reference image, same fabric same color same accessories same hairstyle',
     ].join(', ');
 
-    const cropUrl = refUrls.map(u =>
-      u.includes('cloudinary.com') && u.includes('/upload/')
-        ? u.replace('/upload/', '/upload/c_fill,ar_3:4,g_face,w_900,h_1200/')
-        : u
-    );
+    const imageInput = refUrls.length === 1 ? refUrls[0] : refUrls;
 
     try {
-      const res = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit', {
+      const res = await fetch(ARK_BASE + '/images/generations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Key ' + FAL_API_KEY },
-        body: JSON.stringify({ prompt, image_urls: cropUrl, num_images: 1, aspect_ratio: '16:9', resolution: '2K', output_format: 'png' }),
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ARK_API_KEY },
+        body: JSON.stringify({
+          model: 'seedream-5-0-260128',
+          prompt,
+          image: imageInput,
+          size: '2K',
+          output_format: 'png',
+          watermark: false,
+        }),
       });
-      const data = JSON.parse(await res.text());
-
-      if (data.images?.[0]?.url) return data.images[0].url;
-
-      if (data.status_url) {
-        const start = Date.now();
-        while (Date.now() - start < 120000) {
-          await new Promise(r => setTimeout(r, 3000));
-          try {
-            const pollRes = await fetch(data.status_url, { headers: { 'Authorization': 'Key ' + FAL_API_KEY } });
-            const pollData = JSON.parse(await pollRes.text());
-            if (pollData.status === 'COMPLETED') {
-              for (let retry = 0; retry < 3; retry++) {
-                try {
-                  const resultRes = await fetch(data.response_url, { headers: { 'Authorization': 'Key ' + FAL_API_KEY } });
-                  const resultData = JSON.parse(await resultRes.text());
-                  if (resultData.images?.[0]?.url) return resultData.images[0].url;
-                } catch { await new Promise(r => setTimeout(r, 2000)); }
-              }
-              break;
-            }
-            if (pollData.status === 'FAILED') break;
-          } catch { continue; }
-        }
-      }
-    } catch (e: any) { console.error('[Glamour] error:', e.message); }
+      const data = await res.json();
+      const url = data?.data?.[0]?.url || null;
+      if (url) return url;
+      console.error('[Glamour] SeeDream no url:', JSON.stringify(data).slice(0, 200));
+    } catch (e: any) { console.error('[Glamour] SeeDream error:', e.message); }
     return null;
   }
 
