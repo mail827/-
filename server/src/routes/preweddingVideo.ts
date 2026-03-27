@@ -172,7 +172,7 @@ async function visionQC(originalUrl: string, generatedUrl: string): Promise<bool
     });
     const data = await res.json();
     const answer = (data.choices?.[0]?.message?.content || '').trim().toUpperCase();
-    console.log('[VisionQC]', answer.includes('YES') ? 'PASS' : 'FAIL');
+    console.log('[VisionQC]', answer.includes('YES') ? 'PASS' : 'FAIL', '| raw:', answer.slice(0, 50));
     return answer.includes('YES');
   } catch (e: any) {
     console.error('[VisionQC] error:', e.message);
