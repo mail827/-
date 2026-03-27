@@ -931,7 +931,7 @@ function buildSD15DirectPrompt(photoType: string, camera: string, phase: string,
     'Upper body shot, the man looking at camera with calm expression, soft side lighting, subtle head tilt',
     'Medium close-up, the man standing still, warm golden hour light, gentle wind, natural breathing',
     'Close-up portrait at eye level, the man with relaxed expression, soft ambient lighting, shallow depth of field',
-    'Medium shot, the man leaning slightly against a surface, composed posture, warm backlight',
+    'Medium shot, the man standing with hands clasped in front, composed posture, warm backlight',
     'Upper body, the man with slight natural smile, dramatic rim lighting, calm atmosphere',
     'Medium wide shot, the man standing in scene, face forward, golden hour, gentle breeze',
   ];
@@ -957,7 +957,7 @@ function buildSD15DirectPrompt(photoType: string, camera: string, phase: string,
   ];
 
   const listClean = type === 'groom' ? groomScenesClean : type === 'bride' ? brideScenesClean : coupleScenesClean;
-  return listClean[sceneIndex % listClean.length] + '. Camera MUST be at eye level, NOT from below, NOT low angle, NOT looking up. Cinematic shallow depth of field, natural body movement only, do NOT change facial expression, do NOT add smile, preserve exact original face.';
+  return listClean[sceneIndex % listClean.length] + '. Camera MUST be at eye level, NOT from below, NOT low angle, NOT looking up. Subject MUST face camera at all times, do NOT turn away, do NOT look over shoulder, do NOT show back of head, face MUST be visible in every frame. Cinematic shallow depth of field, minimal body movement only, do NOT change facial expression, do NOT add smile, preserve exact original face.';
 }
 
 function buildPrompt(photoType: string, camera: string, phase: string) {
@@ -1279,33 +1279,23 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
   if (endingPhotos.length >= 2) {
     try {
-      const slidePaths: string[] = [];
-      for (let ei = 0; ei < endingPhotos.length; ei++) {
-        const sp = path.join(tmpDir, 'eslide_' + ei + '.jpg');
+      const gridPaths: string[] = [];
+      for (let ei = 0; ei < Math.min(3, endingPhotos.length); ei++) {
+        const sp = path.join(tmpDir, 'egrid_' + ei + '.jpg');
         execSync('curl -sL -o "' + sp + '" "' + endingPhotos[ei] + '"', { timeout: 30000 });
-        slidePaths.push(sp);
+        gridPaths.push(sp);
       }
-      const sn = slidePaths.length;
-      const perPhoto = endingDur / sn;
-      const slideOut = path.join(tmpDir, 'slide.mp4');
+
       const bgBlurPath = path.join(tmpDir, 'ending_bg.mp4');
+      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + gridPaths[0] + '" -vf "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,boxblur=30,eq=brightness=-0.4" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 30000);
 
-      const slideInputs = slidePaths.map(p => '-loop 1 -t ' + perPhoto.toFixed(1) + ' -i "' + p + '"').join(' ');
-      const sf: string[] = [];
-      for (let si = 0; si < sn; si++) sf.push('[' + si + ':v]scale=440:620:force_original_aspect_ratio=decrease,pad=440:620:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24[sv' + si + ']');
-      let sc2 = '[sv0]';
-      let so = perPhoto;
-      for (let si = 1; si < sn; si++) {
-        const sxo = (so - 0.8).toFixed(1);
-        const sout = '[sxf' + si + ']';
-        sf.push(sc2 + '[sv' + si + ']xfade=transition=fade:duration=0.8:offset=' + sxo + sout);
-        sc2 = sout;
-        so = parseFloat(sxo) + perPhoto;
+      const gridImg = path.join(tmpDir, 'grid.png');
+      const gn = gridPaths.length;
+      if (gn >= 3) {
+        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -i "' + gridPaths[2] + '" -filter_complex "[0:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g1];[2:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g2];[g0][g1][g2]hstack=inputs=3[grid]" -map "[grid]" "' + gridImg + '"', 30000);
+      } else {
+        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -filter_complex "[0:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g1];[g0][g1]hstack=inputs=2[grid]" -map "[grid]" "' + gridImg + '"', 30000);
       }
-      sf.push(sc2 + 'trim=duration=' + endingDur + ',setpts=PTS-STARTPTS[slideout]');
-      await execAsync('ffmpeg -y -threads 2 ' + slideInputs + ' -filter_complex "' + sf.join(';') + '" -map "[slideout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an "' + slideOut + '"', 90000);
-
-      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + slidePaths[0] + '" -vf "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,boxblur=25,eq=brightness=-0.35" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 30000);
 
       const creditEsc = escapeDrawtext(creditLines.join('\n'));
       const fadeO = (endingDur - 1.5).toFixed(1);
@@ -1313,12 +1303,12 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
       const crFade = (endingDur - 1.7).toFixed(1);
       const spd = Math.max(50, Math.round(creditLines.length * 20 / endingDur + 40));
 
-      const endVf = "[0:v][1:v]overlay=60:(H-h)/2,drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=8:x=560:y=h-" + spd + "*t+300:enable='between(t\\," + '0.5' + "\\," + crEnd + ")':alpha='if(lt(t\\,1.2)\\,(t-0.5)/0.7\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
-      await execAsync('ffmpeg -y -threads 2 -i "' + bgBlurPath + '" -i "' + slideOut + '" -filter_complex "' + endVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOut + '"', 90000);
-      console.log('[Pipeline] Cinematic ending: ' + endingDur + 's, ' + sn + ' photos');
+      const endVf = "[0:v][1:v]overlay=(W-w)/2:50:enable='between(t\\,0.5\\," + crEnd + ")':alpha='if(lt(t\\,1.2)\\,(t-0.5)/0.7\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=8:x=(w-text_w)/2:y=380+h-" + spd + "*t+100:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
+      await execAsync('ffmpeg -y -threads 2 -i "' + bgBlurPath + '" -loop 1 -i "' + gridImg + '" -filter_complex "' + endVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOut + '"', 60000);
+      console.log('[Pipeline] Grid ending: ' + endingDur + 's, ' + gn + ' photos');
       endingCreated = true;
     } catch (e: any) {
-      console.error('[Pipeline] Cinematic ending failed:', e.message?.slice(0, 300));
+      console.error('[Pipeline] Grid ending failed:', e.message?.slice(0, 300));
     }
   }
 
@@ -1644,33 +1634,23 @@ async function assembleOnly(videoId: string) {
 
   if (endingPhotos.length >= 2) {
     try {
-      const slidePaths: string[] = [];
-      for (let ei = 0; ei < endingPhotos.length; ei++) {
-        const sp = path.join(tmpDir, 'eslide_' + ei + '.jpg');
+      const gridPaths: string[] = [];
+      for (let ei = 0; ei < Math.min(3, endingPhotos.length); ei++) {
+        const sp = path.join(tmpDir, 'egrid_' + ei + '.jpg');
         execSync('curl -sL -o "' + sp + '" "' + endingPhotos[ei] + '"', { timeout: 30000 });
-        slidePaths.push(sp);
+        gridPaths.push(sp);
       }
-      const sn = slidePaths.length;
-      const perPhoto = endingDur / sn;
-      const slideOut = path.join(tmpDir, 'slide.mp4');
+
       const bgBlurPath = path.join(tmpDir, 'ending_bg.mp4');
+      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + gridPaths[0] + '" -vf "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,boxblur=30,eq=brightness=-0.4" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 30000);
 
-      const slideInputs = slidePaths.map(p => '-loop 1 -t ' + perPhoto.toFixed(1) + ' -i "' + p + '"').join(' ');
-      const sf: string[] = [];
-      for (let si = 0; si < sn; si++) sf.push('[' + si + ':v]scale=440:620:force_original_aspect_ratio=decrease,pad=440:620:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24[sv' + si + ']');
-      let sc2 = '[sv0]';
-      let so = perPhoto;
-      for (let si = 1; si < sn; si++) {
-        const sxo = (so - 0.8).toFixed(1);
-        const sout = '[sxf' + si + ']';
-        sf.push(sc2 + '[sv' + si + ']xfade=transition=fade:duration=0.8:offset=' + sxo + sout);
-        sc2 = sout;
-        so = parseFloat(sxo) + perPhoto;
+      const gridImg = path.join(tmpDir, 'grid.png');
+      const gn = gridPaths.length;
+      if (gn >= 3) {
+        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -i "' + gridPaths[2] + '" -filter_complex "[0:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g1];[2:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g2];[g0][g1][g2]hstack=inputs=3[grid]" -map "[grid]" "' + gridImg + '"', 30000);
+      } else {
+        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -filter_complex "[0:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g1];[g0][g1]hstack=inputs=2[grid]" -map "[grid]" "' + gridImg + '"', 30000);
       }
-      sf.push(sc2 + 'trim=duration=' + endingDur + ',setpts=PTS-STARTPTS[slideout]');
-      await execAsync('ffmpeg -y -threads 2 ' + slideInputs + ' -filter_complex "' + sf.join(';') + '" -map "[slideout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an "' + slideOut + '"', 90000);
-
-      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + slidePaths[0] + '" -vf "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,boxblur=25,eq=brightness=-0.35" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 30000);
 
       const creditEsc = escapeDrawtext(creditLines.join('\n'));
       const fadeO = (endingDur - 1.5).toFixed(1);
@@ -1678,12 +1658,12 @@ async function assembleOnly(videoId: string) {
       const crFade = (endingDur - 1.7).toFixed(1);
       const spd = Math.max(50, Math.round(creditLines.length * 20 / endingDur + 40));
 
-      const endVf = "[0:v][1:v]overlay=60:(H-h)/2,drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=8:x=560:y=h-" + spd + "*t+300:enable='between(t\\," + '0.5' + "\\," + crEnd + ")':alpha='if(lt(t\\,1.2)\\,(t-0.5)/0.7\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
-      await execAsync('ffmpeg -y -threads 2 -i "' + bgBlurPath + '" -i "' + slideOut + '" -filter_complex "' + endVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOut + '"', 90000);
-      console.log('[Pipeline] Cinematic ending: ' + endingDur + 's, ' + sn + ' photos');
+      const endVf = "[0:v][1:v]overlay=(W-w)/2:50:enable='between(t\\,0.5\\," + crEnd + ")':alpha='if(lt(t\\,1.2)\\,(t-0.5)/0.7\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=8:x=(w-text_w)/2:y=380+h-" + spd + "*t+100:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
+      await execAsync('ffmpeg -y -threads 2 -i "' + bgBlurPath + '" -loop 1 -i "' + gridImg + '" -filter_complex "' + endVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOut + '"', 60000);
+      console.log('[Pipeline] Grid ending: ' + endingDur + 's, ' + gn + ' photos');
       endingCreated = true;
     } catch (e: any) {
-      console.error('[Pipeline] Cinematic ending failed:', e.message?.slice(0, 300));
+      console.error('[Pipeline] Grid ending failed:', e.message?.slice(0, 300));
     }
   }
 
