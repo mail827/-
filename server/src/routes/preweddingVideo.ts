@@ -1053,8 +1053,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
   await prisma.preweddingVideo.update({ where: { id: videoId }, data: { photoAnalysis: analyses, subtitles } });
 
-  console.log('[Pipeline] Starting opening clip generation...');
-  const openingPromise = generateOpeningClip(4);
+
 
   const template = [
     { phase: 'intro', camera: 'zoom_out', duration: 5 },
@@ -1136,8 +1135,6 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
     return;
   }
 
-  const openingUrl = await openingPromise;
-  console.log('[Pipeline] Opening:', openingUrl ? 'ready' : 'failed (will use black)');
 
   await prisma.preweddingVideo.update({
     where: { id: videoId },
@@ -1179,32 +1176,28 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
   const fontPath = getFontPath(video.fontId || 'BMJUA_ttf');
 
-  // === STEP A: Build opening.mp4 ===
+  // === STEP A: Build opening.mp4 (intro_raw + names overlay) ===
   const openingOut = path.join(tmpDir, 'opening_final.mp4');
-  if (openingUrl) {
-    const openingRaw = path.join(tmpDir, 'opening_raw.mp4');
+  const introSrc = '/app/assets/intro_raw.mp4';
+  const nameFont = '/app/fonts/ChosunNm.ttf';
+  const ampFont = '/app/fonts/GreatVibes-Regular.ttf';
+  const gName = escapeDrawtext(video.groomName);
+  const bName = escapeDrawtext(video.brideName);
+  const wDate = escapeDrawtext(video.weddingDate || '');
+  try {
+    const dtGroom = ",drawtext=fontfile='" + nameFont + "':text='" + gName + "':fontsize=38:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)-50:enable='between(t\\,0.5\\,4.5)':alpha='if(lt(t\\,1.0)\\,(t-0.5)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
+    const dtAmp = ",drawtext=fontfile='" + ampFont + "':text='&':fontsize=30:fontcolor=white@0.7:x=(w-text_w)/2:y=(h/2)-5:enable='between(t\\,1.0\\,4.5)':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
+    const dtBride = ",drawtext=fontfile='" + nameFont + "':text='" + bName + "':fontsize=38:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)+35:enable='between(t\\,1.3\\,4.5)':alpha='if(lt(t\\,1.8)\\,(t-1.3)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
+    const dtDate = wDate ? ",drawtext=fontfile='" + nameFont + "':text='" + wDate + "':fontsize=20:fontcolor=white@0.7:x=(w-text_w)/2:y=(h/2)+85:enable='between(t\\,1.8\\,4.5)':alpha='if(lt(t\\,2.3)\\,(t-1.8)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'" : '';
+    const introVf = "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24" + dtGroom + dtAmp + dtBride + dtDate + ",fade=t=in:st=0:d=1.0,fade=t=out:st=4.0:d=1.0";
+    await execAsync('ffmpeg -y -threads 2 -i "' + introSrc + '" -vf "' + introVf + '" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t 5 "' + openingOut + '"', 120000);
+    console.log('[Pipeline] Cinematic intro with names created');
+  } catch (e: any) {
+    console.error('[Pipeline] Intro overlay failed:', e.message?.slice(0, 200));
     try {
-      execSync('curl -sL -o "' + openingRaw + '" "' + openingUrl + '"', { timeout: 120000 });
-      const titleText = escapeDrawtext('\uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4');
-      await execAsync("ffmpeg -y -threads 2 -i \"" + openingRaw + "\" -vf \"scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24,drawtext=fontfile='" + fontPath + "':text='" + titleText + "':fontsize=28:fontcolor=white@0.95:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,0.8,3.2)':alpha='if(lt(t,1.4),(t-0.8)/0.6,if(gt(t,2.6),(3.2-t)/0.6,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=2.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t 4 \"" + openingOut + "\"", 120000);
-      console.log('[Pipeline] Opening with title created');
-    } catch (e: any) {
-      console.error('[Pipeline] Opening overlay failed:', e.message?.slice(0, 200));
-      try {
-        await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=black:s=1280x720:d=4:r=24 -vf \"drawtext=fontfile='" + fontPath + "':text='" + escapeDrawtext('\uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4') + "':fontsize=28:fontcolor=white@0.95:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,0.8,3.2)':alpha='if(lt(t,1.4),(t-0.8)/0.6,if(gt(t,2.6),(3.2-t)/0.6,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=2.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 4 \"" + openingOut + "\"", 30000);
-      } catch {}
-    }
-  } else {
-    try {
-      await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=black:s=1280x720:d=4:r=24 -vf \"drawtext=fontfile='" + fontPath + "':text='" + escapeDrawtext('\uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4') + "':fontsize=28:fontcolor=white@0.95:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,0.8,3.2)':alpha='if(lt(t,1.4),(t-0.8)/0.6,if(gt(t,2.6),(3.2-t)/0.6,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=2.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 4 \"" + openingOut + "\"", 30000);
-      console.log('[Pipeline] Black opening with title created');
-    } catch (e: any) {
-      console.error('[Pipeline] Black opening failed:', e.message?.slice(0, 200));
-      try {
-        await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=black:s=1280x720:d=4:r=24 -vf \"fade=t=in:st=0:d=1.5,fade=t=out:st=2.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 4 \"" + openingOut + "\"", 30000);
-        console.log('[Pipeline] Plain black opening fallback created');
-      } catch (e2: any) { console.error('[Pipeline] Even plain black failed:', e2.message?.slice(0, 200)); }
-    }
+      await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=black:s=1280x720:d=5:r=24 -vf \"drawtext=fontfile='" + nameFont + "':text='" + gName + " & " + bName + "':fontsize=36:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2):enable='between(t,0.5,4.0)':alpha='if(lt(t,1.0),(t-0.5)/0.5,if(gt(t,3.5),(4.0-t)/0.5,1))',fade=t=in:st=0:d=1,fade=t=out:st=3.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 5 \"" + openingOut + "\"", 30000);
+      console.log('[Pipeline] Black intro fallback');
+    } catch { console.error('[Pipeline] Intro fallback failed'); }
   }
 
   // === STEP B: Build main.mp4 ===
@@ -1263,18 +1256,73 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
     return;
   }
 
-  // === STEP C: Build ending.mp4 ===
+  // === STEP C: Build ending.mp4 (cinematic photo slide + credits) ===
   const endingOut = path.join(tmpDir, 'ending_final.mp4');
   const v = video as any;
   const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '');
-  const creditText = escapeDrawtext(creditLines.join('\n'));
-  const madeByText = escapeDrawtext('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4');
-  try {
-    await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=black:s=1280x720:d=8:r=24 -vf \"drawtext=fontfile='" + fontPath + "':text='" + creditText + "':fontsize=22:fontcolor=white@0.9:x=(w-text_w)/2:y=h-80*t+200:enable='between(t,0.5,7.0)':alpha='if(lt(t,1.2),(t-0.5)/0.7,if(gt(t,6.3),(7.0-t)/0.7,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=6.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 8 \"" + endingOut + "\"", 60000);
-    console.log('[Pipeline] Ending credits created');
-  } catch (e: any) {
-    console.error('[Pipeline] Ending failed:', e.message?.slice(0, 200));
+  const endingPhotos = (video.photos as string[]).filter(Boolean).slice(0, 6);
+  const endingDur = Math.max(8, Math.min(14, creditLines.length * 1.5));
+  let endingCreated = false;
+
+  if (endingPhotos.length >= 2) {
+    try {
+      const slidePaths: string[] = [];
+      for (let ei = 0; ei < endingPhotos.length; ei++) {
+        const sp = path.join(tmpDir, 'eslide_' + ei + '.jpg');
+        execSync('curl -sL -o "' + sp + '" "' + endingPhotos[ei] + '"', { timeout: 30000 });
+        slidePaths.push(sp);
+      }
+      const sn = slidePaths.length;
+      const perPhoto = endingDur / sn;
+      const slideOut = path.join(tmpDir, 'slide.mp4');
+      const bgBlurPath = path.join(tmpDir, 'ending_bg.mp4');
+
+      const slideInputs = slidePaths.map(p => '-loop 1 -t ' + perPhoto.toFixed(1) + ' -i "' + p + '"').join(' ');
+      const sf: string[] = [];
+      for (let si = 0; si < sn; si++) sf.push('[' + si + ':v]scale=440:620:force_original_aspect_ratio=decrease,pad=440:620:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24[sv' + si + ']');
+      let sc2 = '[sv0]';
+      let so = perPhoto;
+      for (let si = 1; si < sn; si++) {
+        const sxo = (so - 0.8).toFixed(1);
+        const sout = '[sxf' + si + ']';
+        sf.push(sc2 + '[sv' + si + ']xfade=transition=fade:duration=0.8:offset=' + sxo + sout);
+        sc2 = sout;
+        so = parseFloat(sxo) + perPhoto;
+      }
+      sf.push(sc2 + 'trim=duration=' + endingDur + ',setpts=PTS-STARTPTS[slideout]');
+      await execAsync('ffmpeg -y -threads 2 ' + slideInputs + ' -filter_complex "' + sf.join(';') + '" -map "[slideout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an "' + slideOut + '"', 90000);
+
+      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + slidePaths[0] + '" -vf "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,boxblur=25,eq=brightness=-0.35" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 30000);
+
+      const creditEsc = escapeDrawtext(creditLines.join('\n'));
+      const fadeO = (endingDur - 1.5).toFixed(1);
+      const crEnd = (endingDur - 1.0).toFixed(1);
+      const crFade = (endingDur - 1.7).toFixed(1);
+      const spd = Math.max(50, Math.round(creditLines.length * 20 / endingDur + 40));
+
+      const endVf = "[0:v][1:v]overlay=60:(H-h)/2,drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=8:x=560:y=h-" + spd + "*t+300:enable='between(t\\," + '0.5' + "\\," + crEnd + ")':alpha='if(lt(t\\,1.2)\\,(t-0.5)/0.7\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
+      await execAsync('ffmpeg -y -threads 2 -i "' + bgBlurPath + '" -i "' + slideOut + '" -filter_complex "' + endVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOut + '"', 90000);
+      console.log('[Pipeline] Cinematic ending: ' + endingDur + 's, ' + sn + ' photos');
+      endingCreated = true;
+    } catch (e: any) {
+      console.error('[Pipeline] Cinematic ending failed:', e.message?.slice(0, 300));
+    }
   }
+
+  if (!endingCreated) {
+    try {
+      const creditEscS = escapeDrawtext(creditLines.join('\n'));
+      const fadeOS = (endingDur - 1.5).toFixed(1);
+      const crEndS = (endingDur - 1.0).toFixed(1);
+      const crFadeS = (endingDur - 1.7).toFixed(1);
+      const spdS = Math.max(50, Math.round(creditLines.length * 20 / endingDur + 40));
+      await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=0x0a0a0a:s=1280x720:d=" + endingDur + ":r=24 -vf \"drawtext=fontfile='" + fontPath + "':text='" + creditEscS + "':fontsize=22:fontcolor=white@0.9:x=(w-text_w)/2:y=h-" + spdS + "*t+200:enable='between(t\\," + '0.5' + "\\," + crEndS + ")':alpha='if(lt(t\\,1.2)\\,(t-0.5)/0.7\\,if(gt(t\\," + crFadeS + ")\\,(" + crEndS + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeOS + ":d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t " + endingDur + " \"" + endingOut + "\"", 60000);
+      console.log('[Pipeline] Simple ending fallback');
+    } catch (e: any) {
+      console.error('[Pipeline] Ending failed:', e.message?.slice(0, 200));
+    }
+  }
+
 
   // === STEP D: Concat ===
   const concatParts: string[] = [];
@@ -1286,7 +1334,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
   fs.writeFileSync(concatList, concatParts.map(p => "file '" + p + "'").join('\n'));
 
   const hasAudio = bgmPath && fs.existsSync(bgmPath);
-  const totalDuration = (fs.existsSync(openingOut) ? 4 : 0) + mainDuration + (fs.existsSync(endingOut) ? 8 : 0);
+  const totalDuration = (fs.existsSync(openingOut) ? 5 : 0) + mainDuration + (fs.existsSync(endingOut) ? endingDur : 0);
   const outputPath = path.join(tmpDir, 'output.mp4');
 
   let concatCmd: string;
@@ -1467,28 +1515,28 @@ async function assembleOnly(videoId: string) {
 
   const fontPath = getFontPath(video.fontId || 'BMJUA_ttf');
 
-  // === STEP A: Build opening.mp4 ===
+  // === STEP A: Build opening.mp4 (intro_raw + names overlay) ===
   const openingOut = path.join(tmpDir, 'opening_final.mp4');
-  const openingUrl: string | null = null;
-  if (openingUrl) {
-    const openingRaw = path.join(tmpDir, 'opening_raw.mp4');
+  const introSrc = '/app/assets/intro_raw.mp4';
+  const nameFont = '/app/fonts/ChosunNm.ttf';
+  const ampFont = '/app/fonts/GreatVibes-Regular.ttf';
+  const gName = escapeDrawtext(video.groomName);
+  const bName = escapeDrawtext(video.brideName);
+  const wDate = escapeDrawtext(video.weddingDate || '');
+  try {
+    const dtGroom = ",drawtext=fontfile='" + nameFont + "':text='" + gName + "':fontsize=38:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)-50:enable='between(t\\,0.5\\,4.5)':alpha='if(lt(t\\,1.0)\\,(t-0.5)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
+    const dtAmp = ",drawtext=fontfile='" + ampFont + "':text='&':fontsize=30:fontcolor=white@0.7:x=(w-text_w)/2:y=(h/2)-5:enable='between(t\\,1.0\\,4.5)':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
+    const dtBride = ",drawtext=fontfile='" + nameFont + "':text='" + bName + "':fontsize=38:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)+35:enable='between(t\\,1.3\\,4.5)':alpha='if(lt(t\\,1.8)\\,(t-1.3)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
+    const dtDate = wDate ? ",drawtext=fontfile='" + nameFont + "':text='" + wDate + "':fontsize=20:fontcolor=white@0.7:x=(w-text_w)/2:y=(h/2)+85:enable='between(t\\,1.8\\,4.5)':alpha='if(lt(t\\,2.3)\\,(t-1.8)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'" : '';
+    const introVf = "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24" + dtGroom + dtAmp + dtBride + dtDate + ",fade=t=in:st=0:d=1.0,fade=t=out:st=4.0:d=1.0";
+    await execAsync('ffmpeg -y -threads 2 -i "' + introSrc + '" -vf "' + introVf + '" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t 5 "' + openingOut + '"', 120000);
+    console.log('[Pipeline] Cinematic intro with names created');
+  } catch (e: any) {
+    console.error('[Pipeline] Intro overlay failed:', e.message?.slice(0, 200));
     try {
-      execSync('curl -sL -o "' + openingRaw + '" "' + openingUrl + '"', { timeout: 120000 });
-      const titleText = escapeDrawtext('\uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4');
-      await execAsync("ffmpeg -y -threads 2 -i \"" + openingRaw + "\" -vf \"scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24,drawtext=fontfile='" + fontPath + "':text='" + titleText + "':fontsize=28:fontcolor=white@0.95:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,0.8,3.2)':alpha='if(lt(t,1.4),(t-0.8)/0.6,if(gt(t,2.6),(3.2-t)/0.6,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=2.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t 4 \"" + openingOut + "\"", 120000);
-      console.log('[Pipeline] Opening with title created');
-    } catch (e: any) {
-      console.error('[Pipeline] Opening overlay failed:', e.message?.slice(0, 200));
-      try {
-        await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=black:s=1280x720:d=4:r=24 -vf \"drawtext=fontfile='" + fontPath + "':text='" + escapeDrawtext('\uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4') + "':fontsize=28:fontcolor=white@0.95:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,0.8,3.2)':alpha='if(lt(t,1.4),(t-0.8)/0.6,if(gt(t,2.6),(3.2-t)/0.6,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=2.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 4 \"" + openingOut + "\"", 30000);
-        console.log('[Pipeline] Black opening fallback created');
-      } catch { console.error('[Pipeline] Opening fallback also failed'); }
-    }
-  } else {
-    try {
-      await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=black:s=1280x720:d=4:r=24 -vf \"drawtext=fontfile='" + fontPath + "':text='" + escapeDrawtext('\uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4') + "':fontsize=28:fontcolor=white@0.95:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,0.8,3.2)':alpha='if(lt(t,1.4),(t-0.8)/0.6,if(gt(t,2.6),(3.2-t)/0.6,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=2.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 4 \"" + openingOut + "\"", 30000);
-      console.log('[Pipeline] Black opening created');
-    } catch { console.error('[Pipeline] Opening creation failed'); }
+      await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=black:s=1280x720:d=5:r=24 -vf \"drawtext=fontfile='" + nameFont + "':text='" + gName + " & " + bName + "':fontsize=36:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2):enable='between(t,0.5,4.0)':alpha='if(lt(t,1.0),(t-0.5)/0.5,if(gt(t,3.5),(4.0-t)/0.5,1))',fade=t=in:st=0:d=1,fade=t=out:st=3.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 5 \"" + openingOut + "\"", 30000);
+      console.log('[Pipeline] Black intro fallback');
+    } catch { console.error('[Pipeline] Intro fallback failed'); }
   }
 
   // === STEP B: Build main.mp4 (existing clips) ===
@@ -1573,19 +1621,73 @@ async function assembleOnly(videoId: string) {
     return;
   }
 
-  // === STEP C: Build ending.mp4 ===
+  // === STEP C: Build ending.mp4 (cinematic photo slide + credits) ===
   const endingOut = path.join(tmpDir, 'ending_final.mp4');
   const v = video as any;
   const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '');
-  const creditText = escapeDrawtext(creditLines.join('\n'));
-  const madeByText = escapeDrawtext('Made by \uCCAD\uCCA9\uC7A5 \uC791\uC5C5\uC2E4');
+  const endingPhotos = (video.photos as string[]).filter(Boolean).slice(0, 6);
+  const endingDur = Math.max(8, Math.min(14, creditLines.length * 1.5));
+  let endingCreated = false;
 
-  try {
-    await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=black:s=1280x720:d=8:r=24 -vf \"drawtext=fontfile='" + fontPath + "':text='" + creditText + "':fontsize=22:fontcolor=white@0.9:x=(w-text_w)/2:y=h-80*t+200:enable='between(t,0.5,7.0)':alpha='if(lt(t,1.2),(t-0.5)/0.7,if(gt(t,6.3),(7.0-t)/0.7,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=6.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 8 \"" + endingOut + "\"", 60000);
-    console.log('[Pipeline] Ending credits created');
-  } catch (e: any) {
-    console.error('[Pipeline] Ending creation failed:', e.message?.slice(0, 200));
+  if (endingPhotos.length >= 2) {
+    try {
+      const slidePaths: string[] = [];
+      for (let ei = 0; ei < endingPhotos.length; ei++) {
+        const sp = path.join(tmpDir, 'eslide_' + ei + '.jpg');
+        execSync('curl -sL -o "' + sp + '" "' + endingPhotos[ei] + '"', { timeout: 30000 });
+        slidePaths.push(sp);
+      }
+      const sn = slidePaths.length;
+      const perPhoto = endingDur / sn;
+      const slideOut = path.join(tmpDir, 'slide.mp4');
+      const bgBlurPath = path.join(tmpDir, 'ending_bg.mp4');
+
+      const slideInputs = slidePaths.map(p => '-loop 1 -t ' + perPhoto.toFixed(1) + ' -i "' + p + '"').join(' ');
+      const sf: string[] = [];
+      for (let si = 0; si < sn; si++) sf.push('[' + si + ':v]scale=440:620:force_original_aspect_ratio=decrease,pad=440:620:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24[sv' + si + ']');
+      let sc2 = '[sv0]';
+      let so = perPhoto;
+      for (let si = 1; si < sn; si++) {
+        const sxo = (so - 0.8).toFixed(1);
+        const sout = '[sxf' + si + ']';
+        sf.push(sc2 + '[sv' + si + ']xfade=transition=fade:duration=0.8:offset=' + sxo + sout);
+        sc2 = sout;
+        so = parseFloat(sxo) + perPhoto;
+      }
+      sf.push(sc2 + 'trim=duration=' + endingDur + ',setpts=PTS-STARTPTS[slideout]');
+      await execAsync('ffmpeg -y -threads 2 ' + slideInputs + ' -filter_complex "' + sf.join(';') + '" -map "[slideout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an "' + slideOut + '"', 90000);
+
+      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + slidePaths[0] + '" -vf "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,boxblur=25,eq=brightness=-0.35" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 30000);
+
+      const creditEsc = escapeDrawtext(creditLines.join('\n'));
+      const fadeO = (endingDur - 1.5).toFixed(1);
+      const crEnd = (endingDur - 1.0).toFixed(1);
+      const crFade = (endingDur - 1.7).toFixed(1);
+      const spd = Math.max(50, Math.round(creditLines.length * 20 / endingDur + 40));
+
+      const endVf = "[0:v][1:v]overlay=60:(H-h)/2,drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=8:x=560:y=h-" + spd + "*t+300:enable='between(t\\," + '0.5' + "\\," + crEnd + ")':alpha='if(lt(t\\,1.2)\\,(t-0.5)/0.7\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
+      await execAsync('ffmpeg -y -threads 2 -i "' + bgBlurPath + '" -i "' + slideOut + '" -filter_complex "' + endVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOut + '"', 90000);
+      console.log('[Pipeline] Cinematic ending: ' + endingDur + 's, ' + sn + ' photos');
+      endingCreated = true;
+    } catch (e: any) {
+      console.error('[Pipeline] Cinematic ending failed:', e.message?.slice(0, 300));
+    }
   }
+
+  if (!endingCreated) {
+    try {
+      const creditEscS = escapeDrawtext(creditLines.join('\n'));
+      const fadeOS = (endingDur - 1.5).toFixed(1);
+      const crEndS = (endingDur - 1.0).toFixed(1);
+      const crFadeS = (endingDur - 1.7).toFixed(1);
+      const spdS = Math.max(50, Math.round(creditLines.length * 20 / endingDur + 40));
+      await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=0x0a0a0a:s=1280x720:d=" + endingDur + ":r=24 -vf \"drawtext=fontfile='" + fontPath + "':text='" + creditEscS + "':fontsize=22:fontcolor=white@0.9:x=(w-text_w)/2:y=h-" + spdS + "*t+200:enable='between(t\\," + '0.5' + "\\," + crEndS + ")':alpha='if(lt(t\\,1.2)\\,(t-0.5)/0.7\\,if(gt(t\\," + crFadeS + ")\\,(" + crEndS + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeOS + ":d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t " + endingDur + " \"" + endingOut + "\"", 60000);
+      console.log('[Pipeline] Simple ending fallback');
+    } catch (e: any) {
+      console.error('[Pipeline] Ending failed:', e.message?.slice(0, 200));
+    }
+  }
+
 
   // === STEP D: Concat opening + main + ending ===
   const concatParts: string[] = [];
@@ -1597,7 +1699,7 @@ async function assembleOnly(videoId: string) {
   fs.writeFileSync(concatList, concatParts.map(p => "file '" + p + "'").join('\n'));
 
   const hasAudio = bgmPath && fs.existsSync(bgmPath);
-  const totalDuration = 4 + mainDuration + 6;
+  const totalDuration = 5 + mainDuration + endingDur;
   const outputPath = path.join(tmpDir, 'output.mp4');
 
   let concatCmd: string;
