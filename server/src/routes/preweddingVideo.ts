@@ -165,7 +165,7 @@ async function visionQC(originalUrl: string, generatedUrl: string): Promise<bool
           content: [
             { type: 'image_url', image_url: { url: originalUrl, detail: 'low' } },
             { type: 'image_url', image_url: { url: generatedUrl, detail: 'low' } },
-            { type: 'text', text: 'Same person? YES or NO only.' },
+            { type: 'text', text: 'Compare ONLY the facial features (eyes, nose, mouth, jawline, face shape). Ignore clothing, hairstyle, background, lighting, and pose. Is the FACE the same person? YES or NO only.' },
           ],
         }],
       }),
@@ -190,17 +190,23 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
   if (selfieUrls.length >= 3) {
     plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
     plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
+    plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
+    plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
     plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
     plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
-    plan.push({ mode: 'couple', urls: [selfieUrls[0], selfieUrls[1]] });
-    plan.push({ mode: 'couple', urls: [selfieUrls[0], selfieUrls[1]] });
+    plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
+    plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
     plan.push({ mode: 'couple', urls: selfieUrls[2] ? [selfieUrls[2]] : [selfieUrls[0], selfieUrls[1]] });
+    plan.push({ mode: 'couple', urls: [selfieUrls[0], selfieUrls[1]] });
   } else if (selfieUrls.length === 2) {
     plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
     plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
+    plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
+    plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
     plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
     plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
-    plan.push({ mode: 'couple', urls: selfieUrls });
+    plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
+    plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
     plan.push({ mode: 'couple', urls: selfieUrls });
     plan.push({ mode: 'couple', urls: selfieUrls });
   } else {
@@ -1025,6 +1031,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
     if (glamourPhotos.length < 3) throw new Error('Glamour photo generation failed: only ' + glamourPhotos.length + ' photos');
     photoUrls = glamourPhotos;
     await prisma.preweddingVideo.update({ where: { id: videoId }, data: { photos: glamourPhotos } });
+    console.log('[Pipeline] Using glamour photos for ending');
     console.log('[Pipeline] Generated ' + glamourPhotos.length + ' glamour photos (cost ~$' + (glamourPhotos.length * 0.08).toFixed(2) + ')');
   }
 
@@ -1038,15 +1045,18 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
   const template = [
     { phase: 'intro', camera: 'zoom_out', duration: 5 },
-    { phase: 'rising', camera: 'pan_right', duration: 5 },
+    { phase: 'intro', camera: 'pan_right', duration: 5 },
     { phase: 'rising', camera: 'zoom_in', duration: 5 },
-    { phase: 'building', camera: 'pan_left', duration: 4 },
+    { phase: 'rising', camera: 'pan_left', duration: 5 },
+    { phase: 'building', camera: 'zoom_out', duration: 4 },
+    { phase: 'building', camera: 'pan_right', duration: 4 },
     { phase: 'building', camera: 'zoom_in', duration: 4 },
     { phase: 'climax', camera: 'static', duration: 6 },
+    { phase: 'climax', camera: 'static', duration: 5 },
     { phase: 'ending', camera: 'static', duration: 5 },
   ];
 
-  const sceneCount = Math.min(7, Math.max(5, photoUrls.length + 2));
+  const sceneCount = Math.min(10, Math.max(7, photoUrls.length));
   const bestIdx = analyses.reduce((b: number, a: any, i: number) => (a.quality > analyses[b].quality ? i : b), 0);
   const sorted = [...analyses.map((a: any, i: number) => ({ ...a, url: photoUrls[i] }))];
   const best = sorted.splice(bestIdx, 1)[0];
@@ -1241,7 +1251,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
   const endingOut = path.join(tmpDir, 'ending_final.mp4');
   const v = video as any;
   const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '');
-  const endingPhotos = (video.photos as string[]).filter(Boolean).slice(0, 6);
+  const endingPhotos = (photoUrls || (video.photos as string[])).filter(Boolean).slice(0, 6);
   const endingDur = Math.max(8, Math.min(14, creditLines.length * 1.5));
   let endingCreated = false;
 
@@ -1606,7 +1616,7 @@ async function assembleOnly(videoId: string) {
   const endingOut = path.join(tmpDir, 'ending_final.mp4');
   const v = video as any;
   const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '');
-  const endingPhotos = (video.photos as string[]).filter(Boolean).slice(0, 6);
+  const endingPhotos = (photoUrls || (video.photos as string[])).filter(Boolean).slice(0, 6);
   const endingDur = Math.max(8, Math.min(14, creditLines.length * 1.5));
   let endingCreated = false;
 
