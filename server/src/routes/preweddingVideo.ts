@@ -258,10 +258,15 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
       const rawUrl = data?.data?.[0]?.url || null;
       if (rawUrl) {
         try {
-          const { uploadFromUrlToR2 } = await import('../utils/r2.js');
-          const r2 = await uploadFromUrlToR2(rawUrl, 'glamour');
-          console.log('[Glamour] R2 saved:', r2.url.slice(-30));
-          return r2.url;
+          const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+          const imgRes = await fetch(rawUrl);
+          const buf = Buffer.from(await imgRes.arrayBuffer());
+          const s3 = new S3Client({ region: 'auto', endpoint: process.env.R2_ENDPOINT!, credentials: { accessKeyId: process.env.R2_ACCESS_KEY_ID!, secretAccessKey: process.env.R2_SECRET_ACCESS_KEY! } });
+          const key = 'glamour/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.png';
+          await s3.send(new PutObjectCommand({ Bucket: process.env.R2_BUCKET_NAME || 'wedding-assets', Key: key, Body: buf, ContentType: 'image/png' }));
+          const publicUrl = process.env.R2_PUBLIC_URL + '/' + key;
+          console.log('[Glamour] R2 raw saved:', key);
+          return publicUrl;
         } catch (e: any) {
           console.error('[Glamour] R2 save failed, using raw:', e.message);
           return rawUrl;
