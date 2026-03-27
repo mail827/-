@@ -272,33 +272,41 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
     return null;
   }
 
-  const promises: Promise<string | null>[] = [];
+  const allResults: (string | null)[] = [];
+  const BATCH = 3;
+  const totalJobs = Math.min(count, plan.length);
 
-  for (let si = 0; si < Math.min(count, plan.length); si++) {
-    const p = plan[si];
-    const shots = p.mode === 'couple' ? coupleShots : p.mode === 'groom' ? groomShots : brideShots;
-    const shotIdx = p.mode === 'couple' ? ci++ : p.mode === 'groom' ? gi++ : bi++;
-    const shot = shots[shotIdx % shots.length];
+  for (let batch = 0; batch < totalJobs; batch += BATCH) {
+    const batchEnd = Math.min(batch + BATCH, totalJobs);
+    const batchPromises: Promise<string | null>[] = [];
 
-    promises.push(
-      (async () => {
-        const refUrl = p.urls[0];
-        for (let attempt = 0; attempt < 3; attempt++) {
-          const url = await genOne(p, shot, p.urls, si);
-          if (!url) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' GEN FAILED attempt ' + (attempt + 1)); return null; }
-          if (p.mode === 'couple') { console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' OK (skip QC)'); return url; }
-          const pass = await visionQC(refUrl, url);
-          if (pass) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC PASS'); return url; }
-          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC FAIL attempt ' + (attempt + 1) + '/3');
-        }
-        console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' ALL ATTEMPTS FAILED');
-        return null;
-      })()
-    );
+    for (let si = batch; si < batchEnd; si++) {
+      const p = plan[si];
+      const shots = p.mode === 'couple' ? coupleShots : p.mode === 'groom' ? groomShots : brideShots;
+      const shotIdx = p.mode === 'couple' ? ci++ : p.mode === 'groom' ? gi++ : bi++;
+      const shot = shots[shotIdx % shots.length];
+
+      batchPromises.push(
+        (async () => {
+          const url1 = await genOne(p, shot, p.urls, si);
+          if (!url1) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' GEN FAILED'); return null; }
+          if (p.mode === 'couple') { console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' OK'); return url1; }
+          const pass = await visionQC(p.urls[0], url1);
+          if (pass) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC PASS'); return url1; }
+          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC FAIL, retry');
+          const url2 = await genOne(p, shot, p.urls, si);
+          if (url2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry OK'); return url2; }
+          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry failed, use first'); return url1;
+        })()
+      );
+    }
+
+    const batchResults = await Promise.all(batchPromises);
+    allResults.push(...batchResults);
+    console.log('[Glamour] batch ' + (Math.floor(batch/BATCH)+1) + ' done: ' + batchResults.filter(Boolean).length + '/' + batchResults.length);
   }
 
-  const results = await Promise.all(promises);
-  return results.filter((r): r is string => !!r);
+  return allResults.filter((r): r is string => !!r);
 }
 
 
