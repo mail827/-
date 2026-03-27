@@ -151,6 +151,35 @@ const VIDEO_BRIDE_SHOTS = [
   'full body low angle, leaning on doorframe, elegant pose',
 ];
 
+
+async function visionQC(originalUrl: string, generatedUrl: string): Promise<boolean> {
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + OPENAI_API_KEY },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        max_tokens: 10,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image_url', image_url: { url: originalUrl, detail: 'low' } },
+            { type: 'image_url', image_url: { url: generatedUrl, detail: 'low' } },
+            { type: 'text', text: 'Same person? YES or NO only.' },
+          ],
+        }],
+      }),
+    });
+    const data = await res.json();
+    const answer = (data.choices?.[0]?.message?.content || '').trim().toUpperCase();
+    console.log('[VisionQC]', answer.includes('YES') ? 'PASS' : 'FAIL');
+    return answer.includes('YES');
+  } catch (e: any) {
+    console.error('[VisionQC] error:', e.message);
+    return true;
+  }
+}
+
 async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'female' | 'couple', count: number = 7, selectedIds?: string[]): Promise<string[]> {
   const conceptId = selectedIds?.length ? selectedIds[0] : 'studio_classic';
   const concept = SELFIE_CONCEPTS.find(c => c.id === conceptId) || SELFIE_CONCEPTS[0];
@@ -254,10 +283,19 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
     const shot = shots[shotIdx % shots.length];
 
     promises.push(
-      genOne(p, shot, p.urls, si).then(url => {
-        console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + (url ? ' OK' : ' FAILED'));
-        return url;
-      })
+      (async () => {
+        const refUrl = p.urls[0];
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const url = await genOne(p, shot, p.urls, si);
+          if (!url) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' GEN FAILED attempt ' + (attempt + 1)); return null; }
+          if (p.mode === 'couple') { console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' OK (skip QC)'); return url; }
+          const pass = await visionQC(refUrl, url);
+          if (pass) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC PASS'); return url; }
+          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC FAIL attempt ' + (attempt + 1) + '/3');
+        }
+        console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' ALL ATTEMPTS FAILED');
+        return null;
+      })()
     );
   }
 
@@ -879,7 +917,38 @@ function buildSD15DirectPrompt(photoType: string, camera: string, phase: string,
 
   const type = photoType.startsWith('solo_m') ? 'groom' : photoType.startsWith('solo_f') ? 'bride' : 'couple';
   const list = type === 'groom' ? groomScenes : type === 'bride' ? brideScenes : coupleScenes;
-  return list[sceneIndex % list.length] + '. Cinematic shallow depth of field, natural body movement.';
+  const groomScenesClean = [
+    'Wide full body shot, the man walks forward with one hand in pocket, warm golden light, cinematic tracking shot, gentle breeze',
+    'Medium shot, the man stands adjusting his jacket lapel, soft side lighting, calm composed posture',
+    'The man walks through the scene with relaxed stride, cinematic wide tracking, golden hour',
+    'Medium close-up, the man gazes into distance, soft rim lighting, natural stillness',
+    'Close-up side profile, soft golden light, shallow depth of field, calm atmosphere',
+    'The man looks over his shoulder, dramatic backlight, cinematic slow motion',
+    'Close-up, the man looks directly at camera, natural breathing, soft ambient lighting',
+  ];
+
+  const brideScenesClean = [
+    'Wide full body shot, the woman walks gracefully, dress flowing in gentle breeze, soft backlight, cinematic slow motion',
+    'Medium shot, the woman stands elegantly, hand lightly touching her dress, soft warm light, gentle wind in hair',
+    'The woman walks slowly through the scene, cinematic tracking, dreamy atmosphere',
+    'Medium shot, the woman looks over her shoulder, soft rim lighting, wind moving her hair',
+    'Close-up, the woman brushes hair behind her ear, warm morning light, shallow depth of field',
+    'The woman stands still, gentle breeze moving hair, dramatic side lighting',
+    'Close-up profile, soft golden light, natural stillness, calm atmosphere',
+  ];
+
+  const coupleScenesClean = [
+    'Wide shot, the couple walks hand in hand, warm golden hour light, cinematic tracking, gentle breeze',
+    'Medium shot, the couple stands close, she rests her head on his shoulder, soft warm backlight',
+    'The couple walks arm in arm, gentle breeze, cinematic tracking',
+    'Medium close-up, the couple stands facing each other, he gently holds her hands, warm soft lighting',
+    'The couple embraces gently, warm golden backlight, cinematic slow motion',
+    'Close-up two shot, foreheads almost touching, intimate shallow depth of field',
+    'Wide shot from behind, the couple walks away together hand in hand, warm golden backlight, cinematic ending',
+  ];
+
+  const listClean = type === 'groom' ? groomScenesClean : type === 'bride' ? brideScenesClean : coupleScenesClean;
+  return listClean[sceneIndex % listClean.length] + '. Camera MUST be at eye level, NOT from below, NOT low angle, NOT looking up. Cinematic shallow depth of field, natural body movement only, do NOT change facial expression, do NOT add smile, preserve exact original face.';
 }
 
 function buildPrompt(photoType: string, camera: string, phase: string) {
@@ -1241,11 +1310,12 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
   let outputUrl = '';
   try {
-    const cloudinary = (await import('cloudinary')).v2;
-    const result = await cloudinary.uploader.upload(outputPath, { resource_type: 'video', folder: 'prewedding-video', public_id: 'pv-' + videoId });
-    outputUrl = result.secure_url || '';
+    const { uploadVideoToR2 } = await import('../utils/r2.js');
+    const r2Result = await uploadVideoToR2(outputPath, 'prewedding-video', videoId);
+    outputUrl = r2Result.url;
+    console.log('[Pipeline] R2 upload done:', outputUrl);
   } catch (uploadErr: any) {
-    console.error('Cloudinary upload error:', uploadErr.message);
+    console.error('[Pipeline] R2 upload error:', uploadErr.message);
   }
 
   fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -1556,15 +1626,12 @@ async function assembleOnly(videoId: string) {
 
   let outputUrl = '';
   try {
-    const cloudinary = (await import('cloudinary')).v2;
-    const result = await cloudinary.uploader.upload(outputPath, {
-      resource_type: 'video',
-      folder: 'prewedding-video',
-      public_id: 'pv-' + videoId,
-    });
-    outputUrl = result.secure_url || '';
+    const { uploadVideoToR2 } = await import('../utils/r2.js');
+    const r2Result = await uploadVideoToR2(outputPath, 'prewedding-video', videoId);
+    outputUrl = r2Result.url;
+    console.log('[Pipeline] R2 upload done:', outputUrl);
   } catch (uploadErr: any) {
-    console.error('Cloudinary upload error:', uploadErr.message);
+    console.error('[Pipeline] R2 upload error:', uploadErr.message);
   }
 
   fs.rmSync(tmpDir, { recursive: true, force: true });
