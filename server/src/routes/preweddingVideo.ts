@@ -1616,7 +1616,7 @@ async function assembleOnly(videoId: string) {
   const endingOut = path.join(tmpDir, 'ending_final.mp4');
   const v = video as any;
   const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '');
-  const endingPhotos = (photoUrls || (video.photos as string[])).filter(Boolean).slice(0, 6);
+  const endingPhotos = (video.photos as string[]).filter(Boolean).slice(0, 6);
   const endingDur = Math.max(8, Math.min(14, creditLines.length * 1.5));
   let endingCreated = false;
 
