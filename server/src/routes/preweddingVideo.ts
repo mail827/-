@@ -231,12 +231,10 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
       : p.mode === 'groom' ? groomOutfit : brideOutfit;
 
     const prompt = [
-      GLAMOUR_FACE,
       scene,
       outfitPrompt,
       shot,
-      'ONE single photograph only, NOT a collage, NOT split screen, NOT multiple frames',
-      'natural relaxed body language, genuine expression, no kissing, no licking',
+      'photorealistic 8k, ONE single photograph, natural relaxed expression, no text no watermark',
     ].join(', ');
 
     const imageInput = refUrls.length === 1 ? refUrls[0] : refUrls;
@@ -929,33 +927,33 @@ function buildSD15DirectPrompt(photoType: string, camera: string, phase: string,
   const type = photoType.startsWith('solo_m') ? 'groom' : photoType.startsWith('solo_f') ? 'bride' : 'couple';
   const list = type === 'groom' ? groomScenes : type === 'bride' ? brideScenes : coupleScenes;
   const groomScenesClean = [
-    'Wide full body shot, the man walks forward with one hand in pocket, warm golden light, cinematic tracking shot, gentle breeze',
-    'Medium shot, the man stands adjusting his jacket lapel, soft side lighting, calm composed posture',
-    'The man walks through the scene with relaxed stride, cinematic wide tracking, golden hour',
-    'Medium close-up, the man gazes into distance, soft rim lighting, natural stillness',
-    'Close-up side profile, soft golden light, shallow depth of field, calm atmosphere',
-    'The man looks over his shoulder, dramatic backlight, cinematic slow motion',
-    'Close-up, the man looks directly at camera, natural breathing, soft ambient lighting',
+    'Medium shot, the man standing confidently with one hand in pocket, face clearly visible, warm golden light, gentle breeze in hair',
+    'Upper body shot, the man looking at camera with calm expression, soft side lighting, subtle head tilt',
+    'Medium close-up, the man standing still, warm golden hour light, gentle wind, natural breathing',
+    'Close-up portrait at eye level, the man with relaxed expression, soft ambient lighting, shallow depth of field',
+    'Medium shot, the man leaning slightly against a surface, composed posture, warm backlight',
+    'Upper body, the man with slight natural smile, dramatic rim lighting, calm atmosphere',
+    'Medium wide shot, the man standing in scene, face forward, golden hour, gentle breeze',
   ];
 
   const brideScenesClean = [
-    'Wide full body shot, the woman walks gracefully, dress flowing in gentle breeze, soft backlight, cinematic slow motion',
-    'Medium shot, the woman stands elegantly, hand lightly touching her dress, soft warm light, gentle wind in hair',
-    'The woman walks slowly through the scene, cinematic tracking, dreamy atmosphere',
-    'Medium shot, the woman looks over her shoulder, soft rim lighting, wind moving her hair',
-    'Close-up, the woman brushes hair behind her ear, warm morning light, shallow depth of field',
-    'The woman stands still, gentle breeze moving hair, dramatic side lighting',
-    'Close-up profile, soft golden light, natural stillness, calm atmosphere',
+    'Medium shot, the woman standing elegantly, dress flowing in gentle breeze, face clearly visible, soft backlight',
+    'Upper body shot, the woman with serene expression, hair moving softly in wind, warm golden light',
+    'Medium close-up, the woman standing still, hand lightly on dress, soft warm light, natural breathing',
+    'Close-up portrait at eye level, the woman with gentle expression, soft morning light, shallow depth of field',
+    'Medium shot, the woman with slight sway, veil or hair catching breeze, warm backlight',
+    'Upper body, the woman looking at camera, dramatic side lighting, calm atmosphere',
+    'Medium wide shot, the woman standing gracefully in scene, face forward, golden hour',
   ];
 
   const coupleScenesClean = [
-    'Wide shot, the couple walks hand in hand, warm golden hour light, cinematic tracking, gentle breeze',
-    'Medium shot, the couple stands close, she rests her head on his shoulder, soft warm backlight',
-    'The couple walks arm in arm, gentle breeze, cinematic tracking',
-    'Medium close-up, the couple stands facing each other, he gently holds her hands, warm soft lighting',
-    'The couple embraces gently, warm golden backlight, cinematic slow motion',
+    'Medium two shot, the couple standing together side by side, warm golden hour light, gentle breeze',
+    'Medium shot, the couple standing close, she rests her head on his shoulder, soft warm backlight',
+    'Upper body two shot, the couple facing each other with warm expressions, soft lighting',
+    'Medium close-up, the couple standing together, he gently holds her hands, warm soft lighting',
+    'Medium shot, the couple in gentle embrace, warm golden backlight, calm atmosphere',
     'Close-up two shot, foreheads almost touching, intimate shallow depth of field',
-    'Wide shot from behind, the couple walks away together hand in hand, warm golden backlight, cinematic ending',
+    'Medium wide shot, the couple standing together in scene, warm golden backlight, peaceful',
   ];
 
   const listClean = type === 'groom' ? groomScenesClean : type === 'bride' ? brideScenesClean : coupleScenesClean;
@@ -1275,7 +1273,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
   const endingOut = path.join(tmpDir, 'ending_final.mp4');
   const v = video as any;
   const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '');
-  const endingPhotos = (photoUrls || (video.photos as string[])).filter(Boolean).slice(0, 6);
+  const endingPhotos = (photoUrls || (video.photos as string[])).filter(Boolean).slice(0, 3);
   const endingDur = Math.max(8, Math.min(14, creditLines.length * 1.5));
   let endingCreated = false;
 
@@ -1640,7 +1638,7 @@ async function assembleOnly(videoId: string) {
   const endingOut = path.join(tmpDir, 'ending_final.mp4');
   const v = video as any;
   const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '');
-  const endingPhotos = (video.photos as string[]).filter(Boolean).slice(0, 6);
+  const endingPhotos = (video.photos as string[]).filter(Boolean).slice(0, 3);
   const endingDur = Math.max(8, Math.min(14, creditLines.length * 1.5));
   let endingCreated = false;
 
