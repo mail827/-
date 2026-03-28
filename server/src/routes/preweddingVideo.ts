@@ -47,7 +47,7 @@ const SELFIE_CONCEPTS: { id: string; prompt: string; subScenes?: string[] }[] = 
   { id: 'iphone_mirror', prompt: 'mirror selfie with iPhone flash of this person, full body reflected in large clean mirror, bright harsh flash creating high contrast, raw phone camera selfie aesthetic, photorealistic, 8k' },
 ];
 
-const GLAMOUR_FACE = 'CRITICAL INSTRUCTION: preserve the EXACT original face from the reference photo. Do NOT modify eyes, do NOT add double eyelids, do NOT change eye shape or eye size. Keep the exact same nose, lips, jaw shape, face proportions unchanged. Do NOT beautify, do NOT slim the face, do NOT enhance jawline. The face must be identical to the input photo. photorealistic 8k quality. Do NOT add any text, logos, or watermarks. Do NOT create deformed hands or extra fingers. Keep clean elegant clothing with no distortion or melting textures';
+const GLAMOUR_FACE = 'Preserve the exact original face from the reference photo with every detail unchanged including eyes, nose, lips, jaw shape, face proportions. The face must be identical to the input photo. Raw photo texture, natural skin with visible pores and subtle imperfections, realistic skin grain. Photorealistic 8k quality, clean elegant clothing with no distortion. No text, no logos, no watermarks, no deformed hands, no extra fingers';
 
 const GLAMOUR_OUTFIT_GROOM: Record<string, string> = {
   studio_classic: 'wearing elegant black tuxedo with white dress shirt, black bow tie, polished shoes',
@@ -135,7 +135,7 @@ const VIDEO_GROOM_SHOTS = [
   'full body wide shot, standing confidently, one hand in pocket',
   'close-up upper body, adjusting jacket lapel, warm eye contact',
   'cinematic side profile, sharp jawline, rim lighting',
-  'medium shot from low angle, walking forward, confident stride',
+  'medium shot, walking forward with purpose, warm golden light',
   'full body seated on steps, elbows on knees, genuine smile',
   'over-the-shoulder angle, three quarter turn, looking back',
   'wide shot leaning against wall, arms crossed, environmental framing',
@@ -148,8 +148,12 @@ const VIDEO_BRIDE_SHOTS = [
   'wide shot walking gracefully, dress flowing in motion',
   'medium shot seated elegantly, hands on knee, gentle smile',
   'close-up profile view, wind in hair, serene expression',
-  'full body low angle, leaning on doorframe, elegant pose',
+  'full body, standing by doorframe, elegant pose, soft natural light',
 ];
+
+
+
+
 
 
 async function visionQC(originalUrl: string, generatedUrl: string): Promise<boolean> {
@@ -178,6 +182,33 @@ async function visionQC(originalUrl: string, generatedUrl: string): Promise<bool
   } catch (e: any) {
     console.error('[VisionQC] error:', e.message);
     return true;
+  }
+}
+
+
+async function cropUpperBody(imageUrl: string): Promise<string> {
+  try {
+    const sharp = (await import('sharp')).default;
+    const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+    const imgRes = await fetch(imageUrl);
+    const buf = Buffer.from(await imgRes.arrayBuffer());
+    const meta = await sharp(buf).metadata();
+    const w = meta.width || 900;
+    const h = meta.height || 1200;
+    const cropH = Math.round(h * 0.65);
+    const cropped = await sharp(buf)
+      .extract({ left: 0, top: 0, width: w, height: cropH })
+      .jpeg({ quality: 92 })
+      .toBuffer();
+    const s3 = new S3Client({ region: 'auto', endpoint: process.env.R2_ENDPOINT!, credentials: { accessKeyId: process.env.R2_ACCESS_KEY_ID!, secretAccessKey: process.env.R2_SECRET_ACCESS_KEY! } });
+    const key = 'glamour-crop/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
+    await s3.send(new PutObjectCommand({ Bucket: process.env.R2_BUCKET_NAME || 'wedding-assets', Key: key, Body: cropped, ContentType: 'image/jpeg' }));
+    const publicUrl = process.env.R2_PUBLIC_URL + '/' + key;
+    console.log('[CropUpper] OK:', key);
+    return publicUrl;
+  } catch (e: any) {
+    console.error('[CropUpper] failed:', e.message);
+    return imageUrl;
   }
 }
 
@@ -231,29 +262,51 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
       : p.mode === 'groom' ? groomOutfit : brideOutfit;
 
     const prompt = [
+      GLAMOUR_FACE,
       scene,
       outfitPrompt,
       shot,
-      'photorealistic 8k, ONE single photograph, natural relaxed expression, no text no watermark',
     ].join(', ');
 
-    const imageInput = refUrls.length === 1 ? refUrls[0] : refUrls;
-
     try {
-      const res = await fetch(ARK_BASE + '/images/generations', {
+      const submitRes = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ARK_API_KEY },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Key ' + FAL_API_KEY },
         body: JSON.stringify({
-          model: 'seedream-5-0-260128',
           prompt,
-          image: imageInput,
-          size: '2K',
+          image_urls: refUrls,
+          num_images: 1,
+          aspect_ratio: '3:4',
+          resolution: '1K',
           output_format: 'png',
-          watermark: false,
         }),
       });
-      const data = await res.json();
-      const rawUrl = data?.data?.[0]?.url || null;
+      const submitData = await submitRes.json();
+      let rawUrl: string | null = null;
+      if (submitData.images?.[0]?.url) {
+        rawUrl = submitData.images[0].url;
+      } else if (submitData.request_id) {
+        const requestId = submitData.request_id;
+        const responseUrl = submitData.response_url || ('https://queue.fal.run/fal-ai/nano-banana-2/edit/requests/' + requestId);
+        const statusUrl = submitData.status_url || (responseUrl + '/status');
+        for (let i = 0; i < 60; i++) {
+          await new Promise(r => setTimeout(r, 5000));
+          try {
+            const poll = await fetch(statusUrl, { headers: { 'Authorization': 'Key ' + FAL_API_KEY } });
+            const pollData = await poll.json();
+            if (pollData.status === 'COMPLETED') {
+              const resultRes = await fetch(responseUrl, { headers: { 'Authorization': 'Key ' + FAL_API_KEY } });
+              const resultData = await resultRes.json();
+              rawUrl = resultData?.images?.[0]?.url || null;
+              break;
+            }
+            if (pollData.status === 'FAILED') { console.error('[Glamour] fal generation failed'); break; }
+          } catch { continue; }
+        }
+      } else {
+        console.error('[Glamour] no images or request_id:', JSON.stringify(submitData).slice(0, 200));
+        return null;
+      }
       if (rawUrl) {
         try {
           const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
@@ -263,15 +316,15 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
           const key = 'glamour/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.png';
           await s3.send(new PutObjectCommand({ Bucket: process.env.R2_BUCKET_NAME || 'wedding-assets', Key: key, Body: buf, ContentType: 'image/png' }));
           const publicUrl = process.env.R2_PUBLIC_URL + '/' + key;
-          console.log('[Glamour] R2 raw saved:', key);
+          console.log('[Glamour] R2 saved:', key);
           return publicUrl;
         } catch (e: any) {
-          console.error('[Glamour] R2 save failed, using raw:', e.message);
+          console.error('[Glamour] R2 save failed, using fal url:', e.message);
           return rawUrl;
         }
       }
-      console.error('[Glamour] SeeDream no url:', JSON.stringify(data).slice(0, 200));
-    } catch (e: any) { console.error('[Glamour] SeeDream error:', e.message); }
+      console.error('[Glamour] no image url in result');
+    } catch (e: any) { console.error('[Glamour] error:', e.message); }
     return null;
   }
 
@@ -894,71 +947,32 @@ function buildSD2Prompt(photoType: string, camera: string, phase: string) {
 
 
 function buildSD15DirectPrompt(photoType: string, camera: string, phase: string, sceneIndex: number = 0) {
-  const groomScenes = [
-    'Wide full body shot, the man walks forward confidently with one hand in pocket, warm golden light, cinematic tracking shot, gentle breeze',
-    'Medium shot, the man stands adjusting his jacket lapel, soft side lighting, calm confident expression, slight head turn',
-    'The man walks through the scene with relaxed stride, looking around naturally, cinematic wide tracking, golden hour',
-    'Medium close-up from low angle, the man gazes into distance then slowly turns toward camera with a warm smile, rim lighting',
-    'Close-up side profile, the man turns his head toward camera with a natural smile, soft golden light, shallow depth of field',
-    'The man turns to look over his shoulder with a calm expression, dramatic backlight, cinematic slow motion',
-    'Close-up, the man looks directly at camera with a warm gentle smile, natural eye blinks, soft ambient lighting',
+  const FACE_GUARD = 'Camera positioned at exact eye height of subject, lens aimed perfectly horizontal straight ahead, zero degree tilt angle, tripod-mounted completely static camera, fixed vertical and horizontal position throughout entire shot. Subject centered at consistent height in frame from first frame to last frame, subject remains perfectly stationary in vertical axis, steady consistent head-to-frame-top spacing maintained. Face clearly visible at all times, preserve exact original face identity and expression unchanged, maintain original hairstyle and outfit from input image, shallow depth of field.';
+
+  const groomMotions = [
+    'Subtle natural breathing, gentle breeze moves hair slightly, warm golden light',
+    'Subtle weight shift, soft warm side lighting, natural breathing only',
+    'Gentle natural sway, warm ambient light, golden hour tones',
+    'Subtle natural blink, soft warm lighting, peaceful atmosphere',
   ];
 
-  const brideScenes = [
-    'Wide full body shot, the woman walks gracefully, dress flowing in gentle breeze, soft backlight creating halo, cinematic slow motion',
-    'Medium shot, the woman standing elegantly, hand lightly touching her dress, soft warm light, gentle wind in hair',
-    'The woman walks slowly through the scene, looking around peacefully, cinematic tracking, dreamy atmosphere',
-    'Medium shot, the woman looks over her shoulder elegantly, soft rim lighting, wind moving her hair, cinematic',
-    'Close-up, the woman brushes hair behind her ear and smiles gently, warm morning light, shallow depth of field',
-    'The woman turns slowly to face camera with a mysterious gentle smile, dramatic side lighting, hair in wind',
-    'Close-up profile, the woman looks down then lifts her gaze with a warm expression, soft golden light',
+  const brideMotions = [
+    'Hair and veil flowing gently in breeze, soft warm backlight, subtle natural breathing',
+    'Subtle natural breathing, dress fabric sways softly in wind, soft golden light',
+    'Gentle breeze moves hair and dress, warm soft light, natural breathing',
+    'Subtle natural blink, hair strands move in breeze, warm morning light',
   ];
 
-  const coupleScenes = [
-    'Wide shot, the couple walks hand in hand through the scene, warm golden hour light, cinematic tracking, gentle breeze',
-    'Medium shot, the couple stands close, she rests her head on his shoulder, soft warm backlight, peaceful mood',
-    'The couple walks arm in arm, she looks up at him and laughs naturally, gentle breeze, cinematic tracking',
-    'Medium close-up, the couple stands facing each other, he gently holds her hands, warm soft lighting',
-    'The couple embraces gently, warm golden backlight, cinematic slow motion, peaceful atmosphere',
-    'Close-up two shot, foreheads almost touching, warm smiles, intimate shallow depth of field',
-    'Wide shot from behind, the couple walks away together hand in hand, warm golden backlight, cinematic ending',
+  const coupleMotions = [
+    'Subtle natural breathing together, gentle breeze, warm golden hour light',
+    'Subtle natural sway together, warm soft backlight, peaceful atmosphere',
   ];
 
   const type = photoType.startsWith('solo_m') ? 'groom' : photoType.startsWith('solo_f') ? 'bride' : 'couple';
-  const list = type === 'groom' ? groomScenes : type === 'bride' ? brideScenes : coupleScenes;
-  const groomScenesClean = [
-    'Medium shot, the man standing confidently with one hand in pocket, face clearly visible, warm golden light, gentle breeze in hair',
-    'Upper body shot, the man looking at camera with calm expression, soft side lighting, subtle head tilt',
-    'Medium close-up, the man standing still, warm golden hour light, gentle wind, natural breathing',
-    'Close-up portrait at eye level, the man with relaxed expression, soft ambient lighting, shallow depth of field',
-    'Medium shot, the man standing with hands clasped in front, composed posture, warm backlight',
-    'Upper body, the man with slight natural smile, dramatic rim lighting, calm atmosphere',
-    'Medium wide shot, the man standing in scene, face forward, golden hour, gentle breeze',
-  ];
-
-  const brideScenesClean = [
-    'Medium shot, the woman standing elegantly, dress flowing in gentle breeze, face clearly visible, soft backlight',
-    'Upper body shot, the woman with serene expression, hair moving softly in wind, warm golden light',
-    'Medium close-up, the woman standing still, hand lightly on dress, soft warm light, natural breathing',
-    'Close-up portrait at eye level, the woman with gentle expression, soft morning light, shallow depth of field',
-    'Medium shot, the woman with slight sway, veil or hair catching breeze, warm backlight',
-    'Upper body, the woman looking at camera, dramatic side lighting, calm atmosphere',
-    'Medium wide shot, the woman standing gracefully in scene, face forward, golden hour',
-  ];
-
-  const coupleScenesClean = [
-    'Medium two shot, the couple standing together side by side, warm golden hour light, gentle breeze',
-    'Medium shot, the couple standing close, she rests her head on his shoulder, soft warm backlight',
-    'Upper body two shot, the couple facing each other with warm expressions, soft lighting',
-    'Medium close-up, the couple standing together, he gently holds her hands, warm soft lighting',
-    'Medium shot, the couple in gentle embrace, warm golden backlight, calm atmosphere',
-    'Close-up two shot, foreheads almost touching, intimate shallow depth of field',
-    'Medium wide shot, the couple standing together in scene, warm golden backlight, peaceful',
-  ];
-
-  const listClean = type === 'groom' ? groomScenesClean : type === 'bride' ? brideScenesClean : coupleScenesClean;
-  return listClean[sceneIndex % listClean.length] + '. Camera MUST be at eye level, NOT from below, NOT low angle, NOT looking up. Subject MUST face camera at all times, do NOT turn away, do NOT look over shoulder, do NOT show back of head, face MUST be visible in every frame. Cinematic shallow depth of field, minimal body movement only, do NOT change facial expression, do NOT add smile, preserve exact original face.';
+  const list = type === 'groom' ? groomMotions : type === 'bride' ? brideMotions : coupleMotions;
+  return FACE_GUARD + ' ' + list[sceneIndex % list.length];
 }
+
 
 function buildPrompt(photoType: string, camera: string, phase: string) {
   const cam: Record<string, string> = {
@@ -1054,7 +1068,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
     photoUrls = glamourPhotos;
     await prisma.preweddingVideo.update({ where: { id: videoId }, data: { photos: glamourPhotos } });
     console.log('[Pipeline] Using glamour photos for ending');
-    console.log('[Pipeline] Generated ' + glamourPhotos.length + ' glamour photos (cost ~$' + (glamourPhotos.length * 0.08).toFixed(2) + ')');
+    console.log('[Pipeline] Generated ' + glamourPhotos.length + ' glamour photos (cost ~$' + (glamourPhotos.length * 0.04).toFixed(2) + ')');
   }
 
   await prisma.preweddingVideo.update({ where: { id: videoId }, data: { status: 'ANALYZING' } });
@@ -1095,48 +1109,68 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
   await prisma.preweddingVideo.update({ where: { id: videoId }, data: { scenes, status: 'GENERATING' } });
 
-  let totalCost = (video as any).mode === 'selfie' ? photoUrls.length * 0.08 : 0;
+
+
+  if ((video as any).mode === 'selfie') {
+    const uniqueCropUrls = [...new Set(scenes.map((s: any) => s.photoUrl))];
+    const cropMap: Record<string, string> = {};
+    const CROP_BATCH = 3;
+    for (let cb = 0; cb < uniqueCropUrls.length; cb += CROP_BATCH) {
+      const batch = uniqueCropUrls.slice(cb, cb + CROP_BATCH);
+      const results = await Promise.all(batch.map((url: string) => cropUpperBody(url)));
+      batch.forEach((url: string, i: number) => { cropMap[url] = results[i]; });
+    }
+    scenes.forEach((s: any) => { s.photoUrl = cropMap[s.photoUrl] || s.photoUrl; });
+    console.log('[Pipeline] Cropped ' + uniqueCropUrls.length + ' photos to upper body for Seedance');
+  }
+
+  let totalCost = (video as any).mode === 'selfie' ? photoUrls.length * 0.04 : 0;
   const clipResults = new Array(scenes.length).fill('');
 
-  const clipPromises = scenes.map((scene, si) => {
-    let gen: Promise<string | null>;
-    let engineLabel = 'SD1.5';
+  const CLIP_BATCH = 3;
+  for (let bi = 0; bi < scenes.length; bi += CLIP_BATCH) {
+    const batchScenes = scenes.slice(bi, Math.min(bi + CLIP_BATCH, scenes.length));
+    const batchPromises = batchScenes.map((scene, bsi) => {
+      const si = bi + bsi;
+      let gen: Promise<string | null>;
+      let engineLabel = 'SD1.5';
 
-    if (videoEngine === 'kling') {
-      const prompt = buildPrompt(scene.photoType, scene.camera, scene.phase);
-      gen = generateKlingClip(scene.photoUrl, prompt, scene.duration);
-      totalCost += 0.55;
-      engineLabel = 'Kling';
-    } else if (videoEngine === 'seedance2') {
-      const sd2prompt = buildSD2Prompt(scene.photoType, scene.camera, scene.phase);
-      gen = generatePiAPISeedance2Clip(scene.photoUrl, sd2prompt, scene.duration, 'seedance-2-preview').then(url => url ? removePiAPIWatermark(url) : null);
-      totalCost += 0.75;
-      engineLabel = 'SD2.0';
-    } else if (videoEngine === 'seedance2-fast') {
-      const sd2prompt = buildSD2Prompt(scene.photoType, scene.camera, scene.phase);
-      gen = generatePiAPISeedance2Clip(scene.photoUrl, sd2prompt, scene.duration, 'seedance-2-fast-preview').then(url => url ? removePiAPIWatermark(url) : null);
-      totalCost += 0.40;
-      engineLabel = 'SD2.0-fast';
-    } else {
-      const sd15prompt = buildSD15DirectPrompt(scene.photoType, scene.camera, scene.phase, si);
-      gen = generateSeedanceClip(scene.photoUrl, sd15prompt, scene.duration);
-      totalCost += 0.005;
-      engineLabel = 'SD1.5';
-    }
+      if (videoEngine === 'kling') {
+        const prompt = buildPrompt(scene.photoType, scene.camera, scene.phase);
+        gen = generateKlingClip(scene.photoUrl, prompt, scene.duration);
+        totalCost += 0.55;
+        engineLabel = 'Kling';
+      } else if (videoEngine === 'seedance2') {
+        const sd2prompt = buildSD2Prompt(scene.photoType, scene.camera, scene.phase);
+        gen = generatePiAPISeedance2Clip(scene.photoUrl, sd2prompt, scene.duration, 'seedance-2-preview').then(url => url ? removePiAPIWatermark(url) : null);
+        totalCost += 0.75;
+        engineLabel = 'SD2.0';
+      } else if (videoEngine === 'seedance2-fast') {
+        const sd2prompt = buildSD2Prompt(scene.photoType, scene.camera, scene.phase);
+        gen = generatePiAPISeedance2Clip(scene.photoUrl, sd2prompt, scene.duration, 'seedance-2-fast-preview').then(url => url ? removePiAPIWatermark(url) : null);
+        totalCost += 0.40;
+        engineLabel = 'SD2.0-fast';
+      } else {
+        const sd15prompt = buildSD15DirectPrompt(scene.photoType, scene.camera, scene.phase, si);
+        gen = generateSeedanceClip(scene.photoUrl, sd15prompt, scene.duration);
+        totalCost += 0.005;
+        engineLabel = 'SD1.5';
+      }
 
-    return gen.then(url => {
-      clipResults[si] = url || '';
-      console.log('[Pipeline] clip ' + (si + 1) + '/' + scenes.length + (url ? ' OK (' + engineLabel + ')' : ' FAILED'));
-      return prisma.preweddingVideo.update({
-        where: { id: videoId },
-        data: { clipUrls: [...clipResults] },
+      return gen.then(url => {
+        clipResults[si] = url || '';
+        console.log('[Pipeline] clip ' + (si + 1) + '/' + scenes.length + (url ? ' OK (' + engineLabel + ')' : ' FAILED'));
+        return prisma.preweddingVideo.update({
+          where: { id: videoId },
+          data: { clipUrls: [...clipResults] },
+        });
+      }).catch(e => {
+        console.error('[Pipeline] clip ' + (si + 1) + ' error:', (e as any).message);
       });
-    }).catch(e => {
-      console.error('[Pipeline] clip ' + (si + 1) + ' error:', (e as any).message);
     });
-  });
-
-  await Promise.all(clipPromises);
+    await Promise.all(batchPromises);
+    console.log('[Pipeline] clip batch ' + (Math.floor(bi / CLIP_BATCH) + 1) + '/' + Math.ceil(scenes.length / CLIP_BATCH) + ' done');
+  }
   const clipUrls = clipResults;
 
   const validClips = clipUrls.filter(Boolean);
@@ -1282,19 +1316,25 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
       const gridPaths: string[] = [];
       for (let ei = 0; ei < Math.min(3, endingPhotos.length); ei++) {
         const sp = path.join(tmpDir, 'egrid_' + ei + '.jpg');
-        execSync('curl -sL -o "' + sp + '" "' + endingPhotos[ei] + '"', { timeout: 30000 });
-        gridPaths.push(sp);
+        try {
+          console.log('[Ending] downloading photo ' + (ei+1) + ':', endingPhotos[ei].slice(0, 80));
+          execSync('curl -sL -o "' + sp + '" "' + endingPhotos[ei] + '"', { timeout: 30000 });
+          const stat = fs.statSync(sp);
+          if (stat.size > 1000) { gridPaths.push(sp); console.log('[Ending] photo ' + (ei+1) + ' OK, size:', stat.size); }
+          else { console.log('[Ending] photo ' + (ei+1) + ' too small:', stat.size); }
+        } catch (dlErr: any) { console.log('[Ending] photo ' + (ei+1) + ' download failed:', dlErr.message?.slice(0, 100)); }
       }
+      if (gridPaths.length < 2) throw new Error('Only ' + gridPaths.length + ' ending photos downloaded');
 
       const bgBlurPath = path.join(tmpDir, 'ending_bg.mp4');
-      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + gridPaths[0] + '" -vf "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,boxblur=30,eq=brightness=-0.4" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 30000);
+      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + gridPaths[0] + '" -vf "scale=640:360,boxblur=30,eq=brightness=-0.4,scale=1280:720" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 60000);
 
       const gridImg = path.join(tmpDir, 'grid.png');
       const gn = gridPaths.length;
       if (gn >= 3) {
-        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -i "' + gridPaths[2] + '" -filter_complex "[0:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g1];[2:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g2];[g0][g1][g2]hstack=inputs=3[grid]" -map "[grid]" "' + gridImg + '"', 30000);
+        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -i "' + gridPaths[2] + '" -filter_complex "[0:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g1];[2:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g2];[g0][g1][g2]hstack=inputs=3[grid]" -map "[grid]" "' + gridImg + '"', 30000);
       } else {
-        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -filter_complex "[0:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g1];[g0][g1]hstack=inputs=2[grid]" -map "[grid]" "' + gridImg + '"', 30000);
+        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -filter_complex "[0:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g1];[g0][g1]hstack=inputs=2[grid]" -map "[grid]" "' + gridImg + '"', 30000);
       }
 
       const creditEsc = escapeDrawtext(creditLines.join('\n'));
@@ -1303,12 +1343,12 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
       const crFade = (endingDur - 1.7).toFixed(1);
       const spd = Math.max(50, Math.round(creditLines.length * 20 / endingDur + 40));
 
-      const endVf = "[0:v][1:v]overlay=(W-w)/2:50:enable='between(t\\,0.5\\," + crEnd + ")':alpha='if(lt(t\\,1.2)\\,(t-0.5)/0.7\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=8:x=(w-text_w)/2:y=380+h-" + spd + "*t+100:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
+      const endVf = "[1:v]format=rgba,fade=t=in:st=0.5:d=0.7:alpha=1,fade=t=out:st=" + crFade + ":d=0.7:alpha=1[gridFaded];[0:v][gridFaded]overlay=(W-w)/2:50,drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=16:x=(w-text_w)/2:y=700-" + spd + "*t+100:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
       await execAsync('ffmpeg -y -threads 2 -i "' + bgBlurPath + '" -loop 1 -i "' + gridImg + '" -filter_complex "' + endVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOut + '"', 60000);
       console.log('[Pipeline] Grid ending: ' + endingDur + 's, ' + gn + ' photos');
       endingCreated = true;
     } catch (e: any) {
-      console.error('[Pipeline] Grid ending failed:', e.message?.slice(0, 300));
+      console.log('[Pipeline] Grid ending failed:', e.message?.slice(0, 300));
     }
   }
 
@@ -1637,19 +1677,25 @@ async function assembleOnly(videoId: string) {
       const gridPaths: string[] = [];
       for (let ei = 0; ei < Math.min(3, endingPhotos.length); ei++) {
         const sp = path.join(tmpDir, 'egrid_' + ei + '.jpg');
-        execSync('curl -sL -o "' + sp + '" "' + endingPhotos[ei] + '"', { timeout: 30000 });
-        gridPaths.push(sp);
+        try {
+          console.log('[Ending] downloading photo ' + (ei+1) + ':', endingPhotos[ei].slice(0, 80));
+          execSync('curl -sL -o "' + sp + '" "' + endingPhotos[ei] + '"', { timeout: 30000 });
+          const stat = fs.statSync(sp);
+          if (stat.size > 1000) { gridPaths.push(sp); console.log('[Ending] photo ' + (ei+1) + ' OK, size:', stat.size); }
+          else { console.log('[Ending] photo ' + (ei+1) + ' too small:', stat.size); }
+        } catch (dlErr: any) { console.log('[Ending] photo ' + (ei+1) + ' download failed:', dlErr.message?.slice(0, 100)); }
       }
+      if (gridPaths.length < 2) throw new Error('Only ' + gridPaths.length + ' ending photos downloaded');
 
       const bgBlurPath = path.join(tmpDir, 'ending_bg.mp4');
-      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + gridPaths[0] + '" -vf "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,boxblur=30,eq=brightness=-0.4" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 30000);
+      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + gridPaths[0] + '" -vf "scale=640:360,boxblur=30,eq=brightness=-0.4,scale=1280:720" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 60000);
 
       const gridImg = path.join(tmpDir, 'grid.png');
       const gn = gridPaths.length;
       if (gn >= 3) {
-        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -i "' + gridPaths[2] + '" -filter_complex "[0:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g1];[2:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g2];[g0][g1][g2]hstack=inputs=3[grid]" -map "[grid]" "' + gridImg + '"', 30000);
+        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -i "' + gridPaths[2] + '" -filter_complex "[0:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g1];[2:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g2];[g0][g1][g2]hstack=inputs=3[grid]" -map "[grid]" "' + gridImg + '"', 30000);
       } else {
-        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -filter_complex "[0:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=200:280:force_original_aspect_ratio=decrease,pad=200:280:(ow-iw)/2:(oh-ih)/2:black[g1];[g0][g1]hstack=inputs=2[grid]" -map "[grid]" "' + gridImg + '"', 30000);
+        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -filter_complex "[0:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g1];[g0][g1]hstack=inputs=2[grid]" -map "[grid]" "' + gridImg + '"', 30000);
       }
 
       const creditEsc = escapeDrawtext(creditLines.join('\n'));
@@ -1658,12 +1704,12 @@ async function assembleOnly(videoId: string) {
       const crFade = (endingDur - 1.7).toFixed(1);
       const spd = Math.max(50, Math.round(creditLines.length * 20 / endingDur + 40));
 
-      const endVf = "[0:v][1:v]overlay=(W-w)/2:50:enable='between(t\\,0.5\\," + crEnd + ")':alpha='if(lt(t\\,1.2)\\,(t-0.5)/0.7\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=8:x=(w-text_w)/2:y=380+h-" + spd + "*t+100:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
+      const endVf = "[1:v]format=rgba,fade=t=in:st=0.5:d=0.7:alpha=1,fade=t=out:st=" + crFade + ":d=0.7:alpha=1[gridFaded];[0:v][gridFaded]overlay=(W-w)/2:50,drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=16:x=(w-text_w)/2:y=700-" + spd + "*t+100:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
       await execAsync('ffmpeg -y -threads 2 -i "' + bgBlurPath + '" -loop 1 -i "' + gridImg + '" -filter_complex "' + endVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOut + '"', 60000);
       console.log('[Pipeline] Grid ending: ' + endingDur + 's, ' + gn + ' photos');
       endingCreated = true;
     } catch (e: any) {
-      console.error('[Pipeline] Grid ending failed:', e.message?.slice(0, 300));
+      console.log('[Pipeline] Grid ending failed:', e.message?.slice(0, 300));
     }
   }
 
