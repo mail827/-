@@ -862,9 +862,20 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
         } else {
           refUrl = inputUrlsArr[0];
         }
-        const sdPrompt = effectiveMode === 'couple'
-          ? 'Use the reference image as the same couple. Keep the character identities exactly matching the reference image people, only change outfits and background. Preserve the EXACT faces, hairstyles, hair lengths unchanged. ' + prompt
-          : 'Use the reference image as the same person. Keep the character identity exactly matching the reference image person, only change outfit and background. Preserve the EXACT face, hairstyle, hair length unchanged. ' + prompt;
+        const allC = { ...STUDIO_CONCEPTS, ...CINEMATIC_CONCEPTS };
+        const sceneBase = allC[pack.concept]?.base || 'elegant white wedding studio with soft natural window light';
+        let sdPrompt = '';
+        if (effectiveMode === 'couple') {
+          const gOutfit = OUTFIT_GROOM[pack.concept] || OUTFIT_GROOM.studio_classic;
+          const bOutfit = OUTFIT_BRIDE[pack.concept] || OUTFIT_BRIDE.studio_classic;
+          sdPrompt = 'Portrait 3:4 ratio. The same couple from the reference image. The man ' + gOutfit + '. The woman ' + bOutfit + '. ' + sceneBase + '. Photorealistic editorial photograph, shallow depth of field';
+        } else if (effectiveMode === 'groom') {
+          const outfit = OUTFIT_GROOM[pack.concept] || OUTFIT_GROOM.studio_classic;
+          sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + sceneBase + '. Photorealistic editorial photograph, shallow depth of field';
+        } else {
+          const outfit = OUTFIT_BRIDE[pack.concept] || OUTFIT_BRIDE.studio_classic;
+          sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + sceneBase + '. Photorealistic editorial photograph, shallow depth of field';
+        }
 
         const arkRes = await fetch(ARK_BASE + '/images/generations', {
           method: 'POST',

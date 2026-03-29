@@ -925,15 +925,70 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
       refUrl = cropToPortrait(urls[0]);
     }
 
+    const SEEDREAM_SCENES: Record<string, string> = {
+      studio_classic: 'elegant white wedding studio with soft natural window light, clean minimal backdrop',
+      studio_gallery: 'minimal white architectural studio with curved plaster arches, soft diffused natural light',
+      studio_fog: 'warm studio with cream linen draped backdrop and pampas grass, soft warm light',
+      studio_mocha: 'dark moody studio with mocha brown wall and dramatic warm spotlight from above',
+      studio_sage: 'modern studio with sage green wall and cream furniture, soft even natural light',
+      outdoor_garden: 'lush botanical garden with blooming flowers, golden hour sunlight filtering through trees',
+      beach_sunset: 'pristine white sand beach at golden sunset, warm orange pink sky, gentle sea breeze',
+      hanbok_traditional: 'traditional Korean palace courtyard, soft natural daylight, dignified atmosphere',
+      hanbok_wonsam: 'grand Korean royal palace with red lacquered pillars and dancheong patterns',
+      hanbok_dangui: 'serene traditional Korean garden with lotus pond and pine trees',
+      hanbok_modern: 'minimalist Korean courtyard, natural soft lighting, modern fashion editorial',
+      hanbok_saeguk: 'Korean historical palace with ornate traditional interior, warm candlelight',
+      hanbok_flower: 'vibrant flower arrangement spring garden, soft natural light',
+      city_night: 'cinematic night city scene with neon lights reflecting on rain-slicked street, warm bokeh',
+      cherry_blossom: 'cherry blossom trees in full bloom, soft pink petals falling, warm spring sunlight',
+      forest_wedding: 'enchanted forest with tall trees and dappled golden sunlight, moss-covered ground',
+      castle_garden: 'European castle garden with manicured hedges and stone fountain, golden hour light',
+      cathedral: 'grand cathedral with stained glass windows casting colorful light beams',
+      watercolor: 'bright airy art studio with large windows, soft pastel watercolor splashes on white walls',
+      magazine_cover: 'high fashion editorial portrait, clean minimalist studio, dramatic single light source',
+      rainy_day: 'romantic rainy day under clear umbrella, rain drops creating beautiful bokeh, wet street reflections',
+      autumn_leaves: 'autumn setting with golden red maple leaves, warm fall sunlight',
+      winter_snow: 'winter wonderland with softly falling snow, frosted trees, magical atmosphere',
+      vintage_film: 'vintage portrait with warm Kodak Portra 400 tones, soft film grain, natural window light',
+      cruise_sunset: 'luxury yacht deck at golden hour sunset, warm amber ocean light, turquoise Mediterranean sea',
+      cruise_bluesky: 'luxury cruise ship deck under vivid blue sky, crystal clear ocean, bright natural daylight',
+      vintage_record: 'cozy vintage vinyl record shop, warm tungsten lighting, 1970s atmosphere',
+      retro_hongkong: 'Hong Kong night market with red lanterns and neon signs, rain-slicked street',
+      black_swan: 'dark gothic cathedral with pointed arches, deep blue stained glass, polished black marble floor',
+      blue_hour: 'twilight blue hour on European cobblestone street, warm street lamp against deep blue sky',
+      velvet_rouge: 'dark opulent mansion library with crimson velvet curtains, warm dim candlelight',
+      water_memory: 'dimly lit vintage movie theater with red velvet seats, warm projector light',
+      rose_garden: 'lavish rococo salon with pale pink walls, gilded mirrors, climbing pink roses, crystal chandelier, pastel pink dreamy light',
+      grass_rain: 'wide green grassy hillside on overcast rainy day, mist hanging low, grey sky, muted green tones, analog film grain',
+      eternal_blue: 'empty grey winter beach at dusk, grey sky meeting grey ocean, cold blue-grey monochrome, heavy film grain',
+      heart_editorial: 'dark editorial fashion studio, pure black background, hard directional spotlight, high contrast',
+    };
+
+    const SEEDREAM_OUTFIT_GROOM: Record<string, string> = {
+      rose_garden: 'pale warm beige soft wool suit with ivory tie and white dress shirt',
+      grass_rain: 'black wool suit with white shirt open collar, no tie, jacket unbuttoned',
+      eternal_blue: 'slate blue-grey suit with white shirt, pearl lapel pin',
+      heart_editorial: 'sharp black double-breasted suit with wide peaked lapels, narrow black tie, red fabric heart on lapel',
+    };
+    const SEEDREAM_OUTFIT_BRIDE: Record<string, string> = {
+      rose_garden: 'ivory duchess silk satin off-shoulder wedding dress with three blush pink rosettes at shoulder, full A-line skirt with long train',
+      grass_rain: 'light ivory silk chiffon halter-neck dress with crossed neckline, layered opaque chiffon skirt',
+      eternal_blue: 'dusty powder blue strapless sweetheart dress with massive voluminous cloud-like tulle ruffled skirt, pearl strand across bodice',
+      heart_editorial: 'pure white architectural high mock-neck dress with structured square shoulders, origami organza train, red fabric heart brooch at chest',
+    };
+
+    const scene = SEEDREAM_SCENES[concept] || SEEDREAM_SCENES.studio_classic;
     let sdPrompt = '';
     if (isCouple) {
-      sdPrompt = 'Use the reference image as the same couple. Keep the character identities exactly matching the reference image people, only change outfits and background. ' +
-        'Preserve the EXACT faces, hairstyles, hair lengths, and hair colors unchanged. ' +
-        pose + ', ' + basePrompt;
+      const gOutfit = SEEDREAM_OUTFIT_GROOM[concept] || 'classic dark suit with white shirt';
+      const bOutfit = SEEDREAM_OUTFIT_BRIDE[concept] || 'elegant white wedding gown';
+      sdPrompt = 'Portrait 3:4 ratio. The same couple from the reference image. The man wearing ' + gOutfit + '. The woman wearing ' + bOutfit + '. ' + scene + '. Photorealistic editorial photograph, shallow depth of field';
+    } else if (mode === 'groom') {
+      const outfit = SEEDREAM_OUTFIT_GROOM[concept] || 'classic dark suit with white shirt';
+      sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. Wearing ' + outfit + '. ' + scene + '. Photorealistic editorial photograph, shallow depth of field';
     } else {
-      sdPrompt = 'Use the reference image as the same person. Keep the character identity exactly matching the reference image person, only change outfit and background. ' +
-        'Preserve the EXACT face, hairstyle, hair length, and hair color unchanged. ' +
-        pose + ', ' + basePrompt;
+      const outfit = SEEDREAM_OUTFIT_BRIDE[concept] || 'elegant white wedding gown';
+      sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. Wearing ' + outfit + '. ' + scene + '. Photorealistic editorial photograph, shallow depth of field';
     }
 
     console.log('[SeeDream retry] calling ARK API, image:', refUrl.slice(0, 80));
