@@ -937,7 +937,7 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ARK_API_KEY },
       body: JSON.stringify({
         model: 'seedream-5-0-260128',
-        content,
+        prompt: content,
         size: '2K',
         response_format: 'url',
         watermark: false,
