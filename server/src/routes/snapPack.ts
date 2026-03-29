@@ -31,6 +31,9 @@ const uploadToCloudinary = async (imageUrl: string, snapId: string): Promise<str
   }
 };
 
+const ARK_API_KEY = process.env.ARK_API_KEY;
+const ARK_BASE = 'https://ark.ap-southeast.bytepluses.com/api/v3';
+
 const TIERS: Record<string, { snaps: number; price: number; label: string }> = {
   'snap-3': { snaps: 3, price: 5900, label: '3장 세트' },
   'snap-5': { snaps: 5, price: 9900, label: '5장 세트' },
@@ -849,6 +852,52 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     await prisma.snapPack.update({ where: { id: packId }, data: { usedSnaps: pack.usedSnaps + 1 } });
 
     try {
+      if (pack.preferredEngine === 'seedream' && ARK_API_KEY) {
+        console.log('[snapPack SeeDream] generating with ARK for snap:', snap.id, 'mode:', effectiveMode);
+        let refUrl = '';
+        if (effectiveMode === 'bride' && inputUrlsArr.length >= 2) {
+          refUrl = inputUrlsArr[1];
+        } else if (effectiveMode === 'couple' && inputUrlsArr.length >= 3) {
+          refUrl = inputUrlsArr[2];
+        } else {
+          refUrl = inputUrlsArr[0];
+        }
+        const sdPrompt = effectiveMode === 'couple'
+          ? 'Use the reference image as the same couple. Keep the character identities exactly matching the reference image people, only change outfits and background. Preserve the EXACT faces, hairstyles, hair lengths unchanged. ' + prompt
+          : 'Use the reference image as the same person. Keep the character identity exactly matching the reference image person, only change outfit and background. Preserve the EXACT face, hairstyle, hair length unchanged. ' + prompt;
+
+        const arkRes = await fetch(ARK_BASE + '/images/generations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ARK_API_KEY },
+          body: JSON.stringify({ model: 'seedream-5-0-260128', prompt: sdPrompt, image: refUrl, size: '2K', output_format: 'png', watermark: false }),
+        });
+
+        if (!arkRes.ok) {
+          const errText = await arkRes.text().catch(() => '');
+          console.error('[snapPack SeeDream] failed:', arkRes.status, errText.slice(0, 500));
+          await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: 'SeeDream generation failed' } });
+          return res.json({ snapId: snap.id, status: 'failed' });
+        }
+
+        const arkData = await arkRes.json();
+        const sdUrl = arkData.data?.[0]?.url;
+        if (!sdUrl) {
+          console.error('[snapPack SeeDream] no image url:', JSON.stringify(arkData).slice(0, 500));
+          await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: 'No image from SeeDream' } });
+          return res.json({ snapId: snap.id, status: 'failed' });
+        }
+
+        const uploadedUrl = await uploadToCloudinary(sdUrl, snap.id);
+        const updatedChain = { ...chainRefs };
+        if (effectiveMode === 'groom') updatedChain.groom = uploadedUrl;
+        else if (effectiveMode === 'bride') updatedChain.bride = uploadedUrl;
+        else updatedChain.couple = uploadedUrl;
+        await prisma.snapPack.update({ where: { id: packId }, data: { chainRefUrls: updatedChain } });
+        await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: uploadedUrl, engine: 'seedream' } });
+        console.log('[snapPack SeeDream] done:', uploadedUrl.slice(0, 80));
+        return res.json({ snapId: snap.id, status: 'done', resultUrl: uploadedUrl });
+      }
+
         const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
           method: 'POST',
           body: JSON.stringify({ prompt, image_urls: imageUrls, num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),

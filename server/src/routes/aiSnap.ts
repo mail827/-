@@ -1001,6 +1001,19 @@ router.post('/:id/select', authMiddleware, async (req: AuthRequest, res) => {
       where: { id: snap.id },
       data: { resultOriginalUrl: snap.resultUrl, resultUrl: snap.retryResultUrl, engine: 'seedream' },
     });
+    if (snap.snapPackId) {
+      await prisma.snapPack.update({
+        where: { id: snap.snapPackId },
+        data: { preferredEngine: 'seedream' },
+      });
+      console.log('[Select] preferredEngine set to seedream for pack:', snap.snapPackId);
+    }
+  } else if (version === 'original' && snap.snapPackId) {
+    await prisma.snapPack.update({
+      where: { id: snap.snapPackId },
+      data: { preferredEngine: null },
+    });
+    console.log('[Select] preferredEngine cleared for pack:', snap.snapPackId);
   }
   res.json({ ok: true });
 });

@@ -556,6 +556,7 @@ model SnapPack {
   amount      Int
   couponCode    String?
   chainRefUrls  Json      @default("{}")
+  preferredEngine String?
   status      String    @default("PENDING")
   paymentKey  String?
   orderId     String    @unique
