@@ -915,31 +915,28 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
       urls = imageUrls;
     }
 
-    const content: any[] = urls.map(u => ({ type: 'image_url', image_url: { url: cropToPortrait(u) } }));
+    const refUrl = cropToPortrait(urls[0]);
 
     let sdPrompt = '';
     if (isCouple) {
-      sdPrompt = 'The couple in @image1 in a wedding portrait. ' +
-        'Preserve the EXACT faces, hairstyles, hair lengths, and hair colors of both people from @image1. ' +
-        'Do NOT change any facial features, do NOT modify hairstyle or hair length. ' +
+      sdPrompt = 'Use the reference image as the same couple. Keep the character identities exactly matching the reference image people, only change outfits and background. ' +
+        'Preserve the EXACT faces, hairstyles, hair lengths, and hair colors unchanged. ' +
         pose + ', ' + basePrompt;
     } else {
-      const person = mode === 'groom' ? 'man' : 'woman';
-      sdPrompt = 'The ' + person + ' in @image1 in a wedding portrait. ' +
-        'Preserve the EXACT face, hairstyle, hair length, and hair color of the person from @image1. ' +
-        'Do NOT change any facial features, do NOT modify hairstyle or hair length. ' +
+      sdPrompt = 'Use the reference image as the same person. Keep the character identity exactly matching the reference image person, only change outfit and background. ' +
+        'Preserve the EXACT face, hairstyle, hair length, and hair color unchanged. ' +
         pose + ', ' + basePrompt;
     }
-    content.push({ type: 'text', text: sdPrompt });
 
     const res = await fetch(ARK_BASE + '/images/generations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ARK_API_KEY },
       body: JSON.stringify({
         model: 'seedream-5-0-260128',
-        prompt: content,
+        prompt: sdPrompt,
+        image: refUrl,
         size: '2K',
-        response_format: 'url',
+        output_format: 'png',
         watermark: false,
       }),
     });
