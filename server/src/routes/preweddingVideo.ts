@@ -168,8 +168,11 @@ const VIDEO_BRIDE_SHOTS = [
 
 
 
-async function visionQC(originalUrl: string, generatedUrl: string): Promise<boolean> {
+async function visionQC(originalUrl: string, generatedUrl: string, mode: string = ''): Promise<boolean> {
   try {
+    let genderCheck = '';
+    if (mode === 'groom') genderCheck = '\n3. GENDER-OUTFIT: The person MUST be wearing masculine clothing (suit, blazer, shirt, pants). If wearing a dress, skirt, gown, or any feminine clothing, answer FAIL.';
+    else if (mode === 'bride') genderCheck = '\n3. GENDER-OUTFIT: The person MUST be wearing feminine clothing (dress, gown, skirt). If wearing a full suit with pants like a man, answer FAIL.';
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + OPENAI_API_KEY },
@@ -181,7 +184,7 @@ async function visionQC(originalUrl: string, generatedUrl: string): Promise<bool
           content: [
             { type: 'image_url', image_url: { url: originalUrl, detail: 'high' } },
             { type: 'image_url', image_url: { url: generatedUrl, detail: 'high' } },
-            { type: 'text', text: 'Image 1 is the original photo. Image 2 is AI-generated. Check TWO things:\n1. DEFORMITY: Does image 2 have any deformed faces, extra or missing fingers, mutated hands, fused body parts, distorted limbs, extra arms or legs, melted or blurred facial features, asymmetric eyes at different heights, or any anatomical impossibility?\n2. FACE MATCH: Comparing ONLY eyes shape, nose shape, mouth shape, jawline, and face proportions — is it clearly the same person?\nAnswer FAIL if ANY deformity exists OR if the face does not match. Answer PASS only if there are zero deformities AND the face clearly matches. Reply with one word: PASS or FAIL.' },
+            { type: 'text', text: 'Image 1 is the original photo. Image 2 is AI-generated. Check these things:\n1. DEFORMITY: Does image 2 have any deformed faces, extra or missing fingers, mutated hands, fused body parts, distorted limbs, extra arms or legs, melted or blurred facial features, asymmetric eyes at different heights, disproportionately large head compared to body, or any anatomical impossibility?\n2. FACE MATCH: Comparing ONLY eyes shape, nose shape, mouth shape, jawline, and face proportions — is it clearly the same person?' + genderCheck + '\nAnswer FAIL if ANY check fails. Answer PASS only if ALL checks pass. Reply with one word: PASS or FAIL.' },
           ],
         }],
       }),
@@ -362,12 +365,12 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
           if (p.mode === 'couple') {
             const url2 = await genOne(p, shot, p.urls, si);
             if (!url2) {
-              const soloPass = await visionQC(p.urls[0], url1);
+              const soloPass = await visionQC(p.urls[0], url1, p.mode);
               console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' only url1, QC ' + (soloPass ? 'PASS' : 'FAIL(use anyway)'));
               return url1;
             }
-            const qc1 = await visionQC(p.urls[0], url1);
-            const qc2 = await visionQC(p.urls[0], url2);
+            const qc1 = await visionQC(p.urls[0], url1, p.mode);
+            const qc2 = await visionQC(p.urls[0], url2, p.mode);
             console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' QC: A=' + (qc1?'PASS':'FAIL') + ' B=' + (qc2?'PASS':'FAIL'));
             if (qc1 && !qc2) return url1;
             if (!qc1 && qc2) return url2;
@@ -394,12 +397,12 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
               return chosen;
             } catch (e: any) { console.log('[Glamour] couple comparative error:', e.message); return url1; }
           }
-          const pass1 = await visionQC(p.urls[0], url1);
+          const pass1 = await visionQC(p.urls[0], url1, p.mode);
           if (pass1) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC PASS'); return url1; }
           console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC FAIL, retry');
           const url2 = await genOne(p, shot, p.urls, si);
           if (!url2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry gen failed, use first'); return url1; }
-          const pass2 = await visionQC(p.urls[0], url2);
+          const pass2 = await visionQC(p.urls[0], url2, p.mode);
           if (pass2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry QC PASS'); return url2; }
           console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' both QC FAIL, use first'); return url1;
         })()
