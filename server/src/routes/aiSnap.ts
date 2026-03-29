@@ -932,56 +932,37 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
     }
     content.push({ type: 'text', text: sdPrompt });
 
-    const res = await fetch(ARK_BASE + '/contents/generations/tasks', {
+    const res = await fetch(ARK_BASE + '/images/generations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ARK_API_KEY },
-      body: JSON.stringify({ model: 'seedream-5-0-260128', content }),
+      body: JSON.stringify({
+        model: 'seedream-5-0-260128',
+        content,
+        size: '2K',
+        response_format: 'url',
+        watermark: false,
+      }),
     });
 
     if (!res.ok) {
-      console.error('[SeeDream retry] submit failed:', res.status, await res.text().catch(() => ''));
+      const errText = await res.text().catch(() => '');
+      console.error('[SeeDream retry] failed:', res.status, errText.slice(0, 500));
       await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
       return;
     }
 
-    const task = await res.json();
-    if (!task.id) {
-      console.error('[SeeDream retry] no task id:', JSON.stringify(task).slice(0, 300));
+    const data = await res.json();
+    const imgUrl = data.data?.[0]?.url;
+    if (imgUrl) {
+      const uploaded = await uploadFromUrl(imgUrl, 'ai-snap-retry');
+      await prisma.aiSnap.update({
+        where: { id: snapId },
+        data: { retryStatus: 'done', retryResultUrl: uploaded.url },
+      });
+    } else {
+      console.error('[SeeDream retry] no image url:', JSON.stringify(data).slice(0, 500));
       await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
-      return;
     }
-
-    for (let i = 0; i < 60; i++) {
-      await new Promise(r => setTimeout(r, 5000));
-      try {
-        const poll = await fetch(ARK_BASE + '/contents/generations/tasks/' + task.id, {
-          headers: { 'Authorization': 'Bearer ' + ARK_API_KEY },
-        });
-        const data = await poll.json();
-        if (data.status === 'succeeded') {
-          const imgUrl = data.content?.image_urls?.[0] || data.content?.image_url;
-          if (imgUrl) {
-            const uploaded = await uploadFromUrl(imgUrl, 'ai-snap-retry');
-            await prisma.aiSnap.update({
-              where: { id: snapId },
-              data: { retryStatus: 'done', retryResultUrl: uploaded.url },
-            });
-          } else {
-            await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
-          }
-          return;
-        }
-        if (data.status === 'failed') {
-          console.error('[SeeDream retry] generation failed:', JSON.stringify(data).slice(0, 300));
-          await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
-          return;
-        }
-      } catch (pollErr: any) {
-        console.error('[SeeDream retry] poll error:', pollErr.message);
-        continue;
-      }
-    }
-    await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
   } catch (err: any) {
     console.error('[SeeDream retry] fatal:', err.message);
     await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
