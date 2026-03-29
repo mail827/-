@@ -770,7 +770,7 @@ export default function AiSnapStudioPage() {
                 <button onClick={() => setCompareView('original')} className={'px-4 py-2 rounded-full text-xs font-medium transition-all ' + (compareView === 'original' ? 'bg-white text-stone-900' : 'text-white/70 hover:text-white')}>A</button>
                 <button onClick={() => setCompareView('new')} className={'px-4 py-2 rounded-full text-xs font-medium transition-all ' + (compareView === 'new' ? 'bg-white text-stone-900' : 'text-white/70 hover:text-white')}>B</button>
               </div>
-              <img src={compareView === 'original' ? viewSnap.resultUrl : viewSnap.retryResultUrl} alt="" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
+              <img src={compareView === 'original' ? viewSnap.resultUrl : viewSnap.retryResultUrl} alt="" className="max-w-full max-h-[60vh] sm:max-h-[70vh] object-contain rounded-xl" />
               <div className="flex gap-3">
                 <button onClick={async () => { await fetch(API + '/ai-snap/' + viewSnap.id + '/select', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') }, body: JSON.stringify({ version: 'original' }) }); setCompareMode(false); }} className={'px-5 py-2.5 rounded-full text-sm font-medium transition-all ' + (compareView === 'original' ? 'bg-white text-stone-900' : 'bg-white/10 text-white/70 hover:bg-white/20')}>A 선택</button>
                 <button onClick={async () => { await fetch(API + '/ai-snap/' + viewSnap.id + '/select', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') }, body: JSON.stringify({ version: 'retry' }) }); if (activePack) { const up = { ...activePack, snaps: activePack.snaps.map((s: Snap) => s.id === viewSnap.id ? { ...s, resultUrl: viewSnap.retryResultUrl } : s) }; setActivePack(up); } setViewSnap({ ...viewSnap, resultUrl: viewSnap.retryResultUrl! }); setCompareMode(false); }} className={'px-5 py-2.5 rounded-full text-sm font-medium transition-all ' + (compareView === 'new' ? 'bg-white text-stone-900' : 'bg-white/10 text-white/70 hover:bg-white/20')}>B 선택</button>
@@ -778,8 +778,8 @@ export default function AiSnapStudioPage() {
             </div>
           ) : (
             <>
-              <img src={viewSnap.resultUrl} alt="" className="max-w-full max-h-[85vh] object-contain rounded-xl" onClick={(e: React.MouseEvent) => e.stopPropagation()} />
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 items-center">
+              <img src={viewSnap.resultUrl} alt="" className="max-w-full max-h-[70vh] sm:max-h-[85vh] object-contain rounded-xl" onClick={(e: React.MouseEvent) => e.stopPropagation()} />
+              <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 w-full max-w-md px-4 sm:px-0 flex flex-wrap justify-center gap-2 sm:gap-3 items-center">
                 <span className="px-3 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full">#{(activePack?.snaps.findIndex((s: Snap) => s.id === viewSnap.id) ?? 0) + 1} {viewSnap.mode === 'couple' ? at('couple', pl) : viewSnap.mode === 'groom' ? at('groom', pl) : at('bride', pl)}</span>
                 {viewSnap.retryStatus === 'done' && viewSnap.retryResultUrl ? (
                   <button onClick={(e: React.MouseEvent) => { e.stopPropagation(); setCompareMode(true); }} className="flex items-center gap-1.5 px-4 py-1.5 bg-stone-800 text-white rounded-full text-xs font-medium hover:bg-stone-700 transition-colors"><RefreshCw className="w-3.5 h-3.5" />비교하기</button>
