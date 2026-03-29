@@ -132,6 +132,66 @@ const cropToPortrait = (url: string): string => {
 
 const FACE_INSTRUCTION = 'CRITICAL: preserve the EXACT original face AND exact hairstyle hair length hair color from the reference photo unchanged. Do NOT modify eyes, do NOT add double eyelids, do NOT change eye shape. Keep exact nose, lips, jaw, face proportions. Do NOT beautify or slim face. Do NOT change hairstyle, do NOT cut hair shorter, do NOT add bangs if none exist, keep exact same hair from input photo. Do NOT create deformed hands or extra fingers. Do NOT add text logos watermarks. Keep clean elegant clothing with no distortion';
 
+
+const SCENE_ROTATION: Record<string, { groom: string[]; bride: string[]; couple: string[] }> = {
+  rose_garden: {
+    groom: [
+      'editorial portrait in lavish rococo salon with pale pink walls gilded ornate mirrors climbing pink roses crystal chandelier with dripping candle lights, wearing pale warm beige soft wool two-button suit with natural shoulders relaxed drape ivory cream silk tie in loose knot over white dress shirt ivory pocket square, leaning on gilded pink velvet chaise longue with amused grin, scattered rose petals and pale pink macarons on gold tray nearby, soft diffused pastel pink light dreamy hazy atmosphere, long straight black hair, photorealistic, 8k',
+      'editorial portrait standing on small ornate stone balcony overlooking pink rose garden below, rococo pale pink exterior wall with gilded window frame behind, wearing pale warm beige soft wool two-button suit ivory cream silk tie white dress shirt, leaning on stone balustrade looking out at garden, climbing roses around open French doors, soft overcast afternoon light, long straight black hair, photorealistic, 8k',
+    ],
+    bride: [
+      'editorial portrait on grand curved marble staircase with wrought iron pink rose vine railing in rococo palace, pale pink walls with gilded molding, wearing ivory duchess silk satin off-shoulder wedding dress with softly draped silk at collarbone structured corset bodice three blush pink rosettes at left shoulder full voluminous A-line skirt with long graceful train cascading down marble stairs behind her, one hand on railing descending stairs, soft natural light from tall arched window, long straight black hair past shoulders, pastel pink atmosphere, photorealistic, 8k',
+      'editorial portrait standing facing large gilded mirror in rococo salon adjusting rosette on shoulder, wearing ivory duchess silk satin off-shoulder wedding dress with draped silk at collarbone structured corset three blush pink rosettes at left shoulder full A-line skirt, three-quarter back angle with mirror showing face, pale pink walls climbing pink roses around mirror frame, soft diffused pastel pink light, long straight black hair, photorealistic, 8k',
+    ],
+    couple: [
+      'couple in lavish rococo salon with pale pink walls gilded ornate mirrors white iron trellis completely covered in climbing pink roses crystal chandelier with dripping candle lights, man wearing pale warm beige soft wool two-button suit ivory tie white shirt leaning on back of gilded pink velvet chaise longue looking down with amused grin, woman wearing ivory duchess silk satin off-shoulder wedding dress with draped silk at collarbone structured corset three blush pink rosettes at left shoulder full A-line skirt with long train sitting sideways on chaise laughing mid-bite into pale pink macaron, scattered rose petals and macarons on small gold tray, soft diffused natural window light from right with gentle pastel pink color cast, dreamy hazy atmosphere, both with long straight black hair, photorealistic editorial photograph 50mm lens shallow depth of field film grain, 8k',
+      'couple standing on small ornate stone balcony overlooking pink rose garden below, rococo pale pink exterior wall with gilded window frame behind, man wearing pale beige suit ivory tie white shirt, woman wearing ivory duchess silk satin off-shoulder dress with rosettes at shoulder full A-line skirt, leaning on stone balustrade side by side she rests head on his shoulder both looking out at garden, shot from inside room framing them through open French doors, climbing roses around doorframe, soft overcast afternoon light, both with long straight black hair, photorealistic editorial photograph 50mm lens, 8k',
+    ],
+  },
+  grass_rain: {
+    groom: [
+      'analog film portrait in wide green grassy hillside on grey rainy day, wearing black wool slim-fit two-button suit with natural shoulders white shirt open collar no tie jacket unbuttoned slightly damp on shoulders, standing in tall wet grass, fine rain mist visible in air, muted desaturated green-grey tones, completely flat grey overcast light, heavy film grain shot on Fuji Superia 400, long straight black hair, photorealistic, 8k',
+      'analog film portrait walking away from camera up gentle green grassy slope, shot from behind at low waist level, wearing black wool suit white shirt open collar no tie, tall grass and small wildflowers blurred in foreground, soft overcast light, muted desaturated green tone, grainy analog film, long straight black hair, photorealistic, 8k',
+    ],
+    bride: [
+      'analog film portrait in wide green grassy field on overcast rainy day, wearing light ivory silk chiffon halter-neck wedding dress with crossed draped fabric gathered at back of neck shoulders bare, gently fitted bodice with natural soft gathers, multiple opaque layered chiffon skirt with uneven raw-edge hemlines catching slight breeze, fabric fully opaque with dense layering ensuring complete coverage, fine rain on skin, eyes closed soft smile, flat grey overcast light, muted green-grey tones heavy film grain Kodak Portra 400, long straight black hair slightly damp, photorealistic, 8k',
+      'analog film close-up portrait standing forehead to forehead position in green field on rainy day, wearing light ivory silk chiffon halter-neck dress with crossed draped neckline, wet hair sticking to cheeks, raindrops on skin, both eyes closed soft smile, fine rain falling around, completely flat grey overcast light, shallow depth of field grassy background dissolved into green blur, heavy film grain Fuji Pro 400H muted green-grey tones, long straight black hair damp from rain, photorealistic, 8k',
+    ],
+    couple: [
+      'couple sitting close together in tall wet grass on grey rainy day, woman sitting between his legs leaning back into him eyes closed smiling wearing light ivory silk chiffon halter-neck wedding dress with crossed draped neckline fabric fully opaque with dense layering, man wearing black wool two-button suit white shirt open collar no tie wrapping arms around her, fine rain mist visible in air, no sun completely flat grey light, heavy film grain shot on Kodak Portra 400 pushed two stops, muddy green-grey color palette, both with long straight black hair slightly damp, photorealistic analog film photograph, 8k',
+      'couple running through green field holding hands captured with slight motion energy, woman wearing light ivory silk chiffon halter-neck dress sheer skirt flowing in movement, man taller in black suit white shirt, running toward camera laughing, rainy grey overcast day, heavy film grain Fuji Superia 400 muted green-grey tones, both with long straight black hair flying behind, photorealistic analog film, 8k',
+    ],
+  },
+  eternal_blue: {
+    groom: [
+      'melancholic cinematic portrait between tall bookshelves in dimly lit old bookstore, wearing slate blue-grey wool one-button suit with slim peak lapels clean sharp silhouette white silk shirt spread collar top button undone no tie small pearl pin on left lapel, standing above looking down with gentle smile, warm single brass desk lamp at end of aisle casting long shadows through gaps between books, dust particles floating in lamplight beam, warm tungsten and cool shadow split, long straight black hair, heavy film grain, photorealistic, 8k',
+      'melancholic cinematic portrait caught mid-stride inside perfect circle of white spotlight on completely black stage floor wearing slate blue-grey wool one-button suit with slim peak lapels white shirt pearl lapel pin, body angled dynamically one foot forward, everything outside spotlight is pure black void, hard theatrical lighting, long straight black hair, heavy film grain, photorealistic, 8k',
+    ],
+    bride: [
+      'melancholic cinematic portrait on empty grey winter beach at dusk, wearing dusty powder blue strapless sweetheart satin bodice dress with massive voluminous cloud-like tulle ruffled skirt in graduating shades from dusty blue to pale icy blue at hem hand-gathered in irregular cloud-like ruffles, single pearl strand draped across bodice, standing alone at water edge with back three-quarters turned to camera, enormous tulle skirt dragging across dark wet sand, cold wind blowing hair sideways, grey overcast sky meeting grey ocean, cold desaturated blue-grey monochrome, heavy film grain, long straight black hair, photorealistic, 8k',
+      'melancholic cinematic portrait shot from directly overhead bird-eye view lying on frozen cracked ice surface, wearing dusty blue strapless sweetheart satin bodice tulle dress massive blue tulle skirt fanned out across white ice like spilled ink dissolving in water, pearl strand across bodice, hair spread across ice, staring straight up at camera with quiet calm expression, hairline cracks in ice radiating outward, flat cold overcast light, blue tulle against white ice only color, long straight black hair fanned out, heavy film grain Kodak Vision3 500T blue-shifted, photorealistic, 8k',
+    ],
+    couple: [
+      'couple on frozen cracked lake surface under heavy grey sky light snow falling, woman wearing dusty powder blue strapless sweetheart satin bodice dress with massive voluminous cloud-like tulle ruffled skirt in graduating blue tones pearl strand across bodice, man wearing slate blue-grey wool one-button suit white shirt pearl lapel pin wrapping his jacket around both of them, she buries face in his chest, massive blue tulle skirt spreads across white ice like pool of blue watercolor dissolving into white, everything fading to white at edges, monochromatic blue-white-grey palette, both with long straight black hair, quiet melancholic heavy film grain, photorealistic, 8k',
+      'couple standing at water edge on empty grey winter beach at dusk facing ocean with backs to camera, woman wearing dusty blue tulle dress with pearl strand massive skirt pooling on wet sand behind her, man wearing slate blue-grey suit pearl lapel pin standing close beside her shoulders barely touching not holding hands, grey sky beginning to show faintest crack of pale blue light along horizon, wet sand reflects their silhouettes, shot from far away making them small figures against vast grey seascape, cold monochrome with single line of distant blue, both with long straight black hair, heavy film grain quiet and still, photorealistic, 8k',
+    ],
+  },
+  heart_editorial: {
+    groom: [
+      'high fashion editorial portrait caught mid-stride inside perfect circle of white spotlight on completely black stage floor, wearing sharp black wool double-breasted six-button jacket with extreme wide peaked lapels heavily structured squared shoulders high-waisted wide-leg trousers with razor-sharp front crease, crisp white shirt buttoned to top narrow black silk tie pulled very tight, single small red fabric heart pinned on left lapel, body angled dynamically one foot forward jacket swinging slightly arms in motion, everything outside spotlight circle is pure black void, hard theatrical lighting deep contrast, long straight black hair, photorealistic, 8k',
+      'high fashion editorial extreme close-up face against pure black background, holding gold-rimmed magnifying glass over right eye making eye appear enormous through lens staring directly at camera, only eyes nose and lips visible in tight crop, wearing sharp black double-breasted suit just the wide peaked lapel barely visible with red fabric heart pin, one hard key light from upper left creating deep shadow on right side of face, rest is pure darkness, long straight black hair, photorealistic 85mm macro lens razor sharp focus on magnified eye, 8k',
+    ],
+    bride: [
+      'high fashion editorial portrait shot from directly overhead bird-eye view lying on black floor, wearing pure white architectural high mock-neck wedding dress with structured exaggerated square shoulders rigid sculpted heavy white duchess satin torso, massive origami organza train fanned out in perfect spiral around body filling frame like white sculpture on black canvas, one single oversized red fabric heart brooch pinned at center of chest, one hand resting on chest over heart other extended outward disappearing into white folds, hair fanned out around head, looking straight up at camera with intense calm gaze, hard overhead light creating bright white form against pure black floor, long straight black hair, photorealistic, 8k',
+      'high fashion editorial extreme close-up face against pure black background, holding gold-rimmed magnifying glass over right eye making eye appear enormous through lens staring directly at camera, only eyes nose and lips visible in tight crop, wearing white architectural mock-neck dress just the high neckline barely visible at bottom of frame with red fabric heart brooch peeking at edge, one hard key light from upper left creating deep shadow on right side of face, rest is pure darkness, long straight black hair, photorealistic 85mm macro lens razor sharp focus on magnified eye, 8k',
+    ],
+    couple: [
+      'couple in dark studio, woman sitting on simple black cube wearing pure white architectural mock-neck dress with structured exaggerated square shoulders rigid sculpted torso origami train pooled on black floor red fabric heart brooch at chest resting chin on one hand looking directly at camera, man standing tall behind her one head taller wearing sharp black double-breasted six-button suit with wide peaked lapels white shirt narrow black tie red fabric heart on left lapel looking down at her not at camera, single hard beauty dish light from directly above casting defined shadows under cheekbones, everything else falls to black, only white dress black suit two red hearts and skin tones visible, both with long straight black hair, heavy contrast editorial fashion photograph 85mm lens, photorealistic, 8k',
+      'plain white wall with sharp black shadow silhouettes of couple in profile about to kiss projected by single hard side light source, actual couple not visible only their shadows on wall, her shadow shows structured square shoulders of dress and high neckline, his shadow shows wide peaked lapels of double-breasted suit, shadow noses almost touching, in bottom right corner woman actual hand reaches into frame holding red fabric heart between fingers, hand is only real element everything else is shadow play, hard directional side light, high contrast black and white with only red heart in color, photorealistic, 8k',
+    ],
+  },
+};
+
 const SOLO_PROMPTS: Record<string, { groom: string; bride: string }> = {
   studio_classic: {
     groom: 'place the same person in a modern minimalist white studio with clean white walls and large windows casting soft natural daylight, wearing elegant black tuxedo with white shirt and black bow tie, airy contemporary elegance, confident gentle gaze, photorealistic, 8k',
@@ -393,14 +453,18 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
     await prisma.aiSnap.update({ where: { id: snapId }, data: { status: 'generating' } });
 
     let basePrompt = '';
-    if (mode === 'couple') {
+    const rotation = SCENE_ROTATION[concept];
+    if (rotation) {
+      const arr = mode === 'couple' ? rotation.couple : mode === 'groom' ? rotation.groom : rotation.bride;
+      basePrompt = arr[Math.floor(Math.random() * arr.length)];
+    } else if (mode === 'couple') {
       basePrompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
     } else if (mode === 'groom') {
       basePrompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
     } else {
       basePrompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
     }
-    const pose = getRandomPose(mode);
+    const pose = rotation ? '' : getRandomPose(mode);
     const prompt = FACE_INSTRUCTION + ', ' + pose + ', ' + basePrompt;
 
     const isCouple = mode === 'couple';
