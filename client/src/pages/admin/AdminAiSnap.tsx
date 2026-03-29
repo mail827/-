@@ -52,6 +52,10 @@ const CONCEPTS = [
   { id: 'blue_hour', label: '블루아워' },
   { id: 'water_memory', label: '물의 기억' },
   { id: 'velvet_rouge', label: '벨벳 루즈' },
+  { id: 'rose_garden', label: '장미 정원' },
+  { id: 'grass_rain', label: '풀밭' },
+  { id: 'eternal_blue', label: '블루' },
+  { id: 'heart_editorial', label: '하이 에디토리얼' },
 ];
 
 const CONCEPT_MAP = Object.fromEntries(CONCEPTS.map(c => [c.id, c.label]));
