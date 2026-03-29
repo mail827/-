@@ -916,7 +916,14 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
       urls = imageUrls;
     }
 
-    const refUrl = cropToPortrait(urls[0]);
+    let refUrl = '';
+    if (isCouple && urls.length >= 3) {
+      refUrl = cropToPortrait(urls[2]);
+    } else if (mode === 'bride' && urls.length >= 2) {
+      refUrl = cropToPortrait(urls[1]);
+    } else {
+      refUrl = cropToPortrait(urls[0]);
+    }
 
     let sdPrompt = '';
     if (isCouple) {
