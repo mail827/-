@@ -868,13 +868,13 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
         if (effectiveMode === 'couple') {
           const gOutfit = OUTFIT_GROOM[pack.concept] || OUTFIT_GROOM.studio_classic;
           const bOutfit = OUTFIT_BRIDE[pack.concept] || OUTFIT_BRIDE.studio_classic;
-          sdPrompt = 'Portrait 3:4 ratio. The same couple from the reference image. The man ' + gOutfit + '. The woman ' + bOutfit + '. ' + sceneBase + '. Photorealistic editorial photograph, shallow depth of field';
+          sdPrompt = 'Portrait 3:4 ratio. The same couple from the reference image. The man ' + gOutfit + '. The woman ' + bOutfit + '. ' + sceneBase + '. Warm natural expression, gentle smile, relaxed intimate mood. Photorealistic editorial photograph, soft natural skin texture, 50mm lens, shallow depth of field, no AI artifacts';
         } else if (effectiveMode === 'groom') {
           const outfit = OUTFIT_GROOM[pack.concept] || OUTFIT_GROOM.studio_classic;
-          sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + sceneBase + '. Photorealistic editorial photograph, shallow depth of field';
+          sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + sceneBase + '. Warm natural expression, gentle smile, soft confident gaze. Photorealistic editorial photograph, soft natural skin texture, 50mm lens, shallow depth of field, no AI artifacts';
         } else {
           const outfit = OUTFIT_BRIDE[pack.concept] || OUTFIT_BRIDE.studio_classic;
-          sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + sceneBase + '. Photorealistic editorial photograph, shallow depth of field';
+          sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + sceneBase + '. Warm natural expression, gentle smile, soft confident gaze. Photorealistic editorial photograph, soft natural skin texture, 50mm lens, shallow depth of field, no AI artifacts';
         }
 
         const arkRes = await fetch(ARK_BASE + '/images/generations', {

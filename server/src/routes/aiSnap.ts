@@ -965,16 +965,16 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
     };
 
     const SEEDREAM_OUTFIT_GROOM: Record<string, string> = {
-      rose_garden: 'pale warm beige soft wool suit with ivory tie and white dress shirt',
-      grass_rain: 'black wool suit with white shirt open collar, no tie, jacket unbuttoned',
-      eternal_blue: 'slate blue-grey suit with white shirt, pearl lapel pin',
-      heart_editorial: 'sharp black double-breasted suit with wide peaked lapels, narrow black tie, red fabric heart on lapel',
+      rose_garden: 'wearing pale warm beige soft wool two-button suit with natural shoulders and relaxed comfortable drape, ivory cream silk tie in loose four-in-hand knot over white cotton dress shirt with soft spread collar, ivory silk pocket square tucked casually, soft brushed matte texture, romantic elegant groom',
+      grass_rain: 'wearing black wool slim-fit two-button suit with natural shoulders, white cotton shirt with collar open no tie, jacket worn casually unbuttoned, clean simple silhouette, natural relaxed groom',
+      eternal_blue: 'wearing slate blue-grey wool one-button suit with slim peak lapels and clean sharp silhouette, white silk shirt with spread collar top button undone no tie, small pearl pin on left lapel as only accessory, cool melancholic elegance',
+      heart_editorial: 'wearing sharp black wool double-breasted six-button jacket with extreme wide peaked lapels and heavily structured squared shoulders, matching high-waisted wide-leg trousers with razor-sharp front crease, crisp white shirt buttoned to top with narrow black silk tie pulled very tight, single small red fabric heart pinned on left lapel, bold graphic power silhouette, editorial fashion',
     };
     const SEEDREAM_OUTFIT_BRIDE: Record<string, string> = {
-      rose_garden: 'ivory duchess silk satin off-shoulder wedding dress with three blush pink rosettes at shoulder, full A-line skirt with long train',
-      grass_rain: 'light ivory silk chiffon halter-neck dress with crossed neckline, layered opaque chiffon skirt',
-      eternal_blue: 'dusty powder blue strapless sweetheart dress with massive voluminous cloud-like tulle ruffled skirt, pearl strand across bodice',
-      heart_editorial: 'pure white architectural high mock-neck dress with structured square shoulders, origami organza train, red fabric heart brooch at chest',
+      rose_garden: 'wearing ivory duchess silk satin off-shoulder wedding dress with softly draped silk folding across collarbone, structured boned corset bodice with smooth clean surface, three small delicate blush pink silk rosettes clustered at left shoulder, full voluminous A-line skirt with long graceful train sweeping floor, no lace no beading no embroidery, opulent rococo bridal elegance',
+      grass_rain: 'wearing light ivory silk chiffon halter-neck wedding dress with crossed draped fabric gathered at back of neck leaving shoulders bare, gently fitted bodice with natural soft gathers at waist no boning, multiple opaque layered chiffon skirt panels with slightly uneven raw-edge hemlines creating organic flowing movement, fabric fully opaque with dense layering ensuring complete coverage, clean effortless minimal bridal',
+      eternal_blue: 'wearing dusty powder blue strapless sweetheart satin bodice dress with massive voluminous cloud-like tulle ruffled skirt in graduating shades from dusty blue at waist to pale icy blue at hem, tulle layers hand-gathered in irregular cloud-like ruffles creating organic sculptural volume, single strand of small pearls draped loosely across bodice, soft matte tulle finish, no lace no sequins no glitter, dramatic sculptural',
+      heart_editorial: 'wearing pure white architectural high mock-neck wedding dress with structured exaggerated square shoulders, rigid sculpted heavy white duchess satin torso like armor, front sharp straight column stopping at ankle, back dramatic floor-sweeping sculptural train of stiff white organza folds like origami paper, one single oversized red fabric heart pinned at center of chest like brooch, no lace no beading no tulle no soft draping, everything geometric and architectural, editorial high fashion',
     };
 
     const scene = SEEDREAM_SCENES[concept] || SEEDREAM_SCENES.studio_classic;
@@ -982,13 +982,13 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
     if (isCouple) {
       const gOutfit = SEEDREAM_OUTFIT_GROOM[concept] || 'classic dark suit with white shirt';
       const bOutfit = SEEDREAM_OUTFIT_BRIDE[concept] || 'elegant white wedding gown';
-      sdPrompt = 'Portrait 3:4 ratio. The same couple from the reference image. The man wearing ' + gOutfit + '. The woman wearing ' + bOutfit + '. ' + scene + '. Photorealistic editorial photograph, shallow depth of field';
+      sdPrompt = 'Portrait 3:4 ratio. The same couple from the reference image. The man ' + gOutfit + '. The woman ' + bOutfit + '. ' + scene + '. Warm natural expression, gentle smile, relaxed intimate mood. Photorealistic editorial photograph, soft natural skin texture, 50mm lens, shallow depth of field, no AI artifacts';
     } else if (mode === 'groom') {
       const outfit = SEEDREAM_OUTFIT_GROOM[concept] || 'classic dark suit with white shirt';
-      sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. Wearing ' + outfit + '. ' + scene + '. Photorealistic editorial photograph, shallow depth of field';
+      sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + scene + '. Warm natural expression, gentle smile, soft confident gaze. Photorealistic editorial photograph, soft natural skin texture, 50mm lens, shallow depth of field, no AI artifacts';
     } else {
       const outfit = SEEDREAM_OUTFIT_BRIDE[concept] || 'elegant white wedding gown';
-      sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. Wearing ' + outfit + '. ' + scene + '. Photorealistic editorial photograph, shallow depth of field';
+      sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + scene + '. Warm natural expression, gentle smile, soft confident gaze. Photorealistic editorial photograph, soft natural skin texture, 50mm lens, shallow depth of field, no AI artifacts';
     }
 
     console.log('[SeeDream retry] calling ARK API, image:', refUrl.slice(0, 80));

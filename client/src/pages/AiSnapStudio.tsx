@@ -786,31 +786,71 @@ export default function AiSnapStudioPage() {
           <button onClick={() => { setViewSnap(null); setCompareMode(false); setCompareView('original'); }} className="absolute top-4 right-4 p-2 text-white/70 hover:text-white z-10">
             <X className="w-6 h-6" />
           </button>
+
           {compareMode && viewSnap.retryResultUrl ? (
-            <div className="flex flex-col items-center gap-4 max-w-full" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-              <div className="flex gap-2 bg-white/10 backdrop-blur-md rounded-full p-1">
-                <button onClick={() => setCompareView('original')} className={'px-4 py-2 rounded-full text-xs font-medium transition-all ' + (compareView === 'original' ? 'bg-white text-stone-900' : 'text-white/70 hover:text-white')}>A</button>
-                <button onClick={() => setCompareView('new')} className={'px-4 py-2 rounded-full text-xs font-medium transition-all ' + (compareView === 'new' ? 'bg-white text-stone-900' : 'text-white/70 hover:text-white')}>B</button>
+            <div className="flex flex-col items-center gap-4 w-full max-w-lg px-4" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+              <div className="flex gap-1 bg-white/10 backdrop-blur-md rounded-full p-1 w-full max-w-xs">
+                <button onClick={() => setCompareView('original')} className={'flex-1 py-2.5 rounded-full text-xs font-medium transition-all ' + (compareView === 'original' ? 'bg-white text-stone-900' : 'text-white/60 hover:text-white')}>
+                  원래 버전
+                </button>
+                <button onClick={() => setCompareView('new')} className={'flex-1 py-2.5 rounded-full text-xs font-medium transition-all ' + (compareView === 'new' ? 'bg-white text-stone-900' : 'text-white/60 hover:text-white')}>
+                  새 버전
+                </button>
               </div>
-              <img src={compareView === 'original' ? viewSnap.resultUrl : viewSnap.retryResultUrl} alt="" className="max-w-full max-h-[60vh] sm:max-h-[70vh] object-contain rounded-xl" />
-              <div className="flex gap-3">
-                <button onClick={async () => { await fetch(API + '/ai-snap/' + viewSnap.id + '/select', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') }, body: JSON.stringify({ version: 'original' }) }); setCompareMode(false); }} className={'px-5 py-2.5 rounded-full text-sm font-medium transition-all ' + (compareView === 'original' ? 'bg-white text-stone-900' : 'bg-white/10 text-white/70 hover:bg-white/20')}>A 선택</button>
-                <button onClick={async () => { await fetch(API + '/ai-snap/' + viewSnap.id + '/select', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') }, body: JSON.stringify({ version: 'retry' }) }); if (activePack) { const up = { ...activePack, snaps: activePack.snaps.map((s: Snap) => s.id === viewSnap.id ? { ...s, resultUrl: viewSnap.retryResultUrl } : s) }; setActivePack(up); } setViewSnap({ ...viewSnap, resultUrl: viewSnap.retryResultUrl! }); setCompareMode(false); }} className={'px-5 py-2.5 rounded-full text-sm font-medium transition-all ' + (compareView === 'new' ? 'bg-white text-stone-900' : 'bg-white/10 text-white/70 hover:bg-white/20')}>B 선택</button>
+              <img src={compareView === 'original' ? viewSnap.resultUrl : viewSnap.retryResultUrl} alt="" className="max-w-full max-h-[55vh] sm:max-h-[65vh] object-contain rounded-xl" />
+              <div className="w-full max-w-xs space-y-2">
+                <button onClick={async () => {
+                  await fetch(API + '/ai-snap/' + viewSnap.id + '/select', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') }, body: JSON.stringify({ version: 'retry' }) });
+                  if (activePack) { const up = { ...activePack, snaps: activePack.snaps.map((s: Snap) => s.id === viewSnap.id ? { ...s, resultUrl: viewSnap.retryResultUrl } : s) }; setActivePack(up); }
+                  setViewSnap({ ...viewSnap, resultUrl: viewSnap.retryResultUrl! });
+                  setCompareMode(false);
+                }} className="w-full py-3 bg-white text-stone-900 rounded-full text-sm font-medium hover:bg-stone-100 transition-all">
+                  새 버전으로 변경
+                </button>
+                <button onClick={async () => {
+                  await fetch(API + '/ai-snap/' + viewSnap.id + '/select', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') }, body: JSON.stringify({ version: 'original' }) });
+                  setCompareMode(false);
+                }} className="w-full py-3 bg-white/10 text-white/70 rounded-full text-sm font-medium hover:bg-white/20 transition-all">
+                  원래 버전 유지
+                </button>
               </div>
             </div>
           ) : (
             <>
               <img src={viewSnap.resultUrl} alt="" className="max-w-full max-h-[70vh] sm:max-h-[85vh] object-contain rounded-xl" onClick={(e: React.MouseEvent) => e.stopPropagation()} />
-              <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 w-full max-w-md px-4 sm:px-0 flex flex-wrap justify-center gap-2 sm:gap-3 items-center">
-                <span className="px-3 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full">#{(activePack?.snaps.findIndex((s: Snap) => s.id === viewSnap.id) ?? 0) + 1} {viewSnap.mode === 'couple' ? at('couple', pl) : viewSnap.mode === 'groom' ? at('groom', pl) : at('bride', pl)}</span>
+              <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 w-full max-w-sm px-4 flex flex-col items-center gap-2">
                 {viewSnap.retryStatus === 'done' && viewSnap.retryResultUrl ? (
-                  <button onClick={(e: React.MouseEvent) => { e.stopPropagation(); setCompareMode(true); }} className="flex items-center gap-1.5 px-4 py-1.5 bg-stone-800 text-white rounded-full text-xs font-medium hover:bg-stone-700 transition-colors"><RefreshCw className="w-3.5 h-3.5" />비교하기</button>
+                  <button onClick={(e: React.MouseEvent) => { e.stopPropagation(); setCompareMode(true); setCompareView('new'); }}
+                    className="w-full py-3 bg-white text-stone-900 rounded-full text-sm font-medium hover:bg-stone-100 transition-all text-center">
+                    새로운 버전이 준비됐어요
+                  </button>
                 ) : viewSnap.retryStatus === 'generating' ? (
-                  <span className="flex items-center gap-1.5 px-4 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full"><Loader2 className="w-3.5 h-3.5 animate-spin" />새 버전 생성중</span>
+                  <div className="w-full py-3 bg-white/10 backdrop-blur-md text-white/80 rounded-full text-sm text-center flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />새 버전 생성중...
+                  </div>
                 ) : !viewSnap.retryStatus ? (
-                  <button onClick={async (e: React.MouseEvent) => { e.stopPropagation(); setRetrying(true); try { await fetch(API + '/ai-snap/' + viewSnap.id + '/retry', { method: 'POST', headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } }); if (activePack) { const up = { ...activePack, snaps: activePack.snaps.map((s: Snap) => s.id === viewSnap.id ? { ...s, retryStatus: 'generating' } : s) }; setActivePack(up); } setViewSnap({ ...viewSnap, retryStatus: 'generating' }); } catch {} setRetrying(false); }} disabled={retrying} className="flex items-center gap-1.5 px-4 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full hover:bg-white/20 transition-colors">{retrying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}{retrying ? '요청중...' : '다른 느낌으로'}</button>
+                  <button onClick={async (e: React.MouseEvent) => {
+                    e.stopPropagation(); setRetrying(true);
+                    try {
+                      await fetch(API + '/ai-snap/' + viewSnap.id + '/retry', { method: 'POST', headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+                      if (activePack) { const up = { ...activePack, snaps: activePack.snaps.map((s: Snap) => s.id === viewSnap.id ? { ...s, retryStatus: 'generating' } : s) }; setActivePack(up); }
+                      setViewSnap({ ...viewSnap, retryStatus: 'generating' });
+                    } catch {} setRetrying(false);
+                  }} disabled={retrying}
+                    className="w-full py-3 bg-white/10 backdrop-blur-md text-white/80 rounded-full text-sm hover:bg-white/20 transition-all text-center flex items-center justify-center gap-2">
+                    {retrying ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                    {retrying ? '요청중...' : '마음에 안 들어요'}
+                  </button>
                 ) : null}
-                <a href={viewSnap.resultUrl} download target="_blank" onClick={(e: React.MouseEvent) => e.stopPropagation()} className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-stone-900 rounded-full text-xs font-medium hover:bg-stone-100 transition-colors"><Download className="w-3.5 h-3.5" />저장</a>
+                <div className="flex gap-2 w-full">
+                  <span className="px-3 py-2 bg-white/10 backdrop-blur-md text-white/60 text-xs rounded-full">
+                    #{(activePack?.snaps.findIndex((s: Snap) => s.id === viewSnap.id) ?? 0) + 1} {viewSnap.mode === 'couple' ? at('couple', pl) : viewSnap.mode === 'groom' ? at('groom', pl) : at('bride', pl)}
+                  </span>
+                  <a href={viewSnap.resultUrl} download target="_blank" onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                    className="flex-1 py-2 bg-white text-stone-900 rounded-full text-xs font-medium hover:bg-stone-100 transition-all text-center flex items-center justify-center gap-1.5">
+                    <Download className="w-3.5 h-3.5" />저장
+                  </a>
+                </div>
               </div>
             </>
           )}
