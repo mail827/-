@@ -4,7 +4,7 @@ import { at } from '../utils/appI18n';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import JSZip from 'jszip';
-import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download, Loader2, ChevronLeft, ChevronRight, ChevronDown, Camera, Play, Film } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, Plus, Eye, Edit, Share2, LogOut, Crown, CreditCard, Trash2, User as UserIcon, MessageSquare, X, Clock, CheckCircle, RefreshCw, Gift, Users, QrCode, Heart, Download, Loader2, ChevronLeft, ChevronRight, ChevronDown, Camera, Play, Film, Upload } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import QRCardModal from '../components/QRCardModal';
 import ImageCropper from '../components/ImageCropper';
@@ -927,9 +927,39 @@ export default function Dashboard() {
                     {v.status === 'DONE' && v.outputUrl && (
                       <div>
                         <video src={v.outputUrl} controls playsInline className="w-full rounded-lg mb-3" style={{ maxHeight: 360 }} />
-                        <a href={v.outputUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-2.5 bg-stone-800 text-white rounded-lg text-sm font-medium hover:bg-stone-900 transition-colors">
-                          <Download size={14} /> 다운로드
-                        </a>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={async () => {
+                            try {
+                              const res = await fetch(v.outputUrl!);
+                              const blob = await res.blob();
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = (v.groomName || '') + '_' + (v.brideName || '') + '_prewedding.mp4';
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                              URL.revokeObjectURL(url);
+                            } catch { window.open(v.outputUrl!, '_blank'); }
+                          }} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-stone-800 text-white rounded-lg text-sm font-medium hover:bg-stone-900 transition-colors" style={{ border: 'none', cursor: 'pointer' }}>
+                            <Download size={14} /> 저장
+                          </button>
+                          <button onClick={async () => {
+                            if (navigator.share) {
+                              try {
+                                const res = await fetch(v.outputUrl!);
+                                const blob = await res.blob();
+                                const file = new File([blob], (v.groomName || '') + '_' + (v.brideName || '') + '.mp4', { type: 'video/mp4' });
+                                await navigator.share({ title: (v.groomName || '') + ' & ' + (v.brideName || ''), files: [file] });
+                              } catch { try { await navigator.share({ title: (v.groomName || '') + ' & ' + (v.brideName || ''), url: v.outputUrl! }); } catch {} }
+                            } else {
+                              await navigator.clipboard.writeText(v.outputUrl!);
+                              alert('링크가 복사됐어요');
+                            }
+                          }} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white text-stone-800 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors" style={{ border: '1px solid #E0DDD8', cursor: 'pointer' }}>
+                            <Upload size={14} /> 공유
+                          </button>
+                        </div>
                       </div>
                     )}
                     {v.status === 'FAILED' && (

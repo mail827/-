@@ -514,12 +514,15 @@ export default function PreweddingVideo() {
 
                 <input value={venueName} onChange={e => setVenueName(e.target.value)} placeholder="예식장 이름" style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 13, textAlign: 'center', width: '80%', padding: '4px 0', outline: 'none', fontFamily: 'inherit', marginBottom: 24, display: 'block', margin: '0 auto 24px' }} />
 
+                <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginBottom: 8, letterSpacing: 1 }}>PARENTS <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.15)' }}>(선택)</span></p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginBottom: 24 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginBottom: 2 }}>{groomName || '신랑'} 측</p>
                     <input value={groomFather} onChange={e => setGroomFather(e.target.value)} placeholder="아버지" style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', fontSize: 12, textAlign: 'center', width: 80, padding: '3px 0', outline: 'none', fontFamily: 'inherit' }} />
                     <input value={groomMother} onChange={e => setGroomMother(e.target.value)} placeholder="어머니" style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', fontSize: 12, textAlign: 'center', width: 80, padding: '3px 0', outline: 'none', fontFamily: 'inherit' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginBottom: 2 }}>{brideName || '신부'} 측</p>
                     <input value={brideFather} onChange={e => setBrideFather(e.target.value)} placeholder="아버지" style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', fontSize: 12, textAlign: 'center', width: 80, padding: '3px 0', outline: 'none', fontFamily: 'inherit' }} />
                     <input value={brideMother} onChange={e => setBrideMother(e.target.value)} placeholder="어머니" style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', fontSize: 12, textAlign: 'center', width: 80, padding: '3px 0', outline: 'none', fontFamily: 'inherit' }} />
                   </div>
@@ -527,7 +530,20 @@ export default function PreweddingVideo() {
 
                 <textarea value={endingMessage} onChange={e => setEndingMessage(e.target.value)} placeholder="오늘, 우리의 영원이 시작됩니다" rows={2} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.45)', fontSize: 12, textAlign: 'center', width: '90%', padding: '4px 0', outline: 'none', fontFamily: 'inherit', fontStyle: 'italic', letterSpacing: 0.5, resize: 'none', lineHeight: 1.8 }} />
 
-                <div style={{ marginTop: 32, overflow: 'hidden', height: 20 }}>
+                <div style={{ marginTop: 20, textAlign: 'center' }}>
+                  {(groomFather || groomMother || brideFather || brideMother) && (
+                    <div style={{ marginBottom: 8 }}>
+                      {groomFather && <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>{groomName}의 아버지  {groomFather}</p>}
+                      {groomMother && <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>{groomName}의 어머니  {groomMother}</p>}
+                      {brideFather && <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>{brideName}의 아버지  {brideFather}</p>}
+                      {brideMother && <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>{brideName}의 어머니  {brideMother}</p>}
+                    </div>
+                  )}
+                  {familyMembers && <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', whiteSpace: 'pre-line' }}>{familyMembers}</p>}
+                  {friendsList && <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', whiteSpace: 'pre-line', marginTop: 4 }}>{friendsList}</p>}
+                  {specialThanks && <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', whiteSpace: 'pre-line', marginTop: 4 }}>{specialThanks}</p>}
+                </div>
+                <div style={{ marginTop: 16, overflow: 'hidden', height: 20 }}>
                   <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10, letterSpacing: 2, animation: 'creditRoll 3s ease-in-out infinite', transform: 'translateY(20px)' }}>Made by 청첩장 작업실</p>
                 </div>
                 <style>{'@keyframes creditRoll { 0% { transform: translateY(24px); opacity: 0; } 30% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-24px); opacity: 0; } }'}</style>
@@ -541,7 +557,7 @@ export default function PreweddingVideo() {
                 <span style={{ fontSize: 11, color: '#bbb' }}>우리의 안정적인 울타리</span>
               </div>
               <textarea value={familyMembers} onChange={e => setFamilyMembers(e.target.value)} placeholder={'\ud55c \uc904\uc5d0 \ud55c \uc0ac\ub78c\uc529 \uc785\ub825\ud574\uc8fc\uc138\uc694'} rows={3} style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #E8E5E0', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'inherit', color: '#1a1a1a', boxSizing: 'border-box' }} />
-              <p style={{ fontSize: 11, color: '#ccc', marginTop: 6 }}>{'\uc5d4\ud130\ub85c \uc904\ubc14\uafbc \uac00\ub2a5'}</p>
+              <p style={{ fontSize: 11, color: '#ccc', marginTop: 6 }}>{'\uc5d4\ud130\ub85c \uc904\ubc14\uafc8 \uac00\ub2a5'}</p>
             </div>
 
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', padding: '16px 20px', marginBottom: 16 }}>
@@ -550,7 +566,7 @@ export default function PreweddingVideo() {
                 <span style={{ fontSize: 11, color: '#bbb' }}>{'\ub098\uc758 \uae30\uc5b5\uc744 \ub098\ub208 \ud2b9\ubcc4\ud55c \uc774\ub4e4'}</span>
               </div>
               <textarea value={friendsList} onChange={e => setFriendsList(e.target.value)} placeholder={'\ud55c \uc904\uc5d0 \ud55c \uc0ac\ub78c\uc529 \uc785\ub825\ud574\uc8fc\uc138\uc694'} rows={3} style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #E8E5E0', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'inherit', color: '#1a1a1a', boxSizing: 'border-box' }} />
-              <p style={{ fontSize: 11, color: '#ccc', marginTop: 6 }}>{'\uc5d4\ud130\ub85c \uc904\ubc14\uafbc \uac00\ub2a5'}</p>
+              <p style={{ fontSize: 11, color: '#ccc', marginTop: 6 }}>{'\uc5d4\ud130\ub85c \uc904\ubc14\uafc8 \uac00\ub2a5'}</p>
             </div>
 
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', padding: '16px 20px', marginBottom: 16 }}>
@@ -558,7 +574,7 @@ export default function PreweddingVideo() {
                 <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>Special Thanks</p>
               </div>
               <textarea value={specialThanks} onChange={e => setSpecialThanks(e.target.value)} placeholder={'\ud55c \uc904\uc5d0 \ud55c \uc0ac\ub78c\uc529 \uc785\ub825\ud574\uc8fc\uc138\uc694'} rows={3} style={{ width: '100%', padding: '10px 0', border: 'none', borderBottom: '1px solid #E8E5E0', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'inherit', color: '#1a1a1a', boxSizing: 'border-box' }} />
-              <p style={{ fontSize: 11, color: '#ccc', marginTop: 6 }}>{'\uc5d4\ud130\ub85c \uc904\ubc14\uafbc \uac00\ub2a5'}</p>
+              <p style={{ fontSize: 11, color: '#ccc', marginTop: 6 }}>{'\uc5d4\ud130\ub85c \uc904\ubc14\uafc8 \uac00\ub2a5'}</p>
             </div>
 
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', padding: '16px 20px', marginBottom: 16 }}>
@@ -747,18 +763,28 @@ export default function PreweddingVideo() {
                   }} style={{ flex: 1, minWidth: 140, padding: '13px 0', borderRadius: 10, border: 'none', background: '#1a1a1a', color: '#fff', fontSize: 14, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                     <ArrowRight size={14} style={{ transform: 'rotate(90deg)' }} /> 저장
                   </button>
-                  <button onClick={async () => {
+                  <button id="shareBtn" onClick={async () => {
                     if (!videoOrder.outputUrl) return;
-                    if (navigator.share) {
-                      try {
-                        const res = await fetch(videoOrder.outputUrl);
-                        const blob = await res.blob();
-                        const file = new File([blob], groomName + '_' + brideName + '.mp4', { type: 'video/mp4' });
-                        await navigator.share({ title: groomName + ' & ' + brideName + ' 식전영상', files: [file] });
-                      } catch { try { await navigator.share({ title: groomName + ' & ' + brideName, url: videoOrder.outputUrl }); } catch {} }
-                    } else {
-                      await navigator.clipboard.writeText(videoOrder.outputUrl);
-                      alert('링크가 복사됐어요');
+                    const btn = document.getElementById('shareBtn');
+                    if (btn) { btn.textContent = '준비 중...'; btn.setAttribute('disabled', 'true'); }
+                    try {
+                      const res = await fetch(videoOrder.outputUrl);
+                      const blob = await res.blob();
+                      const file = new File([blob], groomName + '_' + brideName + '.mp4', { type: 'video/mp4' });
+                      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file] });
+                      } else if (navigator.share) {
+                        await navigator.share({ title: groomName + ' & ' + brideName, url: videoOrder.outputUrl });
+                      } else {
+                        await navigator.clipboard.writeText(videoOrder.outputUrl);
+                        alert('링크가 복사됐어요');
+                      }
+                    } catch (e: any) {
+                      if (e.name !== 'AbortError') {
+                        try { await navigator.clipboard.writeText(videoOrder.outputUrl!); alert('링크가 복사됐어요'); } catch {}
+                      }
+                    } finally {
+                      if (btn) { btn.textContent = ''; btn.removeAttribute('disabled'); btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg> 공유'; }
                     }
                   }} style={{ flex: 1, minWidth: 140, padding: '13px 0', borderRadius: 10, border: '1px solid #E0DDD8', background: '#fff', color: '#1a1a1a', fontSize: 14, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                     <Upload size={14} /> 공유

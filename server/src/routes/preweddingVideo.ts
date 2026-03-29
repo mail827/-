@@ -1107,7 +1107,8 @@ async function buildCinematicEnding(tmpDir: string, endingPhotos: string[], cred
     const fadeO = (endingDur - 1.5).toFixed(1);
     const crEnd = (endingDur - 1.0).toFixed(1);
     const crFade = (endingDur - 1.7).toFixed(1);
-    const spd = Math.max(20, Math.round((creditLines.length * 22 + 200) / endingDur));
+    const totalTextH2 = creditLines.length * 36;
+    const spd = Math.max(20, Math.round((920 + totalTextH2) / (endingDur - 2)));
     const compVf = "[0:v][1:v]overlay=40:50,drawtext=fontfile='" + fontPath + "':textfile='" + creditFile + "':fontsize=20:fontcolor=" + creditTextColor + "@0.9:line_spacing=16:x=880-text_w/2:y=h-" + spd + "*t+200:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
     await execAsync('ffmpeg -y -threads 2 -f lavfi -i color=c=0x0a0a0a:s=1280x720:d=' + endingDur + ':r=25 -i "' + leftSlide + '" -filter_complex "' + compVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOutPath + '"', 60000);
     console.log('[Pipeline] Cinematic ending: ' + endingDur + 's, ' + slidePaths.length + ' photos');
@@ -1427,7 +1428,8 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
   if (allEndPhotos.length >= 9) { endingPhotos.push(allEndPhotos[0], allEndPhotos[4], allEndPhotos[8]); }
   else if (allEndPhotos.length >= 4) { endingPhotos.push(allEndPhotos[0], allEndPhotos[Math.floor(allEndPhotos.length / 2)], allEndPhotos[allEndPhotos.length - 1]); }
   else { endingPhotos.push(...allEndPhotos.slice(0, 3)); }
-  const endingDur = Math.max(12, Math.min(24, creditLines.length * 1.2));
+  const totalTextH = creditLines.length * 36;
+  const endingDur = Math.max(12, Math.round((920 + totalTextH) / 35 + 2));
   let endingCreated = await buildCinematicEnding(tmpDir, endingPhotos, creditLines, fontPath, endingDur, endingOut, v.creditTextColor || '#ffffff');
 
   if (!endingCreated) {
@@ -1755,7 +1757,8 @@ async function assembleOnly(videoId: string) {
   if (allEndPhotos.length >= 9) { endingPhotos.push(allEndPhotos[0], allEndPhotos[4], allEndPhotos[8]); }
   else if (allEndPhotos.length >= 4) { endingPhotos.push(allEndPhotos[0], allEndPhotos[Math.floor(allEndPhotos.length / 2)], allEndPhotos[allEndPhotos.length - 1]); }
   else { endingPhotos.push(...allEndPhotos.slice(0, 3)); }
-  const endingDur = Math.max(12, Math.min(24, creditLines.length * 1.2));
+  const totalTextH = creditLines.length * 36;
+  const endingDur = Math.max(12, Math.round((920 + totalTextH) / 35 + 2));
   let endingCreated = await buildCinematicEnding(tmpDir, endingPhotos, creditLines, fontPath, endingDur, endingOut, v.creditTextColor || '#ffffff');
 
   if (!endingCreated) {

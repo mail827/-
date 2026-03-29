@@ -472,9 +472,40 @@ export default function AdminPreweddingVideos() {
             {selectedOrder.status === 'DONE' && selectedOrder.outputUrl && (
               <div className="mb-6">
                 <video src={selectedOrder.outputUrl} controls playsInline className="w-full rounded-xl" style={{ maxHeight: 400 }} />
-                <a href={selectedOrder.outputUrl} target="_blank" rel="noopener noreferrer" className="mt-3 flex items-center justify-center gap-2 py-2.5 bg-stone-800 text-white rounded-xl text-sm font-medium hover:bg-stone-900 transition-colors">
-                  <Download size={14} /> 다운로드
-                </a>
+                <div className="mt-3 flex gap-2">
+                  <button onClick={async () => {
+                    try {
+                      const res = await fetch(selectedOrder.outputUrl!);
+                      const blob = await res.blob();
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = selectedOrder.groomName + '_' + selectedOrder.brideName + '_prewedding.mp4';
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    } catch { window.open(selectedOrder.outputUrl!, '_blank'); }
+                  }} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-stone-800 text-white rounded-xl text-sm font-medium hover:bg-stone-900 transition-colors" style={{ border: 'none', cursor: 'pointer' }}>
+                    <Download size={14} /> 저장
+                  </button>
+                  <button onClick={async () => {
+                    if (navigator.share) {
+                      try {
+                        const res = await fetch(selectedOrder.outputUrl!);
+                        const blob = await res.blob();
+                        const file = new File([blob], selectedOrder.groomName + '_' + selectedOrder.brideName + '.mp4', { type: 'video/mp4' });
+                        await navigator.share({ title: selectedOrder.groomName + ' & ' + selectedOrder.brideName, files: [file] });
+                      } catch { try { await navigator.share({ url: selectedOrder.outputUrl! }); } catch {} }
+                    } else {
+                      await navigator.clipboard.writeText(selectedOrder.outputUrl!);
+                      alert('링크 복사됨');
+                    }
+                  }} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white text-stone-800 rounded-xl text-sm font-medium hover:bg-stone-50 transition-colors" style={{ border: '1px solid #E0DDD8', cursor: 'pointer' }}>
+                    <Upload size={14} /> 공유
+                  </button>
+                </div>
+
               </div>
             )}
 
