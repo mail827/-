@@ -31,7 +31,7 @@ type Category = 'studio' | 'cinematic';
 
 interface Tier { id: string; snaps: number; price: number; label: string }
 interface Concept { id: string; label: string; category: string }
-interface Snap { id: string; status: string; resultUrl?: string; concept: string; mode?: string; createdAt: string }
+interface Snap { id: string; status: string; resultUrl?: string; concept: string; mode?: string; createdAt: string; retryStatus?: string; retryResultUrl?: string }
 interface Pack { id: string; tier: string; totalSnaps: number; usedSnaps: number; concept: string; category: string; mode: string; status: string; inputUrls: string[]; snaps: Snap[] }
 
 export default function AiSnapStudioPage() {
@@ -63,6 +63,10 @@ export default function AiSnapStudioPage() {
   const [, setPollingId] = useState<string | null>(null);
   const progressRef = useRef<ReturnType<typeof setInterval>>();
   const pollRef = useRef<ReturnType<typeof setInterval>>();
+  const [viewSnap, setViewSnap] = useState<Snap | null>(null);
+  const [retrying, setRetrying] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareView, setCompareView] = useState<'original' | 'new'>('original');
 
   const [setupPackId, setSetupPackId] = useState<string | null>(null);
   const [setupLoading, setSetupLoading] = useState(false);
@@ -640,12 +644,11 @@ export default function AiSnapStudioPage() {
                   <div key={snap.id} className="rounded-lg overflow-hidden border border-stone-200">
                     {snap.status === 'done' && snap.resultUrl ? (
                       <div className="relative group">
-                        <img src={snap.resultUrl} alt={`Shot ${i + 1}`} className="w-full aspect-square object-cover" />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                          <a href={snap.resultUrl} download target="_blank"
-                            className="opacity-0 group-hover:opacity-100 p-2 bg-white rounded-full transition-all">
+                        <img src={snap.resultUrl} alt={`Shot ${i + 1}`} className="w-full aspect-square object-cover cursor-pointer" onClick={() => setViewSnap(snap)} />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center pointer-events-none">
+                          <div className="opacity-0 group-hover:opacity-100 p-2 bg-white rounded-full transition-all">
                             <Download className="w-5 h-5 text-stone-800" />
-                          </a>
+                          </div>
                         </div>
                         <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
                           <span className="px-2 py-0.5 bg-black/50 rounded-full text-[10px] text-white">#{i + 1}</span>
@@ -755,6 +758,42 @@ export default function AiSnapStudioPage() {
             return null;
           })()}
         </AnimatePresence>
+
+      {viewSnap?.resultUrl && (
+        <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4" onClick={() => { setViewSnap(null); setCompareMode(false); setCompareView('original'); }}>
+          <button onClick={() => { setViewSnap(null); setCompareMode(false); setCompareView('original'); }} className="absolute top-4 right-4 p-2 text-white/70 hover:text-white z-10">
+            <X className="w-6 h-6" />
+          </button>
+          {compareMode && viewSnap.retryResultUrl ? (
+            <div className="flex flex-col items-center gap-4 max-w-full" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+              <div className="flex gap-2 bg-white/10 backdrop-blur-md rounded-full p-1">
+                <button onClick={() => setCompareView('original')} className={'px-4 py-2 rounded-full text-xs font-medium transition-all ' + (compareView === 'original' ? 'bg-white text-stone-900' : 'text-white/70 hover:text-white')}>A</button>
+                <button onClick={() => setCompareView('new')} className={'px-4 py-2 rounded-full text-xs font-medium transition-all ' + (compareView === 'new' ? 'bg-white text-stone-900' : 'text-white/70 hover:text-white')}>B</button>
+              </div>
+              <img src={compareView === 'original' ? viewSnap.resultUrl : viewSnap.retryResultUrl} alt="" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
+              <div className="flex gap-3">
+                <button onClick={async () => { await fetch(API + '/ai-snap/' + viewSnap.id + '/select', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') }, body: JSON.stringify({ version: 'original' }) }); setCompareMode(false); }} className={'px-5 py-2.5 rounded-full text-sm font-medium transition-all ' + (compareView === 'original' ? 'bg-white text-stone-900' : 'bg-white/10 text-white/70 hover:bg-white/20')}>A 선택</button>
+                <button onClick={async () => { await fetch(API + '/ai-snap/' + viewSnap.id + '/select', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') }, body: JSON.stringify({ version: 'retry' }) }); if (activePack) { const up = { ...activePack, snaps: activePack.snaps.map((s: Snap) => s.id === viewSnap.id ? { ...s, resultUrl: viewSnap.retryResultUrl } : s) }; setActivePack(up); } setViewSnap({ ...viewSnap, resultUrl: viewSnap.retryResultUrl! }); setCompareMode(false); }} className={'px-5 py-2.5 rounded-full text-sm font-medium transition-all ' + (compareView === 'new' ? 'bg-white text-stone-900' : 'bg-white/10 text-white/70 hover:bg-white/20')}>B 선택</button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <img src={viewSnap.resultUrl} alt="" className="max-w-full max-h-[85vh] object-contain rounded-xl" onClick={(e: React.MouseEvent) => e.stopPropagation()} />
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 items-center">
+                <span className="px-3 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full">#{(activePack?.snaps.findIndex((s: Snap) => s.id === viewSnap.id) ?? 0) + 1} {viewSnap.mode === 'couple' ? at('couple', pl) : viewSnap.mode === 'groom' ? at('groom', pl) : at('bride', pl)}</span>
+                {viewSnap.retryStatus === 'done' && viewSnap.retryResultUrl ? (
+                  <button onClick={(e: React.MouseEvent) => { e.stopPropagation(); setCompareMode(true); }} className="flex items-center gap-1.5 px-4 py-1.5 bg-stone-800 text-white rounded-full text-xs font-medium hover:bg-stone-700 transition-colors"><RefreshCw className="w-3.5 h-3.5" />비교하기</button>
+                ) : viewSnap.retryStatus === 'generating' ? (
+                  <span className="flex items-center gap-1.5 px-4 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full"><Loader2 className="w-3.5 h-3.5 animate-spin" />새 버전 생성중</span>
+                ) : !viewSnap.retryStatus ? (
+                  <button onClick={async (e: React.MouseEvent) => { e.stopPropagation(); setRetrying(true); try { await fetch(API + '/ai-snap/' + viewSnap.id + '/retry', { method: 'POST', headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } }); if (activePack) { const up = { ...activePack, snaps: activePack.snaps.map((s: Snap) => s.id === viewSnap.id ? { ...s, retryStatus: 'generating' } : s) }; setActivePack(up); } setViewSnap({ ...viewSnap, retryStatus: 'generating' }); } catch {} setRetrying(false); }} disabled={retrying} className="flex items-center gap-1.5 px-4 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full hover:bg-white/20 transition-colors">{retrying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}{retrying ? '요청중...' : '다른 느낌으로'}</button>
+                ) : null}
+                <a href={viewSnap.resultUrl} download target="_blank" onClick={(e: React.MouseEvent) => e.stopPropagation()} className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-stone-900 rounded-full text-xs font-medium hover:bg-stone-100 transition-colors"><Download className="w-3.5 h-3.5" />저장</a>
+              </div>
+            </>
+          )}
+        </div>
+      )}
       </main>
     </div>
   );
