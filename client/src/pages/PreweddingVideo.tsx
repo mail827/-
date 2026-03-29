@@ -718,20 +718,52 @@ export default function PreweddingVideo() {
         {mode === 'create' && step === 5 && videoOrder && (
           <div style={{ textAlign: 'center', paddingTop: 40 }}>
             {videoOrder.status === 'DONE' ? (
-              <div>
-                <div style={{ width: 64, height: 64, borderRadius: 32, background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                  <Check size={32} color="#fff" />
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ width: 56, height: 56, borderRadius: 28, background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <Check size={28} color="#fff" />
                 </div>
-                <p style={{ fontSize: 22, fontWeight: 600, color: '#1a1a1a', marginBottom: 8 }}>영상이 완성됐어요</p>
-                <p style={{ fontSize: 13, color: '#999', marginBottom: 32 }}>{videoOrder.totalDuration}초</p>
+                <p style={{ fontSize: 20, fontWeight: 600, color: '#1a1a1a', marginBottom: 6 }}>완성</p>
+                <p style={{ fontSize: 12, color: '#bbb', marginBottom: 24 }}>{videoOrder.totalDuration ? Math.round(videoOrder.totalDuration) + '초' : ''}</p>
 
                 {videoOrder.outputUrl && (
-                  <video src={videoOrder.outputUrl} controls playsInline style={{ width: '100%', maxWidth: 360, borderRadius: 12, marginBottom: 24 }} />
+                  <video src={videoOrder.outputUrl} controls playsInline style={{ width: '100%', borderRadius: 12, marginBottom: 20 }} />
                 )}
 
-                <a href={videoOrder.outputUrl} download style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', borderRadius: 8, background: '#1a1a1a', color: '#fff', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>
-                  다운로드
-                </a>
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <button onClick={async () => {
+                    if (!videoOrder.outputUrl) return;
+                    try {
+                      const res = await fetch(videoOrder.outputUrl);
+                      const blob = await res.blob();
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = groomName + '_' + brideName + '_prewedding.mp4';
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    } catch { window.open(videoOrder.outputUrl, '_blank'); }
+                  }} style={{ flex: 1, minWidth: 140, padding: '13px 0', borderRadius: 10, border: 'none', background: '#1a1a1a', color: '#fff', fontSize: 14, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    <ArrowRight size={14} style={{ transform: 'rotate(90deg)' }} /> 저장
+                  </button>
+                  <button onClick={async () => {
+                    if (!videoOrder.outputUrl) return;
+                    if (navigator.share) {
+                      try {
+                        const res = await fetch(videoOrder.outputUrl);
+                        const blob = await res.blob();
+                        const file = new File([blob], groomName + '_' + brideName + '.mp4', { type: 'video/mp4' });
+                        await navigator.share({ title: groomName + ' & ' + brideName + ' 식전영상', files: [file] });
+                      } catch { try { await navigator.share({ title: groomName + ' & ' + brideName, url: videoOrder.outputUrl }); } catch {} }
+                    } else {
+                      await navigator.clipboard.writeText(videoOrder.outputUrl);
+                      alert('링크가 복사됐어요');
+                    }
+                  }} style={{ flex: 1, minWidth: 140, padding: '13px 0', borderRadius: 10, border: '1px solid #E0DDD8', background: '#fff', color: '#1a1a1a', fontSize: 14, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    <Upload size={14} /> 공유
+                  </button>
+                </div>
               </div>
             ) : videoOrder.status === 'FAILED' ? (
               <div>

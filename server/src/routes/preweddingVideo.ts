@@ -346,13 +346,37 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
         (async () => {
           const url1 = await genOne(p, shot, p.urls, si);
           if (!url1) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' GEN FAILED'); return null; }
-          if (p.mode === 'couple') { console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' OK'); return url1; }
-          const pass = await visionQC(p.urls[0], url1);
-          if (pass) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC PASS'); return url1; }
+          if (p.mode === 'couple') {
+            const url2 = await genOne(p, shot, p.urls, si);
+            if (!url2) { console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' retry failed, use first'); return url1; }
+            try {
+              const pickRes = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + OPENAI_API_KEY },
+                body: JSON.stringify({
+                  model: 'gpt-4o-mini', max_tokens: 5,
+                  messages: [{ role: 'user', content: [
+                    { type: 'image_url', image_url: { url: url1, detail: 'low' } },
+                    { type: 'image_url', image_url: { url: url2, detail: 'low' } },
+                    { type: 'text', text: 'Two AI-generated couple wedding photos. Pick the one that looks more natural, aesthetically pleasing, and has better preserved faces. Reply ONLY with A (first image) or B (second image).' },
+                  ] }],
+                }),
+              });
+              const pickData = await pickRes.json();
+              const pick = (pickData.choices?.[0]?.message?.content || 'A').trim().toUpperCase();
+              const chosen = pick.includes('B') ? url2 : url1;
+              console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' comparative QC: ' + pick);
+              return chosen;
+            } catch (e: any) { console.log('[Glamour] couple comparative QC error:', e.message); return url1; }
+          }
+          const pass1 = await visionQC(p.urls[0], url1);
+          if (pass1) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC PASS'); return url1; }
           console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC FAIL, retry');
           const url2 = await genOne(p, shot, p.urls, si);
-          if (url2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry OK'); return url2; }
-          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry failed, use first'); return url1;
+          if (!url2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry gen failed, use first'); return url1; }
+          const pass2 = await visionQC(p.urls[0], url2);
+          if (pass2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry QC PASS'); return url2; }
+          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' both QC FAIL, use first'); return url1;
         })()
       );
     }
@@ -1077,12 +1101,14 @@ async function buildCinematicEnding(tmpDir: string, endingPhotos: string[], cred
     }
     await execAsync('ffmpeg -y -threads 2 ' + slideInputs + ' -filter_complex "' + sf.join(';') + '" -map "' + cur + '" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + leftSlide + '"', 60000);
     console.log('[Ending] Left slideshow created');
-    const creditEsc = escapeDrawtext(creditLines.join('\\n'));
+    const creditFile = path.join(tmpDir, 'credits.txt');
+    const fs2 = await import('fs');
+    fs2.writeFileSync(creditFile, creditLines.join('\n'), 'utf-8');
     const fadeO = (endingDur - 1.5).toFixed(1);
     const crEnd = (endingDur - 1.0).toFixed(1);
     const crFade = (endingDur - 1.7).toFixed(1);
-    const spd = Math.max(30, Math.round(creditLines.length * 18 / endingDur + 25));
-    const compVf = "[0:v][1:v]overlay=40:50,drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=' + creditTextColor + '@0.9:line_spacing=16:x=880-text_w/2:y=h-" + spd + "*t+200:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
+    const spd = Math.max(20, Math.round((creditLines.length * 22 + 200) / endingDur));
+    const compVf = "[0:v][1:v]overlay=40:50,drawtext=fontfile='" + fontPath + "':textfile='" + creditFile + "':fontsize=20:fontcolor=" + creditTextColor + "@0.9:line_spacing=16:x=880-text_w/2:y=h-" + spd + "*t+200:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
     await execAsync('ffmpeg -y -threads 2 -f lavfi -i color=c=0x0a0a0a:s=1280x720:d=' + endingDur + ':r=25 -i "' + leftSlide + '" -filter_complex "' + compVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOutPath + '"', 60000);
     console.log('[Pipeline] Cinematic ending: ' + endingDur + 's, ' + slidePaths.length + ' photos');
     return true;
@@ -1401,7 +1427,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
   if (allEndPhotos.length >= 9) { endingPhotos.push(allEndPhotos[0], allEndPhotos[4], allEndPhotos[8]); }
   else if (allEndPhotos.length >= 4) { endingPhotos.push(allEndPhotos[0], allEndPhotos[Math.floor(allEndPhotos.length / 2)], allEndPhotos[allEndPhotos.length - 1]); }
   else { endingPhotos.push(...allEndPhotos.slice(0, 3)); }
-  const endingDur = Math.max(10, Math.min(16, creditLines.length * 1.5));
+  const endingDur = Math.max(12, Math.min(24, creditLines.length * 1.2));
   let endingCreated = await buildCinematicEnding(tmpDir, endingPhotos, creditLines, fontPath, endingDur, endingOut, v.creditTextColor || '#ffffff');
 
   if (!endingCreated) {
@@ -1729,7 +1755,7 @@ async function assembleOnly(videoId: string) {
   if (allEndPhotos.length >= 9) { endingPhotos.push(allEndPhotos[0], allEndPhotos[4], allEndPhotos[8]); }
   else if (allEndPhotos.length >= 4) { endingPhotos.push(allEndPhotos[0], allEndPhotos[Math.floor(allEndPhotos.length / 2)], allEndPhotos[allEndPhotos.length - 1]); }
   else { endingPhotos.push(...allEndPhotos.slice(0, 3)); }
-  const endingDur = Math.max(10, Math.min(16, creditLines.length * 1.5));
+  const endingDur = Math.max(12, Math.min(24, creditLines.length * 1.2));
   let endingCreated = await buildCinematicEnding(tmpDir, endingPhotos, creditLines, fontPath, endingDur, endingOut, v.creditTextColor || '#ffffff');
 
   if (!endingCreated) {
