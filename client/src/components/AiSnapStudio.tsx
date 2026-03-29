@@ -43,6 +43,10 @@ const CONCEPT_META: Record<string, { emoji: string; sub: string }> = {
   cruise_bluesky: { emoji: 'B', sub: '청명한 바다' },
   vintage_record: { emoji: 'V', sub: '레코드샵 레트로' },
   retro_hongkong: { emoji: 'H', sub: '홍콩 야시장' },
+  rose_garden: { emoji: 'R', sub: '로코코 장미' },
+  grass_rain: { emoji: 'G', sub: '비 내리는 풀밭' },
+  eternal_blue: { emoji: 'E', sub: '이터널 블루' },
+  heart_editorial: { emoji: 'H', sub: '하이패션 에디토리얼' },
 };
 
 type Mode = 'couple' | 'groom' | 'bride';

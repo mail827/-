@@ -39,6 +39,10 @@ const CONCEPTS = [
   { id: 'studio_fog', label: '포그' },
   { id: 'studio_mocha', label: '모카' },
   { id: 'studio_sage', label: '세이지' },
+  { id: 'rose_garden', label: '장미 정원' },
+  { id: 'grass_rain', label: '풀밭' },
+  { id: 'eternal_blue', label: '블루' },
+  { id: 'heart_editorial', label: '하이 에디토리얼' },
 ];
 
 interface Sample { id: string; concept: string; mode: string; imageUrl: string; sortOrder: number }

@@ -44,6 +44,10 @@ const CONCEPTS = [
   { id: 'blue_hour', label: '블루아워' },
   { id: 'water_memory', label: '물의 기억' },
   { id: 'velvet_rouge', label: '벨벳 루즈' },
+  { id: 'rose_garden', label: '장미 정원' },
+  { id: 'grass_rain', label: '풀밭' },
+  { id: 'eternal_blue', label: '블루' },
+  { id: 'heart_editorial', label: '하이 에디토리얼' },
 ];
 
 const PACKAGE_QUOTA: Record<string, number> = {
@@ -263,7 +267,23 @@ iphone_selfie: {
   },
   blue_hour: {
     groom: 'romantic twilight portrait on European cobblestone street, wearing classic navy blue fine wool two-button suit with notch lapel, crisp white dress shirt top button undone no tie, navy slim trousers, dark brown leather oxfords, vintage street lamp casting warm golden glow, purple-blue twilight sky, cinematic warm-cool contrast, photorealistic, 8k',
-    bride: 'romantic twilight portrait on European cobblestone street, wearing deep sapphire blue strapless silk bodice gown with flowing chiffon A-line skirt catching wind, matching blue satin pointed-toe heels, long straight black hair with see-through bangs, natural dewy makeup, vintage street lamp warm golden glow against blue hour sky, cinematic warm-cool contrast, photorealistic, 8k',
+    bride: 'romantic twilight portrait on European cobblestone street, wearing deep sapphire blue strapless silk bodice gown with flowing chiffon A-line skirt catching wind, matching blue satin pointed-toe heels, natural dewy makeup, vintage street lamp warm golden glow against blue hour sky, cinematic warm-cool contrast, photorealistic, 8k',
+  },
+  rose_garden: {
+    groom: 'editorial portrait in lavish rococo salon with pale pink walls and gilded mirrors and climbing pink roses, wearing pale warm beige soft wool two-button suit with ivory cream silk tie and white dress shirt, ivory pocket square, crystal chandelier overhead, soft diffused pastel pink light, photorealistic, 8k',
+    bride: 'editorial portrait in lavish rococo salon with pale pink walls and gilded mirrors and climbing pink roses, wearing ivory duchess silk satin off-shoulder wedding dress with draped silk at collarbone structured corset bodice three blush pink rosettes at left shoulder full A-line skirt with long train, crystal chandelier, soft pastel pink light, photorealistic, 8k',
+  },
+  grass_rain: {
+    groom: 'analog film portrait in wide green grassy field on overcast rainy day, wearing black wool two-button suit white shirt open collar no tie jacket unbuttoned, mist and fine rain in air, muted desaturated green tones, heavy film grain Fuji Superia 400, photorealistic, 8k',
+    bride: 'analog film portrait in wide green grassy field on overcast rainy day, wearing light ivory silk chiffon halter-neck dress with crossed draped neckline and layered opaque chiffon skirt, fabric fully opaque with dense layering, mist and fine rain, muted green-grey tones heavy film grain, photorealistic, 8k',
+  },
+  eternal_blue: {
+    groom: 'melancholic cinematic portrait on empty grey winter beach at dusk, wearing slate blue-grey wool one-button suit with peak lapels white shirt open collar pearl lapel pin, cold desaturated blue-grey monochrome, heavy film grain fading edges, photorealistic, 8k',
+    bride: 'melancholic cinematic portrait on empty grey winter beach at dusk, wearing dusty powder blue strapless sweetheart satin bodice dress with massive voluminous cloud-like tulle ruffled skirt graduating blue tones pearl strand across bodice, cold blue-grey monochrome, heavy film grain, photorealistic, 8k',
+  },
+  heart_editorial: {
+    groom: 'high fashion editorial portrait in dark studio with hard directional spotlight, wearing sharp black double-breasted six-button suit with wide peaked lapels structured squared shoulders, white shirt buttoned to top narrow black tie, red fabric heart on left lapel, pure black background, high contrast, photorealistic, 8k',
+    bride: 'high fashion editorial portrait in dark studio with hard directional spotlight, wearing pure white architectural mock-neck dress with structured square shoulders rigid sculpted torso origami organza train, oversized red fabric heart brooch at center of chest, pure black background, high contrast, photorealistic, 8k',
   },
 };
 
@@ -273,6 +293,10 @@ const COUPLE_PROMPTS: Record<string, string> = {
   studio_fog: 'couple in warm studio with cream linen draped backdrop and pampas grass in ceramic vase, man wearing light grey wool-cashmere suit with band-collar shirt, woman wearing white strapless fog gradient gown with layered sheer organza, sitting together on low wooden bench, soft warm light, 50mm lens, photorealistic, 8k',
   studio_mocha: 'couple in dark moody studio with mocha brown plaster wall and warm spotlight from above, man wearing dark warm brown wool suit with ivory shirt, woman wearing white halterneck bell gown with ice-shard organza panels, standing close foreheads touching in golden pool of light, 85mm lens, dramatic warm tones, photorealistic, 8k',
   studio_sage: 'couple in modern editorial studio with sage green wall and cream boucle sofa and oak floor, man wearing off-white shawl collar blazer with white knit standing beside sofa, woman wearing white one-shoulder pleated waterfall gown sitting on sofa, soft even natural light, 50mm lens, calm muted tones, photorealistic, 8k',
+  rose_garden: 'couple in lavish rococo salon with pale pink walls gilded ornate mirrors climbing pink roses crystal chandelier, man wearing pale beige two-button suit ivory tie white shirt standing behind gilded pink velvet chaise longue, woman wearing ivory duchess silk satin off-shoulder dress with rosettes at shoulder sitting on chaise laughing with macaron, scattered rose petals, soft pastel pink light, photorealistic, 8k',
+  grass_rain: 'couple walking through wide green grassy field on overcast rainy day holding hands, man wearing black two-button suit white shirt open collar no tie, woman wearing light ivory silk chiffon halter-neck dress with opaque layered skirt catching slight breeze, tall grass and wildflowers, muted desaturated green, analog film grain, photorealistic, 8k',
+  eternal_blue: 'couple standing together on empty grey winter beach at dusk facing ocean, man wearing slate blue-grey one-button suit white shirt pearl lapel pin, woman wearing dusty powder blue strapless sweetheart massive tulle ruffled skirt dress with pearl strand, tulle skirt pooling on wet sand, grey sky meeting grey ocean, cold blue-grey monochrome heavy film grain, photorealistic, 8k',
+  heart_editorial: 'couple standing back to back in dark editorial studio, dozens of glossy red 3D heart shapes floating around them, man wearing black double-breasted six-button suit narrow black tie red heart lapel pin one head taller, woman wearing white architectural mock-neck dress structured square shoulders origami train red heart brooch, both staring at camera with calm intense expressions, flat even studio lighting white-grey background red hearts only color, photorealistic, 8k',
   outdoor_garden: 'romantic couple in dreamy golden hour garden filled with blooming roses wisteria and wildflowers, groom wearing navy blue suit with white shirt, bride wearing ethereal white lace wedding dress holding colorful wildflower bouquet, soft warm backlit sunlight filtering through flower arches, dreamy bokeh background with pink and purple petals floating in air, romantic enchanted garden atmosphere, photorealistic, 8k',
   beach_sunset: 'place the same couple in a beach wedding setting at golden sunset, the man in light linen suit on the left, the woman in flowing white dress on the right, walking barefoot on white sand, warm orange pink sky, romantic, photorealistic, 8k',
   hanbok_traditional: 'place the same couple in a modern Korean hanbok wedding photoshoot, the man wearing refined navy hanbok with clean lines on the left, the woman wearing elegant pastel pink and ivory hanbok with delicate floral embroidery on the right, minimalist Korean traditional courtyard with soft bokeh, romantic warm golden light, modern editorial wedding style, photorealistic, 8k',

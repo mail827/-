@@ -180,6 +180,22 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '물의 기억',
     base: 'dreamlike cinematic atmosphere, ethereal teal tones, film grain',
   },
+  rose_garden: {
+    label: '장미 정원',
+    base: 'lavish rococo salon with pale pink walls gilded ornate mirrors white iron trellis covered in climbing pink roses crystal chandelier with candle lights pastel pink dreamy hazy atmosphere',
+  },
+  grass_rain: {
+    label: '풀밭',
+    base: 'wide green grassy hillside field on overcast rainy day mist hanging low grey sky flat diffused light muted desaturated green analog film grain atmosphere',
+  },
+  eternal_blue: {
+    label: '블루',
+    base: 'empty grey winter beach at dusk cold desaturated blue-grey monochrome fading edges heavy film grain melancholic memory atmosphere',
+  },
+  heart_editorial: {
+    label: '하이 에디토리얼',
+    base: 'dark editorial fashion studio pure black background hard directional single light source high contrast graphic fashion photograph',
+  },
   retro_hongkong: {
     label: '레트로 홍콩',
     base: 'narrow Hong Kong Mong Kok night market alley, rows of glowing crimson red Chinese paper lanterns strung tightly overhead creating tunnel of warm light, vintage neon signs with traditional Chinese characters in pink cyan and green glow, rain-slicked cobblestone street with deep puddle reflections of all lights, blurred crowd silhouettes in background creating depth, steamy food stall smoke drifting through scene, direct on-camera flash photography, harsh bright flash on subjects with dark background falloff, high contrast paparazzi snapshot style, Wong Kar-wai teal shadows and warm crimson highlights, cross-processed film look, 85mm f1.4, Fuji Superia 400 grain with teal-red color shift',
@@ -329,6 +345,10 @@ const OUTFIT_GROOM: Record<string, string> = {
   blue_hour: 'wearing classic navy blue fine wool two-piece suit, single-breasted two-button blazer with notch lapel fitted silhouette, crisp white dress shirt with top button undone no tie, navy blue tailored slim trousers, dark brown leather oxford shoes, simple classic timeless gentleman',
   velvet_rouge: 'wearing deep dark teal-green silk single-breasted one-button blazer with peaked lapel and refined luminous sheen like aged jade NOT bright turquoise NOT mint, black silk open-collar shirt no tie top two buttons undone, dark teal tailored slim-straight trousers in same silk fabric, black polished leather oxford shoes, no pocket square no accessories, aristocratic sharp darkly romantic',
   water_memory: 'wearing pearl-white silk mikado single-breasted peaked lapel suit with visible luminous silk sheen like wet porcelain, NOT linen NOT matte NOT cream beige, white silk open-collar shirt no tie showing collarbones, pearl-white slim-straight trousers in same silk mikado fabric, white leather minimal dress shoes, entire outfit has unified pearlescent silk glow, ethereal dreamlike elegance',
+  rose_garden: 'wearing pale warm beige soft wool two-button suit with natural shoulders and relaxed comfortable drape, ivory cream silk tie in loose four-in-hand knot over white cotton dress shirt with soft spread collar, ivory silk pocket square tucked casually, soft brushed matte texture, romantic elegant groom',
+  grass_rain: 'wearing black wool slim-fit two-button suit with natural shoulders, white cotton shirt with collar open no tie, jacket worn casually unbuttoned, clean simple silhouette, natural relaxed groom',
+  eternal_blue: 'wearing slate blue-grey wool one-button suit with slim peak lapels and clean sharp silhouette, white silk shirt with spread collar top button undone no tie, small pearl pin on left lapel as only accessory, cool melancholic elegance',
+  heart_editorial: 'wearing sharp black wool double-breasted six-button jacket with extreme wide peaked lapels and heavily structured squared shoulders, matching high-waisted wide-leg trousers with razor-sharp front crease, crisp white shirt buttoned to top with narrow black silk tie pulled very tight, single small red fabric heart pinned on left lapel, bold graphic power silhouette, editorial fashion',
 };
 
 const OUTFIT_BRIDE: Record<string, string> = {
@@ -367,6 +387,10 @@ const OUTFIT_BRIDE: Record<string, string> = {
   blue_hour: 'wearing deep jewel-tone sapphire blue strapless silk tube top bodice with rich royal blue subtle satin sheen, lightweight silk-chiffon A-line floor-length skirt with slight sweep that moves like liquid, layered inner silk with sheer chiffon overlay that catches air and floats with movement, no beading no sequins no feathers pure clean elegant simplicity, matching blue satin pointed-toe heels, natural dewy makeup, elegant evening glamour',
   velvet_rouge: 'wearing deep crimson red strapless sweetheart haute couture bell gown in crimson silk mikado with soft luminous sheen, grand voluminous bell skirt constructed in layers of crimson silk with overlapping sheer crimson organza panels cut into elongated teardrop shapes resembling peacock tail plumes, hand-embroidered tonal dark burgundy and garnet peacock eye motifs with tiny freshwater pearl at center of each panel, white silk satin opera-length gloves smooth luminous fitted, long straight black hair with see-through bangs, natural elegant makeup with subtle lip color, dramatic sculptural alive with layered movement',
   water_memory: 'wearing ice-blue haute couture strapless sweetheart mermaid gown in silk mikado with refined porcelain-like luminous sheen, fitted bodice with invisible boning hugging body to below knees, below knees dramatic cascading fin-like panels of double-layered silk organza in gradients of ice-blue fading to pale silver-grey to near-transparent edges cut at different lengths like betta fish tail fins, freshwater pearls of varying sizes hand-sewn in organic irregular clusters denser near bodice-to-fin transition thinning outward, long cathedral train, natural elegant makeup',
+  rose_garden: 'wearing ivory duchess silk satin off-shoulder wedding dress with softly draped silk folding across collarbone, structured boned corset bodice with smooth clean surface, three small delicate blush pink silk rosettes clustered at left shoulder, full voluminous A-line skirt with long graceful train sweeping floor, no lace no beading no embroidery, opulent rococo bridal elegance',
+  grass_rain: 'wearing light ivory silk chiffon halter-neck wedding dress with crossed draped fabric gathered at back of neck leaving shoulders bare, gently fitted bodice with natural soft gathers at waist no boning, multiple opaque layered chiffon skirt panels with slightly uneven raw-edge hemlines creating organic flowing movement, fabric fully opaque with dense layering ensuring complete coverage, clean effortless minimal bridal',
+  eternal_blue: 'wearing dusty powder blue strapless sweetheart satin bodice dress with massive voluminous cloud-like tulle ruffled skirt in graduating shades from dusty blue at waist to pale icy blue at hem, tulle layers hand-gathered in irregular cloud-like ruffles creating organic sculptural volume, single strand of small pearls draped loosely across bodice, soft matte tulle finish, no lace no sequins no glitter, dramatic sculptural',
+  heart_editorial: 'wearing pure white architectural high mock-neck wedding dress with structured exaggerated square shoulders, rigid sculpted heavy white duchess satin torso like armor, front sharp straight column stopping at ankle, back dramatic floor-sweeping sculptural train of stiff white organza folds like origami paper, one single oversized red fabric heart pinned at center of chest like brooch, no lace no beading no tulle no soft draping, everything geometric and architectural, editorial high fashion',
 };
 
 const HANBOK_CONCEPTS = new Set(['hanbok_wonsam', 'hanbok_dangui', 'hanbok_modern', 'hanbok_saeguk', 'hanbok_flower']);
@@ -424,7 +448,7 @@ const CINEMATIC_COUPLE_SHOTS_DYNAMIC = [
   { id: 'whisper_ear', prompt: 'tight closeup framing at chest level, close-up him whispering in her ear, she smiles with eyes closed, intimate tender moment' },
 ];
 
-const DYNAMIC_CONCEPTS = new Set(['retro_hongkong', 'vintage_record', 'cruise_sunset', 'cruise_bluesky', 'black_swan', 'blue_hour', 'water_memory', 'velvet_rouge']);
+const DYNAMIC_CONCEPTS = new Set(['retro_hongkong', 'vintage_record', 'cruise_sunset', 'cruise_bluesky', 'black_swan', 'blue_hour', 'water_memory', 'velvet_rouge', 'rose_garden', 'grass_rain', 'eternal_blue', 'heart_editorial']);
 
 const STUDIO_SET = new Set(['studio_classic', 'studio_gallery', 'studio_fog', 'studio_mocha', 'studio_sage']);
 
@@ -480,6 +504,18 @@ const CONCEPT_MOOD: Record<string, string> = {
   water_memory_rain: 'empty European city street at night in heavy rain, wet reflective asphalt with warm orange puddle reflections, vintage wrought-iron street lamps casting warm glow, rain streaks visible in lamplight, dark moody night with warm-cool contrast, cinematic rain atmosphere, 50mm lens',
   blue_hour: 'warm golden street lamp glow contrasting cool blue twilight sky, romantic European evening, gentle wind catching hair and dress fabric, cinematic warm bokeh city lights, purple-blue sky gradient, 50mm lens',
   retro_hongkong: 'direct harsh on-camera flash fired at subject, bright white flash illuminating face and body against dark night background, flash falloff creating dark shadows behind subject, paparazzi snapshot caught off-guard moment, candid mid-stride body turned at natural angle, weight on one leg, wind in hair, neon reflections on wet pavement, shallow depth of field f1.4 crowd bokeh, Wong Kar-wai intimate mood, relaxed body language, Fuji Superia 400 cross-processed grain',
+  rose_garden_salon: 'lavish rococo salon with pale pink walls gilded ornate mirrors white iron trellis covered in climbing pink roses crystal chandelier dripping candle lights, pink velvet chaise longue scattered rose petals and macarons on gold tray, soft diffused pastel pink light dreamy hazy atmosphere, 50mm lens',
+  rose_garden_staircase: 'grand curved marble staircase with wrought iron pink rose vine railing in rococo palace interior, pale pink walls with gilded molding, long dress train cascading down five marble steps, soft natural light from tall arched window, pastel pink atmosphere, 35mm lens',
+  rose_garden_balcony: 'small ornate stone balcony overlooking pink rose garden below, rococo pale pink exterior wall with gilded window frame, climbing roses around open French doors framing subjects, soft overcast afternoon light, 50mm lens',
+  grass_rain_overcast: 'wide green grassy hillside with tall grass and small wildflowers, gentle slope disappearing into horizon, soft overcast flat grey light, muted desaturated green tone, grainy analog film Fuji Superia 400, 85mm lens',
+  grass_rain_heavy: 'green field on grey rainy day, fine rain mist visible in air, no sun completely flat grey light, wet grass glistening with water droplets, grainy analog film Kodak Portra 400 pushed two stops, muddy green-grey color palette heavy grain, 50mm lens',
+  grass_rain_motion: 'misty green field after rain, low mist hanging over field in distance, everything soft and hazy, grainy analog film on expired film stock, muted washed-out green tones, light leak on edge, 35mm lens',
+  eternal_blue_beach: 'empty grey winter beach at dusk, grey overcast sky blending into grey ocean at barely visible horizon, wet dark sand with reflections, edges of frame slightly blurred and darkened as if memory is fading, cool blue-grey desaturated palette, heavy film grain slight lens flare, 35mm lens',
+  eternal_blue_frozen: 'frozen cracked lake surface under heavy grey sky, light snow falling, hairline cracks in ice radiating outward, flat cold overcast light casting no shadows, monochromatic blue-white-grey palette, Kodak Vision3 500T blue-shifted film stock, 50mm lens',
+  eternal_blue_bookstore: 'tall bookshelves in dimly lit old bookstore, warm single brass desk lamp at end of aisle casting long shadows through gaps between books, dust particles floating in lamplight beam, deep shadow everywhere else, warm tungsten and cool shadow split, intimate atmosphere, 50mm lens',
+  heart_editorial_spotlight: 'pure black stage floor with perfect circle of white spotlight, everything outside spotlight circle is pure black void, hard clean edge between light and dark on floor, shot from slightly above, hard theatrical lighting deep contrast, 50mm lens',
+  heart_editorial_shadow: 'plain white wall with sharp black shadow silhouettes projected by single hard side light source, shadow play with silhouette profiles visible on wall, high contrast with only red fabric hearts in color rest monochrome, hard directional side light, 35mm lens',
+  heart_editorial_dark: 'dark studio with single hard beauty dish light from directly above casting defined shadows under cheekbones and chin, everything else falls to pure black, only white dress black suit two red hearts and skin tones visible in frame, heavy contrast editorial fashion, 85mm lens',
 };
 
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {
@@ -509,7 +545,11 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
 
   const VELVET_ROUGE_SCENES = ['velvet_rouge_corridor', 'velvet_rouge_library', 'velvet_rouge_bathtub'];
   const WATER_MEMORY_SCENES = ['water_memory_underwater', 'water_memory_theater', 'water_memory_rain'];
-  const mood = concept === 'velvet_rouge' ? (CONCEPT_MOOD[VELVET_ROUGE_SCENES[shotIdx % 3]] || '') : concept === 'water_memory' ? (CONCEPT_MOOD[WATER_MEMORY_SCENES[shotIdx % 3]] || '') : (CONCEPT_MOOD[concept] || '');
+  const ROSE_GARDEN_SCENES = ['rose_garden_salon', 'rose_garden_staircase', 'rose_garden_balcony'];
+  const GRASS_RAIN_SCENES = ['grass_rain_overcast', 'grass_rain_heavy', 'grass_rain_motion'];
+  const ETERNAL_BLUE_SCENES = ['eternal_blue_beach', 'eternal_blue_frozen', 'eternal_blue_bookstore'];
+  const HEART_EDITORIAL_SCENES = ['heart_editorial_spotlight', 'heart_editorial_shadow', 'heart_editorial_dark'];
+  const mood = concept === 'velvet_rouge' ? (CONCEPT_MOOD[VELVET_ROUGE_SCENES[shotIdx % 3]] || '') : concept === 'water_memory' ? (CONCEPT_MOOD[WATER_MEMORY_SCENES[shotIdx % 3]] || '') : concept === 'rose_garden' ? (CONCEPT_MOOD[ROSE_GARDEN_SCENES[shotIdx % 3]] || '') : concept === 'grass_rain' ? (CONCEPT_MOOD[GRASS_RAIN_SCENES[shotIdx % 3]] || '') : concept === 'eternal_blue' ? (CONCEPT_MOOD[ETERNAL_BLUE_SCENES[shotIdx % 3]] || '') : concept === 'heart_editorial' ? (CONCEPT_MOOD[HEART_EDITORIAL_SCENES[shotIdx % 3]] || '') : (CONCEPT_MOOD[concept] || '');
 
   if (mode === 'couple') {
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
