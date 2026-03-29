@@ -195,7 +195,7 @@ async function cropUpperBody(imageUrl: string): Promise<string> {
     const meta = await sharp(buf).metadata();
     const w = meta.width || 900;
     const h = meta.height || 1200;
-    const cropH = Math.round(h * 0.65);
+    const cropH = Math.round(h * 0.75);
     const cropped = await sharp(buf)
       .extract({ left: 0, top: 0, width: w, height: cropH })
       .jpeg({ quality: 92 })
@@ -223,22 +223,22 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
     plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
     plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
     plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
-    plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
     plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
     plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
     plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
-    plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
+    plan.push({ mode: 'couple', urls: selfieUrls[2] ? [selfieUrls[2]] : [selfieUrls[0], selfieUrls[1]] });
+    plan.push({ mode: 'couple', urls: [selfieUrls[0], selfieUrls[1]] });
     plan.push({ mode: 'couple', urls: selfieUrls[2] ? [selfieUrls[2]] : [selfieUrls[0], selfieUrls[1]] });
     plan.push({ mode: 'couple', urls: [selfieUrls[0], selfieUrls[1]] });
   } else if (selfieUrls.length === 2) {
     plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
     plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
     plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
-    plan.push({ mode: 'groom', urls: [selfieUrls[0]] });
     plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
     plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
     plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
-    plan.push({ mode: 'bride', urls: [selfieUrls[1]] });
+    plan.push({ mode: 'couple', urls: selfieUrls });
+    plan.push({ mode: 'couple', urls: selfieUrls });
     plan.push({ mode: 'couple', urls: selfieUrls });
     plan.push({ mode: 'couple', urls: selfieUrls });
   } else {
@@ -439,7 +439,7 @@ router.get('/bgm', async (_req, res) => {
 
 router.post('/create', authMiddleware, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
-  const { groomName, brideName, weddingDate, metStory, photos, bgmId, bgmUrl, fontId, tier, venueName, groomFather, groomMother, brideFather, brideMother, mode, selfieConcepts, endingMessage, videoEngine } = req.body;
+  const { groomName, brideName, weddingDate, metStory, photos, bgmId, bgmUrl, fontId, tier, venueName, groomFather, groomMother, brideFather, brideMother, mode, selfieConcepts, endingMessage, videoEngine, familyMembers, friendsList, specialThanks, creditTextColor } = req.body;
 
   const minPhotos = mode === 'selfie' ? 1 : 3;
   if (!groomName || !brideName || !photos?.length || photos.length < minPhotos) {
@@ -470,6 +470,10 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res) => {
         brideFather: brideFather || '',
         brideMother: brideMother || '',
         endingMessage: endingMessage || '',
+        familyMembers: familyMembers || '',
+        friendsList: friendsList || '',
+        specialThanks: specialThanks || '',
+        creditTextColor: creditTextColor || '#ffffff',
         amount: pricing.amount,
         orderId,
         status: 'PENDING',
@@ -599,6 +603,10 @@ router.post('/admin/free-generate', authMiddleware, adminOnly, async (req: AuthR
         brideFather: req.body.brideFather || '',
         brideMother: req.body.brideMother || '',
         endingMessage: req.body.endingMessage || '',
+        familyMembers: req.body.familyMembers || '',
+        friendsList: req.body.friendsList || '',
+        specialThanks: req.body.specialThanks || '',
+        creditTextColor: req.body.creditTextColor || '#ffffff',
         amount: 0,
         orderId,
         paymentKey: 'ADMIN_FREE',
@@ -1032,19 +1040,100 @@ async function generateOpeningClip(duration: number = 4) {
   } catch (e: any) { console.error('[Opening] fatal:', e.message); return null; }
 }
 
-function buildEndingCredits(groomName: string, brideName: string, weddingDate: string, venueName: string, gf: string, gm: string, bf: string, bm: string, endingMsg: string = ''): string[] {
+
+async function buildCinematicEnding(tmpDir: string, endingPhotos: string[], creditLines: string[], fontPath: string, endingDur: number, endingOutPath: string, creditTextColor: string = '#ffffff'): Promise<boolean> {
+  const { execSync } = await import('child_process');
+  const fs = await import('fs');
+  const path = await import('path');
+  if (endingPhotos.length < 2) return false;
+  try {
+    const slidePaths: string[] = [];
+    for (let i = 0; i < Math.min(3, endingPhotos.length); i++) {
+      const dlPath = path.join(tmpDir, 'eslide_dl_' + i + '.jpg');
+      const scaledPath = path.join(tmpDir, 'eslide_' + i + '.jpg');
+      try {
+        console.log('[Ending] downloading photo ' + (i+1) + ':', endingPhotos[i].slice(0, 80));
+        execSync('curl -sL -o "' + dlPath + '" "' + endingPhotos[i] + '"', { timeout: 30000 });
+        const stat = fs.statSync(dlPath);
+        if (stat.size < 1000) { console.log('[Ending] photo ' + (i+1) + ' too small'); continue; }
+        await execAsync('ffmpeg -y -i "' + dlPath + '" -vf "scale=440:620:force_original_aspect_ratio=decrease,pad=440:620:(ow-iw)/2:(oh-ih)/2:black" -frames:v 1 -update 1 "' + scaledPath + '"', 15000);
+        slidePaths.push(scaledPath);
+        console.log('[Ending] photo ' + (i+1) + ' scaled OK');
+      } catch (e: any) { console.log('[Ending] photo ' + (i+1) + ' failed:', e.message?.slice(0, 100)); }
+    }
+    if (slidePaths.length < 2) throw new Error('Only ' + slidePaths.length + ' ending photos');
+    const perPhoto = Math.max(4, Math.ceil(endingDur / slidePaths.length) + 1);
+    const leftSlide = path.join(tmpDir, 'left_slide.mp4');
+    const slideInputs = slidePaths.map(p => '-loop 1 -t ' + perPhoto + ' -i "' + p + '"').join(' ');
+    const sf: string[] = [];
+    for (let i = 0; i < slidePaths.length; i++) sf.push('[' + i + ':v]fps=25,format=yuv420p[p' + i + ']');
+    let cur = '[p0]';
+    let off = perPhoto - 1;
+    for (let i = 1; i < slidePaths.length; i++) {
+      const out = '[x' + i + ']';
+      sf.push(cur + '[p' + i + ']xfade=transition=fade:duration=1:offset=' + off + out);
+      cur = out;
+      off += perPhoto - 1;
+    }
+    await execAsync('ffmpeg -y -threads 2 ' + slideInputs + ' -filter_complex "' + sf.join(';') + '" -map "' + cur + '" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + leftSlide + '"', 60000);
+    console.log('[Ending] Left slideshow created');
+    const creditEsc = escapeDrawtext(creditLines.join('\\n'));
+    const fadeO = (endingDur - 1.5).toFixed(1);
+    const crEnd = (endingDur - 1.0).toFixed(1);
+    const crFade = (endingDur - 1.7).toFixed(1);
+    const spd = Math.max(30, Math.round(creditLines.length * 18 / endingDur + 25));
+    const compVf = "[0:v][1:v]overlay=40:50,drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=' + creditTextColor + '@0.9:line_spacing=16:x=880-text_w/2:y=h-" + spd + "*t+200:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
+    await execAsync('ffmpeg -y -threads 2 -f lavfi -i color=c=0x0a0a0a:s=1280x720:d=' + endingDur + ':r=25 -i "' + leftSlide + '" -filter_complex "' + compVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOutPath + '"', 60000);
+    console.log('[Pipeline] Cinematic ending: ' + endingDur + 's, ' + slidePaths.length + ' photos');
+    return true;
+  } catch (e: any) {
+    console.log('[Pipeline] Cinematic ending failed:', e.message?.slice(0, 300));
+    return false;
+  }
+}
+
+function buildEndingCredits(groomName: string, brideName: string, weddingDate: string, venueName: string, gf: string, gm: string, bf: string, bm: string, endingMsg: string = '', familyMembers: string = '', friendsList: string = '', specialThanks: string = ''): string[] {
   const lines: string[] = [];
-  lines.push(groomName + '  \\&  ' + brideName);
+  lines.push('CAST');
+  lines.push('');
+  lines.push('\uC2E0\uB791  ' + groomName);
+  lines.push('\uC2E0\uBD80  ' + brideName);
   lines.push('');
   if (weddingDate) lines.push(weddingDate);
   if (venueName) lines.push(venueName);
   lines.push('');
   if (gf || gm || bf || bm) {
-    if (gf || gm) lines.push((gf || '') + '  ' + (gm || ''));
-    if (bf || bm) lines.push((bf || '') + '  ' + (bm || ''));
+    lines.push('PARENTS');
+    lines.push('\uC6B0\uB9AC\uB97C \uC138\uC0C1\uC5D0 \uC788\uAC8C \uD574\uC900 \uBD84\uB4E4');
+    lines.push('');
+    if (gf) lines.push(groomName + '\uC758 \uC544\uBC84\uC9C0  ' + gf);
+    if (gm) lines.push(groomName + '\uC758 \uC5B4\uBA38\uB2C8  ' + gm);
+    if (bf) lines.push(brideName + '\uC758 \uC544\uBC84\uC9C0  ' + bf);
+    if (bm) lines.push(brideName + '\uC758 \uC5B4\uBA38\uB2C8  ' + bm);
+    lines.push('');
+  }
+  if (familyMembers && familyMembers.trim()) {
+    lines.push('FAMILY');
+    lines.push('\uC6B0\uB9AC\uC758 \uC548\uC815\uC801\uC778 \uC6B8\uD0C0\uB9AC');
+    lines.push('');
+    familyMembers.split('\n').filter(l => l.trim()).forEach(l => lines.push(l.trim()));
+    lines.push('');
+  }
+  if (friendsList && friendsList.trim()) {
+    lines.push('FRIENDS');
+    lines.push('\uB098\uC758 \uAE30\uC5B5\uC744 \uB098\uB208 \uD2B9\uBCC4\uD55C \uC774\uB4E4');
+    lines.push('');
+    friendsList.split('\n').filter(l => l.trim()).forEach(l => lines.push(l.trim()));
+    lines.push('');
+  }
+  if (specialThanks && specialThanks.trim()) {
+    lines.push('SPECIAL THANKS');
+    lines.push('');
+    specialThanks.split('\n').filter(l => l.trim()).forEach(l => lines.push(l.trim()));
     lines.push('');
   }
   if (endingMsg) {
+    lines.push('');
     lines.push(endingMsg);
     lines.push('');
   }
@@ -1303,58 +1392,21 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
     return;
   }
 
-  // === STEP C: Build ending.mp4 (cinematic photo slide + credits) ===
+    // === STEP C: Build ending.mp4 (cinematic photo slide + credits) ===
   const endingOut = path.join(tmpDir, 'ending_final.mp4');
   const v = video as any;
-  const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '');
-  const endingPhotos = (photoUrls || (video.photos as string[])).filter(Boolean).slice(0, 3);
-  const endingDur = Math.max(8, Math.min(14, creditLines.length * 1.5));
-  let endingCreated = false;
-
-  if (endingPhotos.length >= 2) {
-    try {
-      const gridPaths: string[] = [];
-      for (let ei = 0; ei < Math.min(3, endingPhotos.length); ei++) {
-        const sp = path.join(tmpDir, 'egrid_' + ei + '.jpg');
-        try {
-          console.log('[Ending] downloading photo ' + (ei+1) + ':', endingPhotos[ei].slice(0, 80));
-          execSync('curl -sL -o "' + sp + '" "' + endingPhotos[ei] + '"', { timeout: 30000 });
-          const stat = fs.statSync(sp);
-          if (stat.size > 1000) { gridPaths.push(sp); console.log('[Ending] photo ' + (ei+1) + ' OK, size:', stat.size); }
-          else { console.log('[Ending] photo ' + (ei+1) + ' too small:', stat.size); }
-        } catch (dlErr: any) { console.log('[Ending] photo ' + (ei+1) + ' download failed:', dlErr.message?.slice(0, 100)); }
-      }
-      if (gridPaths.length < 2) throw new Error('Only ' + gridPaths.length + ' ending photos downloaded');
-
-      const bgBlurPath = path.join(tmpDir, 'ending_bg.mp4');
-      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + gridPaths[0] + '" -vf "scale=640:360,boxblur=30,eq=brightness=-0.4,scale=1280:720" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 60000);
-
-      const gridImg = path.join(tmpDir, 'grid.png');
-      const gn = gridPaths.length;
-      if (gn >= 3) {
-        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -i "' + gridPaths[2] + '" -filter_complex "[0:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g1];[2:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g2];[g0][g1][g2]hstack=inputs=3[grid]" -map "[grid]" "' + gridImg + '"', 30000);
-      } else {
-        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -filter_complex "[0:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g1];[g0][g1]hstack=inputs=2[grid]" -map "[grid]" "' + gridImg + '"', 30000);
-      }
-
-      const creditEsc = escapeDrawtext(creditLines.join('\n'));
-      const fadeO = (endingDur - 1.5).toFixed(1);
-      const crEnd = (endingDur - 1.0).toFixed(1);
-      const crFade = (endingDur - 1.7).toFixed(1);
-      const spd = Math.max(50, Math.round(creditLines.length * 20 / endingDur + 40));
-
-      const endVf = "[1:v]format=rgba,fade=t=in:st=0.5:d=0.7:alpha=1,fade=t=out:st=" + crFade + ":d=0.7:alpha=1[gridFaded];[0:v][gridFaded]overlay=(W-w)/2:50,drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=16:x=(w-text_w)/2:y=700-" + spd + "*t+100:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
-      await execAsync('ffmpeg -y -threads 2 -i "' + bgBlurPath + '" -loop 1 -i "' + gridImg + '" -filter_complex "' + endVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOut + '"', 60000);
-      console.log('[Pipeline] Grid ending: ' + endingDur + 's, ' + gn + ' photos');
-      endingCreated = true;
-    } catch (e: any) {
-      console.log('[Pipeline] Grid ending failed:', e.message?.slice(0, 300));
-    }
-  }
+  const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '', v.familyMembers || '', v.friendsList || '', v.specialThanks || '');
+  const allEndPhotos = (photoUrls || (video.photos as string[])).filter(Boolean);
+  const endingPhotos: string[] = [];
+  if (allEndPhotos.length >= 9) { endingPhotos.push(allEndPhotos[0], allEndPhotos[4], allEndPhotos[8]); }
+  else if (allEndPhotos.length >= 4) { endingPhotos.push(allEndPhotos[0], allEndPhotos[Math.floor(allEndPhotos.length / 2)], allEndPhotos[allEndPhotos.length - 1]); }
+  else { endingPhotos.push(...allEndPhotos.slice(0, 3)); }
+  const endingDur = Math.max(10, Math.min(16, creditLines.length * 1.5));
+  let endingCreated = await buildCinematicEnding(tmpDir, endingPhotos, creditLines, fontPath, endingDur, endingOut, v.creditTextColor || '#ffffff');
 
   if (!endingCreated) {
     try {
-      const creditEscS = escapeDrawtext(creditLines.join('\n'));
+      const creditEscS = escapeDrawtext(creditLines.join('\\n'));
       const fadeOS = (endingDur - 1.5).toFixed(1);
       const crEndS = (endingDur - 1.0).toFixed(1);
       const crFadeS = (endingDur - 1.7).toFixed(1);
@@ -1367,7 +1419,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
   }
 
 
-  // === STEP D: Concat ===
+// === STEP D: Concat ===
   const concatParts: string[] = [];
   if (fs.existsSync(openingOut)) concatParts.push(openingOut);
   concatParts.push(mainOut);
@@ -1420,7 +1472,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
 router.post('/create-with-gift', authMiddleware, async (req: any, res) => {
   const userId = req.user.id;
-  const { groomName, brideName, weddingDate, metStory, photos, bgmId, bgmUrl, fontId, subtitleStyle, giftCode, venueName, groomFather, groomMother, brideFather, brideMother, endingMessage, mode } = req.body;
+  const { groomName, brideName, weddingDate, metStory, photos, bgmId, bgmUrl, fontId, subtitleStyle, giftCode, venueName, groomFather, groomMother, brideFather, brideMother, endingMessage, mode, familyMembers, friendsList, specialThanks, creditTextColor } = req.body;
 
   const freeMinPhotos = mode === 'selfie' ? 1 : 3;
   if (!groomName || !brideName || !photos?.length || photos.length < freeMinPhotos) {
@@ -1454,6 +1506,10 @@ router.post('/create-with-gift', authMiddleware, async (req: any, res) => {
         brideFather: brideFather || '',
         brideMother: brideMother || '',
         endingMessage: endingMessage || '',
+        familyMembers: familyMembers || '',
+        friendsList: friendsList || '',
+        specialThanks: specialThanks || '',
+        creditTextColor: creditTextColor || '#ffffff',
         amount: 0,
         orderId,
         paymentKey: 'GIFT_' + giftCode,
@@ -1664,58 +1720,21 @@ async function assembleOnly(videoId: string) {
     return;
   }
 
-  // === STEP C: Build ending.mp4 (cinematic photo slide + credits) ===
+    // === STEP C: Build ending.mp4 (cinematic photo slide + credits) ===
   const endingOut = path.join(tmpDir, 'ending_final.mp4');
   const v = video as any;
-  const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '');
-  const endingPhotos = (video.photos as string[]).filter(Boolean).slice(0, 3);
-  const endingDur = Math.max(8, Math.min(14, creditLines.length * 1.5));
-  let endingCreated = false;
-
-  if (endingPhotos.length >= 2) {
-    try {
-      const gridPaths: string[] = [];
-      for (let ei = 0; ei < Math.min(3, endingPhotos.length); ei++) {
-        const sp = path.join(tmpDir, 'egrid_' + ei + '.jpg');
-        try {
-          console.log('[Ending] downloading photo ' + (ei+1) + ':', endingPhotos[ei].slice(0, 80));
-          execSync('curl -sL -o "' + sp + '" "' + endingPhotos[ei] + '"', { timeout: 30000 });
-          const stat = fs.statSync(sp);
-          if (stat.size > 1000) { gridPaths.push(sp); console.log('[Ending] photo ' + (ei+1) + ' OK, size:', stat.size); }
-          else { console.log('[Ending] photo ' + (ei+1) + ' too small:', stat.size); }
-        } catch (dlErr: any) { console.log('[Ending] photo ' + (ei+1) + ' download failed:', dlErr.message?.slice(0, 100)); }
-      }
-      if (gridPaths.length < 2) throw new Error('Only ' + gridPaths.length + ' ending photos downloaded');
-
-      const bgBlurPath = path.join(tmpDir, 'ending_bg.mp4');
-      await execAsync('ffmpeg -y -threads 2 -loop 1 -i "' + gridPaths[0] + '" -vf "scale=640:360,boxblur=30,eq=brightness=-0.4,scale=1280:720" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 23 -an -t ' + endingDur + ' "' + bgBlurPath + '"', 60000);
-
-      const gridImg = path.join(tmpDir, 'grid.png');
-      const gn = gridPaths.length;
-      if (gn >= 3) {
-        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -i "' + gridPaths[2] + '" -filter_complex "[0:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g1];[2:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g2];[g0][g1][g2]hstack=inputs=3[grid]" -map "[grid]" "' + gridImg + '"', 30000);
-      } else {
-        await execAsync('ffmpeg -y -i "' + gridPaths[0] + '" -i "' + gridPaths[1] + '" -filter_complex "[0:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g0];[1:v]scale=300:420:force_original_aspect_ratio=decrease,pad=300:420:(ow-iw)/2:(oh-ih)/2:black[g1];[g0][g1]hstack=inputs=2[grid]" -map "[grid]" "' + gridImg + '"', 30000);
-      }
-
-      const creditEsc = escapeDrawtext(creditLines.join('\n'));
-      const fadeO = (endingDur - 1.5).toFixed(1);
-      const crEnd = (endingDur - 1.0).toFixed(1);
-      const crFade = (endingDur - 1.7).toFixed(1);
-      const spd = Math.max(50, Math.round(creditLines.length * 20 / endingDur + 40));
-
-      const endVf = "[1:v]format=rgba,fade=t=in:st=0.5:d=0.7:alpha=1,fade=t=out:st=" + crFade + ":d=0.7:alpha=1[gridFaded];[0:v][gridFaded]overlay=(W-w)/2:50,drawtext=fontfile='" + fontPath + "':text='" + creditEsc + "':fontsize=20:fontcolor=white@0.9:line_spacing=16:x=(w-text_w)/2:y=700-" + spd + "*t+100:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
-      await execAsync('ffmpeg -y -threads 2 -i "' + bgBlurPath + '" -loop 1 -i "' + gridImg + '" -filter_complex "' + endVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOut + '"', 60000);
-      console.log('[Pipeline] Grid ending: ' + endingDur + 's, ' + gn + ' photos');
-      endingCreated = true;
-    } catch (e: any) {
-      console.log('[Pipeline] Grid ending failed:', e.message?.slice(0, 300));
-    }
-  }
+  const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '', v.familyMembers || '', v.friendsList || '', v.specialThanks || '');
+  const allEndPhotos = (video.photos as string[]).filter(Boolean);
+  const endingPhotos: string[] = [];
+  if (allEndPhotos.length >= 9) { endingPhotos.push(allEndPhotos[0], allEndPhotos[4], allEndPhotos[8]); }
+  else if (allEndPhotos.length >= 4) { endingPhotos.push(allEndPhotos[0], allEndPhotos[Math.floor(allEndPhotos.length / 2)], allEndPhotos[allEndPhotos.length - 1]); }
+  else { endingPhotos.push(...allEndPhotos.slice(0, 3)); }
+  const endingDur = Math.max(10, Math.min(16, creditLines.length * 1.5));
+  let endingCreated = await buildCinematicEnding(tmpDir, endingPhotos, creditLines, fontPath, endingDur, endingOut, v.creditTextColor || '#ffffff');
 
   if (!endingCreated) {
     try {
-      const creditEscS = escapeDrawtext(creditLines.join('\n'));
+      const creditEscS = escapeDrawtext(creditLines.join('\\n'));
       const fadeOS = (endingDur - 1.5).toFixed(1);
       const crEndS = (endingDur - 1.0).toFixed(1);
       const crFadeS = (endingDur - 1.7).toFixed(1);
@@ -1728,7 +1747,7 @@ async function assembleOnly(videoId: string) {
   }
 
 
-  // === STEP D: Concat opening + main + ending ===
+// === STEP D: Concat opening + main + ending ===
   const concatParts: string[] = [];
   if (fs.existsSync(openingOut)) concatParts.push(openingOut);
   concatParts.push(mainOut);

@@ -642,6 +642,10 @@ model PreweddingVideo {
   brideFather   String   @default("")
   brideMother   String   @default("")
   endingMessage  String   @default("")
+  familyMembers  String   @default("")
+  friendsList    String   @default("")
+  specialThanks  String   @default("")
+  creditTextColor String  @default("#ffffff")
   subtitles     Json?
   clipUrls      Json?
   outputUrl     String?
