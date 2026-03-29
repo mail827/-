@@ -46,7 +46,7 @@ const SELFIE_CONCEPTS: { id: string; prompt: string; subScenes?: string[] }[] = 
   { id: 'blue_hour', prompt: 'place this person during blue hour twilight, deep cobalt sky with last warm light on horizon, city silhouette in background, cinematic blue-orange contrast, photorealistic, 8k' },
   { id: 'iphone_mirror', prompt: 'mirror selfie with iPhone flash of this person, full body reflected in large clean mirror, bright harsh flash creating high contrast, raw phone camera selfie aesthetic, photorealistic, 8k' },
   { id: 'rose_garden', prompt: 'place this person in a lavish rococo-style salon with pale pink walls gilded ornate mirrors and white iron trellis covered in climbing pink roses, crystal chandelier with dripping candle lights above, soft diffused pastel pink light, dreamy hazy atmosphere, photorealistic, 8k', subScenes: ['place this person in a lavish rococo salon with pale pink walls gilded mirrors climbing pink roses, sitting sideways on gilded pink velvet chaise longue with scattered rose petals and macarons on gold tray, soft pastel pink light, photorealistic, 8k', 'place this person on a grand curved marble staircase with wrought iron pink rose vine railing in rococo palace, pale pink walls gilded molding, long dress train cascading down stairs, soft natural window light, face clearly visible looking toward camera, photorealistic, 8k', 'place this person standing on a small ornate stone balcony overlooking pink rose garden below, rococo pale pink exterior wall gilded window frame, climbing roses around open French doors, facing camera with soft smile, soft overcast afternoon light, photorealistic, 8k', 'place this person standing beside a large gilded mirror in rococo salon, facing camera at three-quarter angle, pale pink walls climbing pink roses around mirror frame, soft diffused pastel pink light, photorealistic, 8k'] },
-  { id: 'grass_rain', prompt: 'place this person in a wide green grassy hillside field on an overcast rainy day, tall grass and small wildflowers, mist hanging low, grey sky, muted desaturated green tone, grainy analog film Fuji Superia 400, photorealistic, 8k', subScenes: ['place this person sitting in tall green grass on a hillside, soft overcast diffused light, small bouquet of white wildflowers, muted desaturated green film tone, grainy analog film, photorealistic, 8k', 'place this person walking through a misty green field after rain, facing camera with gentle expression, mist hanging low over field in distance, everything soft and hazy, grainy analog film expired stock, muted washed-out green tones, photorealistic, 8k', 'place this person standing in a wide green field under grey sky, fine rain falling around, gentle smile looking slightly off camera, flat grey overcast light, grainy analog film Kodak Portra 400, muddy green-grey palette, photorealistic, 8k', 'place this person standing in tall green grass on grey rainy day, raindrops on skin and hair, eyes closed soft peaceful smile, flat grey overcast light, shallow depth of field grassy background, grainy analog film Fuji Pro 400H, photorealistic, 8k', 'place this person standing at edge of misty green hillside field, wind blowing hair gently, holding small wildflower bouquet at waist, soft overcast light, muted green tone, grainy analog film, photorealistic, 8k'] },
+  { id: 'grass_rain', prompt: 'place this person in a wide green grassy hillside field on an overcast rainy day, tall grass and small wildflowers, mist hanging low, grey sky, muted desaturated green tone, grainy analog film Fuji Superia 400, photorealistic, 8k', subScenes: ['place this person sitting in tall green grass on a hillside, soft overcast diffused light, small bouquet of white wildflowers, face clean and dry, muted desaturated green film tone, grainy analog film, photorealistic, 8k', 'place this person walking through a misty green field after rain, facing camera with gentle expression, mist hanging low over field in distance, face clean and dry no water on face, grainy analog film expired stock, muted washed-out green tones, photorealistic, 8k', 'place this person standing in a wide green field under grey sky, fine rain falling around, gentle smile looking slightly off camera, face completely dry and clean, flat grey overcast light, grainy analog film Kodak Portra 400, muddy green-grey palette, photorealistic, 8k', 'place this person standing in tall green grass on grey rainy day, light mist in air, eyes closed soft peaceful smile, face dry and clean no dripping water, flat grey overcast light, shallow depth of field grassy background, grainy analog film Fuji Pro 400H, photorealistic, 8k', 'place this person standing at edge of misty green hillside field, wind blowing hair gently, holding small wildflower bouquet at waist, face clean and dry, soft overcast light, muted green tone, grainy analog film, photorealistic, 8k'] },
   { id: 'eternal_blue', prompt: 'place this person on an empty grey winter beach at dusk, grey overcast sky blending into grey ocean, wet dark sand, cold wind, edges of frame slightly blurred and darkened as if memory is fading, cool blue-grey desaturated palette, heavy film grain, photorealistic, 8k', subScenes: ['place this person standing on a frozen lake under heavy grey sky with light snow falling, massive blue tulle skirt spreading across white ice, face visible looking down gently, monochromatic blue-white-grey palette, quiet melancholic atmosphere, photorealistic, 8k', 'place this person standing between tall bookshelves in dimly lit old bookstore, warm single desk lamp casting long shadows, dust particles floating in lamplight beam, face lit by warm tungsten light, intimate atmosphere, photorealistic, 8k', 'place this person standing on empty grey winter beach facing camera with melancholic expression, enormous tulle skirt dragging across dark wet sand, cold wind blowing hair, cold desaturated blue-grey monochrome, heavy film grain, photorealistic, 8k', 'place this person sitting on edge of bed in dim bedroom, warm amber lamp light on face, looking toward camera with quiet contemplative expression, cool blue shadows in background, heavy film grain, photorealistic, 8k'] },
   { id: 'heart_editorial', prompt: 'place this person in a dark editorial fashion studio with pure black background, hard directional single light source creating deep shadows, high contrast graphic fashion photograph, photorealistic, 8k', subScenes: ['place this person standing in center of white spotlight circle on black stage floor, everything outside spotlight is pure black, face lit by hard theatrical light, confident gaze at camera, photorealistic, 8k', 'place this person standing in studio with white-grey background, dozens of glossy red 3D heart shapes floating around like confetti, flat even studio lighting, red hearts only color in image, editorial fashion, facing camera, photorealistic, 8k', 'place this person sitting on black cube in dark studio, single hard beauty dish light from front casting defined shadows, chin resting on one hand looking directly at camera, everything else pure black, heavy contrast editorial, photorealistic, 8k', 'place this person standing in dark studio with massive white origami organza train fanned out on floor behind, hard front light illuminating face and upper body, intense calm gaze at camera, pure black background, editorial fashion, photorealistic, 8k'] },
 ];
@@ -1004,7 +1004,7 @@ function buildSD2Prompt(photoType: string, camera: string, phase: string) {
 
 
 function buildSD15DirectPrompt(photoType: string, camera: string, phase: string, sceneIndex: number = 0) {
-  const FACE_GUARD = 'Camera positioned at exact eye height of subject, lens aimed perfectly horizontal straight ahead, zero degree tilt angle, tripod-mounted completely static camera, fixed vertical and horizontal position throughout entire shot. Subject centered at consistent height in frame from first frame to last frame, subject remains perfectly stationary in vertical axis, steady consistent head-to-frame-top spacing maintained. Face clearly visible at all times, preserve exact original face identity and expression unchanged, maintain original hairstyle and outfit from input image, shallow depth of field.';
+  const FACE_GUARD = 'Maintain exact same framing and crop level as input image from first frame to last frame. Camera locked at eye height aimed perfectly horizontal, zero tilt angle, zero vertical movement, no panning up or down. The visible area in frame must not change or expand. Subject stays at identical position and scale throughout entire shot. Face clearly visible at all times, preserve exact original face identity expression hairstyle outfit unchanged. Shallow depth of field.';
 
   const groomMotions = [
     'Subtle natural breathing, gentle breeze moves hair slightly, warm golden light',
@@ -1221,13 +1221,13 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
 
   const template = [
-    { phase: 'intro', camera: 'zoom_out', duration: 5 },
+    { phase: 'intro', camera: 'zoom_in', duration: 5 },
     { phase: 'intro', camera: 'pan_right', duration: 5 },
-    { phase: 'rising', camera: 'zoom_in', duration: 5 },
+    { phase: 'rising', camera: 'static', duration: 5 },
     { phase: 'rising', camera: 'pan_left', duration: 5 },
-    { phase: 'building', camera: 'zoom_out', duration: 4 },
-    { phase: 'building', camera: 'pan_right', duration: 4 },
     { phase: 'building', camera: 'zoom_in', duration: 4 },
+    { phase: 'building', camera: 'pan_right', duration: 4 },
+    { phase: 'building', camera: 'static', duration: 4 },
     { phase: 'climax', camera: 'static', duration: 6 },
     { phase: 'climax', camera: 'static', duration: 5 },
     { phase: 'ending', camera: 'static', duration: 5 },
@@ -1235,14 +1235,20 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
   const sceneCount = Math.min(10, Math.max(7, photoUrls.length));
   const bestIdx = analyses.reduce((b: number, a: any, i: number) => (a.quality > analyses[b].quality ? i : b), 0);
-  const sorted = [...analyses.map((a: any, i: number) => ({ ...a, url: photoUrls[i] }))];
-  const best = sorted.splice(bestIdx, 1)[0];
+  const all = analyses.map((a: any, i: number) => ({ ...a, url: photoUrls[i] }));
+  const best = all[bestIdx];
+  const used = new Set<number>();
 
   const scenes = template.slice(0, sceneCount).map((t, i) => {
     let photo;
-    if (t.phase === 'climax') photo = best;
-    else if (t.phase === 'ending') photo = sorted.find(a => a.type === 'couple') || best;
-    else photo = sorted[i % sorted.length] || best;
+    if (t.phase === 'climax') { photo = best; used.add(bestIdx); }
+    else if (t.phase === 'ending') { const ci = all.findIndex((a: any, idx: number) => a.type === 'couple' && !used.has(idx)); photo = ci >= 0 ? all[ci] : best; if (ci >= 0) used.add(ci); }
+    else {
+      const unused = all.findIndex((_: any, idx: number) => !used.has(idx));
+      const pick = unused >= 0 ? unused : i % all.length;
+      photo = all[pick];
+      used.add(pick);
+    }
 
     const tier = decideTier(photo.type, t.phase);
     return { ...t, photoUrl: photo.url, photoType: photo.type, tier, subtitle: subtitles[i] || '' };
