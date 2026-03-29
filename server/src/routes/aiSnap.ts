@@ -916,7 +916,21 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
     }
 
     const content: any[] = urls.map(u => ({ type: 'image_url', image_url: { url: cropToPortrait(u) } }));
-    content.push({ type: 'text', text: prompt });
+
+    let sdPrompt = '';
+    if (isCouple) {
+      sdPrompt = 'The couple in @image1 in a wedding portrait. ' +
+        'Preserve the EXACT faces, hairstyles, hair lengths, and hair colors of both people from @image1. ' +
+        'Do NOT change any facial features, do NOT modify hairstyle or hair length. ' +
+        pose + ', ' + basePrompt;
+    } else {
+      const person = mode === 'groom' ? 'man' : 'woman';
+      sdPrompt = 'The ' + person + ' in @image1 in a wedding portrait. ' +
+        'Preserve the EXACT face, hairstyle, hair length, and hair color of the person from @image1. ' +
+        'Do NOT change any facial features, do NOT modify hairstyle or hair length. ' +
+        pose + ', ' + basePrompt;
+    }
+    content.push({ type: 'text', text: sdPrompt });
 
     const res = await fetch(ARK_BASE + '/contents/generations/tasks', {
       method: 'POST',
