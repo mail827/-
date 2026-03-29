@@ -130,7 +130,7 @@ const cropToPortrait = (url: string): string => {
   return url;
 };
 
-const FACE_INSTRUCTION = 'CRITICAL: preserve the EXACT original face from the reference photo unchanged. Do NOT modify eyes, do NOT add double eyelids, do NOT change eye shape. Keep exact nose, lips, jaw, face proportions. Do NOT beautify or slim face. Do NOT create deformed hands or extra fingers. Do NOT add text logos watermarks. Keep clean elegant clothing with no distortion';
+const FACE_INSTRUCTION = 'CRITICAL: preserve the EXACT original face AND exact hairstyle hair length hair color from the reference photo unchanged. Do NOT modify eyes, do NOT add double eyelids, do NOT change eye shape. Keep exact nose, lips, jaw, face proportions. Do NOT beautify or slim face. Do NOT change hairstyle, do NOT cut hair shorter, do NOT add bangs if none exist, keep exact same hair from input photo. Do NOT create deformed hands or extra fingers. Do NOT add text logos watermarks. Keep clean elegant clothing with no distortion';
 
 const SOLO_PROMPTS: Record<string, { groom: string; bride: string }> = {
   studio_classic: {
@@ -886,6 +886,122 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: 'Delete failed' });
   }
+});
+
+
+const ARK_API_KEY = process.env.ARK_API_KEY;
+const ARK_BASE = 'https://ark.ap-southeast.bytepluses.com/api/v3';
+
+const generateSeeDream = async (snapId: string, concept: string, imageUrls: string[], mode: string) => {
+  try {
+    await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'generating' } });
+
+    let basePrompt = '';
+    if (mode === 'couple') {
+      basePrompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
+    } else if (mode === 'groom') {
+      basePrompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
+    } else {
+      basePrompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
+    }
+    const pose = getRandomPose(mode);
+    const prompt = FACE_INSTRUCTION + ', ' + pose + ', ' + basePrompt;
+
+    const isCouple = mode === 'couple';
+    let urls: string[];
+    if (isCouple) {
+      urls = imageUrls.length >= 3 ? [imageUrls[2], imageUrls[0], imageUrls[1]] : imageUrls.slice(0, 2);
+    } else {
+      urls = imageUrls;
+    }
+
+    const content: any[] = urls.map(u => ({ type: 'image_url', image_url: { url: cropToPortrait(u) } }));
+    content.push({ type: 'text', text: prompt });
+
+    const res = await fetch(ARK_BASE + '/contents/generations/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ARK_API_KEY },
+      body: JSON.stringify({ model: 'seedream-5-0-260128', content }),
+    });
+
+    if (!res.ok) {
+      console.error('[SeeDream retry] submit failed:', res.status, await res.text().catch(() => ''));
+      await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
+      return;
+    }
+
+    const task = await res.json();
+    if (!task.id) {
+      console.error('[SeeDream retry] no task id:', JSON.stringify(task).slice(0, 300));
+      await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
+      return;
+    }
+
+    for (let i = 0; i < 60; i++) {
+      await new Promise(r => setTimeout(r, 5000));
+      try {
+        const poll = await fetch(ARK_BASE + '/contents/generations/tasks/' + task.id, {
+          headers: { 'Authorization': 'Bearer ' + ARK_API_KEY },
+        });
+        const data = await poll.json();
+        if (data.status === 'succeeded') {
+          const imgUrl = data.content?.image_urls?.[0] || data.content?.image_url;
+          if (imgUrl) {
+            const uploaded = await uploadFromUrl(imgUrl, 'ai-snap-retry');
+            await prisma.aiSnap.update({
+              where: { id: snapId },
+              data: { retryStatus: 'done', retryResultUrl: uploaded.url },
+            });
+          } else {
+            await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
+          }
+          return;
+        }
+        if (data.status === 'failed') {
+          console.error('[SeeDream retry] generation failed:', JSON.stringify(data).slice(0, 300));
+          await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
+          return;
+        }
+      } catch (pollErr: any) {
+        console.error('[SeeDream retry] poll error:', pollErr.message);
+        continue;
+      }
+    }
+    await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
+  } catch (err: any) {
+    console.error('[SeeDream retry] fatal:', err.message);
+    await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'failed' } });
+  }
+};
+
+router.post('/:id/retry', authMiddleware, async (req: AuthRequest, res) => {
+  const userId = (req as any).user?.id;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+  const snap = await prisma.aiSnap.findUnique({ where: { id: req.params.id } });
+  if (!snap) return res.status(404).json({ error: 'Snap not found' });
+  if (snap.retryStatus === 'done') return res.status(400).json({ error: 'Already retried' });
+  if (snap.retryStatus === 'generating') return res.status(400).json({ error: 'Retry in progress' });
+  if (snap.status !== 'done') return res.status(400).json({ error: 'Original not done' });
+
+  await prisma.aiSnap.update({ where: { id: snap.id }, data: { retryStatus: 'generating' } });
+  res.json({ ok: true, retryStatus: 'generating' });
+
+  generateSeeDream(snap.id, snap.concept, snap.inputUrls as string[], snap.mode || 'groom');
+});
+
+router.post('/:id/select', authMiddleware, async (req: AuthRequest, res) => {
+  const { version } = req.body;
+  const snap = await prisma.aiSnap.findUnique({ where: { id: req.params.id } });
+  if (!snap) return res.status(404).json({ error: 'Snap not found' });
+
+  if (version === 'retry' && snap.retryResultUrl) {
+    await prisma.aiSnap.update({
+      where: { id: snap.id },
+      data: { resultOriginalUrl: snap.resultUrl, resultUrl: snap.retryResultUrl, engine: 'seedream' },
+    });
+  }
+  res.json({ ok: true });
 });
 
 export default router;

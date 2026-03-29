@@ -585,6 +585,8 @@ model AiSnap {
   errorMsg    String?
   statusUrl   String?
   responseUrl String?
+  retryResultUrl String?
+  retryStatus    String?
   createdAt   DateTime  @default(now())
 }
 

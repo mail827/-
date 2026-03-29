@@ -10,7 +10,7 @@ import { useLocaleStore } from '../store/useLocaleStore';
 interface Concept { id: string; label: string; }
 interface AiSnap {
   id: string; concept: string; engine: string;
-  status: string; resultUrl?: string; errorMsg?: string; createdAt: string;
+  status: string; resultUrl?: string; errorMsg?: string; createdAt: string; retryStatus?: string; retryResultUrl?: string;
 }
 interface Quota { max: number; used: number; remaining: number; isAdmin: boolean; packageSlug: string; extraPrice?: number; }
 interface GalleryItem { id: string; mediaUrl: string; mediaType: string; }
@@ -81,6 +81,9 @@ export default function AiSnapStudio({ weddingId }: Props) {
   const [pollingId, setPollingId] = useState<string | null>(null);
   const [snaps, setSnaps] = useState<AiSnap[]>([]);
   const [viewSnap, setViewSnap] = useState<AiSnap | null>(null);
+  const [retrying, setRetrying] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareView, setCompareView] = useState<'original' | 'new'>('original');
   const [progress, setProgress] = useState(0);
   const progressRef = useRef<ReturnType<typeof setInterval>>();
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryItem[]>([]);
@@ -126,6 +129,24 @@ export default function AiSnapStudio({ weddingId }: Props) {
     }, 3000);
     return () => clearInterval(intervalRef.current);
   }, [pollingId]);
+
+  useEffect(() => {
+    const retryingSnaps = snaps.filter(s => s.retryStatus === 'generating');
+    if (retryingSnaps.length === 0) return;
+    const retryInterval = setInterval(async () => {
+      for (const s of retryingSnaps) {
+        try {
+          const res = await api(`/status/${s.id}`);
+          const updated = await res.json();
+          if (updated.retryStatus === 'done' || updated.retryStatus === 'failed') {
+            setSnaps(prev => prev.map(p => p.id === s.id ? { ...p, retryStatus: updated.retryStatus, retryResultUrl: updated.retryResultUrl } : p));
+            if (viewSnap?.id === s.id) setViewSnap(v => v ? { ...v, retryStatus: updated.retryStatus, retryResultUrl: updated.retryResultUrl } : v);
+          }
+        } catch {}
+      }
+    }, 5000);
+    return () => clearInterval(retryInterval);
+  }, [snaps.filter(s => s.retryStatus === 'generating').length]);
 
   const uploadPhoto = async (file: File, type: 'groom' | 'bride' | 'couple') => {
     setUploading(type);
@@ -414,21 +435,81 @@ export default function AiSnapStudio({ weddingId }: Props) {
       <AnimatePresence>
         {viewSnap?.resultUrl && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setViewSnap(null)}>
-            <button onClick={() => setViewSnap(null)} className="absolute top-4 right-4 p-2 text-white/70 hover:text-white z-10">
+            className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => { setViewSnap(null); setCompareMode(false); setCompareView('original'); }}>
+            <button onClick={() => { setViewSnap(null); setCompareMode(false); setCompareView('original'); }} className="absolute top-4 right-4 p-2 text-white/70 hover:text-white z-10">
               <X className="w-6 h-6" />
             </button>
-            <img src={viewSnap.resultUrl} alt="" className="max-w-full max-h-[85vh] object-contain rounded-xl" onClick={e => e.stopPropagation()} />
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3">
-              <span className="px-3 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full">
-                {concepts.find(c => c.id === viewSnap.concept)?.label || viewSnap.concept}
-              </span>
-              <a href={viewSnap.resultUrl} download target="_blank" onClick={e => e.stopPropagation()}
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-stone-900 rounded-full text-xs font-medium hover:bg-stone-100 transition-colors">
-                <Download className="w-3.5 h-3.5" />
-                저장
-              </a>
-            </div>
+
+            {compareMode && viewSnap.retryResultUrl ? (
+              <div className="flex flex-col items-center gap-4 max-w-full" onClick={e => e.stopPropagation()}>
+                <div className="flex gap-2 bg-white/10 backdrop-blur-md rounded-full p-1">
+                  <button onClick={() => setCompareView('original')} className={'px-4 py-2 rounded-full text-xs font-medium transition-all ' + (compareView === 'original' ? 'bg-white text-stone-900' : 'text-white/70 hover:text-white')}>
+                    A
+                  </button>
+                  <button onClick={() => setCompareView('new')} className={'px-4 py-2 rounded-full text-xs font-medium transition-all ' + (compareView === 'new' ? 'bg-white text-stone-900' : 'text-white/70 hover:text-white')}>
+                    B
+                  </button>
+                </div>
+                <img src={compareView === 'original' ? viewSnap.resultUrl : viewSnap.retryResultUrl} alt="" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
+                <div className="flex gap-3">
+                  <button onClick={async () => {
+                    await api('/' + viewSnap.id + '/select', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ version: 'original' }) });
+                    setCompareMode(false);
+                  }} className={'px-5 py-2.5 rounded-full text-sm font-medium transition-all ' + (compareView === 'original' ? 'bg-white text-stone-900' : 'bg-white/10 text-white/70 hover:bg-white/20')}>
+                    A 선택
+                  </button>
+                  <button onClick={async () => {
+                    await api('/' + viewSnap.id + '/select', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ version: 'retry' }) });
+                    setSnaps(prev => prev.map(s => s.id === viewSnap.id ? { ...s, resultUrl: viewSnap.retryResultUrl!, engine: 'seedream' } : s));
+                    setViewSnap({ ...viewSnap, resultUrl: viewSnap.retryResultUrl! });
+                    setCompareMode(false);
+                  }} className={'px-5 py-2.5 rounded-full text-sm font-medium transition-all ' + (compareView === 'new' ? 'bg-white text-stone-900' : 'bg-white/10 text-white/70 hover:bg-white/20')}>
+                    B 선택
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <img src={viewSnap.resultUrl} alt="" className="max-w-full max-h-[85vh] object-contain rounded-xl" onClick={e => e.stopPropagation()} />
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 items-center">
+                  <span className="px-3 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full">
+                    {concepts.find(c => c.id === viewSnap.concept)?.label || viewSnap.concept}
+                  </span>
+                  {viewSnap.retryStatus === 'done' && viewSnap.retryResultUrl ? (
+                    <button onClick={e => { e.stopPropagation(); setCompareMode(true); }}
+                      className="flex items-center gap-1.5 px-4 py-1.5 bg-stone-800 text-white rounded-full text-xs font-medium hover:bg-stone-700 transition-colors">
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      비교하기
+                    </button>
+                  ) : viewSnap.retryStatus === 'generating' ? (
+                    <span className="flex items-center gap-1.5 px-4 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      새 버전 생성중
+                    </span>
+                  ) : !viewSnap.retryStatus ? (
+                    <button onClick={async e => {
+                      e.stopPropagation();
+                      setRetrying(true);
+                      try {
+                        await api('/' + viewSnap.id + '/retry', { method: 'POST' });
+                        setSnaps(prev => prev.map(s => s.id === viewSnap.id ? { ...s, retryStatus: 'generating' } : s));
+                        setViewSnap({ ...viewSnap, retryStatus: 'generating' });
+                      } catch {}
+                      setRetrying(false);
+                    }} disabled={retrying}
+                      className="flex items-center gap-1.5 px-4 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full hover:bg-white/20 transition-colors">
+                      {retrying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                      {retrying ? '요청중...' : '다른 느낌으로'}
+                    </button>
+                  ) : null}
+                  <a href={viewSnap.resultUrl} download target="_blank" onClick={e => e.stopPropagation()}
+                    className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-stone-900 rounded-full text-xs font-medium hover:bg-stone-100 transition-colors">
+                    <Download className="w-3.5 h-3.5" />
+                    저장
+                  </a>
+                </div>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
