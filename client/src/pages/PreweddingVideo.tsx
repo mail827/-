@@ -110,15 +110,22 @@ export default function PreweddingVideo() {
       setFonts(d.fonts);
       if (d.subtitleStyles) setSubtitleStyles(d.subtitleStyles);
       if (d.selfieConcepts) setSelfieConcepts(d.selfieConcepts);
-      d.fonts.forEach((f: FontOption) => {
-        const style = document.createElement('style');
-        style.textContent = `@font-face { font-family: '${f.id}'; src: url('/fonts/${f.file}') format('woff2'); font-display: swap; }`;
-        document.head.appendChild(style);
-      });
+
     });
     fetch(`${API}/prewedding-video/bgm`).then(r => r.json()).then(d => { setBgms(d); });
     return () => { audioRef.pause(); if (pollInterval) clearInterval(pollInterval); };
   }, []);
+
+  useEffect(() => {
+    if (step < 2 || !fonts.length) return;
+    fonts.forEach((f: FontOption) => {
+      if (document.querySelector(`style[data-font="${f.id}"]`)) return;
+      const style = document.createElement('style');
+      style.setAttribute('data-font', f.id);
+      style.textContent = `@font-face { font-family: '${f.id}'; src: url('/fonts/${f.file}') format('woff2'); font-display: swap; }`;
+      document.head.appendChild(style);
+    });
+  }, [step, fonts]);
 
   useEffect(() => {
     if (giftCode && !giftVerified) {
