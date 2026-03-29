@@ -895,6 +895,7 @@ const ARK_BASE = 'https://ark.ap-southeast.bytepluses.com/api/v3';
 const generateSeeDream = async (snapId: string, concept: string, imageUrls: string[], mode: string) => {
   try {
     await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'generating' } });
+    console.log('[SeeDream retry] starting for snap:', snapId, 'concept:', concept, 'mode:', mode);
 
     let basePrompt = '';
     if (mode === 'couple') {
@@ -928,6 +929,7 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
         pose + ', ' + basePrompt;
     }
 
+    console.log('[SeeDream retry] calling ARK API, image:', refUrl.slice(0, 80));
     const res = await fetch(ARK_BASE + '/images/generations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ARK_API_KEY },

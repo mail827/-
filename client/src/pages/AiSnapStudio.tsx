@@ -64,6 +64,28 @@ export default function AiSnapStudioPage() {
   const progressRef = useRef<ReturnType<typeof setInterval>>();
   const pollRef = useRef<ReturnType<typeof setInterval>>();
   const [viewSnap, setViewSnap] = useState<Snap | null>(null);
+  const retryPollRef = useRef<ReturnType<typeof setInterval>>();
+
+  useEffect(() => {
+    const retrying = activePack?.snaps?.filter((s: Snap) => s.retryStatus === 'generating') || [];
+    if (retrying.length === 0) { clearInterval(retryPollRef.current); return; }
+    retryPollRef.current = setInterval(async () => {
+      for (const s of retrying) {
+        try {
+          const res = await fetch(API + '/ai-snap/status/' + s.id, { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } });
+          const updated = await res.json();
+          if (updated.retryStatus === 'done' || updated.retryStatus === 'failed') {
+            if (activePack) {
+              const up = { ...activePack, snaps: activePack.snaps.map((p: Snap) => p.id === s.id ? { ...p, retryStatus: updated.retryStatus, retryResultUrl: updated.retryResultUrl } : p) };
+              setActivePack(up);
+            }
+            if (viewSnap?.id === s.id) setViewSnap((v: Snap | null) => v ? { ...v, retryStatus: updated.retryStatus, retryResultUrl: updated.retryResultUrl } : v);
+          }
+        } catch {}
+      }
+    }, 5000);
+    return () => clearInterval(retryPollRef.current);
+  }, [activePack?.snaps?.filter((s: Snap) => s.retryStatus === 'generating').length]);
   const [retrying, setRetrying] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
   const [compareView, setCompareView] = useState<'original' | 'new'>('original');
