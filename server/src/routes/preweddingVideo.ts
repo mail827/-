@@ -1400,26 +1400,37 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
   const fontPath = getFontPath(video.fontId || 'BMJUA_ttf');
 
-  // === STEP A: Build opening.mp4 (intro_raw + names overlay) ===
+  // === STEP A: Build opening.mp4 (Netflix/Apple cinematic intro) ===
   const openingOut = path.join(tmpDir, 'opening_final.mp4');
-  const introSrc = '/app/assets/intro_raw.mp4';
-  const nameFont = '/app/fonts/ChosunNm.ttf';
-  const ampFont = '/app/fonts/GreatVibes-Regular.ttf';
+  const introSrc = '/app/assets/intro_cinematic.mp4';
+  const nameFont = '/app/fonts/ClimateCrisisKR.ttf';
   const gName = escapeDrawtext(video.groomName);
   const bName = escapeDrawtext(video.brideName);
   const wDate = escapeDrawtext(video.weddingDate || '');
   try {
-    const dtGroom = ",drawtext=fontfile='" + nameFont + "':text='" + gName + "':fontsize=38:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)-50:enable='between(t\\,0.5\\,4.5)':alpha='if(lt(t\\,1.0)\\,(t-0.5)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
-    const dtAmp = ",drawtext=fontfile='" + ampFont + "':text='&':fontsize=30:fontcolor=white@0.7:x=(w-text_w)/2:y=(h/2)-5:enable='between(t\\,1.0\\,4.5)':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
-    const dtBride = ",drawtext=fontfile='" + nameFont + "':text='" + bName + "':fontsize=38:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)+35:enable='between(t\\,1.3\\,4.5)':alpha='if(lt(t\\,1.8)\\,(t-1.3)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
-    const dtDate = wDate ? ",drawtext=fontfile='" + nameFont + "':text='" + wDate + "':fontsize=20:fontcolor=white@0.7:x=(w-text_w)/2:y=(h/2)+85:enable='between(t\\,1.8\\,4.5)':alpha='if(lt(t\\,2.3)\\,(t-1.8)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'" : '';
-    const introVf = "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24" + dtGroom + dtAmp + dtBride + dtDate + ",fade=t=in:st=0:d=1.0,fade=t=out:st=4.0:d=1.0";
+    const fullName = gName + '  &  ' + bName;
+    const chars = Array.from(fullName);
+    const tBase = 2.0;
+    const tGap = 0.12;
+    let typingVf = '';
+    for (let ci = 0; ci < chars.length; ci++) {
+      const partial = escapeDrawtext(chars.slice(0, ci + 1).join(''));
+      const tS = (tBase + ci * tGap).toFixed(2);
+      const isLast = ci === chars.length - 1;
+      const tE = isLast ? '4.5' : (tBase + (ci + 1) * tGap).toFixed(2);
+      const fade = isLast ? "\\:alpha='if(gt(t\\," + '4.0' + ")\\,(4.5-t)/0.5\\,1)'" : '';
+      typingVf += ",drawtext=fontfile='" + nameFont + "':text='" + partial + "':fontsize=70:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)-24:enable='between(t\\," + tS + "\\," + tE + ")'" + fade;
+    }
+    const dtBrand = ",drawtext=fontfile='" + nameFont + "':text='WEDDING ENGINE':fontsize=13:fontcolor=white@0.35:x=(w-text_w)/2:y=(h*0.62):enable='between(t\\,0.4\\,1.8)':alpha='if(lt(t\\,0.8)\\,(t-0.4)/0.4\\,if(gt(t\\,1.4)\\,(1.8-t)/0.4\\,1))'";
+    const dtDate = wDate ? ",drawtext=fontfile='" + nameFont + "':text='" + wDate + "':fontsize=15:fontcolor=white@0.4:x=(w-text_w)/2:y=(h/2)+52:enable='between(t\\,3.2\\,4.5)':alpha='if(lt(t\\,3.5)\\,(t-3.2)/0.3\\,if(gt(t\\,4.0)\\,(4.5-t)/0.5\\,1))'" : '';
+    const introVf = "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24" + dtBrand + typingVf + dtDate + ",fade=t=in:st=0:d=0.8,fade=t=out:st=4.2:d=0.8";
     await execAsync('ffmpeg -y -threads 2 -i "' + introSrc + '" -vf "' + introVf + '" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t 5 "' + openingOut + '"', 120000);
-    console.log('[Pipeline] Cinematic intro with names created');
+    console.log('[Pipeline] Cinematic intro created (' + chars.length + ' chars typed)');
   } catch (e: any) {
-    console.error('[Pipeline] Intro overlay failed:', e.message?.slice(0, 200));
+    console.error('[Pipeline] Intro failed:', e.message?.slice(0, 200));
     try {
-      await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=black:s=1280x720:d=5:r=24 -vf \"drawtext=fontfile='" + nameFont + "':text='" + gName + " & " + bName + "':fontsize=36:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2):enable='between(t,0.5,4.0)':alpha='if(lt(t,1.0),(t-0.5)/0.5,if(gt(t,3.5),(4.0-t)/0.5,1))',fade=t=in:st=0:d=1,fade=t=out:st=3.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 5 \"" + openingOut + "\"", 30000);
+      const fbVf = "drawtext=fontfile='" + nameFont + "':text='" + gName + "  &  " + bName + "':fontsize=70:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)-24:enable='between(t\\,0.8\\,4.2)':alpha='if(lt(t\\,1.2)\\,(t-0.8)/0.4\\,if(gt(t\\,3.6)\\,(4.2-t)/0.6\\,1))',fade=t=in:st=0:d=0.8,fade=t=out:st=4.0:d=1.0";
+      await execAsync('ffmpeg -y -threads 2 -f lavfi -i "color=c=black:s=1280x720:d=5:r=24" -vf "' + fbVf + '" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 5 "' + openingOut + '"', 60000);
       console.log('[Pipeline] Black intro fallback');
     } catch { console.error('[Pipeline] Intro fallback failed'); }
   }
@@ -1704,26 +1715,37 @@ async function assembleOnly(videoId: string) {
 
   const fontPath = getFontPath(video.fontId || 'BMJUA_ttf');
 
-  // === STEP A: Build opening.mp4 (intro_raw + names overlay) ===
+  // === STEP A: Build opening.mp4 (Netflix/Apple cinematic intro) ===
   const openingOut = path.join(tmpDir, 'opening_final.mp4');
-  const introSrc = '/app/assets/intro_raw.mp4';
-  const nameFont = '/app/fonts/ChosunNm.ttf';
-  const ampFont = '/app/fonts/GreatVibes-Regular.ttf';
+  const introSrc = '/app/assets/intro_cinematic.mp4';
+  const nameFont = '/app/fonts/ClimateCrisisKR.ttf';
   const gName = escapeDrawtext(video.groomName);
   const bName = escapeDrawtext(video.brideName);
   const wDate = escapeDrawtext(video.weddingDate || '');
   try {
-    const dtGroom = ",drawtext=fontfile='" + nameFont + "':text='" + gName + "':fontsize=38:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)-50:enable='between(t\\,0.5\\,4.5)':alpha='if(lt(t\\,1.0)\\,(t-0.5)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
-    const dtAmp = ",drawtext=fontfile='" + ampFont + "':text='&':fontsize=30:fontcolor=white@0.7:x=(w-text_w)/2:y=(h/2)-5:enable='between(t\\,1.0\\,4.5)':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
-    const dtBride = ",drawtext=fontfile='" + nameFont + "':text='" + bName + "':fontsize=38:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)+35:enable='between(t\\,1.3\\,4.5)':alpha='if(lt(t\\,1.8)\\,(t-1.3)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'";
-    const dtDate = wDate ? ",drawtext=fontfile='" + nameFont + "':text='" + wDate + "':fontsize=20:fontcolor=white@0.7:x=(w-text_w)/2:y=(h/2)+85:enable='between(t\\,1.8\\,4.5)':alpha='if(lt(t\\,2.3)\\,(t-1.8)/0.5\\,if(gt(t\\,3.8)\\,(4.5-t)/0.7\\,1))'" : '';
-    const introVf = "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24" + dtGroom + dtAmp + dtBride + dtDate + ",fade=t=in:st=0:d=1.0,fade=t=out:st=4.0:d=1.0";
+    const fullName = gName + '  &  ' + bName;
+    const chars = Array.from(fullName);
+    const tBase = 2.0;
+    const tGap = 0.12;
+    let typingVf = '';
+    for (let ci = 0; ci < chars.length; ci++) {
+      const partial = escapeDrawtext(chars.slice(0, ci + 1).join(''));
+      const tS = (tBase + ci * tGap).toFixed(2);
+      const isLast = ci === chars.length - 1;
+      const tE = isLast ? '4.5' : (tBase + (ci + 1) * tGap).toFixed(2);
+      const fade = isLast ? "\\:alpha='if(gt(t\\," + '4.0' + ")\\,(4.5-t)/0.5\\,1)'" : '';
+      typingVf += ",drawtext=fontfile='" + nameFont + "':text='" + partial + "':fontsize=70:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)-24:enable='between(t\\," + tS + "\\," + tE + ")'" + fade;
+    }
+    const dtBrand = ",drawtext=fontfile='" + nameFont + "':text='WEDDING ENGINE':fontsize=13:fontcolor=white@0.35:x=(w-text_w)/2:y=(h*0.62):enable='between(t\\,0.4\\,1.8)':alpha='if(lt(t\\,0.8)\\,(t-0.4)/0.4\\,if(gt(t\\,1.4)\\,(1.8-t)/0.4\\,1))'";
+    const dtDate = wDate ? ",drawtext=fontfile='" + nameFont + "':text='" + wDate + "':fontsize=15:fontcolor=white@0.4:x=(w-text_w)/2:y=(h/2)+52:enable='between(t\\,3.2\\,4.5)':alpha='if(lt(t\\,3.5)\\,(t-3.2)/0.3\\,if(gt(t\\,4.0)\\,(4.5-t)/0.5\\,1))'" : '';
+    const introVf = "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24" + dtBrand + typingVf + dtDate + ",fade=t=in:st=0:d=0.8,fade=t=out:st=4.2:d=0.8";
     await execAsync('ffmpeg -y -threads 2 -i "' + introSrc + '" -vf "' + introVf + '" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t 5 "' + openingOut + '"', 120000);
-    console.log('[Pipeline] Cinematic intro with names created');
+    console.log('[Pipeline] Cinematic intro created (' + chars.length + ' chars typed)');
   } catch (e: any) {
-    console.error('[Pipeline] Intro overlay failed:', e.message?.slice(0, 200));
+    console.error('[Pipeline] Intro failed:', e.message?.slice(0, 200));
     try {
-      await execAsync("ffmpeg -y -threads 2 -f lavfi -i color=c=black:s=1280x720:d=5:r=24 -vf \"drawtext=fontfile='" + nameFont + "':text='" + gName + " & " + bName + "':fontsize=36:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2):enable='between(t,0.5,4.0)':alpha='if(lt(t,1.0),(t-0.5)/0.5,if(gt(t,3.5),(4.0-t)/0.5,1))',fade=t=in:st=0:d=1,fade=t=out:st=3.5:d=1.5\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 5 \"" + openingOut + "\"", 30000);
+      const fbVf = "drawtext=fontfile='" + nameFont + "':text='" + gName + "  &  " + bName + "':fontsize=70:fontcolor=white@0.95:x=(w-text_w)/2:y=(h/2)-24:enable='between(t\\,0.8\\,4.2)':alpha='if(lt(t\\,1.2)\\,(t-0.8)/0.4\\,if(gt(t\\,3.6)\\,(4.2-t)/0.6\\,1))',fade=t=in:st=0:d=0.8,fade=t=out:st=4.0:d=1.0";
+      await execAsync('ffmpeg -y -threads 2 -f lavfi -i "color=c=black:s=1280x720:d=5:r=24" -vf "' + fbVf + '" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -an -t 5 "' + openingOut + '"', 60000);
       console.log('[Pipeline] Black intro fallback');
     } catch { console.error('[Pipeline] Intro fallback failed'); }
   }
