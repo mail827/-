@@ -17,6 +17,8 @@ const CONCEPTS = [
   { id: 'grass_rain', label: '풀밭', sub: '비 내리는 필름 감성' },
   { id: 'eternal_blue', label: '블루', sub: '겨울 바다 멜랑콜리' },
   { id: 'heart_editorial', label: '하이 에디토리얼', sub: '건축적 하이패션' },
+  { id: 'vintage_tungsten', label: '빈티지 텅스텐', sub: '70년대 웨딩앨범' },
+  { id: 'aao', label: '에에올', sub: '어떤 우주에서든' },
   { id: 'hanbok_dangui', label: '당의 한복', sub: '단아한 정원 화보' },
   { id: 'hanbok_modern', label: '모던 한복', sub: '현대적 한옥 감성' },
   { id: 'hanbok_saeguk', label: '사극풍', sub: '왕과 왕비 컨셉' },

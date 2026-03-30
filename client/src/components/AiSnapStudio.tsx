@@ -47,6 +47,8 @@ const CONCEPT_META: Record<string, { emoji: string; sub: string }> = {
   grass_rain: { emoji: 'G', sub: '비 내리는 풀밭' },
   eternal_blue: { emoji: 'E', sub: '이터널 블루' },
   heart_editorial: { emoji: 'H', sub: '하이패션 에디토리얼' },
+  vintage_tungsten: { emoji: 'V', sub: '70년대 웨딩앨범' },
+  aao: { emoji: 'A', sub: '어떤 우주에서든' },
 };
 
 type Mode = 'couple' | 'groom' | 'bride';

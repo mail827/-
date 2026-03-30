@@ -5,6 +5,12 @@ import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 const router = Router();
 const prisma = new PrismaClient();
 
+const activeJobs = new Map<string, AbortController>();
+
+function checkAbort(videoId: string, signal: AbortSignal) {
+  if (signal.aborted) throw new Error('CANCELLED');
+}
+
 const FAL_API_KEY = process.env.FAL_API_KEY;
 const ARK_API_KEY = process.env.ARK_API_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -49,6 +55,8 @@ const SELFIE_CONCEPTS: { id: string; prompt: string; subScenes?: string[] }[] = 
   { id: 'grass_rain', prompt: 'place this person in a wide green grassy hillside field on an overcast rainy day, tall grass and small wildflowers, mist hanging low, grey sky, muted desaturated green tone, grainy analog film Fuji Superia 400, photorealistic, 8k', subScenes: ['place this person sitting in tall green grass on a hillside, soft overcast diffused light, small bouquet of white wildflowers, face clean and dry, muted desaturated green film tone, grainy analog film, photorealistic, 8k', 'place this person walking through a misty green field after rain, facing camera with gentle expression, mist hanging low over field in distance, face clean and dry no water on face, grainy analog film expired stock, muted washed-out green tones, photorealistic, 8k', 'place this person standing in a wide green field under grey sky, fine rain falling around, gentle smile looking slightly off camera, face completely dry and clean, flat grey overcast light, grainy analog film Kodak Portra 400, muddy green-grey palette, photorealistic, 8k', 'place this person standing in tall green grass on grey rainy day, light mist in air, eyes closed soft peaceful smile, face dry and clean no dripping water, flat grey overcast light, shallow depth of field grassy background, grainy analog film Fuji Pro 400H, photorealistic, 8k', 'place this person standing at edge of misty green hillside field, wind blowing hair gently, holding small wildflower bouquet at waist, face clean and dry, soft overcast light, muted green tone, grainy analog film, photorealistic, 8k'] },
   { id: 'eternal_blue', prompt: 'place this person on an empty grey winter beach at dusk, grey overcast sky blending into grey ocean, wet dark sand, cold wind, edges of frame slightly blurred and darkened as if memory is fading, cool blue-grey desaturated palette, heavy film grain, photorealistic, 8k', subScenes: ['place this person standing on a frozen lake under heavy grey sky with light snow falling, massive blue tulle skirt spreading across white ice, face visible looking down gently, monochromatic blue-white-grey palette, quiet melancholic atmosphere, photorealistic, 8k', 'place this person standing between tall bookshelves in dimly lit old bookstore, warm single desk lamp casting long shadows, dust particles floating in lamplight beam, face lit by warm tungsten light, intimate atmosphere, photorealistic, 8k', 'place this person standing on empty grey winter beach facing camera with melancholic expression, enormous tulle skirt dragging across dark wet sand, cold wind blowing hair, cold desaturated blue-grey monochrome, heavy film grain, photorealistic, 8k', 'place this person sitting on edge of bed in dim bedroom, warm amber lamp light on face, looking toward camera with quiet contemplative expression, cool blue shadows in background, heavy film grain, photorealistic, 8k'] },
   { id: 'heart_editorial', prompt: 'place this person in a dark editorial fashion studio with pure black background, hard directional single light source creating deep shadows, high contrast graphic fashion photograph, photorealistic, 8k', subScenes: ['place this person standing in center of white spotlight circle on black stage floor, everything outside spotlight is pure black, face lit by hard theatrical light, confident gaze at camera, photorealistic, 8k', 'place this person standing in studio with white-grey background, dozens of glossy red 3D heart shapes floating around like confetti, flat even studio lighting, red hearts only color in image, editorial fashion, facing camera, photorealistic, 8k', 'place this person sitting on black cube in dark studio, single hard beauty dish light from front casting defined shadows, chin resting on one hand looking directly at camera, everything else pure black, heavy contrast editorial, photorealistic, 8k', 'place this person standing in dark studio with massive white origami organza train fanned out on floor behind, hard front light illuminating face and upper body, intense calm gaze at camera, pure black background, editorial fashion, photorealistic, 8k'] },
+  { id: 'vintage_tungsten', prompt: 'place this person in a dark maximalist vintage room with large rose and tropical leaf wallpaper, old CRT television, tropical houseplants, floor lamp with fabric shade, direct on-camera flash flat harsh lighting, faded warm print magenta highlights yellow midtones, 1970s wedding album, photorealistic, 8k', subScenes: ['place this person sitting on floral velvet sofa in dark vintage room with rose and tropical leaf wallpaper, CRT television behind, direct on-camera flash faces bright background dark, faded warm colors magenta highlights, 1979 wedding album, face clearly visible, photorealistic, 8k', 'place this person sitting on carpet floor in front of old CRT television showing static, dark floral wallpaper, ambient tungsten light and cool TV glow, low light muddy warm colors, candid snapshot cheap 35mm 1982, face clearly visible, photorealistic, 8k', 'place this person on narrow dark wood staircase with faded floral carpet runner and framed photos on wall, single bare warm bulb in stairwell, on-camera flash harsh shadow behind, faded orange-shifted highlights, face clearly visible looking at camera, photorealistic, 8k', 'place this person standing in front of dark floral wallpaper with roses and tropical leaves, tropical plant beside, direct on-camera flash flat lighting harsh shadow behind, face clearly visible gentle smile, faded warm magenta highlights, compact film camera 1981, photorealistic, 8k', 'place this person standing in long narrow dark hallway with faded floral wallpaper and worn carpet, dim bare warm bulbs in wall sconces, warm amber tones, face clearly visible, 1980 amateur photography, photorealistic, 8k'] },
+  { id: 'aao', prompt: 'place this person standing in a brightly lit Korean convenience store at night, harsh white fluorescent ceiling lights reflecting off cheap linoleum floor, shelves of instant noodles and snacks behind, deadpan centered composition mundane and still, photorealistic, 8k', subScenes: ['place this person standing in brightly lit Korean convenience store at night, harsh fluorescent lights linoleum floor, shelves of snacks, leaning against refrigerator door, deadpan expression, face clearly visible, photorealistic, 8k', 'place this person standing on cluttered apartment rooftop with clotheslines and hanging laundry, concrete floor puddles, rusted water tanks, grey overcast sky flat daylight, face clearly visible, observational quiet, photorealistic, 8k', 'place this person sitting at bottom of large empty drained outdoor swimming pool, cracked pale blue tiles, dead leaves in corners, bright harsh midday sun overhead, face clearly visible looking up, geometric lonely, photorealistic, 8k', 'place this person sitting in empty late-night subway car, harsh fluorescent tube lighting orange plastic seats, green-tinted fluorescent light, black windows reflecting ghost doubles, face clearly visible quiet expression, photorealistic, 8k', 'place this person standing in empty outdoor parking lot at night in rain, single sodium vapor lamp casting harsh orange circle, everything beyond is black, rain streaks visible, face clearly visible looking up at rain, photorealistic, 8k'] },
 ];
 
 const GLAMOUR_FACE = 'Preserve the exact original face from the reference photo with every detail unchanged including eyes, nose, lips, jaw shape, face proportions. The face must be identical to the input photo. Anatomically correct natural proportionate head to body ratio, head size must match realistic human proportions relative to shoulders and torso. Raw photo texture, natural skin with visible pores and subtle imperfections, realistic skin grain. Photorealistic 8k quality, clean elegant clothing with no distortion. No text, no logos, no watermarks, no deformed hands, no extra fingers';
@@ -91,6 +99,8 @@ const GLAMOUR_OUTFIT_GROOM: Record<string, string> = {
   grass_rain: 'wearing black wool slim-fit two-button suit with natural shoulders, white cotton shirt with collar open no tie, jacket worn casually unbuttoned, clean simple silhouette',
   eternal_blue: 'wearing slate blue-grey wool one-button suit with slim peak lapels, white silk shirt spread collar top button undone no tie, small pearl pin on left lapel, cool melancholic',
   heart_editorial: 'wearing sharp black double-breasted six-button jacket with extreme wide peaked lapels and structured squared shoulders, high-waisted wide-leg trousers with razor-sharp crease, crisp white shirt buttoned to top narrow black silk tie, red fabric heart on left lapel, bold graphic',
+  vintage_tungsten: 'wearing dark navy wool two-button suit with wide notch lapels relaxed vintage cut, white cotton shirt soft rounded collar, dusty lavender silk tie slightly loose, soft lived-in quality like 1978 wardrobe',
+  aao: 'wearing grand ivory silk shantung double-breasted peak-lapel long jacket extending past hip, structured wide shoulders, high-waisted wide-leg trousers sharp crease, white silk shirt cream tie, oversized googly eye pinned on left lapel',
 };
 
 const GLAMOUR_OUTFIT_BRIDE: Record<string, string> = {
@@ -131,6 +141,8 @@ const GLAMOUR_OUTFIT_BRIDE: Record<string, string> = {
   grass_rain: 'wearing light ivory silk chiffon halter-neck dress with crossed draped neckline, gently fitted bodice, multiple opaque layered chiffon skirt, fabric fully opaque with dense layering ensuring complete body coverage, natural minimal makeup',
   eternal_blue: 'wearing dusty powder blue strapless sweetheart satin bodice dress with massive voluminous cloud-like tulle ruffled skirt graduating blue tones, single pearl strand across bodice, natural elegant makeup',
   heart_editorial: 'wearing pure white architectural high mock-neck dress with structured exaggerated square shoulders, rigid sculpted duchess satin torso, front straight column back origami organza train, oversized red fabric heart brooch at center of chest, editorial fashion makeup',
+  vintage_tungsten: 'wearing ivory floral cotton lace high Victorian neckline dress with bishop sleeves gathered at wrist, satin ribbon belt, fingertip tulle veil, no beading no sequins, vintage 1970s bridal',
+  aao: 'wearing grand ivory duchess satin off-shoulder ball gown with dramatic oversized puff sleeves, fitted corset bodice, massive ball gown skirt with hundreds of tiny colorful pastel buttons in galaxy spiral pattern, cathedral train, architecturally grand and surreal',
 };
 
 const VIDEO_COUPLE_SHOTS = [
@@ -474,7 +486,7 @@ function getFontPath(fontId: string): string {
 }
 
 router.get('/config', (_req, res) => {
-  res.json({ pricing: PRICING, fonts: FONTS, subtitleStyles: SUBTITLE_STYLES, selfieConcepts: SELFIE_CONCEPTS.map(c => ({ id: c.id, name: ({ studio_classic: '클래식 스튜디오', studio_gallery: '갤러리 스튜디오', studio_fog: '포그 스튜디오', studio_mocha: '모카 스튜디오', studio_sage: '세이지 스튜디오', outdoor_garden: '가든 웨딩', beach_sunset: '비치 선셋', hanbok_traditional: '전통 한복', hanbok_wonsam: '원삼 혼례', hanbok_dangui: '당의 한복', hanbok_modern: '모던 한복', hanbok_saeguk: '사극풍', hanbok_flower: '꽃 한복', city_night: '시티 나이트', cherry_blossom: '벚꽃', forest_wedding: '숲속 웨딩', castle_garden: '유럽 궁전', cathedral: '성당', watercolor: '수채화', magazine_cover: '매거진 커버', rainy_day: '비 오는 날', autumn_leaves: '가을 단풍', winter_snow: '겨울 눈', vintage_film: '빈티지 필름', cruise_sunset: '크루즈 선셋', cruise_bluesky: '크루즈 블루스카이', vintage_record: '빈티지 레코드', retro_hongkong: '레트로 홍콩', black_swan: '블랙 스완', velvet_rouge: '벨벳 루즈', water_memory: '물의 기억', blue_hour: '블루아워', iphone_mirror: '거울 셀카', rose_garden: '장미 정원', grass_rain: '풀밭', eternal_blue: '블루', heart_editorial: '하이 에디토리얼' } as Record<string, string>)[c.id] || c.id })) });
+  res.json({ pricing: PRICING, fonts: FONTS, subtitleStyles: SUBTITLE_STYLES, selfieConcepts: SELFIE_CONCEPTS.map(c => ({ id: c.id, name: ({ studio_classic: '클래식 스튜디오', studio_gallery: '갤러리 스튜디오', studio_fog: '포그 스튜디오', studio_mocha: '모카 스튜디오', studio_sage: '세이지 스튜디오', outdoor_garden: '가든 웨딩', beach_sunset: '비치 선셋', hanbok_traditional: '전통 한복', hanbok_wonsam: '원삼 혼례', hanbok_dangui: '당의 한복', hanbok_modern: '모던 한복', hanbok_saeguk: '사극풍', hanbok_flower: '꽃 한복', city_night: '시티 나이트', cherry_blossom: '벚꽃', forest_wedding: '숲속 웨딩', castle_garden: '유럽 궁전', cathedral: '성당', watercolor: '수채화', magazine_cover: '매거진 커버', rainy_day: '비 오는 날', autumn_leaves: '가을 단풍', winter_snow: '겨울 눈', vintage_film: '빈티지 필름', cruise_sunset: '크루즈 선셋', cruise_bluesky: '크루즈 블루스카이', vintage_record: '빈티지 레코드', retro_hongkong: '레트로 홍콩', black_swan: '블랙 스완', velvet_rouge: '벨벳 루즈', water_memory: '물의 기억', blue_hour: '블루아워', iphone_mirror: '거울 셀카', rose_garden: '장미 정원', grass_rain: '풀밭', eternal_blue: '블루', heart_editorial: '하이 에디토리얼', vintage_tungsten: '빈티지 텅스텐', aao: '에에올' } as Record<string, string>)[c.id] || c.id })) });
 });
 
 router.get('/bgm', async (_req, res) => {
@@ -568,6 +580,8 @@ router.post('/payment/confirm', authMiddleware, async (req: AuthRequest, res) =>
     });
 
     processVideoAsync(video.id).catch(err => {
+      activeJobs.delete(video.id);
+      if (err.message === 'CANCELLED') { console.log('[Pipeline] cancelled:', video.id); return; }
       console.error('Pipeline error:', err);
       prisma.preweddingVideo.update({
         where: { id: video.id },
@@ -668,6 +682,8 @@ router.post('/admin/free-generate', authMiddleware, adminOnly, async (req: AuthR
     });
 
     processVideoAsync(video.id, videoEngine || 'seedance15').catch(err => {
+      activeJobs.delete(video.id);
+      if (err.message === 'CANCELLED') { console.log('[Pipeline] cancelled:', video.id); return; }
       console.error('Free gen pipeline error:', err);
       prisma.preweddingVideo.update({
         where: { id: video.id },
@@ -685,11 +701,13 @@ router.post('/admin/cancel/:id', authMiddleware, adminOnly, async (req: AuthRequ
   try {
     const video = await prisma.preweddingVideo.findUnique({ where: { id: req.params.id } });
     if (!video) return res.status(404).json({ error: 'not found' });
+    const ctrl = activeJobs.get(req.params.id);
+    if (ctrl) { ctrl.abort(); activeJobs.delete(req.params.id); }
     await prisma.preweddingVideo.update({
       where: { id: req.params.id },
       data: { status: 'FAILED', errorMsg: 'Cancelled by admin' },
     });
-    res.json({ success: true });
+    res.json({ success: true, aborted: !!ctrl });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
@@ -705,6 +723,8 @@ router.post('/admin/retry/:id', authMiddleware, adminOnly, async (req: AuthReque
       data: { status: 'ANALYZING', errorMsg: null, outputUrl: null, clipUrls: [], scenes: [], subtitles: [], photoAnalysis: [], totalCost: null, totalDuration: null },
     });
     processVideoAsync(video.id).catch(err => {
+      activeJobs.delete(video.id);
+      if (err.message === 'CANCELLED') { console.log('[Pipeline] cancelled:', video.id); return; }
       console.error('Retry pipeline error:', err);
       prisma.preweddingVideo.update({
         where: { id: video.id },
@@ -1197,6 +1217,9 @@ function buildEndingCredits(groomName: string, brideName: string, weddingDate: s
   return lines;
 }
 async function processVideoAsync(videoId: string, videoEngine: string = 'seedance15') {
+  const abortCtrl = new AbortController();
+  const signal = abortCtrl.signal;
+  activeJobs.set(videoId, abortCtrl);
   const video = await prisma.preweddingVideo.findUnique({ where: { id: videoId } });
   if (!video) throw new Error('Video not found');
 
@@ -1204,6 +1227,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
   if ((video as any).mode === 'selfie') {
     await prisma.preweddingVideo.update({ where: { id: videoId }, data: { status: 'ANALYZING' } });
+    checkAbort(videoId, signal);
     console.log('[Pipeline] Selfie mode: generating glamour photos...');
     const gender = photoUrls.length >= 2 ? 'couple' as const : 'female' as const;
     const savedConcepts = (video.scenes as string[]) || undefined;
@@ -1279,6 +1303,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
   const CLIP_BATCH = 3;
   for (let bi = 0; bi < scenes.length; bi += CLIP_BATCH) {
+    checkAbort(videoId, signal);
     const batchScenes = scenes.slice(bi, Math.min(bi + CLIP_BATCH, scenes.length));
     const batchPromises = batchScenes.map((scene, bsi) => {
       const si = bi + bsi;
@@ -1332,6 +1357,8 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
     return;
   }
 
+
+  checkAbort(videoId, signal);
 
   await prisma.preweddingVideo.update({
     where: { id: videoId },
@@ -1525,6 +1552,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
 
   fs.rmSync(tmpDir, { recursive: true, force: true });
 
+  activeJobs.delete(videoId);
   await prisma.preweddingVideo.update({
     where: { id: videoId },
     data: { status: outputUrl ? 'DONE' : 'FAILED', outputUrl: outputUrl || null, totalDuration, errorMsg: outputUrl ? null : 'Upload failed' },

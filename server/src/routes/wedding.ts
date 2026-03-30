@@ -30,10 +30,7 @@ const isOwner = (user: any, wedding: any) =>
 router.get('/', authMiddleware, async (req, res) => {
   const user = (req as any).user;
 
-  const where =
-    user.role === 'ADMIN'
-      ? {}
-      : { OR: [{ userId: user.id }, { pairUserId: user.id }] };
+  const where = { OR: [{ userId: user.id }, { pairUserId: user.id }] };
 
   const weddings = await prisma.wedding.findMany({
     where,

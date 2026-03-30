@@ -1,3 +1,5 @@
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -105,7 +107,12 @@ app.use("/api/ai-create", aiCreateRouter);
 
 seedPackages().catch(e => console.error("Seed error (ignored):", e.message));
 
-app.listen(Number(PORT), '0.0.0.0', () => {
-  console.log('🎊 Wedding Server running on port ' + PORT);
+app.listen(Number(PORT), '0.0.0.0', async () => {
+  console.log('Wedding Server running on port ' + PORT);
+  try { await prisma.$queryRaw`SELECT 1`; console.log('DB awake'); } catch (e: any) { console.log('DB wake failed:', e.message); }
   startScheduler();
 });
+
+setInterval(async () => {
+  try { await prisma.$queryRaw`SELECT 1`; } catch {}
+}, 4 * 60 * 1000);

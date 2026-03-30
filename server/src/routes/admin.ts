@@ -17,6 +17,7 @@ const adminMiddleware = (req: any, res: any, next: any) => {
 
 router.get('/users', authMiddleware, adminMiddleware, async (req, res) => {
   const users = await prisma.user.findMany({
+    take: 200,
     include: {
       _count: { select: { weddings: true, orders: true } },
       weddings: { select: { id: true, expiresAt: true } },
@@ -65,6 +66,7 @@ router.delete('/users/:id', authMiddleware, adminMiddleware, async (req, res) =>
 
 router.get('/orders', authMiddleware, adminMiddleware, async (req, res) => {
   const orders = await prisma.order.findMany({
+    take: 200,
     include: {
       user: { select: { id: true, name: true, email: true } },
       package: true,
@@ -118,6 +120,7 @@ router.get('/stats', authMiddleware, adminMiddleware, async (req, res) => {
 
 router.get('/inquiries', authMiddleware, adminMiddleware, async (req, res) => {
   const inquiries = await prisma.inquiry.findMany({
+    take: 100,
     orderBy: { createdAt: 'desc' },
   });
   res.json(inquiries);
@@ -308,6 +311,7 @@ router.get('/gifts', authMiddleware, adminMiddleware, async (req, res) => {
 router.get('/reviews', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const reviews = await prisma.review.findMany({
+    take: 100,
       include: {
         wedding: {
           select: { groomName: true, brideName: true }

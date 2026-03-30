@@ -318,51 +318,56 @@ export default function PreweddingVideo() {
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 100px' }}>
 
         {mode === 'select' && (
-          <div style={{ paddingTop: 40 }}>
-            <div style={{ textAlign: 'center', marginBottom: 48 }}>
-              <p style={{ fontSize: 11, letterSpacing: 3, color: '#a8a29e', marginBottom: 12, textTransform: 'uppercase' }}>Pre-Wedding Video</p>
-              <h1 style={{ fontFamily: 'serif', fontSize: 28, color: '#1a1a1a', marginBottom: 10, letterSpacing: -0.5, fontWeight: 400 }}>식전영상</h1>
-              <p style={{ fontSize: 14, color: '#999', lineHeight: 1.7 }}>웨딩 사진이 영상이 되는 순간</p>
+          <div style={{ paddingTop: 12 }}>
+            <button onClick={() => navigate(-1)} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0', marginBottom: 20, color: '#78716c', fontSize: 13 }}>
+              <ArrowLeft size={16} />
+              <span>돌아가기</span>
+            </button>
+
+            <div style={{ textAlign: 'center', marginBottom: 44 }}>
+              <p style={{ fontSize: 10, letterSpacing: 4, color: '#b8b5b0', marginBottom: 14, textTransform: 'uppercase', fontWeight: 500 }}>Pre-Wedding Video</p>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, color: '#1a1a1a', marginBottom: 10, letterSpacing: -1, fontWeight: 300 }}>식전영상</h1>
+              <p style={{ fontSize: 13, color: '#a8a29e', lineHeight: 1.8, letterSpacing: 0.3 }}>웨딩 사진이 영상이 되는 순간</p>
             </div>
 
-            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E5E0', overflow: 'hidden', marginBottom: 16 }}>
-              <button onClick={() => { setMode('create'); setStep(0); }} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '24px 20px', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Sparkles size={22} color="#fff" />
+            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e8e5e0', overflow: 'hidden', marginBottom: 14 }}>
+              <button onClick={() => { setMode('create'); setStep(0); }} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '22px 20px', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Sparkles size={20} color="#fff" />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 16, fontWeight: 600, color: '#1a1a1a', marginBottom: 4 }}>직접 만들기</p>
-                  <p style={{ fontSize: 12, color: '#a8a29e', lineHeight: 1.5 }}>사진만 올리면 영상이 완성돼요</p>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a', marginBottom: 3, letterSpacing: -0.3 }}>직접 만들기</p>
+                  <p style={{ fontSize: 12, color: '#a8a29e', lineHeight: 1.4 }}>사진만 올리면 영상이 완성돼요</p>
                 </div>
-                <ArrowRight size={18} color="#d6d3d1" />
+                <ArrowRight size={16} color="#d6d3d1" />
               </button>
-              <div style={{ height: 1, background: '#F0EDE8', margin: '0 20px' }} />
-              <button onClick={() => navigate('/prewedding-video/gift')} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '24px 20px', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Gift size={22} color="#78716c" />
+              <div style={{ height: 1, background: '#f0ede8', margin: '0 20px' }} />
+              <button onClick={() => navigate('/prewedding-video/gift')} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '22px 20px', width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#f5f3f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Gift size={20} color="#78716c" />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 16, fontWeight: 600, color: '#1a1a1a', marginBottom: 4 }}>선물하기</p>
-                  <p style={{ fontSize: 12, color: '#a8a29e', lineHeight: 1.5 }}>소중한 분에게 식전영상을 선물하세요</p>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a', marginBottom: 3, letterSpacing: -0.3 }}>선물하기</p>
+                  <p style={{ fontSize: 12, color: '#a8a29e', lineHeight: 1.4 }}>소중한 분에게 식전영상을 선물하세요</p>
                 </div>
-                <ArrowRight size={18} color="#d6d3d1" />
+                <ArrowRight size={16} color="#d6d3d1" />
               </button>
             </div>
 
-            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E5E0', padding: '24px 20px', marginBottom: 16 }}>
-              <p style={{ fontSize: 11, letterSpacing: 2, color: '#a8a29e', marginBottom: 16, textTransform: 'uppercase' }}>How it works</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e8e5e0', padding: '22px 20px', marginBottom: 14 }}>
+              <p style={{ fontSize: 10, letterSpacing: 3, color: '#b8b5b0', marginBottom: 18, textTransform: 'uppercase', fontWeight: 500 }}>How it works</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                 {[
-                  ['1', '사진 업로드', '커플 + 솔로 사진 3~8장'],
-                  ['2', 'AI 분석 & 생성', 'AI가 구성하고 영상화'],
-                  ['3', '자막 & BGM', '감성 자막 + 배경음악 자동 합성'],
-                  ['4', '다운로드', '완성된 영상을 바로 받아보세요'],
+                  ['01', '사진 업로드', '커플 + 솔로 사진 3~8장'],
+                  ['02', 'AI 분석 & 생성', 'AI가 구성하고 영상화'],
+                  ['03', '자막 & BGM', '감성 자막 + 배경음악 자동 합성'],
+                  ['04', '다운로드', '완성된 영상을 바로 받아보세요'],
                 ].map(([num, title, desc]) => (
                   <div key={num} style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 12, fontWeight: 700, color: '#78716c' }}>{num}</div>
+                    <div style={{ width: 26, height: 26, borderRadius: 7, background: '#f5f3f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, fontWeight: 600, color: '#a8a29e', fontFamily: "'Cormorant Garamond', serif" }}>{num}</div>
                     <div>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a', marginBottom: 2 }}>{title}</p>
-                      <p style={{ fontSize: 12, color: '#a8a29e' }}>{desc}</p>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 2, letterSpacing: -0.2 }}>{title}</p>
+                      <p style={{ fontSize: 11, color: '#a8a29e', lineHeight: 1.5 }}>{desc}</p>
                     </div>
                   </div>
                 ))}
@@ -370,17 +375,15 @@ export default function PreweddingVideo() {
             </div>
 
             <div style={{ display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1, background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', padding: '16px', textAlign: 'center' }}>
-                <p style={{ fontSize: 20, fontWeight: 300, color: '#1a1a1a', fontFamily: 'serif' }}>29,000</p>
-                <p style={{ fontSize: 11, color: '#a8a29e', marginTop: 4 }}>웨딩사진 모드</p>
+              <div style={{ flex: 1, background: '#fff', borderRadius: 12, border: '1px solid #e8e5e0', padding: '18px 16px', textAlign: 'center' }}>
+                <p style={{ fontSize: 22, fontWeight: 300, color: '#1a1a1a', fontFamily: "'Cormorant Garamond', serif", letterSpacing: -0.5 }}>29,000</p>
+                <p style={{ fontSize: 10, color: '#a8a29e', marginTop: 6, letterSpacing: 0.5 }}>웨딩사진 모드</p>
               </div>
-              <div style={{ flex: 1, background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', padding: '16px', textAlign: 'center' }}>
-                <p style={{ fontSize: 20, fontWeight: 300, color: '#1a1a1a', fontFamily: 'serif' }}>39,000</p>
-                <p style={{ fontSize: 11, color: '#a8a29e', marginTop: 4 }}>AI 화보팩 모드</p>
+              <div style={{ flex: 1, background: '#fff', borderRadius: 12, border: '1px solid #e8e5e0', padding: '18px 16px', textAlign: 'center' }}>
+                <p style={{ fontSize: 22, fontWeight: 300, color: '#1a1a1a', fontFamily: "'Cormorant Garamond', serif", letterSpacing: -0.5 }}>39,000</p>
+                <p style={{ fontSize: 10, color: '#a8a29e', marginTop: 6, letterSpacing: 0.5 }}>AI 화보팩 모드</p>
               </div>
             </div>
-
-            <p style={{ fontSize: 11, color: '#d6d3d1', textAlign: 'center', marginTop: 24 }}></p>
           </div>
         )}
 
