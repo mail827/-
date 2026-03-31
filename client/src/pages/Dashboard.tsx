@@ -929,32 +929,49 @@ export default function Dashboard() {
                         <video src={v.outputUrl} controls playsInline className="w-full rounded-lg mb-3" style={{ maxHeight: 360 }} />
                         <div style={{ display: 'flex', gap: 8 }}>
                           <button onClick={async () => {
+                            const btn = event?.currentTarget as HTMLButtonElement;
+                            if (btn) { btn.textContent = '준비 중...'; btn.disabled = true; }
                             try {
                               const res = await fetch(v.outputUrl!);
                               const blob = await res.blob();
-                              const url = URL.createObjectURL(blob);
-                              const a = document.createElement('a');
-                              a.href = url;
-                              a.download = (v.groomName || '') + '_' + (v.brideName || '') + '_prewedding.mp4';
-                              document.body.appendChild(a);
-                              a.click();
-                              document.body.removeChild(a);
-                              URL.revokeObjectURL(url);
-                            } catch { window.open(v.outputUrl!, '_blank'); }
+                              const fileName = (v.groomName || '') + '_' + (v.brideName || '') + '_prewedding.mp4';
+                              const file = new File([blob], fileName, { type: 'video/mp4' });
+                              if (/iPhone|iPad|Android/i.test(navigator.userAgent) && navigator.canShare && navigator.canShare({ files: [file] })) {
+                                await navigator.share({ files: [file] });
+                              } else {
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a'); a.href = url; a.download = fileName;
+                                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+                              }
+                            } catch (e: any) {
+                              if (e.name !== 'AbortError') window.open(v.outputUrl!, '_blank');
+                            } finally {
+                              if (btn) { btn.disabled = false; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> 저장'; }
+                            }
                           }} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-stone-800 text-white rounded-lg text-sm font-medium hover:bg-stone-900 transition-colors" style={{ border: 'none', cursor: 'pointer' }}>
                             <Download size={14} /> 저장
                           </button>
                           <button onClick={async () => {
-                            if (navigator.share) {
-                              try {
-                                const res = await fetch(v.outputUrl!);
-                                const blob = await res.blob();
-                                const file = new File([blob], (v.groomName || '') + '_' + (v.brideName || '') + '.mp4', { type: 'video/mp4' });
-                                await navigator.share({ title: (v.groomName || '') + ' & ' + (v.brideName || ''), files: [file] });
-                              } catch { try { await navigator.share({ title: (v.groomName || '') + ' & ' + (v.brideName || ''), url: v.outputUrl! }); } catch {} }
-                            } else {
-                              await navigator.clipboard.writeText(v.outputUrl!);
-                              alert('링크가 복사됐어요');
+                            const btn = event?.currentTarget as HTMLButtonElement;
+                            if (btn) { btn.textContent = '준비 중...'; btn.disabled = true; }
+                            try {
+                              const res = await fetch(v.outputUrl!);
+                              const blob = await res.blob();
+                              const file = new File([blob], (v.groomName || '') + '_' + (v.brideName || '') + '.mp4', { type: 'video/mp4' });
+                              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                await navigator.share({ files: [file] });
+                              } else if (navigator.share) {
+                                await navigator.share({ title: (v.groomName || '') + ' & ' + (v.brideName || ''), url: v.outputUrl! });
+                              } else {
+                                await navigator.clipboard.writeText(v.outputUrl!);
+                                alert('링크가 복사됐어요');
+                              }
+                            } catch (e: any) {
+                              if (e.name !== 'AbortError') {
+                                try { await navigator.clipboard.writeText(v.outputUrl!); alert('링크가 복사됐어요'); } catch {}
+                              }
+                            } finally {
+                              if (btn) { btn.disabled = false; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg> 공유'; }
                             }
                           }} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white text-stone-800 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors" style={{ border: '1px solid #E0DDD8', cursor: 'pointer' }}>
                             <Upload size={14} /> 공유
