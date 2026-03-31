@@ -756,20 +756,32 @@ export default function PreweddingVideo() {
                 )}
 
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <button onClick={async () => {
+                  <button id="saveBtn" onClick={async () => {
                     if (!videoOrder.outputUrl) return;
+                    const btn = document.getElementById('saveBtn');
+                    if (btn) { btn.textContent = '준비 중...'; btn.setAttribute('disabled', 'true'); }
                     try {
                       const res = await fetch(videoOrder.outputUrl);
                       const blob = await res.blob();
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = groomName + '_' + brideName + '_prewedding.mp4';
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                      URL.revokeObjectURL(url);
-                    } catch { window.open(videoOrder.outputUrl, '_blank'); }
+                      const fileName = groomName + '_' + brideName + '_prewedding.mp4';
+                      const file = new File([blob], fileName, { type: 'video/mp4' });
+                      if (/iPhone|iPad|Android/i.test(navigator.userAgent) && navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file] });
+                      } else {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                      }
+                    } catch (e: any) {
+                      if (e.name !== 'AbortError') window.open(videoOrder.outputUrl!, '_blank');
+                    } finally {
+                      if (btn) { btn.removeAttribute('disabled'); btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> 저장'; }
+                    }
                   }} style={{ flex: 1, minWidth: 140, padding: '13px 0', borderRadius: 10, border: 'none', background: '#1a1a1a', color: '#fff', fontSize: 14, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                     <ArrowRight size={14} style={{ transform: 'rotate(90deg)' }} /> 저장
                   </button>
