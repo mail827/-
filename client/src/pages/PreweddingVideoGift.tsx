@@ -17,7 +17,7 @@ interface Tier { id: string; price: number; label: string; desc: string }
 
 const TIERS: Tier[] = [
   { id: 'photo', price: 29000, label: '29,000원', desc: '웨딩사진 모드' },
-  { id: 'selfie', price: 39000, label: '39,000원', desc: 'AI 화보팩 + 식전영상' },
+  { id: 'selfie', price: 39000, label: '39,000원', desc: 'AI 화보팩 + 웨딩시네마' },
 ];
 
 type SendMethod = 'phone' | 'email';
@@ -95,8 +95,8 @@ export default function PreweddingVideoGift() {
             <div style={{ width: 64, height: 64, borderRadius: 16, background: 'linear-gradient(135deg, #78716c, #57534e)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
               <Gift size={28} color="#fff" />
             </div>
-            <h1 style={{ fontFamily: 'serif', fontSize: 24, color: '#1a1a1a', marginBottom: 8 }}>식전영상 선물하기</h1>
-            <p style={{ fontSize: 13, color: '#999', marginBottom: 32 }}>소중한 분에게 특별한 식전영상을 선물하세요</p>
+            <h1 style={{ fontFamily: 'serif', fontSize: 24, color: '#1a1a1a', marginBottom: 8 }}>웨딩시네마 선물하기</h1>
+            <p style={{ fontSize: 13, color: '#999', marginBottom: 32 }}>소중한 분에게 특별한 웨딩시네마를 선물하세요</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 300, margin: '0 auto' }}>
               <button onClick={() => handleLogin('kakao')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '14px 24px', borderRadius: 8, background: '#FEE500', border: 'none', cursor: 'pointer' }}>
                 <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.722 1.755 5.108 4.396 6.462-.148.536-.954 3.442-.984 3.66 0 0-.02.163.086.226.105.063.23.03.23.03.303-.042 3.514-2.313 4.07-2.707.717.1 1.457.153 2.202.153 5.523 0 10-3.463 10-7.824C22 6.463 17.523 3 12 3" fill="#3C1E1E"/></svg>
@@ -114,7 +114,7 @@ export default function PreweddingVideoGift() {
           <div>
             <div style={{ textAlign: 'center', marginBottom: 32 }}>
               <h2 style={{ fontFamily: 'serif', fontSize: 22, color: '#1a1a1a', marginBottom: 8 }}>패키지 선택</h2>
-              <p style={{ fontSize: 13, color: '#999' }}>선물할 식전영상 패키지를 골라주세요</p>
+              <p style={{ fontSize: 13, color: '#999' }}>선물할 웨딩시네마 패키지를 골라주세요</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
               {TIERS.map(t => (
@@ -174,7 +174,7 @@ export default function PreweddingVideoGift() {
                   <Film size={20} color="#57534e" />
                 </div>
                 <div>
-                  <p style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a' }}>식전영상 {selectedTier.desc.split('\xb7')[0].trim()}</p>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a' }}>웨딩시네마 {selectedTier.desc.split('\xb7')[0].trim()}</p>
                   <p style={{ fontSize: 12, color: '#999' }}>{selectedTier.desc.split('\xb7').slice(1).join('\xb7').trim()}</p>
                 </div>
               </div>

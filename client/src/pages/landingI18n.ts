@@ -107,8 +107,8 @@ const ld = {
   },
   video: {
     tag: { ko: 'AI VIDEO', en: 'AI VIDEO' },
-    h3: { ko: 'AI 식전영상', en: 'AI Pre-Ceremony Video' },
-    desc: { ko: '사진만 올리면 AI가 식전영상을 자동으로 만들어드려요. 29,000원부터.', en: 'Upload photos, AI creates your pre-ceremony video automatically. From 29,000 KRW.' },
+    h3: { ko: 'AI 웨딩시네마', en: 'AI Wedding Cinema' },
+    desc: { ko: '사진만 올리면 AI가 웨딩시네마를 자동으로 만들어드려요. 29,000원부터.', en: 'Upload photos, AI creates your wedding cinema automatically. From 29,000 KRW.' },
   },
   guide: {
     tag: { ko: 'HOW TO USE', en: 'HOW TO USE' },

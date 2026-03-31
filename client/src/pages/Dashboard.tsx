@@ -895,8 +895,8 @@ export default function Dashboard() {
                 <Film className="w-4 h-4 text-stone-500" />
               </div>
               <div>
-                <p className="text-[11px] tracking-[0.15em] text-stone-400">PRE-WEDDING VIDEO</p>
-                <h2 className="font-serif text-lg text-stone-800">식전영상</h2>
+                <p className="text-[11px] tracking-[0.15em] text-stone-400">WEDDING CINEMA</p>
+                <h2 className="font-serif text-lg text-stone-800">웨딩시네마</h2>
               </div>
             </div>
             <div className="space-y-4">

@@ -36,8 +36,8 @@ interface VideoOrder {
 }
 
 const MODE_PRICING: Record<string, { amount: number; label: string; desc: string }> = {
-  photo: { amount: 29000, label: '29,000', desc: 'AI 식전영상' },
-  selfie: { amount: 39000, label: '39,000', desc: 'AI 화보팩 + 식전영상' },
+  photo: { amount: 29000, label: '29,000', desc: 'AI 웨딩시네마' },
+  selfie: { amount: 39000, label: '39,000', desc: 'AI 화보팩 + 웨딩시네마' },
 };
 
 export default function PreweddingVideo() {
@@ -333,8 +333,8 @@ export default function PreweddingVideo() {
             </button>
 
             <div style={{ textAlign: 'center', marginBottom: 44 }}>
-              <p style={{ fontSize: 10, letterSpacing: 4, color: '#b8b5b0', marginBottom: 14, textTransform: 'uppercase', fontWeight: 500 }}>Pre-Wedding Video</p>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, color: '#1a1a1a', marginBottom: 10, letterSpacing: -1, fontWeight: 300 }}>식전영상</h1>
+              <p style={{ fontSize: 10, letterSpacing: 4, color: '#b8b5b0', marginBottom: 14, textTransform: 'uppercase', fontWeight: 500 }}>Wedding Cinema</p>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, color: '#1a1a1a', marginBottom: 10, letterSpacing: -1, fontWeight: 300 }}>웨딩시네마</h1>
               <p style={{ fontSize: 13, color: '#a8a29e', lineHeight: 1.8, letterSpacing: 0.3 }}>웨딩 사진이 영상이 되는 순간</p>
             </div>
 
@@ -356,7 +356,7 @@ export default function PreweddingVideo() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a', marginBottom: 3, letterSpacing: -0.3 }}>선물하기</p>
-                  <p style={{ fontSize: 12, color: '#a8a29e', lineHeight: 1.4 }}>소중한 분에게 식전영상을 선물하세요</p>
+                  <p style={{ fontSize: 12, color: '#a8a29e', lineHeight: 1.4 }}>소중한 분에게 웨딩시네마를 선물하세요</p>
                 </div>
                 <ArrowRight size={16} color="#d6d3d1" />
               </button>
@@ -401,7 +401,7 @@ export default function PreweddingVideo() {
           <button onClick={() => step > 0 ? setStep(step - 1) : setMode('select')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8 }}>
             <ArrowLeft size={20} color="#1a1a1a" />
           </button>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#1a1a1a', letterSpacing: -0.5 }}>식전영상</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#1a1a1a', letterSpacing: -0.5 }}>웨딩시네마</h1>
         </div>
 
         <div style={{ display: 'flex', gap: 4, marginBottom: 32 }}>

@@ -99,7 +99,7 @@ export default function PreweddingVideoGiftCallback() {
             </div>
 
             <p style={{ fontSize: 12, color: '#bbb', marginBottom: 32 }}>
-              받는 분이 코드를 입력하면 식전영상을 만들 수 있어요
+              받는 분이 코드를 입력하면 웨딩시네마를 만들 수 있어요
             </p>
 
             <div style={{ display: 'flex', gap: 12 }}>

@@ -803,7 +803,7 @@ export default function Landing() {
               </a>
               <a href="/prewedding-video" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#1a1a1a", background: "#fff", padding: "14px 28px", borderRadius: 8, border: "1px solid #E0DDD8", textDecoration: "none", fontWeight: 500 }}>
                 <Film size={16} />
-                {landingLocale === 'ko' ? '식전영상' : 'Pre-ceremony Video'}
+                {landingLocale === 'ko' ? '웨딩시네마' : 'Wedding Cinema'}
               </a>
 
             </div>

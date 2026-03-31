@@ -197,7 +197,7 @@ export default function AdminPreweddingVideos() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-stone-800">식전영상 주문</h2>
+          <h2 className="text-lg font-semibold text-stone-800">웨딩시네마 주문</h2>
           <p className="text-sm text-stone-400 mt-1">{orders.length}건{orders.some(o => ACTIVE_STATUSES.includes(o.status)) ? ' \u00b7 자동 갱신 중' : ''}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -320,7 +320,7 @@ export default function AdminPreweddingVideos() {
           <div>
             <p className="text-xs font-semibold text-stone-500 mb-2 uppercase tracking-wider">배경음악</p>
             {freeBgms.length === 0 ? (
-              <p className="text-xs text-stone-300">관리자 BGM에서 식전영상 카테고리로 등록하세요</p>
+              <p className="text-xs text-stone-300">관리자 BGM에서 웨딩시네마 카테고리로 등록하세요</p>
             ) : (
               <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
                 {freeBgms.map(b => {

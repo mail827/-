@@ -444,8 +444,8 @@ const SUBTITLE_STYLES = [
 ];
 
 const PRICING: Record<string, { amount: number; label: string }> = {
-  photo: { amount: 29000, label: '식전영상' },
-  selfie: { amount: 39000, label: '식전영상 + AI 화보팩' },
+  photo: { amount: 29000, label: '웨딩시네마' },
+  selfie: { amount: 39000, label: '웨딩시네마 + AI 화보팩' },
 };
 
 const FONTS = [
@@ -792,7 +792,7 @@ async function generateSubtitles(analyses: any[], groomName: string, brideName: 
     : '';
 
   const prompt = [
-    '당신은 웨딩 식전영상 자막 작가입니다.',
+    '당신은 웨딩시네마 자막 작가입니다.',
     '커플: ' + groomName + ' & ' + brideName,
     '',
     '규칙:',

@@ -171,7 +171,7 @@ export default function AdminHighlightVideos() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-800">식전영상 관리</h1>
+          <h1 className="text-2xl font-bold text-stone-800">웨딩시네마 관리</h1>
           <p className="text-sm text-stone-400 mt-1">랜딩 페이지에 표시되는 하이라이트 영상</p>
         </div>
         <motion.button

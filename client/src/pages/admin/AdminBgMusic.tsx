@@ -15,7 +15,7 @@ interface BgMusic {
 const CATEGORIES = [
   { id: 'romantic', label: '로맨틱' },
   { id: 'classic', label: '클래식' },
-  { id: 'prewedding', label: '식전영상' },
+  { id: 'prewedding', label: '웨딩시네마' },
   { id: 'calm', label: '잔잔한' },
   { id: 'bright', label: '밝은' },
   { id: 'emotional', label: '감성적' },

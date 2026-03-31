@@ -81,7 +81,7 @@ export default function AdminVideoGifts() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-stone-800">식전영상 선물</h2>
+          <h2 className="text-lg font-semibold text-stone-800">웨딩시네마 선물</h2>
           <p className="text-sm text-stone-400 mt-1">{gifts.length}건</p>
         </div>
         <div className="flex items-center gap-2">

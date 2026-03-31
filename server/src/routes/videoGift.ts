@@ -10,10 +10,10 @@ const prisma = new PrismaClient();
 const TOSS_SECRET = process.env.TOSS_SECRET_KEY;
 
 const TIERS: Record<string, { amount: number; label: string }> = {
-  photo: { amount: 29000, label: '식전영상' },
-  selfie: { amount: 39000, label: '식전영상 + AI 화보팩' },
-  basic: { amount: 29000, label: '식전영상' },
-  premium: { amount: 49000, label: '식전영상 Premium' },
+  photo: { amount: 29000, label: '웨딩시네마' },
+  selfie: { amount: 39000, label: '웨딩시네마 + AI 화보팩' },
+  basic: { amount: 29000, label: '웨딩시네마' },
+  premium: { amount: 49000, label: '웨딩시네마 Premium' },
 };
 
 function generateCode(): string {
@@ -63,13 +63,13 @@ router.post('/payment/confirm', authMiddleware, async (req: any, res) => {
     const senderName = user?.name || '익명';
 
     if (toEmail) {
-      await sendGiftEmail(toEmail, senderName, '식전영상 ' + tierInfo.label, code, message || '');
+      await sendGiftEmail(toEmail, senderName, '웨딩시네마 ' + tierInfo.label, code, message || '');
     }
 
     if (toPhone) {
       sendGiftNotification({
         to: toPhone, groomName: '', brideName: '', senderName,
-        giftName: '식전영상 ' + tierInfo.label, message: message || '',
+        giftName: '웨딩시네마 ' + tierInfo.label, message: message || '',
         link: 'https://weddingshop.cloud/prewedding-video?gift=' + code,
       }).catch(err => console.error('VideoGift notification error:', err));
     }
@@ -180,13 +180,13 @@ router.post('/admin/create-free', authMiddleware, async (req: any, res) => {
     });
 
     if (toEmail) {
-      await sendGiftEmail(toEmail, '청첩장 작업실', '식전영상 ' + tierInfo.label, code, message || '');
+      await sendGiftEmail(toEmail, '청첩장 작업실', '웨딩시네마 ' + tierInfo.label, code, message || '');
     }
 
     if (toPhone) {
       sendGiftNotification({
         to: toPhone, groomName: '', brideName: '', senderName: '청첩장 작업실',
-        giftName: '식전영상 ' + tierInfo.label, message: message || '',
+        giftName: '웨딩시네마 ' + tierInfo.label, message: message || '',
         link: 'https://weddingshop.cloud/prewedding-video?gift=' + code,
       }).catch(err => console.error('Free video gift notification error:', err));
     }
