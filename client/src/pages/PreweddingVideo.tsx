@@ -18,6 +18,12 @@ interface BgmOption {
   duration: number;
 }
 
+interface GlamourResult {
+  url: string;
+  passed: boolean;
+  mode: string;
+}
+
 interface VideoOrder {
   id: string;
   status: string;
@@ -25,6 +31,8 @@ interface VideoOrder {
   totalDuration?: number;
   errorMsg?: string;
   scenes?: any[];
+  glamourResults?: GlamourResult[];
+  mode?: string;
 }
 
 const MODE_PRICING: Record<string, { amount: number; label: string; desc: string }> = {
@@ -753,6 +761,43 @@ export default function PreweddingVideo() {
 
                 {videoOrder.outputUrl && (
                   <video src={videoOrder.outputUrl} controls playsInline style={{ width: '100%', borderRadius: 12, marginBottom: 20 }} />
+                )}
+
+                {videoOrder.mode === 'selfie' && videoOrder.glamourResults && videoOrder.glamourResults.length > 0 && (
+                  <div style={{ marginTop: 28, marginBottom: 20 }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a', marginBottom: 4, letterSpacing: -0.3 }}>AI Glamour</p>
+                    <p style={{ fontSize: 12, color: '#a8a29e', marginBottom: 14 }}>함께 생성된 화보 사진이에요</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                      {videoOrder.glamourResults.map((g, i) => (
+                        <div key={i} style={{ position: 'relative', aspectRatio: '3/4', borderRadius: 10, overflow: 'hidden', border: '1px solid #E8E5E0' }}>
+                          <img src={g.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                          {!g.passed && (
+                            <div style={{ position: 'absolute', top: 6, left: 6, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', borderRadius: 4, padding: '2px 6px' }}>
+                              <span style={{ fontSize: 9, color: '#fff', fontWeight: 500, letterSpacing: 0.5 }}>B CUT</span>
+                            </div>
+                          )}
+                          <button onClick={async () => {
+                            try {
+                              const res = await fetch(g.url);
+                              const blob = await res.blob();
+                              const file = new File([blob], 'glamour_' + (i + 1) + '.png', { type: 'image/png' });
+                              if (/iPhone|iPad|Android/i.test(navigator.userAgent) && navigator.canShare && navigator.canShare({ files: [file] })) {
+                                await navigator.share({ files: [file] });
+                              } else {
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url; a.download = file.name;
+                                document.body.appendChild(a); a.click();
+                                document.body.removeChild(a); URL.revokeObjectURL(url);
+                              }
+                            } catch {}
+                          }} style={{ position: 'absolute', bottom: 6, right: 6, width: 28, height: 28, borderRadius: 14, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ArrowRight size={12} color="#fff" style={{ transform: 'rotate(90deg)' }} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>

@@ -649,6 +649,7 @@ model PreweddingVideo {
   friendsList    String   @default("")
   specialThanks  String   @default("")
   creditTextColor String  @default("#ffffff")
+  glamourResults  Json?
   subtitles     Json?
   clipUrls      Json?
   outputUrl     String?

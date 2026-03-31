@@ -240,7 +240,7 @@ async function cropUpperBody(imageUrl: string): Promise<string> {
   }
 }
 
-async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'female' | 'couple', count: number = 7, selectedIds?: string[]): Promise<string[]> {
+async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'female' | 'couple', count: number = 7, selectedIds?: string[], qcTracker?: {url: string, passed: boolean, mode: string}[]): Promise<string[]> {
   const conceptId = selectedIds?.length ? selectedIds[0] : 'studio_classic';
   const concept = SELFIE_CONCEPTS.find(c => c.id === conceptId) || SELFIE_CONCEPTS[0];
   const groomOutfit = GLAMOUR_OUTFIT_GROOM[conceptId] || GLAMOUR_OUTFIT_GROOM.studio_classic;
@@ -379,13 +379,13 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
             if (!url2) {
               const soloPass = await visionQC(p.urls[0], url1, p.mode);
               console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' only url1, QC ' + (soloPass ? 'PASS' : 'FAIL(use anyway)'));
-              return url1;
+              qcTracker?.push({url: url1, passed: soloPass, mode: p.mode}); return url1;
             }
             const qc1 = await visionQC(p.urls[0], url1, p.mode);
             const qc2 = await visionQC(p.urls[0], url2, p.mode);
             console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' QC: A=' + (qc1?'PASS':'FAIL') + ' B=' + (qc2?'PASS':'FAIL'));
-            if (qc1 && !qc2) return url1;
-            if (!qc1 && qc2) return url2;
+            if (qc1 && !qc2) { qcTracker?.push({url: url1, passed: true, mode: p.mode}); return url1; }
+            if (!qc1 && qc2) { qcTracker?.push({url: url2, passed: true, mode: p.mode}); return url2; }
             if (!qc1 && !qc2) {
               console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' both FAIL, comparative pick');
             }
@@ -406,22 +406,22 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
               const pick = (pickData.choices?.[0]?.message?.content || 'A').trim().toUpperCase();
               const chosen = pick.includes('B') ? url2 : url1;
               console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' comparative: ' + pick);
-              return chosen;
-            } catch (e: any) { console.log('[Glamour] couple comparative error:', e.message); return url1; }
+              qcTracker?.push({url: chosen, passed: qc1 || qc2, mode: p.mode}); return chosen;
+            } catch (e: any) { console.log('[Glamour] couple comparative error:', e.message); qcTracker?.push({url: url1, passed: false, mode: p.mode}); return url1; }
           }
           const pass1 = await visionQC(p.urls[0], url1, p.mode);
-          if (pass1) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC PASS'); return url1; }
+          if (pass1) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC PASS'); qcTracker?.push({url: url1, passed: true, mode: p.mode}); return url1; }
           console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC FAIL, retry 2');
           const url2 = await genOne(p, shot, p.urls, si);
           if (!url2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry2 gen failed, use first'); return url1; }
           const pass2 = await visionQC(p.urls[0], url2, p.mode);
-          if (pass2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry2 QC PASS'); return url2; }
+          if (pass2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry2 QC PASS'); qcTracker?.push({url: url2, passed: true, mode: p.mode}); return url2; }
           console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry2 QC FAIL, retry 3');
           const url3 = await genOne(p, shot, p.urls, si);
           if (!url3) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry3 gen failed, use best'); return url2; }
           const pass3 = await visionQC(p.urls[0], url3, p.mode);
-          if (pass3) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry3 QC PASS'); return url3; }
-          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' all 3 QC FAIL, use first'); return url1;
+          if (pass3) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry3 QC PASS'); qcTracker?.push({url: url3, passed: true, mode: p.mode}); return url3; }
+          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' all 3 QC FAIL, use first'); qcTracker?.push({url: url1, passed: false, mode: p.mode}); return url1;
         })()
       );
     }
@@ -625,6 +625,8 @@ router.get('/poll/:id', authMiddleware, async (req: AuthRequest, res) => {
       totalDuration: video.totalDuration,
       errorMsg: video.errorMsg,
       scenes: video.scenes,
+      glamourResults: video.glamourResults,
+      mode: video.mode,
     });
   } catch {
     res.status(500).json({ error: '조회 실패' });
@@ -1236,10 +1238,11 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
     console.log('[Pipeline] Selfie mode: generating glamour photos...');
     const gender = photoUrls.length >= 2 ? 'couple' as const : 'female' as const;
     const savedConcepts = (video.scenes as string[]) || undefined;
-    const glamourPhotos = await generateGlamourPhotos(photoUrls, gender, 10, savedConcepts);
+    const glamourQc: {url: string, passed: boolean, mode: string}[] = [];
+    const glamourPhotos = await generateGlamourPhotos(photoUrls, gender, 10, savedConcepts, glamourQc);
     if (glamourPhotos.length < 3) throw new Error('Glamour photo generation failed: only ' + glamourPhotos.length + ' photos');
     photoUrls = glamourPhotos;
-    await prisma.preweddingVideo.update({ where: { id: videoId }, data: { photos: glamourPhotos } });
+    await prisma.preweddingVideo.update({ where: { id: videoId }, data: { photos: glamourPhotos, glamourResults: glamourQc } });
     console.log('[Pipeline] Using glamour photos for ending');
     console.log('[Pipeline] Generated ' + glamourPhotos.length + ' glamour photos (cost ~$' + (glamourPhotos.length * 0.04).toFixed(2) + ')');
   }
