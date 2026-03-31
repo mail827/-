@@ -183,20 +183,20 @@ const VIDEO_BRIDE_SHOTS = [
 async function visionQC(originalUrl: string, generatedUrl: string, mode: string = ''): Promise<boolean> {
   try {
     let genderCheck = '';
-    if (mode === 'groom') genderCheck = '\n3. GENDER-OUTFIT: The person MUST be wearing masculine clothing (suit, blazer, shirt, pants). If wearing a dress, skirt, gown, or any feminine clothing, answer FAIL.';
-    else if (mode === 'bride') genderCheck = '\n3. GENDER-OUTFIT: The person MUST be wearing feminine clothing (dress, gown, skirt). If wearing a full suit with pants like a man, answer FAIL.';
+    if (mode === 'groom') genderCheck = '\n4. GENDER-OUTFIT: The person MUST be wearing masculine clothing (suit, blazer, shirt, pants). If wearing a dress, skirt, gown, or any feminine clothing, answer FAIL.';
+    else if (mode === 'bride') genderCheck = '\n4. GENDER-OUTFIT: The person MUST be wearing feminine clothing (dress, gown, skirt). If wearing a full suit with pants like a man, answer FAIL.';
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + OPENAI_API_KEY },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         max_tokens: 20,
         messages: [{
           role: 'user',
           content: [
             { type: 'image_url', image_url: { url: originalUrl, detail: 'high' } },
             { type: 'image_url', image_url: { url: generatedUrl, detail: 'high' } },
-            { type: 'text', text: 'Image 1 is the original photo. Image 2 is AI-generated. Check these things:\n1. DEFORMITY: Does image 2 have any deformed faces, extra or missing fingers, mutated hands, fused body parts, distorted limbs, extra arms or legs, melted or blurred facial features, asymmetric eyes at different heights, disproportionately large head compared to body, or any anatomical impossibility?\n2. FACE MATCH: Comparing ONLY eyes shape, nose shape, mouth shape, jawline, and face proportions — is it clearly the same person?' + genderCheck + '\nAnswer FAIL if ANY check fails. Answer PASS only if ALL checks pass. Reply with one word: PASS or FAIL.' },
+            { type: 'text', text: 'Image 1 is the original reference photo. Image 2 is AI-generated. Carefully check ALL of the following:\n1. DEFORMITY: Does image 2 have ANY deformed faces, extra or missing fingers, mutated hands, fused body parts, distorted or missing limbs, extra arms or legs, melted or blurred facial features, asymmetric eyes, disproportionately large head, missing lower body or legs, incomplete torso, floating or disconnected body parts, or any anatomical impossibility?\n2. FACE IDENTITY: Compare face in image 1 vs image 2. Are the eyes, nose, mouth, jawline the same person? If image 2 shows a DIFFERENT person than image 1, answer FAIL.\n3. PERSON COUNT: If image 1 has 1 person but image 2 has 2 or more, or vice versa, answer FAIL. The number of people must match.' + genderCheck + '\nAnswer FAIL if ANY check fails. Answer PASS only if ALL checks pass. Reply with one word: PASS or FAIL.' },
           ],
         }],
       }),
@@ -357,7 +357,7 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
   }
 
   const allResults: (string | null)[] = [];
-  const BATCH = 3;
+  const BATCH = 5;
   const totalJobs = Math.min(count, plan.length);
 
   for (let batch = 0; batch < totalJobs; batch += BATCH) {
@@ -411,12 +411,17 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
           }
           const pass1 = await visionQC(p.urls[0], url1, p.mode);
           if (pass1) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC PASS'); return url1; }
-          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC FAIL, retry');
+          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC FAIL, retry 2');
           const url2 = await genOne(p, shot, p.urls, si);
-          if (!url2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry gen failed, use first'); return url1; }
+          if (!url2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry2 gen failed, use first'); return url1; }
           const pass2 = await visionQC(p.urls[0], url2, p.mode);
-          if (pass2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry QC PASS'); return url2; }
-          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' both QC FAIL, use first'); return url1;
+          if (pass2) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry2 QC PASS'); return url2; }
+          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry2 QC FAIL, retry 3');
+          const url3 = await genOne(p, shot, p.urls, si);
+          if (!url3) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry3 gen failed, use best'); return url2; }
+          const pass3 = await visionQC(p.urls[0], url3, p.mode);
+          if (pass3) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' retry3 QC PASS'); return url3; }
+          console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' all 3 QC FAIL, use first'); return url1;
         })()
       );
     }
@@ -1288,7 +1293,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
   if ((video as any).mode === 'selfie') {
     const uniqueCropUrls = [...new Set(scenes.map((s: any) => s.photoUrl))];
     const cropMap: Record<string, string> = {};
-    const CROP_BATCH = 3;
+    const CROP_BATCH = 5;
     for (let cb = 0; cb < uniqueCropUrls.length; cb += CROP_BATCH) {
       const batch = uniqueCropUrls.slice(cb, cb + CROP_BATCH);
       const results = await Promise.all(batch.map((url: string) => cropUpperBody(url)));
@@ -1301,7 +1306,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
   let totalCost = (video as any).mode === 'selfie' ? photoUrls.length * 0.04 : 0;
   const clipResults = new Array(scenes.length).fill('');
 
-  const CLIP_BATCH = 3;
+  const CLIP_BATCH = 5;
   for (let bi = 0; bi < scenes.length; bi += CLIP_BATCH) {
     checkAbort(videoId, signal);
     const batchScenes = scenes.slice(bi, Math.min(bi + CLIP_BATCH, scenes.length));
