@@ -19,6 +19,8 @@ interface PreweddingOrder {
   clipUrls: string[] | null;
   subtitles: string[] | null;
   photoAnalysis: any[] | null;
+  glamourResults?: { url: string; passed: boolean; mode: string }[] | null;
+  mode?: string;
   createdAt: string;
   user?: { email: string; name: string };
 }
@@ -537,6 +539,26 @@ export default function AdminPreweddingVideos() {
               {selectedOrder.totalDuration != null && <div className="flex justify-between"><span className="text-stone-400">영상 길이</span><span>{selectedOrder.totalDuration.toFixed(1)}초</span></div>}
               <div className="flex justify-between"><span className="text-stone-400">생성 시각</span><span>{formatDate(selectedOrder.createdAt)}</span></div>
             </div>
+
+            {selectedOrder.glamourResults && selectedOrder.glamourResults.length > 0 && (
+              <div className="mt-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-xs text-stone-400">AI Glamour</p>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-500">{selectedOrder.glamourResults.filter(g => g.passed).length}/{selectedOrder.glamourResults.length} PASS</span>
+                </div>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {selectedOrder.glamourResults.map((g, i) => (
+                    <div key={i} className="relative">
+                      <img src={g.url} className="w-full aspect-[3/4] rounded-lg object-cover border border-stone-100" />
+                      {!g.passed && (
+                        <div className="absolute top-1 left-1 px-1 py-0.5 rounded text-[8px] font-medium text-white" style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}>B CUT</div>
+                      )}
+                      <div className="absolute bottom-1 right-1 text-[8px] px-1 py-0.5 rounded text-white" style={{ background: 'rgba(0,0,0,0.4)' }}>{g.mode === 'couple' ? 'C' : g.mode === 'groom' ? 'G' : 'B'}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {selectedOrder.photos && selectedOrder.photos.length > 0 && (
               <div className="mt-5">

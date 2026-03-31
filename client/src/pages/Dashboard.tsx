@@ -960,6 +960,41 @@ export default function Dashboard() {
                             <Upload size={14} /> 공유
                           </button>
                         </div>
+                        {v.glamourResults && v.glamourResults.length > 0 && (
+                          <div style={{ marginTop: 16 }}>
+                            <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 3, letterSpacing: -0.3 }}>AI Glamour</p>
+                            <p style={{ fontSize: 11, color: '#a8a29e', marginBottom: 10 }}>함께 생성된 화보 사진이에요</p>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 5 }}>
+                              {v.glamourResults.map((g: any, gi: number) => (
+                                <div key={gi} style={{ position: 'relative', aspectRatio: '3/4', borderRadius: 8, overflow: 'hidden', border: '1px solid #E8E5E0' }}>
+                                  <img src={g.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                                  {!g.passed && (
+                                    <div style={{ position: 'absolute', top: 4, left: 4, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', borderRadius: 3, padding: '1px 5px' }}>
+                                      <span style={{ fontSize: 8, color: '#fff', fontWeight: 500 }}>B CUT</span>
+                                    </div>
+                                  )}
+                                  <button onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const res = await fetch(g.url);
+                                      const blob = await res.blob();
+                                      const file = new File([blob], 'glamour_' + (gi + 1) + '.png', { type: 'image/png' });
+                                      if (/iPhone|iPad|Android/i.test(navigator.userAgent) && navigator.canShare && navigator.canShare({ files: [file] })) {
+                                        await navigator.share({ files: [file] });
+                                      } else {
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a'); a.href = url; a.download = file.name;
+                                        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+                                      }
+                                    } catch {}
+                                  }} style={{ position: 'absolute', bottom: 4, right: 4, width: 24, height: 24, borderRadius: 12, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                     {v.status === 'FAILED' && (
