@@ -1229,7 +1229,7 @@ async function buildCinematicEnding(tmpDir: string, endingPhotos: string[], cred
     const totalTextH2 = creditLines.length * 36;
     const spd = Math.max(20, Math.round((920 + totalTextH2) / (endingDur - 2)));
     const compVf = "[0:v][1:v]overlay=40:50,drawtext=fontfile='" + fontPath + "':textfile='" + creditFile + "':fontsize=20:fontcolor=" + creditTextColor + "@0.9:line_spacing=16:x=880-text_w/2:y=h-" + spd + "*t+200:enable='between(t\\,1.0\\," + crEnd + ")':alpha='if(lt(t\\,1.5)\\,(t-1.0)/0.5\\,if(gt(t\\," + crFade + ")\\,(" + crEnd + "-t)/0.7\\,1))',fade=t=in:st=0:d=1.5,fade=t=out:st=" + fadeO + ":d=1.5[vout]";
-    await execAsync('ffmpeg -y -threads 2 -f lavfi -i color=c=0x0a0a0a:s=1280x720:d=' + endingDur + ':r=25 -i "' + leftSlide + '" -filter_complex "' + compVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOutPath + '"', 60000);
+    await execAsync('ffmpeg -y -threads 2 -f lavfi -i color=c=0x0a0a0a:s=1280x720:d=' + endingDur + ':r=25 -i "' + leftSlide + '" -filter_complex "' + compVf + '" -map "[vout]" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + endingOutPath + '"', 120000);
     console.log('[Pipeline] Cinematic ending: ' + endingDur + 's, ' + slidePaths.length + ' photos');
     return true;
   } catch (e: any) {
