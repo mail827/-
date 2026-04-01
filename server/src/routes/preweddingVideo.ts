@@ -153,7 +153,7 @@ const GLAMOUR_OUTFIT_BRIDE: Record<string, string> = {
   aao: 'wearing grand ivory duchess satin off-shoulder ball gown with dramatic oversized puff sleeves, fitted corset bodice, massive ball gown skirt with hundreds of tiny colorful pastel buttons in galaxy spiral pattern, cathedral train, architecturally grand and surreal',
   spring_letter: 'wearing soft blush pink silk organza off-shoulder wedding dress with organza petal cap sleeves, fitted corset bodice with seed pearls scattered across bodice, three-tiered organza A-line skirt with long train, natural elegant makeup',
   summer_rain: 'wearing pure white silk mikado square-neckline wedding dress with wide straps on edge of shoulders, structured minimal bodice with sharp princess seams, softly gathered lightweight white silk chiffon skirt with gentle sweep train, single row of tiny hand-sewn clear glass beads along square neckline edge like water droplets, natural elegant makeup',
-  autumn_film: 'wearing warm champagne ivory silk satin bias-cut V-neckline wedding dress with delicate spaghetti straps crossing once at upper back, smooth diagonal drape across torso creating one soft asymmetric fold at waist, fluid column silhouette skimming body pooling into long elegant puddle train, small cluster of hand-dyed silk leaves in warm amber burnt sienna deep wine red gathered at strap crossing point at upper back, natural elegant makeup',
+  autumn_film: 'wearing warm champagne ivory silk satin bias-cut V-neckline wedding dress with delicate spaghetti straps crossing once at upper back, smooth diagonal drape across torso creating one soft asymmetric fold at waist, fluid column silhouette skimming body pooling into long elegant puddle train, natural elegant makeup',
   winter_zhivago: 'wearing cool silver-white silk faille high boat neckline wedding dress with long fitted sleeves tapering to wrist with row of silk-covered buttons from wrist to elbow, sculpted structured bodice with clean vertical princess seams, full architectural A-line skirt with deep inverted box pleats creating geometric volume chapel-length train, thin detachable silk faille cape attaching at both shoulders falling straight down back to hem, cape inside lining pale icy lavender silk, natural elegant makeup',
 };
 
@@ -1098,7 +1098,7 @@ function buildSD2Prompt(photoType: string, camera: string, phase: string) {
 
 
 function buildSD15DirectPrompt(photoType: string, camera: string, phase: string, sceneIndex: number = 0) {
-  const FACE_GUARD = 'Maintain exact same framing and crop level as input image from first frame to last frame. Camera locked at eye height aimed perfectly horizontal, zero tilt angle, zero vertical movement, no panning up or down. The visible area in frame must not change or expand. Subject stays at identical position and scale throughout entire shot. Face clearly visible facing camera at all times, minimal head movement no large head turns no profile view, preserve exact original face identity expression hairstyle outfit unchanged. Shallow depth of field.';
+  const FACE_GUARD = 'Locked tripod shot, no camera movement, no tilt, no pan. Face facing camera, no head turns, preserve exact face identity unchanged.';
 
   const groomMotions = [
     'Subtle natural breathing, gentle breeze moves hair slightly, warm golden light',
@@ -1191,7 +1191,7 @@ async function buildCinematicEnding(tmpDir: string, endingPhotos: string[], cred
   if (endingPhotos.length < 2) return false;
   try {
     const slidePaths: string[] = [];
-    for (let i = 0; i < Math.min(3, endingPhotos.length); i++) {
+    for (let i = 0; i < Math.min(6, endingPhotos.length); i++) {
       const dlPath = path.join(tmpDir, 'eslide_dl_' + i + '.jpg');
       const scaledPath = path.join(tmpDir, 'eslide_' + i + '.jpg');
       try {
@@ -1218,7 +1218,7 @@ async function buildCinematicEnding(tmpDir: string, endingPhotos: string[], cred
       cur = out;
       off += perPhoto - 1;
     }
-    await execAsync('ffmpeg -y -threads 2 ' + slideInputs + ' -filter_complex "' + sf.join(';') + '" -map "' + cur + '" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + leftSlide + '"', 60000);
+    await execAsync('ffmpeg -y -threads 2 ' + slideInputs + ' -filter_complex "' + sf.join(';') + '" -map "' + cur + '" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf 18 -an -t ' + endingDur + ' "' + leftSlide + '"', 120000);
     console.log('[Ending] Left slideshow created');
     const creditFile = path.join(tmpDir, 'credits.txt');
     const fs2 = await import('fs');
@@ -1569,9 +1569,8 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
   const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '', v.familyMembers || '', v.friendsList || '', v.specialThanks || '');
   const allEndPhotos = (photoUrls || (video.photos as string[])).filter(Boolean);
   const endingPhotos: string[] = [];
-  if (allEndPhotos.length >= 9) { endingPhotos.push(allEndPhotos[0], allEndPhotos[4], allEndPhotos[8]); }
-  else if (allEndPhotos.length >= 4) { endingPhotos.push(allEndPhotos[0], allEndPhotos[Math.floor(allEndPhotos.length / 2)], allEndPhotos[allEndPhotos.length - 1]); }
-  else { endingPhotos.push(...allEndPhotos.slice(0, 3)); }
+  if (allEndPhotos.length >= 6) { const step = (allEndPhotos.length - 1) / 5; for (let i = 0; i < 6; i++) endingPhotos.push(allEndPhotos[Math.round(i * step)]); }
+  else { endingPhotos.push(...allEndPhotos); }
   const totalTextH = creditLines.length * 36;
   const endingDur = Math.max(12, Math.round((920 + totalTextH) / 35 + 2));
   let endingCreated = await buildCinematicEnding(tmpDir, endingPhotos, creditLines, fontPath, endingDur, endingOut, v.creditTextColor || '#ffffff');
@@ -1924,9 +1923,8 @@ async function assembleOnly(videoId: string) {
   const creditLines = buildEndingCredits(video.groomName, video.brideName, video.weddingDate || '', v.venueName || '', v.groomFather || '', v.groomMother || '', v.brideFather || '', v.brideMother || '', v.endingMessage || '', v.familyMembers || '', v.friendsList || '', v.specialThanks || '');
   const allEndPhotos = (video.photos as string[]).filter(Boolean);
   const endingPhotos: string[] = [];
-  if (allEndPhotos.length >= 9) { endingPhotos.push(allEndPhotos[0], allEndPhotos[4], allEndPhotos[8]); }
-  else if (allEndPhotos.length >= 4) { endingPhotos.push(allEndPhotos[0], allEndPhotos[Math.floor(allEndPhotos.length / 2)], allEndPhotos[allEndPhotos.length - 1]); }
-  else { endingPhotos.push(...allEndPhotos.slice(0, 3)); }
+  if (allEndPhotos.length >= 6) { const step = (allEndPhotos.length - 1) / 5; for (let i = 0; i < 6; i++) endingPhotos.push(allEndPhotos[Math.round(i * step)]); }
+  else { endingPhotos.push(...allEndPhotos); }
   const totalTextH = creditLines.length * 36;
   const endingDur = Math.max(12, Math.round((920 + totalTextH) / 35 + 2));
   let endingCreated = await buildCinematicEnding(tmpDir, endingPhotos, creditLines, fontPath, endingDur, endingOut, v.creditTextColor || '#ffffff');
