@@ -1098,7 +1098,7 @@ function buildSD2Prompt(photoType: string, camera: string, phase: string) {
 
 
 function buildSD15DirectPrompt(photoType: string, camera: string, phase: string, sceneIndex: number = 0) {
-  const FACE_GUARD = 'Maintain exact same framing and crop level as input image from first frame to last frame. Camera locked at eye height aimed perfectly horizontal, zero tilt angle, zero vertical movement, no panning up or down. The visible area in frame must not change or expand. Subject stays at identical position and scale throughout entire shot. Face clearly visible at all times, preserve exact original face identity expression hairstyle outfit unchanged. Shallow depth of field.';
+  const FACE_GUARD = 'Maintain exact same framing and crop level as input image from first frame to last frame. Camera locked at eye height aimed perfectly horizontal, zero tilt angle, zero vertical movement, no panning up or down. The visible area in frame must not change or expand. Subject stays at identical position and scale throughout entire shot. Face clearly visible facing camera at all times, minimal head movement no large head turns no profile view, preserve exact original face identity expression hairstyle outfit unchanged. Shallow depth of field.';
 
   const groomMotions = [
     'Subtle natural breathing, gentle breeze moves hair slightly, warm golden light',
