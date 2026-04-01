@@ -472,6 +472,7 @@ model Coupon {
   maxUses       Int?
   usedCount     Int       @default(0)
   expiresAt     DateTime?
+  category      String    @default("ALL")
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -657,6 +658,7 @@ model PreweddingVideo {
   aspectRatio   String   @default("9:16")
   totalDuration Float?
   totalCost     Float?
+  couponCode    String?
   amount        Int
   orderId       String   @unique
   paymentKey    String?

@@ -82,6 +82,9 @@ router.post('/order', authMiddleware, async (req, res) => {
         if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
           return res.status(400).json({ error: '사용 한도 초과' });
         }
+        if (coupon.category !== 'ALL' && coupon.category !== 'PACKAGE') {
+          return res.status(400).json({ error: '이 쿠폰은 패키지 결제에 사용할 수 없습니다' });
+        }
         if (coupon.discountType === 'PERCENT') {
           finalAmount = Math.floor(pkg.price * (100 - coupon.discountValue) / 100);
         } else {

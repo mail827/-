@@ -9,12 +9,15 @@ interface Coupon {
   name: string;
   discountType: string;
   discountValue: number;
+  category: string;
   maxUses: number | null;
   usedCount: number;
   expiresAt: string | null;
   isActive: boolean;
   createdAt: string;
 }
+
+const CATEGORY_LABELS: Record<string, string> = { ALL: '전체', PACKAGE: '패키지', CINEMA: '시네마', SNAP: '스냅' };
 
 export default function AdminCoupon() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -25,6 +28,7 @@ export default function AdminCoupon() {
     name: '',
     discountType: 'PERCENT',
     discountValue: 10,
+    category: 'ALL',
     maxUses: '',
     expiresAt: '',
   });
@@ -69,6 +73,7 @@ export default function AdminCoupon() {
           name: form.name,
           discountType: form.discountType,
           discountValue: Number(form.discountValue),
+          category: form.category,
           maxUses: form.maxUses ? Number(form.maxUses) : null,
           expiresAt: form.expiresAt || null,
         }),
@@ -76,7 +81,7 @@ export default function AdminCoupon() {
 
       if (res.ok) {
         setShowForm(false);
-        setForm({ code: '', name: '', discountType: 'PERCENT', discountValue: 10, maxUses: '', expiresAt: '' });
+        setForm({ code: '', name: '', discountType: 'PERCENT', discountValue: 10, category: 'ALL', maxUses: '', expiresAt: '' });
         fetchCoupons();
       } else {
         const err = await res.json();
@@ -177,6 +182,19 @@ export default function AdminCoupon() {
               </select>
             </div>
             <div>
+              <label className="block text-sm text-stone-600 mb-1">적용 대상</label>
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="w-full px-4 py-2.5 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-300"
+              >
+                <option value="ALL">전체 (패키지 + 시네마)</option>
+                <option value="PACKAGE">패키지만</option>
+                <option value="CINEMA">웨딩시네마만</option>
+                <option value="SNAP">AI 스냅만</option>
+              </select>
+            </div>
+            <div>
               <label className="block text-sm text-stone-600 mb-1">할인값 *</label>
               <input
                 type="number"
@@ -261,12 +279,16 @@ export default function AdminCoupon() {
                   </button>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="grid grid-cols-4 gap-2 text-center">
                 <div className="bg-stone-50 rounded-lg p-2">
                   <p className="text-xs text-stone-500">할인</p>
                   <p className="text-sm font-semibold text-stone-800">
                     {coupon.discountType === 'PERCENT' ? `${coupon.discountValue}%` : `${coupon.discountValue.toLocaleString()}원`}
                   </p>
+                </div>
+                <div className="bg-stone-50 rounded-lg p-2">
+                  <p className="text-xs text-stone-500">대상</p>
+                  <p className="text-sm font-semibold text-stone-800">{CATEGORY_LABELS[coupon.category] || '전체'}</p>
                 </div>
                 <div className="bg-stone-50 rounded-lg p-2">
                   <p className="text-xs text-stone-500">사용</p>
@@ -295,6 +317,7 @@ export default function AdminCoupon() {
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">코드</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">이름</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">할인</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">대상</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">사용</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">만료일</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">상태</th>
@@ -304,7 +327,7 @@ export default function AdminCoupon() {
             <tbody className="divide-y divide-stone-100">
               {coupons.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-stone-400">
+                  <td colSpan={8} className="px-4 py-8 text-center text-stone-400">
                     등록된 쿠폰이 없습니다
                   </td>
                 </tr>
@@ -316,6 +339,7 @@ export default function AdminCoupon() {
                     <td className="px-4 py-3 text-sm text-stone-800">
                       {coupon.discountType === 'PERCENT' ? `${coupon.discountValue}%` : `${coupon.discountValue.toLocaleString()}원`}
                     </td>
+                    <td className="px-4 py-3 text-sm text-stone-600">{CATEGORY_LABELS[coupon.category] || '전체'}</td>
                     <td className="px-4 py-3 text-sm text-stone-600">
                       {coupon.usedCount}{coupon.maxUses ? `/${coupon.maxUses}` : ''}
                     </td>

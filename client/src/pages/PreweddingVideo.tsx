@@ -48,6 +48,10 @@ export default function PreweddingVideo() {
   const [giftVerified, setGiftVerified] = useState(false);
   
   const [step, setStep] = useState(0);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponResult, setCouponResult] = useState<{valid:boolean;discountType:string;discountValue:number;name:string}|null>(null);
+  const [couponChecking, setCouponChecking] = useState(false);
+  const [couponError, setCouponError] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [groomName, setGroomName] = useState('');
@@ -258,6 +262,7 @@ export default function PreweddingVideo() {
           fontId: selectedFont, tier: videoMode,
           venueName, groomFather, groomMother, brideFather, brideMother, endingMessage, familyMembers, friendsList, specialThanks, creditTextColor,
           mode: videoMode, selfieConcepts: videoMode === 'selfie' ? [selectedConcept] : undefined,
+          couponCode: couponResult?.valid ? couponCode.trim().toUpperCase() : undefined,
         }),
       });
       const order = await res.json();
@@ -714,12 +719,50 @@ export default function PreweddingVideo() {
               )}
             </div>
 
-            {!isAdmin && (
+            {!isAdmin && (<>
               <div style={{ background: '#F5F3F0', borderRadius: 12, padding: '16px 20px', marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 14, color: '#78716c' }}>{MODE_PRICING[videoMode]?.desc}</span>
-                <span style={{ fontSize: 20, fontWeight: 600, color: '#1a1a1a', fontFamily: 'serif' }}>{MODE_PRICING[videoMode]?.label}<span style={{ fontSize: 13, fontWeight: 400 }}>원</span></span>
+                <span style={{ fontSize: 20, fontWeight: 600, color: '#1a1a1a', fontFamily: 'serif' }}>{(() => {
+                  const orig = MODE_PRICING[videoMode]?.amount || 0;
+                  if (!couponResult?.valid) return MODE_PRICING[videoMode]?.label;
+                  const disc = couponResult.discountType === 'PERCENT'
+                    ? Math.round(orig * (1 - couponResult.discountValue / 100))
+                    : Math.max(0, orig - couponResult.discountValue);
+                  return disc.toLocaleString();
+                })()}<span style={{ fontSize: 13, fontWeight: 400 }}>원</span></span>
+                {couponResult?.valid && (
+                  <span style={{ fontSize: 12, color: '#a8a29e', textDecoration: 'line-through', marginLeft: 8 }}>{MODE_PRICING[videoMode]?.label}원</span>
+                )}
               </div>
-            )}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="text"
+                    placeholder="할인코드 입력"
+                    value={couponCode}
+                    onChange={e => { setCouponCode(e.target.value); setCouponError(''); setCouponResult(null); }}
+                    style={{ flex: 1, padding: '10px 14px', border: '1px solid #E0DDD8', borderRadius: 8, fontSize: 13, outline: 'none', fontFamily: 'monospace', letterSpacing: 1 }}
+                  />
+                  <button
+                    disabled={couponChecking || !couponCode.trim()}
+                    onClick={async () => {
+                      setCouponChecking(true);
+                      setCouponError('');
+                      try {
+                        const r = await fetch(API + '/coupon/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: couponCode.trim() }) });
+                        const d = await r.json();
+                        if (r.ok) setCouponResult({ valid: true, discountType: d.coupon.discountType, discountValue: d.coupon.discountValue, name: d.coupon.name });
+                        else setCouponError(d.error || '유효하지 않은 코드');
+                      } catch { setCouponError('네트워크 오류'); }
+                      setCouponChecking(false);
+                    }}
+                    style={{ padding: '10px 18px', borderRadius: 8, border: 'none', background: '#1a1a1a', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: couponChecking || !couponCode.trim() ? 0.4 : 1 }}
+                  >{couponChecking ? '...' : '적용'}</button>
+                </div>
+                {couponError && <p style={{ fontSize: 12, color: '#ef4444', marginTop: 6 }}>{couponError}</p>}
+                {couponResult?.valid && <p style={{ fontSize: 12, color: '#16a34a', marginTop: 6 }}>{couponResult.name} 적용 완료</p>}
+              </div>
+            </>)}
 
             {isAdmin && (
               <div style={{ marginBottom: 24 }}>

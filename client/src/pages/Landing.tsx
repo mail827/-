@@ -20,7 +20,7 @@ const FEATURE_EN: Record<string, string> = {
   '봉투 인트로 12종': '12 envelope intros',
   '프로필 · 편지 섹션': 'Profile · Letter sections',
   'Standard 전체 포함': 'Everything in Standard',
-  'AI 웨딩스냅 39컨셉': 'AI Snap 39 concepts',
+  'AI 웨딩스냅 43컨셉': 'AI Snap 43 concepts',
   'AI Reception (AI 비서)': 'AI Guest Reception',
   '커플 · 솔로 · 스튜디오 촬영': 'Couple · Solo · Studio shoots',
   '고화질 다운로드': 'HD download',
@@ -976,7 +976,7 @@ export default function Landing() {
                 })()}
               </div>
               <p style={{ textAlign: "center", marginTop: 14, fontSize: 11, color: "#bbb" }}>
-                {snapSamples.length > 0 ? `${snapSamples.length}개 샘플 등록됨` : "39개 컨셉 — 스와이프하여 둘러보기"}
+                {snapSamples.length > 0 ? `${snapSamples.length}개 샘플 등록됨` : "43개 컨셉 — 스와이프하여 둘러보기"}
               </p>
             </div>
             {selectedSnap && snapSamples.filter(s => s.concept === selectedSnap).length > 0 && (

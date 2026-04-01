@@ -45,6 +45,10 @@ const CONCEPTS = [
   { id: 'heart_editorial', label: '하이 에디토리얼' },
   { id: 'vintage_tungsten', label: '빈티지 텅스텐' },
   { id: 'aao', label: '에에올' },
+  { id: 'spring_letter', label: '봄: 러브레터' },
+  { id: 'summer_rain', label: '여름: 소나기' },
+  { id: 'autumn_film', label: '가을: 필름' },
+  { id: 'winter_zhivago', label: '겨울: 지바고' },
 ];
 
 interface Sample { id: string; concept: string; mode: string; imageUrl: string; sortOrder: number }

@@ -80,7 +80,7 @@ router.get('/admin', authMiddleware, async (req: Request, res: Response) => {
 });
 
 router.post('/admin', authMiddleware, async (req: Request, res: Response) => {
-  const { code, name, discountType, discountValue, maxUses, expiresAt } = req.body;
+  const { code, name, discountType, discountValue, maxUses, expiresAt, category } = req.body;
 
   try {
     const coupon = await prisma.coupon.create({
@@ -90,7 +90,8 @@ router.post('/admin', authMiddleware, async (req: Request, res: Response) => {
         discountType: discountType || 'PERCENT',
         discountValue,
         maxUses: maxUses || null,
-        expiresAt: expiresAt ? new Date(expiresAt) : null
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+        category: category || 'ALL'
       }
     });
     res.status(201).json(coupon);
@@ -134,28 +135,29 @@ router.get('/admin/settlement', authMiddleware, async (req: Request, res: Respon
   const { startDate, endDate, couponCode } = req.query;
 
   try {
-    const where: any = {
-      status: 'PAID',
-      couponCode: { not: null },
-    };
-
-    if (couponCode) {
-      where.couponCode = couponCode as string;
+    const dateFilter: any = {};
+    if (startDate) dateFilter.gte = new Date(startDate as string);
+    if (endDate) {
+      const end = new Date(endDate as string);
+      end.setHours(23, 59, 59, 999);
+      dateFilter.lte = end;
     }
 
-    if (startDate || endDate) {
-      where.paidAt = {};
-      if (startDate) where.paidAt.gte = new Date(startDate as string);
-      if (endDate) {
-        const end = new Date(endDate as string);
-        end.setHours(23, 59, 59, 999);
-        where.paidAt.lte = end;
-      }
-    }
+    const orderWhere: any = { status: 'PAID', couponCode: couponCode ? (couponCode as string) : { not: null } };
+    if (startDate || endDate) orderWhere.paidAt = dateFilter;
 
     const orders = await prisma.order.findMany({
-      where,
+      where: orderWhere,
       include: { package: true, user: true },
+      orderBy: { paidAt: 'desc' },
+    });
+
+    const cinemaWhere: any = { status: { not: 'PENDING' }, couponCode: couponCode ? (couponCode as string) : { not: null } };
+    if (startDate || endDate) cinemaWhere.paidAt = dateFilter;
+
+    const cinemaOrders = await prisma.preweddingVideo.findMany({
+      where: cinemaWhere,
+      include: { user: true },
       orderBy: { paidAt: 'desc' },
     });
 
@@ -163,30 +165,33 @@ router.get('/admin/settlement', authMiddleware, async (req: Request, res: Respon
 
     for (const o of orders) {
       const code = o.couponCode!;
-      if (!summary[code]) {
-        summary[code] = { code, count: 0, totalPaid: 0, commission: 0, net: 0, orders: [] };
-      }
+      if (!summary[code]) summary[code] = { code, count: 0, totalPaid: 0, commission: 0, net: 0, orders: [] };
       summary[code].count++;
       summary[code].totalPaid += o.amount;
       const comm = Math.floor(o.amount * 0.1);
       summary[code].commission += comm;
       summary[code].net += o.amount - comm;
-      summary[code].orders.push({
-        id: o.id,
-        orderId: o.orderId,
-        amount: o.amount,
-        packageName: o.package.name,
-        userName: o.user.name,
-        userEmail: o.user.email,
-        paidAt: o.paidAt,
-      });
+      summary[code].orders.push({ id: o.id, orderId: o.orderId, amount: o.amount, packageName: o.package.name, userName: o.user.name, userEmail: o.user.email, paidAt: o.paidAt, type: 'package' });
     }
 
+    for (const v of cinemaOrders) {
+      const code = v.couponCode!;
+      if (!summary[code]) summary[code] = { code, count: 0, totalPaid: 0, commission: 0, net: 0, orders: [] };
+      summary[code].count++;
+      summary[code].totalPaid += v.amount;
+      const comm = Math.floor(v.amount * 0.1);
+      summary[code].commission += comm;
+      summary[code].net += v.amount - comm;
+      const modeLabel = v.mode === 'selfie' ? 'AI 화보팩 + 웨딩시네마' : '웨딩시네마';
+      summary[code].orders.push({ id: v.id, orderId: v.orderId, amount: v.amount, packageName: modeLabel, userName: v.user.name, userEmail: v.user.email, paidAt: v.paidAt, type: 'cinema' });
+    }
+
+    const allAmounts = [...orders.map(o => o.amount), ...cinemaOrders.map(v => v.amount)];
     const totals = {
-      totalOrders: orders.length,
-      totalPaid: orders.reduce((s, o) => s + o.amount, 0),
-      totalCommission: orders.reduce((s, o) => s + Math.floor(o.amount * 0.1), 0),
-      totalNet: orders.reduce((s, o) => s + (o.amount - Math.floor(o.amount * 0.1)), 0),
+      totalOrders: allAmounts.length,
+      totalPaid: allAmounts.reduce((s, a) => s + a, 0),
+      totalCommission: allAmounts.reduce((s, a) => s + Math.floor(a * 0.1), 0),
+      totalNet: allAmounts.reduce((s, a) => s + (a - Math.floor(a * 0.1)), 0),
     };
 
     res.json({ summary: Object.values(summary), totals });

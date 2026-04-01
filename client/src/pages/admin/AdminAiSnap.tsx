@@ -58,6 +58,10 @@ const CONCEPTS = [
   { id: 'heart_editorial', label: '하이 에디토리얼' },
   { id: 'vintage_tungsten', label: '빈티지 텅스텐' },
   { id: 'aao', label: '에에올' },
+  { id: 'spring_letter', label: '봄: 러브레터' },
+  { id: 'summer_rain', label: '여름: 소나기' },
+  { id: 'autumn_film', label: '가을: 필름' },
+  { id: 'winter_zhivago', label: '겨울: 지바고' },
 ];
 
 const CONCEPT_MAP = Object.fromEntries(CONCEPTS.map(c => [c.id, c.label]));
@@ -117,7 +121,10 @@ export default function AdminAiSnap() {
 
   useEffect(() => { load(); }, []);
 
-  useEffect(() => () => { if (pollRef.current) clearTimeout(pollRef.current); }, []);
+  useEffect(() => () => {
+    if (pollRef.current) clearTimeout(pollRef.current);
+    if (stepRef.current) clearInterval(stepRef.current);
+  }, []);
 
   const uploadPhoto = async (file: File, type: 'groom' | 'bride' | 'couple') => {
     setUploading(type);
@@ -149,6 +156,8 @@ export default function AdminAiSnap() {
 
   const generate = async () => {
     if (!canGen()) return;
+    if (pollRef.current) clearTimeout(pollRef.current);
+    if (stepRef.current) clearInterval(stepRef.current);
     setGenerating(true);
     setGenStep(0);
     stepRef.current = setInterval(() => setGenStep(prev => Math.min(prev + 1, 4)), 5000);
@@ -165,7 +174,15 @@ export default function AdminAiSnap() {
         return;
       }
       if (data.statusUrl) {
+        let pollCount = 0;
+        const MAX_POLLS = 60;
         const poll = async () => {
+          pollCount++;
+          if (pollCount > MAX_POLLS) {
+            setGenerating(false);
+            clearInterval(stepRef.current);
+            return;
+          }
           try {
             const pRes = await api(`/poll?statusUrl=${encodeURIComponent(data.statusUrl)}&responseUrl=${encodeURIComponent(data.responseUrl)}&mode=${encodeURIComponent(mode)}&imageUrls=${encodeURIComponent(JSON.stringify(getUrls()))}&_t=${Date.now()}`);
             const pData = await pRes.json();
@@ -181,6 +198,7 @@ export default function AdminAiSnap() {
             }
           } catch {
             setGenerating(false);
+            clearInterval(stepRef.current);
           }
         };
         pollRef.current = setTimeout(poll, 3000);
