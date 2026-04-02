@@ -69,7 +69,7 @@ export default function AdminDashboard() {
       if (statsRes.ok) setStats(await statsRes.json());
       if (weddingsRes.ok) {
         const data = await weddingsRes.json();
-        setWeddings(data.slice(0, 5));
+        setWeddings(data.filter((w: any) => w.groomName && w.brideName).slice(0, 5));
       }
     } catch (e) {
       console.error('Failed to fetch data:', e);

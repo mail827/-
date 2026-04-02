@@ -1,3 +1,5 @@
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 import { Router } from 'express';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import { readFileSync, existsSync } from 'fs';
@@ -166,3 +168,146 @@ router.get('/daily', async (req, res) => {
 });
 
 export { router as analyticsRouter };
+
+router.post('/visit', async (req, res) => {
+  try {
+    const { path, referrer, utmSource, utmMedium, utmCampaign, utmContent, device, browser, sessionId } = req.body;
+    const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.socket.remoteAddress || null;
+    await prisma.visit.create({
+      data: { path, referrer: referrer || null, utmSource: utmSource || null, utmMedium: utmMedium || null, utmCampaign: utmCampaign || null, utmContent: utmContent || null, device: device || null, browser: browser || null, sessionId: sessionId || null, ip },
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Visit track error:', e);
+    res.json({ ok: false });
+  }
+});
+
+router.get('/traffic', async (req, res) => {
+  try {
+    const days = parseInt(req.query.days as string) || 30;
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const visits = await prisma.visit.findMany({
+      where: { createdAt: { gte: since } },
+      select: { referrer: true, utmSource: true, utmMedium: true, utmCampaign: true, device: true, createdAt: true },
+    });
+
+    const channelMap: Record<string, number> = {};
+    const campaignMap: Record<string, number> = {};
+    const dailyMap: Record<string, number> = {};
+
+    visits.forEach(v => {
+      let channel = 'direct';
+      if (v.utmSource) {
+        channel = v.utmSource;
+      } else if (v.referrer) {
+        if (v.referrer.includes('instagram')) channel = 'instagram';
+        else if (v.referrer.includes('t.co') || v.referrer.includes('twitter')) channel = 'twitter';
+        else if (v.referrer.includes('facebook') || v.referrer.includes('fb.')) channel = 'facebook';
+        else if (v.referrer.includes('naver')) channel = 'naver';
+        else if (v.referrer.includes('google')) channel = 'google';
+        else if (v.referrer.includes('kakao')) channel = 'kakao';
+        else if (v.referrer.includes('blog')) channel = 'blog';
+        else if (v.referrer.includes('youtube') || v.referrer.includes('youtu.be')) channel = 'youtube';
+        else if (v.referrer.includes('threads.net')) channel = 'threads';
+        else channel = new URL(v.referrer).hostname.replace('www.', '');
+      }
+      channelMap[channel] = (channelMap[channel] || 0) + 1;
+
+      if (v.utmCampaign) {
+        campaignMap[v.utmCampaign] = (campaignMap[v.utmCampaign] || 0) + 1;
+      }
+
+      const day = v.createdAt.toISOString().slice(0, 10);
+      dailyMap[day] = (dailyMap[day] || 0) + 1;
+    });
+
+    const channels = Object.entries(channelMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const campaigns = Object.entries(campaignMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const daily = Object.entries(dailyMap)
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    res.json({ total: visits.length, channels, campaigns, daily });
+  } catch (e) {
+    console.error('Traffic stats error:', e);
+    res.json({ total: 0, channels: [], campaigns: [], daily: [] });
+  }
+});
+
+router.get('/traffic-ga', async (req, res) => {
+  try {
+    const client = getClient();
+    const days = parseInt(req.query.days as string) || 30;
+    const startDate = `${days}daysAgo`;
+
+    const [sourceRes] = await client.runReport({
+      property: `properties/${propertyId}`,
+      dateRanges: [{ startDate, endDate: 'today' }],
+      dimensions: [{ name: 'sessionSource' }, { name: 'sessionMedium' }],
+      metrics: [{ name: 'sessions' }, { name: 'totalUsers' }],
+      orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+      limit: 30,
+    });
+
+    const [dailyRes] = await client.runReport({
+      property: `properties/${propertyId}`,
+      dateRanges: [{ startDate, endDate: 'today' }],
+      dimensions: [{ name: 'date' }, { name: 'sessionSource' }],
+      metrics: [{ name: 'sessions' }],
+      orderBys: [{ dimension: { dimensionName: 'date' }, desc: false }],
+    });
+
+    const [campaignRes] = await client.runReport({
+      property: `properties/${propertyId}`,
+      dateRanges: [{ startDate, endDate: 'today' }],
+      dimensions: [{ name: 'sessionCampaignName' }],
+      metrics: [{ name: 'sessions' }],
+      orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+      limit: 20,
+    });
+
+    const channels = sourceRes.rows?.map(row => ({
+      source: row.dimensionValues?.[0]?.value || '(direct)',
+      medium: row.dimensionValues?.[1]?.value || '(none)',
+      sessions: parseInt(row.metricValues?.[0]?.value || '0'),
+      users: parseInt(row.metricValues?.[1]?.value || '0'),
+    })) || [];
+
+    const totalSessions = channels.reduce((s, c) => s + c.sessions, 0);
+
+    const dailyMap: Record<string, number> = {};
+    dailyRes.rows?.forEach(row => {
+      const date = row.dimensionValues?.[0]?.value || '';
+      const count = parseInt(row.metricValues?.[0]?.value || '0');
+      const formatted = date.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+      dailyMap[formatted] = (dailyMap[formatted] || 0) + count;
+    });
+    const daily = Object.entries(dailyMap)
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    const campaigns = campaignRes.rows
+      ?.filter(row => {
+        const v = row.dimensionValues?.[0]?.value || '';
+        return !['(not set)', '(referral)', '(direct)', '(organic)'].includes(v);
+      })
+      .map(row => ({
+        name: row.dimensionValues?.[0]?.value || '',
+        count: parseInt(row.metricValues?.[0]?.value || '0'),
+      })) || [];
+
+    res.json({ total: totalSessions, channels, campaigns, daily });
+  } catch (e) {
+    console.error('GA traffic error:', e);
+    res.json({ total: 0, channels: [], campaigns: [], daily: [] });
+  }
+});

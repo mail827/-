@@ -21,15 +21,18 @@ router.get('/users', authMiddleware, adminMiddleware, async (req, res) => {
     include: {
       _count: { select: { weddings: true, orders: true } },
       weddings: { select: { id: true, expiresAt: true } },
-      snapPacks: { select: { id: true, totalSnaps: true, usedSnaps: true } },
+      snapPacks: { select: { id: true, totalSnaps: true, usedSnaps: true, status: true, amount: true } },
     },
     orderBy: { createdAt: 'desc' },
   });
   const enriched = users.map(u => {
     const archiveCount = u.weddings.filter((w: any) => w.expiresAt === null).length;
-    const totalSnaps = u.snapPacks?.reduce((sum: number, p: any) => sum + (p.totalSnaps - p.usedSnaps), 0) || 0;
+    const paidSnaps = u.snapPacks?.filter((p: any) => p.status === "PAID") || [];
+    const snapPackCount = paidSnaps.length;
+    const snapRemaining = paidSnaps.reduce((s: number, p: any) => s + (p.totalSnaps - p.usedSnaps), 0);
+    const snapSpent = paidSnaps.reduce((s: number, p: any) => s + (p.amount || 0), 0);
     const { weddings: _w, snapPacks: _s, ...rest } = u as any;
-    return { ...rest, archiveCount, snapRemaining: totalSnaps };
+    return { ...rest, archiveCount, snapPackCount, snapRemaining, snapSpent };
   });
   res.json(enriched);
 });

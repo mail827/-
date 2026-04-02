@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Film, Music, Sparkles, Image, Eye, ArrowRightLeft, PieChart, Clock } from 'lucide-react';
+import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Film, Music, Sparkles, Image, Eye, ArrowRightLeft, PieChart, Clock, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const menuGroups = [
@@ -9,6 +9,7 @@ const menuGroups = [
     items: [
       { path: '/admin', icon: LayoutDashboard, label: '대시보드', exact: true },
       { path: '/admin/users', icon: Users, label: '회원 관리' },
+      { path: '/admin/traffic', icon: Globe, label: '유입 분석' },
       { path: '/admin/orders', icon: CreditCard, label: '주문 내역' },
       { path: '/admin/inquiries', icon: MessageSquare, label: '1:1 문의' },
     ],

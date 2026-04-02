@@ -692,3 +692,22 @@ model VideoGift {
   amount     Int       @default(0)
   createdAt  DateTime  @default(now())
 }
+
+model Visit {
+  id        String   @id @default(cuid())
+  path      String
+  referrer  String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+  device    String?
+  browser   String?
+  sessionId String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([utmSource])
+  @@index([referrer])
+}

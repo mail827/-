@@ -4,6 +4,7 @@ import PreweddingVideoGiftCallback from './pages/PreweddingVideoGiftCallback';
 import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import usePageTracking from './hooks/usePageTracking';
+import useVisitTracking from './hooks/useVisitTracking';
 import Landing from './pages/Landing';
 import AiSnapFree from './pages/AiSnapFree';
 import AiSnapStudioPage from './pages/AiSnapStudio';
@@ -37,6 +38,7 @@ import AdminGift from "./pages/admin/AdminGift";
 import AdminRsvpList from './pages/admin/AdminRsvpList';
 import AdminGuestbookList from './pages/admin/AdminGuestbookList';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminTraffic from './pages/admin/AdminTraffic';
 import AdminPackages from './pages/admin/AdminPackages';
 import AdminCoupon from './pages/admin/AdminCoupon';
 import AdminSettlement from './pages/admin/AdminSettlement';
@@ -92,6 +94,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   usePageTracking();
+  useVisitTracking();
   
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 border-2 border-stone-800 border-t-transparent rounded-full animate-spin" /></div>}>
@@ -138,6 +141,7 @@ export default function App() {
       <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="traffic" element={<AdminTraffic />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="packages" element={<AdminPackages />} />
         <Route path="coupons" element={<AdminCoupon />} />
