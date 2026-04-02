@@ -305,3 +305,42 @@ function getWeekId(d: Date): string {
 }
 
 export { router as teamRouter };
+
+router.get('/expenses', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { month } = req.query;
+    if (!month) return res.status(400).json({ error: 'month required' });
+    const m = String(month);
+    const expenses = await prisma.teamExpense.findMany({
+      where: { date: { startsWith: m } },
+      orderBy: { date: 'desc' },
+    });
+    const total = expenses.reduce((s, e) => s + e.amount, 0);
+    const byCategory: Record<string, number> = {};
+    expenses.forEach((e) => { byCategory[e.category] = (byCategory[e.category] || 0) + e.amount; });
+    res.json({ expenses, total, byCategory });
+  } catch (e) {
+    res.status(500).json({ error: 'failed' });
+  }
+});
+
+router.post('/expenses', authMiddleware, adminMiddleware, ownerOnly, async (req, res) => {
+  try {
+    const { date, title, category, amount, memo } = req.body;
+    const expense = await prisma.teamExpense.create({
+      data: { date, title, category, amount, memo: memo || null },
+    });
+    res.json(expense);
+  } catch (e) {
+    res.status(500).json({ error: 'failed' });
+  }
+});
+
+router.delete('/expenses/:id', authMiddleware, adminMiddleware, ownerOnly, async (req, res) => {
+  try {
+    await prisma.teamExpense.delete({ where: { id: req.params.id } });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'failed' });
+  }
+});
