@@ -4,50 +4,66 @@ import { Sparkles, Camera, X, Loader2, User, Users, ArrowRight } from 'lucide-re
 import { at } from '../utils/appI18n';
 import { useLocaleStore } from '../store/useLocaleStore';
 
-const CONCEPTS = [
-  { id: 'studio_classic', label: '스튜디오 클래식', sub: '정석 웨딩 화보' },
-  { id: 'studio_gallery', label: '갤러리', sub: '화이트 아치 스튜디오' },
-  { id: 'studio_fog', label: '포그', sub: '린넨 드레이프 스튜디오' },
-  { id: 'studio_mocha', label: '모카', sub: '다크 스포트라이트' },
-  { id: 'studio_sage', label: '세이지', sub: '세이지그린 에디토리얼' },
-  { id: 'outdoor_garden', label: '야외 가든', sub: '꽃과 자연빛' },
-  { id: 'beach_sunset', label: '해변 선셋', sub: '노을빛 해변' },
-  { id: 'hanbok_wonsam', label: '궁중 혼례', sub: '화려한 궁중 예복' },
-  { id: 'rose_garden', label: '장미 정원', sub: '로코코 장미 살롱' },
-  { id: 'grass_rain', label: '풀밭', sub: '비 내리는 필름 감성' },
-  { id: 'eternal_blue', label: '블루', sub: '겨울 바다 멜랑콜리' },
-  { id: 'heart_editorial', label: '하이 에디토리얼', sub: '건축적 하이패션' },
-  { id: 'vintage_tungsten', label: '빈티지 텅스텐', sub: '70년대 웨딩앨범' },
-  { id: 'aao', label: '에에올', sub: '어떤 우주에서든' },
-  { id: 'spring_letter', label: '봄: 러브레터', sub: '벚꽃이 지던 날' },
-  { id: 'summer_rain', label: '여름: 소나기', sub: '소나기가 지나간 뒤' },
-  { id: 'autumn_film', label: '가을: 필름', sub: '필름 속 기억' },
-  { id: 'winter_zhivago', label: '겨울: 지바고', sub: '눈이 내리던 밤' },
-  { id: 'hanbok_dangui', label: '당의 한복', sub: '단아한 정원 화보' },
-  { id: 'hanbok_modern', label: '모던 한복', sub: '현대적 한옥 감성' },
-  { id: 'hanbok_saeguk', label: '사극풍', sub: '왕과 왕비 컨셉' },
-  { id: 'hanbok_flower', label: '꽃한복', sub: '봄꽃 한옥마당' },
-  { id: 'city_night', label: '시티 나이트', sub: '도시 야경' },
-  { id: 'cherry_blossom', label: '벚꽃', sub: '벚꽃잎 흩날림' },
-  { id: 'forest_wedding', label: '숲속 웨딩', sub: '숲속 빛내림' },
-  { id: 'castle_garden', label: '유럽 궁전', sub: '궁전 웨딩' },
-  { id: 'cathedral', label: '성당 웨딩', sub: '스테인드글라스' },
-  { id: 'watercolor', label: '수채화', sub: '파스텔 수채화' },
-  { id: 'magazine_cover', label: '매거진 커버', sub: '하이패션 화보' },
-  { id: 'rainy_day', label: '비오는 날', sub: '감성 빗속' },
-  { id: 'autumn_leaves', label: '가을 단풍', sub: '단풍길 로맨스' },
-  { id: 'winter_snow', label: '겨울 눈', sub: '눈 내리는 날' },
-  { id: 'vintage_film', label: '빈티지 필름', sub: '필름 감성' },
-  { id: 'iphone_selfie', label: '셀카 스냅', sub: 'iPhone 감성' },
-  { id: 'iphone_mirror', label: '거울 셀카', sub: '미러 셀카' },
-  { id: 'cruise_sunset', label: '크루즈 선셋', sub: '노을빛 크루즈' },
-  { id: 'cruise_bluesky', label: '크루즈 블루', sub: '푸른 바다 크루즈' },
-  { id: 'vintage_record', label: '빈티지 레코드', sub: '레코드샵 빈티지' },
-  { id: 'retro_hongkong', label: '레트로 홍콩', sub: '홍콩 야시장 무드' },
-  { id: 'black_swan', label: '블랙스완', sub: '다크 시네마틱' },
-  { id: 'blue_hour', label: '블루아워', sub: '트와일라잇 로맨스' },
-  { id: 'water_memory', label: '물의 기억', sub: '수중 시네마틱' },
-  { id: 'velvet_rouge', label: '벨벳 루즈', sub: '다크 로맨스' },
+const CONCEPT_CATEGORIES = [
+  { category: 'STUDIO', label: '스튜디오', concepts: [
+    { id: 'studio_classic', label: '스튜디오 클래식', sub: '정석 웨딩 화보' },
+    { id: 'studio_gallery', label: '갤러리', sub: '화이트 아치 스튜디오' },
+    { id: 'studio_fog', label: '포그', sub: '린넨 드레이프 스튜디오' },
+    { id: 'studio_mocha', label: '모카', sub: '다크 스포트라이트' },
+    { id: 'studio_sage', label: '세이지', sub: '세이지그린 에디토리얼' },
+  ]},
+  { category: 'HANBOK', label: '한복', concepts: [
+    { id: 'hanbok_wonsam', label: '궁중 혼례', sub: '화려한 궁중 예복' },
+    { id: 'hanbok_dangui', label: '당의 한복', sub: '단아한 정원 화보' },
+    { id: 'hanbok_modern', label: '모던 한복', sub: '현대적 한옥 감성' },
+    { id: 'hanbok_saeguk', label: '사극풍', sub: '왕과 왕비 컨셉' },
+    { id: 'hanbok_flower', label: '꽃한복', sub: '봄꽃 한옥마당' },
+  ]},
+  { category: 'FOUR_SEASONS', label: '사계 시리즈', concepts: [
+    { id: 'spring_letter', label: '봄: 러브레터', sub: '벚꽃이 지던 날' },
+    { id: 'summer_rain', label: '여름: 소나기', sub: '소나기가 지나간 뒤' },
+    { id: 'autumn_film', label: '가을: 필름', sub: '필름 속 기억' },
+    { id: 'winter_zhivago', label: '겨울: 지바고', sub: '눈이 내리던 밤' },
+  ]},
+  { category: 'CLASSIC_ROMANCE', label: '클래식 로맨스', concepts: [
+    { id: 'cherry_blossom', label: '벚꽃', sub: '벚꽃잎 흩날림' },
+    { id: 'forest_wedding', label: '숲속 웨딩', sub: '안개 속 성당숲' },
+    { id: 'castle_garden', label: '유럽 궁전', sub: '빈 궁전의 새벽' },
+    { id: 'cathedral', label: '성당 웨딩', sub: '키아로스쿠로' },
+    { id: 'watercolor', label: '수채화', sub: '파스텔 수채화' },
+    { id: 'rose_garden', label: '장미 정원', sub: '로코코 장미 살롱' },
+  ]},
+  { category: 'MOOD_CINEMA', label: '무드 시네마', concepts: [
+    { id: 'rainy_day', label: '비오는 날', sub: '버스정류장 빗속' },
+    { id: 'grass_rain', label: '풀밭', sub: '비 내리는 필름 감성' },
+    { id: 'eternal_blue', label: '블루', sub: '겨울 바다 멜랑콜리' },
+    { id: 'water_memory', label: '물의 기억', sub: '수중 시네마틱' },
+    { id: 'blue_hour', label: '블루아워', sub: '트와일라잇 로맨스' },
+  ]},
+  { category: 'DARK_EDITORIAL', label: '다크/에디토리얼', concepts: [
+    { id: 'black_swan', label: '블랙스완', sub: '다크 시네마틱' },
+    { id: 'velvet_rouge', label: '벨벳 루즈', sub: '다크 로맨스' },
+    { id: 'heart_editorial', label: '하이 에디토리얼', sub: '건축적 하이패션' },
+    { id: 'magazine_cover', label: '매거진 커버', sub: '하이패션 화보' },
+    { id: 'city_night', label: '시티 나이트', sub: '네온 야경' },
+  ]},
+  { category: 'VINTAGE', label: '빈티지', concepts: [
+    { id: 'vintage_film', label: '빈티지 필름', sub: '필름 감성' },
+    { id: 'vintage_record', label: '빈티지 레코드', sub: '레코드샵 빈티지' },
+    { id: 'vintage_tungsten', label: '빈티지 텅스텐', sub: '70년대 웨딩앨범' },
+    { id: 'retro_hongkong', label: '레트로 홍콩', sub: '홍콩 야시장 무드' },
+  ]},
+  { category: 'CRUISE', label: '크루즈', concepts: [
+    { id: 'cruise_sunset', label: '크루즈 선셋', sub: '노을빛 크루즈' },
+    { id: 'cruise_bluesky', label: '크루즈 블루', sub: '푸른 바다 크루즈' },
+  ]},
+  { category: 'SELFIE', label: '셀카', concepts: [
+    { id: 'iphone_selfie', label: '셀카 스냅', sub: 'iPhone 감성' },
+    { id: 'iphone_mirror', label: '거울 셀카', sub: '미러 셀카' },
+  ]},
+  { category: 'SPECIAL', label: '스페셜', concepts: [
+    { id: 'aao', label: '에에올', sub: '어떤 우주에서든' },
+  ]},
 ];
 
 type Mode = 'groom' | 'bride' | 'couple';
@@ -330,13 +346,20 @@ export default function AiSnapFree() {
                 <h2 className="text-xl font-semibold text-stone-800 mb-2">{at('snapConceptTitle', fl)}</h2>
                 <p className="text-sm text-stone-500">{at('snapConceptSub', fl)}</p>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                {CONCEPTS.map(c => (
-                  <button key={c.id} onClick={() => setConcept(c.id)}
-                    className={`rounded-lg py-3.5 px-4 text-left transition-all border-2 ${concept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
-                    <p className={`text-sm font-semibold ${concept === c.id ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
-                    <p className={`text-[11px] ${concept === c.id ? 'text-white/60' : 'text-stone-400'}`}>{c.sub}</p>
-                  </button>
+              <div className="space-y-6">
+                {CONCEPT_CATEGORIES.map(cat => (
+                  <div key={cat.category}>
+                    <p className="text-xs font-medium text-stone-400 tracking-widest uppercase mb-2">{cat.label}</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {cat.concepts.map(c => (
+                        <button key={c.id} onClick={() => setConcept(c.id)}
+                          className={`rounded-lg py-3.5 px-4 text-left transition-all border-2 ${concept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
+                          <p className={`text-sm font-semibold ${concept === c.id ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
+                          <p className={`text-[11px] ${concept === c.id ? 'text-white/60' : 'text-stone-400'}`}>{c.sub}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
               {samples.filter(s => s.concept === concept).length > 0 && (
