@@ -16,38 +16,58 @@ interface Quota { max: number; used: number; remaining: number; isAdmin: boolean
 interface GalleryItem { id: string; mediaUrl: string; mediaType: string; }
 interface Props { weddingId: string; }
 
+const CATEGORY_ORDER = [
+  { key: 'STUDIO', label: '스튜디오', ids: ['studio_classic', 'studio_gallery', 'studio_fog', 'studio_mocha', 'studio_sage'] },
+  { key: 'HANBOK', label: '한복', ids: ['hanbok_wonsam', 'hanbok_dangui', 'hanbok_modern', 'hanbok_saeguk', 'hanbok_flower'] },
+  { key: 'FOUR_SEASONS', label: '사계 시리즈', ids: ['spring_letter', 'summer_rain', 'autumn_film', 'winter_zhivago'] },
+  { key: 'CLASSIC', label: '클래식 로맨스', ids: ['cherry_blossom', 'forest_wedding', 'castle_garden', 'cathedral', 'watercolor', 'rose_garden'] },
+  { key: 'MOOD', label: '무드 시네마', ids: ['rainy_day', 'grass_rain', 'eternal_blue', 'water_memory', 'blue_hour'] },
+  { key: 'DARK', label: '다크/에디토리얼', ids: ['black_swan', 'velvet_rouge', 'heart_editorial', 'magazine_cover', 'city_night'] },
+  { key: 'VINTAGE', label: '빈티지', ids: ['vintage_film', 'vintage_record', 'vintage_tungsten', 'retro_hongkong'] },
+  { key: 'CRUISE', label: '크루즈', ids: ['cruise_sunset', 'cruise_bluesky'] },
+  { key: 'SELFIE', label: '셀카', ids: ['iphone_selfie', 'iphone_mirror'] },
+  { key: 'SPECIAL', label: '스페셜', ids: ['aao'] },
+];
+
 const CONCEPT_META: Record<string, { emoji: string; sub: string }> = {
   studio_classic: { emoji: 'S', sub: '정석 웨딩 화보' },
-  outdoor_garden: { emoji: 'G', sub: '꽃과 자연빛' },
-  beach_sunset: { emoji: 'B', sub: '노을빛 해변' },
-  hanbok_traditional: { emoji: 'H', sub: '한복 전통' },
+  studio_gallery: { emoji: 'S', sub: '화이트 아치 스튜디오' },
+  studio_fog: { emoji: 'S', sub: '린넨 드레이프' },
+  studio_mocha: { emoji: 'S', sub: '다크 스포트라이트' },
+  studio_sage: { emoji: 'S', sub: '세이지그린 에디토리얼' },
   hanbok_wonsam: { emoji: 'H', sub: '궁중 혼례' },
   hanbok_dangui: { emoji: 'H', sub: '당의 한복' },
   hanbok_modern: { emoji: 'H', sub: '모던 한복' },
   hanbok_saeguk: { emoji: 'H', sub: '사극풍' },
   hanbok_flower: { emoji: 'H', sub: '꽃한복' },
-  city_night: { emoji: 'N', sub: '도시 야경' },
+  spring_letter: { emoji: 'Q', sub: '벚꽃이 지던 날' },
+  summer_rain: { emoji: 'Q', sub: '소나기가 지나간 뒤' },
+  autumn_film: { emoji: 'Q', sub: '필름 속 기억' },
+  winter_zhivago: { emoji: 'Q', sub: '눈이 내리던 밤' },
   cherry_blossom: { emoji: 'C', sub: '벚꽃잎 흩날림' },
-  forest_wedding: { emoji: 'F', sub: '숲속 빛내림' },
-  castle_garden: { emoji: 'K', sub: '유럽 고성' },
-  cathedral: { emoji: 'T', sub: '성당 스테인드글라스' },
+  forest_wedding: { emoji: 'F', sub: '안개 속 성당숲' },
+  castle_garden: { emoji: 'K', sub: '빈 궁전의 새벽' },
+  cathedral: { emoji: 'T', sub: '키아로스쿠로' },
   watercolor: { emoji: 'W', sub: '파스텔 수채화' },
+  rose_garden: { emoji: 'R', sub: '로코코 장미 살롱' },
+  rainy_day: { emoji: 'R', sub: '버스정류장 빗속' },
+  grass_rain: { emoji: 'G', sub: '비 내리는 필름 감성' },
+  eternal_blue: { emoji: 'E', sub: '겨울 바다 멜랑콜리' },
+  water_memory: { emoji: 'W', sub: '수중 시네마틱' },
+  blue_hour: { emoji: 'B', sub: '트와일라잇 로맨스' },
+  black_swan: { emoji: 'B', sub: '다크 시네마틱' },
+  velvet_rouge: { emoji: 'V', sub: '다크 로맨스' },
+  heart_editorial: { emoji: 'H', sub: '건축적 하이패션' },
   magazine_cover: { emoji: 'M', sub: '하이패션 화보' },
-  rainy_day: { emoji: 'R', sub: '감성 빗속' },
-  autumn_leaves: { emoji: 'A', sub: '단풍길 로맨스' },
-  winter_snow: { emoji: 'I', sub: '눈 내리는 날' },
+  city_night: { emoji: 'N', sub: '네온 야경' },
   vintage_film: { emoji: 'V', sub: '필름 감성' },
-  cruise_sunset: { emoji: 'S', sub: '선셋 요트' },
-  iphone_selfie: { emoji: 'P', sub: '힙한 셀카' },
-  iphone_mirror: { emoji: 'P', sub: '거울 플래시' },
-  cruise_bluesky: { emoji: 'B', sub: '청명한 바다' },
-  vintage_record: { emoji: 'V', sub: '레코드샵 레트로' },
-  retro_hongkong: { emoji: 'H', sub: '홍콩 야시장' },
-  rose_garden: { emoji: 'R', sub: '로코코 장미' },
-  grass_rain: { emoji: 'G', sub: '비 내리는 풀밭' },
-  eternal_blue: { emoji: 'E', sub: '이터널 블루' },
-  heart_editorial: { emoji: 'H', sub: '하이패션 에디토리얼' },
+  vintage_record: { emoji: 'V', sub: '레코드샵 빈티지' },
   vintage_tungsten: { emoji: 'V', sub: '70년대 웨딩앨범' },
+  retro_hongkong: { emoji: 'R', sub: '홍콩 야시장 무드' },
+  cruise_sunset: { emoji: 'C', sub: '노을빛 크루즈' },
+  cruise_bluesky: { emoji: 'C', sub: '푸른 바다 크루즈' },
+  iphone_selfie: { emoji: 'P', sub: 'iPhone 감성' },
+  iphone_mirror: { emoji: 'P', sub: '미러 셀카' },
   aao: { emoji: 'A', sub: '어떤 우주에서든' },
 };
 
@@ -311,23 +331,34 @@ export default function AiSnapStudio({ weddingId }: Props) {
 
       <div>
         <StepLabel num={3} text={at('snapConcept', sl)} sub={at('snapConceptDesc', sl)} />
-        <div className="grid grid-cols-2 gap-2 mt-3">
-          {concepts.map(c => {
-            const meta = CONCEPT_META[c.id] || { emoji: '?', sub: '' };
-            const sel = selectedConcept === c.id;
+        <div className="space-y-5 mt-3">
+          {CATEGORY_ORDER.map(cat => {
+            const catConcepts = cat.ids.map(id => concepts.find(c => c.id === id)).filter(Boolean) as Concept[];
+            if (catConcepts.length === 0) return null;
             return (
-              <button key={c.id} onClick={() => setSelectedConcept(c.id)}
-                className={`rounded-2xl py-3.5 px-4 text-left transition-all duration-200 border-2 ${sel ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 ${sel ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-500'}`}>
-                    {meta.emoji}
-                  </div>
-                  <div className="min-w-0">
-                    <p className={`text-sm font-semibold truncate ${sel ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
-                    <p className={`text-[11px] truncate ${sel ? 'text-white/60' : 'text-stone-400'}`}>{meta.sub}</p>
-                  </div>
+              <div key={cat.key}>
+                <p className="text-xs font-medium text-stone-400 tracking-widest uppercase mb-2">{cat.label}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {catConcepts.map(c => {
+                    const meta = CONCEPT_META[c.id] || { emoji: '?', sub: '' };
+                    const sel = selectedConcept === c.id;
+                    return (
+                      <button key={c.id} onClick={() => setSelectedConcept(c.id)}
+                        className={`rounded-2xl py-3.5 px-4 text-left transition-all duration-200 border-2 ${sel ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 ${sel ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-500'}`}>
+                            {meta.emoji}
+                          </div>
+                          <div className="min-w-0">
+                            <p className={`text-sm font-semibold truncate ${sel ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
+                            <p className={`text-[11px] truncate ${sel ? 'text-white/60' : 'text-stone-400'}`}>{meta.sub}</p>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

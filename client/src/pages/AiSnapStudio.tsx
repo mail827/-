@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Camera, X, Download, Loader2, User, Users, ArrowRight, ArrowLeft, Package, Image, CreditCard, Gift, RefreshCw } from 'lucide-react';
+import { Sparkles, Camera, X, Download, Loader2, User, Users, ArrowRight, ArrowLeft, Package, CreditCard, Gift, RefreshCw } from 'lucide-react';
 import { at } from '../utils/appI18n';
 import { useLocaleStore } from '../store/useLocaleStore';
 
@@ -27,10 +27,23 @@ function loadTossV1(): Promise<any> {
 }
 
 type ShotMode = 'groom' | 'bride' | 'couple';
-type Category = 'studio' | 'cinematic';
+
 
 interface Tier { id: string; snaps: number; price: number; label: string }
 interface Concept { id: string; label: string; category: string }
+
+const CATEGORY_ORDER = [
+  { key: 'STUDIO', label: '\uc2a4\ud29c\ub514\uc624', ids: ['studio_classic', 'studio_gallery', 'studio_fog', 'studio_mocha', 'studio_sage'] },
+  { key: 'HANBOK', label: '\ud55c\ubcf5', ids: ['hanbok_wonsam', 'hanbok_dangui', 'hanbok_modern', 'hanbok_saeguk', 'hanbok_flower'] },
+  { key: 'FOUR_SEASONS', label: '\uc0ac\uacc4 \uc2dc\ub9ac\uc988', ids: ['spring_letter', 'summer_rain', 'autumn_film', 'winter_zhivago'] },
+  { key: 'CLASSIC', label: '\ud074\ub798\uc2dd \ub85c\ub9e8\uc2a4', ids: ['cherry_blossom', 'forest_wedding', 'castle_garden', 'cathedral', 'watercolor', 'rose_garden'] },
+  { key: 'MOOD', label: '\ubb34\ub4dc \uc2dc\ub124\ub9c8', ids: ['rainy_day', 'grass_rain', 'eternal_blue', 'water_memory', 'blue_hour'] },
+  { key: 'DARK', label: '\ub2e4\ud06c/\uc5d0\ub514\ud1a0\ub9ac\uc5bc', ids: ['black_swan', 'velvet_rouge', 'heart_editorial', 'magazine_cover', 'city_night'] },
+  { key: 'VINTAGE', label: '\ube48\ud2f0\uc9c0', ids: ['vintage_film', 'vintage_record', 'vintage_tungsten', 'retro_hongkong'] },
+  { key: 'CRUISE', label: '\ud06c\ub8e8\uc988', ids: ['cruise_sunset', 'cruise_bluesky'] },
+  { key: 'SELFIE', label: '\uc140\uce74', ids: ['iphone_selfie', 'iphone_mirror'] },
+  { key: 'SPECIAL', label: '\uc2a4\ud398\uc15c', ids: ['aao'] },
+];
 interface Snap { id: string; status: string; resultUrl?: string; concept: string; mode?: string; createdAt: string; retryStatus?: string; retryResultUrl?: string }
 interface Pack { id: string; tier: string; totalSnaps: number; usedSnaps: number; concept: string; category: string; mode: string; status: string; inputUrls: string[]; snaps: Snap[] }
 
@@ -42,10 +55,10 @@ export default function AiSnapStudioPage() {
   const [checking, setChecking] = useState(true);
 
   const [tiers, setTiers] = useState<Tier[]>([]);
-  const [concepts, setConcepts] = useState<{ studio: Concept[]; cinematic: Concept[] }>({ studio: [], cinematic: [] });
+  const [concepts, setConcepts] = useState<Concept[]>([]);
 
   const [selectedTier, setSelectedTier] = useState('');
-  const [category, setCategory] = useState<Category>('studio');
+  const [category, setCategory] = useState<string>('studio');
   const [selectedConcept, setSelectedConcept] = useState('');
   const [groomPhoto, setGroomPhoto] = useState('');
   const [bridePhoto, setBridePhoto] = useState('');
@@ -105,7 +118,8 @@ export default function AiSnapStudioPage() {
       fetch(`${API}/snap-pack/my-packs`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
     ]).then(([t, c, p]) => {
       setTiers(t);
-      setConcepts(c);
+      const allC = [...(c.studio || []), ...(c.cinematic || [])];
+      setConcepts(allC);
       if (!Array.isArray(p) || p.length === 0) {
         setStep(1);
         return;
@@ -371,7 +385,7 @@ export default function AiSnapStudioPage() {
                     <ArrowLeft className="w-4 h-4" /> {at('studioMyPortfolioBtn', pl)}
                   </button>
                 )}
-                <button onClick={() => setStep(2)} disabled={!groomPhoto || !bridePhoto}
+                <button onClick={() => setStep(3)} disabled={!groomPhoto || !bridePhoto}
                   className="flex-1 px-8 py-3 rounded-lg bg-stone-800 text-white text-sm font-medium disabled:opacity-30 hover:bg-stone-900 transition-all flex items-center gap-1 justify-center">
                   다음 <ArrowRight className="w-4 h-4" />
                 </button>
@@ -379,67 +393,31 @@ export default function AiSnapStudioPage() {
             </Step>
           )}
 
-          {step === 2 && (
-            <Step title={at('studioCatTitle', pl)} sub={at('studioCatSub', pl)}>
-              <div className="grid grid-cols-2 gap-4">
-                {([
-                  { c: 'studio' as Category, label: at('studioType', pl), desc: at('studioTypeDesc', pl), icon: Image },
-                  { c: 'cinematic' as Category, label: at('cinematicType', pl), desc: at('cinematicTypeDesc', pl), icon: Sparkles },
-                ]).map(item => (
-                  <button key={item.c} onClick={() => { setCategory(item.c); setStep(3); }}
-                    className={`p-6 rounded-lg border-2 text-center transition-all hover:shadow-lg ${category === item.c ? 'border-stone-800 bg-stone-800' : 'border-stone-200 hover:border-stone-400'}`}>
-                    <item.icon className={`w-8 h-8 mx-auto mb-3 ${category === item.c ? 'text-amber-300' : 'text-stone-400'}`} />
-                    <p className={`font-semibold mb-1 ${category === item.c ? 'text-white' : 'text-stone-800'}`}>{item.label}</p>
-                    <p className={`text-xs ${category === item.c ? 'text-white/60' : 'text-stone-400'}`}>{item.desc}</p>
-                  </button>
-                ))}
-              </div>
-              <div className="flex pt-4">
-                <button onClick={() => setStep(1)} className="px-6 py-3 rounded-lg border border-stone-200 text-sm text-stone-500 hover:bg-stone-50 flex items-center gap-1">
-                  <ArrowLeft className="w-4 h-4" /> 이전
-                </button>
-              </div>
-            </Step>
-          )}
+
 
           {step === 3 && (
             <Step title={at('studioConceptTitle', pl)} sub={at('studioConceptSub', pl)}>
-              {(() => {
-                const allItems = category === 'studio' ? concepts.studio : concepts.cinematic;
-                const hanbokItems = allItems.filter(c => c.id.startsWith('hanbok_'));
-                const otherItems = allItems.filter(c => !c.id.startsWith('hanbok_'));
-                return (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-2">
-                      {otherItems.map(c => (
-                        <button key={c.id} onClick={() => setSelectedConcept(c.id)}
-                          className={`rounded-lg py-3.5 px-4 text-left transition-all border-2 ${selectedConcept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
-                          <p className={`text-sm font-semibold ${selectedConcept === c.id ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
-                        </button>
-                      ))}
-                    </div>
-                    {hanbokItems.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="h-px flex-1 bg-stone-200" />
-                          <span className="text-xs font-semibold text-stone-500 tracking-widest uppercase">{at('studioHanbokLabel', pl)}</span>
-                          <div className="h-px flex-1 bg-stone-200" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          {hanbokItems.map(c => (
-                            <button key={c.id} onClick={() => setSelectedConcept(c.id)}
-                              className={`rounded-lg py-3.5 px-4 text-left transition-all border-2 ${selectedConcept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
-                              <p className={`text-sm font-semibold ${selectedConcept === c.id ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
-                            </button>
-                          ))}
-                        </div>
+              <div className="space-y-6">
+                {CATEGORY_ORDER.map(cat => {
+                  const catConcepts = cat.ids.map(id => concepts.find(c => c.id === id)).filter(Boolean) as Concept[];
+                  if (catConcepts.length === 0) return null;
+                  return (
+                    <div key={cat.key}>
+                      <p className="text-xs font-medium text-stone-400 tracking-widest uppercase mb-2">{cat.label}</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {catConcepts.map(c => (
+                          <button key={c.id} onClick={() => { setSelectedConcept(c.id); setCategory(c.category); }}
+                            className={`rounded-lg py-3.5 px-4 text-left transition-all border-2 ${selectedConcept === c.id ? 'border-stone-800 bg-stone-800' : 'border-stone-200 bg-white hover:border-stone-300'}`}>
+                            <p className={`text-sm font-semibold ${selectedConcept === c.id ? 'text-white' : 'text-stone-800'}`}>{c.label}</p>
+                          </button>
+                        ))}
                       </div>
-                    )}
-                  </div>
-                );
-              })()}
+                    </div>
+                  );
+                })}
+              </div>
               <NavButtons
-                onBack={() => setStep(2)}
+                onBack={() => setStep(1)}
                 onNext={() => setStep(isSetupMode ? 7 : 4)}
                 disabled={!selectedConcept}
                 nextLabel={isSetupMode ? at('studioConfirmSetup', pl) : at('next', pl)}
@@ -479,7 +457,7 @@ export default function AiSnapStudioPage() {
             <Step title={at('studioOrderTitle', pl)} sub={at('studioOrderSub', pl)}>
               {(() => {
                 const t = tiers.find(t => t.id === selectedTier);
-                const allC = [...concepts.studio, ...concepts.cinematic];
+                const allC = concepts;
                 const c = allC.find(c => c.id === selectedConcept);
                 const originalPrice = t?.price || 0;
                 const discountedPrice = couponResult?.valid
@@ -542,7 +520,7 @@ export default function AiSnapStudioPage() {
           {step === 7 && isSetupMode && (
             <Step title={at('studioSetupTitle', pl)} sub={at('studioSetupSub', pl)}>
               {(() => {
-                const allC = [...concepts.studio, ...concepts.cinematic];
+                const allC = concepts;
                 const c = allC.find(c => c.id === selectedConcept);
                 return (
                   <div className="space-y-6">
