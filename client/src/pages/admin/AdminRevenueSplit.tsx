@@ -89,7 +89,9 @@ export default function AdminRevenueSplit() {
 
     if (source === 'toss' && tossSummary) {
       totalRevenue = tossSummary.tx ? tossSummary.tx.totalAmount : tossSummary.totalAmount;
-      pgFee = tossSummary.tx ? tossSummary.tx.totalFee : tossSummary.totalFee;
+      const txFee = tossSummary.tx?.totalFee || 0;
+      const settleFee = tossSummary.totalFee || 0;
+      pgFee = txFee > 0 ? txFee : settleFee > 0 ? settleFee : Math.floor(totalRevenue * 0.033);
     } else if (source === 'db' && dbStats) {
       totalRevenue = dbStats.revenue;
       pgFee = Math.floor(totalRevenue * 0.033);

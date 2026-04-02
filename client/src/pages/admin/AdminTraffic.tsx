@@ -77,7 +77,23 @@ export default function AdminTraffic() {
     if (lower.includes('twitter') || lower.includes('t.co')) return '#1DA1F2';
     return '#a8a29e';
   };
-  const getLabel = (name: string) => CHANNEL_LABELS[name] || name;
+  const getLabel = (name: string) => {
+    if (CHANNEL_LABELS[name]) return CHANNEL_LABELS[name];
+    const lower = name.toLowerCase();
+    if (lower.includes('kakao')) return '카카오';
+    if (lower === 'ig' || lower.includes('instagram')) return '인스타그램';
+    if (lower.includes('threads')) return '스레드';
+    if (lower.includes('facebook') || lower.includes('fb')) return '페이스북';
+    if (lower.includes('google')) return '구글';
+    if (lower.includes('naver')) return '네이버';
+    if (lower.includes('youtube') || lower.includes('youtu')) return '유튜브';
+    if (lower.includes('twitter') || lower.includes('t.co')) return '트위터/X';
+    if (lower.includes('vercel')) return 'Vercel';
+    if (lower.includes('tosspayments')) return '토스페이먼츠';
+    if (lower === '(direct)') return '직접 유입';
+    if (lower === '(not set)') return '미분류';
+    return name;
+  };
 
   const DayButton = ({ d, label }: { d: number; label: string }) => (
     <button
@@ -173,7 +189,7 @@ export default function AdminTraffic() {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getColor(ch.source) }} />
-                          <span className="text-sm text-stone-700">{ch.source}</span>
+                          <span className="text-sm text-stone-700">{getLabel(ch.source)}</span>
                           <span className="text-xs text-stone-400">/ {ch.medium}</span>
                         </div>
                         <div className="flex items-center gap-3">

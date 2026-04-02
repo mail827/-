@@ -22,6 +22,7 @@ router.get('/users', authMiddleware, adminMiddleware, async (req, res) => {
       _count: { select: { weddings: true, orders: true } },
       weddings: { select: { id: true, expiresAt: true } },
       snapPacks: { select: { id: true, totalSnaps: true, usedSnaps: true, status: true, amount: true } },
+      preweddingVideos: { select: { id: true, status: true, amount: true, mode: true } },
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -31,10 +32,44 @@ router.get('/users', authMiddleware, adminMiddleware, async (req, res) => {
     const snapPackCount = paidSnaps.length;
     const snapRemaining = paidSnaps.reduce((s: number, p: any) => s + (p.totalSnaps - p.usedSnaps), 0);
     const snapSpent = paidSnaps.reduce((s: number, p: any) => s + (p.amount || 0), 0);
-    const { weddings: _w, snapPacks: _s, ...rest } = u as any;
-    return { ...rest, archiveCount, snapPackCount, snapRemaining, snapSpent };
+    const paidCinema = u.preweddingVideos?.filter((v: any) => ['PAID','ANALYZING','GENERATING','COMPOSING','COMPLETED','DONE'].includes(v.status)) || [];
+    const cinemaCount = paidCinema.length;
+    const cinemaSpent = paidCinema.reduce((s: number, v: any) => s + (v.amount || 0), 0);
+    const { weddings: _w, snapPacks: _s, preweddingVideos: _pv, ...rest } = u as any;
+    return { ...rest, archiveCount, snapPackCount, snapRemaining, snapSpent, cinemaCount, cinemaSpent };
   });
   res.json(enriched);
+});
+
+
+router.get('/users/:id/orders', authMiddleware, adminMiddleware, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [orders, snaps, cinema] = await Promise.all([
+      prisma.order.findMany({
+        where: { userId: id },
+        include: { package: { select: { name: true, slug: true } }, wedding: { select: { groomName: true, brideName: true } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.snapPack.findMany({
+        where: { userId: id },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.preweddingVideo.findMany({
+        where: { userId: id },
+        select: {
+          id: true, orderId: true, amount: true, status: true, mode: true,
+          groomName: true, brideName: true, templateId: true, totalCost: true,
+          couponCode: true, paidAt: true, errorMsg: true, createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+    res.json({ orders, snaps, cinema });
+  } catch (e) {
+    console.error('user orders error:', e);
+    res.status(500).json({ error: 'failed' });
+  }
 });
 
 router.post('/users/:id/grant-archive', authMiddleware, adminMiddleware, async (req, res) => {
@@ -89,6 +124,43 @@ router.delete('/orders/:id', authMiddleware, adminMiddleware, async (req, res) =
   } catch (error) {
     console.error('Delete order error:', error);
     res.status(500).json({ error: '주문 삭제 실패' });
+  }
+});
+
+
+router.get('/snap-orders', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const packs = await prisma.snapPack.findMany({
+      take: 300,
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(packs);
+  } catch (e) {
+    console.error('snap-orders error:', e);
+    res.status(500).json({ error: 'failed' });
+  }
+});
+
+router.get('/cinema-orders', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const videos = await prisma.preweddingVideo.findMany({
+      take: 300,
+      select: {
+        id: true, orderId: true, amount: true, status: true, mode: true,
+        groomName: true, brideName: true, templateId: true, totalCost: true,
+        couponCode: true, paymentKey: true, paidAt: true, errorMsg: true,
+        createdAt: true, updatedAt: true,
+        user: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(videos);
+  } catch (e) {
+    console.error('cinema-orders error:', e);
+    res.status(500).json({ error: 'failed' });
   }
 });
 

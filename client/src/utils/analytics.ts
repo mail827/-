@@ -7,8 +7,8 @@ declare global {
 
 export const pageView = (path: string, title?: string) => {
   if (typeof window.gtag === 'function') {
-    window.gtag('config', 'G-4649EB9Z52', {
-      page_path: path,
+    window.gtag('event', 'page_view', {
+      page_location: window.location.origin + path,
       page_title: title || document.title,
     });
   }

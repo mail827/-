@@ -161,6 +161,15 @@ router.get('/admin/settlement', authMiddleware, async (req: Request, res: Respon
       orderBy: { paidAt: 'desc' },
     });
 
+    const snapWhere: any = { status: 'PAID', couponCode: couponCode ? (couponCode as string) : { not: null } };
+    if (startDate || endDate) snapWhere.paidAt = dateFilter;
+
+    const snapOrders = await prisma.snapPack.findMany({
+      where: snapWhere,
+      include: { user: true },
+      orderBy: { paidAt: 'desc' },
+    });
+
     const summary: Record<string, { code: string; count: number; totalPaid: number; commission: number; net: number; orders: any[] }> = {};
 
     for (const o of orders) {
@@ -172,6 +181,18 @@ router.get('/admin/settlement', authMiddleware, async (req: Request, res: Respon
       summary[code].commission += comm;
       summary[code].net += o.amount - comm;
       summary[code].orders.push({ id: o.id, orderId: o.orderId, amount: o.amount, packageName: o.package.name, userName: o.user.name, userEmail: o.user.email, paidAt: o.paidAt, type: 'package' });
+    }
+
+    for (const s of snapOrders) {
+      const code = s.couponCode!;
+      if (!summary[code]) summary[code] = { code, count: 0, totalPaid: 0, commission: 0, net: 0, orders: [] };
+      summary[code].count++;
+      summary[code].totalPaid += s.amount;
+      const comm = Math.floor(s.amount * 0.1);
+      summary[code].commission += comm;
+      summary[code].net += s.amount - comm;
+      const tierLabel: Record<string, string> = { basic3: '3장', standard5: '5장', value10: '10장', premium20: '20장' };
+      summary[code].orders.push({ id: s.id, orderId: s.orderId, amount: s.amount, packageName: 'AI스냅 ' + (tierLabel[s.tier] || s.tier), userName: s.user.name, userEmail: s.user.email, paidAt: s.paidAt, type: 'snap' });
     }
 
     for (const v of cinemaOrders) {
@@ -186,7 +207,7 @@ router.get('/admin/settlement', authMiddleware, async (req: Request, res: Respon
       summary[code].orders.push({ id: v.id, orderId: v.orderId, amount: v.amount, packageName: modeLabel, userName: v.user.name, userEmail: v.user.email, paidAt: v.paidAt, type: 'cinema' });
     }
 
-    const allAmounts = [...orders.map(o => o.amount), ...cinemaOrders.map(v => v.amount)];
+    const allAmounts = [...orders.map(o => o.amount), ...snapOrders.map(s => s.amount), ...cinemaOrders.map(v => v.amount)];
     const totals = {
       totalOrders: allAmounts.length,
       totalPaid: allAmounts.reduce((s, a) => s + a, 0),
