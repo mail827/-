@@ -450,6 +450,42 @@ const CINEMATIC_BRIDE_SHOTS = [
   { id: 'wind_moment', prompt: 'tight closeup framing at chest level, close-up face and hair, wind catching hair across face, natural surprised expression, authentic beauty' },
 ];
 
+
+const HANBOK_COUPLE_SHOTS = [
+  { id: 'formal_facing', prompt: 'couple facing each other at formal distance across low wooden table with ceremonial candle between them, seated in traditional posture, looking into each other eyes with quiet intensity, warm candlelight from front cool daylight filtering through hanji behind, shallow depth of field on space between them' },
+  { id: 'walking_procession', prompt: 'couple walking along traditional wooden corridor with repeating dark pillars, she walks three steps ahead he walks behind, both look straight ahead with perfect posture, his eyes angled slightly downward toward her trailing fabric, late afternoon golden bars of light across dark wooden floor, 85mm telephoto compressing pillar rhythm' },
+  { id: 'wall_separation', prompt: 'couple separated by tall stone palace wall, she on one side facing wall with hand flat against rough stone at shoulder height, he on other side with hand at exact same height directly opposite, they cannot see each other but hands separated by inches of stone, soft overcast light, symmetrical split composition' },
+  { id: 'seated_distance', prompt: 'couple sitting on dark wooden maru floor looking out at courtyard, one arm length apart, she holds small ceramic tea cup in both hands, his cup sits on wood between them untouched, soft grey diffused light, the deliberate space between them is careful not cold' },
+  { id: 'candlelight_chamber', prompt: 'couple seated formally across from each other in intimate chamber at night, single tall candle in brass holder between them on floor, candlelight warm amber on faces painting Renaissance chiaroscuro, they look at each other across flame, neither smiles, her fingers on lap shift slightly toward his side' },
+  { id: 'garden_reflection', prompt: 'couple at edge of dark still lotus pond in palace garden, she sits on pavilion floor looking at water, his reflection appears in water beside hers, in real world he stands behind railing separated by wooden bars, but in water their reflections exist together without barriers, late afternoon golden light' },
+  { id: 'dawn_courtyard', prompt: 'couple standing together in vast empty palace courtyard at first pale dawn light, pink-grey sky above dark palace roofs, facing each other at formal distance, everything proper and restored, but she holds small folded hanji paper note in clasped hands and he has identical note tucked in sash edge, soft predawn pink light' },
+  { id: 'threshold_moment', prompt: 'he stands at chamber entrance threshold hesitating, formal outer robe loosened revealing white inner layer, she sits on floor inside looking up at him, heavy ceremonial garments removed and draped on wooden rack behind her, warm amber oil lamp light, the threshold between corridor and chamber is the last line of protocol' },
+  { id: 'hidden_hands', prompt: 'couple seated side by side in formal posture facing forward in throne room or ceremonial hall, full formal attire restored, her hand completely hidden beneath wide heavy sleeve resting on top of his hand on armrest, from front perfectly formal, beneath the silk two hands clasped, soft warm morning light' },
+  { id: 'back_view_garden', prompt: 'couple walking along winding stone path through garden with autumn trees, dressed down in simpler daily clothes off duty, she reaches hand back without looking, he takes it, no officials no protocol, golden side light through tree canopy painting warm amber, the hand reaching back is quiet rebellion' },
+];
+
+const HANBOK_GROOM_SHOTS = [
+  { id: 'throne_solitary', prompt: 'seated alone on wooden throne or formal chair, vast empty hall with dark wooden pillars, single beam of daylight cutting diagonally across dark floor, hands grip armrests, eyes look slightly to one side at something offscreen, power and loneliness in same seat, 35mm lens' },
+  { id: 'procession_path', prompt: 'walking alone down center of stone courtyard path at dawn, hands clasped holding jade tablet or folded paper, measured steps looking straight ahead, grey-pink predawn sky, the only upright figure in vast empty space, 85mm telephoto' },
+  { id: 'threshold_hesitate', prompt: 'standing at doorway threshold at night, formal robe collar loosened revealing white inner layer, one hand holding removed headpiece at side, warm amber oil lamp light from room beyond, hesitation at the boundary between duty and intimacy' },
+  { id: 'window_contemplation', prompt: 'standing near hanji paper window, daylight filtering through creating soft geometric shadows on face, profile view looking through lattice at courtyard beyond, contemplative calm expression, quiet composed dignity' },
+  { id: 'seated_floor', prompt: 'seated on floor in formal posture at low wooden table, hands on knees, single candle on table painting warm amber on face, looking down at small folded paper or letter, intimate private moment, shallow depth of field' },
+  { id: 'corridor_walk', prompt: 'walking along dark wooden palace corridor with repeating pillars, late afternoon golden bars of light alternating with shadow, measured dignified stride, three quarter body, cinematic pillar compression' },
+  { id: 'garden_alone', prompt: 'standing alone in palace garden with twisted pine tree and autumn maple leaves, dressed in simpler daily clothes, holding removed hat in hand, looking at falling leaves, off duty vulnerable, golden side light' },
+  { id: 'profile_authority', prompt: 'tight closeup profile, strong jawline lit by single directional warm light, formal collar and headpiece visible, composed regal expression, deep shadow on far side of face, 85mm lens shallow depth' },
+];
+
+const HANBOK_BRIDE_SHOTS = [
+  { id: 'mirror_vanity', prompt: 'seated alone at low wooden vanity with small bronze mirror in private chamber, looking at own slightly distorted reflection, ornate folding screen behind, brass oil lamps casting warm amber, dressed for him but he has not arrived, shallow depth of field on face and bronze reflection side by side' },
+  { id: 'ondol_solitary', prompt: 'sitting alone on warm ondol floor in formal posture, knees folded beneath, hands resting open on lap as if reading own palms, single oil lamp on low table only light, the room quiet enough to hear flame, intimate and solitary, 50mm lens' },
+  { id: 'fan_mystery', prompt: 'tight closeup holding unfolded traditional silk fan covering lower half of face, only eyes visible above fan edge, eyes look directly at camera soft and deep holding something unsaid, warm oil lamp light from below painting eyes luminous, 85mm lens razor sharp focus on eyes everything else dissolves' },
+  { id: 'corridor_silhouette', prompt: 'walking along wooden corridor seen from behind, fabric train trailing on dark wooden floor, repeating pillars creating rhythm, late afternoon golden light from open side, elegant silhouette, three quarter body' },
+  { id: 'garden_pavilion', prompt: 'sitting alone on pavilion floor beside lotus pond, legs folded beneath, looking at dark water, reflection wavering on surface below, autumn maple trees framing scene, late afternoon golden light, contemplative serene, 50mm lens' },
+  { id: 'hands_wrapping', prompt: 'extreme closeup of hands carefully wrapping small object in silk pojagi cloth, precise tender folds, gold ring glimpsed inside before last fold, brass oil lamp at edge of frame warm directional light, 90mm macro lens on fingertips, everything else cream blur' },
+  { id: 'window_light', prompt: 'standing near hanji window, soft diffused light on face creating gentle geometric lattice shadow pattern, three quarter angle, serene peaceful expression, hair ornaments catching window light' },
+  { id: 'profile_gentle', prompt: 'tight closeup gentle profile, soft warm light on cheekbone and jawline, ornamental hairpin visible, peaceful closed-eye moment, extremely shallow depth of field, intimate beauty' },
+];
+
 const CINEMATIC_COUPLE_SHOTS_DYNAMIC = [
   { id: 'closeup_foreheads', prompt: 'tight closeup framing at chest level, extreme close-up foreheads gently touching, eyes closed, peaceful intimate moment, faces fill entire frame, shallow depth of field' },
   { id: 'walking_look', prompt: 'three quarter body walking together mid-stride, turning to look at each other with warm smiles, natural hand holding' },
@@ -468,6 +504,9 @@ const DYNAMIC_CONCEPTS = new Set(['retro_hongkong', 'vintage_record', 'cruise_su
 const STUDIO_SET = new Set(['studio_classic', 'studio_gallery', 'studio_fog', 'studio_mocha', 'studio_sage']);
 
 const getVariants = (mode: string, concept: string) => {
+  if (HANBOK_CONCEPTS.has(concept)) {
+    return mode === 'couple' ? HANBOK_COUPLE_SHOTS : mode === 'groom' ? HANBOK_GROOM_SHOTS : HANBOK_BRIDE_SHOTS;
+  }
   if (DYNAMIC_CONCEPTS.has(concept)) {
     return mode === 'couple' ? CINEMATIC_COUPLE_SHOTS_DYNAMIC : mode === 'groom' ? CINEMATIC_GROOM_SHOTS : CINEMATIC_BRIDE_SHOTS;
   }
