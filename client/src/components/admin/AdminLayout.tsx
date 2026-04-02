@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Film, Music, Sparkles, Image, Eye, ArrowRightLeft, PieChart, Clock, Globe } from 'lucide-react';
+import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Film, Music, Sparkles, Image, Eye, ArrowRightLeft, PieChart, Clock, Globe, ClipboardCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const menuGroups = [
+  {
+    label: 'TEAM',
+    items: [
+      { path: '/admin/team', icon: ClipboardCheck, label: '팀 대시보드' },
+    ],
+  },
   {
     label: 'OPERATION',
     items: [

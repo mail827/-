@@ -711,3 +711,74 @@ model Visit {
   @@index([utmSource])
   @@index([referrer])
 }
+
+model TeamTask {
+  id        String   @id @default(cuid())
+  weekId    String
+  assignee  String
+  category  String
+  title     String
+  target    Int?
+  done      Int      @default(0)
+  checked   Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([weekId])
+  @@index([assignee])
+}
+
+model TeamLog {
+  id        String   @id @default(cuid())
+  userId    String
+  userName  String   @default("")
+  date      String
+  content   String
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([date])
+}
+
+model TeamNotice {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model TeamFocus {
+  id        String   @id @default(cuid())
+  weekId    String
+  priority  Int      @default(0)
+  title     String
+  assignee  String
+  deadline  String?
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([weekId])
+}
+
+model TeamMetric {
+  id        String   @id @default(cuid())
+  month     String
+  key       String
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([month, key])
+}
+
+model TeamReview {
+  id        String   @id @default(cuid())
+  month     String
+  field     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([month, field])
+}

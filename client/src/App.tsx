@@ -48,6 +48,7 @@ import AdminRevenueSplit from './pages/admin/AdminRevenueSplit';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminInquiries from './pages/admin/AdminInquiries';
 import AdminContents from './pages/admin/AdminContents';
+import AdminTeam from './pages/admin/AdminTeam';
 import ReviewManagement from "./pages/admin/ReviewManagement";
 import AdminBgMusic from "./pages/admin/AdminBgMusic";
 import AdminAiSnap from "./pages/admin/AdminAiSnap";
@@ -169,6 +170,7 @@ export default function App() {
         <Route path="weddings/:id/rsvp" element={<AdminRsvpList />} />
         <Route path="weddings/:id/guestbook" element={<AdminGuestbookList />} />
         <Route path="contents" element={<AdminContents />} />
+        <Route path="team" element={<AdminTeam />} />
         <Route path="reviews" element={<ReviewManagement />} />
       </Route>
     </Routes>
