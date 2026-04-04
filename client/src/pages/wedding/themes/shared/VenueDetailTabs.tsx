@@ -28,11 +28,15 @@ export default function VenueDetailTabs({ tabs, theme = 'MODERN_MINIMAL'}: Venue
 
     const computed = window.getComputedStyle(venueSection);
     const bg = computed.backgroundColor;
-    const match = bg.match(/\d+/g);
+    const match = bg.match(/[\d.]+/g);
     if (match && match.length >= 3) {
       const [r, g, b] = match.map(Number);
+      const a = match.length >= 4 ? parseFloat(match[3]) : 1;
+      if (a < 0.1) { setParentDark(false); return; }
       const lum = (r * 299 + g * 587 + b * 114) / 1000;
       setParentDark(lum < 128);
+    } else {
+      setParentDark(false);
     }
   }, []);
 

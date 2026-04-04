@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 const SECTION_ID_MAP: Record<string, string> = {
   'gallery-section': 'gallery',
@@ -10,6 +10,7 @@ const SECTION_ID_MAP: Record<string, string> = {
   'guestbook': 'guestbook',
   'greeting-section': 'greeting',
   'calendar-section': 'calendar',
+  'closing-section': 'closing',
 };
 
 const DEFAULT_ORDER = [
@@ -17,11 +18,11 @@ const DEFAULT_ORDER = [
   'location', 'rsvp', 'account', 'guestbook', 'closing',
 ];
 
-const KNOWN_IDS = ['gallery-section', 'venue-section', 'rsvp-section', 'rsvp', 'account-section', 'guestbook-section', 'guestbook', 'greeting-section', 'calendar-section'];
+const KNOWN_IDS = ['gallery-section', 'venue-section', 'rsvp-section', 'rsvp', 'account-section', 'guestbook-section', 'guestbook', 'greeting-section', 'calendar-section', 'closing-section'];
 
 function detectKeyByContent(el: HTMLElement): string | null {
-  const text = el.textContent || '';
-  const html = el.innerHTML || '';
+  const text = (el.textContent || '').slice(0, 500);
+  const html = (el.innerHTML || '').slice(0, 2000);
 
   if (el.querySelector('.grid-cols-7') || text.includes('CALENDAR')) return 'calendar';
   if (text.includes('INVITATION') || text.includes('초대합니다') || text.includes('결혼합니다')) {
@@ -33,10 +34,11 @@ function detectKeyByContent(el: HTMLElement): string | null {
   if ((text.includes('RSVP') || text.includes('참석')) && el.querySelector('form, input')) return 'rsvp';
   if (text.includes('GIFT') || text.includes('축의금') || text.includes('신랑측')) return 'account';
   if (text.includes('GUESTBOOK') || text.includes('방명록')) return 'guestbook';
+  if (text.includes('공유하기') || text.includes('Share') || html.includes('showShareModal') || html.includes('showShare')) return 'closing';
   return null;
 }
 
-function findContainerByIds(root: HTMLElement): HTMLElement | null {
+function findContainer(root: HTMLElement): HTMLElement | null {
   const found: HTMLElement[] = [];
   for (const id of KNOWN_IDS) {
     const el = root.querySelector('#' + id);
@@ -69,34 +71,43 @@ function findContainerByIds(root: HTMLElement): HTMLElement | null {
   return best;
 }
 
-function applyOrder(root: HTMLElement, order: string[], hiddenSections: string[] = []) {
-  const container = findContainerByIds(root);
-  if (!container) return false;
+function getKey(child: HTMLElement): string | null {
+  if (child.id && SECTION_ID_MAP[child.id]) return SECTION_ID_MAP[child.id];
+  const inner = child.querySelector(KNOWN_IDS.map(id => '#' + id).join(','));
+  if (inner && (inner as HTMLElement).id && SECTION_ID_MAP[(inner as HTMLElement).id]) {
+    return SECTION_ID_MAP[(inner as HTMLElement).id];
+  }
+  return detectKeyByContent(child);
+}
 
-  container.style.display = 'flex';
-  container.style.flexDirection = 'column';
+function applyOrder(root: HTMLElement, order: string[], hidden: string[]): boolean {
+  const container = findContainer(root);
+  if (!container) return false;
 
   const children = Array.from(container.children) as HTMLElement[];
   if (children.length < 3) return false;
+
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
 
   const assigned = new Set<string>();
   let heroFound = false;
 
   children.forEach((child) => {
     const tag = child.tagName.toLowerCase();
-
     if (tag === 'style' || tag === 'audio' || tag === 'canvas' || tag === 'svg') {
       child.style.order = '-1';
       return;
     }
-
     if (tag === 'footer') {
       child.style.order = '99';
       return;
     }
 
-    const pos = getComputedStyle(child).position;
-    if (pos === 'fixed') return;
+    try {
+      const pos = getComputedStyle(child).position;
+      if (pos === 'fixed') return;
+    } catch { return; }
 
     if (!heroFound && (
       child.classList.contains('min-h-screen') ||
@@ -107,121 +118,92 @@ function applyOrder(root: HTMLElement, order: string[], hiddenSections: string[]
       return;
     }
 
-    let key: string | null = null;
-    if (child.id && SECTION_ID_MAP[child.id]) {
-      key = SECTION_ID_MAP[child.id];
-    }
-    if (!key) {
-      const inner = child.querySelector(KNOWN_IDS.map(id => '#' + id).join(','));
-      if (inner?.id && SECTION_ID_MAP[inner.id]) {
-        key = SECTION_ID_MAP[inner.id];
-      }
-    }
-    if (!key) {
-      key = detectKeyByContent(child);
-    }
-
+    const key = getKey(child);
     if (key && !assigned.has(key)) {
       const idx = order.indexOf(key);
       child.style.order = idx !== -1 ? String(idx + 1) : '50';
-
-      if (hiddenSections.includes(key)) {
-        child.style.display = 'none';
-      } else {
-        child.style.display = '';
-      }
-
+      child.style.display = hidden.includes(key) ? 'none' : '';
       assigned.add(key);
       return;
     }
 
-    const text = child.textContent || '';
-    if (text.includes('공유하기') || text.includes('Share')) {
-      child.style.order = '97';
-      return;
-    }
 
     if (child.classList.contains('min-h-screen')) {
       child.style.order = '0';
       return;
     }
-
     child.style.order = '50';
   });
 
   return assigned.size >= 2;
 }
 
+function applyHiddenOnly(root: HTMLElement, hidden: string[]): boolean {
+  const container = findContainer(root);
+  if (!container) return false;
+  const children = Array.from(container.children) as HTMLElement[];
+  children.forEach((child) => {
+    const key = getKey(child);
+    if (key) {
+      child.style.display = hidden.includes(key) ? 'none' : '';
+    }
+  });
+  return true;
+}
+
 export function useSectionOrder(sectionOrder?: string[], hiddenSections?: string[]) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const appliedRef = useRef(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const order = Array.isArray(sectionOrder) && sectionOrder.length > 0
-    ? sectionOrder
-    : null;
-
+  const order = Array.isArray(sectionOrder) && sectionOrder.length > 0 ? sectionOrder : null;
   const hidden = Array.isArray(hiddenSections) ? hiddenSections : [];
 
-  useEffect(() => {
-    appliedRef.current = false;
+  const apply = useCallback(() => {
     const root = containerRef.current;
-    if (!root || !order) {
-      if (root && hidden.length > 0) {
-        const tryHide = () => {
-          const container = findContainerByIds(root);
-          if (!container) return false;
-          const children = Array.from(container.children) as HTMLElement[];
-          children.forEach((child) => {
-            let key: string | null = null;
-            if (child.id && SECTION_ID_MAP[child.id]) key = SECTION_ID_MAP[child.id];
-            if (!key) {
-              const inner = child.querySelector(KNOWN_IDS.map(id => '#' + id).join(','));
-              if (inner?.id && SECTION_ID_MAP[inner.id]) key = SECTION_ID_MAP[inner.id];
-            }
-            if (!key) key = detectKeyByContent(child);
-            if (key && hidden.includes(key)) {
-              child.style.display = 'none';
-            } else if (key) {
-              child.style.display = '';
-            }
-          });
-          return true;
-        };
-        if (!tryHide()) {
-          const observer = new MutationObserver(() => {
-            if (tryHide()) observer.disconnect();
-          });
-          observer.observe(root, { childList: true, subtree: true });
-          const fallback = setTimeout(() => tryHide(), 1500);
-          return () => { observer.disconnect(); clearTimeout(fallback); };
-        }
-      }
-      return;
-    }
+    if (!root) return false;
+    if (order) return applyOrder(root, order, hidden);
+    if (hidden.length > 0) return applyHiddenOnly(root, hidden);
+    return false;
+  }, [order, hidden]);
+
+  useEffect(() => {
+    if (!order && hidden.length === 0) return;
 
     const tryApply = () => {
-      if (appliedRef.current) return true;
-      if (applyOrder(root, order, hidden)) {
-        appliedRef.current = true;
+      if (apply()) {
         return true;
       }
       return false;
     };
 
-    if (tryApply()) return;
+    tryApply();
 
     const observer = new MutationObserver(() => {
-      if (tryApply()) observer.disconnect();
+      tryApply();
     });
 
-    observer.observe(root, { childList: true, subtree: true });
+    const root = containerRef.current;
+    if (root) {
+      observer.observe(root, { childList: true, subtree: true });
+    }
 
-    const fallback = setTimeout(() => {
-      if (!appliedRef.current) tryApply();
-    }, 1500);
+    intervalRef.current = setInterval(() => {
+      tryApply();
+    }, 800);
 
-    return () => { observer.disconnect(); clearTimeout(fallback); };
-  }, [order ? order.join(',') : null, hidden.join(',')]);
+    const cleanup = setTimeout(() => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    }, 5000);
+
+    return () => {
+      observer.disconnect();
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      clearTimeout(cleanup);
+    };
+  }, [apply, order ? order.join(',') : '', hidden.join(',')]);
 
   return containerRef;
 }

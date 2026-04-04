@@ -13,6 +13,7 @@ interface Wedding {
   theme: string;
   expiresAt: string | null;
   _count?: { rsvps: number; guestbooks: number };
+  user?: { id: string; name: string; email: string };
 }
 
 export default function AdminWeddingList() {
@@ -27,7 +28,7 @@ export default function AdminWeddingList() {
   const fetchWeddings = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/weddings`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/weddings-all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -118,6 +119,9 @@ export default function AdminWeddingList() {
                     <span className="font-semibold text-stone-800">
                       {wedding.groomName} ♥ {wedding.brideName}
                     </span>
+                    {wedding.user && (
+                      <span className="text-xs text-stone-400">{wedding.user.name}</span>
+                    )}
                     <span className={`px-2 py-0.5 text-xs rounded-full ${
                       wedding.isPublished ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-600'
                     }`}>
@@ -200,6 +204,7 @@ export default function AdminWeddingList() {
           <thead className="bg-stone-50">
             <tr>
               <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">청첩장</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">회원</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">예식일</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">만료일</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-stone-600">상태</th>
@@ -217,6 +222,12 @@ export default function AdminWeddingList() {
                     <span className="font-medium text-stone-800">
                       {wedding.groomName} ♥ {wedding.brideName}
                     </span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="text-xs text-stone-500">
+                      <p className="font-medium text-stone-700">{wedding.user?.name || '-'}</p>
+                      <p className="text-stone-400">{wedding.user?.email || ''}</p>
+                    </div>
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-1 text-sm text-stone-600">

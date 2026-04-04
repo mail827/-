@@ -301,6 +301,27 @@ router.delete('/:id/gallery/:galleryId', authMiddleware, async (req, res) => {
   res.json({ success: true });
 });
 
+router.put('/:id/gallery/reorder', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const user = (req as any).user;
+  const { order } = req.body;
+
+  const wedding = await prisma.wedding.findUnique({ where: { id } });
+  if (!wedding) return res.status(404).json({ error: '청첩장을 찾을 수 없습니다' });
+  if (!canAccess(user, wedding)) {
+    return res.status(403).json({ error: '접근 권한이 없습니다' });
+  }
+
+  if (!Array.isArray(order)) return res.status(400).json({ error: 'order must be array' });
+
+  await Promise.all(
+    order.map((galleryId: string, idx: number) =>
+      prisma.gallery.update({ where: { id: galleryId }, data: { order: idx } })
+    )
+  );
+  res.json({ success: true });
+});
+
 export const weddingRouter = router;
 
 router.get('/:id/rsvp', authMiddleware, async (req, res) => {

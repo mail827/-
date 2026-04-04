@@ -120,6 +120,7 @@ model Wedding {
   venue                    String
   venueHall                String?
   venueAddress             String
+  mealText                 String?
   venuePhone               String?
   venueMapUrl              String?
   venueNaverMap            String?
@@ -212,6 +213,7 @@ model Wedding {
   heroLayout             String?          @default("spread")
   envelopeEnabled      Boolean          @default(false)
   envelopeStyle        String?          @default("ivory")
+  envelopeCardStyle    String?          @default("white_crumple")
   envelopeCardText     String?
   envelopeCardColor    String?
   aiChats                  AiChat[]

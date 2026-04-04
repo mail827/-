@@ -516,6 +516,12 @@ function getFontPath(fontId: string): string {
   return `/app/fonts/${entry.file}`;
 }
 
+function getSubtitleFontPath(fontId: string): string {
+  const latinOnly = ['GreatVibes-Regular'];
+  if (latinOnly.includes(fontId)) return '/app/fonts/DXMSubtitlesM.ttf';
+  return getFontPath(fontId);
+}
+
 router.get('/config', (_req, res) => {
   res.json({ pricing: PRICING, fonts: FONTS, subtitleStyles: SUBTITLE_STYLES, selfieConcepts: SELFIE_CONCEPTS.map(c => ({ id: c.id, name: ({ studio_classic: '클래식 스튜디오', studio_gallery: '갤러리 스튜디오', studio_fog: '포그 스튜디오', studio_mocha: '모카 스튜디오', studio_sage: '세이지 스튜디오', outdoor_garden: '가든 웨딩', beach_sunset: '비치 선셋', hanbok_traditional: '전통 한복', hanbok_wonsam: '원삼 혼례', hanbok_dangui: '당의 한복', hanbok_modern: '모던 한복', hanbok_saeguk: '사극풍', hanbok_flower: '꽃 한복', city_night: '시티 나이트', cherry_blossom: '벚꽃', forest_wedding: '숲속 웨딩', castle_garden: '유럽 궁전', cathedral: '성당', watercolor: '수채화', magazine_cover: '매거진 커버', rainy_day: '비 오는 날', autumn_leaves: '가을 단풍', winter_snow: '겨울 눈', vintage_film: '빈티지 필름', cruise_sunset: '크루즈 선셋', cruise_bluesky: '크루즈 블루스카이', vintage_record: '빈티지 레코드', retro_hongkong: '레트로 홍콩', black_swan: '블랙 스완', velvet_rouge: '벨벳 루즈', water_memory: '물의 기억', blue_hour: '블루아워', iphone_mirror: '거울 셀카', rose_garden: '장미 정원', grass_rain: '풀밭', eternal_blue: '블루', heart_editorial: '하이 에디토리얼', vintage_tungsten: '빈티지 텅스텐', aao: '에에올', spring_letter: '봄: 러브레터', summer_rain: '여름: 소나기', autumn_film: '가을: 필름', winter_zhivago: '겨울: 지바고' } as Record<string, string>)[c.id] || c.id })) });
 });
@@ -1461,6 +1467,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
   }
 
   const fontPath = getFontPath(video.fontId || 'BMJUA_ttf');
+  const subtitleFontPath = getSubtitleFontPath(video.fontId || 'BMJUA_ttf');
 
   // === STEP A: Build opening.mp4 (Netflix/Apple cinematic intro) ===
   const openingOut = path.join(tmpDir, 'opening_final.mp4');
@@ -1531,7 +1538,7 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
       const outLabel = isLast ? '[subtitled]' : '[sub' + i + ']';
       const escaped = escapeDrawtext(st.text);
       const fi0 = st.start; const fi1 = st.start + 0.6; const fo0 = st.end - 0.6; const fo1 = st.end;
-      filters.push(subStream + "drawtext=fontfile='" + fontPath + "':text='" + escaped + "':fontsize=30:fontcolor=white:shadowx=2:shadowy=2:shadowcolor=black@0.6:x=(w-text_w)/2:y=h-60:enable='between(t\\," + fi0.toFixed(2) + "\\," + fo1.toFixed(2) + ")':alpha='if(lt(t\\," + fi1.toFixed(2) + ")\\,(t-" + fi0.toFixed(2) + ")/0.6\\,if(gt(t\\," + fo0.toFixed(2) + ")\\,(" + fo1.toFixed(2) + "-t)/0.6\\,1))'" + outLabel);
+      filters.push(subStream + "drawtext=fontfile='" + subtitleFontPath + "':text='" + escaped + "':fontsize=30:fontcolor=white:shadowx=2:shadowy=2:shadowcolor=black@0.6:x=(w-text_w)/2:y=h-60:enable='between(t\\," + fi0.toFixed(2) + "\\," + fo1.toFixed(2) + ")':alpha='if(lt(t\\," + fi1.toFixed(2) + ")\\,(t-" + fi0.toFixed(2) + ")/0.6\\,if(gt(t\\," + fo0.toFixed(2) + ")\\,(" + fo1.toFixed(2) + "-t)/0.6\\,1))'" + outLabel);
       subStream = outLabel;
     });
     filters.push('[subtitled]fade=t=in:st=0:d=1,fade=t=out:st=' + (mainDuration - 1).toFixed(1) + ':d=1[vfinal]');

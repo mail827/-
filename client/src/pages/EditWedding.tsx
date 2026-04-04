@@ -465,6 +465,26 @@ export default function EditWedding() {
     }
   };
 
+  const saveGalleryOrder = async (items: GalleryItem[]) => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/weddings/${id}/gallery/reorder`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ order: items.map(i => i.id) }),
+      });
+    } catch (e) { console.error('Reorder error:', e); }
+  };
+
+  const handleDragEnd = (fromIdx: number, toIdx: number) => {
+    if (fromIdx === toIdx) return;
+    const updated = [...galleries];
+    const [moved] = updated.splice(fromIdx, 1);
+    updated.splice(toIdx, 0, moved);
+    const reordered = updated.map((item, i) => ({ ...item, order: i }));
+    setGalleries(reordered);
+    saveGalleryOrder(reordered);
+  };
+
   const handleDeleteGallery = async (galleryId: string) => {
     if (!confirm(at('deleteConfirm', locale))) return;
     
@@ -942,6 +962,8 @@ export default function EditWedding() {
                 { value: 'HsBombaram30', label: '봄바람' },
                 { value: 'BM Kkubulim', label: '배민 꾸불림' },
                 { value: 'Zen Serif', label: 'Zen Serif' },
+                { value: 'DXSubtitleFont', label: 'DX 영화자막체' },
+                { value: 'MaruBuri', label: '마루 부리' },
               ].map((font) => (
                 <button
                   key={font.value}
@@ -961,7 +983,18 @@ export default function EditWedding() {
           </>
         )}
 
-        {tab === 'basic' && (
+        {tab === 'basic' && (<>
+          <Section title="식사 안내">
+            <p className="text-sm text-stone-500 mb-4">예식 후 식사 안내 문구를 입력하세요</p>
+            <textarea
+              value={wedding.mealText || ''}
+              onChange={(e) => updateField('mealText', e.target.value)}
+              placeholder="식이 끝난 후 1층 그랜드볼룸에서 식사가 준비되어 있습니다."
+              className="w-full px-4 py-3 text-sm border border-stone-200 rounded-lg focus:ring-1 focus:ring-stone-300 focus:border-stone-300 outline-none resize-none"
+              rows={3}
+            />
+          </Section>
+
           <Section title={at('envelope', locale)}>
             <p className="text-sm text-stone-500 mb-4">{at('envelopeDesc', locale)}</p>
             <div className="flex items-center gap-2 mb-4">
@@ -1042,9 +1075,70 @@ export default function EditWedding() {
                   ))}
                 </div>
               </div>
+              <div className="mt-6 pt-4 border-t border-stone-100">
+                <label className="block text-xs text-stone-500 mb-3">카드(종이) 스타일</label>
+                <div className="grid grid-cols-4 gap-3">
+                  {[
+                    { value: 'white_crumple', label: '화이트 크럼플' },
+                    { value: 'ivory_crumple', label: '아이보리 크럼플' },
+                    { value: 'emboss_floral', label: '엠보싱 플로럴' },
+                    { value: 'linen', label: '린넨' },
+                    { value: 'daisy_a', label: '데이지 A' },
+                    { value: 'daisy_b', label: '데이지 B' },
+                    { value: 'watercolor_rose', label: '수채화 로즈' },
+                    { value: 'pink_watercolor', label: '핑크 워터컬러' },
+                    { value: 'rose_layer', label: '로즈 레이어' },
+                    { value: 'purple_aurora', label: '퍼플 오로라' },
+                    { value: 'violet', label: '바이올렛' },
+                    { value: 'white_watercolor', label: '화이트 수채화지' },
+                  ].map((c) => (
+                    <button
+                      key={c.value}
+                      onClick={() => updateField('envelopeCardStyle', c.value)}
+                      className={`rounded-lg overflow-hidden border-2 transition-all ${
+                        (wedding.envelopeCardStyle || 'white_crumple') === c.value
+                          ? 'border-stone-800 scale-105'
+                          : 'border-stone-200 hover:border-stone-400'
+                      }`}
+                    >
+                      <img src={`https://pub-b58d4a5cf82a4aebaa7badae6e00ebf0.r2.dev/envelope/card/${c.value === 'white_crumple' ? '1' : c.value === 'ivory_crumple' ? '2' : c.value === 'emboss_floral' ? '3' : c.value === 'linen' ? '4' : c.value === 'daisy_a' ? '5' : c.value === 'daisy_b' ? '6' : c.value === 'watercolor_rose' ? '7' : c.value === 'pink_watercolor' ? '8' : c.value === 'rose_layer' ? '9' : c.value === 'purple_aurora' ? '10' : c.value === 'violet' ? '11' : '12'}-Photoroom.png`} alt={c.label} className="w-full aspect-[3/4] object-cover" />
+                      <p className="text-[10px] text-stone-500 py-1 text-center">{c.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="block text-xs text-stone-500 mb-3">새 봉투 스타일</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'white_pink_ribbon', label: '화이트 핑크리본' },
+                    { value: 'pink_ivory_ribbon', label: '핑크 아이보리리본' },
+                    { value: 'peach_gold_ribbon', label: '피치 골드리본' },
+                    { value: 'ivory_gold_ribbon', label: '아이보리 골드리본' },
+                    { value: 'cream_mini_gold', label: '크림 미니골드리본' },
+                    { value: 'cream_gold_chiffon', label: '크림 골드쉬폰리본' },
+                    { value: 'lavender_silver', label: '라벤더 실버리본' },
+                    { value: 'watercolor_twine', label: '수채화 마끈' },
+                    { value: 'aurora_cotton', label: '오로라 코튼리본' },
+                  ].map((env) => (
+                    <button
+                      key={env.value}
+                      onClick={() => updateField('envelopeStyle', env.value)}
+                      className={`rounded-lg overflow-hidden border-2 transition-all ${
+                        (wedding.envelopeStyle || 'ivory') === env.value
+                          ? 'border-stone-800 scale-105'
+                          : 'border-stone-200 hover:border-stone-400'
+                      }`}
+                    >
+                      <img src={`https://pub-b58d4a5cf82a4aebaa7badae6e00ebf0.r2.dev/envelope/closed/${{'white_pink_ribbon':'1','pink_ivory_ribbon':'2','peach_gold_ribbon':'3','ivory_gold_ribbon':'4','cream_mini_gold':'5','cream_gold_chiffon':'6','lavender_silver':'7','watercolor_twine':'8','aurora_cotton':'9'}[env.value]}-Photoroom.png`} alt={env.label} className="w-full aspect-[3/4] object-cover" />
+                      <p className="text-[10px] text-stone-500 py-1 text-center">{env.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </>)}
           </Section>
-        )}
+        </>)}
 
         {tab === 'basic' && (
           <Section title={at('kakaoShare', locale)}>
@@ -1541,18 +1635,29 @@ export default function EditWedding() {
             </div>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
-              {galleries.map((item) => (
-                <div key={item.id} className={`relative ${
-                  (wedding.galleryRatio || '1:1') === '3:4' ? 'aspect-[3/4]' :
-                  (wedding.galleryRatio || '1:1') === '4:3' ? 'aspect-[4/3]' :
-                  (wedding.galleryRatio || '1:1') === 'original' ? 'aspect-auto' :
-                  'aspect-square'
-                }`}>
+              {galleries.map((item, idx) => (
+                <div
+                  key={item.id}
+                  className={`relative ${
+                    (wedding.galleryRatio || '1:1') === '3:4' ? 'aspect-[3/4]' :
+                    (wedding.galleryRatio || '1:1') === '4:3' ? 'aspect-[4/3]' :
+                    (wedding.galleryRatio || '1:1') === 'original' ? 'aspect-auto' :
+                    'aspect-square'
+                  }`}
+                >
                   {item.mediaType === 'VIDEO' ? (
                     <video src={item.mediaUrl} className="w-full h-full object-cover rounded-lg" />
                   ) : (
                     <img src={item.mediaUrl} alt="" className="w-full h-full object-cover rounded-lg" />
                   )}
+                  <div className="absolute top-2 left-2 flex gap-1">
+                    {idx > 0 && (
+                      <button onClick={() => handleDragEnd(idx, idx - 1)} className="p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80">
+                        <ArrowLeft className="w-3 h-3" />
+                      </button>
+                    )}
+                    <span className="px-2 py-1 bg-black/60 rounded-full text-white text-[10px] font-medium">{idx + 1}</span>
+                  </div>
                   <button
                     onClick={() => handleDeleteGallery(item.id)}
                     className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70"

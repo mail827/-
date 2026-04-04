@@ -112,7 +112,7 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
       </section>
 
       {wedding.greeting && (
-        <section className="py-20 px-8">
+        <section id="greeting-section" className="py-20 px-8">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="max-w-sm mx-auto text-center">
             {wedding.greetingTitle && (
               <p className="text-[15px] font-light leading-relaxed text-black/80 mb-8 whitespace-pre-line">{wedding.greetingTitle}</p>
@@ -268,6 +268,13 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
               <Phone className="w-3 h-3" /> {wedding.venuePhone}
             </a>
           )}
+
+          {(wedding as any).mealText && (
+            <div className="mt-10 pt-8 border-t border-black/5 text-center">
+              <p className="text-[10px] tracking-[0.3em] text-black/25 mb-4">DINING</p>
+              <p className="text-[13px] font-light leading-[2] text-black/50 whitespace-pre-line">{(wedding as any).mealText}</p>
+            </div>
+          )}
         </motion.div>
       </section>
 
@@ -372,8 +379,13 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
       </section>
 
       {guestPhotoSlot}
-      <section className="py-12 px-8">
+      <section id="closing-section" className="py-12 px-8">
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="max-w-sm mx-auto">
+          {(wedding as any).closingMessage && (
+            <div className="text-center mb-12">
+              <p className="text-[13px] font-light leading-[2.2] text-black/50 whitespace-pre-line">{(wedding as any).closingMessage}</p>
+            </div>
+          )}
           <div className="flex justify-center gap-6 mb-8">
             {wedding.groomPhone && (
               <a href={`tel:${wedding.groomPhone}`} className="text-center">

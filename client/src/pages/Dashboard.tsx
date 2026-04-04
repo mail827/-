@@ -993,16 +993,16 @@ export default function Dashboard() {
                                   <button onClick={async (e) => {
                                     e.stopPropagation();
                                     try {
-                                      const res = await fetch(g.url);
-                                      const blob = await res.blob();
-                                      const file = new File([blob], 'glamour_' + (gi + 1) + '.png', { type: 'image/png' });
-                                      if (/iPhone|iPad|Android/i.test(navigator.userAgent) && navigator.canShare && navigator.canShare({ files: [file] })) {
-                                        await navigator.share({ files: [file] });
-                                      } else {
-                                        const url = URL.createObjectURL(blob);
-                                        const a = document.createElement('a'); a.href = url; a.download = file.name;
-                                        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+                                      const proxyUrl = g.url.includes('cloudinary.com') ? g.url.replace('/upload/', '/upload/fl_attachment/') : g.url;
+                                      const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+                                      if (isMobile) {
+                                        const res = await fetch(proxyUrl);
+                                        const blob = await res.blob();
+                                        const file = new File([blob], 'glamour_' + (gi + 1) + '.png', { type: blob.type || 'image/png' });
+                                        if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); return; }
                                       }
+                                      const a = document.createElement('a'); a.href = proxyUrl; a.download = 'glamour_' + (gi + 1) + '.png'; a.target = '_blank';
+                                      document.body.appendChild(a); a.click(); document.body.removeChild(a);
                                     } catch {}
                                   }} style={{ position: 'absolute', bottom: 4, right: 4, width: 24, height: 24, borderRadius: 12, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>

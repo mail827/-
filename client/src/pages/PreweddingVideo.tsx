@@ -821,19 +821,21 @@ export default function PreweddingVideo() {
                           )}
                           <button onClick={async () => {
                             try {
-                              const res = await fetch(g.url);
+                              const proxyUrl = g.url.includes('cloudinary.com')
+                                ? g.url.replace('/upload/', '/upload/fl_attachment/')
+                                : g.url;
+                              const res = await fetch(proxyUrl);
                               const blob = await res.blob();
-                              const file = new File([blob], 'glamour_' + (i + 1) + '.png', { type: 'image/png' });
-                              if (/iPhone|iPad|Android/i.test(navigator.userAgent) && navigator.canShare && navigator.canShare({ files: [file] })) {
+                              const file = new File([blob], 'glamour_' + (i + 1) + '.png', { type: blob.type || 'image/png' });
+                              const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+                              if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
                                 await navigator.share({ files: [file] });
                               } else {
                                 const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url; a.download = file.name;
-                                document.body.appendChild(a); a.click();
-                                document.body.removeChild(a); URL.revokeObjectURL(url);
+                                const a = document.createElement('a'); a.href = url; a.download = file.name;
+                                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
                               }
-                            } catch {}
+                            } catch (e) { console.error('Download error:', e); window.open(g.url, '_blank'); }
                           }} style={{ position: 'absolute', bottom: 6, right: 6, width: 28, height: 28, borderRadius: 14, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <ArrowRight size={12} color="#fff" style={{ transform: 'rotate(90deg)' }} />
                           </button>

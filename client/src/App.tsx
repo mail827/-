@@ -32,7 +32,6 @@ import AdminVideoGifts from "./pages/admin/AdminVideoGifts";
 import AdminThemeShowcase from "./pages/admin/AdminThemeShowcase";
 import AdminShowcase from "./components/admin/AdminShowcase";
 import AdminWeddingCreate from './pages/admin/AdminWeddingCreate';
-import AdminWeddingEdit from './pages/admin/AdminWeddingEdit';
 import AiReport from "./pages/admin/AiReport";
 import AdminGift from "./pages/admin/AdminGift";
 import AdminRsvpList from './pages/admin/AdminRsvpList';
@@ -164,7 +163,7 @@ export default function App() {
         <Route path="weddings" element={<AdminWeddingList />} />
         <Route path="weddings/create" element={<AdminWeddingCreate />} />
         <Route path="weddings/new" element={<AdminWeddingCreate />} />
-        <Route path="weddings/:id/edit" element={<AdminWeddingEdit />} />
+        <Route path="weddings/:id/edit" element={<EditWedding />} />
         <Route path="weddings/:id/ai-report" element={<AiReport />} />
         <Route path="gifts" element={<AdminGift />} />
         <Route path="weddings/:id/rsvp" element={<AdminRsvpList />} />

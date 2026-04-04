@@ -319,6 +319,7 @@ export default function WeddingPage() {
           brideName={weddingToUse.brideName}
           weddingDate={weddingToUse.weddingDate}
           style={weddingToUse.envelopeStyle || 'ivory'}
+          cardStyle={weddingToUse.envelopeCardStyle}
           cardText={weddingToUse.envelopeCardText}
           fontFamily={weddingToUse.fontFamily}
           cardColor={weddingToUse.envelopeCardColor}

@@ -116,7 +116,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
       </section>
 
       {wedding.greeting && (
-        <Section title="인사말" color={C}>
+        <Section id="greeting-section" title="인사말" color={C}>
           <div className="bg-white rounded-2xl p-8 shadow-sm">
             {wedding.greetingTitle && (
               <p className="text-xl text-gray-700 font-medium mb-6 text-center">{wedding.greetingTitle}</p>
@@ -143,7 +143,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
         </Section>
       )}
 
-      <Section title="예식 일시" color={C} bgColor={C_light}>
+      <Section id="calendar-section" title="예식 일시" color={C} bgColor={C_light}>
         <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
           <div className="flex items-center justify-center gap-3 text-xl text-gray-700 mb-4">
             <Calendar className="w-6 h-6" style={{ color: C }} />
@@ -172,7 +172,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
 )}
 
       {wedding.galleries && wedding.galleries.length > 0 && (
-        <Section title="갤러리" color={C}>
+        <Section id="gallery-section" title="갤러리" color={C}>
           <div className="grid grid-cols-2 gap-3">
             {wedding.galleries.slice(0, 6).map((item, index) => (
               <div 
@@ -191,7 +191,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
         </Section>
       )}
 
-      <Section title="오시는 길" color={C} bgColor={C_light}>
+      <Section id="venue-section" title="오시는 길" color={C} bgColor={C_light}>
         <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
           <KakaoMap address={wedding.venueAddress} mapAddress={(wedding as any).mapAddress} mapVenue={(wedding as any).mapVenue} locale={locale} venue={wedding.venue} latitude={wedding.venueLatitude} longitude={wedding.venueLongitude} />
           <div className="p-6 text-center">
@@ -215,7 +215,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
         </div>
       </Section>
 
-      <Section title="참석 여부" color={C}>
+      <Section id="rsvp-section" title="참석 여부" color={C}>
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           {rsvpSubmitted ? (
             <div className="text-center py-8">
@@ -247,7 +247,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
       </Section>
 
       {(wedding.groomAccount || wedding.brideAccount) && (
-        <Section title="마음 전하기" color={C} bgColor={C_light}>
+        <Section id="account-section" title="마음 전하기" color={C} bgColor={C_light}>
           <div className="space-y-4">
             {wedding.groomAccount && (
               <div className="bg-white rounded-2xl p-6 shadow-sm">
@@ -275,7 +275,7 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
         </Section>
       )}
 
-      <Section title="축하 메시지" color={C}>
+      <Section id="guestbook-section" title="축하 메시지" color={C}>
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           {guestbookSubmitted && <p className="text-center text-lg mb-4" style={{ color: C }}>메시지가 등록되었습니다</p>}
           <div className="space-y-3">
@@ -343,9 +343,9 @@ export default function SeniorSimple({ wedding, guestbooks, onRsvpSubmit, onGues
   );
 }
 
-function Section({ children, title, color, bgColor, className = '' }: { children: React.ReactNode; title?: string; color?: string; bgColor?: string; className?: string }) {
+function Section({ children, title, color, bgColor, className = '', id }: { children: React.ReactNode; title?: string; color?: string; bgColor?: string; className?: string; id?: string }) {
   return (
-    <section className={`py-10 px-6 ${className}`} style={{ backgroundColor: bgColor }}>
+    <section id={id} className={`py-10 px-6 ${className}`} style={{ backgroundColor: bgColor }}>
       <div className="max-w-md mx-auto">
         {title && <h2 className="text-2xl font-medium text-center mb-6" style={{ color: color || '#1f2937' }}>{title}</h2>}
         {children}

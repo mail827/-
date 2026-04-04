@@ -22,9 +22,10 @@ export default function VenueTabsOverride({ tabs, theme }: VenueTabsOverrideProp
     const section = document.getElementById('venue-section');
     if (!section) return false;
 
+    const inner = section.querySelector(':scope > div') || section;
     const wrapper = document.createElement('div');
     wrapper.id = 'venue-tabs-root';
-    section.appendChild(wrapper);
+    inner.appendChild(wrapper);
     setTarget(wrapper);
     done.current = true;
     return true;
