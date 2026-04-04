@@ -143,6 +143,21 @@ export default function ModernMinimal({ wedding, guestbooks, onRsvpSubmit, onGue
         </section>
       )}
 
+      {wedding.loveStoryVideo && (
+        <section className="py-16 px-8">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="max-w-sm mx-auto">
+            <p className="text-[10px] tracking-[0.4em] text-black/30 text-center mb-8">OUR STORY</p>
+            <div className="overflow-hidden">
+              {wedding.loveStoryVideo.includes("youtube") || wedding.loveStoryVideo.includes("youtu.be") ? (
+                <iframe src={wedding.loveStoryVideo.includes("youtu.be") ? `https://www.youtube.com/embed/${wedding.loveStoryVideo.split("youtu.be/")[1]?.split("?")[0]}` : `https://www.youtube.com/embed/${wedding.loveStoryVideo.split("watch?v=")[1]?.split("&")[0]}`} className="w-full aspect-video" allowFullScreen />
+              ) : (
+                <video src={wedding.loveStoryVideo} controls playsInline className="w-full aspect-video" style={{ background: '#000' }} />
+              )}
+            </div>
+          </motion.div>
+        </section>
+      )}
+
       {galleryImages.length > 0 && (
         <section id="gallery-section" className="py-16">
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="px-4">

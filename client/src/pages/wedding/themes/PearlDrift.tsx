@@ -144,6 +144,20 @@ export default function PearlDrift({ wedding, guestbooks, onRsvpSubmit, onGuestb
         </section>
       )}
 
+      {wedding.loveStoryVideo && (
+        <section className="py-24 px-8">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="max-w-sm mx-auto text-center">
+            <div className="overflow-hidden" style={{ borderRadius: 8 }}>
+              {wedding.loveStoryVideo.includes("youtube") || wedding.loveStoryVideo.includes("youtu.be") ? (
+                <iframe src={wedding.loveStoryVideo.includes("youtu.be") ? `https://www.youtube.com/embed/${wedding.loveStoryVideo.split("youtu.be/")[1]?.split("?")[0]}` : `https://www.youtube.com/embed/${wedding.loveStoryVideo.split("watch?v=")[1]?.split("&")[0]}`} className="w-full aspect-video" allowFullScreen />
+              ) : (
+                <video src={wedding.loveStoryVideo} controls playsInline className="w-full aspect-video" style={{ background: '#000' }} />
+              )}
+            </div>
+          </motion.div>
+        </section>
+      )}
+
       {galleries.length > 0 && (
         <section id="gallery-section" className="py-32 px-4">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn}>
