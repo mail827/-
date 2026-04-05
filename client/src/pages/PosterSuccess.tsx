@@ -18,7 +18,7 @@ export default function PosterSuccess() {
     if (!orderId || !paymentKey || !amount) { setPhase('error'); setError('\uacb0\uc81c \uc815\ubcf4\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.'); return; }
     (async () => {
       try {
-        const confirmRes = await fetch(`${API}/api/poster/confirm`, {
+        const confirmRes = await fetch(`${API}/poster/confirm`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) }),
@@ -26,7 +26,7 @@ export default function PosterSuccess() {
         const confirmData = await confirmRes.json();
         if (!confirmRes.ok) throw new Error(confirmData.error || '\uacb0\uc81c \uc2b9\uc778 \uc2e4\ud328');
         setPhase('generating');
-        await fetch(`${API}/api/poster/generate`, {
+        await fetch(`${API}/poster/generate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ orderId }),
@@ -35,7 +35,7 @@ export default function PosterSuccess() {
         const poll = setInterval(async () => {
           attempts++;
           try {
-            const statusRes = await fetch(`${API}/api/poster/status/${orderId}`);
+            const statusRes = await fetch(`${API}/poster/status/${orderId}`);
             const statusData = await statusRes.json();
             if (statusData.status === 'DONE') {
               clearInterval(poll);

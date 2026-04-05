@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -34,13 +35,13 @@ const LAYOUT_OPTIONS: { id: Layout; label: string; desc: string }[] = [
 ];
 
 const FONT_OPTIONS = [
-  { id: 'script_elegant', label: 'Great Vibes', sample: 'Eternal Tides' },
-  { id: 'script_sacramento', label: 'Sacramento', sample: 'Eternal Tides' },
-  { id: 'script_pinyon', label: 'Pinyon Script', sample: 'Eternal Tides' },
-  { id: 'serif_classic', label: 'Playfair Display', sample: 'Eternal Tides' },
-  { id: 'sans_modern', label: 'Montserrat', sample: 'Eternal Tides' },
-  { id: 'calligraphy_kr', label: '마포꽃섬', sample: '영원한 물결' },
-  { id: 'museum_classic', label: '국립박물관 클래식', sample: '영원한 물결' },
+  { id: 'script_elegant', label: 'Great Vibes', sample: 'Eternal Tides', family: "'Great Vibes', cursive" },
+  { id: 'script_sacramento', label: 'Sacramento', sample: 'Eternal Tides', family: "'Sacramento', cursive" },
+  { id: 'script_pinyon', label: 'Pinyon Script', sample: 'Eternal Tides', family: "'Pinyon Script', cursive" },
+  { id: 'serif_classic', label: 'Playfair Display', sample: 'Eternal Tides', family: "'Playfair Display', serif" },
+  { id: 'sans_modern', label: 'Montserrat', sample: 'Eternal Tides', family: "'Montserrat', sans-serif" },
+  { id: 'calligraphy_kr', label: '마포꽃섬', family: "'MapoFlowerIsland', serif", sample: '영원한 물결' },
+  { id: 'museum_classic', label: '국립박물관 클래식', family: "'MuseumClassic', serif", sample: '영원한 물결' },
 ];
 
 export default function WeddingPoster() {
@@ -70,7 +71,7 @@ export default function WeddingPoster() {
 
   const loadConcepts = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/api/poster/concepts`);
+      const res = await fetch(`${API}/poster/concepts`);
       const data = await res.json();
       setConcepts(data);
     } catch (e) {}
@@ -95,7 +96,7 @@ export default function WeddingPoster() {
     if (!track) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API}/api/poster/order`, {
+      const res = await fetch(`${API}/poster/order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -113,7 +114,7 @@ export default function WeddingPoster() {
         const formData = new FormData();
         formData.append('image', photoFile);
         formData.append('orderId', data.orderId);
-        await fetch(`${API}/api/poster/upload`, { method: 'POST', body: formData });
+        await fetch(`${API}/poster/upload`, { method: 'POST', body: formData });
       }
 
       const TossPayments = await new Promise<any>((resolve, reject) => {
@@ -142,7 +143,16 @@ export default function WeddingPoster() {
 
   return (
     <div style={{ minHeight: '100dvh', background: '#FAFAF8' }}>
+      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Sacramento&family=Pinyon+Script&family=Playfair+Display:wght@400;600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet" />
+      <style>{`
+        @font-face { font-family: 'MapoFlowerIsland'; src: url('/fonts/MapoFlowerIsland.ttf') format('truetype'); }
+        @font-face { font-family: 'MuseumClassic'; src: url('/fonts/국립박물관문화재단클래식M.ttf') format('truetype'); }
+      `}</style>
       <div style={{ maxWidth: 520, margin: '0 auto', padding: '60px 20px 120px' }}>
+        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, color: '#A8A8A0', textDecoration: 'none', marginBottom: 24 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          돌아가기
+        </Link>
 
         <header style={{ textAlign: 'center', marginBottom: 48 }}>
           <p style={{ fontSize: 11, letterSpacing: 4, color: '#A8A8A0', textTransform: 'uppercase', marginBottom: 8 }}>Wedding Engine</p>

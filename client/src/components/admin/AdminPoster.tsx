@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Image, RefreshCw, Download, Eye, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL;
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || '';
 
 interface PosterOrder {
   id: string;
@@ -44,7 +44,7 @@ export default function AdminPoster() {
     try {
       const q = new URLSearchParams({ page: String(page), limit: String(limit) });
       if (statusFilter) q.set('status', statusFilter);
-      const res = await fetch(`${API}/admin/poster/orders?${q}`, { headers });
+      const res = await fetch(`${API_BASE}/admin/poster/orders?${q}`, { headers });
       const data = await res.json();
       setOrders(data.orders || data);
       setTotal(data.total || data.length);
@@ -53,14 +53,14 @@ export default function AdminPoster() {
 
   const loadStats = async () => {
     try {
-      const res = await fetch(`${API}/admin/poster/stats`, { headers });
+      const res = await fetch(`${API_BASE}/admin/poster/stats`, { headers });
       setStats(await res.json());
     } catch {}
   };
 
   const retry = async (orderId: string) => {
     try {
-      await fetch(`${API}/admin/poster/retry`, {
+      await fetch(`${API_BASE}/admin/poster/retry`, {
         method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId }),
       });
@@ -69,11 +69,11 @@ export default function AdminPoster() {
   };
 
   const loadGifts = async () => {
-    try { const res = await fetch(`${API}/admin/poster/gifts`, { headers }); setGifts(await res.json()); } catch {}
+    try { const res = await fetch(`${API_BASE}/admin/poster/gifts`, { headers }); setGifts(await res.json()); } catch {}
   };
   const createGift = async () => {
     try {
-      await fetch(`${API}/admin/poster/gift`, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ track: giftTrack, toEmail: giftEmail || null, toPhone: giftPhone || null, message: giftMessage || null, isFree: true }) });
+      await fetch(`${API_BASE}/admin/poster/gift`, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ track: giftTrack, toEmail: giftEmail || null, toPhone: giftPhone || null, message: giftMessage || null, isFree: true }) });
       setShowGiftModal(false); setGiftEmail(''); setGiftPhone(''); setGiftMessage(''); loadGifts();
     } catch {}
   };
