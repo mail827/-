@@ -58,4 +58,64 @@ router.patch('/:id/retry', async (req: Request, res: Response) => {
   }
 });
 
+
+router.post('/gift', async (req: Request, res: Response) => {
+  try {
+    const { track, toEmail, toPhone, message, isFree } = req.body;
+    const code = 'PG-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 6).toUpperCase();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 90);
+
+    const gift = await prisma.posterGift.create({
+      data: {
+        code,
+        track: track || 'PHOTO',
+        fromAdmin: isFree !== false,
+        toEmail: toEmail || null,
+        toPhone: toPhone || null,
+        message: message || null,
+        expiresAt,
+      },
+    });
+
+    res.json({ success: true, gift });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get('/gifts', async (_req: Request, res: Response) => {
+  try {
+    const gifts = await prisma.posterGift.findMany({ orderBy: { createdAt: 'desc' }, take: 100 });
+    res.json(gifts);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get('/stats', async (_req: Request, res: Response) => {
+  try {
+    const [total, paid, done, failed] = await Promise.all([
+      prisma.posterOrder.count(),
+      prisma.posterOrder.count({ where: { status: 'PAID' } }),
+      prisma.posterOrder.count({ where: { status: 'DONE' } }),
+      prisma.posterOrder.count({ where: { status: 'FAILED' } }),
+    ]);
+    const agg = await prisma.posterOrder.aggregate({ _sum: { amount: true }, where: { status: { in: ['PAID', 'DONE', 'GENERATING', 'COMPOSITING'] } } });
+    res.json({ total, paid, done, failed, revenue: agg._sum.amount || 0 });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/retry', async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.body;
+    await prisma.posterOrder.update({ where: { orderId }, data: { status: 'PAID' as const } });
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;

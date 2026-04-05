@@ -853,3 +853,18 @@ model PosterOrder {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 }
+
+model PosterGift {
+  id         String    @id @default(cuid())
+  code       String    @unique
+  track      PosterTrack
+  fromAdmin  Boolean   @default(false)
+  fromUserId String?
+  toEmail    String?
+  toPhone    String?
+  message    String?
+  isRedeemed Boolean   @default(false)
+  redeemedAt DateTime?
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+}

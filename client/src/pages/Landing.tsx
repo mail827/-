@@ -1120,6 +1120,42 @@ export default function Landing() {
           </div>
         </section>
 
+        <section style={{ padding: "100px 0", borderTop: "1px solid #E8E5E0" }}>
+          <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 48px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+              <a href="/prewedding-video" style={{ textDecoration: "none", padding: "48px 36px", borderRadius: 16, border: "1px solid #E8E5E0", background: "#fff", display: "flex", flexDirection: "column", gap: 16, transition: "all 0.3s" }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: "#F5F4F1", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="1.5"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                </div>
+                <div>
+                  <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 6 }}>WEDDING CINEMA</p>
+                  <p className="serif" style={{ fontSize: 22, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>{landingLocale === 'ko' ? '\uc6e8\ub529\uc2dc\ub124\ub9c8' : 'Wedding Cinema'}</p>
+                  <p style={{ fontSize: 13, color: "#999", lineHeight: 1.6 }}>{landingLocale === 'ko' ? 'AI\uac00 \ub9cc\ub4dc\ub294 \uc2dc\ub124\ub9c8\ud2f1 \uc6e8\ub529 \uc601\uc0c1.\n\uc0ac\uc9c4\ub9cc \uc62c\ub9ac\uba74 \uc790\ub9c9\uacfc \uc74c\uc545\uc774 \uc785\ud600\uc9c4 1\ubd84 \uc601\uc0c1\uc774 \uc644\uc131\ub429\ub2c8\ub2e4.' : 'Cinematic wedding video powered by AI.\nJust upload photos to get a 1-min film with subtitles and music.'}</p>
+                </div>
+                <div style={{ display: "flex", gap: 12, marginTop: "auto" }}>
+                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Photo 29,000\uc6d0</span>
+                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Selfie 39,000\uc6d0</span>
+                </div>
+              </a>
+
+              <a href="/poster" style={{ textDecoration: "none", padding: "48px 36px", borderRadius: 16, border: "1px solid #E8E5E0", background: "#fff", display: "flex", flexDirection: "column", gap: 16, transition: "all 0.3s" }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: "#F5F4F1", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
+                </div>
+                <div>
+                  <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 6 }}>WEDDING POSTER</p>
+                  <p className="serif" style={{ fontSize: 22, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>{landingLocale === 'ko' ? '\uc6e8\ub529\ud3ec\uc2a4\ud130' : 'Wedding Poster'}</p>
+                  <p style={{ fontSize: 13, color: "#999", lineHeight: 1.6 }}>{landingLocale === 'ko' ? '\ub2f9\uc2e0\uc758 \uc6e8\ub529 \uc0ac\uc9c4\uc744 \uc601\ud654 \ud3ec\uc2a4\ud130\ucc98\ub7fc.\n\uc0ac\uacc4 12\uc885 \ucee8\uc149 + 7\uc885 \ud3f0\ud2b8 \ud0c0\uc774\ud3ec\uadf8\ub798\ud53c.' : 'Turn your wedding photos into cinematic posters.\n12 seasonal concepts + 7 typography fonts.'}</p>
+                </div>
+                <div style={{ display: "flex", gap: 12, marginTop: "auto" }}>
+                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Photo 3,000\uc6d0</span>
+                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>AI 5,000\uc6d0</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </section>
+
         <section style={{ padding: "80px 48px", background: "#FAF9F7" }}>
           <div style={{ maxWidth: 900, margin: "0 auto" }}>
             <div style={{ textAlign: "center", marginBottom: 36 }}>

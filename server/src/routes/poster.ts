@@ -60,7 +60,33 @@ router.post('/order', async (req: Request, res: Response) => {
     }
 
     const orderId = `poster_${Date.now().toString(36) + Math.random().toString(36).slice(2, 10).replace(/-/g, '').slice(0, 16)}`;
-    const amount = POSTER_PRICES[track as keyof typeof POSTER_PRICES];
+    let amount: number = POSTER_PRICES[track as keyof typeof POSTER_PRICES];
+    let validCoupon: string | null = null;
+
+    if (couponCode) {
+      const coupon = await prisma.coupon.findUnique({ where: { code: couponCode.toUpperCase() } });
+      if (coupon && coupon.isActive && (!coupon.expiresAt || new Date() < coupon.expiresAt) && (!coupon.maxUses || coupon.usedCount < coupon.maxUses) && (coupon.category === 'ALL' || coupon.category === 'POSTER')) {
+        if (coupon.discountType === 'PERCENT') {
+          amount = Math.round(amount * (1 - coupon.discountValue / 100));
+        } else {
+          amount = Math.max(0, amount - coupon.discountValue);
+        }
+        validCoupon = coupon.code;
+        await prisma.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+      }
+    }
+
+    const { giftCode, isAdmin } = req.body;
+    if (giftCode) {
+      const gift = await prisma.posterGift.findUnique({ where: { code: giftCode } });
+      if (gift && !gift.isRedeemed && new Date() < gift.expiresAt) {
+        amount = 0;
+        await prisma.posterGift.update({ where: { id: gift.id }, data: { isRedeemed: true, redeemedAt: new Date() } });
+      }
+    }
+    if (isAdmin === true) {
+      amount = 0;
+    }
 
     const order = await prisma.posterOrder.create({
       data: {
@@ -78,6 +104,7 @@ router.post('/order', async (req: Request, res: Response) => {
       },
     });
 
+    if (validCoupon) { await prisma.coupon.update({ where: { code: validCoupon }, data: {} }).catch(() => {}); }
     res.json({ orderId: order.orderId, amount: order.amount, id: order.id });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
