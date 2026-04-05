@@ -110,7 +110,7 @@ export default function AdminPoster() {
                   <tr key={g.id} style={{ borderBottom: '1px solid #F0EEEB' }}>
                     <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontSize: 12, fontWeight: 600 }}>{g.code}</td>
                     <td style={{ padding: '10px 12px' }}>{g.track}</td>
-                    <td style={{ padding: '10px 12px' }}>{g.toEmail || '-'}</td>
+                    <td style={{ padding: '10px 12px' }}>{g.toEmail || g.toPhone || '-'}</td>
                     <td style={{ padding: '10px 12px', fontSize: 12, color: '#999' }}>{g.message || '-'}</td>
                     <td style={{ padding: '10px 12px' }}><span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 500, color: '#fff', background: g.isRedeemed ? '#6B9E78' : '#A8A8A0' }}>{g.isRedeemed ? '사용됨' : '미사용'}</span></td>
                     <td style={{ padding: '10px 12px', fontSize: 11, color: '#999' }}>{new Date(g.expiresAt).toLocaleDateString('ko')}</td>

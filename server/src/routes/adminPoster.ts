@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
@@ -78,6 +79,16 @@ router.post('/gift', async (req: Request, res: Response) => {
       },
     });
 
+    if (gift.toPhone) {
+      import('../utils/solapi.js').then(({ sendCustomNotification }) => {
+        sendCustomNotification({
+          to: gift.toPhone!,
+          groomName: '',
+          brideName: '',
+          message: `[\uccad\ucca9\uc7a5 \uc791\uc5c5\uc2e4] \uc6e8\ub529\ud3ec\uc2a4\ud130 \uc120\ubb3c\uc774 \ub3c4\ucc29\ud588\uc5b4\uc694!\n\ucf54\ub4dc: ${gift.code}\nweddingshop.cloud/poster \uc5d0\uc11c \uc0ac\uc6a9\ud574\uc8fc\uc138\uc694.`,
+        }).catch(() => {});
+      }).catch(() => {});
+    }
     res.json({ success: true, gift });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
