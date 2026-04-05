@@ -798,3 +798,58 @@ model TeamExpense {
   @@index([date])
   @@index([category])
 }
+enum PosterTrack {
+  PHOTO
+  AI
+}
+
+enum PosterStatus {
+  PENDING
+  PAID
+  GENERATING
+  COMPOSITING
+  DONE
+  FAILED
+}
+
+enum PosterLayout {
+  CLASSIC
+  MODERN
+  BOLD
+  MINIMAL
+}
+
+model PosterOrder {
+  id             String        @id @default(cuid())
+  track          PosterTrack
+  status         PosterStatus  @default(PENDING)
+  amount         Int
+  paymentKey     String?
+  orderId        String        @unique
+  customerEmail  String?
+  customerPhone  String?
+
+  groomNameKr    String?
+  groomNameEn    String?
+  brideNameKr    String?
+  brideNameEn    String?
+  titleText      String?
+  tagline        String?
+  dateText       String?
+  venueText      String?
+
+  fontId         String        @default("script_elegant")
+  layout         PosterLayout  @default(CLASSIC)
+  conceptId      String?
+
+  sourceImageUrl String?
+  faceImageUrls  String[]
+  aiGeneratedUrl String?
+  finalPosterUrl String?
+  thumbnailUrl   String?
+
+  couponCode     String?
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}

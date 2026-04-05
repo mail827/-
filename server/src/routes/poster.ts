@@ -1,0 +1,284 @@
+import { Router, Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+
+import multer from 'multer';
+import { generatePosterOverlay, generateThumbnail, PosterTextInput, PosterConfig } from '../services/posterOverlay.js';
+import { getPosterConcept, POSTER_CONCEPTS } from '../data/posterPrompts.js';
+import { uploadToR2, getR2PublicUrl } from '../utils/r2.js';
+
+const router = Router();
+const prisma = new PrismaClient();
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
+
+const POSTER_PRICES = { PHOTO: 3000, AI: 5000 } as const;
+
+router.get('/concepts', (_req: Request, res: Response) => {
+  const grouped = {
+    spring: POSTER_CONCEPTS.filter((c) => c.season === 'spring').map((c) => ({ id: c.id, label: c.label, sub: c.sub })),
+    summer: POSTER_CONCEPTS.filter((c) => c.season === 'summer').map((c) => ({ id: c.id, label: c.label, sub: c.sub })),
+    autumn: POSTER_CONCEPTS.filter((c) => c.season === 'autumn').map((c) => ({ id: c.id, label: c.label, sub: c.sub })),
+    winter: POSTER_CONCEPTS.filter((c) => c.season === 'winter').map((c) => ({ id: c.id, label: c.label, sub: c.sub })),
+  };
+  res.json(grouped);
+});
+
+router.get('/fonts', (_req: Request, res: Response) => {
+  res.json([
+    { id: 'script_elegant', label: 'Elegant Script', preview: 'Aa' },
+    { id: 'serif_classic', label: 'Classic Serif', preview: 'Aa' },
+    { id: 'sans_modern', label: 'Modern Sans', preview: 'Aa' },
+    { id: 'calligraphy_kr', label: '캘리그라피', preview: '가' },
+  ]);
+});
+
+router.get('/layouts', (_req: Request, res: Response) => {
+  res.json([
+    { id: 'CLASSIC', label: 'Classic', desc: '상단 이름 · 중앙 타이틀 · 하단 정보' },
+    { id: 'MODERN', label: 'Modern', desc: '좌측 정렬 미니멀' },
+    { id: 'BOLD', label: 'Bold', desc: '대형 타이틀 중앙' },
+    { id: 'MINIMAL', label: 'Minimal', desc: '하단 한 줄 집약' },
+  ]);
+});
+
+router.post('/order', async (req: Request, res: Response) => {
+  try {
+    const {
+      track,
+      groomNameKr, groomNameEn,
+      brideNameKr, brideNameEn,
+      titleText, tagline, dateText, venueText,
+      fontId, layout, conceptId,
+      customerEmail, customerPhone,
+      couponCode,
+    } = req.body;
+
+    if (!track || !['PHOTO', 'AI'].includes(track)) {
+      return res.status(400).json({ error: 'Invalid track' });
+    }
+    if (track === 'AI' && !conceptId) {
+      return res.status(400).json({ error: 'AI track requires conceptId' });
+    }
+
+    const orderId = `poster_${Date.now().toString(36) + Math.random().toString(36).slice(2, 10).replace(/-/g, '').slice(0, 16)}`;
+    const amount = POSTER_PRICES[track as keyof typeof POSTER_PRICES];
+
+    const order = await prisma.posterOrder.create({
+      data: {
+        orderId,
+        track,
+        amount,
+        groomNameKr, groomNameEn,
+        brideNameKr, brideNameEn,
+        titleText, tagline, dateText, venueText,
+        fontId: fontId || 'script_elegant',
+        layout: layout || 'CLASSIC',
+        conceptId,
+        customerEmail, customerPhone,
+        couponCode,
+      },
+    });
+
+    res.json({ orderId: order.orderId, amount: order.amount, id: order.id });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/payment/confirm', async (req: Request, res: Response) => {
+  try {
+    const { orderId, paymentKey, amount } = req.body;
+
+    const order = await prisma.posterOrder.findUnique({ where: { orderId } });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (order.amount !== amount) return res.status(400).json({ error: 'Amount mismatch' });
+
+    const tossRes = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${Buffer.from(process.env.TOSS_SECRET_KEY + ':').toString('base64')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ orderId, paymentKey, amount }),
+    });
+
+    if (!tossRes.ok) {
+      const err = await tossRes.json();
+      return res.status(400).json({ error: err.message || 'Payment failed' });
+    }
+
+    await prisma.posterOrder.update({
+      where: { orderId },
+      data: { paymentKey, status: 'PAID' },
+    });
+
+    res.json({ success: true, orderId });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/upload', upload.single('image'), async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.body;
+    if (!req.file) return res.status(400).json({ error: 'No file' });
+
+    const order = await prisma.posterOrder.findUnique({ where: { orderId } });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (order.track !== 'PHOTO') return res.status(400).json({ error: 'Upload only for PHOTO track' });
+
+    const key = `posters/${order.id}/source.jpg`;
+    await uploadToR2(req.file.buffer, key, 'image/jpeg');
+    const url = getR2PublicUrl(key);
+
+    await prisma.posterOrder.update({
+      where: { orderId },
+      data: { sourceImageUrl: url },
+    });
+
+    res.json({ success: true, url });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/generate', async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.body;
+    const order = await prisma.posterOrder.findUnique({ where: { orderId } });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (order.status !== 'PAID') return res.status(400).json({ error: 'Order not paid' });
+
+    await prisma.posterOrder.update({ where: { orderId }, data: { status: 'COMPOSITING' } });
+
+    let baseImageBuffer: Buffer;
+
+    if (order.track === 'PHOTO') {
+      if (!order.sourceImageUrl) return res.status(400).json({ error: 'No source image' });
+      const imgRes = await fetch(order.sourceImageUrl);
+      baseImageBuffer = Buffer.from(await imgRes.arrayBuffer());
+    } else {
+      await prisma.posterOrder.update({ where: { orderId }, data: { status: 'GENERATING' } });
+      const concept = getPosterConcept(order.conceptId!);
+      if (!concept) return res.status(400).json({ error: 'Invalid concept' });
+
+      const falRes = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Key ${process.env.FAL_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: concept.posterPrompt,
+          image_url: order.faceImageUrls[0],
+          aspect_ratio: '3:4',
+        }),
+      });
+
+      if (!falRes.ok) {
+        await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' } });
+        return res.status(500).json({ error: 'AI generation failed' });
+      }
+
+      const falData = await falRes.json();
+      const requestId = falData.request_id;
+
+      let aiImageUrl = '';
+      let attempts = 0;
+      while (attempts < 60) {
+        await new Promise((r) => setTimeout(r, 3000));
+        const statusRes = await fetch(`https://queue.fal.run/fal-ai/nano-banana-2/edit/requests/${requestId}/status`, {
+          headers: { 'Authorization': `Key ${process.env.FAL_KEY}` },
+        });
+        const statusData = await statusRes.json();
+        if (statusData.status === 'COMPLETED') {
+          const resultRes = await fetch(`https://queue.fal.run/fal-ai/nano-banana-2/edit/requests/${requestId}`, {
+            headers: { 'Authorization': `Key ${process.env.FAL_KEY}` },
+          });
+          const resultData = await resultRes.json();
+          aiImageUrl = resultData.images?.[0]?.url || '';
+          break;
+        }
+        if (statusData.status === 'FAILED') {
+          await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' } });
+          return res.status(500).json({ error: 'AI generation failed' });
+        }
+        attempts++;
+      }
+
+      if (!aiImageUrl) {
+        await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' } });
+        return res.status(500).json({ error: 'AI generation timeout' });
+      }
+
+      const aiKey = `posters/${order.id}/ai_generated.jpg`;
+      const aiImgRes = await fetch(aiImageUrl);
+      const aiBuffer = Buffer.from(await aiImgRes.arrayBuffer());
+      await uploadToR2(aiBuffer, aiKey, 'image/jpeg');
+      await prisma.posterOrder.update({ where: { orderId }, data: { aiGeneratedUrl: getR2PublicUrl(aiKey), status: 'COMPOSITING' } });
+      baseImageBuffer = aiBuffer;
+    }
+
+    const textInput: PosterTextInput = {
+      groomName: order.groomNameEn || order.groomNameKr || '',
+      brideName: order.brideNameEn || order.brideNameKr || '',
+      titleText: order.titleText || undefined,
+      tagline: order.tagline || undefined,
+      dateText: order.dateText || undefined,
+      venueText: order.venueText || undefined,
+      nameLanguage: order.groomNameEn ? 'en' : 'kr',
+    };
+
+    const posterConfig: PosterConfig = {
+      fontId: order.fontId,
+      layout: order.layout as any,
+    };
+
+    const posterBuffer = await generatePosterOverlay(baseImageBuffer, textInput, posterConfig);
+    const thumbBuffer = await generateThumbnail(posterBuffer);
+
+    const posterKey = `posters/${order.id}/final.jpg`;
+    const thumbKey = `posters/${order.id}/thumb.jpg`;
+    await uploadToR2(posterBuffer, posterKey, 'image/jpeg');
+    await uploadToR2(thumbBuffer, thumbKey, 'image/jpeg');
+
+    await prisma.posterOrder.update({
+      where: { orderId },
+      data: {
+        finalPosterUrl: getR2PublicUrl(posterKey),
+        thumbnailUrl: getR2PublicUrl(thumbKey),
+        status: 'DONE',
+      },
+    });
+
+    res.json({ success: true, posterUrl: getR2PublicUrl(posterKey), thumbnailUrl: getR2PublicUrl(thumbKey) });
+  } catch (e: any) {
+    await prisma.posterOrder.update({ where: { orderId: req.body.orderId }, data: { status: 'FAILED' } }).catch(() => {});
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get('/status/:orderId', async (req: Request, res: Response) => {
+  try {
+    const order = await prisma.posterOrder.findUnique({ where: { orderId: req.params.orderId } });
+    if (!order) return res.status(404).json({ error: 'Not found' });
+    res.json({
+      status: order.status,
+      posterUrl: order.finalPosterUrl,
+      thumbnailUrl: order.thumbnailUrl,
+    });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get('/download/:orderId', async (req: Request, res: Response) => {
+  try {
+    const order = await prisma.posterOrder.findUnique({ where: { orderId: req.params.orderId } });
+    if (!order || !order.finalPosterUrl) return res.status(404).json({ error: 'Not found' });
+    res.json({ url: order.finalPosterUrl });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+export default router;

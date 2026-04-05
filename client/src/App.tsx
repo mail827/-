@@ -67,6 +67,7 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import BoothCreditSuccess from './pages/BoothCreditSuccess';
 import AdminLogin from './pages/AdminLogin';
 import PairAccept from './pages/PairAccept';
+import WeddingPoster from "./pages/WeddingPoster";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token');
@@ -112,6 +113,9 @@ export default function App() {
       <Route path="/prewedding-video/gift" element={<PreweddingVideoGift />} />
       <Route path="/prewedding-video/gift/callback" element={<PreweddingVideoGiftCallback />} />
       <Route path="/ai-snap/gift/callback" element={<AiSnapGiftCallback />} />
+      <Route path="/poster" element={<WeddingPoster />} />
+      <Route path="/poster/success" element={<WeddingPoster />} />
+      <Route path="/poster/fail" element={<WeddingPoster />} />
       <Route path="/oauth/callback" element={<OAuthCallback />} />
       <Route path="/w/:slug" element={<WeddingPage />} />
         <Route path="/w/:slug/rsvp" element={<RsvpCheck />} />
