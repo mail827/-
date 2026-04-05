@@ -68,6 +68,9 @@ import BoothCreditSuccess from './pages/BoothCreditSuccess';
 import AdminLogin from './pages/AdminLogin';
 import PairAccept from './pages/PairAccept';
 import WeddingPoster from "./pages/WeddingPoster";
+import PosterSuccess from "./pages/PosterSuccess";
+import AdminPoster from "./components/admin/AdminPoster";
+import PosterFail from "./pages/PosterFail";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token');
@@ -114,8 +117,8 @@ export default function App() {
       <Route path="/prewedding-video/gift/callback" element={<PreweddingVideoGiftCallback />} />
       <Route path="/ai-snap/gift/callback" element={<AiSnapGiftCallback />} />
       <Route path="/poster" element={<WeddingPoster />} />
-      <Route path="/poster/success" element={<WeddingPoster />} />
-      <Route path="/poster/fail" element={<WeddingPoster />} />
+      <Route path="/poster/success" element={<PosterSuccess />} />
+      <Route path="/poster/fail" element={<PosterFail />} />
       <Route path="/oauth/callback" element={<OAuthCallback />} />
       <Route path="/w/:slug" element={<WeddingPage />} />
         <Route path="/w/:slug/rsvp" element={<RsvpCheck />} />
@@ -163,7 +166,8 @@ export default function App() {
               <Route path="bg-music" element={<AdminBgMusic />} />
         <Route path="ai-snap" element={<AdminAiSnap />} />
             <Route path="snap-gift" element={<AdminSnapGift />} />
-        <Route path="snap-samples" element={<AdminSnapSample />} />
+        <Route path="poster" element={<AdminPoster />} />
+            <Route path="snap-samples" element={<AdminSnapSample />} />
         <Route path="weddings" element={<AdminWeddingList />} />
         <Route path="weddings/create" element={<AdminWeddingCreate />} />
         <Route path="weddings/new" element={<AdminWeddingCreate />} />

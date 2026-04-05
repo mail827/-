@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Film, Music, Sparkles, Image, Eye, ArrowRightLeft, PieChart, Clock, Globe, ClipboardCheck } from 'lucide-react';
+import { LayoutDashboard, FileHeart, LogOut, Users, CreditCard, MessageSquare, FileText, Gift, Star, Menu, X, Package, Play, Palette, Ticket, TrendingUp, Film, Music, Sparkles, Image, Eye, ArrowRightLeft, PieChart, Clock, Globe, ClipboardCheck, Frame } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const menuGroups = [
@@ -63,6 +63,12 @@ const menuGroups = [
       { path: '/admin/ai-snap', icon: Sparkles, label: 'AI 웨딩스냅' },
       { path: '/admin/snap-gift', icon: Gift, label: 'AI스냅 선물' },
       { path: '/admin/snap-samples', icon: Image, label: 'AI스냅 샘플' },
+    ],
+  },
+  {
+    label: 'POSTER',
+    items: [
+      { path: '/admin/poster', icon: Frame, label: '웨딩포스터' },
     ],
   },
 ];

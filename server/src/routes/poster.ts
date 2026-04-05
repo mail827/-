@@ -157,7 +157,7 @@ router.post('/generate', async (req: Request, res: Response) => {
       const imgRes = await fetch(order.sourceImageUrl);
       baseImageBuffer = Buffer.from(await imgRes.arrayBuffer());
     } else {
-      await prisma.posterOrder.update({ where: { orderId }, data: { status: 'GENERATING' } });
+      await prisma.posterOrder.update({ where: { orderId }, data: { status: 'GENERATING' as const } });
       const concept = getPosterConcept(order.conceptId!);
       if (!concept) return res.status(400).json({ error: 'Invalid concept' });
 
@@ -175,7 +175,7 @@ router.post('/generate', async (req: Request, res: Response) => {
       });
 
       if (!falRes.ok) {
-        await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' } });
+        await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' as const } });
         return res.status(500).json({ error: 'AI generation failed' });
       }
 
@@ -199,14 +199,14 @@ router.post('/generate', async (req: Request, res: Response) => {
           break;
         }
         if (statusData.status === 'FAILED') {
-          await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' } });
+          await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' as const } });
           return res.status(500).json({ error: 'AI generation failed' });
         }
         attempts++;
       }
 
       if (!aiImageUrl) {
-        await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' } });
+        await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' as const } });
         return res.status(500).json({ error: 'AI generation timeout' });
       }
 
@@ -225,7 +225,7 @@ router.post('/generate', async (req: Request, res: Response) => {
       tagline: order.tagline || undefined,
       dateText: order.dateText || undefined,
       venueText: order.venueText || undefined,
-      nameLanguage: order.groomNameEn ? 'en' : 'kr',
+      nameLanguage: (order.groomNameEn ? 'en' : 'kr') as 'en' | 'kr',
     };
 
     const posterConfig: PosterConfig = {
@@ -252,7 +252,7 @@ router.post('/generate', async (req: Request, res: Response) => {
 
     res.json({ success: true, posterUrl: getR2PublicUrl(posterKey), thumbnailUrl: getR2PublicUrl(thumbKey) });
   } catch (e: any) {
-    await prisma.posterOrder.update({ where: { orderId: req.body.orderId }, data: { status: 'FAILED' } }).catch(() => {});
+    await prisma.posterOrder.update({ where: { orderId: req.body.orderId }, data: { status: 'FAILED' as const } }).catch(() => {});
     res.status(500).json({ error: e.message });
   }
 });
@@ -276,6 +276,131 @@ router.get('/download/:orderId', async (req: Request, res: Response) => {
     const order = await prisma.posterOrder.findUnique({ where: { orderId: req.params.orderId } });
     if (!order || !order.finalPosterUrl) return res.status(404).json({ error: 'Not found' });
     res.json({ url: order.finalPosterUrl });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+router.post('/confirm', async (req: Request, res: Response) => {
+  try {
+    const { paymentKey, orderId, amount } = req.body;
+    if (!paymentKey || !orderId || !amount) return res.status(400).json({ error: 'Missing params' });
+
+    const order = await prisma.posterOrder.findUnique({ where: { orderId } });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (order.status !== 'PENDING') return res.json({ success: true, order });
+
+    const tossRes = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Basic ' + Buffer.from(process.env.TOSS_SECRET_KEY + ':').toString('base64'),
+      },
+      body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) }),
+    });
+
+    if (!tossRes.ok) {
+      const err = await tossRes.json();
+      return res.status(400).json({ error: err.message || 'Payment failed' });
+    }
+
+    const updated = await prisma.posterOrder.update({
+      where: { orderId },
+      data: { status: 'PAID' as const, paymentKey },
+    });
+
+    res.json({ success: true, order: updated });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/generate', async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.body;
+    if (!orderId) return res.status(400).json({ error: 'orderId required' });
+
+    const order = await prisma.posterOrder.findUnique({ where: { orderId } });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (order.status !== 'PAID') return res.status(400).json({ error: 'Not paid' });
+
+    await prisma.posterOrder.update({ where: { orderId }, data: { status: 'GENERATING' as const } });
+
+    (async () => {
+      try {
+        const { generatePosterOverlay, generateThumbnail } = await import('../services/posterOverlay.js');
+        const { uploadToR2 } = await import('../utils/r2.js');
+        const { getR2PublicUrl } = await import('../utils/r2.js');
+
+        let baseImageBuffer: Buffer;
+
+        if (order.track === 'PHOTO' && order.sourceImageUrl) {
+          const imgRes = await fetch(order.sourceImageUrl);
+          baseImageBuffer = Buffer.from(await imgRes.arrayBuffer());
+        } else if (order.track === 'AI' && order.conceptId) {
+          const { getPosterConcept } = await import('../data/posterPrompts.js');
+          const concept = getPosterConcept(order.conceptId);
+          if (!concept) throw new Error('Concept not found');
+          await prisma.posterOrder.update({ where: { orderId }, data: { status: 'GENERATING' as const } });
+          const faceUrls = order.faceImageUrls || [];
+          const arkRes = await fetch(process.env.ARK_BASE_URL || 'https://ark.ap-southeast.bytepluses.com/api/v3/images/generations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + process.env.ARK_API_KEY },
+            body: JSON.stringify({ model: process.env.ARK_SEEDREAM_MODEL || 'seedream-5.0', prompt: concept.posterPrompt, image: faceUrls.length > 0 ? faceUrls : undefined, size: '768x1024' }),
+          });
+          const arkData = await arkRes.json();
+          const aiUrl = arkData?.data?.[0]?.url;
+          if (!aiUrl) throw new Error('AI generation failed');
+          const aiImgRes = await fetch(aiUrl);
+          baseImageBuffer = Buffer.from(await aiImgRes.arrayBuffer());
+          const aiKey = 'posters/' + order.id + '/ai_generated.jpg';
+          await uploadToR2(baseImageBuffer, aiKey, 'image/jpeg');
+          await prisma.posterOrder.update({ where: { orderId }, data: { aiGeneratedUrl: getR2PublicUrl(aiKey) } });
+        } else {
+          throw new Error('No source image');
+        }
+
+        const textInput = {
+          groomName: order.groomNameEn || order.groomNameKr || '',
+          brideName: order.brideNameEn || order.brideNameKr || '',
+          titleText: order.titleText || undefined,
+          tagline: order.tagline || undefined,
+          dateText: order.dateText || undefined,
+          venueText: order.venueText || undefined,
+          nameLanguage: (order.groomNameEn ? 'en' : 'kr') as 'en' | 'kr',
+        };
+
+        const posterConfig = { fontId: order.fontId, layout: order.layout };
+        const posterBuffer = await generatePosterOverlay(baseImageBuffer, textInput, posterConfig);
+        const thumbBuffer = await generateThumbnail(posterBuffer);
+
+        const posterKey = 'posters/' + order.id + '/final.jpg';
+        const thumbKey = 'posters/' + order.id + '/thumb.jpg';
+        await uploadToR2(posterBuffer, posterKey, 'image/jpeg');
+        await uploadToR2(thumbBuffer, thumbKey, 'image/jpeg');
+
+        await prisma.posterOrder.update({
+          where: { orderId },
+          data: { status: 'DONE' as const, finalPosterUrl: getR2PublicUrl(posterKey), thumbnailUrl: getR2PublicUrl(thumbKey) },
+        });
+      } catch (e: any) {
+        await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' as const } });
+        console.error('[poster generate]', e.message);
+      }
+    })();
+
+    res.json({ success: true, status: 'GENERATING' });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get('/status/:orderId', async (req: Request, res: Response) => {
+  try {
+    const order = await prisma.posterOrder.findUnique({ where: { orderId: req.params.orderId } });
+    if (!order) return res.status(404).json({ error: 'Not found' });
+    res.json({ status: order.status, posterUrl: order.finalPosterUrl, thumbnailUrl: order.thumbnailUrl });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
