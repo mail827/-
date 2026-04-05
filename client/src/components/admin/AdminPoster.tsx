@@ -33,6 +33,7 @@ export default function AdminPoster() {
   const [showGiftModal, setShowGiftModal] = useState(false);
   const [giftTrack, setGiftTrack] = useState<'PHOTO' | 'AI'>('PHOTO');
   const [giftEmail, setGiftEmail] = useState('');
+  const [giftPhone, setGiftPhone] = useState('');
   const [giftMessage, setGiftMessage] = useState('');
   const limit = 20;
 
@@ -72,8 +73,8 @@ export default function AdminPoster() {
   };
   const createGift = async () => {
     try {
-      await fetch(`${API}/admin/poster/gift`, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ track: giftTrack, toEmail: giftEmail || null, message: giftMessage || null, isFree: true }) });
-      setShowGiftModal(false); setGiftEmail(''); setGiftMessage(''); loadGifts();
+      await fetch(`${API}/admin/poster/gift`, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ track: giftTrack, toEmail: giftEmail || null, toPhone: giftPhone || null, message: giftMessage || null, isFree: true }) });
+      setShowGiftModal(false); setGiftEmail(''); setGiftPhone(''); setGiftMessage(''); loadGifts();
     } catch {}
   };
   useEffect(() => { load(); loadStats(); loadGifts(); }, [page, statusFilter]);
@@ -131,6 +132,9 @@ export default function AdminPoster() {
                 </div>
                 <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, color: '#999', display: 'block', marginBottom: 4 }}>받는 사람 이메일</label>
                   <input value={giftEmail} onChange={e=>setGiftEmail(e.target.value)} placeholder="선택사항" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E8E5E0', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                </div>
+                <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, color: '#999', display: 'block', marginBottom: 4 }}>받는 사람 전화번호</label>
+                  <input value={giftPhone} onChange={e=>setGiftPhone(e.target.value)} placeholder="선택사항" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E8E5E0', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
                 </div>
                 <div style={{ marginBottom: 20 }}><label style={{ fontSize: 12, color: '#999', display: 'block', marginBottom: 4 }}>메시지</label>
                   <input value={giftMessage} onChange={e=>setGiftMessage(e.target.value)} placeholder="선택사항" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E8E5E0', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />

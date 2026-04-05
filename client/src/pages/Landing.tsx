@@ -1133,8 +1133,8 @@ export default function Landing() {
                   <p style={{ fontSize: 13, color: "#999", lineHeight: 1.6 }}>{landingLocale === 'ko' ? 'AI\uac00 \ub9cc\ub4dc\ub294 \uc2dc\ub124\ub9c8\ud2f1 \uc6e8\ub529 \uc601\uc0c1.\n\uc0ac\uc9c4\ub9cc \uc62c\ub9ac\uba74 \uc790\ub9c9\uacfc \uc74c\uc545\uc774 \uc785\ud600\uc9c4 1\ubd84 \uc601\uc0c1\uc774 \uc644\uc131\ub429\ub2c8\ub2e4.' : 'Cinematic wedding video powered by AI.\nJust upload photos to get a 1-min film with subtitles and music.'}</p>
                 </div>
                 <div style={{ display: "flex", gap: 12, marginTop: "auto" }}>
-                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Photo 29,000\uc6d0</span>
-                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Selfie 39,000\uc6d0</span>
+                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Photo 29,000원</span>
+                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Selfie 39,000원</span>
                 </div>
               </a>
 
@@ -1148,8 +1148,8 @@ export default function Landing() {
                   <p style={{ fontSize: 13, color: "#999", lineHeight: 1.6 }}>{landingLocale === 'ko' ? '\ub2f9\uc2e0\uc758 \uc6e8\ub529 \uc0ac\uc9c4\uc744 \uc601\ud654 \ud3ec\uc2a4\ud130\ucc98\ub7fc.\n\uc0ac\uacc4 12\uc885 \ucee8\uc149 + 7\uc885 \ud3f0\ud2b8 \ud0c0\uc774\ud3ec\uadf8\ub798\ud53c.' : 'Turn your wedding photos into cinematic posters.\n12 seasonal concepts + 7 typography fonts.'}</p>
                 </div>
                 <div style={{ display: "flex", gap: 12, marginTop: "auto" }}>
-                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Photo 3,000\uc6d0</span>
-                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>AI 5,000\uc6d0</span>
+                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Photo 3,000원</span>
+                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>AI 5,000원</span>
                 </div>
               </a>
             </div>
