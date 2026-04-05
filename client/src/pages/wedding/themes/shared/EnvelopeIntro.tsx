@@ -154,6 +154,7 @@ const ENVELOPES: Record<string, {
 const CARD_TEXTURES: Record<string, {
   url: string;
   defaultTextColor: string;
+  isDark?: boolean;
 }> = {
   white_crumple: { url: `${R2}/card/1-Photoroom.png`, defaultTextColor: '#4a4038' },
   ivory_crumple: { url: `${R2}/card/2-Photoroom.png`, defaultTextColor: '#4a4038' },
@@ -161,12 +162,20 @@ const CARD_TEXTURES: Record<string, {
   linen: { url: `${R2}/card/4-Photoroom.png`, defaultTextColor: '#4a4038' },
   daisy_a: { url: `${R2}/card/5-Photoroom.png`, defaultTextColor: '#5a4038' },
   daisy_b: { url: `${R2}/card/6-Photoroom.png`, defaultTextColor: '#5a4038' },
-  watercolor_rose: { url: `${R2}/card/7-Photoroom.png`, defaultTextColor: '#ffffff' },
-  pink_watercolor: { url: `${R2}/card/8-Photoroom.png`, defaultTextColor: '#ffffff' },
-  rose_layer: { url: `${R2}/card/9-Photoroom.png`, defaultTextColor: '#ffffff' },
-  purple_aurora: { url: `${R2}/card/10-Photoroom.png`, defaultTextColor: '#ffffff' },
-  violet: { url: `${R2}/card/11-Photoroom.png`, defaultTextColor: '#f0e0f0' },
+  watercolor_rose: { isDark: true, url: `${R2}/card/7-Photoroom.png`, defaultTextColor: '#ffffff' },
+  pink_watercolor: { isDark: true, url: `${R2}/card/8-Photoroom.png`, defaultTextColor: '#ffffff' },
+  rose_layer: { isDark: true, url: `${R2}/card/9-Photoroom.png`, defaultTextColor: '#ffffff' },
+  purple_aurora: { isDark: true, url: `${R2}/card/10-Photoroom.png`, defaultTextColor: '#ffffff' },
+  violet: { isDark: true, url: `${R2}/card/11-Photoroom.png`, defaultTextColor: '#f0e0f0' },
   white_watercolor: { url: `${R2}/card/12-Photoroom.png`, defaultTextColor: '#4a4038' },
+  green_hanji_1: { url: `${R2}/card/%EA%B7%B8%EB%A6%B0%ED%8E%B8%EC%A7%80%EC%A7%801.png`, defaultTextColor: '#e8dfd4' },
+  green_hanji_2: { url: `${R2}/card/%EA%B7%B8%EB%A6%B0%ED%8E%B8%EC%A7%80%EC%A7%802.png`, defaultTextColor: '#3a4a3a' },
+  black_hanji_1: { isDark: true, url: `${R2}/card/%EB%B8%94%EB%9E%99%ED%8E%B8%EC%A7%80%EC%A7%801.png`, defaultTextColor: '#e0d8cc' },
+  black_hanji_2: { isDark: true, url: `${R2}/card/%EB%B8%94%EB%9E%99%ED%8E%B8%EC%A7%80%EC%A7%802.png`, defaultTextColor: '#e0d8cc' },
+  blue_fabric_1: { isDark: true, url: `${R2}/card/%EB%B8%94%EB%A3%A8%ED%8E%B8%EC%A7%80%EC%A7%801.png`, defaultTextColor: '#c0d0e0' },
+  blue_fabric_2: { isDark: true, url: `${R2}/card/%EB%B8%94%EB%A3%A8%ED%8E%B8%EC%A7%80%EC%A7%802.png`, defaultTextColor: '#c0d0e0' },
+  pink_silk_1: { url: `${R2}/card/%ED%95%91%ED%81%AC%ED%8E%B8%EC%A7%80%EC%A7%801.png`, defaultTextColor: '#5a3a4a' },
+  pink_fabric_2: { url: `${R2}/card/%ED%95%91%ED%81%AC%ED%8E%B8%EC%A7%80%EC%A7%802.png`, defaultTextColor: '#5a3a4a' },
 };
 
 interface EnvelopeIntroProps {
@@ -189,6 +198,10 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
   const card = cardStyle ? CARD_TEXTURES[cardStyle] : null;
   const textureUrl = card ? card.url : env.legacyTexture || CARD_TEXTURES.white_crumple.url;
   const defaultCardTextColor = card ? card.defaultTextColor : '#4a4038';
+  const isCardDark = card?.isDark || false;
+  const embossShadow = isCardDark
+    ? '0 1px 0 rgba(255,255,255,0.15), 0 -1px 1px rgba(0,0,0,0.6)'
+    : '0 -1px 0 rgba(0,0,0,0.15), 0 1px 1px rgba(255,255,255,0.6)';
 
   const dateStr = (() => {
     try {
@@ -290,12 +303,19 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
               backgroundImage: `url(${textureUrl})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
+              position: 'relative',
+            }}>
+
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              height: '100%',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               padding: '2.5rem 1.5rem',
-            }}>
+                          }}>
               <p style={{
                 fontSize: 8,
                 letterSpacing: '0.4em',
@@ -304,6 +324,7 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
                 marginBottom: 24,
                 textTransform: 'uppercase',
                 fontFamily: cardFont,
+                textShadow: embossShadow,
               }}>
                 Wedding Invitation
               </p>
@@ -315,6 +336,7 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
                 textAlign: 'center',
                 whiteSpace: 'pre-wrap',
                 fontFamily: cardFont,
+                textShadow: embossShadow,
               }}>
                 {displayText}
               </p>
@@ -325,9 +347,11 @@ export default function EnvelopeIntro({ groomName, brideName, weddingDate, style
                 opacity: 0.35,
                 letterSpacing: '0.2em',
                 fontFamily: cardFont,
+                textShadow: embossShadow,
               }}>
                 {dateStr}
               </p>
+            </div>
             </div>
           </motion.div>
 

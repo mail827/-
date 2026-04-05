@@ -1053,12 +1053,20 @@ export default function EditWedding() {
                   {[
                     { value: '', label: '기본' },
                     { value: '#1a1a1a', label: '블랙' },
+                    { value: '#ffffff', label: '화이트' },
                     { value: '#4a4038', label: '브라운' },
                     { value: '#2a3a4a', label: at('colorNavy', locale) },
                     { value: '#3a4a3a', label: '올리브' },
                     { value: '#5a3a4a', label: at('colorWine', locale) },
                     { value: '#C9A96E', label: at('colorGold', locale) },
                     { value: '#e8dfd4', label: '아이보리' },
+                    { value: '#8B7355', label: '세피아' },
+                    { value: '#6B5B4B', label: '월넛' },
+                    { value: '#A0522D', label: '시에나' },
+                    { value: '#B8860B', label: '다크골드' },
+                    { value: '#556B2F', label: '다크올리브' },
+                    { value: '#4A0E2E', label: '버건디' },
+                    { value: '#2F4F4F', label: '다크슬레이트' },
                     { value: '#ffffff', label: '화이트' },
                   ].map((c) => (
                     <button
@@ -1091,6 +1099,14 @@ export default function EditWedding() {
                     { value: 'purple_aurora', label: '퍼플 오로라' },
                     { value: 'violet', label: '바이올렛' },
                     { value: 'white_watercolor', label: '화이트 수채화지' },
+                    { value: 'green_hanji_1', label: '세이지 한지' },
+                    { value: 'green_hanji_2', label: '라이트 세이지' },
+                    { value: 'black_hanji_1', label: '블랙 한지' },
+                    { value: 'black_hanji_2', label: '블랙 벨벳' },
+                    { value: 'blue_fabric_1', label: '네이비 가죽' },
+                    { value: 'blue_fabric_2', label: '네이비 린넨' },
+                    { value: 'pink_silk_1', label: '피치 실크' },
+                    { value: 'pink_fabric_2', label: '핑크 린넨' },
                   ].map((c) => (
                     <button
                       key={c.value}
@@ -1101,7 +1117,15 @@ export default function EditWedding() {
                           : 'border-stone-200 hover:border-stone-400'
                       }`}
                     >
-                      <img src={`https://pub-b58d4a5cf82a4aebaa7badae6e00ebf0.r2.dev/envelope/card/${c.value === 'white_crumple' ? '1' : c.value === 'ivory_crumple' ? '2' : c.value === 'emboss_floral' ? '3' : c.value === 'linen' ? '4' : c.value === 'daisy_a' ? '5' : c.value === 'daisy_b' ? '6' : c.value === 'watercolor_rose' ? '7' : c.value === 'pink_watercolor' ? '8' : c.value === 'rose_layer' ? '9' : c.value === 'purple_aurora' ? '10' : c.value === 'violet' ? '11' : '12'}-Photoroom.png`} alt={c.label} className="w-full aspect-[3/4] object-cover" />
+                      <img src={`https://pub-b58d4a5cf82a4aebaa7badae6e00ebf0.r2.dev/envelope/card/${{
+                        'white_crumple':'1-Photoroom','ivory_crumple':'2-Photoroom','emboss_floral':'3-Photoroom','linen':'4-Photoroom',
+                        'daisy_a':'5-Photoroom','daisy_b':'6-Photoroom','watercolor_rose':'7-Photoroom','pink_watercolor':'8-Photoroom',
+                        'rose_layer':'9-Photoroom','purple_aurora':'10-Photoroom','violet':'11-Photoroom','white_watercolor':'12-Photoroom',
+                        'green_hanji_1':'%EA%B7%B8%EB%A6%B0%ED%8E%B8%EC%A7%80%EC%A7%801','green_hanji_2':'%EA%B7%B8%EB%A6%B0%ED%8E%B8%EC%A7%80%EC%A7%802',
+                        'black_hanji_1':'%EB%B8%94%EB%9E%99%ED%8E%B8%EC%A7%80%EC%A7%801','black_hanji_2':'%EB%B8%94%EB%9E%99%ED%8E%B8%EC%A7%80%EC%A7%802',
+                        'blue_fabric_1':'%EB%B8%94%EB%A3%A8%ED%8E%B8%EC%A7%80%EC%A7%801','blue_fabric_2':'%EB%B8%94%EB%A3%A8%ED%8E%B8%EC%A7%80%EC%A7%802',
+                        'pink_silk_1':'%ED%95%91%ED%81%AC%ED%8E%B8%EC%A7%80%EC%A7%801','pink_fabric_2':'%ED%95%91%ED%81%AC%ED%8E%B8%EC%A7%80%EC%A7%802'
+                      }[c.value]}.png`} alt={c.label} className="w-full aspect-[3/4] object-cover" />
                       <p className="text-[10px] text-stone-500 py-1 text-center">{c.label}</p>
                     </button>
                   ))}
