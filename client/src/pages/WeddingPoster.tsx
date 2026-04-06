@@ -55,6 +55,13 @@ export default function WeddingPoster() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
+  const [groomFace, setGroomFace] = useState<File | null>(null);
+  const [brideFace, setBrideFace] = useState<File | null>(null);
+  const [groomFacePreview, setGroomFacePreview] = useState('');
+  const [brideFacePreview, setBrideFacePreview] = useState('');
+  const groomFaceRef = useRef<HTMLInputElement>(null);
+  const brideFaceRef = useRef<HTMLInputElement>(null);
+
   const [groomNameKr, setGroomNameKr] = useState('');
   const [brideNameKr, setBrideNameKr] = useState('');
   const [groomNameEn, setGroomNameEn] = useState('');
@@ -77,6 +84,81 @@ export default function WeddingPoster() {
   const [layout, setLayout] = useState<Layout>('CLASSIC');
 
   const [loading, setLoading] = useState(false);
+  const previewRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const cv = previewRef.current;
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    if (!ctx) return;
+    const W = 540, H = 720;
+    cv.width = W; cv.height = H;
+
+    const draw = (bgImg?: HTMLImageElement) => {
+      ctx.clearRect(0, 0, W, H);
+      if (bgImg) {
+        const s = Math.max(W / bgImg.width, H / bgImg.height);
+        const sw = bgImg.width * s, sh = bgImg.height * s;
+        ctx.drawImage(bgImg, (W - sw) / 2, (H - sh) / 2, sw, sh);
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.fillRect(0, 0, W, H);
+      } else {
+        const g = ctx.createLinearGradient(0, 0, 0, H);
+        g.addColorStop(0, '#3a3632');
+        g.addColorStop(1, '#1a1816');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+      }
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      const font = FONT_OPTIONS.find(fo => fo.id === fontId);
+      const ff = font ? font.family.split(',')[0].replace(/'/g, '') : 'serif';
+      if (layout === 'CLASSIC') {
+        ctx.font = '14px sans-serif';
+        ctx.letterSpacing = '3px';
+        ctx.fillText((groomNameEn || groomNameKr).toUpperCase() + '  &  ' + (brideNameEn || brideNameKr).toUpperCase(), W / 2, 80);
+        ctx.letterSpacing = '0px';
+        ctx.font = '48px "' + ff + '"';
+        ctx.fillText(titleText || 'Your Title', W / 2, H / 2 - 10);
+        ctx.font = '14px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillText(tagline || '', W / 2, H / 2 + 30);
+        ctx.font = '12px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillText([dateText, venueText].filter(Boolean).join('  ·  '), W / 2, H - 60);
+      } else if (layout === 'MODERN') {
+        ctx.textAlign = 'left';
+        ctx.font = '12px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillText((groomNameEn || groomNameKr) + ' & ' + (brideNameEn || brideNameKr), 40, H - 140);
+        ctx.font = '40px "' + ff + '"';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(titleText || 'Your Title', 40, H - 90);
+        ctx.font = '13px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillText([dateText, venueText].filter(Boolean).join(' · '), 40, H - 55);
+      } else if (layout === 'BOLD') {
+        ctx.font = '72px "' + ff + '"';
+        ctx.fillText(titleText || 'Your Title', W / 2, H / 2 + 10);
+        ctx.font = '13px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillText((groomNameEn || groomNameKr) + ' & ' + (brideNameEn || brideNameKr), W / 2, H / 2 + 50);
+      } else {
+        ctx.font = '13px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        const line = [(groomNameEn || groomNameKr) + ' & ' + (brideNameEn || brideNameKr), titleText, dateText].filter(Boolean).join('  ·  ');
+        ctx.fillText(line, W / 2, H - 40);
+      }
+    };
+
+    if (photoPreview && track === 'PHOTO') {
+      const img = new Image();
+      img.onload = () => draw(img);
+      img.src = photoPreview;
+    } else {
+      draw();
+    }
+  }, [photoPreview, track, groomNameKr, brideNameKr, groomNameEn, brideNameEn, titleText, tagline, dateText, venueText, fontId, layout]);
 
   const loadConcepts = useCallback(async () => {
     try {
@@ -98,6 +180,19 @@ export default function WeddingPoster() {
     setPhotoFile(file);
     const reader = new FileReader();
     reader.onload = () => setPhotoPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleFaceUpload = (e: React.ChangeEvent<HTMLInputElement>, who: 'groom' | 'bride') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (who === 'groom') setGroomFace(file);
+    else setBrideFace(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (who === 'groom') setGroomFacePreview(reader.result as string);
+      else setBrideFacePreview(reader.result as string);
+    };
     reader.readAsDataURL(file);
   };
 
@@ -126,6 +221,14 @@ export default function WeddingPoster() {
         formData.append('image', photoFile);
         formData.append('orderId', data.orderId);
         await fetch(`${API}/poster/upload`, { method: 'POST', body: formData });
+      }
+
+      if (track === 'AI' && (groomFace || brideFace)) {
+        const fd = new FormData();
+        if (groomFace) fd.append('faces', groomFace);
+        if (brideFace) fd.append('faces', brideFace);
+        fd.append('orderId', data.orderId);
+        await fetch(`${API}/poster/upload-faces`, { method: 'POST', body: fd });
       }
 
       if (data.amount === 0) {
@@ -313,7 +416,48 @@ export default function WeddingPoster() {
           </div>
         )}
 
-        {step === 2 && (
+
+        {step === 2 && track === 'AI' && (
+          <div>
+            <p style={{ fontSize: 15, fontWeight: 500, color: '#2C2C2A', marginBottom: 8 }}>얼굴 사진 업로드</p>
+            <p style={{ fontSize: 13, color: '#8A8A82', marginBottom: 20, lineHeight: 1.6 }}>정면 사진을 올려주세요. 모자나 선글라스는 피해주세요.</p>
+            <input ref={groomFaceRef} type="file" accept="image/*" onChange={(e) => handleFaceUpload(e, 'groom')} style={{ display: 'none' }} />
+            <input ref={brideFaceRef} type="file" accept="image/*" onChange={(e) => handleFaceUpload(e, 'bride')} style={{ display: 'none' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+              {[
+                { label: '신랑', ref: groomFaceRef, preview: groomFacePreview, clear: () => { setGroomFace(null); setGroomFacePreview(''); } },
+                { label: '신부', ref: brideFaceRef, preview: brideFacePreview, clear: () => { setBrideFace(null); setBrideFacePreview(''); } },
+              ].map(({ label, ref, preview, clear }) => (
+                <div key={label}>
+                  <p style={{ fontSize: 12, color: '#8A8A82', marginBottom: 6 }}>{label}</p>
+                  {preview ? (
+                    <div style={{ position: 'relative' }}>
+                      <img src={preview} alt="" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 10 }} />
+                      <button onClick={clear} style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: 12, border: 'none', background: 'rgba(0,0,0,0.5)', color: '#fff', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>x</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => ref.current?.click()} style={{ width: '100%', aspectRatio: '1', border: '2px dashed #D4D4CC', borderRadius: 10, background: '#fff', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A8A8A0" strokeWidth="1.5"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3.1-6.5 7-6.5s7 3 7 6.5"/></svg>
+                      <span style={{ fontSize: 12, color: '#A8A8A0' }}>{label}</span>
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => setStep(3)}
+              disabled={!groomFace && !brideFace}
+              style={{
+                width: '100%', padding: '16px', border: 'none', borderRadius: 10,
+                background: (groomFace || brideFace) ? '#2C2C2A' : '#E5E5E0',
+                color: (groomFace || brideFace) ? '#fff' : '#A8A8A0',
+                fontSize: 15, fontWeight: 500, cursor: (groomFace || brideFace) ? 'pointer' : 'default',
+              }}
+            >다음</button>
+          </div>
+        )}
+
+        {((step === 2 && track === 'PHOTO') || (step === 3 && track === 'AI')) && (
           <div>
             <p style={{ fontSize: 15, fontWeight: 500, color: '#2C2C2A', marginBottom: 20 }}>포스터 정보 입력</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -365,7 +509,7 @@ export default function WeddingPoster() {
               </div>
             </div>
             <button
-              onClick={() => setStep(3)}
+              onClick={() => setStep(track === 'AI' ? 4 : 3)}
               disabled={!groomNameKr && !groomNameEn}
               style={{
                 width: '100%', padding: '16px', border: 'none', borderRadius: 10, marginTop: 24,
@@ -377,7 +521,7 @@ export default function WeddingPoster() {
           </div>
         )}
 
-        {step === 3 && (
+        {((step === 3 && track === 'PHOTO') || (step === 4 && track === 'AI')) && (
           <div>
             <p style={{ fontSize: 15, fontWeight: 500, color: '#2C2C2A', marginBottom: 16 }}>글씨체 선택</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
@@ -415,6 +559,13 @@ export default function WeddingPoster() {
               ))}
             </div>
 
+
+            <div style={{ marginBottom: 24 }}>
+              <p style={{ fontSize: 13, color: '#8A8A82', marginBottom: 10 }}>미리보기</p>
+              <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #E5E5E0', background: '#1a1816' }}>
+                <canvas ref={previewRef} style={{ width: '100%', height: 'auto', display: 'block', aspectRatio: '3/4' }} />
+              </div>
+            </div>
             <div style={{ background: '#fff', border: '1px solid #E5E5E0', borderRadius: 12, padding: '20px', marginBottom: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <span style={{ fontSize: 14, color: '#6B6B63' }}>상품</span>

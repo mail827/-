@@ -111,39 +111,6 @@ router.post('/order', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/payment/confirm', async (req: Request, res: Response) => {
-  try {
-    const { orderId, paymentKey, amount } = req.body;
-
-    const order = await prisma.posterOrder.findUnique({ where: { orderId } });
-    if (!order) return res.status(404).json({ error: 'Order not found' });
-    if (order.amount !== amount) return res.status(400).json({ error: 'Amount mismatch' });
-
-    const tossRes = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${Buffer.from(process.env.TOSS_SECRET_KEY + ':').toString('base64')}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ orderId, paymentKey, amount }),
-    });
-
-    if (!tossRes.ok) {
-      const err = await tossRes.json();
-      return res.status(400).json({ error: err.message || 'Payment failed' });
-    }
-
-    await prisma.posterOrder.update({
-      where: { orderId },
-      data: { paymentKey, status: 'PAID' },
-    });
-
-    res.json({ success: true, orderId });
-  } catch (e: any) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
 router.post('/upload', upload.single('image'), async (req: Request, res: Response) => {
   try {
     const { orderId } = req.body;
@@ -168,131 +135,21 @@ router.post('/upload', upload.single('image'), async (req: Request, res: Respons
   }
 });
 
-router.post('/generate', async (req: Request, res: Response) => {
+
+router.post('/upload-faces', upload.array('faces', 4), async (req: Request, res: Response) => {
   try {
     const { orderId } = req.body;
+    if (!req.files || !Array.isArray(req.files) || req.files.length === 0) return res.status(400).json({ error: 'No files' });
     const order = await prisma.posterOrder.findUnique({ where: { orderId } });
     if (!order) return res.status(404).json({ error: 'Order not found' });
-    if (order.status !== 'PAID') return res.status(400).json({ error: 'Order not paid' });
-
-    await prisma.posterOrder.update({ where: { orderId }, data: { status: 'COMPOSITING' } });
-
-    let baseImageBuffer: Buffer;
-
-    if (order.track === 'PHOTO') {
-      if (!order.sourceImageUrl) return res.status(400).json({ error: 'No source image' });
-      const imgRes = await fetch(order.sourceImageUrl);
-      baseImageBuffer = Buffer.from(await imgRes.arrayBuffer());
-    } else {
-      await prisma.posterOrder.update({ where: { orderId }, data: { status: 'GENERATING' as const } });
-      const concept = getPosterConcept(order.conceptId!);
-      if (!concept) return res.status(400).json({ error: 'Invalid concept' });
-
-      const falRes = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Key ${process.env.FAL_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt: concept.posterPrompt,
-          image_url: order.faceImageUrls[0],
-          aspect_ratio: '3:4',
-        }),
-      });
-
-      if (!falRes.ok) {
-        await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' as const } });
-        return res.status(500).json({ error: 'AI generation failed' });
-      }
-
-      const falData = await falRes.json();
-      const requestId = falData.request_id;
-
-      let aiImageUrl = '';
-      let attempts = 0;
-      while (attempts < 60) {
-        await new Promise((r) => setTimeout(r, 3000));
-        const statusRes = await fetch(`https://queue.fal.run/fal-ai/nano-banana-2/edit/requests/${requestId}/status`, {
-          headers: { 'Authorization': `Key ${process.env.FAL_KEY}` },
-        });
-        const statusData = await statusRes.json();
-        if (statusData.status === 'COMPLETED') {
-          const resultRes = await fetch(`https://queue.fal.run/fal-ai/nano-banana-2/edit/requests/${requestId}`, {
-            headers: { 'Authorization': `Key ${process.env.FAL_KEY}` },
-          });
-          const resultData = await resultRes.json();
-          aiImageUrl = resultData.images?.[0]?.url || '';
-          break;
-        }
-        if (statusData.status === 'FAILED') {
-          await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' as const } });
-          return res.status(500).json({ error: 'AI generation failed' });
-        }
-        attempts++;
-      }
-
-      if (!aiImageUrl) {
-        await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' as const } });
-        return res.status(500).json({ error: 'AI generation timeout' });
-      }
-
-      const aiKey = `posters/${order.id}/ai_generated.jpg`;
-      const aiImgRes = await fetch(aiImageUrl);
-      const aiBuffer = Buffer.from(await aiImgRes.arrayBuffer());
-      await uploadToR2(aiBuffer, aiKey, 'image/jpeg');
-      await prisma.posterOrder.update({ where: { orderId }, data: { aiGeneratedUrl: getR2PublicUrl(aiKey), status: 'COMPOSITING' } });
-      baseImageBuffer = aiBuffer;
+    const urls: string[] = [];
+    for (let i = 0; i < req.files.length; i++) {
+      const key = `posters/${order.id}/face_${i}.jpg`;
+      await uploadToR2(req.files[i].buffer, key, 'image/jpeg');
+      urls.push(getR2PublicUrl(key));
     }
-
-    const textInput: PosterTextInput = {
-      groomName: order.groomNameEn || order.groomNameKr || '',
-      brideName: order.brideNameEn || order.brideNameKr || '',
-      titleText: order.titleText || undefined,
-      tagline: order.tagline || undefined,
-      dateText: order.dateText || undefined,
-      venueText: order.venueText || undefined,
-      nameLanguage: (order.groomNameEn ? 'en' : 'kr') as 'en' | 'kr',
-    };
-
-    const posterConfig: PosterConfig = {
-      fontId: order.fontId,
-      layout: order.layout as any,
-    };
-
-    const posterBuffer = await generatePosterOverlay(baseImageBuffer, textInput, posterConfig);
-    const thumbBuffer = await generateThumbnail(posterBuffer);
-
-    const posterKey = `posters/${order.id}/final.jpg`;
-    const thumbKey = `posters/${order.id}/thumb.jpg`;
-    await uploadToR2(posterBuffer, posterKey, 'image/jpeg');
-    await uploadToR2(thumbBuffer, thumbKey, 'image/jpeg');
-
-    await prisma.posterOrder.update({
-      where: { orderId },
-      data: {
-        finalPosterUrl: getR2PublicUrl(posterKey),
-        thumbnailUrl: getR2PublicUrl(thumbKey),
-        status: 'DONE',
-      },
-    });
-
-    res.json({ success: true, posterUrl: getR2PublicUrl(posterKey), thumbnailUrl: getR2PublicUrl(thumbKey) });
-  } catch (e: any) {
-    await prisma.posterOrder.update({ where: { orderId: req.body.orderId }, data: { status: 'FAILED' as const } }).catch(() => {});
-    res.status(500).json({ error: e.message });
-  }
-});
-
-router.get('/status/:orderId', async (req: Request, res: Response) => {
-  try {
-    const order = await prisma.posterOrder.findUnique({ where: { orderId: req.params.orderId } });
-    if (!order) return res.status(404).json({ error: 'Not found' });
-    res.json({
-      status: order.status,
-      posterUrl: order.finalPosterUrl,
-      thumbnailUrl: order.thumbnailUrl,
-    });
+    await prisma.posterOrder.update({ where: { orderId }, data: { faceImageUrls: urls } });
+    res.json({ success: true, urls });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
@@ -379,14 +236,29 @@ router.post('/generate', async (req: Request, res: Response) => {
           if (!concept) throw new Error('Concept not found');
           await prisma.posterOrder.update({ where: { orderId }, data: { status: 'GENERATING' as const } });
           const faceUrls = order.faceImageUrls || [];
-          const arkRes = await fetch(process.env.ARK_BASE_URL || 'https://ark.ap-southeast.bytepluses.com/api/v3/images/generations', {
+          if (faceUrls.length === 0) throw new Error('No face images uploaded');
+          const falRes = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + process.env.ARK_API_KEY },
-            body: JSON.stringify({ model: process.env.ARK_SEEDREAM_MODEL || 'seedream-5.0', prompt: concept.posterPrompt, image: faceUrls.length > 0 ? faceUrls : undefined, size: '768x1024' }),
+            headers: { Authorization: 'Key ' + process.env.FAL_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: concept.posterPrompt, image_url: faceUrls[0], aspect_ratio: '3:4' }),
           });
-          const arkData = await arkRes.json();
-          const aiUrl = arkData?.data?.[0]?.url;
-          if (!aiUrl) throw new Error('AI generation failed');
+          if (!falRes.ok) throw new Error('fal.ai queue submit failed');
+          const falQueue = await falRes.json();
+          const reqId = falQueue.request_id;
+          let aiUrl = '';
+          for (let poll = 0; poll < 60; poll++) {
+            await new Promise(r => setTimeout(r, 3000));
+            const sRes = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit/requests/' + reqId + '/status', { headers: { Authorization: 'Key ' + process.env.FAL_KEY } });
+            const sData = await sRes.json();
+            if (sData.status === 'COMPLETED') {
+              const rRes = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit/requests/' + reqId, { headers: { Authorization: 'Key ' + process.env.FAL_KEY } });
+              const rData = await rRes.json();
+              aiUrl = rData.images?.[0]?.url || '';
+              break;
+            }
+            if (sData.status === 'FAILED') throw new Error('fal.ai generation failed');
+          }
+          if (!aiUrl) throw new Error('fal.ai generation timeout');
           const aiImgRes = await fetch(aiUrl);
           baseImageBuffer = Buffer.from(await aiImgRes.arrayBuffer());
           const aiKey = 'posters/' + order.id + '/ai_generated.jpg';
