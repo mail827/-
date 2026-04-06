@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -65,6 +65,15 @@ export default function WeddingPoster() {
   const [venueText, setVenueText] = useState('');
 
   const [fontId, setFontId] = useState('script_elegant');
+  const [couponCode, setCouponCode] = useState('');
+  const [giftCode, setGiftCode] = useState('');
+  const [isGift, setIsGift] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const g = searchParams.get('gift');
+    if (g) { setGiftCode(g); setIsGift(true); }
+  }, [searchParams]);
   const [layout, setLayout] = useState<Layout>('CLASSIC');
 
   const [loading, setLoading] = useState(false);
@@ -106,6 +115,8 @@ export default function WeddingPoster() {
           titleText, tagline, dateText, venueText,
           fontId, layout,
           conceptId: track === 'AI' ? selectedConcept : undefined,
+          couponCode: couponCode || undefined,
+          giftCode: giftCode || undefined,
         }),
       });
       const data = await res.json();
@@ -117,6 +128,19 @@ export default function WeddingPoster() {
         await fetch(`${API}/poster/upload`, { method: 'POST', body: formData });
       }
 
+      if (data.amount === 0) {
+        await fetch(`${API}/poster/confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentKey: 'FREE', orderId: data.orderId, amount: 0 }),
+        });
+        window.location.href = `/poster/success?orderId=${data.orderId}&paymentKey=FREE&amount=0`;
+        return;
+      }
+
+      const keyRes = await fetch(`${API}/snap-pack/toss-client-key`);
+      const { clientKey } = await keyRes.json();
+
       const TossPayments = await new Promise<any>((resolve, reject) => {
         if ((window as any).TossPayments) { resolve((window as any).TossPayments); return; }
         const s = document.createElement('script');
@@ -125,7 +149,7 @@ export default function WeddingPoster() {
         s.onerror = () => reject(new Error('Toss SDK load failed'));
         document.head.appendChild(s);
       });
-      const tp = TossPayments(import.meta.env.VITE_TOSS_CLIENT_KEY);
+      const tp = TossPayments(clientKey);
       await tp.requestPayment('카드', {
         amount: data.amount,
         orderId: data.orderId,
@@ -158,6 +182,12 @@ export default function WeddingPoster() {
           <p style={{ fontSize: 11, letterSpacing: 4, color: '#A8A8A0', textTransform: 'uppercase', marginBottom: 8 }}>Wedding Engine</p>
           <h1 style={{ fontSize: 28, fontWeight: 300, color: '#2C2C2A', letterSpacing: -0.5, margin: 0 }}>Wedding Poster</h1>
           <p style={{ fontSize: 14, color: '#8A8A82', marginTop: 8, lineHeight: 1.6 }}>당신의 이야기를 한 장의 영화 포스터로</p>
+        {isGift && (
+          <div style={{ marginTop: 16, padding: '14px 20px', borderRadius: 10, background: 'rgba(107,158,120,0.08)', border: '1px solid rgba(107,158,120,0.2)' }}>
+            <p style={{ fontSize: 14, fontWeight: 500, color: '#2C8C6B', margin: 0 }}>선물받은 이용권이 적용되었어요</p>
+            <p style={{ fontSize: 12, color: '#6B9E78', margin: '4px 0 0' }}>무료로 웨딩포스터를 만들어보세요</p>
+          </div>
+        )}
         </header>
 
         {step === 0 && (
@@ -362,7 +392,7 @@ export default function WeddingPoster() {
                   }}
                 >
                   <p style={{ fontSize: 13, color: '#8A8A82', margin: '0 0 4px' }}>{f.label}</p>
-                  <p style={{ fontSize: 22, color: '#2C2C2A', margin: 0, fontWeight: 300 }}>{f.sample}</p>
+                  <p style={{ fontSize: 22, color: '#2C2C2A', margin: 0, fontWeight: 300, fontFamily: f.family }}>{f.sample}</p>
                 </button>
               ))}
             </div>
@@ -393,6 +423,17 @@ export default function WeddingPoster() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 14, color: '#6B6B63' }}>결제 금액</span>
                 <span style={{ fontSize: 18, fontWeight: 500, color: '#2C2C2A' }}>{price.toLocaleString()}원</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 11, color: '#A8A8A0', marginBottom: 4, display: 'block' }}>선물코드</label>
+                <input value={giftCode} onChange={e => setGiftCode(e.target.value)} placeholder="PG-XXXXXXXX" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E8E5E0', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 11, color: '#A8A8A0', marginBottom: 4, display: 'block' }}>할인코드</label>
+                <input value={couponCode} onChange={e => setCouponCode(e.target.value)} placeholder="선택사항" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E8E5E0', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
               </div>
             </div>
 

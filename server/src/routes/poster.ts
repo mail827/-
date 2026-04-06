@@ -312,11 +312,19 @@ router.get('/download/:orderId', async (req: Request, res: Response) => {
 router.post('/confirm', async (req: Request, res: Response) => {
   try {
     const { paymentKey, orderId, amount } = req.body;
-    if (!paymentKey || !orderId || !amount) return res.status(400).json({ error: 'Missing params' });
+    if (!paymentKey || !orderId || amount === undefined || amount === null) return res.status(400).json({ error: 'Missing params' });
 
     const order = await prisma.posterOrder.findUnique({ where: { orderId } });
     if (!order) return res.status(404).json({ error: 'Order not found' });
     if (order.status !== 'PENDING') return res.json({ success: true, order });
+
+    if (paymentKey === 'FREE' && Number(amount) === 0) {
+      const updated = await prisma.posterOrder.update({
+        where: { orderId },
+        data: { status: 'PAID' as const, paymentKey: 'FREE' },
+      });
+      return res.json({ success: true, order: updated });
+    }
 
     const tossRes = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
       method: 'POST',
