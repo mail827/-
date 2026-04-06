@@ -100,10 +100,10 @@ export default function AdminPoster() {
       {tab === 'gifts' ? (
         <div>
           <button onClick={() => setShowGiftModal(true)} style={{ padding: '10px 20px', background: '#2C2C2A', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}><Plus size={14} />선물 코드 생성</button>
-          <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <table style={{ minWidth: 640, width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead><tr style={{ borderBottom: '1px solid #E8E5E0', background: '#FAFAF8' }}>
-                {['코드','트랙','받는 사람','메시지','사용','만료','생성일'].map(h=><th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11 }}>{h}</th>)}
+                {['코드','트랙','받는 사람','메시지','사용','만료','생성일'].map(h=><th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, whiteSpace: 'nowrap' }}>{h}</th>)}
               </tr></thead>
               <tbody>
                 {gifts.map(g=>(
@@ -163,7 +163,7 @@ export default function AdminPoster() {
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
         {['', 'PENDING', 'PAID', 'GENERATING', 'DONE', 'FAILED'].map((s) => (
           <button key={s} onClick={() => { setStatusFilter(s); setPage(1); }}
             style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid', borderColor: statusFilter === s ? '#2C2C2A' : '#E8E5E0', background: statusFilter === s ? '#2C2C2A' : '#fff', color: statusFilter === s ? '#fff' : '#666', fontSize: 12, cursor: 'pointer' }}>
@@ -172,29 +172,36 @@ export default function AdminPoster() {
         ))}
       </div>
 
-      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={{ minWidth: 720, width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ borderBottom: '1px solid #E8E5E0', background: '#FAFAF8' }}>
-              {['주문번호', '트랙', '이름', '폰트', '레이아웃', '금액', '상태', '일시', ''].map((h) => (
-                <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11 }}>{h}</th>
-              ))}
+              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 90 }}>주문번호</th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 44 }}>트랙</th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 100, whiteSpace: 'nowrap' }}>이름</th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 80 }}>폰트</th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 60 }}>레이아웃</th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 60 }}>금액</th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 70 }}>상태</th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 70 }}>일시</th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 56 }}></th>
             </tr>
           </thead>
           <tbody>
             {orders.map((o) => (
               <tr key={o.id} style={{ borderBottom: '1px solid #F0EEEB' }}>
-                <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontSize: 11 }}>{o.orderId.slice(-10)}</td>
-                <td style={{ padding: '10px 12px' }}>{o.track}</td>
-                <td style={{ padding: '10px 12px' }}>{[o.groomNameKr, o.brideNameKr].filter(Boolean).join(' & ')}</td>
-                <td style={{ padding: '10px 12px', fontSize: 11 }}>{o.fontId}</td>
-                <td style={{ padding: '10px 12px', fontSize: 11 }}>{o.layout}</td>
-                <td style={{ padding: '10px 12px' }}>{o.amount.toLocaleString()}원</td>
+                <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontSize: 11, whiteSpace: 'nowrap' }}>{o.orderId.slice(-10)}</td>
+                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>{o.track}</td>
+                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>{[o.groomNameKr, o.brideNameKr].filter(Boolean).join(' & ')}</td>
+                <td style={{ padding: '10px 12px', fontSize: 11, whiteSpace: 'nowrap' }}>{o.fontId.replace('script_', '').replace('serif_', '').replace('sans_', '')}</td>
+                <td style={{ padding: '10px 12px', fontSize: 11, whiteSpace: 'nowrap' }}>{o.layout}</td>
+                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>{o.amount.toLocaleString()}원</td>
                 <td style={{ padding: '10px 12px' }}>
-                  <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 500, color: '#fff', background: statusColor[o.status] || '#999' }}>{o.status}</span>
+                  <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 500, color: '#fff', background: statusColor[o.status] || '#999', whiteSpace: 'nowrap' }}>{o.status}</span>
                 </td>
-                <td style={{ padding: '10px 12px', fontSize: 11, color: '#999' }}>{new Date(o.createdAt).toLocaleDateString('ko')}</td>
-                <td style={{ padding: '10px 12px', display: 'flex', gap: 4 }}>
+                <td style={{ padding: '10px 12px', fontSize: 11, color: '#999', whiteSpace: 'nowrap' }}>{new Date(o.createdAt).toLocaleDateString('ko')}</td>
+                <td style={{ padding: '10px 12px' }}>
+                  <div style={{ display: 'flex', gap: 4 }}>
                   {o.finalPosterUrl && (
                     <>
                       <button onClick={() => setPreview(o.finalPosterUrl)} style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}><Eye size={14} /></button>
@@ -204,6 +211,7 @@ export default function AdminPoster() {
                   {o.status === 'FAILED' && (
                     <button onClick={() => retry(o.orderId)} style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', color: '#C0392B' }}><RefreshCw size={14} /></button>
                   )}
+                  </div>
                 </td>
               </tr>
             ))}

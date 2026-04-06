@@ -85,48 +85,48 @@ interface LayoutPosition {
 
 const LAYOUTS: Record<string, LayoutPosition> = {
   CLASSIC: {
-    nameY: 0.06,
+    nameY: 0.055,
     nameAlign: 'center',
-    nameSize: 42,
-    titleY: 0.42,
-    titleSize: 120,
-    taglineY: 0.72,
-    taglineSize: 28,
-    infoY: 0.94,
-    infoSize: 22,
+    nameSize: 32,
+    titleY: 0.44,
+    titleSize: 110,
+    taglineY: 0.56,
+    taglineSize: 24,
+    infoY: 0.95,
+    infoSize: 18,
   },
   MODERN: {
-    nameY: 0.08,
+    nameY: 0.88,
     nameAlign: 'left',
-    nameSize: 36,
-    titleY: 0.35,
-    titleSize: 100,
-    taglineY: 0.68,
-    taglineSize: 24,
-    infoY: 0.93,
-    infoSize: 20,
+    nameSize: 26,
+    titleY: 0.78,
+    titleSize: 90,
+    taglineY: 0.84,
+    taglineSize: 20,
+    infoY: 0.96,
+    infoSize: 16,
   },
   BOLD: {
-    nameY: 0.05,
+    nameY: 0.04,
     nameAlign: 'center',
-    nameSize: 38,
-    titleY: 0.3,
-    titleSize: 160,
-    taglineY: 0.65,
-    taglineSize: 30,
-    infoY: 0.94,
-    infoSize: 22,
+    nameSize: 30,
+    titleY: 0.38,
+    titleSize: 140,
+    taglineY: 0.52,
+    taglineSize: 26,
+    infoY: 0.95,
+    infoSize: 18,
   },
   MINIMAL: {
-    nameY: 0.92,
+    nameY: 0.93,
     nameAlign: 'center',
-    nameSize: 28,
-    titleY: 0.45,
-    titleSize: 80,
-    taglineY: 0.55,
-    taglineSize: 22,
-    infoY: 0.96,
-    infoSize: 18,
+    nameSize: 22,
+    titleY: 0.46,
+    titleSize: 72,
+    taglineY: 0.54,
+    taglineSize: 18,
+    infoY: 0.97,
+    infoSize: 15,
   },
 };
 
@@ -149,17 +149,25 @@ function ensureFontsRegistered() {
 }
 
 function drawGradientVignette(ctx: CanvasRenderingContext2D, w: number, h: number) {
-  const topGrad = ctx.createLinearGradient(0, 0, 0, h * 0.4);
-  topGrad.addColorStop(0, 'rgba(0,0,0,0.45)');
+  const topGrad = ctx.createLinearGradient(0, 0, 0, h * 0.5);
+  topGrad.addColorStop(0, 'rgba(0,0,0,0.55)');
+  topGrad.addColorStop(0.6, 'rgba(0,0,0,0.15)');
   topGrad.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = topGrad;
-  ctx.fillRect(0, 0, w, h * 0.4);
+  ctx.fillRect(0, 0, w, h * 0.5);
 
-  const bottomGrad = ctx.createLinearGradient(0, h * 0.7, 0, h);
+  const bottomGrad = ctx.createLinearGradient(0, h * 0.6, 0, h);
   bottomGrad.addColorStop(0, 'rgba(0,0,0,0)');
-  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.5)');
+  bottomGrad.addColorStop(0.5, 'rgba(0,0,0,0.2)');
+  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
   ctx.fillStyle = bottomGrad;
-  ctx.fillRect(0, h * 0.7, w, h * 0.3);
+  ctx.fillRect(0, h * 0.6, w, h * 0.4);
+
+  const edgeGrad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
+  edgeGrad.addColorStop(0, 'rgba(0,0,0,0)');
+  edgeGrad.addColorStop(1, 'rgba(0,0,0,0.2)');
+  ctx.fillStyle = edgeGrad;
+  ctx.fillRect(0, 0, w, h);
 }
 
 function drawTextWithShadow(
@@ -206,6 +214,7 @@ export async function generatePosterOverlay(
 
   const resized = await sharp(baseImageBuffer)
     .resize(OUTPUT_WIDTH, OUTPUT_HEIGHT, { fit: 'cover', position: 'attention' })
+    .jpeg({ quality: 95 })
     .toBuffer();
 
   const baseImage = await loadImage(resized);
@@ -228,12 +237,13 @@ export async function generatePosterOverlay(
 
   const nameStr =
     textInput.nameLanguage === 'en'
-      ? `${textInput.groomName} & ${textInput.brideName}`
+      ? `${textInput.groomName}  &  ${textInput.brideName}`
       : `${textInput.groomName}  ${textInput.brideName}`;
 
-  const nameSize = fitTextWidth(ctx, nameStr, fonts.name, layout.nameSize, maxTextWidth);
+  const spacedName = nameStr.split('').join('\u2009');
+  const nameSize = fitTextWidth(ctx, spacedName, fonts.name, layout.nameSize, maxTextWidth);
   ctx.font = `${nameSize}px "${fonts.name}"`;
-  drawTextWithShadow(ctx, nameStr, padX, OUTPUT_HEIGHT * layout.nameY, color, opacity);
+  drawTextWithShadow(ctx, spacedName.toUpperCase(), padX, OUTPUT_HEIGHT * layout.nameY, color, opacity * 0.55);
 
   if (textInput.titleText) {
     const lines = textInput.titleText.split('\n');

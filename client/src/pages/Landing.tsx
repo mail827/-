@@ -754,11 +754,8 @@ export default function Landing() {
           section h2.serif { font-size: 24px !important; line-height: 1.4 !important; word-break: keep-all !important; }
           section h3.serif { font-size: 22px !important; line-height: 1.4 !important; word-break: keep-all !important; }
         }
-          .theme-builder-grid > div:first-child > div > div:first-child { flex-direction: column !important; }
-          .theme-builder-grid > div:first-child { padding: 0 20px !important; }
-          #themes > div { padding: 0 20px !important; }
-          .footer-info { flex-direction: column !important; gap: 16px !important; }
-        }
+        .landing-product-grid { grid-template-columns: 1fr 1fr; }
+        @media (max-width: 640px) { .landing-product-grid { grid-template-columns: 1fr !important; } }
       `}</style>
 
       <div className="landing-body" style={{ minHeight: "100vh", background: "#FAF9F7", overflowX: "hidden", fontFamily: "'Noto Sans KR', -apple-system, sans-serif", WebkitFontSmoothing: "antialiased" }}>
@@ -1121,8 +1118,8 @@ export default function Landing() {
         </section>
 
         <section style={{ padding: "100px 0", borderTop: "1px solid #E8E5E0" }}>
-          <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 48px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 20px" }}>
+            <div className="landing-product-grid" style={{ display: "grid", gap: 24 }}>
               <a href="/prewedding-video" style={{ textDecoration: "none", padding: "48px 36px", borderRadius: 16, border: "1px solid #E8E5E0", background: "#fff", display: "flex", flexDirection: "column", gap: 16, transition: "all 0.3s" }}>
                 <div style={{ width: 48, height: 48, borderRadius: 12, background: "#F5F4F1", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="1.5"><polygon points="5 3 19 12 5 21 5 3" /></svg>

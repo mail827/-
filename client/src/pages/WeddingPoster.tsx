@@ -77,113 +77,201 @@ export default function WeddingPoster() {
   const [isGift, setIsGift] = useState(false);
   const [searchParams] = useSearchParams();
 
+  const [orderStatus, setOrderStatus] = useState<'idle' | 'confirming' | 'generating' | 'done' | 'failed'>('idle');
+  const [finalPosterUrl, setFinalPosterUrl] = useState('');
+
   useEffect(() => {
     const g = searchParams.get('gift');
     if (g) { setGiftCode(g); setIsGift(true); }
   }, [searchParams]);
+
+  useEffect(() => {
+    const oid = searchParams.get('orderId');
+    const pk = searchParams.get('paymentKey');
+    const amt = searchParams.get('amount');
+    if (!oid || !pk) return;
+    if (orderStatus !== 'idle') return;
+    setOrderStatus('confirming');
+    (async () => {
+      try {
+        const cRes = await fetch(`${API}/poster/confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentKey: pk, orderId: oid, amount: Number(amt) }),
+        });
+        const cData = await cRes.json();
+        if (!cData.success) { setOrderStatus('failed'); return; }
+        setOrderStatus('generating');
+        await fetch(`${API}/poster/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: oid }),
+        });
+        for (let i = 0; i < 120; i++) {
+          await new Promise(r => setTimeout(r, 3000));
+          const sRes = await fetch(`${API}/poster/status/${oid}`);
+          const sData = await sRes.json();
+          if (sData.status === 'DONE') {
+            setFinalPosterUrl(sData.posterUrl);
+            setOrderStatus('done');
+            return;
+          }
+          if (sData.status === 'FAILED') { setOrderStatus('failed'); return; }
+        }
+        setOrderStatus('failed');
+      } catch { setOrderStatus('failed'); }
+    })();
+  }, [searchParams, orderStatus]);
   const [layout, setLayout] = useState<Layout>('CLASSIC');
 
   const [loading, setLoading] = useState(false);
   const previewRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const cv = previewRef.current;
-    if (!cv) return;
-    const ctx = cv.getContext('2d');
-    if (!ctx) return;
-    const W = 540, H = 720;
-    cv.width = W; cv.height = H;
+    const raf = requestAnimationFrame(() => {
+      const cv = previewRef.current;
+      if (!cv) return;
+      const ctx = cv.getContext('2d');
+      if (!ctx) return;
+      const W = 540, H = 720;
+      cv.width = W; cv.height = H;
 
-    const spaced = (text: string, n: number) => text.split('').join('\u2009'.repeat(n));
-    const font = FONT_OPTIONS.find(fo => fo.id === fontId);
-    const ff = font ? font.family.split(',')[0].replace(/'/g, '') : 'serif';
-    const gName = groomNameEn || groomNameKr || 'Groom';
-    const bName = brideNameEn || brideNameKr || 'Bride';
-    const title = titleText || 'Eternal Tides';
-    const tag = tagline || 'Some journeys never end';
-    const info = [dateText || '2026. 06. 15', venueText].filter(Boolean).join('  \u00b7  ');
+      const spaced = (text: string, n: number) => text.split('').join('\u2009'.repeat(n));
+      const font = FONT_OPTIONS.find(fo => fo.id === fontId);
+      const ff = font ? font.family.split(',')[0].replace(/'/g, '') : 'serif';
+      const gName = groomNameEn || groomNameKr || 'Groom';
+      const bName = brideNameEn || brideNameKr || 'Bride';
+      const title = titleText || 'Eternal Tides';
+      const tag = tagline || 'Some journeys never end';
+      const info = [dateText || '2026. 06. 15', venueText].filter(Boolean).join('  \u00b7  ');
+      const nameDisplay = gName + '  &  ' + bName;
 
-    const draw = (bgImg?: HTMLImageElement) => {
-      ctx.clearRect(0, 0, W, H);
-      if (bgImg) {
-        const s = Math.max(W / bgImg.width, H / bgImg.height);
-        const sw = bgImg.width * s, sh = bgImg.height * s;
-        ctx.drawImage(bgImg, (W - sw) / 2, (H - sh) / 2, sw, sh);
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        ctx.fillRect(0, 0, W, H);
-      } else {
-        const bg = ctx.createLinearGradient(0, 0, W * 0.3, H);
-        bg.addColorStop(0, '#4a4540');
-        bg.addColorStop(0.5, '#2a2622');
-        bg.addColorStop(1, '#1a1816');
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, W, H);
-        ctx.fillStyle = 'rgba(255,255,255,0.015)';
-        for (let y = 0; y < H; y += 3) { ctx.fillRect(0, y, W, 1); }
-      }
-
-      ctx.fillStyle = '#fff';
-      ctx.textAlign = 'center';
-      if (layout === 'CLASSIC') {
-        ctx.font = '13px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.5)';
-        ctx.fillText(spaced((gName + '  &  ' + bName).toUpperCase(), 2), W / 2, 72);
-        ctx.font = '46px "' + ff + '", Georgia, serif';
-        ctx.fillStyle = '#fff';
-        ctx.fillText(title, W / 2, H / 2 - 10);
-        ctx.font = '14px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.55)';
-        ctx.fillText(tag, W / 2, H / 2 + 28);
-        ctx.font = '11px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.4)';
-        ctx.fillText(info, W / 2, H - 52);
-      } else if (layout === 'MODERN') {
-        ctx.textAlign = 'left';
-        ctx.font = '11px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.45)';
-        ctx.fillText(spaced((gName + ' & ' + bName).toUpperCase(), 1), 36, H - 148);
-        ctx.font = '38px "' + ff + '", Georgia, serif';
-        ctx.fillStyle = '#fff';
-        ctx.fillText(title, 36, H - 96);
-        ctx.font = '12px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.45)';
-        ctx.fillText(tag, 36, H - 62);
-        ctx.fillText(info, 36, H - 40);
-      } else if (layout === 'BOLD') {
-        ctx.font = '68px "' + ff + '", Georgia, serif';
-        ctx.fillStyle = '#fff';
-        ctx.fillText(title, W / 2, H / 2);
-        ctx.font = '13px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.45)';
-        ctx.fillText(gName + '  &  ' + bName, W / 2, H / 2 + 44);
-        ctx.fillText(info, W / 2, H / 2 + 68);
-      } else {
-        ctx.font = '12px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.55)';
-        ctx.fillText([gName + ' & ' + bName, title, dateText || '2026. 06. 15'].filter(Boolean).join('  \u00b7  '), W / 2, H - 36);
-      }
-
-      ctx.save();
-      ctx.globalAlpha = 0.07;
-      ctx.font = '15px sans-serif';
-      ctx.fillStyle = '#fff';
-      ctx.translate(W / 2, H / 2);
-      ctx.rotate(-Math.PI / 6);
-      for (let row = -6; row < 7; row++) {
-        for (let col = -4; col < 5; col++) {
-          ctx.fillText('WEDDING ENGINE', col * 180, row * 48);
+      const drawBg = (bgImg?: HTMLImageElement) => {
+        ctx.clearRect(0, 0, W, H);
+        if (bgImg) {
+          const s = Math.max(W / bgImg.width, H / bgImg.height);
+          const sw = bgImg.width * s, sh = bgImg.height * s;
+          ctx.drawImage(bgImg, (W - sw) / 2, (H - sh) / 2, sw, sh);
+        } else {
+          const bg = ctx.createLinearGradient(0, 0, 0, H);
+          bg.addColorStop(0, '#3d3835');
+          bg.addColorStop(0.35, '#2e2a27');
+          bg.addColorStop(0.65, '#252220');
+          bg.addColorStop(1, '#1c1a18');
+          ctx.fillStyle = bg;
+          ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = 'rgba(255,255,255,0.008)';
+          for (let y = 0; y < H; y += 2) ctx.fillRect(0, y, W, 1);
         }
-      }
-      ctx.restore();
-    };
+        const topV = ctx.createLinearGradient(0, 0, 0, H * 0.45);
+        topV.addColorStop(0, 'rgba(0,0,0,0.5)');
+        topV.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = topV;
+        ctx.fillRect(0, 0, W, H * 0.45);
+        const botV = ctx.createLinearGradient(0, H * 0.65, 0, H);
+        botV.addColorStop(0, 'rgba(0,0,0,0)');
+        botV.addColorStop(1, 'rgba(0,0,0,0.55)');
+        ctx.fillStyle = botV;
+        ctx.fillRect(0, H * 0.65, W, H * 0.35);
+      };
 
-    if (photoPreview && track === 'PHOTO') {
-      const img = new Image();
-      img.onload = () => draw(img);
-      img.src = photoPreview;
-    } else {
-      draw();
-    }
+      const drawText = () => {
+        ctx.textBaseline = 'middle';
+        const shadow = (text: string, x: number, y: number, alpha: number) => {
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.shadowColor = 'rgba(0,0,0,0.7)';
+          ctx.shadowBlur = 10;
+          ctx.shadowOffsetX = 1;
+          ctx.shadowOffsetY = 2;
+          ctx.fillText(text, x, y);
+          ctx.restore();
+        };
+        ctx.fillStyle = '#fff';
+        if (layout === 'CLASSIC') {
+          ctx.textAlign = 'center';
+          ctx.font = '500 11px "Montserrat", sans-serif';
+          shadow(spaced(nameDisplay.toUpperCase(), 3), W / 2, 62, 0.45);
+          ctx.font = '300 52px "' + ff + '", Georgia, serif';
+          shadow(title, W / 2, H * 0.44, 0.95);
+          ctx.font = '300 13px "Montserrat", sans-serif';
+          shadow(tag, W / 2, H * 0.44 + 40, 0.5);
+          ctx.fillStyle = 'rgba(255,255,255,0.25)';
+          ctx.fillRect(W / 2 - 20, H * 0.44 + 58, 40, 0.5);
+          ctx.fillStyle = '#fff';
+          ctx.font = '300 10px "Montserrat", sans-serif';
+          shadow(info.toUpperCase(), W / 2, H - 44, 0.4);
+        } else if (layout === 'MODERN') {
+          ctx.textAlign = 'left';
+          const lx = 32;
+          ctx.font = '300 10px "Montserrat", sans-serif';
+          shadow(spaced(nameDisplay.toUpperCase(), 2), lx, H - 160, 0.4);
+          ctx.font = '300 42px "' + ff + '", Georgia, serif';
+          shadow(title, lx, H - 108, 0.95);
+          ctx.font = '300 11px "Montserrat", sans-serif';
+          shadow(tag, lx, H - 70, 0.45);
+          ctx.fillStyle = 'rgba(255,255,255,0.2)';
+          ctx.fillRect(lx, H - 56, 30, 0.5);
+          ctx.fillStyle = '#fff';
+          ctx.font = '300 10px "Montserrat", sans-serif';
+          shadow(info, lx, H - 38, 0.35);
+        } else if (layout === 'BOLD') {
+          ctx.textAlign = 'center';
+          ctx.font = '300 72px "' + ff + '", Georgia, serif';
+          shadow(title, W / 2, H * 0.42, 0.95);
+          ctx.font = '300 12px "Montserrat", sans-serif';
+          shadow(nameDisplay, W / 2, H * 0.42 + 50, 0.4);
+          ctx.font = '300 10px "Montserrat", sans-serif';
+          shadow(info.toUpperCase(), W / 2, H * 0.42 + 74, 0.35);
+        } else {
+          ctx.textAlign = 'center';
+          ctx.font = '300 11px "Montserrat", sans-serif';
+          const minLine = [gName + ' & ' + bName, title, dateText || '2026. 06. 15'].filter(Boolean).join('  \u00b7  ');
+          shadow(minLine, W / 2, H - 32, 0.5);
+        }
+      };
+
+      const drawWatermark = () => {
+        ctx.save();
+        ctx.globalAlpha = 0.18;
+        ctx.font = '600 14px "Montserrat", sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.translate(W / 2, H / 2);
+        ctx.rotate(-Math.PI / 6);
+        for (let row = -7; row < 8; row++) {
+          for (let col = -5; col < 6; col++) {
+            ctx.fillText('WEDDING ENGINE', col * 160, row * 40);
+          }
+        }
+        ctx.restore();
+        ctx.save();
+        ctx.globalAlpha = 0.25;
+        ctx.font = '300 42px "Montserrat", sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('PREVIEW', W / 2, H / 2);
+        ctx.restore();
+      };
+
+      const render = (bgImg?: HTMLImageElement) => {
+        drawBg(bgImg);
+        drawText();
+        drawWatermark();
+      };
+
+      if (photoPreview && track === 'PHOTO') {
+        const img = new Image();
+        img.onload = () => render(img);
+        img.onerror = () => render();
+        img.src = photoPreview;
+      } else {
+        render();
+      }
+    });
+    return () => cancelAnimationFrame(raf);
   }, [step, photoPreview, track, groomNameKr, brideNameKr, groomNameEn, brideNameEn, titleText, tagline, dateText, venueText, fontId, layout]);
 
 
@@ -630,7 +718,7 @@ export default function WeddingPoster() {
           </div>
         )}
 
-        {step > 0 && (
+        {step > 0 && orderStatus === 'idle' && (
           <button
             onClick={() => setStep(step - 1)}
             style={{
@@ -639,6 +727,43 @@ export default function WeddingPoster() {
               fontSize: 13, cursor: 'pointer',
             }}
           >이전으로</button>
+        )}
+
+        {orderStatus === 'confirming' && (
+          <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+            <div style={{ width: 40, height: 40, border: '2px solid #E5E5E0', borderTopColor: '#2C2C2A', borderRadius: '50%', margin: '0 auto 20px', animation: 'spin 0.8s linear infinite' }} />
+            <p style={{ fontSize: 15, color: '#2C2C2A', fontWeight: 500 }}>결제 확인 중</p>
+            <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+          </div>
+        )}
+
+        {orderStatus === 'generating' && (
+          <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+            <div style={{ width: 40, height: 40, border: '2px solid #E5E5E0', borderTopColor: '#2C2C2A', borderRadius: '50%', margin: '0 auto 20px', animation: 'spin 0.8s linear infinite' }} />
+            <p style={{ fontSize: 15, color: '#2C2C2A', fontWeight: 500, marginBottom: 8 }}>포스터를 만들고 있어요</p>
+            <p style={{ fontSize: 13, color: '#8A8A82' }}>AI 트랙은 최대 3분 정도 걸려요</p>
+            <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+          </div>
+        )}
+
+        {orderStatus === 'done' && finalPosterUrl && (
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <p style={{ fontSize: 11, letterSpacing: 4, color: '#A8A8A0', textTransform: 'uppercase', marginBottom: 12 }}>Complete</p>
+            <p style={{ fontSize: 20, fontWeight: 300, color: '#2C2C2A', marginBottom: 24 }}>포스터가 완성되었어요</p>
+            <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #E5E5E0', marginBottom: 24 }}>
+              <img src={finalPosterUrl} alt="Wedding Poster" style={{ width: '100%', display: 'block' }} />
+            </div>
+            <a href={finalPosterUrl} download style={{ display: 'inline-block', padding: '16px 40px', background: '#2C2C2A', color: '#fff', borderRadius: 10, fontSize: 15, fontWeight: 500, textDecoration: 'none' }}>다운로드</a>
+            <Link to="/" style={{ display: 'block', marginTop: 16, fontSize: 13, color: '#A8A8A0', textDecoration: 'none' }}>홈으로</Link>
+          </div>
+        )}
+
+        {orderStatus === 'failed' && (
+          <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+            <p style={{ fontSize: 20, fontWeight: 300, color: '#2C2C2A', marginBottom: 8 }}>문제가 발생했어요</p>
+            <p style={{ fontSize: 13, color: '#8A8A82', marginBottom: 24 }}>다시 시도하거나 문의해주세요</p>
+            <Link to="/poster" style={{ display: 'inline-block', padding: '14px 32px', background: '#2C2C2A', color: '#fff', borderRadius: 10, fontSize: 14, textDecoration: 'none' }}>다시 시도</Link>
+          </div>
         )}
 
       </div>

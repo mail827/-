@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
 import { generatePosterOverlay, generateThumbnail, PosterTextInput, PosterConfig } from '../services/posterOverlay.js';
 import { getPosterConcept, POSTER_CONCEPTS } from '../data/posterPrompts.js';
-import { uploadToR2, getR2PublicUrl } from '../utils/r2.js';
+import { uploadToR2 } from '../utils/r2.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -120,16 +120,15 @@ router.post('/upload', upload.single('image'), async (req: Request, res: Respons
     if (!order) return res.status(404).json({ error: 'Order not found' });
     if (order.track !== 'PHOTO') return res.status(400).json({ error: 'Upload only for PHOTO track' });
 
-    const key = `posters/${order.id}/source.jpg`;
-    await uploadToR2(req.file.buffer, key, 'image/jpeg');
-    const url = getR2PublicUrl(key);
+    const key = `posters/${order.id}/source`;
+    const result = await uploadToR2(req.file.buffer, key, 'image/jpeg', { keepOriginal: true, skipThumb: true });
 
     await prisma.posterOrder.update({
       where: { orderId },
-      data: { sourceImageUrl: url },
+      data: { sourceImageUrl: result.url },
     });
 
-    res.json({ success: true, url });
+    res.json({ success: true, url: result.url });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
@@ -233,8 +232,16 @@ router.post('/generate', async (req: Request, res: Response) => {
         let baseImageBuffer: Buffer;
 
         if (order.track === 'PHOTO' && order.sourceImageUrl) {
+          console.log('[poster generate] fetching source:', order.sourceImageUrl);
           const imgRes = await fetch(order.sourceImageUrl);
+          const contentType = imgRes.headers.get('content-type') || '';
+          console.log('[poster generate] content-type:', contentType, 'status:', imgRes.status);
           baseImageBuffer = Buffer.from(await imgRes.arrayBuffer());
+          console.log('[poster generate] buffer size:', baseImageBuffer.length, 'first bytes:', baseImageBuffer.slice(0, 16).toString('hex'));
+          if (baseImageBuffer.length < 1000) {
+            console.log('[poster generate] body text:', baseImageBuffer.toString('utf-8').slice(0, 300));
+            throw new Error('Source image too small, likely error response');
+          }
         } else if (order.track === 'AI' && order.conceptId) {
           const { getPosterConcept } = await import('../data/posterPrompts.js');
           const concept = getPosterConcept(order.conceptId);
