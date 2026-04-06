@@ -7,6 +7,7 @@ export default defineConfig({
     charset: 'utf8',
   },
   build: {
+    sourcemap: false,
     charset: 'utf8',
   },
   server: {

@@ -247,42 +247,40 @@ router.post('/generate', async (req: Request, res: Response) => {
           const concept = getPosterConcept(order.conceptId);
           if (!concept) throw new Error('Concept not found');
           await prisma.posterOrder.update({ where: { orderId }, data: { status: 'GENERATING' as const } });
-          const faceUrls = order.faceImageUrls || [];
+          const faceUrls = (order.faceImageUrls || []) as string[];
           if (faceUrls.length === 0) throw new Error('No face images uploaded');
+
+          const finalPrompt = concept.posterPrompt + ' Do NOT add any text letters words watermark.';
+          console.log('[poster] nano-banana direct, faces:', faceUrls.length, 'prompt length:', finalPrompt.length);
+
           const falRes = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit', {
             method: 'POST',
             headers: { Authorization: 'Key ' + process.env.FAL_API_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: concept.posterPrompt, image_urls: faceUrls, num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
+            body: JSON.stringify({ prompt: finalPrompt, image_urls: faceUrls, num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
           });
           if (!falRes.ok) {
             const errBody = await falRes.text();
             console.error('[poster fal.ai]', falRes.status, errBody);
-            throw new Error('fal.ai queue submit failed: ' + falRes.status + ' ' + errBody);
+            throw new Error('fal.ai failed: ' + falRes.status);
           }
-          const falText = await falRes.text();
-          console.log('[poster fal.ai] queue response:', falText.slice(0, 500));
-          const falQueue = JSON.parse(falText);
-          const reqId = falQueue.request_id;
-          const statusUrl = falQueue.status_url;
-          const responseUrl = falQueue.response_url;
-          if (!reqId) throw new Error('No request_id: ' + falText.slice(0, 200));
+          const falQueue = await falRes.json();
+          console.log('[poster fal.ai] queued:', falQueue.request_id);
           let aiUrl = '';
           for (let poll = 0; poll < 60; poll++) {
             await new Promise(r => setTimeout(r, 3000));
-            const sRes = await fetch(statusUrl, { headers: { Authorization: 'Key ' + process.env.FAL_API_KEY } });
+            const sRes = await fetch(falQueue.status_url, { headers: { Authorization: 'Key ' + process.env.FAL_API_KEY } });
             const sData = await sRes.json();
             console.log('[poster fal.ai] poll', poll, sData.status);
             if (sData.status === 'COMPLETED') {
-              const rRes = await fetch(responseUrl, { headers: { Authorization: 'Key ' + process.env.FAL_API_KEY } });
-              const rText = await rRes.text();
-              console.log('[poster fal.ai] result:', rText.slice(0, 500));
-              const rData = JSON.parse(rText);
+              const rRes = await fetch(falQueue.response_url, { headers: { Authorization: 'Key ' + process.env.FAL_API_KEY } });
+              const rData = await rRes.json();
               aiUrl = rData.images?.[0]?.url || '';
               break;
             }
-            if (sData.status === 'FAILED') throw new Error('fal.ai generation failed');
+            if (sData.status === 'FAILED') throw new Error('fal.ai failed');
           }
-          if (!aiUrl) throw new Error('fal.ai generation timeout');
+          if (!aiUrl) throw new Error('fal.ai timeout');
+          console.log('[poster fal.ai] done:', aiUrl.slice(0, 80));
           const aiImgRes = await fetch(aiUrl);
           baseImageBuffer = Buffer.from(await aiImgRes.arrayBuffer());
           const aiKey = 'posters/' + order.id + '/ai_generated';
