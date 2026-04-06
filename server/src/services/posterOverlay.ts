@@ -180,9 +180,9 @@ function drawTextWithShadow(
 ) {
   ctx.save();
   ctx.globalAlpha = opacity;
-  ctx.shadowColor = 'rgba(0,0,0,0.6)';
-  ctx.shadowBlur = 8;
-  ctx.shadowOffsetX = 2;
+  ctx.shadowColor = 'rgba(0,0,0,0.8)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetX = 1;
   ctx.shadowOffsetY = 2;
   ctx.fillStyle = color;
   ctx.fillText(text, x, y);
@@ -223,7 +223,23 @@ export async function generatePosterOverlay(
 
   ctx.drawImage(baseImage, 0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
-  drawGradientVignette(ctx, OUTPUT_WIDTH, OUTPUT_HEIGHT);
+  const metadata = await sharp(baseImageBuffer).stats();
+  const avgBrightness = (metadata.channels[0].mean + metadata.channels[1].mean + metadata.channels[2].mean) / 3;
+  const isDark = avgBrightness < 100;
+  if (isDark) {
+    drawGradientVignette(ctx, OUTPUT_WIDTH, OUTPUT_HEIGHT);
+  } else {
+    const topG = ctx.createLinearGradient(0, 0, 0, OUTPUT_HEIGHT * 0.15);
+    topG.addColorStop(0, 'rgba(0,0,0,0.18)');
+    topG.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topG;
+    ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT * 0.15);
+    const botG = ctx.createLinearGradient(0, OUTPUT_HEIGHT * 0.88, 0, OUTPUT_HEIGHT);
+    botG.addColorStop(0, 'rgba(0,0,0,0)');
+    botG.addColorStop(1, 'rgba(0,0,0,0.2)');
+    ctx.fillStyle = botG;
+    ctx.fillRect(0, OUTPUT_HEIGHT * 0.88, OUTPUT_WIDTH, OUTPUT_HEIGHT * 0.12);
+  }
 
   const layout = LAYOUTS[config.layout] || LAYOUTS.CLASSIC;
   const fonts = FONT_REGISTRY[config.fontId] || FONT_REGISTRY.script_elegant;
