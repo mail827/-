@@ -94,61 +94,87 @@ export default function WeddingPoster() {
     const W = 540, H = 720;
     cv.width = W; cv.height = H;
 
+    const spaced = (text: string, n: number) => text.split('').join('\u2009'.repeat(n));
+    const font = FONT_OPTIONS.find(fo => fo.id === fontId);
+    const ff = font ? font.family.split(',')[0].replace(/'/g, '') : 'serif';
+    const gName = groomNameEn || groomNameKr || 'Groom';
+    const bName = brideNameEn || brideNameKr || 'Bride';
+    const title = titleText || 'Eternal Tides';
+    const tag = tagline || 'Some journeys never end';
+    const info = [dateText || '2026. 06. 15', venueText].filter(Boolean).join('  \u00b7  ');
+
     const draw = (bgImg?: HTMLImageElement) => {
       ctx.clearRect(0, 0, W, H);
       if (bgImg) {
         const s = Math.max(W / bgImg.width, H / bgImg.height);
         const sw = bgImg.width * s, sh = bgImg.height * s;
         ctx.drawImage(bgImg, (W - sw) / 2, (H - sh) / 2, sw, sh);
-        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
         ctx.fillRect(0, 0, W, H);
       } else {
-        const g = ctx.createLinearGradient(0, 0, 0, H);
-        g.addColorStop(0, '#3a3632');
-        g.addColorStop(1, '#1a1816');
-        ctx.fillStyle = g;
+        const bg = ctx.createLinearGradient(0, 0, W * 0.3, H);
+        bg.addColorStop(0, '#4a4540');
+        bg.addColorStop(0.5, '#2a2622');
+        bg.addColorStop(1, '#1a1816');
+        ctx.fillStyle = bg;
         ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = 'rgba(255,255,255,0.015)';
+        for (let y = 0; y < H; y += 3) { ctx.fillRect(0, y, W, 1); }
       }
+
       ctx.fillStyle = '#fff';
       ctx.textAlign = 'center';
-      const font = FONT_OPTIONS.find(fo => fo.id === fontId);
-      const ff = font ? font.family.split(',')[0].replace(/'/g, '') : 'serif';
       if (layout === 'CLASSIC') {
+        ctx.font = '13px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fillText(spaced((gName + '  &  ' + bName).toUpperCase(), 2), W / 2, 72);
+        ctx.font = '46px "' + ff + '", Georgia, serif';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(title, W / 2, H / 2 - 10);
         ctx.font = '14px sans-serif';
-        ctx.letterSpacing = '3px';
-        ctx.fillText((groomNameEn || groomNameKr).toUpperCase() + '  &  ' + (brideNameEn || brideNameKr).toUpperCase(), W / 2, 80);
-        ctx.letterSpacing = '0px';
-        ctx.font = '48px "' + ff + '"';
-        ctx.fillText(titleText || 'Your Title', W / 2, H / 2 - 10);
-        ctx.font = '14px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.7)';
-        ctx.fillText(tagline || '', W / 2, H / 2 + 30);
-        ctx.font = '12px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.fillText([dateText, venueText].filter(Boolean).join('  ·  '), W / 2, H - 60);
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.fillText(tag, W / 2, H / 2 + 28);
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fillText(info, W / 2, H - 52);
       } else if (layout === 'MODERN') {
         ctx.textAlign = 'left';
-        ctx.font = '12px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.fillText((groomNameEn || groomNameKr) + ' & ' + (brideNameEn || brideNameKr), 40, H - 140);
-        ctx.font = '40px "' + ff + '"';
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.fillText(spaced((gName + ' & ' + bName).toUpperCase(), 1), 36, H - 148);
+        ctx.font = '38px "' + ff + '", Georgia, serif';
         ctx.fillStyle = '#fff';
-        ctx.fillText(titleText || 'Your Title', 40, H - 90);
-        ctx.font = '13px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.fillText([dateText, venueText].filter(Boolean).join(' · '), 40, H - 55);
+        ctx.fillText(title, 36, H - 96);
+        ctx.font = '12px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.fillText(tag, 36, H - 62);
+        ctx.fillText(info, 36, H - 40);
       } else if (layout === 'BOLD') {
-        ctx.font = '72px "' + ff + '"';
-        ctx.fillText(titleText || 'Your Title', W / 2, H / 2 + 10);
+        ctx.font = '68px "' + ff + '", Georgia, serif';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(title, W / 2, H / 2);
         ctx.font = '13px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.fillText((groomNameEn || groomNameKr) + ' & ' + (brideNameEn || brideNameKr), W / 2, H / 2 + 50);
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.fillText(gName + '  &  ' + bName, W / 2, H / 2 + 44);
+        ctx.fillText(info, W / 2, H / 2 + 68);
       } else {
-        ctx.font = '13px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.7)';
-        const line = [(groomNameEn || groomNameKr) + ' & ' + (brideNameEn || brideNameKr), titleText, dateText].filter(Boolean).join('  ·  ');
-        ctx.fillText(line, W / 2, H - 40);
+        ctx.font = '12px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.fillText([gName + ' & ' + bName, title, dateText || '2026. 06. 15'].filter(Boolean).join('  \u00b7  '), W / 2, H - 36);
       }
+
+      ctx.save();
+      ctx.globalAlpha = 0.07;
+      ctx.font = '15px sans-serif';
+      ctx.fillStyle = '#fff';
+      ctx.translate(W / 2, H / 2);
+      ctx.rotate(-Math.PI / 6);
+      for (let row = -6; row < 7; row++) {
+        for (let col = -4; col < 5; col++) {
+          ctx.fillText('WEDDING ENGINE', col * 180, row * 48);
+        }
+      }
+      ctx.restore();
     };
 
     if (photoPreview && track === 'PHOTO') {
@@ -159,6 +185,7 @@ export default function WeddingPoster() {
       draw();
     }
   }, [photoPreview, track, groomNameKr, brideNameKr, groomNameEn, brideNameEn, titleText, tagline, dateText, venueText, fontId, layout]);
+
 
   const loadConcepts = useCallback(async () => {
     try {
