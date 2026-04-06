@@ -139,18 +139,23 @@ router.post('/upload', upload.single('image'), async (req: Request, res: Respons
 router.post('/upload-faces', upload.array('faces', 4), async (req: Request, res: Response) => {
   try {
     const { orderId } = req.body;
+    console.log('[upload-faces] orderId:', orderId, 'files:', req.files?.length || 0);
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) return res.status(400).json({ error: 'No files' });
     const order = await prisma.posterOrder.findUnique({ where: { orderId } });
     if (!order) return res.status(404).json({ error: 'Order not found' });
     const urls: string[] = [];
     for (let i = 0; i < req.files.length; i++) {
-      const key = `posters/${order.id}/face_${i}.jpg`;
-      await uploadToR2(req.files[i].buffer, key, 'image/jpeg');
-      urls.push(getR2PublicUrl(key));
+      const folder = `posters/${order.id}/face_${i}`;
+      console.log('[upload-faces] uploading', folder, req.files[i].size, 'bytes');
+      const result = await uploadToR2(req.files[i].buffer, folder, 'image/jpeg', { keepOriginal: true, skipThumb: true });
+      console.log('[upload-faces] url:', result.url);
+      urls.push(result.url);
     }
     await prisma.posterOrder.update({ where: { orderId }, data: { faceImageUrls: urls } });
+    console.log('[upload-faces] done:', urls);
     res.json({ success: true, urls });
   } catch (e: any) {
+    console.error('[upload-faces] error:', e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -239,20 +244,32 @@ router.post('/generate', async (req: Request, res: Response) => {
           if (faceUrls.length === 0) throw new Error('No face images uploaded');
           const falRes = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit', {
             method: 'POST',
-            headers: { Authorization: 'Key ' + process.env.FAL_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: concept.posterPrompt, image_url: faceUrls[0], aspect_ratio: '3:4' }),
+            headers: { Authorization: 'Key ' + process.env.FAL_API_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: concept.posterPrompt, image_urls: faceUrls, num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
           });
-          if (!falRes.ok) throw new Error('fal.ai queue submit failed');
-          const falQueue = await falRes.json();
+          if (!falRes.ok) {
+            const errBody = await falRes.text();
+            console.error('[poster fal.ai]', falRes.status, errBody);
+            throw new Error('fal.ai queue submit failed: ' + falRes.status + ' ' + errBody);
+          }
+          const falText = await falRes.text();
+          console.log('[poster fal.ai] queue response:', falText.slice(0, 500));
+          const falQueue = JSON.parse(falText);
           const reqId = falQueue.request_id;
+          const statusUrl = falQueue.status_url;
+          const responseUrl = falQueue.response_url;
+          if (!reqId) throw new Error('No request_id: ' + falText.slice(0, 200));
           let aiUrl = '';
           for (let poll = 0; poll < 60; poll++) {
             await new Promise(r => setTimeout(r, 3000));
-            const sRes = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit/requests/' + reqId + '/status', { headers: { Authorization: 'Key ' + process.env.FAL_KEY } });
+            const sRes = await fetch(statusUrl, { headers: { Authorization: 'Key ' + process.env.FAL_API_KEY } });
             const sData = await sRes.json();
+            console.log('[poster fal.ai] poll', poll, sData.status);
             if (sData.status === 'COMPLETED') {
-              const rRes = await fetch('https://queue.fal.run/fal-ai/nano-banana-2/edit/requests/' + reqId, { headers: { Authorization: 'Key ' + process.env.FAL_KEY } });
-              const rData = await rRes.json();
+              const rRes = await fetch(responseUrl, { headers: { Authorization: 'Key ' + process.env.FAL_API_KEY } });
+              const rText = await rRes.text();
+              console.log('[poster fal.ai] result:', rText.slice(0, 500));
+              const rData = JSON.parse(rText);
               aiUrl = rData.images?.[0]?.url || '';
               break;
             }
@@ -261,9 +278,9 @@ router.post('/generate', async (req: Request, res: Response) => {
           if (!aiUrl) throw new Error('fal.ai generation timeout');
           const aiImgRes = await fetch(aiUrl);
           baseImageBuffer = Buffer.from(await aiImgRes.arrayBuffer());
-          const aiKey = 'posters/' + order.id + '/ai_generated.jpg';
-          await uploadToR2(baseImageBuffer, aiKey, 'image/jpeg');
-          await prisma.posterOrder.update({ where: { orderId }, data: { aiGeneratedUrl: getR2PublicUrl(aiKey) } });
+          const aiKey = 'posters/' + order.id + '/ai_generated';
+          const aiResult = await uploadToR2(baseImageBuffer, aiKey, 'image/jpeg', { keepOriginal: true, skipThumb: true });
+          await prisma.posterOrder.update({ where: { orderId }, data: { aiGeneratedUrl: aiResult.url } });
         } else {
           throw new Error('No source image');
         }
@@ -282,14 +299,12 @@ router.post('/generate', async (req: Request, res: Response) => {
         const posterBuffer = await generatePosterOverlay(baseImageBuffer, textInput, posterConfig);
         const thumbBuffer = await generateThumbnail(posterBuffer);
 
-        const posterKey = 'posters/' + order.id + '/final.jpg';
-        const thumbKey = 'posters/' + order.id + '/thumb.jpg';
-        await uploadToR2(posterBuffer, posterKey, 'image/jpeg');
-        await uploadToR2(thumbBuffer, thumbKey, 'image/jpeg');
+        const posterResult = await uploadToR2(posterBuffer, 'posters/' + order.id + '/final', 'image/jpeg', { keepOriginal: true, skipThumb: true });
+        const thumbResult = await uploadToR2(thumbBuffer, 'posters/' + order.id + '/thumb', 'image/jpeg', { keepOriginal: true, skipThumb: true });
 
         await prisma.posterOrder.update({
           where: { orderId },
-          data: { status: 'DONE' as const, finalPosterUrl: getR2PublicUrl(posterKey), thumbnailUrl: getR2PublicUrl(thumbKey) },
+          data: { status: 'DONE' as const, finalPosterUrl: posterResult.url, thumbnailUrl: thumbResult.url },
         });
       } catch (e: any) {
         await prisma.posterOrder.update({ where: { orderId }, data: { status: 'FAILED' as const } });

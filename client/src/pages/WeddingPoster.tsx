@@ -184,7 +184,7 @@ export default function WeddingPoster() {
     } else {
       draw();
     }
-  }, [photoPreview, track, groomNameKr, brideNameKr, groomNameEn, brideNameEn, titleText, tagline, dateText, venueText, fontId, layout]);
+  }, [step, photoPreview, track, groomNameKr, brideNameKr, groomNameEn, brideNameEn, titleText, tagline, dateText, venueText, fontId, layout]);
 
 
   const loadConcepts = useCallback(async () => {
@@ -255,7 +255,10 @@ export default function WeddingPoster() {
         if (groomFace) fd.append('faces', groomFace);
         if (brideFace) fd.append('faces', brideFace);
         fd.append('orderId', data.orderId);
-        await fetch(`${API}/poster/upload-faces`, { method: 'POST', body: fd });
+        const ufRes = await fetch(`${API}/poster/upload-faces`, { method: 'POST', body: fd });
+        const ufData = await ufRes.json();
+        console.log('upload-faces result:', ufData);
+        if (!ufData.success) throw new Error('Face upload failed');
       }
 
       if (data.amount === 0) {
