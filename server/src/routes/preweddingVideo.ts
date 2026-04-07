@@ -276,10 +276,16 @@ async function cropUpperBody(imageUrl: string): Promise<string> {
 
     const cropH = Math.round(h * 0.75);
 
+    const shortSide = Math.min(w, cropH);
+    const scale = shortSide < 1024 ? 1024 / shortSide : 1;
+    const outW = Math.round(w * scale);
+    const outH = Math.round(cropH * scale);
     const cropped = await sharp(buf)
       .extract({ left: 0, top: 0, width: w, height: cropH })
-      .jpeg({ quality: 92 })
+      .resize(outW, outH, { fit: 'fill', kernel: 'lanczos3' })
+      .jpeg({ quality: 95 })
       .toBuffer();
+    console.log('[CropUpper] ' + w + 'x' + cropH + ' -> ' + outW + 'x' + outH);
     const s3 = new S3Client({ region: 'auto', endpoint: process.env.R2_ENDPOINT!, credentials: { accessKeyId: process.env.R2_ACCESS_KEY_ID!, secretAccessKey: process.env.R2_SECRET_ACCESS_KEY! } });
     const key = 'glamour-crop/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
     await s3.send(new PutObjectCommand({ Bucket: process.env.R2_BUCKET_NAME || 'wedding-assets', Key: key, Body: cropped, ContentType: 'image/jpeg' }));
@@ -1120,7 +1126,7 @@ function buildSD2Prompt(photoType: string, camera: string, phase: string) {
 
 
 function buildSD15DirectPrompt(photoType: string, camera: string, phase: string, sceneIndex: number = 0) {
-  const FACE_GUARD = 'Locked tripod shot, no camera movement, no tilt, no pan. Face facing camera, no head turns, preserve exact face identity unchanged. Preserve exact eye shape and eyelid fold from source image.';
+  const FACE_GUARD = 'Locked tripod shot, no camera movement, no tilt, no pan. Face facing camera, no head turns, preserve exact face identity unchanged.';
 
   const groomMotions = [
     'Subtle natural breathing, gentle breeze moves hair slightly, warm golden light',
