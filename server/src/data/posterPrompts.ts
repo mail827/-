@@ -1,6 +1,6 @@
 export interface PosterConcept {
   id: string;
-  season: 'spring' | 'summer' | 'autumn' | 'winter';
+  season: 'spring' | 'summer' | 'autumn' | 'winter' | 'film';
   label: string;
   sub: string;
   posterPrompt: string;
@@ -19,6 +19,15 @@ const OUTFIT_AUTUMN_GROOM = 'rich warm tobacco brown wool-silk blend three-butto
 
 const OUTFIT_WINTER_BRIDE = 'cool silver-white silk faille high boat neckline long fitted sleeve wedding dress silk-covered buttons sculpted bodice A-line skirt chapel train';
 const OUTFIT_WINTER_GROOM = 'deep charcoal black silk-wool blend two-button jacket slim notch lapels matching slim trousers silver-white silk shirt pale icy lavender silk tie black cashmere overcoat hanging open';
+
+const OUTFIT_TAPE_BRIDE = 'soft warm apricot silk organza off-shoulder wedding dress with sheer organza petal cap sleeves fitted bodice in pale apricot silk charmeuse three graduated tiers of weightless silk organza subtle ombre from pale apricot to soft peach seed pearls at neckline';
+const OUTFIT_TAPE_GROOM = 'soft warm sand ivory washed linen-silk blend unstructured two-button suit jacket left open pale celadon green silk shirt open at collar no tie off-white canvas sneakers';
+
+const OUTFIT_CLUE_BRIDE = 'deep emerald green silk taffeta cocktail-length dress clean square neckline wide shoulder straps structured fitted bodice full playful A-line skirt ending at mid-calf with petticoat volume oversized handmade crimson red silk camellia flower at left waist';
+const OUTFIT_CLUE_GROOM = 'warm tobacco brown corduroy two-button suit slim notch lapels cream white cotton shirt soft rounded collar deep crimson red knit tie emerald green enamel arrow pin on left lapel dark brown leather desert boots';
+
+const OUTFIT_TUNGSTEN_BRIDE = 'ivory floral cotton lace high Victorian neckline wedding dress with bishop sleeves gathered at wrist with lace cuffs entire bodice and sleeves of dense floral cotton lace with white silk lining beneath natural waistline with thin white satin ribbon belt skirt falling in relaxed straight column with slight flare at hem in matching lace over silk simple fingertip-length tulle veil';
+const OUTFIT_TUNGSTEN_GROOM = 'dark navy wool single-breasted two-button suit with slightly wide notch lapels in relaxed vintage cut not slim-fit straight-leg trousers with gentle break white cotton dress shirt with soft rounded collar muted dusty lavender silk tie in slightly loose knot';
 
 export const POSTER_CONCEPTS: PosterConcept[] = [
   {
@@ -128,6 +137,87 @@ export const POSTER_CONCEPTS: PosterConcept[] = [
     outfitBride: OUTFIT_WINTER_BRIDE,
     outfitGroom: OUTFIT_WINTER_GROOM,
     posterPrompt: `KEEP EXACT SAME FACE from reference. DO NOT change face features eyes nose mouth jawline hair. Portrait 3:4 ratio. Medium shot in a small bare room with old wooden floor and peeling wallpaper. No electricity. The room is dark and cold. The couple sits on the floor in the empty room. Mismatched candles of different heights placed around them in a rough circle are the only light source. Woman in ${OUTFIT_WINTER_BRIDE} pooling around her glowing gold in candlelight. Man in ${OUTFIT_WINTER_GROOM} behind her wrapping his arms around her, black overcoat spread beneath them. The dark ceiling and walls fill the upper 55 percent of the frame in deep shadow. Warm amber candlelight on their faces contrasts the freezing dark room. Their breath faintly visible despite the candles. Photorealistic, 50mm portrait lens, deep depth of field, cinematic photograph, fragile warmth inside hostile cold, 8k`,
+  },
+  {
+    id: 'memoir_playground',
+    season: 'film',
+    label: '서머 테이프: 운동장',
+    sub: '하루가 끝나는 줄 모르는 사람들',
+    outfitBride: OUTFIT_TAPE_BRIDE,
+    outfitGroom: OUTFIT_TAPE_GROOM,
+    posterPrompt: `KEEP EXACT SAME FACE from reference. DO NOT change face features eyes nose mouth jawline hair. Portrait 3:4 ratio. Medium shot. Empty school playground at golden hour, sun minutes from setting. Old green-painted iron bench beside rusted pull-up bars. Long shadows of pull-up bars stretch across dusty playground like sundial lines. She sits on bench, ${OUTFIT_TAPE_BRIDE} glowing deep warm gold in low sun, tiered skirt spread on bench. He lies on bench with head in her lap, ${OUTFIT_TAPE_GROOM} turned warm amber in sunset light, eyes closed. Her hand rests on his forehead fingers in his hair. Silver camcorder sits upright on bench arm, LCD screen open recording, red light blinking. Entire image heavily overexposed, edges dissolving into pure warm white, lens flare streaking across upper right corner. The blown-out golden sky fills the upper 50 percent. Photorealistic, 50mm portrait lens, deep depth of field, cinematic photograph, a small machine remembers this for them, 8k`,
+  },
+  {
+    id: 'memoir_corridor',
+    season: 'film',
+    label: '서머 테이프: 복도',
+    sub: '창문은 시간이고 그녀는 지나간다',
+    outfitBride: OUTFIT_TAPE_BRIDE,
+    outfitGroom: OUTFIT_TAPE_GROOM,
+    posterPrompt: `KEEP EXACT SAME FACE from reference. DO NOT change face features eyes nose mouth jawline hair. Portrait 3:4 ratio. Medium shot. Long empty school corridor with old wooden floor and tall windows on right side. Afternoon sun pouring through windows creating five sharp rectangles of golden light on dark wooden floor with deep shadows between. She walks ahead through the light rectangles, ${OUTFIT_TAPE_BRIDE} flaring as she moves through alternating bands of blinding gold and cool mauve shadow. He walks behind her in ${OUTFIT_TAPE_GROOM}, holding silver camcorder filming her back. Dust motes thick in light shafts like golden snow. She looks back over bare shoulder mid-laugh, face half in sun half in shadow. The corridor ceiling and repeating windows fill the upper 45 percent of the frame. Photorealistic, 50mm portrait lens, deep depth of field, cinematic photograph, each window is a year, 8k`,
+  },
+  {
+    id: 'memoir_stairwell',
+    season: 'film',
+    label: '서머 테이프: 계단',
+    sub: '빛이 말하는 것',
+    outfitBride: OUTFIT_TAPE_BRIDE,
+    outfitGroom: OUTFIT_TAPE_GROOM,
+    posterPrompt: `KEEP EXACT SAME FACE from reference. DO NOT change face features eyes nose mouth jawline hair. Portrait 3:4 ratio. Medium shot. Old concrete school stairwell between floors, shot from above looking down. He sits on stairs three steps above her, ${OUTFIT_TAPE_GROOM}, elbows on knees. She sits on landing below, ${OUTFIT_TAPE_BRIDE} pooling on concrete, train cascading down two steps behind her. She has turned and faces upward toward him, her expression reshaped into something with more weight. One window on stairwell wall lets in single shaft of warm amber light cutting horizontally between them like a visible sentence hanging in air. Dust particles in the light shaft. Below the landing is shadow, above him is shadow. They exist only in this one floor of light. The dark stairwell ceiling and upper shadows fill the upper 50 percent. Photorealistic, 85mm portrait lens, deep depth of field, cinematic photograph, the light separates them like glass, 8k`,
+  },
+  {
+    id: 'clue_carousel',
+    season: 'film',
+    label: '루즈 클루: 회전목마',
+    sub: '닿을 듯 닿지 않는',
+    outfitBride: OUTFIT_CLUE_BRIDE,
+    outfitGroom: OUTFIT_CLUE_GROOM,
+    posterPrompt: `KEEP EXACT SAME FACE from reference. DO NOT change face features eyes nose mouth jawline hair. Portrait 3:4 ratio. Medium shot. Old carousel in a small park at dusk. She rides a painted white wooden horse sidesaddle, ${OUTFIT_CLUE_BRIDE} spread over painted saddle, one hand gripping brass pole, other hand trailing behind reaching toward him. He stands on carousel platform beside her horse, ${OUTFIT_CLUE_GROOM}, one hand holding brass pole, other hand reaching toward her trailing hand. Fingertips almost touching as carousel turns slowly. A red arrow painted on the carousel floor points in a circle. Carousel string lights in warm yellow bulbs overhead, mixed with cool blue dusk sky between canopy gaps. The ornate carousel canopy with gilded decoration and warm string lights fills the upper 45 percent of the frame. Photorealistic, 50mm portrait lens, deep depth of field, cinematic photograph, almost touching is more than touching, 8k`,
+  },
+  {
+    id: 'clue_reddoor',
+    season: 'film',
+    label: '루즈 클루: 빨간 문',
+    sub: '모든 화살표는 널 가리키고 있었다',
+    outfitBride: OUTFIT_CLUE_BRIDE,
+    outfitGroom: OUTFIT_CLUE_GROOM,
+    posterPrompt: `KEEP EXACT SAME FACE from reference. DO NOT change face features eyes nose mouth jawline hair. Portrait 3:4 ratio. Medium shot. Quiet cobblestone alley at evening, vivid crimson red painted wooden door with warm yellow streetlamp above, green ivy climbing stone walls. She stands with back against the closed red door, ${OUTFIT_CLUE_BRIDE} vivid emerald against crimson paint, crimson camellia at waist disappearing into the red door behind her. She looks directly at him, no more hiding. He stands close in front of her, ${OUTFIT_CLUE_GROOM}, holding five opened cards in one hand at his side, other hand resting on the red door beside her head. A red arrow sticker on the cobblestone at their feet points at the door, at her, it was always pointing at her. The stone wall, ivy, and warm streetlamp glow fill the upper 45 percent. Photorealistic, 50mm portrait lens, deep depth of field, cinematic photograph, every arrow led here, 8k`,
+  },
+  {
+    id: 'clue_records',
+    season: 'film',
+    label: '루즈 클루: 레코드샵',
+    sub: '세 장 건너의 사랑',
+    outfitBride: OUTFIT_CLUE_BRIDE,
+    outfitGroom: OUTFIT_CLUE_GROOM,
+    posterPrompt: `KEEP EXACT SAME FACE from reference. DO NOT change face features eyes nose mouth jawline hair. Portrait 3:4 ratio. Medium shot. Tiny cramped vintage record shop, walls lined floor to ceiling with LP sleeves in rainbow of worn cardboard spines creating mosaic of muted color. She stands in narrow aisle flipping through records in a bin, ${OUTFIT_CLUE_BRIDE} compressed between packed shelves. He stands in parallel aisle on other side of same double-sided record bin, ${OUTFIT_CLUE_GROOM}. The record bin divides them at chest height. They flip through records from opposite sides, fingers moving toward each other through LP sleeves without seeing. A red arrow sticker is stuck to the spine of the LP between their approaching hands. Warm tungsten light from single hanging bulb above. The packed LP shelves and hanging bulb fill the upper 40 percent. Photorealistic, 50mm portrait lens, deep depth of field, cinematic photograph, their fingers tell a story their eyes cannot see, 8k`,
+  },
+  {
+    id: 'tungsten_sofa',
+    season: 'film',
+    label: '텅스텐: 꽃소파',
+    sub: '1979년, 우리의 처음',
+    outfitBride: OUTFIT_TUNGSTEN_BRIDE,
+    outfitGroom: OUTFIT_TUNGSTEN_GROOM,
+    posterPrompt: `KEEP EXACT SAME FACE from reference. DO NOT change face features eyes nose mouth jawline hair. Portrait 3:4 ratio. Medium shot. A Korean couple sitting on a floral velvet sofa in a dark maximalist vintage room. Large rose and tropical leaf wallpaper in deep red and green covering the entire wall behind them. An old CRT television to one side showing warm static glow, tropical houseplants, floor lamp with fabric shade. Woman wearing ${OUTFIT_TUNGSTEN_BRIDE}. Man wearing ${OUTFIT_TUNGSTEN_GROOM}. They sit close together, she holds his hand on her lap, both smiling warmly at camera. Shot with direct on-camera flash, faces brightly lit but background falls dark quickly beyond two meters. Faded warm print colors with magenta tint in highlights and yellow shift in midtones. The dark floral wallpaper and CRT television fill the upper 45 percent of the frame. Looks like a scanned photograph from a 1979 wedding album. Photorealistic, 50mm lens, celluloid grain, 8k`,
+  },
+  {
+    id: 'tungsten_stairs',
+    season: 'film',
+    label: '텅스텐: 계단',
+    sub: '내려오는 그녀를 기다리는 시간',
+    outfitBride: OUTFIT_TUNGSTEN_BRIDE,
+    outfitGroom: OUTFIT_TUNGSTEN_GROOM,
+    posterPrompt: `KEEP EXACT SAME FACE from reference. DO NOT change face features eyes nose mouth jawline hair. Portrait 3:4 ratio. Medium shot. A Korean couple on a narrow dark wood staircase with faded floral carpet runner and old framed family photos on the dark wooden wall. She descends the stairs in ${OUTFIT_TUNGSTEN_BRIDE}, veil trailing on stairs behind her, one hand on dark wooden banister. He waits at the bottom in ${OUTFIT_TUNGSTEN_GROOM}, hand extended upward toward her. A single bare warm Edison bulb hanging in the stairwell overhead is the only light source casting warm amber glow. Shot with on-camera flash from the bottom of stairs creating harsh bright light on her face with strong shadow behind her on the wall. The flash falls off leaving the top of the staircase in deep darkness. The dark stairwell ceiling and upper wall with framed photos fill the upper 50 percent. Faded print colors with orange-shifted highlights. 1976 amateur photography aesthetic. Photorealistic, 50mm lens, celluloid grain, 8k`,
+  },
+  {
+    id: 'tungsten_formal',
+    season: 'film',
+    label: '텅스텐: 스튜디오 포트레이트',
+    sub: '1977년 소도시의 작은 사진관',
+    outfitBride: OUTFIT_TUNGSTEN_BRIDE,
+    outfitGroom: OUTFIT_TUNGSTEN_GROOM,
+    posterPrompt: `KEEP EXACT SAME FACE from reference. DO NOT change face features eyes nose mouth jawline hair. Portrait 3:4 ratio. Medium full body shot. A Korean couple standing side by side facing camera for a formal wedding portrait. A mottled grey-brown canvas studio backdrop fills the entire background seamlessly with no edges visible. Woman wearing ${OUTFIT_TUNGSTEN_BRIDE}, holding a small round bouquet of white fabric flowers at her waist. Man wearing ${OUTFIT_TUNGSTEN_GROOM}, standing straight with both arms at sides. Both have tight polite closed-mouth smiles with chins slightly raised. Flat even studio lighting with very faint soft shadow behind them. Skin slightly pale and washed out from overexposure. Perfectly centered symmetrical composition. The grey-brown backdrop fills the upper 55 percent providing generous text space. A formal wedding studio portrait from a small Korean town in 1977. Slight warm magenta cast from aged photo paper. Photorealistic, 50mm lens, sharp focus, 8k`,
   },
 ];
 

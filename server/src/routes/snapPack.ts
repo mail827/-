@@ -211,6 +211,22 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '겨울: 지바고',
     base: 'freezing winter landscape with heavy snowfall, snow-covered streets and train tracks, frosted windows candle-lit rooms, cold blue-white snow contrasting warm amber candlelight, dramatic winter atmosphere visible breath in cold air, photorealistic cinematic',
   },
+  lovesick: {
+    label: '러브시크',
+    base: 'empty urban spaces at dawn and night, scarlet red silk charmeuse and electric cobalt blue wool-silk color collision, sodium vapor lamps harsh orange circles on dark asphalt, heart-shaped helium balloon, deadpan awkward distance becoming zero, celluloid grain photorealistic cinematic',
+  },
+  silver_thread: {
+    label: '실버스레드',
+    base: 'grand austere London townhouse atelier with pale grey walls and dark herringbone wooden floor, cold grey morning north-light from tall windows, silver-lavender and midnight navy tonal palette, tailor cutting table silver needle brass desk lamp, precise controlled intimate atmosphere, celluloid grain photorealistic cinematic',
+  },
+  summer_tape: {
+    label: '서머 테이프',
+    base: 'empty school playground and corridors in blazing midsummer afternoon, harsh overhead sun overexposed blown-out white sky, apricot and warm sand ivory color palette, silver camcorder, lens flare bleeding across frame, hazy heat shimmer, golden hour sunset dissolving edges into warm white, celluloid grain photorealistic cinematic',
+  },
+  rouge_clue: {
+    label: '루즈 클루',
+    base: 'old Parisian cobblestone alleys with crimson red painted doors and green ivy on stone walls, warm amber cafe interiors through fogged glass, old carousel with string lights at dusk, vintage record shop with tungsten bulbs, over-saturated emerald green and crimson red Amelie color palette, whimsical romantic treasure hunt atmosphere, celluloid grain photorealistic cinematic',
+  },
 
 
 };

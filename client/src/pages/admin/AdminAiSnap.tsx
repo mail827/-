@@ -58,6 +58,10 @@ const CONCEPTS = [
   { id: 'iphone_selfie', label: '셀카 스냅' },
   { id: 'iphone_mirror', label: '거울 셀카' },
   { id: 'aao', label: '에에올' },
+  { id: 'lovesick', label: '러브시크' },
+  { id: 'silver_thread', label: '실버스레드' },
+  { id: 'summer_tape', label: '서머 테이프' },
+  { id: 'rouge_clue', label: '루즈 클루' },
 ];
 
 const CONCEPT_MAP = Object.fromEntries(CONCEPTS.map(c => [c.id, c.label]));

@@ -18,6 +18,7 @@ router.get('/concepts', (_req: Request, res: Response) => {
     summer: POSTER_CONCEPTS.filter((c) => c.season === 'summer').map((c) => ({ id: c.id, label: c.label, sub: c.sub })),
     autumn: POSTER_CONCEPTS.filter((c) => c.season === 'autumn').map((c) => ({ id: c.id, label: c.label, sub: c.sub })),
     winter: POSTER_CONCEPTS.filter((c) => c.season === 'winter').map((c) => ({ id: c.id, label: c.label, sub: c.sub })),
+    film: POSTER_CONCEPTS.filter((c) => c.season === 'film').map((c) => ({ id: c.id, label: c.label, sub: c.sub })),
   };
   res.json(grouped);
 });
@@ -334,3 +335,90 @@ router.get('/status/:orderId', async (req: Request, res: Response) => {
 });
 
 export default router;
+
+router.post('/suggest', async (req: Request, res: Response) => {
+  try {
+    const { groomName, brideName, conceptLabel, season, mood } = req.body;
+    if (!groomName || !brideName) return res.status(400).json({ error: 'names required' });
+
+    const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
+    if (!CLAUDE_KEY) return res.status(500).json({ error: 'AI not configured' });
+
+    const prompt = `You are a world-class wedding poster art director. Generate a wedding poster title and tagline.
+
+Couple: ${groomName} & ${brideName}
+${conceptLabel ? `Concept: ${conceptLabel}` : ''}
+${season ? `Season: ${season}` : ''}
+${mood ? `Mood: ${mood}` : ''}
+
+Rules:
+- Title: 2-6 words, poetic and cinematic, English. Can include a colon for two-part titles. Think movie poster, art exhibition, fashion editorial.
+- Tagline: One elegant sentence, 6-12 words, English. Evocative, not cliche.
+- Do NOT use: "forever", "happily ever after", "two hearts one soul", "journey", "adventure", "tale"
+- Think: Wong Kar-wai film titles, Vogue cover lines, museum exhibition names
+- Return ONLY valid JSON: {"title":"...","tagline":"..."}
+- Generate 3 options as an array: [{"title":"...","tagline":"..."},...]`;
+
+    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!claudeRes.ok) {
+      const errText = await claudeRes.text();
+      console.error('[poster/suggest] Claude error:', errText);
+      return res.status(500).json({ error: 'AI generation failed' });
+    }
+
+    const data = await claudeRes.json() as any;
+    const text = data.content?.[0]?.text || '';
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) return res.status(500).json({ error: 'AI response parse failed' });
+
+    const suggestions = JSON.parse(jsonMatch[0]);
+    res.json({ suggestions });
+  } catch (e: any) {
+    console.error('[poster/suggest]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get('/my-orders', async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'no token' });
+    const token = authHeader.replace('Bearer ', '');
+    let payload: any;
+    try {
+      const [, b] = token.split('.');
+      payload = JSON.parse(Buffer.from(b, 'base64').toString());
+    } catch { return res.status(401).json({ error: 'invalid token' }); }
+
+    const user = await prisma.user.findUnique({ where: { id: payload.userId || payload.id } });
+    if (!user) return res.status(401).json({ error: 'user not found' });
+
+    const orders = await prisma.posterOrder.findMany({
+      where: { customerEmail: user.email, status: { not: 'PENDING' } },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true, orderId: true, track: true, status: true,
+        groomNameKr: true, brideNameKr: true, groomNameEn: true, brideNameEn: true,
+        titleText: true, tagline: true, conceptId: true,
+        thumbnailUrl: true, finalPosterUrl: true,
+        createdAt: true,
+      },
+    });
+    res.json(orders);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});

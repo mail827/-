@@ -17,6 +17,23 @@ interface User {
   role: string;
 }
 
+interface PosterOrder {
+  id: string;
+  orderId: string;
+  track: string;
+  status: string;
+  groomNameKr?: string;
+  brideNameKr?: string;
+  groomNameEn?: string;
+  brideNameEn?: string;
+  titleText?: string;
+  tagline?: string;
+  conceptId?: string;
+  thumbnailUrl?: string;
+  finalPosterUrl?: string;
+  createdAt: string;
+}
+
 interface Wedding {
   id: string;
   slug: string;
@@ -114,6 +131,8 @@ export default function Dashboard() {
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [showModal, setShowModal] = useState<'inquiries' | 'orders' | null>(null);
   const [retryingOrderId, setRetryingOrderId] = useState<string | null>(null);
+  const [myPosters, setMyPosters] = useState<PosterOrder[]>([]);
+  const [posterOpen, setPosterOpen] = useState(false);
   const [snapOpen, setSnapOpen] = useState(false);
   const [guestPhotos, setGuestPhotos] = useState<GuestPhoto[]>([]);
   const [guestPhotoSlug, setGuestPhotoSlug] = useState<string | null>(null);
@@ -279,6 +298,8 @@ export default function Dashboard() {
       }
 
       try {
+        const posterRes = await fetch(`${import.meta.env.VITE_API_URL}/poster/my-orders`, { headers: { Authorization: `Bearer ${token}` } });
+        if (posterRes.ok) { const pd = await posterRes.json(); setMyPosters(pd); }
         const snapRes = await fetch(`${import.meta.env.VITE_API_URL}/ai-snap/free/my-snaps`, { headers: { Authorization: `Bearer ${token}` } });
         if (snapRes.ok) { const snapData = await snapRes.json(); setMySnaps(snapData); }
       } catch {}
@@ -559,6 +580,67 @@ export default function Dashboard() {
             </motion.button>
           )}
         </div>
+
+        <section className="mb-12">
+          <button onClick={() => setPosterOpen(!posterOpen)} className="w-full flex items-center justify-between mb-0 group">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-stone-100 flex items-center justify-center">
+                <Film className="w-4 h-4 text-stone-500" />
+              </div>
+              <div className="text-left">
+                <p className="text-[11px] tracking-[0.15em] text-stone-400">WEDDING POSTER</p>
+                <h2 className="font-serif text-lg text-stone-800">나의 포스터</h2>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <a href="/poster" onClick={e => e.stopPropagation()} className="px-3 py-1.5 bg-stone-800 text-white rounded-lg text-xs font-medium hover:bg-stone-900 transition-all flex items-center gap-1.5">
+                <Plus className="w-3.5 h-3.5" /> 새 포스터
+              </a>
+              <ChevronDown className={`w-5 h-5 text-stone-400 transition-transform ${posterOpen ? "rotate-180" : ""}`} />
+            </div>
+          </button>
+          {posterOpen && (
+            <div className="mt-6">
+              {myPosters.length === 0 ? (
+                <div className="text-center py-12 bg-stone-50 rounded-lg border border-stone-100">
+                  <Film className="w-8 h-8 text-stone-300 mx-auto mb-3" />
+                  <p className="text-sm text-stone-400">아직 포스터가 없습니다</p>
+                  <a href="/poster" className="inline-block mt-3 text-xs text-stone-600 underline underline-offset-4">포스터 만들기</a>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {myPosters.map(p => (
+                    <div key={p.id} className="bg-white rounded-lg border border-stone-200 overflow-hidden group">
+                      {p.thumbnailUrl ? (
+                        <img src={p.thumbnailUrl} alt="" className="w-full aspect-[3/4] object-cover" />
+                      ) : p.finalPosterUrl ? (
+                        <img src={p.finalPosterUrl} alt="" className="w-full aspect-[3/4] object-cover" />
+                      ) : (
+                        <div className="w-full aspect-[3/4] bg-stone-100 flex items-center justify-center">
+                          {p.status === 'PROCESSING' ? <Loader2 className="w-5 h-5 text-stone-400 animate-spin" /> : <Film className="w-5 h-5 text-stone-300" />}
+                        </div>
+                      )}
+                      <div className="p-3">
+                        <p className="text-xs font-medium text-stone-700 truncate">{p.titleText || 'Untitled'}</p>
+                        <p className="text-[10px] text-stone-400 mt-0.5">{p.tagline || ''}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${p.status === 'DONE' ? 'bg-emerald-50 text-emerald-600' : p.status === 'PROCESSING' ? 'bg-amber-50 text-amber-600' : 'bg-stone-100 text-stone-400'}`}>
+                            {p.status === 'DONE' ? '완료' : p.status === 'PROCESSING' ? '생성중' : p.status}
+                          </span>
+                          {p.finalPosterUrl && p.status === 'DONE' && (
+                            <a href={p.finalPosterUrl} download className="text-stone-400 hover:text-stone-700">
+                              <Download className="w-3.5 h-3.5" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
 
         <section className="mb-12">
           <button onClick={() => setSnapOpen(!snapOpen)} className="w-full flex items-center justify-between mb-0 group">

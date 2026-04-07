@@ -36,6 +36,7 @@ const CATEGORY_ORDER = [
   { key: 'STUDIO', label: '\uc2a4\ud29c\ub514\uc624', ids: ['studio_classic', 'studio_gallery', 'studio_fog', 'studio_mocha', 'studio_sage'] },
   { key: 'HANBOK', label: '\ud55c\ubcf5', ids: ['hanbok_wonsam', 'hanbok_dangui', 'hanbok_modern', 'hanbok_saeguk', 'hanbok_flower'] },
   { key: 'FOUR_SEASONS', label: '\uc0ac\uacc4 \uc2dc\ub9ac\uc988', ids: ['spring_letter', 'summer_rain', 'autumn_film', 'winter_zhivago'] },
+  { key: 'FILM', label: '\ud544\ub984 \ub0b4\ub7ec\ud2f0\ube0c', ids: ['lovesick', 'silver_thread', 'summer_tape', 'rouge_clue'] },
   { key: 'CLASSIC', label: '\ud074\ub798\uc2dd \ub85c\ub9e8\uc2a4', ids: ['cherry_blossom', 'forest_wedding', 'castle_garden', 'cathedral', 'watercolor', 'rose_garden'] },
   { key: 'MOOD', label: '\ubb34\ub4dc \uc2dc\ub124\ub9c8', ids: ['rainy_day', 'grass_rain', 'eternal_blue', 'water_memory', 'blue_hour'] },
   { key: 'DARK', label: '\ub2e4\ud06c/\uc5d0\ub514\ud1a0\ub9ac\uc5bc', ids: ['black_swan', 'velvet_rouge', 'heart_editorial', 'magazine_cover', 'city_night'] },

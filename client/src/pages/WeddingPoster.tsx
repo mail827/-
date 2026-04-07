@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 const API = import.meta.env.VITE_API_URL;
 
 type Track = 'PHOTO' | 'AI';
-type Season = 'spring' | 'summer' | 'autumn' | 'winter';
+type Season = 'spring' | 'summer' | 'autumn' | 'winter' | 'film';
 type Layout = 'CLASSIC' | 'MODERN' | 'BOLD' | 'MINIMAL';
 
 interface Concept {
@@ -18,6 +18,7 @@ interface ConceptMap {
   summer: Concept[];
   autumn: Concept[];
   winter: Concept[];
+    film: Concept[];
 }
 
 const SEASON_META: Record<Season, { label: string; color: string; bg: string }> = {
@@ -25,14 +26,9 @@ const SEASON_META: Record<Season, { label: string; color: string; bg: string }> 
   summer: { label: '여름', color: '#6B9E78', bg: 'rgba(107,158,120,0.08)' },
   autumn: { label: '가을', color: '#C4855C', bg: 'rgba(196,133,92,0.08)' },
   winter: { label: '겨울', color: '#8E9AAF', bg: 'rgba(142,154,175,0.08)' },
+    film: { label: '필름', color: '#B8860B', bg: 'rgba(184,134,11,0.08)' },
 };
 
-const LAYOUT_OPTIONS: { id: Layout; label: string; desc: string }[] = [
-  { id: 'CLASSIC', label: 'Classic', desc: '상단 이름 / 중앙 타이틀 / 하단 정보' },
-  { id: 'MODERN', label: 'Modern', desc: '좌측 정렬 미니멀' },
-  { id: 'BOLD', label: 'Bold', desc: '대형 타이틀 중앙 점유' },
-  { id: 'MINIMAL', label: 'Minimal', desc: '하단 한 줄 집약' },
-];
 
 const FONT_OPTIONS = [
   { id: 'script_elegant', label: 'Great Vibes', sample: 'Eternal Tides', family: "'Great Vibes', cursive" },
@@ -73,6 +69,23 @@ export default function WeddingPoster() {
 
   const [fontId, setFontId] = useState('script_elegant');
   const [couponCode, setCouponCode] = useState('');
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestions, setSuggestions] = useState<{title:string;tagline:string}[]>([]);
+
+  const suggestWithAI = async () => {
+    setSuggesting(true);
+    setSuggestions([]);
+    try {
+      const r = await fetch(API + '/poster/suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groomName: groomNameEn || groomNameKr, brideName: brideNameEn || brideNameKr }),
+      });
+      const d = await r.json();
+      if (d.suggestions) setSuggestions(d.suggestions);
+    } catch {}
+    setSuggesting(false);
+  };
   const [giftCode, setGiftCode] = useState('');
   const [isGift, setIsGift] = useState(false);
   const [searchParams] = useSearchParams();
@@ -122,7 +135,7 @@ export default function WeddingPoster() {
       } catch { setOrderStatus('failed'); }
     })();
   }, [searchParams, orderStatus]);
-  const [layout, setLayout] = useState<Layout>('CLASSIC');
+  const [layout] = useState<Layout>('CLASSIC');
 
   const [loading, setLoading] = useState(false);
   const previewRef = useRef<HTMLCanvasElement>(null);
@@ -604,9 +617,25 @@ export default function WeddingPoster() {
                 </div>
               </div>
               <div>
-                <label style={{ fontSize: 12, color: '#8A8A82', marginBottom: 4, display: 'block' }}>타이틀 텍스트</label>
-                <input value={titleText} onChange={(e) => setTitleText(e.target.value)} placeholder="Eternal Tides"
-                  style={{ width: '100%', padding: '12px 14px', border: '1px solid #E5E5E0', borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <label style={{ fontSize: 12, color: '#8A8A82' }}>타이틀 텍스트</label>
+                  <button onClick={suggestWithAI} disabled={suggesting} style={{ fontSize: 11, color: '#B8860B', background: 'none', border: '1px solid #E5E0D8', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', opacity: suggesting ? 0.5 : 1 }}>
+                    {suggesting ? 'AI 생성중...' : 'AI 추천'}
+                  </button>
+                </div>
+                {suggestions.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
+                    {suggestions.map((s, i) => (
+                      <button key={i} onClick={() => { setTitleText(s.title); setTagline(s.tagline); setSuggestions([]); }}
+                        style={{ textAlign: 'left', padding: '10px 12px', border: '1px solid #E8E5E0', borderRadius: 8, background: 'rgba(184,134,11,0.04)', cursor: 'pointer', transition: 'all 0.2s' }}>
+                        <p style={{ fontSize: 13, color: '#2C2C2A', margin: '0 0 2px', fontWeight: 500 }}>{s.title}</p>
+                        <p style={{ fontSize: 11, color: '#8A8A82', margin: 0, fontStyle: 'italic' }}>{s.tagline}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <textarea value={titleText} onChange={(e) => setTitleText(e.target.value)} placeholder={"Eternal Tides\n(줄바꿈 가능)"} rows={2}
+                  style={{ width: '100%', padding: '12px 14px', border: '1px solid #E5E5E0', borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box', resize: 'none', fontFamily: 'inherit' }} />
               </div>
               <div>
                 <label style={{ fontSize: 12, color: '#8A8A82', marginBottom: 4, display: 'block' }}>태그라인</label>
@@ -659,23 +688,7 @@ export default function WeddingPoster() {
               ))}
             </div>
 
-            <p style={{ fontSize: 15, fontWeight: 500, color: '#2C2C2A', marginBottom: 16 }}>레이아웃 선택</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 28 }}>
-              {LAYOUT_OPTIONS.map((l) => (
-                <button
-                  key={l.id}
-                  onClick={() => setLayout(l.id)}
-                  style={{
-                    padding: '16px 14px', border: layout === l.id ? '1.5px solid #2C2C2A' : '1px solid #E5E5E0',
-                    borderRadius: 10, background: layout === l.id ? 'rgba(44,44,42,0.03)' : '#fff',
-                    cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s',
-                  }}
-                >
-                  <p style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A', margin: '0 0 4px' }}>{l.label}</p>
-                  <p style={{ fontSize: 11, color: '#A8A8A0', margin: 0, lineHeight: 1.4 }}>{l.desc}</p>
-                </button>
-              ))}
-            </div>
+
 
 
             <div style={{ marginBottom: 24 }}>

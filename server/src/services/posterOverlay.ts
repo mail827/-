@@ -22,7 +22,7 @@ export interface PosterTextInput {
 
 export interface PosterConfig {
   fontId: string;
-  layout: 'CLASSIC' | 'MODERN' | 'BOLD' | 'MINIMAL';
+  layout?: string;
   textColor?: string;
   textOpacity?: number;
 }
@@ -71,65 +71,6 @@ const FONT_REGISTRY: Record<string, FontSet> = {
   },
 };
 
-interface LayoutPosition {
-  nameY: number;
-  nameAlign: CanvasTextAlign;
-  nameSize: number;
-  titleY: number;
-  titleSize: number;
-  taglineY: number;
-  taglineSize: number;
-  infoY: number;
-  infoSize: number;
-}
-
-const LAYOUTS: Record<string, LayoutPosition> = {
-  CLASSIC: {
-    nameY: 0.055,
-    nameAlign: 'center',
-    nameSize: 32,
-    titleY: 0.44,
-    titleSize: 110,
-    taglineY: 0.56,
-    taglineSize: 24,
-    infoY: 0.95,
-    infoSize: 18,
-  },
-  MODERN: {
-    nameY: 0.88,
-    nameAlign: 'left',
-    nameSize: 26,
-    titleY: 0.78,
-    titleSize: 90,
-    taglineY: 0.84,
-    taglineSize: 20,
-    infoY: 0.96,
-    infoSize: 16,
-  },
-  BOLD: {
-    nameY: 0.04,
-    nameAlign: 'center',
-    nameSize: 30,
-    titleY: 0.38,
-    titleSize: 140,
-    taglineY: 0.52,
-    taglineSize: 26,
-    infoY: 0.95,
-    infoSize: 18,
-  },
-  MINIMAL: {
-    nameY: 0.93,
-    nameAlign: 'center',
-    nameSize: 22,
-    titleY: 0.46,
-    titleSize: 72,
-    taglineY: 0.54,
-    taglineSize: 18,
-    infoY: 0.97,
-    infoSize: 15,
-  },
-};
-
 let fontsRegistered = false;
 
 function ensureFontsRegistered() {
@@ -148,44 +89,199 @@ function ensureFontsRegistered() {
   fontsRegistered = true;
 }
 
-function drawGradientVignette(ctx: CanvasRenderingContext2D, w: number, h: number) {
-  const topGrad = ctx.createLinearGradient(0, 0, 0, h * 0.5);
-  topGrad.addColorStop(0, 'rgba(0,0,0,0.55)');
-  topGrad.addColorStop(0.6, 'rgba(0,0,0,0.15)');
-  topGrad.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = topGrad;
-  ctx.fillRect(0, 0, w, h * 0.5);
-
-  const bottomGrad = ctx.createLinearGradient(0, h * 0.6, 0, h);
-  bottomGrad.addColorStop(0, 'rgba(0,0,0,0)');
-  bottomGrad.addColorStop(0.5, 'rgba(0,0,0,0.2)');
-  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
-  ctx.fillStyle = bottomGrad;
-  ctx.fillRect(0, h * 0.6, w, h * 0.4);
-
-  const edgeGrad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
-  edgeGrad.addColorStop(0, 'rgba(0,0,0,0)');
-  edgeGrad.addColorStop(1, 'rgba(0,0,0,0.2)');
-  ctx.fillStyle = edgeGrad;
-  ctx.fillRect(0, 0, w, h);
+interface ZoneAnalysis {
+  row: number;
+  col: number;
+  brightness: number;
+  contrast: number;
+  isSkinTone: boolean;
 }
 
-function drawTextWithShadow(
+interface Placement {
+  titleY: number;
+  titleAlign: CanvasTextAlign;
+  titleSize: number;
+  taglineY: number;
+  taglineSize: number;
+  padX: number;
+  textColor: string;
+  shadowColor: string;
+  shadowBlur: number;
+  isDark: boolean;
+}
+
+async function analyzeImageZones(buffer: Buffer): Promise<ZoneAnalysis[]> {
+  const zones: ZoneAnalysis[] = [];
+  const resized = await sharp(buffer).resize(300, 400, { fit: 'cover' }).raw().toBuffer({ resolveWithObject: true });
+  const { data, info } = resized;
+  const { width, height, channels } = info;
+  const rowH = Math.floor(height / 3);
+  const colW = Math.floor(width / 3);
+
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      let sum = 0;
+      let sumSq = 0;
+      let skinCount = 0;
+      let count = 0;
+      const yStart = r * rowH;
+      const yEnd = Math.min((r + 1) * rowH, height);
+      const xStart = c * colW;
+      const xEnd = Math.min((c + 1) * colW, width);
+
+      for (let y = yStart; y < yEnd; y++) {
+        for (let x = xStart; x < xEnd; x++) {
+          const idx = (y * width + x) * channels;
+          const rr = data[idx];
+          const gg = data[idx + 1];
+          const bb = data[idx + 2];
+          const lum = 0.299 * rr + 0.587 * gg + 0.114 * bb;
+          sum += lum;
+          sumSq += lum * lum;
+          count++;
+          if (lum > 100 && lum < 200 && rr > gg && rr > bb && (rr - gg) < 80 && (rr - bb) > 10) {
+            skinCount++;
+          }
+        }
+      }
+
+      const avg = sum / count;
+      const variance = sumSq / count - avg * avg;
+      zones.push({
+        row: r,
+        col: c,
+        brightness: avg,
+        contrast: Math.sqrt(variance),
+        isSkinTone: (skinCount / count) > 0.25,
+      });
+    }
+  }
+  return zones;
+}
+
+function findOptimalPlacement(zones: ZoneAnalysis[], titleLineCount: number): Placement {
+  const candidates: { y: number; align: CanvasTextAlign; padX: number; score: number; zone: ZoneAnalysis }[] = [];
+
+  const zoneAt = (r: number, c: number) => zones.find(z => z.row === r && z.col === c)!;
+
+  const evalCandidate = (row: number, cols: number[], yRatio: number, align: CanvasTextAlign, padX: number, aestheticBonus: number) => {
+    const relevantZones = cols.map(c => zoneAt(row, c));
+    const hasFace = relevantZones.some(z => z.isSkinTone);
+    const avgBright = relevantZones.reduce((s, z) => s + z.brightness, 0) / relevantZones.length;
+    const avgContrast = relevantZones.reduce((s, z) => s + z.contrast, 0) / relevantZones.length;
+
+    let score = aestheticBonus;
+    if (hasFace) score -= 100;
+    score += (avgContrast < 40) ? 15 : 0;
+    const darkBonus = Math.max(0, (180 - avgBright) / 3);
+    score += darkBonus;
+    if (row === 1) score += 8;
+    if (align === 'center') score += 5;
+
+    candidates.push({ y: yRatio, align, padX, score, zone: relevantZones[0] });
+  };
+
+  evalCandidate(0, [0, 1, 2], 0.20, 'center', OUTPUT_WIDTH / 2, 12);
+  evalCandidate(0, [0, 1, 2], 0.28, 'center', OUTPUT_WIDTH / 2, 15);
+  evalCandidate(1, [0, 1, 2], 0.42, 'center', OUTPUT_WIDTH / 2, 20);
+  evalCandidate(1, [0, 1, 2], 0.50, 'center', OUTPUT_WIDTH / 2, 18);
+  evalCandidate(2, [0, 1, 2], 0.72, 'center', OUTPUT_WIDTH / 2, 10);
+  evalCandidate(2, [0, 1, 2], 0.78, 'center', OUTPUT_WIDTH / 2, 8);
+  evalCandidate(1, [0], 0.45, 'left', OUTPUT_WIDTH * 0.08, 10);
+  evalCandidate(1, [2], 0.45, 'right', OUTPUT_WIDTH * 0.92, 8);
+  evalCandidate(2, [0], 0.75, 'left', OUTPUT_WIDTH * 0.08, 6);
+
+  candidates.sort((a, b) => b.score - a.score);
+  const best = candidates[0];
+
+  const zoneBright = best.zone.brightness;
+  const isDark = zoneBright < 120;
+
+  const titleSize = best.align === 'center' ? 110 : 90;
+  const taglineSize = best.align === 'center' ? 24 : 20;
+  const lineHeight = titleSize * 1.15;
+  const taglineOffset = (titleLineCount * lineHeight) / 2 + titleSize * 0.6;
+
+  return {
+    titleY: best.y,
+    titleAlign: best.align,
+    titleSize,
+    taglineY: best.y + taglineOffset / OUTPUT_HEIGHT,
+    taglineSize,
+    padX: best.padX,
+    textColor: isDark ? '#FFFFFF' : '#1A1A18',
+    shadowColor: isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.7)',
+    shadowBlur: isDark ? 14 : 10,
+    isDark,
+  };
+}
+
+function drawAdaptiveVignette(ctx: CanvasRenderingContext2D, w: number, h: number, placement: Placement) {
+  if (placement.isDark) {
+    const topGrad = ctx.createLinearGradient(0, 0, 0, h * 0.18);
+    topGrad.addColorStop(0, 'rgba(0,0,0,0.45)');
+    topGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topGrad;
+    ctx.fillRect(0, 0, w, h * 0.18);
+
+    const botGrad = ctx.createLinearGradient(0, h * 0.88, 0, h);
+    botGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    botGrad.addColorStop(1, 'rgba(0,0,0,0.5)');
+    ctx.fillStyle = botGrad;
+    ctx.fillRect(0, h * 0.88, w, h * 0.12);
+  } else {
+    const topGrad = ctx.createLinearGradient(0, 0, 0, h * 0.15);
+    topGrad.addColorStop(0, 'rgba(255,255,255,0.3)');
+    topGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = topGrad;
+    ctx.fillRect(0, 0, w, h * 0.15);
+
+    const botGrad = ctx.createLinearGradient(0, h * 0.9, 0, h);
+    botGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    botGrad.addColorStop(1, 'rgba(0,0,0,0.25)');
+    ctx.fillStyle = botGrad;
+    ctx.fillRect(0, h * 0.9, w, h * 0.1);
+  }
+
+  const titleY = placement.titleY * h;
+  const bandTop = Math.max(0, titleY - h * 0.15);
+  const bandBot = Math.min(h, titleY + h * 0.15);
+  const bandGrad = ctx.createLinearGradient(0, bandTop, 0, bandBot);
+  if (placement.isDark) {
+    bandGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    bandGrad.addColorStop(0.3, 'rgba(0,0,0,0.25)');
+    bandGrad.addColorStop(0.7, 'rgba(0,0,0,0.25)');
+    bandGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  } else {
+    bandGrad.addColorStop(0, 'rgba(255,255,255,0)');
+    bandGrad.addColorStop(0.3, 'rgba(255,255,255,0.2)');
+    bandGrad.addColorStop(0.7, 'rgba(255,255,255,0.2)');
+    bandGrad.addColorStop(1, 'rgba(255,255,255,0)');
+  }
+  ctx.fillStyle = bandGrad;
+  ctx.fillRect(0, bandTop, w, bandBot - bandTop);
+}
+
+function drawTextAdaptive(
   ctx: CanvasRenderingContext2D,
   text: string,
   x: number,
   y: number,
-  color: string,
-  opacity: number,
+  placement: Placement,
+  alpha: number,
 ) {
   ctx.save();
-  ctx.globalAlpha = opacity;
-  ctx.shadowColor = 'rgba(0,0,0,0.8)';
-  ctx.shadowBlur = 12;
-  ctx.shadowOffsetX = 1;
-  ctx.shadowOffsetY = 2;
-  ctx.fillStyle = color;
+  ctx.globalAlpha = alpha;
+  ctx.shadowColor = placement.shadowColor;
+  ctx.shadowBlur = placement.shadowBlur;
+  ctx.shadowOffsetX = placement.isDark ? 1 : 0;
+  ctx.shadowOffsetY = placement.isDark ? 2 : 1;
+  ctx.fillStyle = placement.textColor;
   ctx.fillText(text, x, y);
+  if (!placement.isDark) {
+    ctx.shadowBlur = 0;
+    ctx.fillText(text, x, y);
+  }
   ctx.restore();
 }
 
@@ -217,106 +313,83 @@ export async function generatePosterOverlay(
     .jpeg({ quality: 95 })
     .toBuffer();
 
+  const zones = await analyzeImageZones(resized);
+  const titleLines = textInput.titleText ? textInput.titleText.split('\n') : ['Eternal Tides'];
+  const placement = findOptimalPlacement(zones, titleLines.length);
+
   const baseImage = await loadImage(resized);
   const canvas = createCanvas(OUTPUT_WIDTH, OUTPUT_HEIGHT);
   const ctx = canvas.getContext('2d');
 
   ctx.drawImage(baseImage, 0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
-  const metadata = await sharp(baseImageBuffer).stats();
-  const avgBrightness = (metadata.channels[0].mean + metadata.channels[1].mean + metadata.channels[2].mean) / 3;
-  const isDark = avgBrightness < 100;
-  if (isDark) {
-    drawGradientVignette(ctx, OUTPUT_WIDTH, OUTPUT_HEIGHT);
-  } else {
-    const topG = ctx.createLinearGradient(0, 0, 0, OUTPUT_HEIGHT * 0.15);
-    topG.addColorStop(0, 'rgba(0,0,0,0.18)');
-    topG.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = topG;
-    ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT * 0.15);
-    const botG = ctx.createLinearGradient(0, OUTPUT_HEIGHT * 0.88, 0, OUTPUT_HEIGHT);
-    botG.addColorStop(0, 'rgba(0,0,0,0)');
-    botG.addColorStop(1, 'rgba(0,0,0,0.2)');
-    ctx.fillStyle = botG;
-    ctx.fillRect(0, OUTPUT_HEIGHT * 0.88, OUTPUT_WIDTH, OUTPUT_HEIGHT * 0.12);
-  }
+  drawAdaptiveVignette(ctx, OUTPUT_WIDTH, OUTPUT_HEIGHT, placement);
 
-  const layout = LAYOUTS[config.layout] || LAYOUTS.CLASSIC;
   const fonts = FONT_REGISTRY[config.fontId] || FONT_REGISTRY.script_elegant;
-  const color = config.textColor || '#FFFFFF';
   const opacity = config.textOpacity ?? 0.95;
   const maxTextWidth = OUTPUT_WIDTH * 0.85;
-  const padX = config.layout === 'MODERN' ? OUTPUT_WIDTH * 0.08 : OUTPUT_WIDTH / 2;
 
-  ctx.textAlign = layout.nameAlign;
   ctx.textBaseline = 'middle';
 
   const nameStr =
     textInput.nameLanguage === 'en'
       ? `${textInput.groomName}  &  ${textInput.brideName}`
       : `${textInput.groomName}  ${textInput.brideName}`;
-
   const spacedName = nameStr.split('').join('\u2009');
-  const nameSize = fitTextWidth(ctx, spacedName, fonts.name, layout.nameSize, maxTextWidth);
-  ctx.font = `${nameSize}px "${fonts.name}"`;
-  drawTextWithShadow(ctx, spacedName.toUpperCase(), padX, OUTPUT_HEIGHT * layout.nameY, color, opacity * 0.55);
 
-  if (textInput.titleText) {
-    const lines = textInput.titleText.split('\n');
-    const lineHeight = layout.titleSize * 1.15;
-    const startY = OUTPUT_HEIGHT * layout.titleY - ((lines.length - 1) * lineHeight) / 2;
-    ctx.textAlign = 'center';
-    for (let i = 0; i < lines.length; i++) {
-      const tSize = fitTextWidth(ctx, lines[i], fonts.title, layout.titleSize, maxTextWidth);
+  ctx.textAlign = 'center';
+  const nameSize = fitTextWidth(ctx, spacedName, fonts.name, 32, maxTextWidth);
+  ctx.font = `${nameSize}px "${fonts.name}"`;
+  const nameColor = zones[1].brightness < 120 ? '#FFFFFF' : '#1A1A18';
+  const nameShadow = zones[1].brightness < 120 ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.6)';
+  ctx.save();
+  ctx.globalAlpha = opacity * 0.5;
+  ctx.shadowColor = nameShadow;
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = nameColor;
+  ctx.fillText(spacedName.toUpperCase(), OUTPUT_WIDTH / 2, OUTPUT_HEIGHT * 0.055);
+  ctx.restore();
+
+  if (titleLines.length > 0) {
+    const lineHeight = placement.titleSize * 1.15;
+    const startY = OUTPUT_HEIGHT * placement.titleY - ((titleLines.length - 1) * lineHeight) / 2;
+    ctx.textAlign = placement.titleAlign;
+    for (let i = 0; i < titleLines.length; i++) {
+      const tSize = fitTextWidth(ctx, titleLines[i], fonts.title, placement.titleSize, maxTextWidth);
       ctx.font = `${tSize}px "${fonts.title}"`;
-      drawTextWithShadow(
-        ctx,
-        lines[i],
-        OUTPUT_WIDTH / 2,
-        startY + i * lineHeight,
-        color,
-        opacity * 0.9,
-      );
+      drawTextAdaptive(ctx, titleLines[i], placement.padX, startY + i * lineHeight, placement, opacity * 0.9);
     }
   }
 
   if (textInput.tagline) {
-    const tgSize = fitTextWidth(ctx, textInput.tagline, fonts.title, layout.taglineSize, maxTextWidth);
+    const tgSize = fitTextWidth(ctx, textInput.tagline, fonts.title, placement.taglineSize, maxTextWidth);
     ctx.font = `italic ${tgSize}px "${fonts.title}"`;
-    ctx.textAlign = 'center';
-    drawTextWithShadow(
-      ctx,
-      textInput.tagline,
-      OUTPUT_WIDTH / 2,
-      OUTPUT_HEIGHT * layout.taglineY,
-      color,
-      opacity * 0.85,
-    );
+    ctx.textAlign = placement.titleAlign;
+    drawTextAdaptive(ctx, textInput.tagline, placement.padX, OUTPUT_HEIGHT * placement.taglineY, placement, opacity * 0.7);
   }
 
   const infoParts: string[] = [];
   if (textInput.dateText) infoParts.push(textInput.dateText);
   if (textInput.venueText) infoParts.push(textInput.venueText);
   if (infoParts.length > 0) {
-    const infoStr = infoParts.join('  ·  ');
-    const infoSize = fitTextWidth(ctx, infoStr, fonts.info, layout.infoSize, maxTextWidth);
+    const infoStr = infoParts.join('  \u00b7  ');
+    const infoZone = zones[7];
+    const infoColor = infoZone.brightness < 120 ? '#FFFFFF' : '#1A1A18';
+    const infoShadow = infoZone.brightness < 120 ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.6)';
+    const infoSize = fitTextWidth(ctx, infoStr, fonts.info, 18, maxTextWidth);
     ctx.font = `${infoSize}px "${fonts.info}"`;
     ctx.textAlign = 'center';
-    drawTextWithShadow(
-      ctx,
-      infoStr,
-      OUTPUT_WIDTH / 2,
-      OUTPUT_HEIGHT * layout.infoY,
-      color,
-      opacity * 0.8,
-    );
+    ctx.save();
+    ctx.globalAlpha = opacity * 0.7;
+    ctx.shadowColor = infoShadow;
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = infoColor;
+    ctx.fillText(infoStr, OUTPUT_WIDTH / 2, OUTPUT_HEIGHT * 0.95);
+    ctx.restore();
   }
 
   const posterBuffer = canvas.toBuffer('image/png');
-
-  const finalJpeg = await sharp(posterBuffer).jpeg({ quality: 95 }).toBuffer();
-
-  return finalJpeg;
+  return sharp(posterBuffer).jpeg({ quality: 95 }).toBuffer();
 }
 
 export async function generateThumbnail(posterBuffer: Buffer): Promise<Buffer> {
