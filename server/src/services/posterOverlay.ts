@@ -1,5 +1,6 @@
 import { createCanvas, registerFont, loadImage, CanvasRenderingContext2D } from 'canvas';
 import sharp from 'sharp';
+import fetch from 'node-fetch';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -110,6 +111,35 @@ interface Placement {
   isDark: boolean;
 }
 
+async function detectFaceBBoxes(buffer: Buffer): Promise<{x1:number;y1:number;x2:number;y2:number}[]> {
+  try {
+    const small = await sharp(buffer).resize(512, 683, { fit: 'cover' }).jpeg({ quality: 70 }).toBuffer();
+    const b64 = small.toString('base64');
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + process.env.OPENAI_API_KEY },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini', max_tokens: 200,
+        messages: [{ role: 'user', content: [
+          { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + b64, detail: 'low' } },
+          { type: 'text', text: 'Detect all human faces in this image. For each face return its bounding box as percentage of image dimensions. Return ONLY a JSON array like [{"x1":20,"y1":10,"x2":45,"y2":40}] where values are 0-100 percentages. If no faces found return [].' },
+        ] }],
+      }),
+    });
+    const data = await res.json() as any;
+    const raw = (data.choices?.[0]?.message?.content || '[]').replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      console.log('[PosterOverlay] Face detect:', parsed.length, 'faces');
+      return parsed;
+    }
+    return [];
+  } catch (e: any) {
+    console.log('[PosterOverlay] Face detect failed:', e.message);
+    return [];
+  }
+}
+
 async function analyzeImageZones(buffer: Buffer): Promise<ZoneAnalysis[]> {
   const zones: ZoneAnalysis[] = [];
   const resized = await sharp(buffer).resize(300, 400, { fit: 'cover' }).raw().toBuffer({ resolveWithObject: true });
@@ -159,7 +189,7 @@ async function analyzeImageZones(buffer: Buffer): Promise<ZoneAnalysis[]> {
   return zones;
 }
 
-function findOptimalPlacement(zones: ZoneAnalysis[], titleLineCount: number): Placement {
+function findOptimalPlacement(zones: ZoneAnalysis[], titleLineCount: number, faceBBoxes: {x1:number;y1:number;x2:number;y2:number}[] = []): Placement {
   const candidates: { y: number; align: CanvasTextAlign; padX: number; score: number; zone: ZoneAnalysis }[] = [];
 
   const zoneAt = (r: number, c: number) => zones.find(z => z.row === r && z.col === c)!;
@@ -172,6 +202,12 @@ function findOptimalPlacement(zones: ZoneAnalysis[], titleLineCount: number): Pl
 
     let score = aestheticBonus;
     if (hasFace) score -= 100;
+    const rowCenter = (row + 0.5) / 3 * 100;
+    for (const fb of faceBBoxes) {
+      const fy1 = fb.y1; const fy2 = fb.y2;
+      const fCenterY = (fy1 + fy2) / 2;
+      if (Math.abs(rowCenter - fCenterY) < 25) score -= 200;
+    }
     score += (avgContrast < 40) ? 15 : 0;
     const darkBonus = Math.max(0, (180 - avgBright) / 3);
     score += darkBonus;
@@ -314,8 +350,9 @@ export async function generatePosterOverlay(
     .toBuffer();
 
   const zones = await analyzeImageZones(resized);
+  const faceBBoxes = await detectFaceBBoxes(resized);
   const titleLines = textInput.titleText ? textInput.titleText.split('\n') : ['Eternal Tides'];
-  const placement = findOptimalPlacement(zones, titleLines.length);
+  const placement = findOptimalPlacement(zones, titleLines.length, faceBBoxes);
 
   const baseImage = await loadImage(resized);
   const canvas = createCanvas(OUTPUT_WIDTH, OUTPUT_HEIGHT);
