@@ -327,9 +327,12 @@ export default function WeddingPage() {
           onComplete={() => setEnvelopeDismissed(true)}
         />
       )}
-      <div ref={sectionRef} style={{
+      <div ref={sectionRef} className="wedding-page" onContextMenu={e => e.preventDefault()} style={{
         zoom: (weddingToUse.fontScale === 'small' ? 0.92 : weddingToUse.fontScale === 'large' ? 1.08 : 1),
+        WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none',
       }}>
+
+      <style>{'.wedding-page img { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; pointer-events: none; } .wedding-page img[data-interactive] { pointer-events: auto; }'}</style>
       {fontScaleStyle && <style>{fontScaleStyle}</style>}
       {accentColorStyle && <style>{accentColorStyle}</style>}
       {galleryAspectStyle && <style>{galleryAspectStyle}</style>}
