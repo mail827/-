@@ -96,6 +96,9 @@ interface ZoneAnalysis {
   brightness: number;
   contrast: number;
   isSkinTone: boolean;
+  avgR: number;
+  avgG: number;
+  avgB: number;
 }
 
 interface Placement {
@@ -177,12 +180,22 @@ async function analyzeImageZones(buffer: Buffer): Promise<ZoneAnalysis[]> {
 
       const avg = sum / count;
       const variance = sumSq / count - avg * avg;
+      let sumR = 0, sumG = 0, sumB = 0;
+      for (let y2 = yStart; y2 < yEnd; y2++) {
+        for (let x2 = xStart; x2 < xEnd; x2++) {
+          const idx2 = (y2 * width + x2) * channels;
+          sumR += data[idx2]; sumG += data[idx2 + 1]; sumB += data[idx2 + 2];
+        }
+      }
       zones.push({
         row: r,
         col: c,
         brightness: avg,
         contrast: Math.sqrt(variance),
         isSkinTone: (skinCount / count) > 0.25,
+        avgR: Math.round(sumR / count),
+        avgG: Math.round(sumG / count),
+        avgB: Math.round(sumB / count),
       });
     }
   }
@@ -231,18 +244,45 @@ function findOptimalPlacement(zones: ZoneAnalysis[], titleLineCount: number, fac
   const titleSize = best.align === 'center' ? 110 : 90;
   const taglineSize = best.align === 'center' ? 24 : 20;
   const lineHeight = titleSize * 1.15;
-  const taglineOffset = (titleLineCount * lineHeight) / 2 + titleSize * 0.6;
 
   return {
     titleY: best.y,
     titleAlign: best.align,
     titleSize,
-    taglineY: best.y + taglineOffset / OUTPUT_HEIGHT,
+    taglineY: 0.88,
     taglineSize,
     padX: best.padX,
-    textColor: isDark ? '#FFFFFF' : '#1A1A18',
-    shadowColor: isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.7)',
-    shadowBlur: isDark ? 14 : 10,
+    textColor: (() => {
+      const z = candidates[0].zone;
+      const r = z.avgR, g = z.avgG, b = z.avgB;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h = 0;
+      if (max !== min) {
+        const d = max - min;
+        if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+        else if (max === g) h = ((b - r) / d + 2) * 60;
+        else h = ((r - g) / d + 4) * 60;
+      }
+      const s = isDark ? 0.15 : 0.45;
+      const l = isDark ? 0.92 : 0.28;
+      const hueRad = h * Math.PI / 180;
+      const c2 = (1 - Math.abs(2 * l - 1)) * s;
+      const x2 = c2 * (1 - Math.abs((h / 60) % 2 - 1));
+      const m2 = l - c2 / 2;
+      let rr2 = 0, gg2 = 0, bb2 = 0;
+      if (h < 60) { rr2 = c2; gg2 = x2; }
+      else if (h < 120) { rr2 = x2; gg2 = c2; }
+      else if (h < 180) { gg2 = c2; bb2 = x2; }
+      else if (h < 240) { gg2 = x2; bb2 = c2; }
+      else if (h < 300) { rr2 = x2; bb2 = c2; }
+      else { rr2 = c2; bb2 = x2; }
+      const fr = Math.round((rr2 + m2) * 255);
+      const fg = Math.round((gg2 + m2) * 255);
+      const fb = Math.round((bb2 + m2) * 255);
+      return '#' + [fr, fg, fb].map(v => v.toString(16).padStart(2, '0')).join('');
+    })(),
+    shadowColor: isDark ? 'rgba(0,0,0,0.9)' : 'rgba(0,0,0,0.5)',
+    shadowBlur: isDark ? 16 : 12,
     isDark,
   };
 }
@@ -370,12 +410,12 @@ export async function generatePosterOverlay(
   const spacedName = nameStr.split('').join('\u2009');
 
   ctx.textAlign = 'center';
-  const nameSize = fitTextWidth(ctx, spacedName, fonts.name, 32, maxTextWidth);
+  const nameSize = fitTextWidth(ctx, spacedName, fonts.name, 38, maxTextWidth);
   ctx.font = `${nameSize}px "${fonts.name}"`;
-  const nameColor = zones[1].brightness < 120 ? '#FFFFFF' : '#1A1A18';
-  const nameShadow = zones[1].brightness < 120 ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.6)';
+  const nameColor = placement.textColor;
+  const nameShadow = placement.shadowColor;
   ctx.save();
-  ctx.globalAlpha = opacity * 0.5;
+  ctx.globalAlpha = opacity * 0.85;
   ctx.shadowColor = nameShadow;
   ctx.shadowBlur = 10;
   ctx.fillStyle = nameColor;
@@ -394,10 +434,10 @@ export async function generatePosterOverlay(
   }
 
   if (textInput.tagline) {
-    const tgSize = fitTextWidth(ctx, textInput.tagline, fonts.title, placement.taglineSize, maxTextWidth);
-    ctx.font = `italic ${tgSize}px "${fonts.title}"`;
-    ctx.textAlign = placement.titleAlign;
-    drawTextAdaptive(ctx, textInput.tagline, placement.padX, OUTPUT_HEIGHT * placement.taglineY, placement, opacity * 0.7);
+    const tgSize = fitTextWidth(ctx, textInput.tagline, fonts.info, 22, maxTextWidth);
+    ctx.font = `italic ${tgSize}px "${fonts.info}"`;
+    ctx.textAlign = 'center';
+    drawTextAdaptive(ctx, textInput.tagline, OUTPUT_WIDTH / 2, OUTPUT_HEIGHT * 0.88, placement, opacity * 0.75);
   }
 
   const infoParts: string[] = [];
@@ -406,8 +446,8 @@ export async function generatePosterOverlay(
   if (infoParts.length > 0) {
     const infoStr = infoParts.join('  \u00b7  ');
     const infoZone = zones[7];
-    const infoColor = infoZone.brightness < 120 ? '#FFFFFF' : '#1A1A18';
-    const infoShadow = infoZone.brightness < 120 ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.6)';
+    const infoColor = placement.textColor;
+    const infoShadow = placement.shadowColor;
     const infoSize = fitTextWidth(ctx, infoStr, fonts.info, 18, maxTextWidth);
     ctx.font = `${infoSize}px "${fonts.info}"`;
     ctx.textAlign = 'center';
