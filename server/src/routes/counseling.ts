@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middleware/auth.js';
+import { randomUUID } from 'crypto';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -44,23 +45,23 @@ function buildSupportReply({
 }
 
 async function ensureSeedUsers() {
-  await prisma.$executeRawUnsafe(`INSERT INTO "CounselingUser" ("id","name","role","createdAt","updatedAt")
+  await prisma.$executeRaw`INSERT INTO "CounselingUser" ("id","name","role","createdAt","updatedAt")
     SELECT 'gahyun','가현','member',NOW(),NOW()
-    WHERE NOT EXISTS (SELECT 1 FROM "CounselingUser" WHERE "id"='gahyun')`);
-  await prisma.$executeRawUnsafe(`INSERT INTO "CounselingUser" ("id","name","role","createdAt","updatedAt")
+    WHERE NOT EXISTS (SELECT 1 FROM "CounselingUser" WHERE "id"='gahyun')`;
+  await prisma.$executeRaw`INSERT INTO "CounselingUser" ("id","name","role","createdAt","updatedAt")
     SELECT 'dakyum','다겸','member',NOW(),NOW()
-    WHERE NOT EXISTS (SELECT 1 FROM "CounselingUser" WHERE "id"='dakyum')`);
+    WHERE NOT EXISTS (SELECT 1 FROM "CounselingUser" WHERE "id"='dakyum')`;
 }
 
 router.get('/users', authMiddleware, async (req: any, res) => {
   try {
     await ensureSeedUsers();
     if (isAdmin(req.user)) {
-      const rows = await prisma.$queryRawUnsafe(`SELECT * FROM "CounselingUser" ORDER BY "createdAt" ASC`);
+      const rows = await prisma.$queryRaw<any[]>`SELECT * FROM "CounselingUser" ORDER BY "createdAt" ASC`;
       return res.json(rows);
     }
     const mine = resolveMemberName(req.user) === '가현' ? 'gahyun' : 'dakyum';
-    const rows = await prisma.$queryRawUnsafe(`SELECT * FROM "CounselingUser" WHERE "id" = $1`, mine);
+    const rows = await prisma.$queryRaw<any[]>`SELECT * FROM "CounselingUser" WHERE "id" = ${mine}`;
     res.json(rows);
   } catch (e: any) {
     res.status(500).json({ error: e.message || 'failed' });
@@ -72,10 +73,9 @@ router.get('/sessions', authMiddleware, async (req: any, res) => {
     const requestedUserId = String(req.query.userId || '');
     const mine = resolveMemberName(req.user) === '가현' ? 'gahyun' : 'dakyum';
     const userId = isAdmin(req.user) ? (requestedUserId || mine) : mine;
-    const rows = await prisma.$queryRawUnsafe(
-      `SELECT * FROM "CounselingSession" WHERE "userId" = $1 ORDER BY "updatedAt" DESC`,
-      userId
-    );
+    const rows = await prisma.$queryRaw<any[]>`
+      SELECT * FROM "CounselingSession" WHERE "userId" = ${userId} ORDER BY "updatedAt" DESC
+    `;
     res.json(rows);
   } catch (e: any) {
     res.status(500).json({ error: e.message || 'failed' });
@@ -89,16 +89,14 @@ router.post('/sessions', authMiddleware, async (req: any, res) => {
     const userId = isAdmin(req.user) ? requestedUserId : mine;
     const mood = MOODS.includes(req.body.mood) ? req.body.mood : 'okay';
     const title = req.body.title || '새 상담';
-    const id = 'cs_' + Date.now();
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO "CounselingSession" ("id","userId","title","mood","createdAt","updatedAt") VALUES ($1,$2,$3,$4,NOW(),NOW())`,
-      id,
-      userId,
-      title,
-      mood
-    );
-    const rows = await prisma.$queryRawUnsafe(`SELECT * FROM "CounselingSession" WHERE "id" = $1`, id);
-    res.json((rows as any[])[0]);
+    await ensureSeedUsers();
+    const id = `cs_${randomUUID()}`;
+    await prisma.$executeRaw`
+      INSERT INTO "CounselingSession" ("id","userId","title","mood","createdAt","updatedAt")
+      VALUES (${id},${userId},${title},${mood},NOW(),NOW())
+    `;
+    const rows = await prisma.$queryRaw<any[]>`SELECT * FROM "CounselingSession" WHERE "id" = ${id}`;
+    res.json(rows[0]);
   } catch (e: any) {
     res.status(500).json({ error: e.message || 'failed' });
   }
@@ -106,15 +104,14 @@ router.post('/sessions', authMiddleware, async (req: any, res) => {
 
 router.get('/sessions/:id/messages', authMiddleware, async (req: any, res) => {
   try {
-    const sessionRows = (await prisma.$queryRawUnsafe(`SELECT * FROM "CounselingSession" WHERE "id" = $1`, req.params.id)) as any[];
+    const sessionRows = await prisma.$queryRaw<any[]>`SELECT * FROM "CounselingSession" WHERE "id" = ${req.params.id}`;
     const session = sessionRows[0];
     if (!session) return res.status(404).json({ error: 'not found' });
     const mine = resolveMemberName(req.user) === '가현' ? 'gahyun' : 'dakyum';
     if (!isAdmin(req.user) && session.userId !== mine) return res.status(403).json({ error: 'forbidden' });
-    const rows = await prisma.$queryRawUnsafe(
-      `SELECT * FROM "CounselingMessage" WHERE "sessionId" = $1 ORDER BY "createdAt" ASC`,
-      req.params.id
-    );
+    const rows = await prisma.$queryRaw<any[]>`
+      SELECT * FROM "CounselingMessage" WHERE "sessionId" = ${req.params.id} ORDER BY "createdAt" ASC
+    `;
     res.json({ session, messages: rows });
   } catch (e: any) {
     res.status(500).json({ error: e.message || 'failed' });
@@ -125,40 +122,34 @@ router.post('/sessions/:id/messages', authMiddleware, async (req: any, res) => {
   try {
     const content = String(req.body.content || '').trim();
     if (!content) return res.status(400).json({ error: 'content required' });
-    const sessionRows = (await prisma.$queryRawUnsafe(`SELECT * FROM "CounselingSession" WHERE "id" = $1`, req.params.id)) as any[];
+    const sessionRows = await prisma.$queryRaw<any[]>`SELECT * FROM "CounselingSession" WHERE "id" = ${req.params.id}`;
     const session = sessionRows[0];
     if (!session) return res.status(404).json({ error: 'not found' });
     const mine = resolveMemberName(req.user) === '가현' ? 'gahyun' : 'dakyum';
     if (!isAdmin(req.user) && session.userId !== mine) return res.status(403).json({ error: 'forbidden' });
 
-    const userMsgId = 'msg_u_' + Date.now();
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO "CounselingMessage" ("id","sessionId","role","content","createdAt") VALUES ($1,$2,'user',$3,NOW())`,
-      userMsgId,
-      req.params.id,
-      content
-    );
+    await prisma.$executeRaw`
+      INSERT INTO "CounselingMessage" ("id","sessionId","role","content","createdAt")
+      VALUES (${`msg_u_${randomUUID()}`},${req.params.id},'user',${content},NOW())
+    `;
 
-    const recent = (await prisma.$queryRawUnsafe(
-      `SELECT "role","content" FROM "CounselingMessage" WHERE "sessionId" = $1 ORDER BY "createdAt" DESC LIMIT 8`,
-      req.params.id
-    )) as any[];
+    const recent = await prisma.$queryRaw<any[]>`
+      SELECT "role","content" FROM "CounselingMessage"
+      WHERE "sessionId" = ${req.params.id}
+      ORDER BY "createdAt" DESC
+      LIMIT 8
+    `;
     const memoryNote = String(session.memoryNote || '');
     const assistantText = buildSupportReply({ mood: session.mood, memoryNote, lastUserMessage: content });
 
-    const aiMsgId = 'msg_a_' + Date.now();
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO "CounselingMessage" ("id","sessionId","role","content","createdAt") VALUES ($1,$2,'assistant',$3,NOW())`,
-      aiMsgId,
-      req.params.id,
-      assistantText
-    );
+    await prisma.$executeRaw`
+      INSERT INTO "CounselingMessage" ("id","sessionId","role","content","createdAt")
+      VALUES (${`msg_a_${randomUUID()}`},${req.params.id},'assistant',${assistantText},NOW())
+    `;
     const summary = content.length > 28 ? content.slice(0, 28) + '...' : content;
-    await prisma.$executeRawUnsafe(
-      `UPDATE "CounselingSession" SET "summary" = $2, "updatedAt" = NOW() WHERE "id" = $1`,
-      req.params.id,
-      summary
-    );
+    await prisma.$executeRaw`
+      UPDATE "CounselingSession" SET "summary" = ${summary}, "updatedAt" = NOW() WHERE "id" = ${req.params.id}
+    `;
     res.json({ ok: true, reply: assistantText, recentCount: recent.length });
   } catch (e: any) {
     res.status(500).json({ error: e.message || 'failed' });
@@ -167,12 +158,15 @@ router.post('/sessions/:id/messages', authMiddleware, async (req: any, res) => {
 
 router.patch('/sessions/:id/memory', authMiddleware, async (req: any, res) => {
   try {
+    const sessionRows = await prisma.$queryRaw<any[]>`SELECT * FROM "CounselingSession" WHERE "id" = ${req.params.id}`;
+    const session = sessionRows[0];
+    if (!session) return res.status(404).json({ error: 'not found' });
+    const mine = resolveMemberName(req.user) === '가현' ? 'gahyun' : 'dakyum';
+    if (!isAdmin(req.user) && session.userId !== mine) return res.status(403).json({ error: 'forbidden' });
     const note = String(req.body.memoryNote || '').trim();
-    await prisma.$executeRawUnsafe(
-      `UPDATE "CounselingSession" SET "memoryNote" = $2, "updatedAt" = NOW() WHERE "id" = $1`,
-      req.params.id,
-      note
-    );
+    await prisma.$executeRaw`
+      UPDATE "CounselingSession" SET "memoryNote" = ${note}, "updatedAt" = NOW() WHERE "id" = ${req.params.id}
+    `;
     res.json({ ok: true });
   } catch (e: any) {
     res.status(500).json({ error: e.message || 'failed' });

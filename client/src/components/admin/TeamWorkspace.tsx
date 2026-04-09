@@ -6,6 +6,8 @@ import TabMonthly from './team/TabMonthly';
 import TabRoles from './team/TabRoles';
 import TabExpenses from './team/TabExpenses';
 import TabMarketing from './team/TabMarketing';
+import TabCounseling from './team/TabCounseling';
+import TabFinanceAnalysis from './team/TabFinanceAnalysis';
 
 const TABS = [
   { id: 'overview', label: '대시보드' },
@@ -14,6 +16,8 @@ const TABS = [
   { id: 'roles', label: '분담표' },
   { id: 'expenses', label: '사업비' },
   { id: 'marketing', label: '마케팅 AI' },
+  { id: 'counseling', label: '상담심리' },
+  { id: 'finance', label: '재정 분석' },
 ] as const;
 
 type TabId = typeof TABS[number]['id'];
@@ -53,6 +57,8 @@ export default function TeamWorkspace() {
         {activeTab === 'roles' && <TabRoles />}
         {activeTab === 'expenses' && <TabExpenses />}
         {activeTab === 'marketing' && <TabMarketing />}
+        {activeTab === 'counseling' && <TabCounseling />}
+        {activeTab === 'finance' && <TabFinanceAnalysis />}
       </motion.div>
     </div>
   );
