@@ -74,6 +74,43 @@ async function callClaude(prompt: string, maxTokens = 4000, useSearch = false): 
   return textBlocks.map((b: any) => b.text).join('\n') || '';
 }
 
+function stripMarkdownCodeFence(input: string): string {
+  return input
+    .replace(/^\uFEFF/, '')
+    .replace(/```(?:json)?\s*/gi, '')
+    .replace(/```/g, '')
+    .trim();
+}
+
+function extractJsonArrayBlock(input: string): string {
+  const cleaned = stripMarkdownCodeFence(input);
+  const firstBracket = cleaned.indexOf('[');
+  const lastBracket = cleaned.lastIndexOf(']');
+  if (firstBracket === -1 || lastBracket === -1 || lastBracket <= firstBracket) {
+    throw new Error('no JSON array found');
+  }
+  return cleaned.substring(firstBracket, lastBracket + 1);
+}
+
+function normalizeInsightItems(rawParsed: any): Array<{ type: string; title: string; content: string }> {
+  if (!Array.isArray(rawParsed)) throw new Error('response is not array');
+
+  return rawParsed
+    .map((item: any) => ({
+      type: typeof item?.type === 'string' ? item.type.trim() : '',
+      title: typeof item?.title === 'string' ? item.title.trim() : '',
+      content:
+        typeof item?.content === 'string'
+          ? item.content.trim()
+          : Array.isArray(item?.content)
+            ? item.content.map((v: any) => String(v)).join('\n').trim()
+            : item?.content != null
+              ? String(item.content).trim()
+              : '',
+    }))
+    .filter((item) => item.type && item.title && item.content);
+}
+
 router.get('/insights', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { weekId } = req.query;
@@ -294,22 +331,11 @@ ${research}
 
     const raw = await callClaude(finalPrompt, 4000, false);
 
-    let parsed: any[];
+    let parsed: Array<{ type: string; title: string; content: string }>;
     try {
-      let cleaned = raw;
-      cleaned = cleaned.replace(/```json/g, '').replace(/```/g, '');
-      const jsonStart = cleaned.search(/\[\s*\{\s*"type"/);
-      if (jsonStart === -1) throw new Error('no JSON array found');
-      const lastBracket = cleaned.lastIndexOf(']');
-      if (lastBracket <= jsonStart) throw new Error('no closing bracket');
-      cleaned = cleaned.substring(jsonStart, lastBracket + 1);
-      cleaned = cleaned.replace(/[\x00-\x1f]/g, (ch) => {
-        if (ch === '\n') return '\\n';
-        if (ch === '\r') return '';
-        if (ch === '\t') return '\\t';
-        return '';
-      });
-      parsed = JSON.parse(cleaned);
+      const jsonArrayText = extractJsonArrayBlock(raw);
+      parsed = normalizeInsightItems(JSON.parse(jsonArrayText));
+      if (parsed.length === 0) throw new Error('empty insights after normalization');
     } catch (parseErr: any) {
       console.error('JSON parse error:', parseErr.message);
       console.error('raw substring (first 500):', raw?.substring(0, 500));

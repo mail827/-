@@ -75,10 +75,19 @@ export default function TabMarketing() {
   };
 
   const copyContent = (insight: Insight) => {
-    navigator.clipboard.writeText(insight.content);
+    const text = typeof insight.content === 'string' ? insight.content : String(insight.content ?? '');
+    navigator.clipboard.writeText(text);
     setCopiedId(insight.id);
     setTimeout(() => setCopiedId(null), 2000);
   };
+
+  const normalizeText = (value: unknown) => (typeof value === 'string' ? value : String(value ?? ''));
+  const stripCodeFence = (value: unknown) =>
+    normalizeText(value)
+      .replace(/^\uFEFF/, '')
+      .replace(/```(?:json)?\s*/gi, '')
+      .replace(/```/g, '')
+      .trim();
 
   const meta = insights[0]?.metadata;
   const filtered = activeType === 'all' ? insights.filter(i => i.type !== 'error') : insights.filter(i => i.type === activeType);
@@ -183,7 +192,7 @@ export default function TabMarketing() {
             const config = TYPE_CONFIG[insight.type] || TYPE_CONFIG.error;
             const Icon = config.icon;
             const isExpanded = expandedId === insight.id;
-            const paragraphs = insight.content.split('\n').filter(l => l.trim());
+            const paragraphs = normalizeText(insight.content).split('\n').filter(l => l.trim());
             const preview = paragraphs.slice(0, 6);
             const needsTruncate = paragraphs.length > 6;
             return (
@@ -246,7 +255,7 @@ export default function TabMarketing() {
                   </button>
                 )}
               </div>
-              <p className="text-[13px] text-amber-800 leading-relaxed line-clamp-3">{e.content.substring(0, 200)}...</p>
+              <p className="text-[13px] text-amber-800 leading-relaxed line-clamp-3">{stripCodeFence(e.content).substring(0, 200)}...</p>
             </div>
           ))}
         </div>
