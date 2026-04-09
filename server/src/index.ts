@@ -44,6 +44,8 @@ import { aiCreateRouter } from "./routes/aiCreate.js";
 import { settlementRouter } from "./routes/settlement.js";
 import { teamRouter } from "./routes/team.js";
 import { marketingRouter } from "./routes/marketing.js";
+import { counselingRouter } from "./routes/counseling.js";
+import { financeAnalysisRouter } from "./routes/financeAnalysis.js";
 import guestPhotoRouter from './routes/guestPhoto.js';
 import boothCreditRouter from './routes/boothCredit.js';
 import showcaseRouter from "./routes/showcase.js";
@@ -112,6 +114,8 @@ app.use('/api/bg-music', bgMusicRouter);
 app.use("/api/ai-create", aiCreateRouter);
 app.use("/api/admin/team", teamRouter);
 app.use("/api/admin/marketing", marketingRouter);
+app.use("/api/admin/counseling", counselingRouter);
+app.use("/api/admin/finance", financeAnalysisRouter);
 
 seedPackages().catch(e => console.error("Seed error (ignored):", e.message));
 
