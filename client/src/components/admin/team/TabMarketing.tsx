@@ -16,20 +16,26 @@ interface Insight {
 const TYPES = [
   { id: 'all', label: '전체' },
   { id: 'trend', label: '트렌드' },
-  { id: 'pain', label: '빡침포인트' },
+  { id: 'painpoint', label: '빡침포인트' },
   { id: 'devlog', label: '개발로그' },
-  { id: 'guide', label: '콘텐츠가이드' },
-  { id: 'script', label: '숏폼대본' },
+  { id: 'hook', label: '후킹카피' },
+  { id: 'shortform', label: '숏폼대본' },
+  { id: 'longform', label: '롱폼기획' },
+  { id: 'scenario', label: '시나리오' },
 ] as const;
 
 const TYPE_CONFIG: Record<string, { icon: any; label: string; accent: string; bg: string; border: string }> = {
   trend: { icon: TrendingUp, label: 'HOT TREND', accent: 'text-blue-600', bg: 'bg-blue-50/60', border: 'border-blue-200/40' },
-  pain: { icon: Flame, label: 'PAIN POINT', accent: 'text-red-600', bg: 'bg-red-50/60', border: 'border-red-200/40' },
+  painpoint: { icon: Flame, label: 'PAIN POINT', accent: 'text-red-600', bg: 'bg-red-50/60', border: 'border-red-200/40' },
   devlog: { icon: Code2, label: 'DEV LOG', accent: 'text-emerald-600', bg: 'bg-emerald-50/60', border: 'border-emerald-200/40' },
-  guide: { icon: Megaphone, label: 'CONTENT GUIDE', accent: 'text-violet-600', bg: 'bg-violet-50/60', border: 'border-violet-200/40' },
-  script: { icon: Film, label: 'SHORT-FORM SCRIPT', accent: 'text-orange-600', bg: 'bg-orange-50/60', border: 'border-orange-200/40' },
+  hook: { icon: Megaphone, label: 'HOOK', accent: 'text-violet-600', bg: 'bg-violet-50/60', border: 'border-violet-200/40' },
+  shortform: { icon: Film, label: 'SHORTFORM SCRIPT', accent: 'text-orange-600', bg: 'bg-orange-50/60', border: 'border-orange-200/40' },
+  longform: { icon: Film, label: 'LONGFORM PLAN', accent: 'text-indigo-600', bg: 'bg-indigo-50/60', border: 'border-indigo-200/40' },
+  scenario: { icon: Film, label: 'SCENARIO', accent: 'text-rose-600', bg: 'bg-rose-50/60', border: 'border-rose-200/40' },
   error: { icon: AlertTriangle, label: 'ERROR', accent: 'text-amber-600', bg: 'bg-amber-50/60', border: 'border-amber-200/40' },
 };
+
+const DEFAULT_CONFIG = { icon: Film, label: 'INSIGHT', accent: 'text-stone-600', bg: 'bg-stone-50/60', border: 'border-stone-200/50' };
 
 export default function TabMarketing() {
   const [weekOffset, setWeekOffset] = useState(0);
@@ -82,13 +88,6 @@ export default function TabMarketing() {
   };
 
   const normalizeText = (value: unknown) => (typeof value === 'string' ? value : String(value ?? ''));
-  const stripCodeFence = (value: unknown) =>
-    normalizeText(value)
-      .replace(/^\uFEFF/, '')
-      .replace(/```(?:json)?\s*/gi, '')
-      .replace(/```/g, '')
-      .trim();
-
   const meta = insights[0]?.metadata;
   const filtered = activeType === 'all' ? insights.filter(i => i.type !== 'error') : insights.filter(i => i.type === activeType);
   const errors = insights.filter(i => i.type === 'error');
@@ -189,7 +188,7 @@ export default function TabMarketing() {
       ) : (
         <div className="space-y-4">
           {filtered.map(insight => {
-            const config = TYPE_CONFIG[insight.type] || TYPE_CONFIG.error;
+            const config = TYPE_CONFIG[insight.type] || DEFAULT_CONFIG;
             const Icon = config.icon;
             const isExpanded = expandedId === insight.id;
             const paragraphs = normalizeText(insight.content).split('\n').filter(l => l.trim());
@@ -255,7 +254,7 @@ export default function TabMarketing() {
                   </button>
                 )}
               </div>
-              <p className="text-[13px] text-amber-800 leading-relaxed line-clamp-3">{stripCodeFence(e.content).substring(0, 200)}...</p>
+              <p className="text-[13px] text-amber-800 leading-relaxed line-clamp-3">응답 형식 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>
             </div>
           ))}
         </div>

@@ -74,16 +74,21 @@ async function callClaude(prompt: string, maxTokens = 4000, useSearch = false): 
   return textBlocks.map((b: any) => b.text).join('\n') || '';
 }
 
-function stripMarkdownCodeFence(input: string): string {
-  return input
+type MarketingCard = { type: string; title: string; content: string };
+
+function stripCodeFence(input: string): string {
+  return String(input || '')
     .replace(/^\uFEFF/, '')
-    .replace(/```(?:json)?\s*/gi, '')
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/\s*```$/, '')
+    .replace(/```json/gi, '')
     .replace(/```/g, '')
     .trim();
 }
 
 function extractJsonArrayBlock(input: string): string {
-  const cleaned = stripMarkdownCodeFence(input);
+  const cleaned = stripCodeFence(input);
   const firstBracket = cleaned.indexOf('[');
   const lastBracket = cleaned.lastIndexOf(']');
   if (firstBracket === -1 || lastBracket === -1 || lastBracket <= firstBracket) {
@@ -92,8 +97,13 @@ function extractJsonArrayBlock(input: string): string {
   return cleaned.substring(firstBracket, lastBracket + 1);
 }
 
-function normalizeInsightItems(rawParsed: any): Array<{ type: string; title: string; content: string }> {
+function normalizeInsightItems(rawParsed: any): MarketingCard[] {
   if (!Array.isArray(rawParsed)) throw new Error('response is not array');
+
+  const limitByType = (type: string) => {
+    if (type === 'shortform' || type === 'longform' || type === 'scenario') return 520;
+    return 280;
+  };
 
   return rawParsed
     .map((item: any) => ({
@@ -108,7 +118,40 @@ function normalizeInsightItems(rawParsed: any): Array<{ type: string; title: str
               ? String(item.content).trim()
               : '',
     }))
+    .map((item) => ({
+      ...item,
+      content: item.content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').slice(0, limitByType(item.type)),
+    }))
     .filter((item) => item.type && item.title && item.content);
+}
+
+function fallbackCards(): MarketingCard[] {
+  return [
+    {
+      type: 'error',
+      title: '인사이트 생성 실패',
+      content: '응답 형식이 깨졌습니다. 잠시 후 다시 시도해주세요.',
+    },
+  ];
+}
+
+function safeParseMarketingCards(raw: string): { cards: MarketingCard[]; parseFailed: boolean } {
+  const fencedCleaned = stripCodeFence(raw);
+
+  try {
+    const cleaned = extractJsonArrayBlock(fencedCleaned);
+    const parsed = normalizeInsightItems(JSON.parse(cleaned)).slice(0, 6);
+    if (!parsed.length) throw new Error('empty insights after normalization');
+    return { cards: parsed, parseFailed: false };
+  } catch (error: any) {
+    console.error('Marketing AI parse failed', {
+      error: error?.message || String(error),
+      rawPreview: String(raw || '').slice(0, 300),
+      cleanedPreview: fencedCleaned.slice(0, 300),
+      cleanedLength: fencedCleaned.length,
+    });
+    return { cards: fallbackCards(), parseFailed: true };
+  }
 }
 
 router.get('/insights', authMiddleware, adminOnly, async (req, res) => {
@@ -265,50 +308,36 @@ ${gahyunDone.map((t: any) => '- [' + t.category + '] ' + t.title).join('\n') || 
 [가현 수동 로그]
 ${gahyunLogs.map(l => `${l.date}: ${l.content}`).join('\n') || '없음'}
 
-아래 5가지를 JSON 배열로 반환해. 반드시 순수 JSON만 반환. 백틱, 설명, 서론 절대 없이 [ 로 시작해서 ] 로 끝내라.
-
+반환 형식은 아래 JSON 배열 하나만 허용한다. 이 외 모든 텍스트는 금지.
 [
-  {
-    "type": "trend",
-    "title": "이번 주 웨딩 업계 핫이슈",
-    "content": "최근 웨딩 업계에서 화제인 트렌드 3-4가지. 각 트렌드가 '청첩장 작업실'에 어떤 기회인지 연결. 예비신부들이 실제 커뮤니티에서 관심 갖는 것들 위주로."
-  },
-  {
-    "type": "pain",
-    "title": "예비신부 빡침 포인트",
-    "content": "예비신부들이 커뮤니티에서 분노/짜증/한탄하는 포인트 3-4가지. 스튜디오 추가금, 뻔한 청첩장, 비싼 식전영상 등. 각 빡침포인트를 '청첩장 작업실'이 어떻게 해결해주는지 가현이가 콘텐츠로 쓸 수 있게 구체적으로. 톤은 공감+약간의 독설."
-  },
-  {
-    "type": "devlog",
-    "title": "개발자의 피땀눈물",
-    "content": "위 [다겸 이번 주 완료 업무] 목록을 기반으로 개발 비하인드 스토리를 직접 창작해라. 수동 로그가 없어도 완료된 태스크 제목만으로 충분히 스토리를 만들 수 있다. 예: posterOverlay v2면 '얼굴 감지 좌표 0.01 차이로 타이틀이 눈 위에 걸리는 버그를 3일 밤새 잡았다' 같은 식. 각 완료 태스크에서 2-3개 골라 '30초만에 쓰는 기능, 만드는 데 72시간' 톤으로. 절대 '로그를 기록해주세요' 같은 안내 금지. 무조건 창작해서 채워라. 가현이가 숏폼/블로그 소재로 바로 쓸 수 있게."
-  },
-  {
-    "type": "guide",
-    "title": "가현의 이번 주 콘텐츠 가이드",
-    "content": "위 분석을 종합해서 가현이에게 주는 구체적 행동 지침. 숏폼 2-3개 + 롱폼 1개 제안. 각각에 POV 스타일 후킹 멘트, 자막 흐름, 해시태그 포함. 알고리즘 잘 타는 구조로. 예시: 'POV: 스튜디오 추가금 200만원 맞고 멘탈 나간 예신'."
-  },
-  {
-    "type": "script",
-    "title": "숏폼 대본 (바로 촬영 가능)",
-    "content": "이번 주 트렌드와 빡침포인트를 반영한 숏폼 대본 3개. 각 대본은 25초 기준, 초 단위 타임라인으로 작성. 우리 서비스별(AI스냅/웨딩시네마/웨딩포스터/청첩장) 하나씩 다른 제품 홍보. 대본 포맷 예시:\n\n[대본1: 웨딩포스터 - 능지 상승형]\n0-3초: (한심한 표정) 아직도 스튜디오 사진 한 장에 10만원?\n3-8초: 내 친구는 9,900원으로 톡 프사 도배함\n8-15초: AI 포스터인데 보정까지 갓벽\n15-20초: 남들 추가금 파티할 때 우린 치킨 사먹자\n20-25초: 링크는 프로필에. 돈 버리는 예신한테 공유해줘\n\n이런 식으로 3개. 버전명 붙이기(능지 상승형, 웅장 반전, 공감 폭발 등). 각 대본에 촬영 팁(표정, 소품, BGM 추천)도 한줄씩. MZ 말투 필수, 뻔한 광고 톤 절대 금지."
-  }
+  { "type": "trend", "title": "string", "content": "string" }
 ]
 
-[형식 규칙 - 반드시 지켜라]
-- 이모지 절대 금지 (이모티콘, 유니코드 이모지 전부 금지)
-- 마크다운 문법 금지 (**, ##, - 등 금지)
-- 번호 매기기는 1. 2. 3. 이런 식으로 평문
-- 줄바꿈은 \n 사용
-- 각 content 안에서 소제목이 필요하면 [소제목] 대괄호 사용
+[출력 규칙 - 반드시 준수]
+1) JSON 배열만 반환 (배열 앞뒤 설명문 금지)
+2) 코드블록/백틱/마크다운 금지
+3) 항목은 최대 6개
+4) type 허용값: trend, painpoint, devlog, hook, shortform, longform, scenario
+5) 각 title은 40자 이하
+6) content 길이 제한:
+   - trend, painpoint, devlog, hook: 280자 이하
+   - shortform, longform, scenario: 520자 이하
+7) 문자열 내부 줄바꿈은 반드시 escaped newline(\\n)으로만 표현
+8) 잘 모르면 빈 배열 [] 반환
 
-[중요 규칙]
-- 반드시 web_search 도구로 '예비신부 불만', '웨딩 추가금', '청첩장 후기', '웨딩스냅 가격', 'AI 웨딩' 등을 실제 검색해서 최신 트렌드와 빡침포인트를 수집해라
-- 검색 결과 기반으로 실제 커뮤니티(더웨딩, 웨딩의여신, 네이버카페 등)의 리얼한 톤으로
-- 뻔한 마케팅 용어 금지. MZ세대가 실제로 쓰는 말투로
-- 숫자와 구체적 예시 필수
-- 각 content는 최소 300자 이상으로 풍성하게
-- 다겸 작업로그가 없으면 devlog는 "이번 주 로그를 기록해주세요" 안내로 대체`;
+[콘텐츠 가이드]
+- 이번 주 트렌드/빡침포인트/개발로그/콘텐츠 후킹 아이디어를 중심으로 요약
+- 가현이를 위한 숏폼/롱폼/시나리오를 반드시 포함해서 최대 6개 카드 구성
+- 숏폼/시나리오는 0-3초, 3-8초 형태의 타임라인 포함
+- POV 스타일 후킹 문장 반드시 포함
+- 광고 문구보다 실제 실행 가능한 문장 위주
+
+[강제 포함 섹션]
+- painpoint: 예비신부 부정 감정(추가금, 뻔한 디자인, 돈 아까움) 기반
+- devlog: 다겸 작업을 '피땀눈물' 콘텐츠로 재가공
+- shortform: 20~25초 숏폼 대본 1개 이상
+- longform: 블로그/릴스 확장용 롱폼 기획 1개 이상
+- scenario: 바로 촬영 가능한 장면별 시나리오 1개 이상`;
 
     const researchPrompt = `너는 웨딩 업계 리서치 전문가야. 아래 주제들을 web_search로 검색해서 최신 정보를 수집해줘.
 
@@ -317,7 +346,7 @@ ${gahyunLogs.map(l => `${l.date}: ${l.content}`).join('\n') || '없음'}
 3. 웨딩 커뮤니티(더웨딩, 웨딩의여신, 네이버카페)에서 화제인 주제
 4. AI 웨딩스냅, AI 청첩장 관련 최신 동향
 
-각 주제별로 구체적 수치, 사례, 커뮤니티 반응을 정리해줘. 자유로운 텍스트로.`;
+각 주제별 구체적 수치, 사례, 커뮤니티 반응을 정리해줘. 자유로운 텍스트로.`;
 
     const research = await callClaude(researchPrompt, 3000, true);
 
@@ -326,24 +355,11 @@ ${gahyunLogs.map(l => `${l.date}: ${l.content}`).join('\n') || '없음'}
 [AI 웹 리서치 결과]
 ${research}
 
-위 리서치 결과와 내부 데이터를 종합하여 순수 JSON 배열만 반환해라.
-반드시 [ 로 시작해서 ] 로 끝내라. 서론, 설명, 백틱 절대 금지.`;
+위 리서치 결과와 내부 데이터를 종합하여 JSON 배열만 반환.
+배열 외 텍스트를 절대 출력하지 마라.`;
 
-    const raw = await callClaude(finalPrompt, 4000, false);
-
-    let parsed: Array<{ type: string; title: string; content: string }>;
-    try {
-      const jsonArrayText = extractJsonArrayBlock(raw);
-      parsed = normalizeInsightItems(JSON.parse(jsonArrayText));
-      if (parsed.length === 0) throw new Error('empty insights after normalization');
-    } catch (parseErr: any) {
-      console.error('JSON parse error:', parseErr.message);
-      console.error('raw substring (first 500):', raw?.substring(0, 500));
-      await prisma.marketingInsight.create({
-        data: { weekId, type: 'error', title: 'AI 파싱 실패: ' + (parseErr.message || ''), content: raw.substring(0, 3000) },
-      });
-      return res.json({ ok: true, raw: true });
-    }
+    const raw = await callClaude(finalPrompt, 2600, false);
+    const { cards: parsed, parseFailed } = safeParseMarketingCards(raw);
 
     await prisma.marketingInsight.deleteMany({ where: { weekId } });
 
@@ -366,7 +382,7 @@ ${research}
       )
     );
 
-    res.json({ ok: true, count: saved.length });
+    res.json({ ok: true, count: saved.length, parseFailed });
   } catch (e: any) {
     console.error('marketing generate error:', e);
     res.status(500).json({ error: e.message || 'failed' });
