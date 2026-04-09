@@ -5,6 +5,7 @@ import TabWeekly from './team/TabWeekly';
 import TabMonthly from './team/TabMonthly';
 import TabRoles from './team/TabRoles';
 import TabExpenses from './team/TabExpenses';
+import TabMarketing from './team/TabMarketing';
 
 const TABS = [
   { id: 'overview', label: '대시보드' },
@@ -12,6 +13,7 @@ const TABS = [
   { id: 'monthly', label: '월간 리뷰' },
   { id: 'roles', label: '분담표' },
   { id: 'expenses', label: '사업비' },
+  { id: 'marketing', label: '마케팅 AI' },
 ] as const;
 
 type TabId = typeof TABS[number]['id'];
@@ -27,12 +29,12 @@ export default function TeamWorkspace() {
         <p className="text-[12px] text-stone-400 mt-1">우리가 만드는 건 청첩장이 아니라, 두 사람의 시작을 담는 공간이다.</p>
       </div>
 
-      <div className="flex gap-1 bg-stone-100 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 bg-stone-100 p-1 rounded-xl overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative px-4 py-2 text-[13px] rounded-lg transition-all ${
+            className={`relative px-3 py-2 text-[12px] sm:text-[13px] sm:px-4 rounded-lg transition-all whitespace-nowrap flex-shrink-0 ${
               activeTab === tab.id ? 'text-stone-800 font-semibold' : 'text-stone-400 hover:text-stone-600'
             }`}
           >
@@ -50,6 +52,7 @@ export default function TeamWorkspace() {
         {activeTab === 'monthly' && <TabMonthly />}
         {activeTab === 'roles' && <TabRoles />}
         {activeTab === 'expenses' && <TabExpenses />}
+        {activeTab === 'marketing' && <TabMarketing />}
       </motion.div>
     </div>
   );

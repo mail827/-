@@ -89,6 +89,20 @@ router.post('/order', async (req: Request, res: Response) => {
       amount = 0;
     }
 
+    let resolvedEmail = customerEmail || '';
+    if (!resolvedEmail) {
+      const authHeader = req.headers.authorization;
+      if (authHeader) {
+        try {
+          const tk = authHeader.replace('Bearer ', '');
+          const [, b] = tk.split('.');
+          const pl = JSON.parse(Buffer.from(b, 'base64').toString());
+          const u = await prisma.user.findUnique({ where: { id: pl.userId || pl.id } });
+          if (u?.email) resolvedEmail = u.email;
+        } catch {}
+      }
+    }
+
     const order = await prisma.posterOrder.create({
       data: {
         orderId,
@@ -100,7 +114,7 @@ router.post('/order', async (req: Request, res: Response) => {
         fontId: fontId || 'script_elegant',
         layout: layout || 'CLASSIC',
         conceptId,
-        customerEmail, customerPhone,
+        customerEmail: resolvedEmail, customerPhone,
         couponCode,
       },
     });

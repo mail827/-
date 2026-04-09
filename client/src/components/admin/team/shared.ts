@@ -60,7 +60,7 @@ export function isOwner(): boolean {
     const token = localStorage.getItem('token');
     if (!token) return false;
     const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.email === 'oicrcutie@gmail.com';
+    return ['oicrcutie@gmail.com','gah7186@naver.com','lovegah2010@daum.net','gah7186@gmail.com'].includes(payload.email);
   } catch { return false; }
 }
 

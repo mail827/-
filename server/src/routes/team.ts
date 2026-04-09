@@ -11,7 +11,7 @@ const adminMiddleware = (req: any, res: any, next: any) => {
 };
 
 const ownerOnly = (req: any, res: any, next: any) => {
-  if (req.user?.email !== 'oicrcutie@gmail.com') return res.status(403).json({ error: 'owner only' });
+  const OWNERS = ['oicrcutie@gmail.com','gah7186@naver.com','lovegah2010@daum.net','gah7186@gmail.com']; if (!OWNERS.includes(req.user?.email)) return res.status(403).json({ error: 'owner only' });
   next();
 };
 

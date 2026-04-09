@@ -71,170 +71,247 @@ export default function AdminPoster() {
   const loadGifts = async () => {
     try { const res = await fetch(`${API_BASE}/admin/poster/gifts`, { headers }); setGifts(await res.json()); } catch {}
   };
+
   const createGift = async () => {
     try {
       await fetch(`${API_BASE}/admin/poster/gift`, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ track: giftTrack, toEmail: giftEmail || null, toPhone: giftPhone || null, message: giftMessage || null, isFree: true }) });
       setShowGiftModal(false); setGiftEmail(''); setGiftPhone(''); setGiftMessage(''); loadGifts();
     } catch {}
   };
+
   useEffect(() => { load(); loadStats(); loadGifts(); }, [page, statusFilter]);
 
   const statusColor: Record<string, string> = {
     PENDING: '#A8A8A0', PAID: '#6B9E78', GENERATING: '#D4A0B0',
     COMPOSITING: '#C4855C', DONE: '#2C8C6B', FAILED: '#C0392B',
   };
+  const statusLabel: Record<string, string> = {
+    PENDING: '\uB300\uAE30', PAID: '\uACB0\uC81C', GENERATING: '\uC0DD\uC131\uC911',
+    COMPOSITING: '\uD569\uC131\uC911', DONE: '\uC644\uB8CC', FAILED: '\uC2E4\uD328',
+  };
 
   const totalPages = Math.ceil(total / limit);
 
   return (
     <div>
-      <h2 style={{ fontSize: 20, fontWeight: 600, color: '#2C2C2A', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Image size={20} />웨딩포스터 관리
+      <h2 className="text-lg font-semibold text-stone-800 mb-5 flex items-center gap-2">
+        <Image size={20} />
+        <span>{'\uC6E8\uB529\uD3EC\uC2A4\uD130 \uAD00\uB9AC'}</span>
       </h2>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        <button onClick={() => setTab('orders')} style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid', borderColor: tab === 'orders' ? '#2C2C2A' : '#E8E5E0', background: tab === 'orders' ? '#2C2C2A' : '#fff', color: tab === 'orders' ? '#fff' : '#666', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>주문</button>
-        <button onClick={() => setTab('gifts')} style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid', borderColor: tab === 'gifts' ? '#2C2C2A' : '#E8E5E0', background: tab === 'gifts' ? '#2C2C2A' : '#fff', color: tab === 'gifts' ? '#fff' : '#666', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>선물</button>
+      <div className="flex gap-2 mb-5">
+        <button onClick={() => setTab('orders')} className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all ${tab === 'orders' ? 'bg-stone-800 text-white border-stone-800' : 'bg-white text-stone-500 border-stone-200'}`}>{'\uC8FC\uBB38'}</button>
+        <button onClick={() => setTab('gifts')} className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all ${tab === 'gifts' ? 'bg-stone-800 text-white border-stone-800' : 'bg-white text-stone-500 border-stone-200'}`}>{'\uC120\uBB3C'}</button>
       </div>
 
       {tab === 'gifts' ? (
         <div>
-          <button onClick={() => setShowGiftModal(true)} style={{ padding: '10px 20px', background: '#2C2C2A', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}><Plus size={14} />선물 코드 생성</button>
-          <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            <table style={{ minWidth: 640, width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-              <thead><tr style={{ borderBottom: '1px solid #E8E5E0', background: '#FAFAF8' }}>
-                {['코드','트랙','받는 사람','메시지','사용','만료','생성일'].map(h=><th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, whiteSpace: 'nowrap' }}>{h}</th>)}
-              </tr></thead>
-              <tbody>
-                {gifts.map(g=>(
-                  <tr key={g.id} style={{ borderBottom: '1px solid #F0EEEB' }}>
-                    <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontSize: 12, fontWeight: 600 }}>{g.code}</td>
-                    <td style={{ padding: '10px 12px' }}>{g.track}</td>
-                    <td style={{ padding: '10px 12px' }}>{g.toEmail || g.toPhone || '-'}</td>
-                    <td style={{ padding: '10px 12px', fontSize: 12, color: '#999' }}>{g.message || '-'}</td>
-                    <td style={{ padding: '10px 12px' }}><span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 500, color: '#fff', background: g.isRedeemed ? '#6B9E78' : '#A8A8A0' }}>{g.isRedeemed ? '사용됨' : '미사용'}</span></td>
-                    <td style={{ padding: '10px 12px', fontSize: 11, color: '#999' }}>{new Date(g.expiresAt).toLocaleDateString('ko')}</td>
-                    <td style={{ padding: '10px 12px', fontSize: 11, color: '#999' }}>{new Date(g.createdAt).toLocaleDateString('ko')}</td>
+          <button onClick={() => setShowGiftModal(true)} className="flex items-center gap-1.5 px-4 py-2.5 bg-stone-800 text-white rounded-lg text-xs font-medium mb-4">
+            <Plus size={14} />{'\uC120\uBB3C \uCF54\uB4DC \uC0DD\uC131'}
+          </button>
+          <div className="space-y-3 md:space-y-0">
+            <div className="hidden md:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
+              <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr className="border-b border-stone-200 bg-stone-50">
+                    {['\uCF54\uB4DC','\uD2B8\uB799','\uBC1B\uB294 \uC0AC\uB78C','\uBA54\uC2DC\uC9C0','\uC0AC\uC6A9','\uB9CC\uB8CC','\uC0DD\uC131\uC77C'].map(h =>
+                      <th key={h} className="px-3 py-2.5 text-left font-medium text-stone-400 text-[11px]">{h}</th>
+                    )}
                   </tr>
-                ))}
-                {gifts.length === 0 && <tr><td colSpan={7} style={{ padding: 40, textAlign: 'center', color: '#ccc' }}>선물 코드 없음</td></tr>}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {gifts.map(g => (
+                    <tr key={g.id} className="border-b border-stone-100">
+                      <td className="px-3 py-2.5 font-mono font-semibold text-[11px]">{g.code}</td>
+                      <td className="px-3 py-2.5">{g.track}</td>
+                      <td className="px-3 py-2.5">{g.toEmail || g.toPhone || '-'}</td>
+                      <td className="px-3 py-2.5 text-stone-400">{g.message || '-'}</td>
+                      <td className="px-3 py-2.5">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-medium text-white ${g.isRedeemed ? 'bg-green-600' : 'bg-stone-400'}`}>
+                          {g.isRedeemed ? '\uC0AC\uC6A9\uB428' : '\uBBF8\uC0AC\uC6A9'}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5 text-[11px] text-stone-400">{new Date(g.expiresAt).toLocaleDateString('ko')}</td>
+                      <td className="px-3 py-2.5 text-[11px] text-stone-400">{new Date(g.createdAt).toLocaleDateString('ko')}</td>
+                    </tr>
+                  ))}
+                  {gifts.length === 0 && <tr><td colSpan={7} className="py-10 text-center text-stone-300">{'\uC120\uBB3C \uCF54\uB4DC \uC5C6\uC74C'}</td></tr>}
+                </tbody>
+              </table>
+            </div>
+            <div className="md:hidden space-y-3">
+              {gifts.map(g => (
+                <div key={g.id} className="bg-white rounded-xl border border-stone-200 p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-semibold text-xs">{g.code}</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-medium text-white ${g.isRedeemed ? 'bg-green-600' : 'bg-stone-400'}`}>
+                      {g.isRedeemed ? '\uC0AC\uC6A9\uB428' : '\uBBF8\uC0AC\uC6A9'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-stone-400">{'\uD2B8\uB799'}</span>
+                    <span className="text-stone-700">{g.track}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-stone-400">{'\uBC1B\uB294 \uC0AC\uB78C'}</span>
+                    <span className="text-stone-700">{g.toEmail || g.toPhone || '-'}</span>
+                  </div>
+                  <div className="text-[11px] text-stone-400">{new Date(g.createdAt).toLocaleDateString('ko')}</div>
+                </div>
+              ))}
+              {gifts.length === 0 && <div className="py-10 text-center text-stone-300 text-sm">{'\uC120\uBB3C \uCF54\uB4DC \uC5C6\uC74C'}</div>}
+            </div>
           </div>
           {showGiftModal && (
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-              <div style={{ background: '#fff', borderRadius: 16, padding: 32, width: 400, maxWidth: '90vw' }}>
-                <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20 }}>포스터 선물 코드 생성</h3>
-                <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, color: '#999', display: 'block', marginBottom: 4 }}>트랙</label>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {(['PHOTO','AI'] as const).map(t=><button key={t} onClick={()=>setGiftTrack(t)} style={{ flex: 1, padding: 8, borderRadius: 8, border: '1px solid', borderColor: giftTrack===t ? '#2C2C2A' : '#E8E5E0', background: giftTrack===t ? '#2C2C2A' : '#fff', color: giftTrack===t ? '#fff' : '#666', fontSize: 13, cursor: 'pointer' }}>{t}</button>)}
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
+              <div className="bg-white rounded-2xl p-6 w-[400px] max-w-[90vw]">
+                <h3 className="text-base font-semibold mb-5">{'\uD3EC\uC2A4\uD130 \uC120\uBB3C \uCF54\uB4DC \uC0DD\uC131'}</h3>
+                <div className="mb-3">
+                  <label className="text-[11px] text-stone-400 block mb-1">{'\uD2B8\uB799'}</label>
+                  <div className="flex gap-2">
+                    {(['PHOTO','AI'] as const).map(t =>
+                      <button key={t} onClick={() => setGiftTrack(t)} className={`flex-1 py-2 rounded-lg text-xs border ${giftTrack === t ? 'bg-stone-800 text-white border-stone-800' : 'bg-white text-stone-500 border-stone-200'}`}>{t}</button>
+                    )}
                   </div>
                 </div>
-                <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, color: '#999', display: 'block', marginBottom: 4 }}>받는 사람 이메일</label>
-                  <input value={giftEmail} onChange={e=>setGiftEmail(e.target.value)} placeholder="선택사항" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E8E5E0', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                <div className="mb-3">
+                  <label className="text-[11px] text-stone-400 block mb-1">{'\uC774\uBA54\uC77C'}</label>
+                  <input value={giftEmail} onChange={e => setGiftEmail(e.target.value)} placeholder={'\uC120\uD0DD\uC0AC\uD56D'} className="w-full px-3 py-2.5 rounded-lg border border-stone-200 text-xs outline-none focus:border-stone-400" />
                 </div>
-                <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, color: '#999', display: 'block', marginBottom: 4 }}>받는 사람 전화번호</label>
-                  <input value={giftPhone} onChange={e=>setGiftPhone(e.target.value)} placeholder="선택사항" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E8E5E0', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                <div className="mb-3">
+                  <label className="text-[11px] text-stone-400 block mb-1">{'\uC804\uD654\uBC88\uD638'}</label>
+                  <input value={giftPhone} onChange={e => setGiftPhone(e.target.value)} placeholder={'\uC120\uD0DD\uC0AC\uD56D'} className="w-full px-3 py-2.5 rounded-lg border border-stone-200 text-xs outline-none focus:border-stone-400" />
                 </div>
-                <div style={{ marginBottom: 20 }}><label style={{ fontSize: 12, color: '#999', display: 'block', marginBottom: 4 }}>메시지</label>
-                  <input value={giftMessage} onChange={e=>setGiftMessage(e.target.value)} placeholder="선택사항" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E8E5E0', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                <div className="mb-5">
+                  <label className="text-[11px] text-stone-400 block mb-1">{'\uBA54\uC2DC\uC9C0'}</label>
+                  <input value={giftMessage} onChange={e => setGiftMessage(e.target.value)} placeholder={'\uC120\uD0DD\uC0AC\uD56D'} className="w-full px-3 py-2.5 rounded-lg border border-stone-200 text-xs outline-none focus:border-stone-400" />
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={()=>setShowGiftModal(false)} style={{ flex: 1, padding: 12, borderRadius: 8, border: '1px solid #E8E5E0', background: '#fff', color: '#666', fontSize: 13, cursor: 'pointer' }}>취소</button>
-                  <button onClick={createGift} style={{ flex: 1, padding: 12, borderRadius: 8, border: 'none', background: '#2C2C2A', color: '#fff', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>생성</button>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowGiftModal(false)} className="flex-1 py-3 rounded-lg border border-stone-200 text-stone-500 text-xs">{'\uCDE8\uC18C'}</button>
+                  <button onClick={createGift} className="flex-1 py-3 rounded-lg bg-stone-800 text-white text-xs font-medium">{'\uC0DD\uC131'}</button>
                 </div>
               </div>
             </div>
           )}
         </div>
       ) : (
-      <><div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 28 }}>
-        {[
-          { label: '전체', value: stats.total, color: '#2C2C2A' },
-          { label: '결제완료', value: stats.paid, color: '#6B9E78' },
-          { label: '완료', value: stats.done, color: '#2C8C6B' },
-          { label: '실패', value: stats.failed, color: '#C0392B' },
-          { label: '매출', value: `${stats.revenue.toLocaleString()}원`, color: '#2C2C2A' },
-        ].map((s) => (
-          <div key={s.label} style={{ padding: '16px 12px', background: '#FAFAF8', borderRadius: 10, border: '1px solid #E8E5E0', textAlign: 'center' }}>
-            <p style={{ fontSize: 11, color: '#A8A8A0', marginBottom: 4 }}>{s.label}</p>
-            <p style={{ fontSize: 20, fontWeight: 600, color: s.color }}>{s.value}</p>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
-        {['', 'PENDING', 'PAID', 'GENERATING', 'DONE', 'FAILED'].map((s) => (
-          <button key={s} onClick={() => { setStatusFilter(s); setPage(1); }}
-            style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid', borderColor: statusFilter === s ? '#2C2C2A' : '#E8E5E0', background: statusFilter === s ? '#2C2C2A' : '#fff', color: statusFilter === s ? '#fff' : '#666', fontSize: 12, cursor: 'pointer' }}>
-            {s || '전체'}
-          </button>
-        ))}
-      </div>
-
-      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E8E5E0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <table style={{ minWidth: 720, width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid #E8E5E0', background: '#FAFAF8' }}>
-              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 90 }}>주문번호</th>
-              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 44 }}>트랙</th>
-              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 100, whiteSpace: 'nowrap' }}>이름</th>
-              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 80 }}>폰트</th>
-              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 60 }}>레이아웃</th>
-              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 60 }}>금액</th>
-              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 70 }}>상태</th>
-              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 70 }}>일시</th>
-              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 500, color: '#999', fontSize: 11, minWidth: 56 }}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((o) => (
-              <tr key={o.id} style={{ borderBottom: '1px solid #F0EEEB' }}>
-                <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontSize: 11, whiteSpace: 'nowrap' }}>{o.orderId.slice(-10)}</td>
-                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>{o.track}</td>
-                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>{[o.groomNameKr, o.brideNameKr].filter(Boolean).join(' & ')}</td>
-                <td style={{ padding: '10px 12px', fontSize: 11, whiteSpace: 'nowrap' }}>{o.fontId.replace('script_', '').replace('serif_', '').replace('sans_', '')}</td>
-                <td style={{ padding: '10px 12px', fontSize: 11, whiteSpace: 'nowrap' }}>{o.layout}</td>
-                <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>{o.amount.toLocaleString()}원</td>
-                <td style={{ padding: '10px 12px' }}>
-                  <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 500, color: '#fff', background: statusColor[o.status] || '#999', whiteSpace: 'nowrap' }}>{o.status}</span>
-                </td>
-                <td style={{ padding: '10px 12px', fontSize: 11, color: '#999', whiteSpace: 'nowrap' }}>{new Date(o.createdAt).toLocaleDateString('ko')}</td>
-                <td style={{ padding: '10px 12px' }}>
-                  <div style={{ display: 'flex', gap: 4 }}>
-                  {o.finalPosterUrl && (
-                    <>
-                      <button onClick={() => setPreview(o.finalPosterUrl)} style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}><Eye size={14} /></button>
-                      <a href={o.finalPosterUrl} target="_blank" rel="noopener noreferrer" style={{ padding: 4, color: '#666' }}><Download size={14} /></a>
-                    </>
-                  )}
-                  {o.status === 'FAILED' && (
-                    <button onClick={() => retry(o.orderId)} style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', color: '#C0392B' }}><RefreshCw size={14} /></button>
-                  )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {orders.length === 0 && (
-              <tr><td colSpan={9} style={{ padding: 40, textAlign: 'center', color: '#ccc' }}>주문 없음</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 16 }}>
-          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ padding: 6, background: 'none', border: 'none', cursor: 'pointer', color: page <= 1 ? '#ddd' : '#666' }}><ChevronLeft size={16} /></button>
-          <span style={{ fontSize: 12, color: '#999' }}>{page} / {totalPages}</span>
-          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} style={{ padding: 6, background: 'none', border: 'none', cursor: 'pointer', color: page >= totalPages ? '#ddd' : '#666' }}><ChevronRight size={16} /></button>
+      <>
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-3 mb-6">
+          {[
+            { label: '\uC804\uCCB4', value: stats.total, color: '#2C2C2A' },
+            { label: '\uACB0\uC81C', value: stats.paid, color: '#6B9E78' },
+            { label: '\uC644\uB8CC', value: stats.done, color: '#2C8C6B' },
+            { label: '\uC2E4\uD328', value: stats.failed, color: '#C0392B' },
+            { label: '\uB9E4\uCD9C', value: `${stats.revenue.toLocaleString()}\uC6D0`, color: '#2C2C2A' },
+          ].map(s => (
+            <div key={s.label} className="p-3 md:p-4 bg-stone-50 rounded-xl border border-stone-200 text-center">
+              <p className="text-[10px] md:text-[11px] text-stone-400 mb-1">{s.label}</p>
+              <p className="text-base md:text-xl font-semibold" style={{ color: s.color }}>{s.value}</p>
+            </div>
+          ))}
         </div>
+
+        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+          {['', 'PENDING', 'PAID', 'GENERATING', 'DONE', 'FAILED'].map(s => (
+            <button key={s} onClick={() => { setStatusFilter(s); setPage(1); }}
+              className={`px-3 py-1.5 rounded-md text-[11px] border whitespace-nowrap ${statusFilter === s ? 'bg-stone-800 text-white border-stone-800' : 'bg-white text-stone-500 border-stone-200'}`}>
+              {s ? (statusLabel[s] || s) : '\uC804\uCCB4'}
+            </button>
+          ))}
+        </div>
+
+        <div className="hidden md:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
+          <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+            <thead>
+              <tr className="border-b border-stone-200 bg-stone-50">
+                {['\uC8FC\uBB38\uBC88\uD638','\uD2B8\uB799','\uC774\uB984','\uD3F0\uD2B8','\uAE08\uC561','\uC0C1\uD0DC','\uC77C\uC2DC',''].map(h =>
+                  <th key={h} className="px-3 py-2.5 text-left font-medium text-stone-400 text-[11px]">{h}</th>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map(o => (
+                <tr key={o.id} className="border-b border-stone-100">
+                  <td className="px-3 py-2.5 font-mono text-[11px]">{o.orderId.slice(-10)}</td>
+                  <td className="px-3 py-2.5">{o.track}</td>
+                  <td className="px-3 py-2.5">{[o.groomNameKr, o.brideNameKr].filter(Boolean).join(' & ')}</td>
+                  <td className="px-3 py-2.5 text-[11px]">{o.fontId.replace(/script_|serif_|sans_/g, '')}</td>
+                  <td className="px-3 py-2.5">{o.amount.toLocaleString()}{'\uC6D0'}</td>
+                  <td className="px-3 py-2.5">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-medium text-white" style={{ background: statusColor[o.status] || '#999' }}>
+                      {statusLabel[o.status] || o.status}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2.5 text-[11px] text-stone-400">{new Date(o.createdAt).toLocaleDateString('ko')}</td>
+                  <td className="px-3 py-2.5">
+                    <div className="flex gap-1">
+                      {o.finalPosterUrl && (
+                        <>
+                          <button onClick={() => setPreview(o.finalPosterUrl)} className="p-1 text-stone-500 hover:text-stone-800"><Eye size={14} /></button>
+                          <a href={o.finalPosterUrl} target="_blank" rel="noopener noreferrer" className="p-1 text-stone-500 hover:text-stone-800"><Download size={14} /></a>
+                        </>
+                      )}
+                      {o.status === 'FAILED' && (
+                        <button onClick={() => retry(o.orderId)} className="p-1 text-red-500 hover:text-red-700"><RefreshCw size={14} /></button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {orders.length === 0 && <tr><td colSpan={8} className="py-10 text-center text-stone-300">{'\uC8FC\uBB38 \uC5C6\uC74C'}</td></tr>}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="md:hidden space-y-3">
+          {orders.map(o => (
+            <div key={o.id} className="bg-white rounded-xl border border-stone-200 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  {o.thumbnailUrl && <img src={o.thumbnailUrl} alt="" className="w-10 h-14 rounded object-cover" />}
+                  <div>
+                    <p className="text-sm font-medium text-stone-800">{[o.groomNameKr, o.brideNameKr].filter(Boolean).join(' & ') || '-'}</p>
+                    <p className="text-[11px] text-stone-400 font-mono">{o.orderId.slice(-10)}</p>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium text-white" style={{ background: statusColor[o.status] || '#999' }}>
+                  {statusLabel[o.status] || o.status}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-[11px] mb-2">
+                <div><span className="text-stone-400">{'\uD2B8\uB799'}</span> <span className="text-stone-700 ml-1">{o.track}</span></div>
+                <div><span className="text-stone-400">{'\uAE08\uC561'}</span> <span className="text-stone-700 ml-1">{o.amount.toLocaleString()}{'\uC6D0'}</span></div>
+                <div><span className="text-stone-400">{'\uC77C\uC2DC'}</span> <span className="text-stone-700 ml-1">{new Date(o.createdAt).toLocaleDateString('ko')}</span></div>
+              </div>
+              <div className="flex gap-2">
+                {o.finalPosterUrl && (
+                  <>
+                    <button onClick={() => setPreview(o.finalPosterUrl)} className="flex-1 py-2 rounded-lg border border-stone-200 text-stone-600 text-[11px] flex items-center justify-center gap-1"><Eye size={12} />{'\uBCF4\uAE30'}</button>
+                    <a href={o.finalPosterUrl} target="_blank" rel="noopener noreferrer" className="flex-1 py-2 rounded-lg border border-stone-200 text-stone-600 text-[11px] flex items-center justify-center gap-1"><Download size={12} />{'\uB2E4\uC6B4\uB85C\uB4DC'}</a>
+                  </>
+                )}
+                {o.status === 'FAILED' && (
+                  <button onClick={() => retry(o.orderId)} className="flex-1 py-2 rounded-lg border border-red-200 text-red-500 text-[11px] flex items-center justify-center gap-1"><RefreshCw size={12} />{'\uC7AC\uC2DC\uB3C4'}</button>
+                )}
+              </div>
+            </div>
+          ))}
+          {orders.length === 0 && <div className="py-10 text-center text-stone-300 text-sm">{'\uC8FC\uBB38 \uC5C6\uC74C'}</div>}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-3 mt-4">
+            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="p-1.5 disabled:text-stone-200 text-stone-500"><ChevronLeft size={16} /></button>
+            <span className="text-xs text-stone-400">{page} / {totalPages}</span>
+            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="p-1.5 disabled:text-stone-200 text-stone-500"><ChevronRight size={16} /></button>
+          </div>
+        )}
+      </>
       )}
 
-      </>)}
-
       {preview && (
-        <div onClick={() => setPreview(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, cursor: 'pointer' }}>
-          <img src={preview} alt="" style={{ maxHeight: '90vh', maxWidth: '90vw', borderRadius: 8 }} />
+        <div onClick={() => setPreview(null)} className="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] cursor-pointer">
+          <img src={preview} alt="" className="max-h-[90vh] max-w-[90vw] rounded-lg" />
         </div>
       )}
     </div>

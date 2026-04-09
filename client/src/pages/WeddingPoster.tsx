@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
+
 const API = import.meta.env.VITE_API_URL;
 
 type Track = 'PHOTO' | 'AI';
@@ -328,9 +329,10 @@ export default function WeddingPoster() {
     if (!track) return;
     setLoading(true);
     try {
+      const authToken = localStorage.getItem('token');
       const res = await fetch(`${API}/poster/order`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
         body: JSON.stringify({
           track,
           groomNameKr, groomNameEn,
@@ -340,6 +342,7 @@ export default function WeddingPoster() {
           conceptId: track === 'AI' ? selectedConcept : undefined,
           couponCode: couponCode || undefined,
           giftCode: giftCode || undefined,
+          isAdmin: !!localStorage.getItem('token') || undefined,
         }),
       });
       const data = await res.json();
@@ -727,7 +730,7 @@ export default function WeddingPoster() {
                 background: loading ? '#A8A8A0' : '#2C2C2A', color: '#fff',
                 fontSize: 15, fontWeight: 500, cursor: loading ? 'default' : 'pointer',
               }}
-            >{loading ? '처리 중...' : `${price.toLocaleString()}원 결제하기`}</button>
+            >{loading ? '처리 중...' : !!localStorage.getItem('token') ? '관리자 생성' : `${price.toLocaleString()}원 결제하기`}</button>
           </div>
         )}
 

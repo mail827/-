@@ -222,7 +222,7 @@ async function visionQC(originalUrl: string, generatedUrl: string, mode: string 
           content: [
             { type: 'image_url', image_url: { url: originalUrl, detail: 'high' } },
             { type: 'image_url', image_url: { url: generatedUrl, detail: 'high' } },
-            { type: 'text', text: 'Image 1 is the original reference photo. Image 2 is AI-generated. Carefully check ALL of the following:\n1. DEFORMITY: Does image 2 have ANY deformed faces, extra or missing fingers, mutated hands, fused body parts, distorted or missing limbs, extra arms or legs, melted or blurred facial features, asymmetric eyes, disproportionately large head, missing lower body or legs, incomplete torso, floating or disconnected body parts, or any anatomical impossibility?\n2. FACE IDENTITY: Compare face in image 1 vs image 2. Are the eyes, nose, mouth, jawline the same person? If image 2 shows a DIFFERENT person than image 1, answer FAIL.\n3. PERSON COUNT: If image 1 has 1 person but image 2 has 2 or more, or vice versa, answer FAIL. The number of people must match.' + genderCheck + '\nAnswer FAIL if ANY check fails. Answer PASS only if ALL checks pass. Reply with one word: PASS or FAIL.' },
+            { type: 'text', text: 'Image 1 is the original reference photo. Image 2 is AI-generated. Carefully check ALL of the following:\n1. DEFORMITY: Does image 2 have ANY deformed faces, extra or missing fingers, mutated hands, fused body parts, distorted or missing limbs, extra arms or legs, melted or blurred facial features, asymmetric eyes, disproportionately large head, missing lower body or legs, incomplete torso, floating or disconnected body parts, missing head, headless body, body without a head visible from any angle, or any anatomical impossibility? If a person is shown from behind, their head must still be visible. If a mirror or reflection is present, the reflected person must also have a complete head and body with no missing parts.\n2. FACE IDENTITY: Compare face in image 1 vs image 2. Are the eyes, nose, mouth, jawline the same person? If image 2 shows a DIFFERENT person than image 1, answer FAIL.\n3. PERSON COUNT: If image 1 has 1 person but image 2 has 2 or more, or vice versa, answer FAIL. The number of people must match.\n4. COMPLETENESS: Every person visible in image 2 (including reflections in mirrors, windows, or water) must have a complete head with hair, face, and all body parts. A person shown from behind with no head or a cut-off head is FAIL.' + genderCheck + '\nAnswer FAIL if ANY check fails. Answer PASS only if ALL checks pass. Reply with one word: PASS or FAIL.' },
           ],
         }],
       }),
@@ -1448,6 +1448,36 @@ async function processVideoAsync(videoId: string, videoEngine: string = 'seedanc
     await Promise.all(batchPromises);
     console.log('[Pipeline] clip batch ' + (Math.floor(bi / CLIP_BATCH) + 1) + '/' + Math.ceil(scenes.length / CLIP_BATCH) + ' done');
   }
+  const failedIndices = clipResults.map((url, i) => !url ? i : -1).filter(i => i >= 0);
+  if (failedIndices.length > 0 && failedIndices.length <= 5) {
+    console.log('[Pipeline] Retrying ' + failedIndices.length + ' failed clips:', failedIndices.map(i => i + 1).join(','));
+    const retryPromises = failedIndices.map(si => {
+      const scene = scenes[si];
+      let gen: Promise<string | null>;
+      if (videoEngine === 'seedance2') {
+        const sd2prompt = buildSD2Prompt(scene.photoType, scene.camera, scene.phase);
+        gen = generatePiAPISeedance2Clip(scene.photoUrl, sd2prompt, scene.duration, 'seedance-2-preview').then(url => url ? removePiAPIWatermark(url) : null);
+      } else if (videoEngine === 'seedance2-fast') {
+        const sd2prompt = buildSD2Prompt(scene.photoType, scene.camera, scene.phase);
+        gen = generatePiAPISeedance2Clip(scene.photoUrl, sd2prompt, scene.duration, 'seedance-2-fast-preview').then(url => url ? removePiAPIWatermark(url) : null);
+      } else {
+        const sd15prompt = buildSD15DirectPrompt(scene.photoType, scene.camera, scene.phase, si);
+        gen = generateSeedanceClip(scene.photoUrl, sd15prompt, scene.duration);
+      }
+      return gen.then(url => {
+        if (url) {
+          clipResults[si] = url;
+          console.log('[Pipeline] retry clip ' + (si + 1) + ' OK');
+        } else {
+          console.log('[Pipeline] retry clip ' + (si + 1) + ' FAILED again');
+        }
+      }).catch(e => {
+        console.error('[Pipeline] retry clip ' + (si + 1) + ' error:', (e as any).message);
+      });
+    });
+    await Promise.all(retryPromises);
+  }
+
   const clipUrls = clipResults;
 
   const validClips = clipUrls.filter(Boolean);

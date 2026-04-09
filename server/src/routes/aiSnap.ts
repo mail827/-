@@ -120,7 +120,8 @@ const applyFaceSwap = async (baseUrl: string, isCouple: boolean, imageUrls: stri
       if (swap2?.image?.url) return swap2.image.url;
       return swap1.image.url;
     }
-  } catch (e: any) { console.log('Face-swap skipped:', e.message); }
+  } catch (e: any) {
+    console.error("[admin/poll] error:", e.message); console.log('Face-swap skipped:', e.message); }
   return baseUrl;
 };
 
@@ -597,10 +598,12 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
     const body: Record<string, unknown> = {
       prompt,
       image_urls: urls.map(cropToPortrait),
+      id_weight: 0.85,
       num_images: 1,
       aspect_ratio: '3:4',
       resolution: '1K',
       output_format: 'png',
+      negative_prompt: 'deformed hands, extra fingers, fused fingers, missing fingers, extra limbs, missing limbs, deformed face, ugly face, blurry face, distorted proportions, mutation, bad anatomy, disfigured, poorly drawn hands, poorly drawn face, extra arms, extra legs, text, watermark, logo, signature',
     };
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
@@ -686,7 +689,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
-      body: JSON.stringify({ prompt, image_urls: urls.map(cropToPortrait), num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
+      body: JSON.stringify({ prompt, image_urls: urls.map(cropToPortrait), id_weight: 0.85, num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png', negative_prompt: 'deformed hands, extra fingers, fused fingers, missing fingers, extra limbs, missing limbs, deformed face, ugly face, blurry face, distorted proportions, mutation, bad anatomy, disfigured, poorly drawn hands, poorly drawn face, extra arms, extra legs, text, watermark, logo, signature' }),
     });
 
     if (submit.images) {
@@ -712,6 +715,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
     });
     res.json({ status: 'generating', snapId: snap.id, statusUrl: submit.status_url, responseUrl: submit.response_url });
   } catch (e: any) {
+    console.error("[admin/poll] error:", e.message);
     console.error('[free/generate] Error:', e.message);
     await prisma.user.update({ where: { id: userId }, data: { freeSnapUsed: false } }).catch(() => {});
     res.status(500).json({ error: e.message });
@@ -781,6 +785,7 @@ router.get('/free/poll', async (req, res) => {
     if (status.status === 'FAILED') return res.json({ status: 'failed', error: status.error });
     res.json({ status: 'generating' });
   } catch (e: any) {
+    console.error("[admin/poll] error:", e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -847,6 +852,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     const updatedQuota = { ...quota, used: quota.used + 1, remaining: quota.isAdmin ? 999 : quota.remaining - 1 };
     res.json({ ...snap, quota: updatedQuota });
   } catch (e: any) {
+    console.error("[admin/poll] error:", e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -864,6 +870,7 @@ router.post('/admin/ic-test', authMiddleware, async (req: AuthRequest, res) => {
         prompt,
         image_url: imageUrl,
         aspect_ratio: '3:4', resolution: '1K', output_format: 'png',
+        negative_prompt: 'deformed hands, extra fingers, fused fingers, missing fingers, extra limbs, missing limbs, deformed face, ugly face, blurry face, distorted proportions, mutation, bad anatomy, disfigured, poorly drawn hands, poorly drawn face, extra arms, extra legs, text, watermark, logo, signature',
       }),
     });
     let falUrl: string | null = null;
@@ -887,6 +894,7 @@ router.post('/admin/ic-test', authMiddleware, async (req: AuthRequest, res) => {
     const uploaded = await uploadFromUrl(falUrl, 'ai-snap-ic-test');
     res.json({ status: 'done', resultUrl: uploaded.url, engine: 'instant-character' });
   } catch (e: any) {
+    console.error("[admin/poll] error:", e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -902,6 +910,7 @@ router.post('/admin/pulid-test', authMiddleware, async (req: AuthRequest, res) =
         prompt,
         reference_image_url: imageUrl,
         aspect_ratio: '3:4', resolution: '1K', output_format: 'png',
+        negative_prompt: 'deformed hands, extra fingers, fused fingers, missing fingers, extra limbs, missing limbs, deformed face, ugly face, blurry face, distorted proportions, mutation, bad anatomy, disfigured, poorly drawn hands, poorly drawn face, extra arms, extra legs, text, watermark, logo, signature',
         id_weight: idWeight || 0.85,
         guidance_scale: 4,
         num_inference_steps: 20,
@@ -930,6 +939,7 @@ router.post('/admin/pulid-test', authMiddleware, async (req: AuthRequest, res) =
     const uploaded = await uploadFromUrl(falUrl, 'ai-snap-pulid-test');
     res.json({ status: 'done', resultUrl: uploaded.url, engine: 'flux-pulid' });
   } catch (e: any) {
+    console.error("[admin/poll] error:", e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -966,10 +976,12 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
       body: JSON.stringify({
         prompt,
         image_urls: urls.map(cropToPortrait),
+        id_weight: 0.85,
         num_images: 1,
         aspect_ratio: '3:4',
         resolution: '1K',
         output_format: 'png',
+        negative_prompt: 'deformed hands, extra fingers, fused fingers, missing fingers, extra limbs, missing limbs, deformed face, ugly face, blurry face, distorted proportions, mutation, bad anatomy, disfigured, poorly drawn hands, poorly drawn face, extra arms, extra legs, text, watermark, logo, signature',
       }),
     });
     if (submit.images) {
@@ -983,6 +995,7 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
     if (!submit.status_url) throw new Error('No status_url');
     res.json({ statusUrl: submit.status_url, responseUrl: submit.response_url });
   } catch (e: any) {
+    console.error("[admin/poll] error:", e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -1016,6 +1029,7 @@ router.get('/admin/poll', async (req, res) => {
     }
     res.json({ status: 'processing' });
   } catch (e: any) {
+    console.error("[admin/poll] error:", e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -1272,6 +1286,7 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
         image: refUrl,
         size: '2K',
         output_format: 'png',
+        negative_prompt: 'deformed hands, extra fingers, fused fingers, missing fingers, extra limbs, missing limbs, deformed face, ugly face, blurry face, distorted proportions, mutation, bad anatomy, disfigured, poorly drawn hands, poorly drawn face, extra arms, extra legs, text, watermark, logo, signature',
         watermark: false,
       }),
     });

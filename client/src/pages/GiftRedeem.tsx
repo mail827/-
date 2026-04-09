@@ -12,6 +12,12 @@ export default function GiftRedeem() {
   const [success, setSuccess] = useState<{ packageName: string } | null>(null);
   const [autoRedeemTriggered, setAutoRedeemTriggered] = useState(false);
 
+  useEffect(() => {
+    if (code && code.startsWith('SNAP-')) {
+      navigate('/ai-snap/redeem?code=' + code, { replace: true });
+    }
+  }, [code, navigate]);
+
   const handleRedeem = useCallback(async (giftCode: string) => {
     if (!giftCode.trim()) return;
 

@@ -868,3 +868,17 @@ model PosterGift {
   expiresAt  DateTime
   createdAt  DateTime  @default(now())
 }
+
+model MarketingInsight {
+  id          String   @id @default(cuid())
+  weekId      String
+  type        String
+  title       String
+  content     String   @db.Text
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([weekId])
+  @@index([type])
+}
