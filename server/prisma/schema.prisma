@@ -882,3 +882,70 @@ model MarketingInsight {
   @@index([weekId])
   @@index([type])
 }
+
+enum CounselingRole {
+  admin
+  member
+}
+
+enum CounselingMood {
+  anxious
+  angry
+  tired
+  sad
+  overwhelmed
+  okay
+}
+
+model CounselingUser {
+  id        String            @id
+  name      String
+  role      CounselingRole    @default(member)
+  sessions  CounselingSession[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model CounselingSession {
+  id         String             @id
+  userId     String
+  user       CounselingUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  mood       CounselingMood?
+  summary    String?            @db.Text
+  memoryNote String?            @db.Text
+  messages   CounselingMessage[]
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([updatedAt])
+}
+
+model CounselingMessage {
+  id        String            @id
+  sessionId String
+  session   CounselingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      String
+  content   String            @db.Text
+  createdAt DateTime          @default(now())
+
+  @@index([sessionId])
+  @@index([createdAt])
+}
+
+model FinanceSession {
+  id           String   @id
+  ownerUserId  String
+  month        String
+  rawInput     String   @db.Text
+  income       Int
+  totalExpense Int
+  net          Int
+  expensesJson Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([ownerUserId])
+  @@index([month])
+}

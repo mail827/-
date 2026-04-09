@@ -19,7 +19,7 @@ const TYPES = [
   { id: 'painpoint', label: '빡침포인트' },
   { id: 'devlog', label: '개발로그' },
   { id: 'hook', label: '후킹카피' },
-  { id: 'shortform', label: '숏폼대본' },
+  { id: 'shortform_script', label: '숏폼대본' },
   { id: 'longform', label: '롱폼기획' },
   { id: 'scenario', label: '시나리오' },
 ] as const;
@@ -29,7 +29,7 @@ const TYPE_CONFIG: Record<string, { icon: any; label: string; accent: string; bg
   painpoint: { icon: Flame, label: 'PAIN POINT', accent: 'text-red-600', bg: 'bg-red-50/60', border: 'border-red-200/40' },
   devlog: { icon: Code2, label: 'DEV LOG', accent: 'text-emerald-600', bg: 'bg-emerald-50/60', border: 'border-emerald-200/40' },
   hook: { icon: Megaphone, label: 'HOOK', accent: 'text-violet-600', bg: 'bg-violet-50/60', border: 'border-violet-200/40' },
-  shortform: { icon: Film, label: 'SHORTFORM SCRIPT', accent: 'text-orange-600', bg: 'bg-orange-50/60', border: 'border-orange-200/40' },
+  shortform_script: { icon: Film, label: 'SHORTFORM SCRIPT', accent: 'text-orange-600', bg: 'bg-orange-50/60', border: 'border-orange-200/40' },
   longform: { icon: Film, label: 'LONGFORM PLAN', accent: 'text-indigo-600', bg: 'bg-indigo-50/60', border: 'border-indigo-200/40' },
   scenario: { icon: Film, label: 'SCENARIO', accent: 'text-rose-600', bg: 'bg-rose-50/60', border: 'border-rose-200/40' },
   error: { icon: AlertTriangle, label: 'ERROR', accent: 'text-amber-600', bg: 'bg-amber-50/60', border: 'border-amber-200/40' },
