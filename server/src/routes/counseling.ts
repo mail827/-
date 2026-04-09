@@ -44,6 +44,89 @@ function buildSupportReply({
   return `${lead} ${memory}지금 메시지에서 핵심은 "${lastUserMessage.slice(0, 40)}"로 보여요. 오늘 할 수 있는 작은 행동 1가지는 10분 산책 또는 물 한 잔 마시고 호흡 6회입니다.`;
 }
 
+async function buildClaudeReply({
+  mood,
+  memoryNote,
+  recentMessages,
+  lastUserMessage,
+}: {
+  mood?: string;
+  memoryNote?: string;
+  recentMessages: Array<{ role: string; content: string }>;
+  lastUserMessage: string;
+}) {
+  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
+  if (!apiKey) {
+    return null; // 키 없으면 fallback
+  }
+
+  const safety = /(자해|죽고 싶|죽고싶|해치고 싶|해치고싶|극단적)/.test(lastUserMessage);
+  if (safety) {
+    return '지금 많이 힘든 상태로 보여요. 혼자 버티지 말고 주변 신뢰 가능한 사람이나 지역 정신건강상담전화(1393) 같은 즉시 도움 채널에 바로 연결해 주세요.';
+  }
+
+  const system = [
+    '당신은 한국어 상담 코치입니다.',
+    '진단/치료 행위는 하지 말고 공감 + 현실적인 한 걸음 행동 제안 위주로 답하세요.',
+    '길이는 2~5문장으로 간결하게.',
+    '절대 JSON이 아닌 일반 텍스트만 반환.',
+    `현재 mood: ${mood || 'okay'}`,
+    `memoryNote: ${memoryNote || ''}`,
+  ].join('\n');
+
+  const transcript = recentMessages
+    .slice(-8)
+    .map((m) => `${m.role === 'assistant' ? '상담사' : '내담자'}: ${m.content}`)
+    .join('\n');
+
+  const userPrompt = [
+    '아래 대화를 바탕으로 다음 사용자 메시지에 답변해 주세요.',
+    '',
+    transcript || '(이전 대화 없음)',
+    '',
+    `최신 사용자 메시지: ${lastUserMessage}`,
+  ].join('\n');
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: process.env.CLAUDE_MODEL || 'claude-3-5-sonnet-20241022',
+        max_tokens: 300,
+        temperature: 0.5,
+        system,
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
+      signal: controller.signal,
+    });
+
+    const data: any = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      console.error('[counseling] claude error:', r.status, data);
+      return null;
+    }
+
+    const text = Array.isArray(data?.content)
+      ? data.content.filter((x: any) => x?.type === 'text').map((x: any) => x?.text || '').join('\n').trim()
+      : '';
+
+    return text || null;
+  } catch (e: any) {
+    console.error('[counseling] claude fetch failed:', e?.message || e);
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function ensureSeedUsers() {
   await prisma.$executeRaw`INSERT INTO "CounselingUser" ("id","name","role","createdAt","updatedAt")
     SELECT 'gahyun','가현','member',NOW(),NOW()
@@ -93,7 +176,7 @@ router.post('/sessions', authMiddleware, async (req: any, res) => {
     const id = `cs_${randomUUID()}`;
     await prisma.$executeRaw`
       INSERT INTO "CounselingSession" ("id","userId","title","mood","createdAt","updatedAt")
-      VALUES (${id},${userId},${title},${mood},NOW(),NOW())
+      VALUES (${id},${userId},${title},CAST(${mood} AS "CounselingMood"),NOW(),NOW())
     `;
     const rows = await prisma.$queryRaw<any[]>`SELECT * FROM "CounselingSession" WHERE "id" = ${id}`;
     res.json(rows[0]);
@@ -122,9 +205,11 @@ router.post('/sessions/:id/messages', authMiddleware, async (req: any, res) => {
   try {
     const content = String(req.body.content || '').trim();
     if (!content) return res.status(400).json({ error: 'content required' });
+
     const sessionRows = await prisma.$queryRaw<any[]>`SELECT * FROM "CounselingSession" WHERE "id" = ${req.params.id}`;
     const session = sessionRows[0];
     if (!session) return res.status(404).json({ error: 'not found' });
+
     const mine = resolveMemberName(req.user) === '가현' ? 'gahyun' : 'dakyum';
     if (!isAdmin(req.user) && session.userId !== mine) return res.status(403).json({ error: 'forbidden' });
 
@@ -139,18 +224,38 @@ router.post('/sessions/:id/messages', authMiddleware, async (req: any, res) => {
       ORDER BY "createdAt" DESC
       LIMIT 8
     `;
+
     const memoryNote = String(session.memoryNote || '');
-    const assistantText = buildSupportReply({ mood: session.mood, memoryNote, lastUserMessage: content });
+
+    const claudeReply = await buildClaudeReply({
+      mood: session.mood,
+      memoryNote,
+      recentMessages: [...recent].reverse(),
+      lastUserMessage: content,
+    });
+
+    const assistantText = claudeReply || buildSupportReply({
+      mood: session.mood,
+      memoryNote,
+      lastUserMessage: content,
+    });
 
     await prisma.$executeRaw`
       INSERT INTO "CounselingMessage" ("id","sessionId","role","content","createdAt")
       VALUES (${`msg_a_${randomUUID()}`},${req.params.id},'assistant',${assistantText},NOW())
     `;
+
     const summary = content.length > 28 ? content.slice(0, 28) + '...' : content;
     await prisma.$executeRaw`
       UPDATE "CounselingSession" SET "summary" = ${summary}, "updatedAt" = NOW() WHERE "id" = ${req.params.id}
     `;
-    res.json({ ok: true, reply: assistantText, recentCount: recent.length });
+
+    res.json({
+      ok: true,
+      reply: assistantText,
+      recentCount: recent.length,
+      provider: claudeReply ? 'claude' : 'fallback',
+    });
   } catch (e: any) {
     res.status(500).json({ error: e.message || 'failed' });
   }
@@ -161,8 +266,10 @@ router.patch('/sessions/:id/memory', authMiddleware, async (req: any, res) => {
     const sessionRows = await prisma.$queryRaw<any[]>`SELECT * FROM "CounselingSession" WHERE "id" = ${req.params.id}`;
     const session = sessionRows[0];
     if (!session) return res.status(404).json({ error: 'not found' });
+
     const mine = resolveMemberName(req.user) === '가현' ? 'gahyun' : 'dakyum';
     if (!isAdmin(req.user) && session.userId !== mine) return res.status(403).json({ error: 'forbidden' });
+
     const note = String(req.body.memoryNote || '').trim();
     await prisma.$executeRaw`
       UPDATE "CounselingSession" SET "memoryNote" = ${note}, "updatedAt" = NOW() WHERE "id" = ${req.params.id}
