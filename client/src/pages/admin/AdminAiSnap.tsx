@@ -10,6 +10,12 @@ interface AiSnapItem {
   engine: string;
   status: string;
   resultUrl?: string;
+  providerStatus?: string;
+  providerResultUrl?: string;
+  pollCount?: number;
+  lastPolledAt?: string;
+  reconcileAfter?: string;
+  errorMessage?: string;
   errorMsg?: string;
   createdAt: string;
   wedding?: { id: string; slug: string; groomName: string; brideName: string; } | null;
@@ -69,7 +75,10 @@ const CONCEPT_MAP = Object.fromEntries(CONCEPTS.map(c => [c.id, c.label]));
 const STATUS_STYLES: Record<string, { label: string; cls: string }> = {
   done: { label: '완료', cls: 'bg-emerald-100 text-emerald-700' },
   failed: { label: '실패', cls: 'bg-red-100 text-red-600' },
+  stuck: { label: '지연', cls: 'bg-orange-100 text-orange-700' },
   generating: { label: '생성중', cls: 'bg-amber-100 text-amber-700' },
+  queued: { label: '큐 대기', cls: 'bg-blue-100 text-blue-700' },
+  uploading: { label: '업로드중', cls: 'bg-purple-100 text-purple-700' },
   processing: { label: '대기중', cls: 'bg-stone-100 text-stone-600' },
 };
 
@@ -93,6 +102,7 @@ export default function AdminAiSnap() {
   const [couplePhoto, setCouplePhoto] = useState('');
   const [uploading, setUploading] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [reconcilingId, setReconcilingId] = useState<string | null>(null);
   const [genStep, setGenStep] = useState(0);
   const stepRef = useRef<ReturnType<typeof setInterval>>();
   const GEN_STEPS = ['AI가 컨셉을 분석하고 있어요', '이미지를 생성하고 있어요', '얼굴을 정밀 보정 중이에요', '고화질로 변환하고 있어요', '거의 다 됐어요'];
@@ -206,6 +216,22 @@ export default function AdminAiSnap() {
     } catch {
       setGenerating(false);
       clearInterval(stepRef.current);
+    }
+  };
+
+
+  const handleReconcile = async (id: string) => {
+    setReconcilingId(id);
+    try {
+      const res = await api(`/reconcile/${id}`, { method: 'POST' });
+      const data = await res.json();
+      if (data?.snap) {
+        setSnaps(prev => prev.map(s => s.id === id ? { ...s, ...data.snap } : s));
+      }
+      await load();
+    } catch {
+    } finally {
+      setReconcilingId(null);
     }
   };
 
@@ -352,6 +378,8 @@ export default function AdminAiSnap() {
                   <p className="text-xs text-stone-500">{snap.user?.name || snap.user?.email || '알수없음'}</p>
                   <p className="text-xs text-stone-500">{CONCEPT_MAP[snap.concept] || snap.concept}</p>
                   <p className="text-[11px] text-stone-400 mt-0.5">{new Date(snap.createdAt).toLocaleString('ko-KR')}</p>
+                  {snap.providerStatus && <p className="text-[11px] text-stone-400">provider: {snap.providerStatus} · polls: {snap.pollCount || 0}</p>}
+                  {(snap.errorMessage || snap.errorMsg) && <p className="text-[11px] text-red-400 truncate">{snap.errorMessage || snap.errorMsg}</p>}
                 </div>
                 <div className="flex flex-col gap-1 flex-shrink-0">
                   {snap.resultUrl && (
@@ -359,6 +387,18 @@ export default function AdminAiSnap() {
                       <ExternalLink className="w-4 h-4 text-stone-400" />
                     </a>
                   )}
+                  <button
+                    onClick={() => handleReconcile(snap.id)}
+                    disabled={reconcilingId === snap.id}
+                    className="p-1.5 hover:bg-amber-50 rounded-lg transition-colors disabled:opacity-50"
+                    title="재동기화"
+                  >
+                    {reconcilingId === snap.id ? (
+                      <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4 text-amber-500" />
+                    )}
+                  </button>
                   <button onClick={() => handleDelete(snap.id)} className="p-1.5 hover:bg-red-50 rounded-lg transition-colors">
                     <Trash2 className="w-4 h-4 text-red-400" />
                   </button>

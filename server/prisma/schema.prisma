@@ -585,6 +585,13 @@ model AiSnap {
   resultUrl   String?
   resultOriginalUrl String?
   status      String    @default("pending")
+  falRequestId String?
+  providerStatus String?
+  providerResultUrl String?
+  pollCount   Int       @default(0)
+  lastPolledAt DateTime?
+  reconcileAfter DateTime?
+  errorMessage String?
   isFree      Boolean   @default(false)
   errorMsg    String?
   statusUrl   String?
