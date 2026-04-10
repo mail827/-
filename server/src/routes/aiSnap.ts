@@ -139,7 +139,7 @@ const cropToPortrait = (url: string): string => {
   return url;
 };
 
-const FACE_INSTRUCTION = 'CRITICAL: preserve the EXACT original face AND exact hairstyle hair length hair color from the reference photo unchanged. Do NOT modify eyes, do NOT add double eyelids, do NOT change eye shape. Keep exact nose, lips, jaw, face proportions. Do NOT beautify or slim face. Do NOT change hairstyle, do NOT cut hair shorter, do NOT add bangs if none exist, keep exact same hair from input photo. Do NOT create deformed hands or extra fingers. Do NOT add text logos watermarks. Keep clean elegant clothing with no distortion';
+const FACE_INSTRUCTION = 'Keep the person\'s facial features exactly the same as the reference image, including eye shape, nose, lips, jawline, and hairstyle. The face must be identical to the input photo';
 
 
 const SCENE_ROTATION: Record<string, { groom: string[]; bride: string[]; couple: string[] }> = {
@@ -622,12 +622,10 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
     const body: Record<string, unknown> = {
       prompt,
       image_urls: urls.map(cropToPortrait),
-      id_weight: 0.85,
       num_images: 1,
       aspect_ratio: '3:4',
       resolution: '1K',
       output_format: 'png',
-      negative_prompt: 'deformed hands, extra fingers, fused fingers, missing fingers, extra limbs, missing limbs, deformed face, ugly face, blurry face, distorted proportions, mutation, bad anatomy, disfigured, poorly drawn hands, poorly drawn face, extra arms, extra legs, text, watermark, logo, signature',
     };
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
@@ -715,7 +713,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
-      body: JSON.stringify({ prompt, image_urls: urls.map(cropToPortrait), id_weight: 0.85, num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png', negative_prompt: 'deformed hands, extra fingers, fused fingers, missing fingers, extra limbs, missing limbs, deformed face, ugly face, blurry face, distorted proportions, mutation, bad anatomy, disfigured, poorly drawn hands, poorly drawn face, extra arms, extra legs, text, watermark, logo, signature' }),
+      body: JSON.stringify({ prompt, image_urls: urls.map(cropToPortrait), num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
     });
 
     if (submit.images) {
@@ -1153,50 +1151,111 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
       refUrl = cropToPortrait(urls[0]);
     }
 
-    const SEEDREAM_SCENES: Record<string, string> = {
-      studio_classic: 'elegant white wedding studio with soft natural window light, clean minimal backdrop',
-      studio_gallery: 'minimal white architectural studio with curved plaster arches, soft diffused natural light',
-      studio_fog: 'warm studio with cream linen draped backdrop and pampas grass, soft warm light',
-      studio_mocha: 'dark moody studio with mocha brown wall and dramatic warm spotlight from above',
-      studio_sage: 'modern studio with sage green wall and cream furniture, soft even natural light',
-      hanbok_traditional: 'traditional Korean palace courtyard, soft natural daylight, dignified atmosphere',
-      hanbok_wonsam: 'vast empty courtyard of Korean royal palace with dark grey stone pavement and grand wooden palace hall with dancheong painted eaves',
-      hanbok_dangui: 'warm ondol room with hanji walls and dark wooden daecheongmaru of traditional hanok, stone courtyard with curved eaves, plum blossom garden',
-      hanbok_modern: 'mountain ridge in thick cold fog with dark pine silhouettes, modern minimalist hanok with glass sliding doors and wooden beams, misty mountain valley, cool diffused light',
-      hanbok_saeguk: 'Joseon palace throne room with ilwolobongdo screen, ceremonial hall with hanji doors, queen private chamber with oil lamps, secret rear garden with maple trees and lotus pond',
-      hanbok_flower: 'midnight Paris Seine riverbank with iron lampposts and wet cobblestones, ornate iron bridge, narrow Parisian streets with flower shop windows, stone arcade in rain, cinematic night atmosphere',
-      city_night: 'late night empty city streets with neon reflections on wet pavement, sodium streetlamps, rooftop parking garage overlooking skyline, underground passage with flickering fluorescent tubes, nocturnal urban cinematic atmosphere',
-      cherry_blossom: 'quiet street lined with cherry blossom trees in full bloom forming pale pink canopy, petals drifting slowly, petal-covered ground soft pink, soft flat overcast light, dreamy spring pastel atmosphere',
-      forest_wedding: 'dense old-growth forest with massive dark trunks like cathedral pillars, thick white fog between trees at waist height, deep green moss on dark wet earth, flat grey diffused light, sacred woodland atmosphere',
-      castle_garden: 'vast empty European palace interior with high painted ceilings marble columns, grand hall of mirrors with gilded frames, dusty golden light from high windows, abandoned grandeur',
-      cathedral: 'vast old gothic stone cathedral with soaring ribbed vault ceiling massive stone pillars, tall stained glass windows casting colored light pools on stone floor, votive candles flickering in dark alcove, sacred Caravaggio chiaroscuro atmosphere',
-      watercolor: 'bright airy art studio with large windows, soft pastel watercolor splashes on white walls',
-      magazine_cover: 'high fashion editorial portrait, clean minimalist studio, dramatic single light source',
-      rainy_day: 'steady rain on quiet Korean street with old low buildings, wet dark asphalt reflecting grey sky, flickering fluorescent light, clear vinyl umbrella, silver rain lines, patient intimate atmosphere',
-      vintage_film: 'vintage portrait with warm Kodak Portra 400 tones, soft film grain, natural window light',
-      cruise_sunset: 'luxury yacht deck at golden hour sunset, warm amber ocean light, turquoise Mediterranean sea',
-      cruise_bluesky: 'luxury cruise ship deck under vivid blue sky, crystal clear ocean, bright natural daylight',
-      vintage_record: 'cozy vintage vinyl record shop, warm tungsten lighting, 1970s atmosphere',
-      retro_hongkong: 'Hong Kong night market with red lanterns and neon signs, rain-slicked street',
-      black_swan: 'dark gothic cathedral with pointed arches, deep blue stained glass, polished black marble floor',
-      blue_hour: 'twilight blue hour on European cobblestone street, warm street lamp against deep blue sky',
-      velvet_rouge: 'dark opulent mansion library with crimson velvet curtains, warm dim candlelight',
-      water_memory: 'dimly lit vintage movie theater with red velvet seats, warm projector light',
-      rose_garden: 'lavish rococo salon with pale pink walls, gilded mirrors, climbing pink roses, crystal chandelier, pastel pink dreamy light',
-      grass_rain: 'wide green grassy hillside on overcast rainy day, mist hanging low, grey sky, muted green tones, analog film grain',
-      eternal_blue: 'empty grey winter beach at dusk, grey sky meeting grey ocean, cold blue-grey monochrome, heavy film grain',
-      heart_editorial: 'dark editorial fashion studio, pure black background, hard directional spotlight, high contrast',
-      vintage_tungsten: 'dark maximalist vintage room with rose and tropical leaf floral wallpaper, old CRT television, houseplants, floor lamp with fabric shade, direct on-camera flash flat harsh lighting, faded warm print colors magenta highlights yellow midtones, 1970s wedding album',
-      aao: 'brightly lit Korean convenience store at night, harsh white fluorescent ceiling lights, linoleum floor, shelves of instant noodles and snacks, deadpan mundane atmosphere, flat ugly fluorescent light',
-      spring_letter: 'old quiet library with tall windows cherry blossom branches pressing against glass, soft afternoon dappled pink-tinted light filtering through blossoms, dust floating in warm light beams, quiet and still',
-      summer_rain: 'wide open grass field under blazing summer sun or barley field before thunderstorm, harsh midday sun dappled shade or dramatic split sky, hot summer heat and breeze',
-      autumn_film: 'narrow Korean residential alley autumn ginkgo leaves or small old portrait studio warm tungsten bulb, extremely low golden afternoon light turning everything amber, quiet unhurried film grain',
-      winter_zhivago: 'snow-covered landscape at night or early dawn, heavy snowfall or pristine fresh snow, single distant streetlamp warm orange point, cold blue-white monochrome, breath visible freezing air',
-      lovesick: 'empty outdoor parking lot or narrow urban alley, sodium vapor lamp harsh orange light on dark asphalt, predawn flat grey-blue light or night with single lamp circle, scarlet red and cobalt blue as only vivid colors against grey, deadpan awkward cinematic atmosphere',
-      silver_thread: 'grand austere London townhouse atelier with pale grey walls dark herringbone wooden floor, tall windows cold grey north light, tailor cutting table with silver needle and thread, ornate gilded standing mirror, dark wooden staircase, warm brass desk lamp at night, controlled intimate atmosphere',
-      rouge_clue: 'old Parisian cobblestone alleys with crimson red painted doors green ivy on stone walls, warm amber cafe interiors through fogged glass, old carousel with warm string lights at dusk, vintage record shop with tungsten bulbs, over-saturated emerald green and crimson red whimsical romantic atmosphere',
-    in_the_mood: 'dark narrow alleys at night with wet asphalt reflecting neon and sodium vapor lamps, old black motorcycle against graffitied walls, highway tunnel with infinite orange sodium lights, glass phone booth with cold fluorescent inside and warm amber outside, empty subway station escalators with cold blue-white fluorescent, dark arcade with multicolor screen glow, rooftop at night with city skyline neon, elevated highway underpass with concrete pillars and sparklers, Wong Kar-wai cinematic split color temperature atmosphere',
-      summer_tape: 'empty school playground with rusted pull-up bars and old green iron bench, blazing midsummer afternoon harsh overhead sun overexposed blown-out white sky, school corridor with old wooden floor and afternoon sun rectangles, school rooftop, golden hour sunset dissolving edges',
+    const SEEDREAM_SCENES: Record<string, string | string[]> = {
+      studio_classic: 'pristine white plaster studio with floor-to-ceiling sheer curtain diffusing soft morning light, polished cream marble floor reflecting gentle glow, clean minimal elegance',
+      studio_gallery: 'white architectural gallery space with curved plaster archway and soft overhead diffused north light, seamless white floor, serene sculptural atmosphere',
+      studio_fog: 'warm ivory studio draped in cream linen, dried pampas grass arrangement, soft golden window light filtering through gauze curtain, quiet intimate warmth',
+      studio_mocha: 'deep mocha brown textured wall studio with single warm overhead spotlight creating dramatic pool of amber light, dark polished concrete floor, cinematic contrast',
+      studio_sage: 'airy studio with muted sage green wall and cream linen armchair, soft even daylight from large north-facing window, calm understated refinement',
+      hanbok_traditional: 'traditional Korean palace courtyard with dark grey stone pavement and grand wooden hall with dancheong painted eaves, dignified soft natural daylight',
+      hanbok_wonsam: 'vast empty courtyard of Gyeongbokgung palace with dark grey flagstones and grand wooden throne hall rising behind, warm low afternoon sun casting long shadows, solemn regal atmosphere',
+      hanbok_dangui: [
+        'warm ondol room with ivory hanji sliding doors and dark chestnut wood daecheongmaru floor, soft golden afternoon light through paper screens, serene traditional elegance',
+        'stone courtyard of traditional hanok with curved clay tile eaves framing pale blue sky, plum blossom tree in corner, gentle spring daylight',
+      ],
+      hanbok_modern: [
+        'minimalist contemporary hanok with floor-to-ceiling glass sliding doors framed in dark wood, misty mountain valley visible outside, cool diffused overcast light',
+        'mountain ridge in cold morning fog with dark pine silhouettes, modern hanok wooden deck, muted cool palette, contemplative stillness',
+      ],
+      hanbok_saeguk: [
+        'Joseon dynasty throne hall with ilwolobongdo sun-moon screen behind golden throne, warm oil lamp glow on dark lacquered columns, ceremonial grandeur',
+        'royal palace private chamber with hanji walls and brass oil lamps casting warm amber pools, silk cushions on dark wooden floor, intimate regal warmth',
+      ],
+      hanbok_flower: [
+        'midnight Paris Seine riverbank with iron lampposts reflecting on wet cobblestones, distant Pont Alexandre III golden lights, romantic rain-kissed atmosphere',
+        'narrow Parisian alley with flower shop spilling pink peonies onto cobblestones, warm amber storefront glow against blue twilight, whimsical romance',
+      ],
+      city_night: [
+        'rain-slicked city street at midnight with neon signs reflecting in wet asphalt, sodium streetlamp casting amber cone of light, nocturnal urban solitude',
+        'empty rooftop parking garage overlooking glittering city skyline at night, cool concrete and distant warm city glow, cinematic isolation',
+      ],
+      cherry_blossom: 'quiet tree-lined path under full bloom cherry blossom canopy, pale pink petals drifting slowly through still air, soft flat overcast light, petal-covered ground, dreamy spring haze',
+      forest_wedding: 'ancient old-growth forest with massive dark moss-covered trunks rising like cathedral pillars, thick white fog suspended at waist height, deep green ferns, diffused grey light filtering through canopy, sacred woodland silence',
+      castle_garden: [
+        'vast European palace hall of mirrors with gilded frames and crystal chandeliers, dusty golden light streaming through tall arched windows, faded aristocratic grandeur',
+        'grand marble staircase in Baroque palace with ornate balustrade and painted ceiling fresco, warm amber afternoon light from high windows, timeless opulence',
+      ],
+      cathedral: 'soaring gothic stone cathedral with ribbed vault ceiling and massive stone pillars, tall stained glass windows casting colored light pools on worn stone floor, flickering votive candles in shadowed alcove, Caravaggio chiaroscuro reverence',
+      watercolor: 'bright airy artist atelier with tall arched windows and white plaster walls, soft pastel light, scattered watercolor paintings leaning against walls, creative gentle warmth',
+      magazine_cover: 'high-end photography studio with single large octagonal softbox creating clean directional light against seamless charcoal grey backdrop, editorial precision',
+      rainy_day: [
+        'steady silver rain on quiet Korean street with low tile-roofed buildings, wet dark asphalt reflecting grey sky, flickering convenience store fluorescent spill, patient intimate melancholy',
+        'glass bus shelter in soft rain with warm amber streetlamp overhead, wet pavement reflecting streaked light, quiet urban solitude',
+      ],
+      vintage_film: 'sunlit living room with warm honey-toned wooden furniture and sheer lace curtains, afternoon golden light creating soft lens flare, Kodak Portra 400 warm grain, nostalgic tenderness',
+      cruise_sunset: 'polished teak yacht deck at golden hour, warm amber sun low over turquoise Mediterranean horizon, gentle ocean breeze, luxurious golden warmth',
+      cruise_bluesky: 'white luxury cruise ship deck railing against vivid cerulean sky and crystal ocean, bright clean midday sun with soft sea spray, fresh nautical radiance',
+      vintage_record: [
+        'cozy vinyl record shop with floor-to-ceiling wooden shelves of albums, warm tungsten pendant lights, turntable spinning on oak counter, 1970s amber warmth',
+        'dim jazz bar corner with burgundy leather booth seat and warm pendant lamp, vinyl records on exposed brick wall, intimate vintage glow',
+      ],
+      retro_hongkong: 'narrow Hong Kong alley at night with vertical neon signs in red and cyan reflecting on rain-slicked flagstones, steam rising from street food cart, warm tungsten lantern glow, chaotic romantic nostalgia',
+      black_swan: 'dark gothic cathedral nave with pointed stone arches receding into shadow, deep midnight blue stained glass casting faint colored ribbons on polished black marble floor, single shaft of pale moonlight, darkly ethereal',
+      blue_hour: 'European cobblestone street at blue hour twilight, single warm amber gas lamp against deep sapphire sky, wet stone reflecting both warm and cool tones, romantic liminal quiet',
+      velvet_rouge: [
+        'opulent dark mansion library with floor-to-ceiling leather-bound books and deep crimson velvet curtains, single brass desk lamp casting warm amber pool, aristocratic shadow and warmth',
+        'candlelit ballroom with dark mahogany paneling and gilded ceiling molding, deep red velvet drapes, warm flickering amber glow against deep shadow, gothic romantic opulence',
+      ],
+      water_memory: 'dimly lit vintage art deco cinema with plush red velvet seats in rows, warm projector beam cutting through dusty air, silver screen glowing soft white, dreamlike subaquatic stillness',
+      rose_garden: 'lavish rococo salon with pale blush pink walls and ornate gilded mirror frames, crystal chandelier casting prismatic rainbow flecks, climbing pink roses framing tall window, pastel romantic reverie',
+      grass_rain: 'wide green hillside meadow on overcast rainy afternoon, soft drizzle visible against grey sky, muted sage and olive tones, gentle mist hanging low over tall grass, analog film grain melancholy',
+      eternal_blue: 'empty grey winter shoreline at dusk, grey sky merging with grey ocean at indistinct horizon, cold monochrome blue-grey palette, heavy film grain, solitary vast melancholy',
+      heart_editorial: 'stark fashion studio with pure matte black background and single hard directional spotlight creating sharp dramatic shadow, high contrast graphic minimalism',
+      vintage_tungsten: 'dark maximalist room with large rose and tropical leaf wallpaper in deep burgundy and forest green, old CRT television glowing in corner, floor lamp with fabric shade, harsh direct on-camera flash with rapid falloff into darkness, faded warm magenta-tinted print, 1970s amateur wedding album',
+      aao: [
+        'brightly lit Korean convenience store interior at 2am, harsh white fluorescent ceiling panels, linoleum floor, colorful snack shelves, deadpan mundane absurdity',
+        'empty laundromat at night with row of front-loading washing machines, harsh overhead fluorescent tubes, mint green tile walls, lonely ambient hum',
+      ],
+      spring_letter: [
+        'old quiet library with tall arched windows, cherry blossom branches pressing against glass outside, soft dappled pink-tinted afternoon light filtering through petals, dust motes floating in warm beams, still reverent hush',
+        'wooden writing desk by window overlooking cherry blossom garden, scattered handwritten letters and dried flower petals, warm golden afternoon light, tender nostalgia',
+      ],
+      summer_rain: [
+        'wide open barley field under dramatic split sky, half blazing sun half dark thundercloud, harsh midsummer midday light with wind rippling golden stalks, electric anticipation',
+        'empty school courtyard after sudden summer downpour, steam rising from hot wet asphalt, harsh overhead sun breaking through clearing clouds, fresh humid stillness',
+      ],
+      autumn_film: [
+        'narrow Korean residential alley carpeted in golden ginkgo leaves, extremely low amber afternoon sun stretching long shadows, quiet unhurried stillness, warm 35mm film grain',
+        'small portrait studio with single warm tungsten bulb hanging on cord, dark wood paneling, vintage camera on tripod, intimate amber glow, analog film warmth',
+      ],
+      winter_zhivago: [
+        'snow-covered birch forest at blue dawn, heavy snowflakes falling through still air, single distant warm amber streetlamp, cold blue-white monochrome, visible frozen breath, hushed crystalline silence',
+        'empty train platform at night during heavy snowfall, single sodium lamp casting orange cone on fresh white snow, dark railway tracks disappearing into blizzard, lonely romantic solitude',
+      ],
+      lovesick: [
+        'empty outdoor parking lot at night, single sodium vapor lamp casting harsh orange circle on dark wet asphalt, everything beyond the light lost in predawn grey-blue darkness, deadpan aching loneliness',
+        'narrow urban alley with single bare bulb above metal door, scarlet red graffiti on concrete wall, cobalt blue dumpster, flat grey ambient light, raw vulnerable stillness',
+      ],
+      silver_thread: [
+        'grand austere London townhouse atelier with pale dove grey walls and dark herringbone parquet floor, tall north-facing window with cold grey natural light, tailor cutting table with silver scissors, controlled precise intimacy',
+        'dimly lit bespoke fitting room with ornate gilded standing mirror, dark wooden staircase ascending into shadow, single warm brass desk lamp, refined nocturnal craftsmanship',
+      ],
+      rouge_clue: [
+        'old Parisian cobblestone alley with crimson red painted door and green ivy climbing ancient stone wall, warm amber light spilling from cafe window, twilight blue sky above, whimsical romantic mystery',
+        'vintage record shop interior with warm tungsten bulbs, dark wooden shelves of vinyl, old carousel poster on stone wall, over-saturated emerald and crimson warmth, playful nostalgia',
+      ],
+      in_the_mood: [
+        'dark narrow alley at night with wet asphalt reflecting distant cyan neon and warm sodium vapor lamp, old motorcycle parked against graffitied concrete wall, split warm-cool color temperature, Wong Kar-wai melancholy',
+        'old glass phone booth on empty sidewalk at night, cold fluorescent tube inside contrasting warm amber streetlight outside, rain-slicked pavement, isolated intimate longing',
+        'empty subway station escalator descending into cold blue-white fluorescent depth, rhythmic repeating overhead tube lights, solitary late-night stillness, urban poetic isolation',
+        'highway tunnel at night with infinite receding orange sodium vapor lights creating perspective lines on wet road surface, solitary headlight glow, hypnotic nocturnal drift',
+      ],
+      summer_tape: [
+        'empty school playground with rusted pull-up bars and old green iron bench, harsh midsummer overhead sun creating overexposed blown-out white sky, cicada heat shimmer, nostalgic ache',
+        'school corridor with old worn wooden floor and rectangles of hot afternoon sun from classroom windows, dust suspended in golden light beams, fading summer memory',
+      ],
+      iphone_selfie: 'casual bright cafe interior with large window and warm natural daylight, simple clean background with soft bokeh, relaxed everyday warmth',
+      iphone_mirror: 'clean modern bathroom with large rectangular mirror and soft overhead vanity lighting, neutral tile background, casual intimate moment',
     };
 
     const SEEDREAM_OUTFIT_GROOM: Record<string, string> = {
@@ -1296,18 +1355,19 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
   summer_tape: 'wearing soft warm apricot silk organza off-shoulder wedding dress with sheer organza draped loosely across collarbones forming gentle petal cap sleeves, fitted bodice in pale apricot silk charmeuse beneath floating organza overlay, full romantic A-line skirt in three graduated tiers of weightless silk organza with gentle sweep train, subtle ombre from pale apricot at bodice to soft peach at hem, single tiny cluster of freshwater seed pearls at center of neckline, no lace no beading elsewhere, natural elegant makeup',
 };
 
-    const scene = SEEDREAM_SCENES[concept] || SEEDREAM_SCENES.studio_classic;
+    const sceneRaw = SEEDREAM_SCENES[concept] || SEEDREAM_SCENES.studio_classic;
+    const scene = Array.isArray(sceneRaw) ? sceneRaw[Math.floor(Math.random() * sceneRaw.length)] : sceneRaw;
     let sdPrompt = '';
     if (isCouple) {
       const gOutfit = SEEDREAM_OUTFIT_GROOM[concept] || 'classic dark suit with white shirt';
       const bOutfit = SEEDREAM_OUTFIT_BRIDE[concept] || 'elegant white wedding gown';
-      sdPrompt = 'Portrait 3:4 ratio. The same couple from the reference image. The man ' + gOutfit + '. The woman ' + bOutfit + '. ' + scene + '. Each person must retain their own distinct unique facial features from the reference photo, the man and woman must have clearly different faces, the man must look masculine with his own jawline and bone structure, the woman must look feminine with her own separate distinct features, do NOT merge or blend their faces, do NOT make them look like siblings or the same person. Warm friendly natural expressions with genuine gentle smiles and kind soft eyes, relaxed comfortable intimate mood, NOT stern NOT cold NOT serious NOT expressionless NOT frowning. Photorealistic editorial photograph, soft natural skin texture with visible pores, warm natural skin tone, 50mm lens, shallow depth of field, no AI artifacts no plastic skin no uncanny valley';
+      sdPrompt = 'Photorealistic editorial wedding portrait, 3:4 ratio, 50mm lens f/1.8, shallow depth of field. ' + scene + '. A couple: the man ' + gOutfit + ', the woman ' + bOutfit + '. Man and woman each have their own unique distinct facial bone structure preserved exactly from the reference, man with strong masculine jawline and brow ridge, woman with soft feminine cheekbones and features, two clearly different individual faces. Warm genuine smiles, kind relaxed eyes, intimate comfortable mood. Natural skin with visible pores and subtle texture, warm skin tone, no AI artifacts, no plastic skin';
     } else if (mode === 'groom') {
       const outfit = SEEDREAM_OUTFIT_GROOM[concept] || 'classic dark suit with white shirt';
-      sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + scene + '. Warm friendly natural expression with genuine gentle smile and kind soft eyes, relaxed comfortable body language, NOT stern NOT cold NOT serious NOT expressionless NOT frowning. Photorealistic editorial photograph, soft natural skin texture with visible pores, warm natural skin tone, 50mm lens, shallow depth of field, no AI artifacts no plastic skin no uncanny valley';
+      sdPrompt = 'Photorealistic editorial wedding portrait, 3:4 ratio, 50mm lens f/1.8, shallow depth of field. ' + scene + '. The person from the reference image, ' + outfit + '. Warm genuine smile, kind relaxed eyes, comfortable natural posture. Natural skin with visible pores and subtle texture, warm skin tone, no AI artifacts, no plastic skin';
     } else {
       const outfit = SEEDREAM_OUTFIT_BRIDE[concept] || 'elegant white wedding gown';
-      sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + scene + '. Warm friendly natural expression with genuine gentle smile and kind soft eyes, relaxed comfortable body language, NOT stern NOT cold NOT serious NOT expressionless NOT frowning. Photorealistic editorial photograph, soft natural skin texture with visible pores, warm natural skin tone, 50mm lens, shallow depth of field, no AI artifacts no plastic skin no uncanny valley';
+      sdPrompt = 'Photorealistic editorial wedding portrait, 3:4 ratio, 50mm lens f/1.8, shallow depth of field. ' + scene + '. The person from the reference image, ' + outfit + '. Warm genuine smile, kind relaxed eyes, comfortable natural posture. Natural skin with visible pores and subtle texture, warm skin tone, no AI artifacts, no plastic skin';
     }
 
     console.log('[SeeDream retry] calling ARK API, image:', refUrl.slice(0, 80));

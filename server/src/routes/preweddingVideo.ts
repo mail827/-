@@ -64,7 +64,7 @@ const SELFIE_CONCEPTS: { id: string; prompt: string; subScenes?: string[] }[] = 
     { id: 'summer_tape', prompt: 'place this person in empty school playground in blazing midsummer afternoon, harsh overhead sun entire frame overexposed blown-out white sky, rusted pull-up bars and old green iron bench, hazy heat shimmer, face clearly visible, photorealistic, 8k', subScenes: ['place this person sitting on old green-painted iron bench in empty school playground, harsh overhead midsummer sun overexposed blown-out sky, hazy heat shimmer above asphalt, face clearly visible, photorealistic, 8k', 'place this person walking through long empty school corridor with old wooden floor, afternoon sun pouring through tall windows creating sharp golden light rectangles on dark floor, walking through alternating bands of blinding gold and cool shadow, face clearly visible mid-laugh, photorealistic, 8k', 'place this person sitting on concrete ledge on school rooftop beside concrete water tank, late afternoon sun lower but still intense, face tilted up to sky eyes closed sun on face, warm amber light, face clearly visible, photorealistic, 8k', 'place this person in old concrete school stairwell between floors, single shaft of warm amber light from stairwell window cutting horizontally, dust in light shaft, face in warm light rest in deep shadow, face clearly visible, photorealistic, 8k', 'place this person standing beside outdoor water fountain near school field at golden hour, low golden sun making everything warm amber, water from brass tap catching sunlight as liquid gold, face clearly visible, photorealistic, 8k', 'place this person on same school playground at golden hour sun minutes from setting, deep amber-orange light drenching everything, long shadows of pull-up bars stretching across playground, entire image heavily overexposed edges dissolving into pure warm white lens flare, face clearly visible, photorealistic, 8k'] },
 ];
 
-const GLAMOUR_FACE = 'Preserve the exact original face from the reference photo with every detail unchanged including eyes, nose, lips, jaw shape, face proportions. Preserve exact eye shape: if the original has double eyelids keep double eyelids, if single keep single, do not alter eyelid fold or eye size. The face must be identical to the input photo. Anatomically correct natural proportionate head to body ratio, head size must match realistic human proportions relative to shoulders and torso. Raw photo texture, natural skin with visible pores and subtle imperfections, realistic skin grain. Photorealistic 8k quality, clean elegant clothing with no distortion. No text, no logos, no watermarks, no deformed hands, no extra fingers';
+const GLAMOUR_FACE = 'Keep the person\'s facial features exactly the same as the reference image, including eye shape, eyelid fold, nose, lips, jawline, and face proportions. The face must be identical to the input photo. Natural proportionate head to body ratio with realistic skin texture';
 
 const GLAMOUR_OUTFIT_GROOM: Record<string, string> = {
   studio_classic: 'wearing elegant black tuxedo with white dress shirt, black bow tie, polished shoes, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
@@ -213,33 +213,35 @@ const VIDEO_BRIDE_SHOTS = [
 async function visionQC(originalUrl: string, generatedUrl: string, mode: string = ''): Promise<boolean> {
   try {
     let genderCheck = '';
-    if (mode === 'groom') genderCheck = '\n4. GENDER-OUTFIT: The person MUST be wearing masculine clothing (suit, blazer, shirt, pants). If wearing a dress, skirt, gown, or any feminine clothing, answer FAIL.';
-    else if (mode === 'bride') genderCheck = '\n4. GENDER-OUTFIT: The person MUST be wearing feminine clothing (dress, gown, skirt). If wearing a full suit with pants like a man, answer FAIL.';
+    if (mode === 'groom') genderCheck = '\n5. GENDER-OUTFIT: The person MUST be wearing masculine clothing (suit, blazer, shirt, pants). If wearing a dress, skirt, gown, or any feminine clothing, answer FAIL.';
+    else if (mode === 'bride') genderCheck = '\n5. GENDER-OUTFIT: The person MUST be wearing feminine clothing (dress, gown, skirt). If wearing a full suit with pants like a man, answer FAIL.';
+    else if (mode === 'couple') genderCheck = '\n5. GENDER-OUTFIT: Image 2 must show exactly TWO people — one man in masculine clothing (suit/blazer/shirt) and one woman in feminine clothing (dress/gown). If both wear the same gender clothing or only one person is visible, answer FAIL.';
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + OPENAI_API_KEY },
       body: JSON.stringify({
         model: 'gpt-4o',
         max_tokens: 20,
-        messages: [{
-          role: 'user',
-          content: [
+        temperature: 0,
+        messages: [
+          { role: 'system', content: 'You are an extremely strict facial identity verification inspector. Your job is to REJECT any image where the face does not closely match the reference. When in doubt, answer FAIL. You must be harsh — a photo of a different person wearing similar clothes is still FAIL.' },
+          { role: 'user', content: [
             { type: 'image_url', image_url: { url: originalUrl, detail: 'high' } },
             { type: 'image_url', image_url: { url: generatedUrl, detail: 'high' } },
-            { type: 'text', text: 'Image 1 is the original reference photo. Image 2 is AI-generated. Carefully check ALL of the following:\n1. DEFORMITY: Does image 2 have ANY deformed faces, extra or missing fingers, mutated hands, fused body parts, distorted or missing limbs, extra arms or legs, melted or blurred facial features, asymmetric eyes, disproportionately large head, missing lower body or legs, incomplete torso, floating or disconnected body parts, missing head, headless body, body without a head visible from any angle, or any anatomical impossibility? If a person is shown from behind, their head must still be visible. If a mirror or reflection is present, the reflected person must also have a complete head and body with no missing parts.\n2. FACE IDENTITY: Compare face in image 1 vs image 2. Are the eyes, nose, mouth, jawline the same person? If image 2 shows a DIFFERENT person than image 1, answer FAIL.\n3. PERSON COUNT: If image 1 has 1 person but image 2 has 2 or more, or vice versa, answer FAIL. The number of people must match.\n4. COMPLETENESS: Every person visible in image 2 (including reflections in mirrors, windows, or water) must have a complete head with hair, face, and all body parts. A person shown from behind with no head or a cut-off head is FAIL.' + genderCheck + '\nAnswer FAIL if ANY check fails. Answer PASS only if ALL checks pass. Reply with one word: PASS or FAIL.' },
-          ],
-        }],
+            { type: 'text', text: 'Image 1 is the original reference selfie. Image 2 is AI-generated. You MUST be extremely strict. Check ALL:\n1. FACE IDENTITY (MOST IMPORTANT): Compare the face in image 1 vs the main person in image 2. Check eye shape (single vs double eyelid), nose bridge width, lip thickness, jawline angle, cheekbone height, face width-to-height ratio, eyebrow shape. If these features do NOT closely match — even if the person looks vaguely similar — answer FAIL. A different person who looks somewhat alike is still FAIL.\n2. DEFORMITY: Any deformed faces, extra/missing fingers, mutated hands, fused body parts, extra/missing limbs, melted facial features, disproportionate head, missing body parts, headless body, or anatomical impossibility = FAIL.\n3. PERSON COUNT: Solo mode: must be exactly 1 person. Couple mode: must be exactly 2 people. Wrong count = FAIL.\n4. COMPLETENESS: Every visible person (including reflections) must have complete head, face, hair, and body. Missing head or cut-off head = FAIL.' + genderCheck + '\nFAIL if ANY check fails. PASS only if ALL checks pass. When uncertain, default to FAIL. Reply with one word only: PASS or FAIL.' },
+          ] },
+        ],
       }),
     });
     const data = await res.json();
     const answer = (data.choices?.[0]?.message?.content || '').trim().toUpperCase();
-    if (!answer) { console.log('[VisionQC] empty response, PASS by default'); return true; }
+    if (!answer) { console.log('[VisionQC] empty response, FAIL by default'); return false; }
     const passed = answer.includes('PASS') && !answer.includes('FAIL');
     console.log('[VisionQC]', passed ? 'PASS' : 'FAIL', '| raw:', answer.slice(0, 80));
     return passed;
   } catch (e: any) {
     console.error('[VisionQC] error:', e.message);
-    return true;
+    return false;
   }
 }
 
@@ -369,7 +371,7 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
           image_urls: refUrls,
           num_images: 1,
           aspect_ratio: '3:4',
-          resolution: '1K',
+          resolution: '2K',
           output_format: 'png',
         }),
       });
@@ -439,39 +441,51 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
           const url1 = await genOne(p, shot, p.urls, si);
           if (!url1) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' GEN FAILED'); return null; }
           if (p.mode === 'couple') {
+            const coupleQC = async (refUrls: string[], genUrl: string): Promise<boolean> => {
+              const basePass = await visionQC(refUrls[0], genUrl, 'couple');
+              if (!basePass) return false;
+              if (refUrls.length >= 2) {
+                const bridePass = await visionQC(refUrls[1], genUrl, 'couple');
+                if (!bridePass) { console.log('[CoupleQC] bride face FAIL'); return false; }
+              }
+              return true;
+            };
+            const pass1 = await coupleQC(p.urls, url1);
+            if (pass1) { console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' QC PASS'); qcTracker?.push({url: url1, passed: true, mode: p.mode}); return url1; }
+            console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' QC FAIL, retry 2');
             const url2 = await genOne(p, shot, p.urls, si);
-            if (!url2) {
-              const soloPass = await visionQC(p.urls[0], url1, p.mode);
-              console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' only url1, QC ' + (soloPass ? 'PASS' : 'FAIL(use anyway)'));
-              qcTracker?.push({url: url1, passed: soloPass, mode: p.mode}); return url1;
+            if (url2) {
+              const pass2 = await coupleQC(p.urls, url2);
+              if (pass2) { console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' retry2 QC PASS'); qcTracker?.push({url: url2, passed: true, mode: p.mode}); return url2; }
             }
-            const qc1 = await visionQC(p.urls[0], url1, p.mode);
-            const qc2 = await visionQC(p.urls[0], url2, p.mode);
-            console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' QC: A=' + (qc1?'PASS':'FAIL') + ' B=' + (qc2?'PASS':'FAIL'));
-            if (qc1 && !qc2) { qcTracker?.push({url: url1, passed: true, mode: p.mode}); return url1; }
-            if (!qc1 && qc2) { qcTracker?.push({url: url2, passed: true, mode: p.mode}); return url2; }
-            if (!qc1 && !qc2) {
-              console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' both FAIL, comparative pick');
+            console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' QC FAIL, retry 3');
+            const url3 = await genOne(p, shot, p.urls, si);
+            if (url3) {
+              const pass3 = await coupleQC(p.urls, url3);
+              if (pass3) { console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' retry3 QC PASS'); qcTracker?.push({url: url3, passed: true, mode: p.mode}); return url3; }
             }
-            try {
-              const pickRes = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + OPENAI_API_KEY },
-                body: JSON.stringify({
-                  model: 'gpt-4o-mini', max_tokens: 10,
-                  messages: [{ role: 'user', content: [
-                    { type: 'image_url', image_url: { url: url1, detail: 'high' } },
-                    { type: 'image_url', image_url: { url: url2, detail: 'high' } },
-                    { type: 'text', text: 'Two AI-generated couple wedding photos. Pick the one with more natural faces, better preserved facial identity, and fewer visual artifacts. Reply ONLY A or B.' },
-                  ] }],
-                }),
-              });
-              const pickData = await pickRes.json();
-              const pick = (pickData.choices?.[0]?.message?.content || 'A').trim().toUpperCase();
-              const chosen = pick.includes('B') ? url2 : url1;
-              console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' comparative: ' + pick);
-              qcTracker?.push({url: chosen, passed: qc1 || qc2, mode: p.mode}); return chosen;
-            } catch (e: any) { console.log('[Glamour] couple comparative error:', e.message); qcTracker?.push({url: url1, passed: false, mode: p.mode}); return url1; }
+            const candidates = [url1, url2, url3].filter((u): u is string => !!u);
+            if (candidates.length >= 2) {
+              try {
+                const pickRes = await fetch('https://api.openai.com/v1/chat/completions', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + OPENAI_API_KEY },
+                  body: JSON.stringify({
+                    model: 'gpt-4o-mini', max_tokens: 10,
+                    messages: [{ role: 'user', content: [
+                      ...candidates.slice(0, 2).map(u => ({ type: 'image_url' as const, image_url: { url: u, detail: 'high' as const } })),
+                      { type: 'text' as const, text: 'Two AI-generated couple wedding photos. Pick the one where BOTH faces look more natural and better match real human proportions. Reply ONLY A or B.' },
+                    ] }],
+                  }),
+                });
+                const pickData = await pickRes.json();
+                const pick = (pickData.choices?.[0]?.message?.content || 'A').trim().toUpperCase();
+                const chosen = pick.includes('B') ? candidates[1] : candidates[0];
+                console.log('[Glamour] ' + conceptId + ' couple shot ' + (si + 1) + ' all QC FAIL, comparative: ' + pick);
+                qcTracker?.push({url: chosen, passed: false, mode: p.mode}); return chosen;
+              } catch (e: any) { console.log('[Glamour] couple comparative error:', e.message); }
+            }
+            qcTracker?.push({url: url1, passed: false, mode: p.mode}); return url1;
           }
           const pass1 = await visionQC(p.urls[0], url1, p.mode);
           if (pass1) { console.log('[Glamour] ' + conceptId + ' ' + p.mode + ' shot ' + (si + 1) + ' QC PASS'); qcTracker?.push({url: url1, passed: true, mode: p.mode}); return url1; }
@@ -561,7 +575,7 @@ function getSubtitleFontPath(fontId: string): string {
 }
 
 router.get('/config', (_req, res) => {
-  res.json({ pricing: PRICING, fonts: FONTS, subtitleStyles: SUBTITLE_STYLES, selfieConcepts: SELFIE_CONCEPTS.map(c => ({ id: c.id, name: ({ studio_classic: '클래식 스튜디오', studio_gallery: '갤러리 스튜디오', studio_fog: '포그 스튜디오', studio_mocha: '모카 스튜디오', studio_sage: '세이지 스튜디오', outdoor_garden: '가든 웨딩', beach_sunset: '비치 선셋', hanbok_traditional: '전통 한복', hanbok_wonsam: '원삼 혼례', hanbok_dangui: '당의 한복', hanbok_modern: '모던 한복', hanbok_saeguk: '사극풍', hanbok_flower: '꽃 한복', city_night: '시티 나이트', cherry_blossom: '벚꽃', forest_wedding: '숲속 웨딩', castle_garden: '유럽 궁전', cathedral: '성당', watercolor: '수채화', magazine_cover: '매거진 커버', rainy_day: '비 오는 날', autumn_leaves: '가을 단풍', winter_snow: '겨울 눈', vintage_film: '빈티지 필름', cruise_sunset: '크루즈 선셋', cruise_bluesky: '크루즈 블루스카이', vintage_record: '빈티지 레코드', retro_hongkong: '레트로 홍콩', black_swan: '블랙 스완', velvet_rouge: '벨벳 루즈', water_memory: '물의 기억', blue_hour: '블루아워', iphone_mirror: '거울 셀카', rose_garden: '장미 정원', grass_rain: '풀밭', eternal_blue: '블루', heart_editorial: '하이 에디토리얼', vintage_tungsten: '빈티지 텅스텐', aao: '에에올', spring_letter: '봄: 러브레터', summer_rain: '여름: 소나기', autumn_film: '가을: 필름', winter_zhivago: '겨울: 지바고' } as Record<string, string>)[c.id] || c.id })) });
+  res.json({ pricing: PRICING, fonts: FONTS, subtitleStyles: SUBTITLE_STYLES, selfieConcepts: SELFIE_CONCEPTS.map(c => ({ id: c.id, name: ({ studio_classic: '클래식 스튜디오', studio_gallery: '갤러리 스튜디오', studio_fog: '포그 스튜디오', studio_mocha: '모카 스튜디오', studio_sage: '세이지 스튜디오', outdoor_garden: '가든 웨딩', beach_sunset: '비치 선셋', hanbok_traditional: '전통 한복', hanbok_wonsam: '원삼 혼례', hanbok_dangui: '당의 한복', hanbok_modern: '모던 한복', hanbok_saeguk: '사극풍', hanbok_flower: '꽃 한복', city_night: '시티 나이트', cherry_blossom: '벚꽃', forest_wedding: '숲속 웨딩', castle_garden: '유럽 궁전', cathedral: '성당', watercolor: '수채화', magazine_cover: '매거진 커버', rainy_day: '비 오는 날', autumn_leaves: '가을 단풍', winter_snow: '겨울 눈', vintage_film: '빈티지 필름', cruise_sunset: '크루즈 선셋', cruise_bluesky: '크루즈 블루스카이', vintage_record: '빈티지 레코드', retro_hongkong: '레트로 홍콩', black_swan: '블랙 스완', velvet_rouge: '벨벳 루즈', water_memory: '물의 기억', blue_hour: '블루아워', iphone_mirror: '거울 셀카', rose_garden: '장미 정원', grass_rain: '풀밭', eternal_blue: '블루', heart_editorial: '하이 에디토리얼', vintage_tungsten: '빈티지 텅스텐', aao: '에에올', spring_letter: '봄: 러브레터', summer_rain: '여름: 소나기', autumn_film: '가을: 필름', winter_zhivago: '겨울: 지바고', lovesick: '러브시크', silver_thread: '실버스레드', summer_tape: '서머테이프', rouge_clue: '루즈클루', in_the_mood: '화양연화' } as Record<string, string>)[c.id] || c.id })) });
 });
 
 router.get('/bgm', async (_req, res) => {

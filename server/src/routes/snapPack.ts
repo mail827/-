@@ -225,12 +225,13 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
   },
   in_the_mood: {
     label: '화양연화',
-    base: 'dark narrow alleys at night with wet asphalt reflecting neon and sodium vapor lamps, old black motorcycle against graffitied walls, highway tunnel with infinite orange sodium lights, glass phone booth with cold fluorescent inside and warm amber outside, empty subway station escalators, arcade with multicolor screen glow, rooftop at night with city skyline, elevated highway underpass with sparklers, Wong Kar-wai cinematic split color temperature atmosphere, celluloid grain photorealistic cinematic',
+    base: 'Wong Kar-wai cinematic split warm-cool color temperature, celluloid grain photorealistic cinematic',
   },
   rouge_clue: {
     label: '루즈 클루',
-    base: 'old Parisian cobblestone alleys with crimson red painted doors and green ivy on stone walls, warm amber cafe interiors through fogged glass, old carousel with string lights at dusk, vintage record shop with tungsten bulbs, over-saturated emerald green and crimson red Amelie color palette, whimsical romantic treasure hunt atmosphere, celluloid grain photorealistic cinematic',
+    base: 'over-saturated emerald green and crimson red whimsical romantic atmosphere, celluloid grain photorealistic cinematic',
   },
+
 
 
 };
@@ -382,6 +383,11 @@ const OUTFIT_GROOM: Record<string, string> = {
   grass_rain: 'wearing black wool slim-fit two-button suit with natural shoulders, white cotton shirt with collar open no tie, jacket worn casually unbuttoned, clean simple silhouette, natural relaxed groom',
   eternal_blue: 'wearing slate blue-grey wool one-button suit with slim peak lapels and clean sharp silhouette, white silk shirt with spread collar top button undone no tie, small pearl pin on left lapel as only accessory, cool melancholic elegance',
   heart_editorial: 'wearing sharp black wool double-breasted six-button jacket with extreme wide peaked lapels and heavily structured squared shoulders, matching high-waisted wide-leg trousers with razor-sharp front crease, crisp white shirt buttoned to top with narrow black silk tie pulled very tight, single small red fabric heart pinned on left lapel, bold graphic power silhouette, editorial fashion',
+  lovesick: 'wearing vivid electric cobalt blue wool-silk blend single-breasted two-button suit with slim notch lapels, crisp white cotton poplin shirt buttoned to top no tie, single tiny red silk heart pinned on left lapel, dark navy leather shoes',
+  silver_thread: 'wearing deep midnight navy wool gabardine double-breasted six-button suit with sharp wide peak lapels and structured squared shoulders, high-waisted wide-leg trousers with single front pleat, crisp white cotton poplin shirt with stiff cutaway collar, narrow dark silver-lavender silk tie, white linen pocket square folded sharp, dark burgundy leather oxford shoes, Savile Row precision',
+  summer_tape: 'wearing soft warm sand ivory washed linen-silk blend unstructured two-button jacket with soft rolled notch lapels no padding, matching straight-leg linen-silk trousers, pale celadon green silk shirt with soft point collar top two buttons open no tie, jacket left open, off-white canvas sneakers, sun-faded lived-in summer look',
+  rouge_clue: 'wearing warm tobacco brown corduroy single-breasted two-button suit with slim notch lapels and soft natural shoulders, matching corduroy trousers with slight taper, cream white cotton shirt with soft rounded collar, deep crimson red knit tie, dark brown leather desert boots, warm lived-in texture',
+  in_the_mood: 'wearing deep charcoal black wool-silk blend slim single-breasted two-button suit with narrow notch lapels and sharp shoulders, slim tapered trousers, pure white silk charmeuse shirt with subtle luminous sheen soft point collar no tie top two buttons open, black leather chelsea boots',
 };
 
 const OUTFIT_BRIDE: Record<string, string> = {
@@ -426,6 +432,11 @@ const OUTFIT_BRIDE: Record<string, string> = {
   grass_rain: 'wearing light ivory silk chiffon halter-neck wedding dress with crossed draped fabric gathered at back of neck leaving shoulders bare, gently fitted bodice with natural soft gathers at waist no boning, multiple opaque layered chiffon skirt panels with slightly uneven raw-edge hemlines creating organic flowing movement, fabric fully opaque with dense layering ensuring complete coverage, clean effortless minimal bridal',
   eternal_blue: 'wearing dusty powder blue strapless sweetheart satin bodice dress with massive voluminous cloud-like tulle ruffled skirt in graduating shades from dusty blue at waist to pale icy blue at hem, tulle layers hand-gathered in irregular cloud-like ruffles creating organic sculptural volume, single strand of small pearls draped loosely across bodice, soft matte tulle finish, no lace no sequins no glitter, dramatic sculptural',
   heart_editorial: 'wearing pure white architectural high mock-neck wedding dress with structured exaggerated square shoulders, rigid sculpted heavy white duchess satin torso like armor, front sharp straight column stopping at ankle, back dramatic floor-sweeping sculptural train of stiff white organza folds like origami paper, one single oversized red fabric heart pinned at center of chest like brooch, no lace no beading no tulle no soft draping, everything geometric and architectural, editorial high fashion',
+  lovesick: 'wearing deep vivid scarlet red silk charmeuse slip dress with thin spaghetti straps and clean scoop neckline, smooth bias-cut fitted bodice, fluid straight column skirt to floor with small puddle train, single oversized white silk fabric heart pinned at center of chest, no lace no beading, natural elegant makeup',
+  silver_thread: 'wearing pale silver-lavender heavy silk duchess satin wedding dress with high closed jewel neckline and long fitted sleeves with tiny silk-covered buttons from wrist to mid-forearm, sculpted tailored bodice with precise princess seams, restrained A-line skirt with cathedral train, no embellishment no lace no beading, natural elegant makeup',
+  summer_tape: 'wearing soft warm apricot silk organza off-shoulder wedding dress with sheer organza petal cap sleeves, fitted bodice in pale apricot silk charmeuse, full romantic A-line skirt in three graduated tiers of weightless silk organza with gentle sweep train, subtle ombre from pale apricot at bodice to soft peach at hem, natural elegant makeup',
+  rouge_clue: 'wearing deep emerald green silk taffeta cocktail-length wedding dress with clean square neckline and wide shoulder straps, structured fitted bodice, full playful A-line skirt ending at mid-calf, single oversized crimson red silk fabric camellia flower pinned at left waist, retro 1960s silhouette, natural elegant makeup',
+  in_the_mood: 'wearing pure white heavy silk charmeuse off-shoulder wedding dress with romantic gathered sweetheart neckline and dramatic oversized puff sleeves in silk organza billowing at shoulder then gathered tight at elbow, fitted boned corset bodice in smooth luminous silk charmeuse, massive voluminous four-tiered ruched bell-shaped ball gown skirt, cathedral train, fingertip-length tulle veil with silk bow at crown, no lace no beading, natural elegant makeup',
 };
 
 const HANBOK_CONCEPTS = new Set(['hanbok_wonsam', 'hanbok_dangui', 'hanbok_modern', 'hanbok_saeguk', 'hanbok_flower']);
@@ -628,6 +639,25 @@ const CONCEPT_MOOD: Record<string, string> = {
   heart_editorial_spotlight: 'pure black stage floor with perfect circle of white spotlight, everything outside spotlight circle is pure black void, hard clean edge between light and dark on floor, shot from slightly above, hard theatrical lighting deep contrast, 50mm lens',
   heart_editorial_shadow: 'plain white wall with sharp black shadow silhouettes projected by single hard side light source, shadow play with silhouette profiles visible on wall, high contrast with only red fabric hearts in color rest monochrome, hard directional side light, 35mm lens',
   heart_editorial_dark: 'dark studio with single hard beauty dish light from directly above casting defined shadows under cheekbones and chin, everything else falls to pure black, only white dress black suit two red hearts and skin tones visible in frame, heavy contrast editorial fashion, 85mm lens',
+  in_the_mood_alley: 'dark narrow alley at night with wet asphalt reflecting cyan neon and warm sodium vapor lamp, old black motorcycle parked against graffitied concrete wall, split warm-cool color temperature',
+  in_the_mood_tunnel: 'empty highway tunnel at night with infinite receding orange sodium vapor lights creating perspective lines on wet road surface, solitary atmosphere',
+  in_the_mood_phone: 'old glass phone booth on empty sidewalk at night, cold fluorescent tube inside contrasting warm amber streetlight outside, rain-slicked pavement',
+  in_the_mood_escalator: 'empty subway station escalator descending into cold blue-white fluorescent depth, rhythmic repeating overhead tube lights, solitary late-night stillness',
+  in_the_mood_arcade: 'dark retro arcade at night with rows of glowing game screens casting multicolor light on faces, warm ambient neon',
+  in_the_mood_rooftop: 'building rooftop at night overlooking city skyline with distant neon and warm sodium lamps, cool night air',
+  in_the_mood_underpass: 'elevated highway underpass at night with concrete pillars and rhythmic headlight sweeps from cars above, warm sparkler glow',
+  lovesick_parking: 'empty outdoor parking lot at night, single sodium vapor lamp casting harsh orange circle on dark wet asphalt, predawn grey-blue darkness',
+  lovesick_alley: 'narrow urban alley with single bare bulb above metal door, scarlet red graffiti on concrete wall, cobalt blue accents, flat grey ambient light',
+  lovesick_rooftop: 'empty concrete rooftop at dawn, grey sky with first pale light, scattered empty bottles, raw vulnerable stillness',
+  silver_thread_atelier: 'grand austere London townhouse atelier with pale dove grey walls and dark herringbone parquet floor, tall window with cold grey north light, tailor cutting table with silver scissors',
+  silver_thread_fitting: 'dimly lit bespoke fitting room with ornate gilded standing mirror, dark wooden staircase ascending into shadow, single warm brass desk lamp',
+  silver_thread_staircase: 'dark wooden staircase in Victorian townhouse with worn carpet runner, brass handrail, cold blue-grey light from high window',
+  rouge_clue_alley: 'old Parisian cobblestone alley with crimson red painted door and green ivy climbing ancient stone wall, warm amber light spilling from cafe window, twilight blue sky',
+  rouge_clue_carousel: 'vintage carousel with warm string lights at dusk, weathered painted horses, golden hour glow against indigo sky',
+  rouge_clue_record: 'vintage record shop interior with warm tungsten bulbs, dark wooden shelves of vinyl, old carousel poster on stone wall, emerald and crimson warmth',
+  summer_tape_playground: 'empty school playground with rusted pull-up bars and old green iron bench, harsh midsummer overhead sun, overexposed blown-out white sky, cicada heat shimmer',
+  summer_tape_corridor: 'school corridor with old worn wooden floor and rectangles of hot afternoon sun from classroom windows, dust suspended in golden light beams',
+  summer_tape_rooftop: 'school rooftop at golden hour, warm sunset dissolving edges, chain-link fence silhouette, summer breeze',
 };
 
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {
@@ -639,7 +669,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const shot = variants[shotIdx % variants.length];
   const isDetail = DETAIL_SHOTS.has(shot.id);
 
-  const face = 'CRITICAL INSTRUCTION: preserve the EXACT original face from the reference photo. Do NOT modify eyes, do NOT add double eyelids, do NOT change eye shape or eye size. Keep the exact same nose, lips, jaw shape, face proportions unchanged. Do NOT beautify, do NOT slim the face, do NOT enhance jawline. The face must be identical to the input photo. photorealistic 8k quality. Do NOT add any text, logos, or watermarks. Do NOT create deformed hands or extra fingers. Keep clean elegant clothing with no distortion or melting textures';
+  const face = 'Keep the person\'s facial features exactly the same as the reference image, including eye shape, nose, lips, jawline, and hairstyle. The face must be identical to the input photo';
 
   const outfitLock = DYNAMIC_CONCEPTS.has(concept) ? 'MUST keep absolutely identical outfit from first shot, same fabric same color same accessories same shoes same hairstyle, do not change any clothing detail' : 'keep identical outfit, hairstyle, accessories from first shot';
 
@@ -661,20 +691,20 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const GRASS_RAIN_SCENES = ['grass_rain_overcast', 'grass_rain_heavy', 'grass_rain_motion'];
   const ETERNAL_BLUE_SCENES = ['eternal_blue_beach', 'eternal_blue_frozen', 'eternal_blue_bookstore'];
   const HEART_EDITORIAL_SCENES = ['heart_editorial_spotlight', 'heart_editorial_shadow', 'heart_editorial_dark'];
-  const mood = concept === 'velvet_rouge' ? (CONCEPT_MOOD[VELVET_ROUGE_SCENES[shotIdx % 3]] || '') : concept === 'water_memory' ? (CONCEPT_MOOD[WATER_MEMORY_SCENES[shotIdx % 3]] || '') : concept === 'rose_garden' ? (CONCEPT_MOOD[ROSE_GARDEN_SCENES[shotIdx % 3]] || '') : concept === 'grass_rain' ? (CONCEPT_MOOD[GRASS_RAIN_SCENES[shotIdx % 3]] || '') : concept === 'eternal_blue' ? (CONCEPT_MOOD[ETERNAL_BLUE_SCENES[shotIdx % 3]] || '') : concept === 'vintage_tungsten' ? (CONCEPT_MOOD[(['vintage_tungsten_sofa', 'vintage_tungsten_floor', 'vintage_tungsten_stairs', 'vintage_tungsten_portrait', 'vintage_tungsten_hug', 'vintage_tungsten_hallway', 'vintage_tungsten_studio'])[shotIdx % 7]] || '') : concept === 'aao' ? (CONCEPT_MOOD[(['aao_convenience', 'aao_rooftop', 'aao_pool', 'aao_subway', 'aao_parking', 'aao_stairwell', 'aao_convenience_final'])[shotIdx % 7]] || '') : concept === 'heart_editorial' ? (CONCEPT_MOOD[HEART_EDITORIAL_SCENES[shotIdx % 3]] || '') : concept === 'spring_letter' ? (CONCEPT_MOOD[(['spring_letter_library', 'spring_letter_corridor', 'spring_letter_steps', 'spring_letter_bicycle', 'spring_letter_window', 'spring_letter_field', 'spring_letter_letter'])[shotIdx % 7]] || '') : concept === 'summer_rain' ? (CONCEPT_MOOD[(['summer_rain_tree', 'summer_rain_stream', 'summer_rain_curtain', 'summer_rain_porch', 'summer_rain_storm', 'summer_rain_downpour', 'summer_rain_rainbow'])[shotIdx % 7]] || '') : concept === 'autumn_film' ? (CONCEPT_MOOD[(['autumn_film_studio', 'autumn_film_alley', 'autumn_film_crossing', 'autumn_film_rooftop', 'autumn_film_store', 'autumn_film_glass', 'autumn_film_dawn'])[shotIdx % 7]] || '') : concept === 'winter_zhivago' ? (CONCEPT_MOOD[(['winter_zhivago_breath', 'winter_zhivago_frost', 'winter_zhivago_candles', 'winter_zhivago_tracks', 'winter_zhivago_piano', 'winter_zhivago_dance', 'winter_zhivago_dawn'])[shotIdx % 7]] || '') : (CONCEPT_MOOD[concept] || '');
+  const mood = concept === 'velvet_rouge' ? (CONCEPT_MOOD[VELVET_ROUGE_SCENES[shotIdx % 3]] || '') : concept === 'water_memory' ? (CONCEPT_MOOD[WATER_MEMORY_SCENES[shotIdx % 3]] || '') : concept === 'rose_garden' ? (CONCEPT_MOOD[ROSE_GARDEN_SCENES[shotIdx % 3]] || '') : concept === 'grass_rain' ? (CONCEPT_MOOD[GRASS_RAIN_SCENES[shotIdx % 3]] || '') : concept === 'eternal_blue' ? (CONCEPT_MOOD[ETERNAL_BLUE_SCENES[shotIdx % 3]] || '') : concept === 'vintage_tungsten' ? (CONCEPT_MOOD[(['vintage_tungsten_sofa', 'vintage_tungsten_floor', 'vintage_tungsten_stairs', 'vintage_tungsten_portrait', 'vintage_tungsten_hug', 'vintage_tungsten_hallway', 'vintage_tungsten_studio'])[shotIdx % 7]] || '') : concept === 'aao' ? (CONCEPT_MOOD[(['aao_convenience', 'aao_rooftop', 'aao_pool', 'aao_subway', 'aao_parking', 'aao_stairwell', 'aao_convenience_final'])[shotIdx % 7]] || '') : concept === 'heart_editorial' ? (CONCEPT_MOOD[HEART_EDITORIAL_SCENES[shotIdx % 3]] || '') : concept === 'spring_letter' ? (CONCEPT_MOOD[(['spring_letter_library', 'spring_letter_corridor', 'spring_letter_steps', 'spring_letter_bicycle', 'spring_letter_window', 'spring_letter_field', 'spring_letter_letter'])[shotIdx % 7]] || '') : concept === 'summer_rain' ? (CONCEPT_MOOD[(['summer_rain_tree', 'summer_rain_stream', 'summer_rain_curtain', 'summer_rain_porch', 'summer_rain_storm', 'summer_rain_downpour', 'summer_rain_rainbow'])[shotIdx % 7]] || '') : concept === 'autumn_film' ? (CONCEPT_MOOD[(['autumn_film_studio', 'autumn_film_alley', 'autumn_film_crossing', 'autumn_film_rooftop', 'autumn_film_store', 'autumn_film_glass', 'autumn_film_dawn'])[shotIdx % 7]] || '') : concept === 'winter_zhivago' ? (CONCEPT_MOOD[(['winter_zhivago_breath', 'winter_zhivago_frost', 'winter_zhivago_candles', 'winter_zhivago_tracks', 'winter_zhivago_piano', 'winter_zhivago_dance', 'winter_zhivago_dawn'])[shotIdx % 7]] || '') : concept === 'in_the_mood' ? (CONCEPT_MOOD[(['in_the_mood_alley', 'in_the_mood_tunnel', 'in_the_mood_phone', 'in_the_mood_escalator', 'in_the_mood_arcade', 'in_the_mood_rooftop', 'in_the_mood_underpass'])[shotIdx % 7]] || '') : concept === 'lovesick' ? (CONCEPT_MOOD[(['lovesick_parking', 'lovesick_alley', 'lovesick_rooftop'])[shotIdx % 3]] || '') : concept === 'silver_thread' ? (CONCEPT_MOOD[(['silver_thread_atelier', 'silver_thread_fitting', 'silver_thread_staircase'])[shotIdx % 3]] || '') : concept === 'rouge_clue' ? (CONCEPT_MOOD[(['rouge_clue_alley', 'rouge_clue_carousel', 'rouge_clue_record'])[shotIdx % 3]] || '') : concept === 'summer_tape' ? (CONCEPT_MOOD[(['summer_tape_playground', 'summer_tape_corridor', 'summer_tape_rooftop'])[shotIdx % 3]] || '') : (CONCEPT_MOOD[concept] || '');
 
   if (mode === 'couple') {
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
     const bOutfit = OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic;
     const coupleNatural = 'natural relaxed body language, genuine warm smiles, not stiff not rigid, candid authentic interaction';
-    return `${face}, ${shot.prompt}, ${coupleNatural}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} Korean wedding photo, man ${gOutfit}, woman ${bOutfit}, ${scene}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
+    return `${face}. ${mood ? mood + '. ' : ''}${scene}. A couple: the man ${gOutfit}. The woman ${bOutfit}. They have natural relaxed body language with genuine warm smiles. ${shot.prompt}. ${isCinematic ? 'Cinematic' : 'Professional'} wedding photograph${hanbokExtra}. ${detailFocus}`.replace(/\. \./g, '.').trim();
   }
 
   const clothe = mode === 'groom'
     ? (OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic)
     : (OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic);
   const subj = mode === 'groom' ? 'Korean groom' : 'Korean bride';
-  return `${face}, ${shot.prompt}, ${mood}, ${isCinematic ? 'cinematic' : 'professional'} ${subj} wedding portrait, ${clothe}, ${scene}, ${outfitLock}${hanbokExtra}, ${detailFocus}, ${cam}`.replace(/, ,/g, ',');
+  return `${face}. ${mood ? mood + '. ' : ''}${scene}. The person is a ${subj}, ${clothe}. ${shot.prompt}. ${isCinematic ? 'Cinematic' : 'Professional'} wedding photograph${hanbokExtra}. ${detailFocus}`.replace(/\. \./g, '.').trim();
 };
 
 const buildNegativePrompt = (mode: string, concept: string, shotIdx?: number): string => {
