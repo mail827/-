@@ -223,6 +223,10 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '서머 테이프',
     base: 'empty school playground and corridors in blazing midsummer afternoon, harsh overhead sun overexposed blown-out white sky, apricot and warm sand ivory color palette, silver camcorder, lens flare bleeding across frame, hazy heat shimmer, golden hour sunset dissolving edges into warm white, celluloid grain photorealistic cinematic',
   },
+  in_the_mood: {
+    label: '화양연화',
+    base: 'dark narrow alleys at night with wet asphalt reflecting neon and sodium vapor lamps, old black motorcycle against graffitied walls, highway tunnel with infinite orange sodium lights, glass phone booth with cold fluorescent inside and warm amber outside, empty subway station escalators, arcade with multicolor screen glow, rooftop at night with city skyline, elevated highway underpass with sparklers, Wong Kar-wai cinematic split color temperature atmosphere, celluloid grain photorealistic cinematic',
+  },
   rouge_clue: {
     label: '루즈 클루',
     base: 'old Parisian cobblestone alleys with crimson red painted doors and green ivy on stone walls, warm amber cafe interiors through fogged glass, old carousel with string lights at dusk, vintage record shop with tungsten bulbs, over-saturated emerald green and crimson red Amelie color palette, whimsical romantic treasure hunt atmosphere, celluloid grain photorealistic cinematic',

@@ -6,6 +6,12 @@ import { uploadFromUrl, getWatermarkedUrl } from '../utils/cloudinary.js';
 const router = Router();
 const prisma = new PrismaClient();
 
+const IN_THE_MOOD_REFS = {
+  dress_front: 'https://pub-b58d4a5053f1e1d6dbae674447d9b83a9.r2.dev/ai-snap/reference/in_the_mood_dress_front.png',
+  dress_back: 'https://pub-b58d4a5053f1e1d6dbae674447d9b83a9.r2.dev/ai-snap/reference/in_the_mood_dress_back.png',
+  suit: 'https://pub-b58d4a5053f1e1d6dbae674447d9b83a9.r2.dev/ai-snap/reference/in_the_mood_suit.png',
+};
+
 const FAL_API_KEY = process.env.FAL_API_KEY;
 const FAL_QUEUE = 'https://queue.fal.run';
 
@@ -263,6 +269,18 @@ const SCENE_ROTATION: Record<string, { groom: string[]; bride: string[]; couple:
       'couple at same crimson red door on same cobblestone alley now evening warm yellow streetlamp light, she stands with back against closed red door emerald green dress vivid against crimson paint red camellia at waist, she looks directly at him no more hiding, he stands close in front brown corduroy suit cream shirt red tie holding five opened cards in one hand his other hand resting on red door beside her head, red arrow sticker still on cobblestone at their feet pointing at her, warm yellow streetlamp from above, photorealistic, 50mm lens, 8k',
     ],
   },
+  in_the_mood: {
+    groom: [
+      'place the same person standing beside old black motorcycle in dark narrow alley at night, wet asphalt reflecting distant neon, concrete wall with peeling posters behind, wearing deep charcoal black wool-silk blend slim single-breasted two-button suit with narrow notch lapels and sharp shoulders slim tapered trousers, pure white silk charmeuse shirt with subtle luminous sheen soft point collar no tie top two buttons open, black leather chelsea boots, holding matte black motorcycle helmet in one hand at his side, warm sodium vapor lamp from above left casting amber on face, distant cyan neon from alley end, photorealistic, visible pores, strand-level hair, celluloid grain, 50mm lens, 8k',
+    ],
+    bride: [
+      'place the same person inside old glass phone booth on empty sidewalk at night, wearing pure white heavy silk charmeuse off-shoulder wedding dress with romantic gathered sweetheart neckline dramatic oversized puff sleeves in silk organza billowing at shoulder gathered tight at elbow fitted boned corset bodice in smooth luminous silk charmeuse massive four-tiered ruched bell skirt compressed inside tiny glass box charmeuse pressing against all four glass panels fingertip-length tulle veil caught in folding door, holding old phone receiver to ear with one hand other hand flat against glass looking out through glass, single cold fluorescent tube in booth ceiling making charmeuse glow white-blue, warm amber streetlight outside, photorealistic, visible pores, strand-level hair, breath condensation on glass, celluloid grain, 85mm lens, 8k',
+    ],
+    couple: [
+      'couple in dark narrow alley at night wet asphalt reflecting neon, old black motorcycle parked against graffitied concrete wall, she sits sidesaddle on motorcycle seat pure white heavy silk charmeuse off-shoulder wedding dress with gathered sweetheart neckline dramatic puff sleeves corset bodice massive four-tiered ruched bell skirt cascading off both sides of motorcycle onto wet asphalt cathedral train pooling in puddle behind rear wheel fingertip tulle veil hanging down her back looking at camera deadpan, he stands beside motorcycle in charcoal black wool-silk suit white silk charmeuse shirt open at collar holding matte black motorcycle helmet in one hand at his side, distant cyan neon from end of alley and warm sodium vapor lamp above creating split lighting cyan left side amber right side, photorealistic, visible pores, strand-level hair, celluloid grain, 50mm lens, 8k',
+      'couple beneath elevated highway overpass at night massive concrete pillars, they lean against concrete pillar side by side, she holds lit sparkler in one hand white silk charmeuse off-shoulder dress with puff sleeves corset bodice massive four-tiered ruched bell skirt spread across rough concrete ground charmeuse catching sparkler light in dancing gold points, he holds second lit sparkler black suit white charmeuse shirt, both sparklers throwing tiny orange embers into dark air, cars pass on highway above creating rhythmic headlight sweeps across concrete ceiling, photorealistic, visible pores, sparkler light dancing on charmeuse and skin, strand-level hair, celluloid grain, 85mm lens, 8k',
+    ],
+  },
   summer_tape: {
     groom: [
       'portrait leaning against rusted pull-up bar frame in empty school playground, harsh overhead midsummer sun, entire frame overexposed and blown out, sky pure white, wearing soft warm sand ivory washed linen-silk unstructured two-button suit jacket over shoulder, pale celadon green silk shirt open at collar no tie, off-white canvas sneakers, holding small silver camcorder loosely in one hand at side, hazy heat shimmer above asphalt, photorealistic, 8k',
@@ -456,6 +474,10 @@ iphone_selfie: {
     groom: 'place the same person climbing steep narrow outdoor stone staircase in old European quartier, wearing warm tobacco brown corduroy single-breasted two-button suit with slim notch lapels soft natural shoulders, cream white cotton shirt with soft rounded collar, deep crimson red knit tie in slim square-bottom shape slightly loosened, dark brown leather desert boots, single small emerald green enamel arrow pin on left lapel, holding white envelopes, late afternoon sun, photorealistic, 8k',
     bride: 'place the same person peeking out from behind half-open vivid crimson red painted wooden door on quiet cobblestone alley with green ivy climbing stone wall, wearing deep emerald green silk taffeta cocktail-length wedding dress with clean square neckline and wide shoulder straps, structured fitted bodice with sharp princess seams, full playful A-line skirt ending at mid-calf with slight petticoat volume, single oversized handmade crimson red silk fabric camellia flower pinned at left waist, mischievous smile, warm golden afternoon light, photorealistic, 8k',
   },
+  in_the_mood: {
+    groom: 'place the same person standing beside old black motorcycle in dark narrow alley at night, wet asphalt reflecting distant neon, concrete wall with peeling posters behind, wearing deep charcoal black wool-silk blend slim single-breasted two-button suit with narrow notch lapels and sharp shoulders slim tapered trousers, pure white silk charmeuse shirt with subtle luminous sheen soft point collar no tie top two buttons open, black leather chelsea boots, holding matte black motorcycle helmet in one hand at his side, warm sodium vapor lamp from above left casting amber on face, distant cyan neon from alley end, photorealistic, visible pores, strand-level hair, celluloid grain, 50mm lens, 8k',
+    bride: 'place the same person inside old glass phone booth on empty sidewalk at night, wearing pure white heavy silk charmeuse off-shoulder wedding dress with romantic gathered sweetheart neckline dramatic oversized puff sleeves in silk organza billowing at shoulder gathered tight at elbow fitted boned corset bodice in smooth luminous silk charmeuse massive four-tiered ruched bell skirt compressed inside tiny glass box charmeuse pressing against all four glass panels fingertip-length tulle veil caught in folding door, holding old phone receiver to ear with one hand other hand flat against glass looking out through glass, single cold fluorescent tube in booth ceiling making charmeuse glow white-blue, warm amber streetlight outside, photorealistic, visible pores, strand-level hair, breath condensation on glass, celluloid grain, 85mm lens, 8k',
+  },
 };
 
 const COUPLE_PROMPTS: Record<string, string> = {
@@ -503,6 +525,7 @@ iphone_selfie: 'authentic iPhone couple selfie from above at arms length, both f
   silver_thread: 'couple in grand austere atelier with pale grey walls and dark herringbone wooden floor, shot from behind both looking into large ornate gilded standing mirror, mirror reflects their faces, woman wearing pale silver-lavender heavy silk duchess satin wedding dress high closed jewel neckline long fitted sleeves twelve tiny silk-covered buttons at wrists sculpted tailored bodice cathedral train spreading behind on dark floor like liquid, man one step behind her right shoulder wearing deep midnight navy wool gabardine double-breasted suit peak lapels white shirt silver-lavender silk tie his right hand hovering near her waist paused mid-air not touching, cool diffused north window light from tall window to left of mirror, photorealistic, 50mm lens celluloid grain, 8k',
   summer_tape: 'couple on same school playground same green iron bench beside rusted pull-up bars at golden hour sun minutes from setting everything drenched in deep amber-orange, she sits on bench soft warm apricot silk organza off-shoulder dress three tiered organza skirt glowing deep warm gold seed pearls at neckline, he lies on bench with head in her lap sand ivory washed linen-silk suit celadon green shirt turned golden eyes closed, her hand on his forehead fingers in his hair, silver camcorder on bench arm LCD open recording red light blinking, entire image heavily overexposed edges dissolving into warm white lens flare, photorealistic, 50mm lens celluloid grain, 8k',
   rouge_clue: 'couple at crimson red painted wooden door on quiet cobblestone alley in evening warm yellow streetlamp above green ivy on stone walls, woman wearing deep emerald green silk taffeta cocktail-length dress square neckline wide straps full playful A-line skirt at mid-calf crimson red silk camellia at left waist standing with back against closed red door looking directly at him, man wearing warm tobacco brown corduroy two-button suit cream shirt crimson red knit tie emerald green arrow pin on lapel standing close in front holding opened cards in one hand other hand resting on red door beside her head, red arrow sticker on cobblestone pointing at her, warm yellow streetlamp, photorealistic, 50mm lens celluloid grain, 8k',
+  in_the_mood: 'couple in dark narrow alley at night wet asphalt reflecting neon, old black motorcycle parked against graffitied concrete wall, she sits sidesaddle on motorcycle seat pure white heavy silk charmeuse off-shoulder wedding dress with gathered sweetheart neckline dramatic puff sleeves corset bodice massive four-tiered ruched bell skirt cascading off both sides of motorcycle onto wet asphalt cathedral train pooling in puddle behind rear wheel fingertip tulle veil hanging down her back looking at camera deadpan, he stands beside motorcycle in charcoal black wool-silk suit white silk charmeuse shirt open at collar holding matte black motorcycle helmet in one hand at his side, distant cyan neon from end of alley and warm sodium vapor lamp above creating split lighting cyan left side amber right side on both faces and luminous charmeuse surface, photorealistic, visible pores, strand-level hair, celluloid grain, 50mm lens, 8k',
 };
 
 const falFetch = async (url: string, opts?: RequestInit) => {
@@ -582,7 +605,8 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
       basePrompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
     }
     const pose = rotation ? '' : getRandomPose(mode);
-    const prompt = FACE_INSTRUCTION + ', ' + pose + ', ' + basePrompt;
+    const prompt = FACE_INSTRUCTION + ", " + pose + ", " + basePrompt;
+    console.log("[quick-gen] concept:", concept, "prompt (first 200):", prompt.substring(0, 200));
 
     const isCouple = mode === 'couple';
     let urls: string[];
@@ -660,16 +684,18 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
   if (!concept || !imageUrls || imageUrls.length < 1) return res.status(400).json({ error: 'concept, imageUrls required' });
 
   try {
+    const pickRandom = (v: any) => Array.isArray(v) ? v[Math.floor(Math.random() * v.length)] : v;
     let basePrompt = '';
     if (mode === 'couple') {
-      basePrompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
+      basePrompt = pickRandom(COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic);
     } else if (mode === 'groom') {
-      basePrompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
+      basePrompt = pickRandom(SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom);
     } else {
-      basePrompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
+      basePrompt = pickRandom(SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride);
     }
     const pose = getRandomPose(mode);
-    const prompt = FACE_INSTRUCTION + ', ' + pose + ', ' + basePrompt;
+    const prompt = FACE_INSTRUCTION + ", " + pose + ", " + basePrompt;
+    console.log("[quick-gen] concept:", concept, "prompt (first 200):", prompt.substring(0, 200));
 
     await prisma.user.update({ where: { id: userId }, data: { freeSnapUsed: true } });
 
@@ -949,16 +975,19 @@ router.post('/admin/quick-generate', authMiddleware, async (req: AuthRequest, re
   const { concept, imageUrls, mode } = req.body;
   if (!concept || !imageUrls || imageUrls.length < 1) return res.status(400).json({ error: 'concept, imageUrls required' });
   try {
+    const pickRandom = (v: any) => Array.isArray(v) ? v[Math.floor(Math.random() * v.length)] : v;
     let basePrompt = '';
     if (mode === 'couple') {
-      basePrompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
+      basePrompt = pickRandom(COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic);
     } else if (mode === 'groom') {
-      basePrompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
+      basePrompt = pickRandom(SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom);
     } else {
-      basePrompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
+      basePrompt = pickRandom(SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride);
     }
     const pose = getRandomPose(mode);
-    const prompt = FACE_INSTRUCTION + ', ' + pose + ', ' + basePrompt;
+    const prompt = FACE_INSTRUCTION + ", " + pose + ", " + basePrompt;
+    console.log("[quick-gen] concept:", concept, "mode:", mode, "FULL PROMPT:", prompt);
+    console.log("[quick-gen] concept:", concept, "prompt (first 200):", prompt.substring(0, 200));
     const effectiveMode = req.body.mode || 'groom';
     const isCouple = effectiveMode === 'couple';
     let urls: string[];
@@ -1094,16 +1123,18 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
     await prisma.aiSnap.update({ where: { id: snapId }, data: { retryStatus: 'generating' } });
     console.log('[SeeDream retry] starting for snap:', snapId, 'concept:', concept, 'mode:', mode);
 
+    const pickRandom = (v: any) => Array.isArray(v) ? v[Math.floor(Math.random() * v.length)] : v;
     let basePrompt = '';
     if (mode === 'couple') {
-      basePrompt = COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic;
+      basePrompt = pickRandom(COUPLE_PROMPTS[concept] || COUPLE_PROMPTS.studio_classic);
     } else if (mode === 'groom') {
-      basePrompt = SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom;
+      basePrompt = pickRandom(SOLO_PROMPTS[concept]?.groom || SOLO_PROMPTS.studio_classic.groom);
     } else {
-      basePrompt = SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride;
+      basePrompt = pickRandom(SOLO_PROMPTS[concept]?.bride || SOLO_PROMPTS.studio_classic.bride);
     }
     const pose = getRandomPose(mode);
-    const prompt = FACE_INSTRUCTION + ', ' + pose + ', ' + basePrompt;
+    const prompt = FACE_INSTRUCTION + ", " + pose + ", " + basePrompt;
+    console.log("[quick-gen] concept:", concept, "prompt (first 200):", prompt.substring(0, 200));
 
     const isCouple = mode === 'couple';
     let urls: string[];
@@ -1164,6 +1195,7 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
       lovesick: 'empty outdoor parking lot or narrow urban alley, sodium vapor lamp harsh orange light on dark asphalt, predawn flat grey-blue light or night with single lamp circle, scarlet red and cobalt blue as only vivid colors against grey, deadpan awkward cinematic atmosphere',
       silver_thread: 'grand austere London townhouse atelier with pale grey walls dark herringbone wooden floor, tall windows cold grey north light, tailor cutting table with silver needle and thread, ornate gilded standing mirror, dark wooden staircase, warm brass desk lamp at night, controlled intimate atmosphere',
       rouge_clue: 'old Parisian cobblestone alleys with crimson red painted doors green ivy on stone walls, warm amber cafe interiors through fogged glass, old carousel with warm string lights at dusk, vintage record shop with tungsten bulbs, over-saturated emerald green and crimson red whimsical romantic atmosphere',
+    in_the_mood: 'dark narrow alleys at night with wet asphalt reflecting neon and sodium vapor lamps, old black motorcycle against graffitied walls, highway tunnel with infinite orange sodium lights, glass phone booth with cold fluorescent inside and warm amber outside, empty subway station escalators with cold blue-white fluorescent, dark arcade with multicolor screen glow, rooftop at night with city skyline neon, elevated highway underpass with concrete pillars and sparklers, Wong Kar-wai cinematic split color temperature atmosphere',
       summer_tape: 'empty school playground with rusted pull-up bars and old green iron bench, blazing midsummer afternoon harsh overhead sun overexposed blown-out white sky, school corridor with old wooden floor and afternoon sun rectangles, school rooftop, golden hour sunset dissolving edges',
     };
 
@@ -1212,6 +1244,7 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
   lovesick: 'wearing vivid electric cobalt blue wool-silk blend single-breasted two-button suit with slim notch lapels contemporary sharp cut, crisp white cotton poplin shirt buttoned to top no tie, single tiny red silk heart pinned on left lapel, dark navy leather shoes, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
   silver_thread: 'wearing deep midnight navy wool gabardine double-breasted six-button suit with sharp wide peak lapels and structured squared shoulders, high-waisted wide-leg trousers with single front pleat, crisp white cotton poplin shirt with stiff cutaway collar, narrow dark silver-lavender silk tie in tight four-in-hand knot, white linen pocket square folded sharp, dark burgundy leather oxford shoes, Savile Row precision, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
   rouge_clue: 'wearing warm tobacco brown corduroy single-breasted two-button suit with slim notch lapels and soft natural shoulders, matching corduroy trousers with slight taper, cream white cotton shirt with soft rounded collar, deep crimson red knit tie in slim square-bottom shape, dark brown leather desert boots, single small emerald green enamel arrow pin on left lapel, warm lived-in texture, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
+  in_the_mood: 'wearing deep charcoal black wool-silk blend slim single-breasted two-button suit jacket with narrow notch lapels and sharp shoulders, slim tapered trousers, pure white silk charmeuse shirt with subtle luminous sheen matching bride dress fabric exactly soft point collar no tie top two buttons open, black leather chelsea boots, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
   summer_tape: 'wearing soft warm sand ivory washed linen-silk blend unstructured two-button jacket with soft rolled notch lapels no padding slightly relaxed fit, matching straight-leg linen-silk trousers, pale celadon green silk shirt with soft point collar top two buttons open no tie, jacket left open, off-white canvas sneakers, sun-faded lived-in summer look, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
 };
     const SEEDREAM_OUTFIT_BRIDE: Record<string, string> = {
@@ -1259,6 +1292,7 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
   lovesick: 'wearing deep vivid scarlet red silk charmeuse slip dress with thin spaghetti straps and clean scoop neckline, smooth bias-cut fitted bodice with no boning fabric draping by gravity, fluid straight column skirt to floor with small puddle train, single oversized white silk fabric heart pinned at center of chest as only embellishment, no lace no beading, natural elegant makeup',
   silver_thread: 'wearing pale silver-lavender heavy silk duchess satin wedding dress with high closed jewel neckline and long fitted sleeves with twelve tiny silk-covered buttons from wrist to mid-forearm, sculpted tailored bodice with precise princess seams and structured boned interior, restrained A-line skirt with cathedral train, surface completely clean no embellishment no lace no beading the construction is the decoration, natural elegant makeup',
   rouge_clue: 'wearing deep emerald green silk taffeta cocktail-length wedding dress with clean square neckline and wide shoulder straps, structured fitted bodice with sharp princess seams in crisp taffeta, full playful A-line skirt ending at mid-calf with slight petticoat volume beneath, single oversized handmade crimson red silk fabric camellia flower pinned at left waist as only embellishment, no lace no beading, retro 1960s silhouette, natural elegant makeup',
+  in_the_mood: 'wearing pure white heavy silk charmeuse off-shoulder wedding dress with romantic gathered sweetheart neckline and dramatic oversized puff sleeves in silk organza billowing at shoulder then gathered tight at elbow, fitted boned corset bodice in smooth luminous silk charmeuse with visible soft sheen, massive voluminous bell-shaped ball gown skirt in cascading tiers of silk charmeuse with deep romantic ruching between each tier four tiers total creating waterfall of gathered silk, cathedral train extending six feet, fingertip-length tulle veil attached at crown with single silk charmeuse bow, no lace no beading pure silk volume and sheen as only decoration, natural elegant makeup',
   summer_tape: 'wearing soft warm apricot silk organza off-shoulder wedding dress with sheer organza draped loosely across collarbones forming gentle petal cap sleeves, fitted bodice in pale apricot silk charmeuse beneath floating organza overlay, full romantic A-line skirt in three graduated tiers of weightless silk organza with gentle sweep train, subtle ombre from pale apricot at bodice to soft peach at hem, single tiny cluster of freshwater seed pearls at center of neckline, no lace no beading elsewhere, natural elegant makeup',
 };
 
