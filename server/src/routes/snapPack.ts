@@ -950,7 +950,9 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     const snap = await prisma.aiSnap.create({
       data: {
         snapPackId: pack.id, userId: pack.userId, concept: pack.concept, mode: effectiveMode,
-        engine: 'nano-banana-2', prompt, inputUrls: pack.inputUrls as any, status: 'processing',
+        engine: 'nano-banana-2', prompt, inputUrls: pack.inputUrls as any, status: 'queued',
+        pollCount: 0,
+        reconcileAfter: new Date(),
       },
     });
 
@@ -1026,7 +1028,18 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
         if (submit.images && submit.images[0]?.url) {
           falUrl = submit.images[0].url;
         } else if (submit.status_url) {
-          await prisma.aiSnap.update({ where: { id: snap.id }, data: { statusUrl: submit.status_url, responseUrl: submit.response_url } });
+          await prisma.aiSnap.update({
+            where: { id: snap.id },
+            data: {
+              status: 'processing',
+              statusUrl: submit.status_url,
+              responseUrl: submit.response_url,
+              falRequestId: submit.request_id || null,
+              providerStatus: 'IN_QUEUE',
+              pollCount: 0,
+              reconcileAfter: new Date(),
+            },
+          });
           return res.json({ snapId: snap.id, shotIndex: shotIdx, remaining: pack.totalSnaps - pack.usedSnaps - 1, status: 'processing' });
         } else {
           throw new Error('No images or status_url');
@@ -1091,7 +1104,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
         }
 
         const permanentUrl = await uploadToCloudinary(finalUrl, snap.id);
-        await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: permanentUrl } });
+        await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: permanentUrl, providerStatus: 'COMPLETED', providerResultUrl: finalUrl, errorMessage: null } });
 
         if (!chainRefs[effectiveMode] || shouldResetChain) {
           chainRefs[effectiveMode] = permanentUrl;
@@ -1102,7 +1115,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
         }
     } catch (err: any) {
       console.error('[snapPack generate] FAILED:', err.message);
-      await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: err.message?.slice(0, 500) } });
+      await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: err.message?.slice(0, 500), errorMessage: err.message?.slice(0, 500) } });
       await prisma.snapPack.update({ where: { id: packId }, data: { usedSnaps: { decrement: 1 } } });
       return res.json({ snapId: snap.id, shotIndex: shotIdx, remaining: pack.totalSnaps - pack.usedSnaps - 1, failed: true });
     }
@@ -1181,7 +1194,7 @@ router.get('/snap/:id', authMiddleware, async (req, res) => {
                   body: JSON.stringify({ prompt: snap.prompt, image_urls: snap.inputUrls as string[], num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
                 });
                 if (retrySubmit.status_url) {
-                  await prisma.aiSnap.update({ where: { id: snap.id }, data: { statusUrl: retrySubmit.status_url, responseUrl: retrySubmit.response_url } });
+                  await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'processing', statusUrl: retrySubmit.status_url, responseUrl: retrySubmit.response_url, falRequestId: retrySubmit.request_id || null, providerStatus: 'IN_QUEUE', reconcileAfter: new Date() } });
                   console.log('[snap poll]', snap.id, 'retry submitted');
                   return res.json({ ...snap, status: 'processing' });
                 }
@@ -1190,7 +1203,7 @@ router.get('/snap/:id', authMiddleware, async (req, res) => {
               }
             }
             console.error('[snap poll]', snap.id, 'fal error detail:', errMsg);
-            await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: errMsg, statusUrl: null, responseUrl: null } });
+            await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: errMsg, errorMessage: errMsg, statusUrl: null, responseUrl: null } });
             if (snap.snapPackId) await prisma.snapPack.update({ where: { id: snap.snapPackId }, data: { usedSnaps: { decrement: 1 } } }).catch(() => {});
             const updated = await prisma.aiSnap.findUnique({ where: { id: snap.id } });
             return res.json(updated);
@@ -1206,7 +1219,7 @@ router.get('/snap/:id', authMiddleware, async (req, res) => {
               console.log('[snap poll]', snap.id, 'uploading to cloudinary...');
               const permanentUrl = await uploadToCloudinary(falUrl, snap.id);
               console.log('[snap poll]', snap.id, 'done:', permanentUrl?.slice(0, 60));
-              await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: permanentUrl, statusUrl: null, responseUrl: null } });
+              await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: permanentUrl, providerStatus: 'COMPLETED', providerResultUrl: falUrl, errorMessage: null, statusUrl: null, responseUrl: null } });
 
               if (snap.snapPackId) {
                 const pack = await prisma.snapPack.findUnique({ where: { id: snap.snapPackId } });
@@ -1224,7 +1237,7 @@ router.get('/snap/:id', authMiddleware, async (req, res) => {
             }
           }
         } else if (status.status === 'FAILED') {
-          await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: status.error || 'fal.ai failed', statusUrl: null, responseUrl: null } });
+          await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: status.error || 'fal.ai failed', errorMessage: (status.error || 'fal.ai failed'), statusUrl: null, responseUrl: null } });
           await prisma.snapPack.update({ where: { id: snap.snapPackId! }, data: { usedSnaps: { decrement: 1 } } }).catch(() => {});
           const updated = await prisma.aiSnap.findUnique({ where: { id: snap.id } });
           return res.json(updated);

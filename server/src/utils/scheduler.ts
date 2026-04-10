@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import { sendReminderNotification, sendReportNotification } from './solapi.js';
+import { reconcileStuckAiSnaps } from '../services/aiSnapReconcile.js';
 
 const prisma = new PrismaClient();
 
@@ -154,6 +155,20 @@ export async function sendAiReports() {
   }
 }
 
+
+export async function runAiSnapReconcileWorker() {
+  try {
+    const results = await reconcileStuckAiSnaps(prisma, 20, { reason: 'scheduler' });
+    if (results.length > 0) {
+      const done = results.filter(r => r.status === 'done').length;
+      const failed = results.filter(r => r.status === 'failed' || r.status === 'stuck').length;
+      console.log(`[Scheduler] AI Snap reconcile processed=${results.length} done=${done} failed_or_stuck=${failed}`);
+    }
+  } catch (error) {
+    console.error('[Scheduler] AI Snap reconcile error:', error);
+  }
+}
+
 export function startScheduler() {
   cron.schedule('0 9 * * *', sendReminders, {
     timezone: 'Asia/Seoul'
@@ -164,4 +179,9 @@ export function startScheduler() {
     timezone: 'Asia/Seoul'
   });
   console.log('[Scheduler] AI 리포트 스케줄러 시작 (매일 10:00 KST)');
+
+  cron.schedule('*/2 * * * *', runAiSnapReconcileWorker, {
+    timezone: 'Asia/Seoul'
+  });
+  console.log('[Scheduler] AI 스냅 reconcile 스케줄러 시작 (2분 간격)');
 }

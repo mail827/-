@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { uploadFromUrl, getWatermarkedUrl } from '../utils/cloudinary.js';
+import { reconcileAiSnapById } from '../services/aiSnapReconcile.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -617,7 +618,7 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
         const uploaded = await uploadFromUrl(swappedUrl, 'ai-snap');
         await prisma.aiSnap.update({
           where: { id: snapId },
-          data: { status: 'done', resultUrl: uploaded.url, prompt },
+          data: { status: 'done', resultUrl: uploaded.url, prompt, providerStatus: 'COMPLETED', providerResultUrl: falUrl || null, errorMessage: null },
         });
       } else {
         await prisma.aiSnap.update({
@@ -630,18 +631,31 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
 
     if (!submit.status_url) throw new Error('No status_url');
 
+    await prisma.aiSnap.update({
+      where: { id: snapId },
+      data: {
+        status: 'processing',
+        statusUrl: submit.status_url,
+        responseUrl: submit.response_url,
+        falRequestId: submit.request_id || null,
+        providerStatus: 'IN_QUEUE',
+        pollCount: 0,
+        reconcileAfter: new Date(),
+      },
+    });
+
     const result = await waitForResult(submit.status_url, submit.response_url);
     const falUrl = result.images?.[0]?.url;
     if (!falUrl) throw new Error('No result image');
     const uploaded = await uploadFromUrl(falUrl, 'ai-snap');
     await prisma.aiSnap.update({
       where: { id: snapId },
-      data: { status: 'done', resultUrl: uploaded.url, prompt },
+      data: { status: 'done', resultUrl: uploaded.url, prompt, providerStatus: 'COMPLETED', providerResultUrl: falUrl || null, errorMessage: null },
     });
   } catch (err: any) {
     await prisma.aiSnap.update({
       where: { id: snapId },
-      data: { status: 'failed', errorMsg: err.message?.slice(0, 500) },
+      data: { status: 'failed', errorMsg: err.message?.slice(0, 500), errorMessage: err.message?.slice(0, 500) },
     });
   }
 };
@@ -702,6 +716,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
           userId, concept, engine: 'nano-banana-2', prompt,
           inputUrls: imageUrls, resultUrl: watermarked,
           resultOriginalUrl: uploaded.url, status: 'done', isFree: true,
+          providerStatus: 'COMPLETED', providerResultUrl: rawUrl || null, errorMessage: null,
         },
       });
       return res.json({ status: 'done', resultUrl: watermarked });
@@ -711,6 +726,8 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
       data: {
         userId, concept, engine: 'nano-banana-2', prompt,
         inputUrls: imageUrls, status: 'processing', isFree: true,
+        statusUrl: submit.status_url, responseUrl: submit.response_url,
+        falRequestId: submit.request_id || null, providerStatus: 'IN_QUEUE', pollCount: 0, reconcileAfter: new Date(),
       },
     });
     res.json({ status: 'generating', snapId: snap.id, statusUrl: submit.status_url, responseUrl: submit.response_url });
@@ -777,7 +794,7 @@ router.get('/free/poll', async (req, res) => {
       if (snapId) {
         await prisma.aiSnap.update({
           where: { id: snapId },
-          data: { resultUrl: watermarked, resultOriginalUrl: uploaded.url, status: 'done' },
+          data: { resultUrl: watermarked, resultOriginalUrl: uploaded.url, status: 'done', providerStatus: 'COMPLETED', providerResultUrl: falUrl, errorMessage: null },
         });
       }
       return res.json({ status: 'done', resultUrl: watermarked });
@@ -843,7 +860,9 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     const snap = await prisma.aiSnap.create({
       data: {
         weddingId, concept, engine: 'nano-banana-2',
-        prompt: '', inputUrls: imageUrls, status: 'processing',
+        prompt: '', inputUrls: imageUrls, status: 'queued',
+        pollCount: 0,
+        reconcileAfter: new Date(),
       },
     });
 
@@ -1063,6 +1082,18 @@ router.get('/admin/stats', authMiddleware, async (req: AuthRequest, res) => {
     res.json({ total, done, failed, generating });
   } catch (e) {
     res.status(500).json({ error: 'Stats failed' });
+  }
+});
+
+
+router.post('/admin/reconcile/:id', authMiddleware, async (req: AuthRequest, res) => {
+  if ((req as AuthRequest).user?.role !== 'ADMIN') return res.status(403).json({ error: '관리자만 접근 가능' });
+  try {
+    const result = await reconcileAiSnapById(prisma, req.params.id, { reason: 'admin-manual', force: true });
+    const snap = await prisma.aiSnap.findUnique({ where: { id: req.params.id } });
+    res.json({ result, snap });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
   }
 });
 
