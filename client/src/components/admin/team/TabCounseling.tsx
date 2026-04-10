@@ -26,6 +26,7 @@ export default function TabCounseling() {
   const [mood, setMood] = useState('okay');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [modelFailed, setModelFailed] = useState(false);
 
   const [typedById, setTypedById] = useState<Record<string, string>>({});
   const [typingId, setTypingId] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export default function TabCounseling() {
     const r = await fetch(`${API}/admin/counseling/users`, { headers });
     const data = await safeJson(r);
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+
     const list = Array.isArray(data) ? data : [];
     setUsers(list);
     if (!activeUserId && list[0]?.id) setActiveUserId(list[0].id);
@@ -50,17 +52,21 @@ export default function TabCounseling() {
 
   const fetchSessions = async (userId: string) => {
     if (!userId) return;
+
     const r = await fetch(`${API}/admin/counseling/sessions?userId=${encodeURIComponent(userId)}`, { headers });
     const data = await safeJson(r);
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+
     setSessions(Array.isArray(data) ? data : []);
   };
 
   const openSession = async (id?: string) => {
     if (!id) return;
+
     const r = await fetch(`${API}/admin/counseling/sessions/${id}/messages`, { headers });
     const data = await safeJson(r);
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+
     setActiveSession(data.session || null);
     setMessages(Array.isArray(data.messages) ? data.messages : []);
     setMood(data.session?.mood || 'okay');
@@ -68,6 +74,7 @@ export default function TabCounseling() {
 
   const createSession = async () => {
     if (!activeUserId) throw new Error('사용자를 먼저 선택해 주세요.');
+
     const r = await fetch(`${API}/admin/counseling/sessions`, {
       method: 'POST',
       headers,
@@ -76,8 +83,10 @@ export default function TabCounseling() {
     const s = await safeJson(r);
     if (!r.ok) throw new Error(s?.error || `HTTP ${r.status}`);
     if (!s?.id) throw new Error('세션 생성 실패(id 없음)');
+
     await fetchSessions(activeUserId);
     await openSession(s.id);
+
     return s.id as string;
   };
 
@@ -96,7 +105,6 @@ export default function TabCounseling() {
     fetchSessions(activeUserId).catch((e: any) => setError(e?.message || '세션 조회 실패'));
   }, [activeUserId]);
 
-  // 마지막 assistant 메시지 타이핑 애니메이션
   useEffect(() => {
     const assistantMsgs = messages.filter((m) => m.role === 'assistant');
     const last = assistantMsgs[assistantMsgs.length - 1];
@@ -117,13 +125,14 @@ export default function TabCounseling() {
         animatedIdsRef.current.add(last.id);
         setTypingId(null);
       }
-    }, 16); // 타이핑 속도
+    }, 16);
 
     return () => clearTypingTimer();
   }, [messages]);
 
   const onCreateSessionClick = async () => {
     try {
+      setModelFailed(false);
       setError('');
       await createSession();
     } catch (e: any) {
@@ -134,9 +143,12 @@ export default function TabCounseling() {
   const send = async (text?: string) => {
     const content = (text || input).trim();
     if (!content) return;
+
     try {
       setLoading(true);
       setError('');
+      setModelFailed(false);
+
       const sessionId = await ensureSession();
       setInput('');
 
@@ -146,7 +158,14 @@ export default function TabCounseling() {
         body: JSON.stringify({ content }),
       });
       const data = await safeJson(r);
-      if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+      if (!r.ok) {
+        if (data?.code === 'COUNSELING_MODEL_UNAVAILABLE' || r.status === 502) {
+          setModelFailed(true);
+          setActiveSession((prev) => (prev ? { ...prev, summary: undefined } : prev));
+          throw new Error('상담 응답 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+        }
+        throw new Error(data?.error || `HTTP ${r.status}`);
+      }
 
       await openSession(sessionId);
     } catch (e: any) {
@@ -157,10 +176,11 @@ export default function TabCounseling() {
   };
 
   const stressKeywords = useMemo(() => {
+    if (modelFailed) return [];
     const text = messages.filter((m) => m.role === 'user').map((m) => m.content).join(' ');
     const seeds = ['불안', '압박', '피곤', '돈', '관계', '무기력', '예민'];
     return seeds.filter((k) => text.includes(k));
-  }, [messages]);
+  }, [messages, modelFailed]);
 
   return (
     <div className="space-y-3">
@@ -225,7 +245,7 @@ export default function TabCounseling() {
                     className={[
                       'w-fit max-w-[88%] md:max-w-[80%]',
                       'px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words',
-                      isUser ? 'bg-stone-900 text-white rounded-br-md' : 'bg-stone-100 text-stone-800 rounded-bl-md'
+                      isUser ? 'bg-stone-900 text-white rounded-br-md' : 'bg-stone-100 text-stone-800 rounded-bl-md',
                     ].join(' ')}
                   >
                     {content}
@@ -234,14 +254,19 @@ export default function TabCounseling() {
                 </div>
               );
             })}
-            {messages.length === 0 && <p className="text-xs text-stone-400">메지가 없습니다. 바로 보내면 세션이 자동 생성됩니다.</p>}
+            {messages.length === 0 && <p className="text-xs text-stone-400">메시지가 없습니다. 바로 보내면 세션이 자동 생성됩니다.</p>}
           </div>
 
           <div className="mt-3 flex gap-2">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  send();
+                }
+              }}
               className="flex-1 border rounded-xl px-3 py-2 text-sm"
               placeholder="마음 상태를 편하게 적어보세요"
             />
@@ -273,7 +298,9 @@ export default function TabCounseling() {
 
           <div className="bg-white rounded-xl border p-3">
             <p className="text-xs text-stone-500 mb-2">최근 요약</p>
-            <p className="text-sm text-stone-700">{activeSession?.summary || '아직 요약이 없습니다.'}</p>
+            <p className="text-sm text-stone-700">
+              {modelFailed ? '상담 응답 생성 실패로 요약을 표시할 수 없습니다.' : (activeSession?.summary || '아직 요약이 없습니다.')}
+            </p>
           </div>
 
           <div className="bg-white rounded-xl border p-3">
