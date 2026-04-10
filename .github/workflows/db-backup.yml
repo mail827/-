@@ -15,9 +15,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-          fetch-depth: 0
 
       - name: Install PostgreSQL client
         run: |
@@ -34,6 +31,7 @@ jobs:
             echo "DATABASE_URL secret is not set"
             exit 1
           fi
+
           mkdir -p backups
           BACKUP_FILE="backups/backup_$(date +%Y%m%d).sql"
           pg_dump "${DATABASE_URL}" > "${BACKUP_FILE}"
