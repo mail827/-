@@ -569,7 +569,7 @@ export default function AiSnapStudioPage() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-semibold text-stone-800">{at('studioMyPortraits', pl)}</h2>
-                  <p className="text-xs text-stone-400 mt-1">{activePack.concept} · {activePack.usedSnaps}/{activePack.totalSnaps}장</p><p className="text-[10px] text-stone-300 mt-0.5">{at('studioAiNote', pl)}</p>
+                  <p className="text-xs text-stone-400 mt-1">{CONCEPT_LABELS[activePack.concept] || activePack.concept} · {activePack.usedSnaps}/{activePack.totalSnaps}장</p><p className="text-[10px] text-stone-300 mt-0.5">{at('studioAiNote', pl)}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button onClick={() => { setSelectedTier(''); setSelectedConcept(''); setCategory('studio'); setGroomPhoto(''); setBridePhoto(''); setCouponCode(''); setCouponResult(null); setCouponError(''); setStep(1); }}
@@ -586,7 +586,7 @@ export default function AiSnapStudioPage() {
                   {myPacks.filter(p => p.concept && p.concept !== '').map(p => (
                     <button key={p.id} onClick={() => setActivePack(p)}
                       className={`shrink-0 px-3 py-1.5 rounded-full text-xs border transition-all ${activePack.id === p.id ? 'border-stone-800 bg-stone-800 text-white' : 'border-stone-200 text-stone-500 hover:border-stone-300'}`}>
-                      {p.concept} · {p.usedSnaps}/{p.totalSnaps}
+                      {CONCEPT_LABELS[p.concept] || p.concept} · {p.usedSnaps}/{p.totalSnaps}
                     </button>
                   ))}
                 </div>
@@ -758,7 +758,7 @@ export default function AiSnapStudioPage() {
                     {myPacks.filter(p => p.concept && p.concept !== '').map(p => (
                       <button key={p.id} onClick={() => setActivePack(p)}
                         className={`flex-shrink-0 px-4 py-2 rounded-lg text-xs transition-all ${p.id === activePack?.id ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-                        {p.concept} · {p.usedSnaps}/{p.totalSnaps}
+                        {CONCEPT_LABELS[p.concept] || p.concept} · {p.usedSnaps}/{p.totalSnaps}
                       </button>
                     ))}
                   </div>
