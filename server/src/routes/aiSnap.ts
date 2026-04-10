@@ -1359,4 +1359,31 @@ router.post('/:id/select', authMiddleware, async (req: AuthRequest, res) => {
   res.json({ ok: true });
 });
 
+
+import { reconcileAiSnapById, reconcileStuckAiSnaps } from '../services/aiSnapReconcile.js';
+
+router.post('/admin/reconcile/:id', authMiddleware, async (req: any, res) => {
+  if (req.user?.role !== 'ADMIN') return res.status(403).json({ error: 'forbidden' });
+  try {
+    const result = await reconcileAiSnapById(prisma, req.params.id, { force: true, reason: 'manual' });
+    console.log('[reconcile] manual:', result.snapId, result.status, result.message);
+    res.json(result);
+  } catch (e: any) {
+    console.error('[reconcile] error:', e.message);
+    res.status(500).json({ error: e.message || 'failed' });
+  }
+});
+
+router.post('/admin/reconcile-stuck', authMiddleware, async (req: any, res) => {
+  if (req.user?.role !== 'ADMIN') return res.status(403).json({ error: 'forbidden' });
+  try {
+    const results = await reconcileStuckAiSnaps(prisma, 20, { reason: 'batch-manual' });
+    console.log('[reconcile] batch:', results.length, 'processed');
+    res.json({ ok: true, results });
+  } catch (e: any) {
+    console.error('[reconcile] batch error:', e.message);
+    res.status(500).json({ error: e.message || 'failed' });
+  }
+});
+
 export default router;

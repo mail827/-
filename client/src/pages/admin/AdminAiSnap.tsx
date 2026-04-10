@@ -70,7 +70,11 @@ const STATUS_STYLES: Record<string, { label: string; cls: string }> = {
   done: { label: '완료', cls: 'bg-emerald-100 text-emerald-700' },
   failed: { label: '실패', cls: 'bg-red-100 text-red-600' },
   generating: { label: '생성중', cls: 'bg-amber-100 text-amber-700' },
-  processing: { label: '대기중', cls: 'bg-stone-100 text-stone-600' },
+  processing: { label: '처리중', cls: 'bg-stone-100 text-stone-600' },
+  queued: { label: '대기', cls: 'bg-blue-100 text-blue-600' },
+  uploading: { label: '업로드중', cls: 'bg-cyan-100 text-cyan-600' },
+  stuck: { label: '멈춤', cls: 'bg-orange-100 text-orange-600' },
+  pending: { label: '대기', cls: 'bg-stone-100 text-stone-500' },
 };
 
 type Mode = 'couple' | 'groom' | 'bride';
@@ -93,6 +97,8 @@ export default function AdminAiSnap() {
   const [couplePhoto, setCouplePhoto] = useState('');
   const [uploading, setUploading] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [reconcilingId, setReconcilingId] = useState<string | null>(null);
+  const [reconcilingBatch, setReconcilingBatch] = useState(false);
   const [genStep, setGenStep] = useState(0);
   const stepRef = useRef<ReturnType<typeof setInterval>>();
   const GEN_STEPS = ['AI가 컨셉을 분석하고 있어요', '이미지를 생성하고 있어요', '얼굴을 정밀 보정 중이에요', '고화질로 변환하고 있어요', '거의 다 됐어요'];
@@ -215,6 +221,38 @@ export default function AdminAiSnap() {
     setSnaps(prev => prev.filter(s => s.id !== id));
   };
 
+  const handleReconcile = async (id: string) => {
+    setReconcilingId(id);
+    try {
+      const res = await api(`/reconcile/${id}`, { method: 'POST' });
+      const data = await res.json();
+      if (data.status === 'done') {
+        load();
+      } else {
+        alert(data.status + ': ' + data.message);
+        load();
+      }
+    } catch (e: any) {
+      alert(e.message || 'failed');
+    }
+    setReconcilingId(null);
+  };
+
+  const handleReconcileBatch = async () => {
+    setReconcilingBatch(true);
+    try {
+      const res = await api('/reconcile-stuck', { method: 'POST' });
+      const data = await res.json();
+      alert((data.results?.length || 0) + '건 처리 완료');
+      load();
+    } catch (e: any) {
+      alert(e.message || 'failed');
+    }
+    setReconcilingBatch(false);
+  };
+
+  const stuckCount = snaps.filter(s => ['stuck', 'processing', 'queued', 'uploading'].includes(s.status)).length;
+
   const filtered = snaps.filter(s => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -237,9 +275,18 @@ export default function AdminAiSnap() {
             <p className="text-sm text-stone-400">빠른 생성 및 전체 관리</p>
           </div>
         </div>
-        <button onClick={load} className="p-2 hover:bg-stone-100 rounded-lg">
-          <RefreshCw className={`w-5 h-5 text-stone-500 ${loading ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          {stuckCount > 0 && (
+            <button onClick={handleReconcileBatch} disabled={reconcilingBatch}
+              className="flex items-center gap-1.5 px-3 py-2 bg-amber-100 text-amber-700 rounded-xl text-xs font-medium hover:bg-amber-200 disabled:opacity-50 transition-all">
+              <RefreshCw className={`w-3.5 h-3.5 ${reconcilingBatch ? 'animate-spin' : ''}`} />
+              {reconcilingBatch ? '복구중...' : `재동기화 ${stuckCount}건`}
+            </button>
+          )}
+          <button onClick={load} className="p-2 hover:bg-stone-100 rounded-lg">
+            <RefreshCw className={`w-5 h-5 text-stone-500 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
@@ -358,6 +405,12 @@ export default function AdminAiSnap() {
                     <a href={snap.resultUrl} target="_blank" className="p-1.5 hover:bg-stone-100 rounded-lg transition-colors">
                       <ExternalLink className="w-4 h-4 text-stone-400" />
                     </a>
+                  )}
+                  {['stuck', 'failed', 'processing', 'queued', 'uploading'].includes(snap.status) && (
+                    <button onClick={() => handleReconcile(snap.id)} disabled={reconcilingId === snap.id}
+                      className="p-1.5 hover:bg-amber-50 rounded-lg transition-colors" title="재동기화">
+                      <RefreshCw className={`w-4 h-4 text-amber-500 ${reconcilingId === snap.id ? 'animate-spin' : ''}`} />
+                    </button>
                   )}
                   <button onClick={() => handleDelete(snap.id)} className="p-1.5 hover:bg-red-50 rounded-lg transition-colors">
                     <Trash2 className="w-4 h-4 text-red-400" />

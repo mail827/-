@@ -115,3 +115,35 @@ wedding-app/
 - `/w/:slug` - 공개 청첩장 페이지
 
 ## 💕 Made by 다겸 & 가현
+
+## 🗄️ DB 자동 백업 (GitHub Actions)
+
+이 프로젝트는 GitHub Actions로 Neon PostgreSQL 백업을 자동 저장할 수 있습니다.
+
+- 워크플로우 파일: `.github/workflows/db-backup.yml`
+- 실행 방식:
+  - 매일 1회 자동 실행 (`schedule`)
+  - Actions 탭에서 수동 실행 (`workflow_dispatch`)
+- 백업 위치: `backups/`
+- 파일명 형식: `backup_YYYYMMDD.sql`
+- 변경이 있을 때만 커밋/푸시 수행
+
+### 1) GitHub Secret 설정
+
+GitHub 저장소에서 다음 값을 추가하세요.
+
+- 경로: **Repository → Settings → Secrets and variables → Actions → New repository secret**
+- 이름: `DATABASE_URL`
+- 값: Neon PostgreSQL 접속 문자열 (예: `postgresql://user:password@host/db?sslmode=require`)
+
+### 2) 수동 실행 방법
+
+1. GitHub 저장소의 **Actions** 탭으로 이동
+2. **Neon DB Backup** 워크플로우 선택
+3. **Run workflow** 클릭
+
+### 3) 동작 확인 방법
+
+- Actions 실행 로그에서 `Create SQL backup` 단계 성공 확인
+- 저장소의 `backups/backup_YYYYMMDD.sql` 파일 생성/갱신 확인
+- 변경이 없는 경우 `No backup changes to commit.` 로그 확인 (커밋/푸시 생략)
