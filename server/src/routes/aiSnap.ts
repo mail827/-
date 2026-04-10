@@ -626,6 +626,7 @@ const generate = async (snapId: string, concept: string, imageUrls: string[], mo
       aspect_ratio: '3:4',
       resolution: '1K',
       output_format: 'png',
+      thinking_level: 'high',
     };
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
@@ -713,7 +714,7 @@ router.post('/free/generate', authMiddleware, async (req: AuthRequest, res) => {
 
     const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
       method: 'POST',
-      body: JSON.stringify({ prompt, image_urls: urls.map(cropToPortrait), num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
+      body: JSON.stringify({ prompt, image_urls: urls.map(cropToPortrait), num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png', thinking_level: 'high' }),
     });
 
     if (submit.images) {

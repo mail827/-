@@ -1050,7 +1050,7 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
 
         const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
           method: 'POST',
-          body: JSON.stringify({ prompt, image_urls: imageUrls, num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
+          body: JSON.stringify({ prompt, image_urls: imageUrls, num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png', thinking_level: 'high' }),
         });
 
         console.log('[snapPack fal response]', JSON.stringify(submit).slice(0, 300));
@@ -1212,7 +1212,7 @@ router.get('/snap/:id', authMiddleware, async (req, res) => {
                 const retryPack = await prisma.snapPack.findUnique({ where: { id: snap.snapPackId! } });
                 const retrySubmit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
                   method: 'POST',
-                  body: JSON.stringify({ prompt: snap.prompt, image_urls: snap.inputUrls as string[], num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png' }),
+                  body: JSON.stringify({ prompt: snap.prompt, image_urls: snap.inputUrls as string[], num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png', thinking_level: 'high' }),
                 });
                 if (retrySubmit.status_url) {
                   await prisma.aiSnap.update({ where: { id: snap.id }, data: { statusUrl: retrySubmit.status_url, responseUrl: retrySubmit.response_url } });

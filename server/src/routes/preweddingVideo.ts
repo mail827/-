@@ -373,6 +373,7 @@ async function generateGlamourPhotos(selfieUrls: string[], gender: 'male' | 'fem
           aspect_ratio: '3:4',
           resolution: '2K',
           output_format: 'png',
+          thinking_level: 'high',
         }),
       });
       const submitData = await submitRes.json();
