@@ -49,6 +49,7 @@ import { financeAnalysisRouter } from "./routes/financeAnalysis.js";
 import guestPhotoRouter from './routes/guestPhoto.js';
 import boothCreditRouter from './routes/boothCredit.js';
 import showcaseRouter from "./routes/showcase.js";
+import idPhotoRouter from "./routes/idPhoto.js";
 
 dotenv.config();
 
@@ -91,6 +92,7 @@ app.use('/api/public', publicRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/payment', paymentRouter);
 app.use("/api", showcaseRouter);
+app.use("/api/id-photo", idPhotoRouter);
 app.use("/api/poster", posterRouter);
 app.use("/admin/poster", adminPosterRouter);
 app.use('/api/admin', adminRouter);

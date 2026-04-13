@@ -25,7 +25,7 @@ export default function OAuthCallback() {
         localStorage.removeItem('redirectAfterLogin');
         navigate(redirectUrl);
       } else {
-        navigate('/dashboard');
+        const afterLogin = sessionStorage.getItem('afterLogin'); sessionStorage.removeItem('afterLogin'); navigate(afterLogin || '/dashboard');
       }
     } else if (error) {
       navigate('/?error=' + encodeURIComponent(error));

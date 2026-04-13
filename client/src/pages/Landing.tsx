@@ -732,6 +732,8 @@ export default function Landing() {
           .hero-btns { justify-content: center !important; }
           .engine-grid { grid-template-columns: 1fr !important; }
           .chat-section { flex-direction: column !important; padding: 60px 20px !important; gap: 40px !important; }
+          .idphoto-section { flex-direction: column !important; padding: 60px 20px !important; gap: 40px !important; }
+          .idphoto-section > div { width: 100% !important; max-width: 100% !important; }
           .snap-section { flex-direction: column-reverse !important; padding: 60px 20px !important; gap: 40px !important; }
           .snap-text, .chat-text-col { max-width: 100% !important; }
           .specs-grid { grid-template-columns: repeat(2, 1fr) !important; }
@@ -1009,6 +1011,46 @@ export default function Landing() {
               {lt('snap','cta',landingLocale)}
               <ArrowRight size={14} />
             </a>
+          </div>
+        </section>
+
+
+        <section className="idphoto-section" style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "100px 48px", gap: 72, borderTop: "1px solid #E8E5E0" }}>
+          <div style={{ maxWidth: 440 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 100, border: "1px solid #E0DDD8", marginBottom: 24, background: "#F5F4F1" }}>
+              <Camera size={11} color="#999" />
+              <p style={{ fontSize: 11, color: "#888" }}>AI ID Portrait</p>
+            </div>
+            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.4, color: "#1a1a1a", marginBottom: 8 }}>셀카 한 장으로<br />정합도 높은 기초사진</h2>
+            <p className="serif" style={{ fontSize: 20, fontWeight: 300, color: "#aaa", marginBottom: 20 }}>AI 스냅의 퀄리티를 한 단계 올려주는 첫 번째 단계</p>
+            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 24 }}>AI가 얼굴 특징을 정밀하게 읽어내고<br />스튜디오급 정면 포트레이트로 자동 변환해드려요</p>
+            <div style={{ padding: "16px 18px", borderRadius: 10, border: "1px solid #E8E5E0", background: "#FAFAF8", marginBottom: 24 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>이런 분께 추천</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {["AI 스냅 결과에서 얼굴이 안 닮는 분", "셀카밖에 없는데 화보를 만들고 싶은 분", "정면 스튜디오 사진이 필요한 분"].map((t, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <Check size={11} color="#bbb" strokeWidth={2.5} />
+                    <p style={{ fontSize: 12, color: "#666" }}>{t}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <a href="/id-photo" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#fff", background: "#1a1a1a", textDecoration: "none", fontWeight: 500, padding: "12px 24px", borderRadius: 8 }}>
+              1,000원으로 시작하기
+              <ArrowRight size={14} />
+            </a>
+          </div>
+          <div style={{ width: 380, height: 480, borderRadius: 20, background: "linear-gradient(160deg, #F5F4F1 0%, #E8E5E0 100%)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16, border: "1px solid #E8E5E0" }}>
+            <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+              <div style={{ width: 120, height: 160, borderRadius: 12, background: "linear-gradient(135deg, #D5CEC5 0%, #C4BCB0 100%)", display: "flex", alignItems: "center", justifyContent: "center", border: "2px dashed #bbb" }}>
+                <Camera size={28} color="#999" />
+              </div>
+              <ArrowRight size={20} color="#bbb" />
+              <div style={{ width: 120, height: 160, borderRadius: 12, background: "linear-gradient(135deg, #E8E5E0 0%, #F5F4F1 100%)", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #ccc", boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
+                <Camera size={28} color="#666" />
+              </div>
+            </div>
+            <p style={{ fontSize: 12, color: "#999", fontWeight: 500 }}>셀카 → AI 정면 포트레이트</p>
           </div>
         </section>
 

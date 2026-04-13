@@ -51,12 +51,15 @@ import AdminTeam from './pages/admin/AdminTeam';
 import ReviewManagement from "./pages/admin/ReviewManagement";
 import AdminBgMusic from "./pages/admin/AdminBgMusic";
 import AdminAiSnap from "./pages/admin/AdminAiSnap";
+import AdminIdPhoto from "./pages/admin/AdminIdPhoto";
 import MyPage from './pages/MyPage';
 import Terms from './pages/info/Terms';
 import Privacy from "./pages/info/Privacy";
 import PublicReport from "./pages/PublicReport";
 import GiftRedeem from "./pages/GiftRedeem";
 import ArchiveSuccess from "./pages/ArchiveSuccess";
+import IdPhoto from "./pages/IdPhoto";
+import IdPhotoCallback from "./pages/IdPhotoCallback";
 import GiftRedirect from './pages/GiftRedirect';
 import GiftSend from "./pages/GiftSend";
 import MyGifts from "./pages/MyGifts";
@@ -104,6 +107,8 @@ export default function App() {
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 border-2 border-stone-800 border-t-transparent rounded-full animate-spin" /></div>}>
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/id-photo" element={<IdPhoto />} />
+      <Route path="/id-photo/callback" element={<IdPhotoCallback />} />
       <Route path="/ai-snap" element={<AiSnapFree />} />
       <Route path="/ai-snap/studio" element={<AiSnapStudioPage />} />
       <Route path="/ai-snap/studio/callback" element={<AiSnapCallback />} />
@@ -168,6 +173,7 @@ export default function App() {
             <Route path="snap-gift" element={<AdminSnapGift />} />
         <Route path="poster" element={<AdminPoster />} />
             <Route path="snap-samples" element={<AdminSnapSample />} />
+        <Route path="id-photo" element={<AdminIdPhoto />} />
         <Route path="weddings" element={<AdminWeddingList />} />
         <Route path="weddings/create" element={<AdminWeddingCreate />} />
         <Route path="weddings/new" element={<AdminWeddingCreate />} />
