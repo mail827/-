@@ -46,6 +46,8 @@ function getWeekDates(weekId: string): string[] {
   return dates;
 }
 
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
 async function callClaude(prompt: string, maxTokens = 4000, useSearch = false): Promise<string> {
   if (!CLAUDE_KEY) throw new Error('CLAUDE_API_KEY not set');
   const body: any = {
@@ -56,22 +58,31 @@ async function callClaude(prompt: string, maxTokens = 4000, useSearch = false): 
   if (useSearch) {
     body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
   }
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': CLAUDE_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Claude API error: ${err}`);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(body),
+    });
+    if (res.status === 429) {
+      const wait = (attempt + 1) * 30000;
+      console.log('Claude rate limit hit, waiting ' + wait + 'ms...');
+      await sleep(wait);
+      continue;
+    }
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error('Claude API error: ' + err);
+    }
+    const data = await res.json() as any;
+    const textBlocks = (data.content || []).filter((b: any) => b.type === 'text');
+    return textBlocks.map((b: any) => b.text).join('\n') || '';
   }
-  const data = await res.json() as any;
-  const textBlocks = (data.content || []).filter((b: any) => b.type === 'text');
-  return textBlocks.map((b: any) => b.text).join('\n') || '';
+  throw new Error('Claude API rate limit exceeded after 3 retries');
 }
 
 type MarketingCard = { type: string; title: string; content: string; sourceProduct?: string };
@@ -220,7 +231,7 @@ router.delete('/insights/:id', authMiddleware, adminOnly, ownerOnly, async (req,
 
 router.post('/generate', authMiddleware, adminOnly, ownerOnly, async (req, res) => {
   try {
-    const weekId = getWeekId(0);
+    const weekId = (req.body?.weekId as string) || getWeekId(0);
     const weekDates = getWeekDates(weekId);
     const startDate = weekDates[0];
     const endDate = weekDates[6];
@@ -463,6 +474,7 @@ ${gahyunLogs.map(l => `${l.date}: ${l.content}`).join('\n') || '없음'}
 각 주제별로 구체적 수치, 사례, 커뮤니티 반응을 정리해줘. 자유로운 텍스트로.`;
 
     const research = await callClaude(researchPrompt, 3000, true);
+    await sleep(15000);
 
     const finalPrompt = prompt + `
 
@@ -500,6 +512,150 @@ ${research}
     res.json({ ok: true, count: saved.length, parseFailed });
   } catch (e: any) {
     console.error('marketing generate error:', e);
+    res.status(500).json({ error: e.message || 'failed' });
+  }
+});
+
+
+function safeParseThreadCards(raw: string): { cards: any[]; parseFailed: boolean } {
+  try {
+    const cleaned = extractJsonArrayBlock(stripCodeFence(raw));
+    const parsed = JSON.parse(cleaned);
+    if (!Array.isArray(parsed) || !parsed.length) throw new Error('empty');
+    const valid = parsed.slice(0, 5).map((item: any) => ({
+      category: ['rage','comparison','pov','story','event'].includes(item.category) ? item.category : 'story',
+      title: String(item.title || '').slice(0, 60),
+      content: String(item.content || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').slice(0, 800),
+      heatLevel: [1,2,3].includes(item.heatLevel) ? item.heatLevel : 1,
+      platform: ['threads','instagram','cafe','blog'].includes(item.platform) ? item.platform : 'threads',
+    })).filter((item: any) => item.title && item.content);
+    return { cards: valid, parseFailed: false };
+  } catch (e: any) {
+    console.error('Thread parse failed:', e?.message, raw?.slice(0, 200));
+    return { cards: [], parseFailed: true };
+  }
+}
+
+
+router.get('/threads', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const threads = await prisma.marketingInsight.findMany({
+      where: { type: { in: ['thread_rage','thread_comparison','thread_pov','thread_story','thread_event'] } },
+      orderBy: { createdAt: 'desc' },
+      take: 30,
+    });
+    res.json(threads.map((t: any) => {
+      const meta = (t.metadata as any) || {};
+      return {
+        id: t.id,
+        category: t.type.replace('thread_', ''),
+        title: t.title,
+        content: t.content,
+        heatLevel: meta.heatLevel || 1,
+        platform: meta.platform || 'threads',
+        metadata: meta,
+        createdAt: t.createdAt,
+      };
+    }));
+  } catch (e) {
+    res.status(500).json({ error: 'failed' });
+  }
+});
+
+router.delete('/threads/:id', authMiddleware, adminOnly, ownerOnly, async (req, res) => {
+  try {
+    await prisma.marketingInsight.delete({ where: { id: req.params.id } });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'failed' });
+  }
+});
+
+router.post('/threads/generate', authMiddleware, adminOnly, ownerOnly, async (req, res) => {
+  try {
+    const topic = req.body?.topic || '';
+
+    const serviceSpec = `[청첩장 작업실 서비스]
+- AI웨딩스냅: 47컨셉, 3장 5,900원~20장 24,900원
+- 웨딩시네마: photo 29,000 / selfie 39,000원
+- 웨딩포스터: 41컨셉, AI생성 5,000원 / 사진 3,000원
+- 모바일청첩장: Standard 9,900원 / Premium 29,900원
+- 영구아카이브: 9,900원
+- 사이트: weddingshop.cloud / 인스타: @weddingstudiolab`;
+
+    const researchPrompt = `너는 웨딩 커뮤니티 리서치 전문가야. 아래 주제를 web_search로 검색해서 최신 반응을 수집해:
+1. 스레드에서 예비신부들이 빡치는 웨딩 이슈
+2. 인스타 웨딩 계정 중 바이럴 된 포스트 패턴
+3. 웨딩카페(더웨딩/웨딩의여신)에서 논쟁중인 주제
+4. AI 웨딩 관련 최신 반응
+\${topic ? '5. 추가 주제: ' + topic : ''}
+각 주제별 구체적 사례와 반응 정리해줘.`;
+
+    const research = await callClaude(researchPrompt, 2000, true);
+    await sleep(15000);
+
+    const generatePrompt = `너는 '청첩장 작업실(@weddingstudiolab)'의 스레드/인스타 바이럴 글 기획 AI야.
+개발자 다겸이 직접 만든 2인 스타트업. 톤은 솔직하고 약간 시비조, MZ 말투.
+\${serviceSpec}
+
+[웹 리서치 결과]
+\${research}
+
+[출력 규칙]
+1) JSON 배열만 반환 (배열 앞뒤 텍스트 금지)
+2) 코드블록/백틱 금지
+3) 항목 정확히 5개
+4) 각 항목 구조:
+{
+  "category": "rage|comparison|pov|story|event",
+  "title": "글 제목 (30자 이하)",
+  "content": "본문 (줄바꿈은 \\n, 200자~500자)",
+  "heatLevel": 1~3,
+  "platform": "threads|instagram|cafe"
+}
+
+[카테고리별 톤]
+- rage: "이거 나만 빡치나?" 계열. 스드메 추가금/뻔한 청첩장/비싼 식전영상
+- comparison: "아직도 그렇게 해?" 계열. 가격/퀄리티 비교
+- pov: "POV: ~한 예신" 계열. 상황극 몰입형
+- story: 개발자 비하인드/만든 과정/실패담. 진정성 있게
+- event: 이벤트/할인/체험단. 액션 유도형
+
+[필수 규칙]
+- 5개 중 rage 1개, comparison 1개, pov 1개는 반드시 포함
+- 나머지 2개는 story 또는 event
+- heatLevel 3(FIRE)은 최대 1개
+- 금지어: 혁신, 솔루션, 니즈, 프리미엄 경험, 완벽한 선택
+- 블로그 글투/보도자료 말투 절대 금지
+- 실제 복붙해서 바로 올릴 수 있는 완성된 글로 작성
+- content에 해시태그 3~5개 포함 (마지막 줄에)
+- 청첩장 작업실 검색 유도 CTA 자연스럽게 포함
+\${topic ? '\n[지정 주제 반영]\n' + topic + '를 반드시 1개 이상 글에 녹여줘' : ''}`;
+
+    const raw = await callClaude(generatePrompt, 3000, false);
+    const { cards, parseFailed } = safeParseThreadCards(raw);
+
+    const saved = await Promise.all(
+      cards.map((item: any) =>
+        prisma.marketingInsight.create({
+          data: {
+            weekId: getWeekId(0),
+            type: 'thread_' + item.category,
+            title: item.title,
+            content: item.content,
+            metadata: {
+              heatLevel: item.heatLevel || 1,
+              platform: item.platform || 'threads',
+              generatedAt: new Date().toISOString(),
+            },
+          },
+        })
+      )
+    );
+
+    res.json({ ok: true, count: saved.length, parseFailed });
+  } catch (e: any) {
+    console.error('thread generate error:', e);
     res.status(500).json({ error: e.message || 'failed' });
   }
 });

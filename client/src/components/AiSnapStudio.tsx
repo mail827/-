@@ -26,6 +26,7 @@ const CATEGORY_ORDER = [
   { key: 'VINTAGE', label: '빈티지', ids: ['vintage_film', 'vintage_record', 'vintage_tungsten', 'retro_hongkong'] },
   { key: 'CRUISE', label: '크루즈', ids: ['cruise_sunset', 'cruise_bluesky'] },
   { key: 'SELFIE', label: '셀카', ids: ['iphone_selfie', 'iphone_mirror'] },
+  { key: 'UNIFORM', label: '교복', ids: ['summer_film', 'lily_choucho'] },
   { key: 'SPECIAL', label: '스페셜', ids: ['aao'] },
 ];
 
@@ -68,6 +69,8 @@ const CONCEPT_META: Record<string, { emoji: string; sub: string }> = {
   cruise_bluesky: { emoji: 'C', sub: '푸른 바다 크루즈' },
   iphone_selfie: { emoji: 'P', sub: 'iPhone 감성' },
   iphone_mirror: { emoji: 'P', sub: '미러 셀카' },
+  summer_film: { emoji: 'U', sub: '썸머필름' },
+  lily_choucho: { emoji: 'U', sub: '릴리슈슈' },
   aao: { emoji: 'A', sub: '어떤 우주에서든' },
 };
 

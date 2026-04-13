@@ -295,6 +295,41 @@ const SCENE_ROTATION: Record<string, { groom: string[]; bride: string[]; couple:
       'couple on same school playground same green iron bench at golden hour, deep amber-orange light, long shadows of pull-up bars stretching across playground, she sits on bench apricot organza dress glowing deep warm gold in low sun tiered skirt spread, he lies on bench with head in her lap sand ivory suit warm amber celadon shirt turned golden eyes closed, her hand rests on his forehead fingers in his hair, silver camcorder sits upright on bench arm LCD screen open recording them red light blinking, entire image heavily overexposed edges dissolving into pure warm white lens flare streaking across upper corner, photorealistic, 50mm lens, 8k',
     ],
   },
+  summer_film: {
+    groom: [
+      'standing on sidewalk in front of old single-screen cinema with hand-painted poster board and faded red awning, late afternoon golden sun, wearing deep navy gakuran with five gold buttons, celluloid grain',
+      'walking down quiet shopping street with colored awnings, warm afternoon sun creating golden rim light, long shadows, wearing navy gakuran, celluloid grain',
+      'standing at iron railing of pedestrian bridge over quiet river at late afternoon, low warm sun, wearing navy gakuran unbuttoned showing white shirt, celluloid grain',
+    ],
+    bride: [
+      'standing at school rooftop chain-link fence with afternoon sky beyond, fingers hooked through mesh, wearing deep navy sailor uniform with crimson ribbon bow, celluloid grain',
+      'sitting on floor between library bookshelves holding open book, warm amber reading lamp above, wearing navy sailor uniform with loosened ribbon, celluloid grain',
+      'sliding down wooden banister in school stairwell laughing, warm tungsten light, wearing navy sailor uniform with ribbon streaming, celluloid grain',
+    ],
+    couple: [
+      'couple standing on sidewalk in front of old cinema with hand-painted poster and faded red awning, late afternoon golden sun, he in navy gakuran she in navy sailor uniform with crimson ribbon, celluloid grain',
+      'couple walking side by side on quiet shopping street with colored awnings, warm afternoon golden rim light, he in navy gakuran she in navy sailor uniform, celluloid grain',
+      'couple sitting on concrete school staircase at golden hour, deep golden horizontal light, he in navy gakuran open showing white shirt she in navy sailor uniform bare feet, celluloid grain',
+    ],
+  },
+  lily_choucho: {
+    groom: [
+      'standing on narrow dirt path between vast green rice paddies under heavy overcast grey sky, wearing muted ash grey wool blazer with school crest olive green necktie, white earphone in one ear, oversaturated green, digital video texture',
+      'walking alone down long school corridor away from camera, old wooden floor, rectangles of grey window light creating alternating bars on his back, wearing grey blazer olive tie, earphone cord trailing, digital video texture',
+      'riding old silver bicycle on long straight rural road between rice paddies at dusk, grey blazer open flapping white shirt olive tie streaming, holding earphone bud by cord at side trailing in air, oversaturated green, digital video texture',
+    ],
+    bride: [
+      'standing among rice shoots in shallow paddy water not on path, wearing grey blazer olive ribbon tie tartan pleated skirt grey socks darkened with water, looking down at water around shoes, oversaturated green, digital video texture',
+      'standing at school rooftop chain-link fence forehead resting against mesh looking through diamonds at grey city, wearing grey blazer tartan skirt, white earphone cord from one ear swaying in wind, overcast flat light, digital video texture',
+      'lying on back on green grass beside paddy path, grey blazer spread open white shirt olive ribbon tie, both earphone buds in, palms up on grass eyes open looking straight up, oversaturated green, digital video texture',
+    ],
+    couple: [
+      'couple walking on narrow path between vast green paddies under heavy overcast, sharing earphones one bud each white cord in arc between heads, both in grey blazers with school crest, oversaturated green, digital video texture',
+      'couple sitting behind school building against stained concrete wall with green moss, sharing earphones backs against wall, she resting cheek on drawn-up knee he leaning head back eyes shut, flat grey light, digital video texture',
+      'couple sitting on dirt path in vast paddy field late afternoon single shaft of warm light breaking through overcast, blazers removed as blankets earphones pulled out resting on dirt between them connected to nothing, oversaturated green one warm shaft, digital video texture',
+    ],
+  },
+
 };
 
 const SOLO_PROMPTS: Record<string, { groom: string; bride: string }> = {
@@ -478,6 +513,14 @@ iphone_selfie: {
     groom: 'place the same person standing beside old black motorcycle in dark narrow alley at night, wet asphalt reflecting distant neon, concrete wall with peeling posters behind, wearing deep charcoal black wool-silk blend slim single-breasted two-button suit with narrow notch lapels and sharp shoulders slim tapered trousers, pure white silk charmeuse shirt with subtle luminous sheen soft point collar no tie top two buttons open, black leather chelsea boots, holding matte black motorcycle helmet in one hand at his side, warm sodium vapor lamp from above left casting amber on face, distant cyan neon from alley end, photorealistic, visible pores, strand-level hair, celluloid grain, 50mm lens, 8k',
     bride: 'place the same person inside old glass phone booth on empty sidewalk at night, wearing pure white heavy silk charmeuse off-shoulder wedding dress with romantic gathered sweetheart neckline dramatic oversized puff sleeves in silk organza billowing at shoulder gathered tight at elbow fitted boned corset bodice in smooth luminous silk charmeuse massive four-tiered ruched bell skirt compressed inside tiny glass box charmeuse pressing against all four glass panels fingertip-length tulle veil caught in folding door, holding old phone receiver to ear with one hand other hand flat against glass looking out through glass, single cold fluorescent tube in booth ceiling making charmeuse glow white-blue, warm amber streetlight outside, photorealistic, visible pores, strand-level hair, breath condensation on glass, celluloid grain, 85mm lens, 8k',
   },
+  summer_film: {
+    groom: 'place the same person standing in long empty school corridor by window looking out in profile, late afternoon sun pouring through window creating sharp rectangle of golden light on dark wooden floor, wearing deep navy blue wool serge gakuran-style school uniform with standing mandarin collar buttoned to top with five gold metal buttons catching side light as bright points, white cotton shirt visible at collar edge, matching deep navy straight-leg trousers, black leather lace-up shoes, one hand in trouser pocket, dust motes floating in light shaft, photorealistic, visible pores, strand-level hair, celluloid grain, 50mm lens, 8k',
+    bride: 'place the same person standing at school rooftop chain-link fence with afternoon sky beyond, fingers of both hands hooked through fence mesh at shoulder height, wearing deep navy blue wool serge sailor-style school uniform with broad square sailor collar edged with three thin white stripe lines, white cotton inner blouse with rounded collar, crimson red silk ribbon bow at chest, knife-pleated navy skirt, white cotton knee-high socks, brown leather Mary Jane shoes, wind pressing skirt pleats, afternoon sun from right creating diamond grid shadow on sailor collar and white blouse, photorealistic, visible pores, strand-level hair, celluloid grain, 85mm lens, 8k',
+  },
+  lily_choucho: {
+    groom: 'place the same person walking alone down long school corridor away from camera, old worn wooden floor, tall windows on left casting repeating rectangles of grey light creating alternating bars of light and shadow across his back, wearing muted ash grey wool blazer with single button and faded navy school crest on left chest pocket, white cotton dress shirt, thin muted olive green woven necktie, dark charcoal grey wool straight-leg trousers, black leather oxford shoes, one white earphone in left ear cord trailing to pocket, flat grey window light, photorealistic, visible pores, strand-level hair, celluloid grain with digital video texture, 50mm lens, 8k',
+    bride: 'place the same person lying on back on green grass beside rice paddy path, wearing muted ash grey wool blazer spread open beneath her, white cotton dress shirt, olive green satin ribbon tie lying on chest, dark charcoal grey-green tartan check pleated skirt spread flat, grey knee-high socks, penny loafers off beside her, both earphone buds in, palms up on grass, eyes open looking straight up at camera, oversaturated green frames her, flat overcast light, photorealistic, visible pores, strand-level hair, celluloid grain with digital video texture, 50mm lens, 8k',
+  },
 };
 
 const COUPLE_PROMPTS: Record<string, string> = {
@@ -526,6 +569,8 @@ iphone_selfie: 'authentic iPhone couple selfie from above at arms length, both f
   summer_tape: 'couple on same school playground same green iron bench beside rusted pull-up bars at golden hour sun minutes from setting everything drenched in deep amber-orange, she sits on bench soft warm apricot silk organza off-shoulder dress three tiered organza skirt glowing deep warm gold seed pearls at neckline, he lies on bench with head in her lap sand ivory washed linen-silk suit celadon green shirt turned golden eyes closed, her hand on his forehead fingers in his hair, silver camcorder on bench arm LCD open recording red light blinking, entire image heavily overexposed edges dissolving into warm white lens flare, photorealistic, 50mm lens celluloid grain, 8k',
   rouge_clue: 'couple at crimson red painted wooden door on quiet cobblestone alley in evening warm yellow streetlamp above green ivy on stone walls, woman wearing deep emerald green silk taffeta cocktail-length dress square neckline wide straps full playful A-line skirt at mid-calf crimson red silk camellia at left waist standing with back against closed red door looking directly at him, man wearing warm tobacco brown corduroy two-button suit cream shirt crimson red knit tie emerald green arrow pin on lapel standing close in front holding opened cards in one hand other hand resting on red door beside her head, red arrow sticker on cobblestone pointing at her, warm yellow streetlamp, photorealistic, 50mm lens celluloid grain, 8k',
   in_the_mood: 'couple in dark narrow alley at night wet asphalt reflecting neon, old black motorcycle parked against graffitied concrete wall, she sits sidesaddle on motorcycle seat pure white heavy silk charmeuse off-shoulder wedding dress with gathered sweetheart neckline dramatic puff sleeves corset bodice massive four-tiered ruched bell skirt cascading off both sides of motorcycle onto wet asphalt cathedral train pooling in puddle behind rear wheel fingertip tulle veil hanging down her back looking at camera deadpan, he stands beside motorcycle in charcoal black wool-silk suit white silk charmeuse shirt open at collar holding matte black motorcycle helmet in one hand at his side, distant cyan neon from end of alley and warm sodium vapor lamp above creating split lighting cyan left side amber right side on both faces and luminous charmeuse surface, photorealistic, visible pores, strand-level hair, celluloid grain, 50mm lens, 8k',
+  summer_film: 'couple standing on sidewalk in front of old single-screen cinema with hand-painted movie poster board and faded red awning, late afternoon golden sun on quiet street, he wearing deep navy blue wool serge gakuran with standing mandarin collar buttoned to top with five gold metal buttons white shirt edge at collar matching navy trousers black leather shoes holding two movie ticket stubs in one hand, she wearing deep navy blue sailor uniform with broad square sailor collar edged with three white stripes white inner blouse crimson red silk ribbon bow knife-pleated navy skirt white knee-high socks brown Mary Jane shoes shielding eyes from sun with one hand, warm late afternoon side light, photorealistic, visible pores, strand-level hair, celluloid grain, 50mm lens, 8k',
+  lily_choucho: 'couple walking on narrow dirt path between vast green rice paddies under heavy overcast grey sky sharing white wired earphones one bud in his left ear other in her right ear white cord in gentle arc between their heads, he wearing muted ash grey wool blazer with school crest white shirt olive green necktie charcoal trousers black oxfords, she wearing matching grey blazer with school crest white shirt olive green ribbon tie dark charcoal grey-green tartan check pleated skirt grey knee-high socks black penny loafers, shoulders fifteen centimeters apart wind bending rice plants in waves, oversaturated green grey sky, photorealistic, visible pores, strand-level hair, celluloid grain with digital video texture, 50mm lens, 8k',
 };
 
 const falFetch = async (url: string, opts?: RequestInit) => {
@@ -1255,6 +1300,23 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
         'empty school playground with rusted pull-up bars and old green iron bench, harsh midsummer overhead sun creating overexposed blown-out white sky, cicada heat shimmer, nostalgic ache',
         'school corridor with old worn wooden floor and rectangles of hot afternoon sun from classroom windows, dust suspended in golden light beams, fading summer memory',
       ],
+      summer_film: [
+        'sidewalk in front of old single-screen cinema with hand-painted movie poster board and faded red awning, late afternoon golden sun on quiet street, warm celluloid nostalgia',
+        'quiet shopping street with small old storefronts and colored awnings, potted plants on sidewalk, warm afternoon sun from behind creating golden rim light, long shadows stretching forward',
+        'old iron railing pedestrian bridge over quiet river at late afternoon, peeling paint on railing, low warm sun raking along bridge and river surface catching golden light in slow ripples',
+        'school bicycle parking area with rows of identical silver bicycles in metal racks, late afternoon long shadows from bicycle rows creating stripe pattern on concrete',
+        'wide concrete outdoor school staircase at golden hour, deep golden horizontal light from left, long sharp shadows on concrete steps, warm amber atmosphere',
+        'riverside embankment at sunset, concrete slope down to water, tall grass at water edge catching golden light, deep amber sunset light from directly ahead, river catching entire sunset as flat orange mirror',
+        'same old cinema at night, warm yellow marquee bulbs glowing above faded red awning, next screening starting, cool blue night sky mixing with warm bulb light',
+      ],
+      lily_choucho: [
+        'vast green rice paddy field under heavy overcast grey sky, narrow dirt path between oversaturated green rice plants towering like walls on both sides, flat grey light, digital video texture',
+        'long school corridor with old worn wooden floor and tall windows casting repeating rectangles of grey light creating alternating bars of light and shadow, corridor stretching to vanishing point',
+        'behind school building, stained concrete wall with green moss cracks, flat grey light, damp concrete texture, institutional quiet',
+        'empty classroom shot through rows of empty desks toward tall rain-streaked windows, rain blurring green trees outside into watercolor, grey rain light with green reflection on glass',
+        'small suburban train station platform at dusk, single fluorescent tube under corrugated shelter, rails stretching to vanishing point, distant red signal light, blue-grey sky',
+        'vast green paddy field same path, late afternoon overcast thinned, single shaft of warm light breaking through cloud hitting one rectangle of paddy in gold-green among grey-green',
+      ],
       iphone_selfie: 'casual bright cafe interior with large window and warm natural daylight, simple clean background with soft bokeh, relaxed everyday warmth',
       iphone_mirror: 'clean modern bathroom with large rectangular mirror and soft overhead vanity lighting, neutral tile background, casual intimate moment',
     };
@@ -1306,6 +1368,8 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
   rouge_clue: 'wearing warm tobacco brown corduroy single-breasted two-button suit with slim notch lapels and soft natural shoulders, matching corduroy trousers with slight taper, cream white cotton shirt with soft rounded collar, deep crimson red knit tie in slim square-bottom shape, dark brown leather desert boots, single small emerald green enamel arrow pin on left lapel, warm lived-in texture, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
   in_the_mood: 'wearing deep charcoal black wool-silk blend slim single-breasted two-button suit jacket with narrow notch lapels and sharp shoulders, slim tapered trousers, pure white silk charmeuse shirt with subtle luminous sheen matching bride dress fabric exactly soft point collar no tie top two buttons open, black leather chelsea boots, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
   summer_tape: 'wearing soft warm sand ivory washed linen-silk blend unstructured two-button jacket with soft rolled notch lapels no padding slightly relaxed fit, matching straight-leg linen-silk trousers, pale celadon green silk shirt with soft point collar top two buttons open no tie, jacket left open, off-white canvas sneakers, sun-faded lived-in summer look, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
+  summer_film: 'wearing deep navy blue wool serge gakuran-style school uniform with standing mandarin collar buttoned to top with five gold metal buttons in single column, structured shoulders, white cotton shirt visible only at collar edge beneath buttoned gakuran, matching deep navy straight-leg trousers, black leather lace-up shoes, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
+  lily_choucho: 'wearing muted ash grey wool blazer with single button slim fit notch lapels and faded navy school crest embroidered on left chest pocket, white cotton dress shirt with point collar, thin muted olive green woven necktie in loose four-in-hand knot, dark charcoal grey wool straight-leg trousers, black leather oxford lace-up shoes, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
 };
     const SEEDREAM_OUTFIT_BRIDE: Record<string, string> = {
   studio_classic: 'wearing white haute couture strapless sweetheart bell gown with sculpted white silk mikado bodice, bell skirt constructed of hundreds of individually cut white silk organza petals in elongated wave shapes layered and overlapping like ocean ripples frozen in motion, each petal heat-shaped to curl slightly at edges creating three-dimensional depth, petals denser at waist gradually more sparse toward hem revealing sheer tulle underneath, long sweeping train',
@@ -1354,21 +1418,28 @@ const generateSeeDream = async (snapId: string, concept: string, imageUrls: stri
   rouge_clue: 'wearing deep emerald green silk taffeta cocktail-length wedding dress with clean square neckline and wide shoulder straps, structured fitted bodice with sharp princess seams in crisp taffeta, full playful A-line skirt ending at mid-calf with slight petticoat volume beneath, single oversized handmade crimson red silk fabric camellia flower pinned at left waist as only embellishment, no lace no beading, retro 1960s silhouette, natural elegant makeup',
   in_the_mood: 'wearing pure white heavy silk charmeuse off-shoulder wedding dress with romantic gathered sweetheart neckline and dramatic oversized puff sleeves in silk organza billowing at shoulder then gathered tight at elbow, fitted boned corset bodice in smooth luminous silk charmeuse with visible soft sheen, massive voluminous bell-shaped ball gown skirt in cascading tiers of silk charmeuse with deep romantic ruching between each tier four tiers total creating waterfall of gathered silk, cathedral train extending six feet, fingertip-length tulle veil attached at crown with single silk charmeuse bow, no lace no beading pure silk volume and sheen as only decoration, natural elegant makeup',
   summer_tape: 'wearing soft warm apricot silk organza off-shoulder wedding dress with sheer organza draped loosely across collarbones forming gentle petal cap sleeves, fitted bodice in pale apricot silk charmeuse beneath floating organza overlay, full romantic A-line skirt in three graduated tiers of weightless silk organza with gentle sweep train, subtle ombre from pale apricot at bodice to soft peach at hem, single tiny cluster of freshwater seed pearls at center of neckline, no lace no beading elsewhere, natural elegant makeup',
+  summer_film: 'wearing deep navy blue wool serge sailor-style school uniform with broad square sailor collar flap edged with three thin white stripe lines, white cotton inner blouse with rounded collar, single crimson red silk ribbon tied in neat bow at center of V-opening, fitted waist, knife-pleated matching deep navy skirt ending above knee, white cotton knee-high socks, dark brown leather Mary Jane strap shoes, natural elegant makeup',
+  lily_choucho: 'wearing muted ash grey wool blazer with single button slim fit notch lapels and faded navy school crest on left chest pocket, white cotton dress shirt with soft point collar, thin muted olive green satin ribbon tie in small neat bow at collar, dark charcoal grey-green tartan check pleated skirt ending above knee with muted tones of charcoal and dark olive woven together knife pleats pressed, dark grey cotton knee-high socks, black leather penny loafer shoes, natural elegant makeup',
 };
 
     const sceneRaw = SEEDREAM_SCENES[concept] || SEEDREAM_SCENES.studio_classic;
     const scene = Array.isArray(sceneRaw) ? sceneRaw[Math.floor(Math.random() * sceneRaw.length)] : sceneRaw;
+    const UNIFORM_CONCEPTS = ['summer_film', 'lily_choucho'];
+    const isUniform = UNIFORM_CONCEPTS.includes(concept);
+    const basePrefix = isUniform
+      ? 'Photorealistic cinematic portrait, 3:4 ratio, 50mm lens f/1.8, shallow depth of field, celluloid film grain. '
+      : 'Photorealistic editorial wedding portrait, 3:4 ratio, 50mm lens f/1.8, shallow depth of field. ';
     let sdPrompt = '';
     if (isCouple) {
       const gOutfit = SEEDREAM_OUTFIT_GROOM[concept] || 'classic dark suit with white shirt';
       const bOutfit = SEEDREAM_OUTFIT_BRIDE[concept] || 'elegant white wedding gown';
-      sdPrompt = 'Photorealistic editorial wedding portrait, 3:4 ratio, 50mm lens f/1.8, shallow depth of field. ' + scene + '. A couple: the man ' + gOutfit + ', the woman ' + bOutfit + '. Man and woman each have their own unique distinct facial bone structure preserved exactly from the reference, man with strong masculine jawline and brow ridge, woman with soft feminine cheekbones and features, two clearly different individual faces. Warm genuine smiles, kind relaxed eyes, intimate comfortable mood. Natural skin with visible pores and subtle texture, warm skin tone, no AI artifacts, no plastic skin';
+      sdPrompt = basePrefix + scene + '. A couple: the man ' + gOutfit + ', the woman ' + bOutfit + '. Man and woman each have their own unique distinct facial bone structure preserved exactly from the reference, man with strong masculine jawline and brow ridge, woman with soft feminine cheekbones and features, two clearly different individual faces. Warm genuine smiles, kind relaxed eyes, intimate comfortable mood. Natural skin with visible pores and subtle texture, warm skin tone, no AI artifacts, no plastic skin';
     } else if (mode === 'groom') {
       const outfit = SEEDREAM_OUTFIT_GROOM[concept] || 'classic dark suit with white shirt';
-      sdPrompt = 'Photorealistic editorial wedding portrait, 3:4 ratio, 50mm lens f/1.8, shallow depth of field. ' + scene + '. The person from the reference image, ' + outfit + '. Warm genuine smile, kind relaxed eyes, comfortable natural posture. Natural skin with visible pores and subtle texture, warm skin tone, no AI artifacts, no plastic skin';
+      sdPrompt = basePrefix + scene + '. The person from the reference image, ' + outfit + '. Warm genuine smile, kind relaxed eyes, comfortable natural posture. Natural skin with visible pores and subtle texture, warm skin tone, no AI artifacts, no plastic skin';
     } else {
       const outfit = SEEDREAM_OUTFIT_BRIDE[concept] || 'elegant white wedding gown';
-      sdPrompt = 'Photorealistic editorial wedding portrait, 3:4 ratio, 50mm lens f/1.8, shallow depth of field. ' + scene + '. The person from the reference image, ' + outfit + '. Warm genuine smile, kind relaxed eyes, comfortable natural posture. Natural skin with visible pores and subtle texture, warm skin tone, no AI artifacts, no plastic skin';
+      sdPrompt = basePrefix + scene + '. The person from the reference image, ' + outfit + '. Warm genuine smile, kind relaxed eyes, comfortable natural posture. Natural skin with visible pores and subtle texture, warm skin tone, no AI artifacts, no plastic skin';
     }
 
     console.log('[SeeDream retry] calling ARK API, image:', refUrl.slice(0, 80));
@@ -1424,7 +1495,8 @@ router.post('/:id/retry', authMiddleware, async (req: AuthRequest, res) => {
   await prisma.aiSnap.update({ where: { id: snap.id }, data: { retryStatus: 'generating' } });
   res.json({ ok: true, retryStatus: 'generating' });
 
-  generateSeeDream(snap.id, snap.concept, snap.inputUrls as string[], snap.mode || 'groom');
+  // SeeDream disabled
+  // generateSeeDream(snap.id, snap.concept, snap.inputUrls as string[], snap.mode || 'groom');
 });
 
 router.post('/:id/select', authMiddleware, async (req: AuthRequest, res) => {

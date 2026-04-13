@@ -342,6 +342,9 @@ const COUPLE_SHOT_VARIANTS = [
 ];
 
 const OUTFIT_GROOM: Record<string, string> = {
+  summer_film: 'deep navy blue wool serge gakuran-style school uniform with standing mandarin collar buttoned to top with five gold metal buttons in single column, structured shoulders, white cotton shirt visible at collar edge, matching deep navy straight-leg trousers, black leather lace-up shoes',
+  lily_choucho: 'muted ash grey wool blazer with single button, slim fit, notch lapels, faded navy school crest embroidered on left chest pocket, white cotton dress shirt with point collar, thin muted olive green woven necktie in loose four-in-hand knot, dark charcoal grey wool straight-leg trousers, black leather oxford lace-up shoes',
+
   studio_classic: 'wearing elegant black tuxedo with white dress shirt, black bow tie, polished shoes',
   studio_gallery: 'wearing charcoal grey wool-silk single-breasted one-button blazer with exaggerated angular peaked lapel with crisp geometric edges, light grey silk mock-neck top no collar, charcoal tailored straight-leg trousers with sharp center crease, black matte leather oxford shoes, architectural sharp silhouette',
   studio_fog: 'wearing light grey wool-cashmere single-breasted two-button blazer with notch lapel and soft matte brushed texture, white linen band-collar shirt all buttons closed minimal, light grey straight-leg trousers, light grey suede desert boots, quiet tonal grey no accessories',
@@ -391,6 +394,9 @@ const OUTFIT_GROOM: Record<string, string> = {
 };
 
 const OUTFIT_BRIDE: Record<string, string> = {
+  summer_film: 'deep navy blue wool serge sailor-style school uniform with broad square sailor collar flap edged with three thin white stripe lines, white cotton inner blouse with rounded collar, single crimson red silk ribbon tied in neat bow at center of V-opening, fitted waist, knife-pleated matching deep navy skirt ending above knee, white cotton knee-high socks, dark brown leather Mary Jane strap shoes',
+  lily_choucho: 'muted ash grey wool blazer with single button, slim fit, notch lapels, faded navy school crest on left chest pocket, white cotton dress shirt with soft point collar, thin muted olive green satin ribbon tie in small neat bow at collar, dark charcoal grey-green tartan check pleated skirt ending above knee with muted tones of charcoal and dark olive woven together knife pleats pressed, dark grey cotton knee-high socks, black leather penny loafer shoes',
+
   studio_classic: 'wearing white haute couture strapless sweetheart bell gown with sculpted white silk mikado bodice, bell skirt constructed of hundreds of individually cut white silk organza petals in elongated wave shapes layered and overlapping like ocean ripples frozen in motion, each petal heat-shaped to curl slightly at edges creating three-dimensional depth, petals denser at waist gradually more sparse toward hem revealing sheer tulle underneath, long sweeping train',
   studio_gallery: 'wearing white haute couture strapless sweetheart bell gown with sculpted white silk mikado bodice, bell skirt constructed of hundreds of individually cut white silk organza petals in elongated wave shapes layered and overlapping like ocean ripples frozen in motion, each petal heat-shaped to curl at edges creating three-dimensional depth, petals denser at waist gradually sparse toward hem revealing tulle underneath, long sweeping train, natural elegant makeup',
   studio_fog: 'wearing white haute couture strapless sweetheart bell gown that looks like fog, ivory silk crepe smooth minimal bodice, bell skirt with over twenty layers of ultra-sheer white silk organza in gradually varying tones from pure white to softest hint of pale grey at outermost layer, each layer slightly longer than last raw-edged creating soft blurred gradient at hem like dissipating mist, no embellishment no pattern, long fading train, natural elegant makeup',
@@ -658,6 +664,12 @@ const CONCEPT_MOOD: Record<string, string> = {
   summer_tape_playground: 'empty school playground with rusted pull-up bars and old green iron bench, harsh midsummer overhead sun, overexposed blown-out white sky, cicada heat shimmer',
   summer_tape_corridor: 'school corridor with old worn wooden floor and rectangles of hot afternoon sun from classroom windows, dust suspended in golden light beams',
   summer_tape_rooftop: 'school rooftop at golden hour, warm sunset dissolving edges, chain-link fence silhouette, summer breeze',
+  summer_film_cinema: 'sidewalk in front of old single-screen cinema with hand-painted movie poster board and faded red awning, late afternoon golden sun on quiet street, warm celluloid nostalgia, 50mm lens',
+  summer_film_bridge: 'old iron railing pedestrian bridge over quiet river at late afternoon, peeling paint on railing, low warm sun raking along bridge and river surface catching golden light in slow ripples, 50mm lens',
+  summer_film_staircase: 'wide concrete outdoor school staircase at golden hour, deep golden horizontal light from left, long sharp shadows on concrete steps, warm amber atmosphere, 85mm lens',
+  lily_choucho_paddy: 'vast green rice paddy field under heavy overcast grey sky, narrow dirt path between oversaturated green rice plants, flat grey light, digital video texture, 50mm lens',
+  lily_choucho_corridor: 'long school corridor with old worn wooden floor and tall windows casting repeating rectangles of grey light creating alternating bars of light and shadow, corridor stretching to vanishing point, digital video texture, 50mm lens',
+  lily_choucho_wall: 'behind school building stained concrete wall with green moss cracks, flat grey light, damp concrete texture, sharing earphones backs against wall, digital video texture, 85mm lens',
 };
 
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {
@@ -691,7 +703,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const GRASS_RAIN_SCENES = ['grass_rain_overcast', 'grass_rain_heavy', 'grass_rain_motion'];
   const ETERNAL_BLUE_SCENES = ['eternal_blue_beach', 'eternal_blue_frozen', 'eternal_blue_bookstore'];
   const HEART_EDITORIAL_SCENES = ['heart_editorial_spotlight', 'heart_editorial_shadow', 'heart_editorial_dark'];
-  const mood = concept === 'velvet_rouge' ? (CONCEPT_MOOD[VELVET_ROUGE_SCENES[shotIdx % 3]] || '') : concept === 'water_memory' ? (CONCEPT_MOOD[WATER_MEMORY_SCENES[shotIdx % 3]] || '') : concept === 'rose_garden' ? (CONCEPT_MOOD[ROSE_GARDEN_SCENES[shotIdx % 3]] || '') : concept === 'grass_rain' ? (CONCEPT_MOOD[GRASS_RAIN_SCENES[shotIdx % 3]] || '') : concept === 'eternal_blue' ? (CONCEPT_MOOD[ETERNAL_BLUE_SCENES[shotIdx % 3]] || '') : concept === 'vintage_tungsten' ? (CONCEPT_MOOD[(['vintage_tungsten_sofa', 'vintage_tungsten_floor', 'vintage_tungsten_stairs', 'vintage_tungsten_portrait', 'vintage_tungsten_hug', 'vintage_tungsten_hallway', 'vintage_tungsten_studio'])[shotIdx % 7]] || '') : concept === 'aao' ? (CONCEPT_MOOD[(['aao_convenience', 'aao_rooftop', 'aao_pool', 'aao_subway', 'aao_parking', 'aao_stairwell', 'aao_convenience_final'])[shotIdx % 7]] || '') : concept === 'heart_editorial' ? (CONCEPT_MOOD[HEART_EDITORIAL_SCENES[shotIdx % 3]] || '') : concept === 'spring_letter' ? (CONCEPT_MOOD[(['spring_letter_library', 'spring_letter_corridor', 'spring_letter_steps', 'spring_letter_bicycle', 'spring_letter_window', 'spring_letter_field', 'spring_letter_letter'])[shotIdx % 7]] || '') : concept === 'summer_rain' ? (CONCEPT_MOOD[(['summer_rain_tree', 'summer_rain_stream', 'summer_rain_curtain', 'summer_rain_porch', 'summer_rain_storm', 'summer_rain_downpour', 'summer_rain_rainbow'])[shotIdx % 7]] || '') : concept === 'autumn_film' ? (CONCEPT_MOOD[(['autumn_film_studio', 'autumn_film_alley', 'autumn_film_crossing', 'autumn_film_rooftop', 'autumn_film_store', 'autumn_film_glass', 'autumn_film_dawn'])[shotIdx % 7]] || '') : concept === 'winter_zhivago' ? (CONCEPT_MOOD[(['winter_zhivago_breath', 'winter_zhivago_frost', 'winter_zhivago_candles', 'winter_zhivago_tracks', 'winter_zhivago_piano', 'winter_zhivago_dance', 'winter_zhivago_dawn'])[shotIdx % 7]] || '') : concept === 'in_the_mood' ? (CONCEPT_MOOD[(['in_the_mood_alley', 'in_the_mood_tunnel', 'in_the_mood_phone', 'in_the_mood_escalator', 'in_the_mood_arcade', 'in_the_mood_rooftop', 'in_the_mood_underpass'])[shotIdx % 7]] || '') : concept === 'lovesick' ? (CONCEPT_MOOD[(['lovesick_parking', 'lovesick_alley', 'lovesick_rooftop'])[shotIdx % 3]] || '') : concept === 'silver_thread' ? (CONCEPT_MOOD[(['silver_thread_atelier', 'silver_thread_fitting', 'silver_thread_staircase'])[shotIdx % 3]] || '') : concept === 'rouge_clue' ? (CONCEPT_MOOD[(['rouge_clue_alley', 'rouge_clue_carousel', 'rouge_clue_record'])[shotIdx % 3]] || '') : concept === 'summer_tape' ? (CONCEPT_MOOD[(['summer_tape_playground', 'summer_tape_corridor', 'summer_tape_rooftop'])[shotIdx % 3]] || '') : (CONCEPT_MOOD[concept] || '');
+  const mood = concept === 'velvet_rouge' ? (CONCEPT_MOOD[VELVET_ROUGE_SCENES[shotIdx % 3]] || '') : concept === 'water_memory' ? (CONCEPT_MOOD[WATER_MEMORY_SCENES[shotIdx % 3]] || '') : concept === 'rose_garden' ? (CONCEPT_MOOD[ROSE_GARDEN_SCENES[shotIdx % 3]] || '') : concept === 'grass_rain' ? (CONCEPT_MOOD[GRASS_RAIN_SCENES[shotIdx % 3]] || '') : concept === 'eternal_blue' ? (CONCEPT_MOOD[ETERNAL_BLUE_SCENES[shotIdx % 3]] || '') : concept === 'vintage_tungsten' ? (CONCEPT_MOOD[(['vintage_tungsten_sofa', 'vintage_tungsten_floor', 'vintage_tungsten_stairs', 'vintage_tungsten_portrait', 'vintage_tungsten_hug', 'vintage_tungsten_hallway', 'vintage_tungsten_studio'])[shotIdx % 7]] || '') : concept === 'aao' ? (CONCEPT_MOOD[(['aao_convenience', 'aao_rooftop', 'aao_pool', 'aao_subway', 'aao_parking', 'aao_stairwell', 'aao_convenience_final'])[shotIdx % 7]] || '') : concept === 'heart_editorial' ? (CONCEPT_MOOD[HEART_EDITORIAL_SCENES[shotIdx % 3]] || '') : concept === 'spring_letter' ? (CONCEPT_MOOD[(['spring_letter_library', 'spring_letter_corridor', 'spring_letter_steps', 'spring_letter_bicycle', 'spring_letter_window', 'spring_letter_field', 'spring_letter_letter'])[shotIdx % 7]] || '') : concept === 'summer_rain' ? (CONCEPT_MOOD[(['summer_rain_tree', 'summer_rain_stream', 'summer_rain_curtain', 'summer_rain_porch', 'summer_rain_storm', 'summer_rain_downpour', 'summer_rain_rainbow'])[shotIdx % 7]] || '') : concept === 'autumn_film' ? (CONCEPT_MOOD[(['autumn_film_studio', 'autumn_film_alley', 'autumn_film_crossing', 'autumn_film_rooftop', 'autumn_film_store', 'autumn_film_glass', 'autumn_film_dawn'])[shotIdx % 7]] || '') : concept === 'winter_zhivago' ? (CONCEPT_MOOD[(['winter_zhivago_breath', 'winter_zhivago_frost', 'winter_zhivago_candles', 'winter_zhivago_tracks', 'winter_zhivago_piano', 'winter_zhivago_dance', 'winter_zhivago_dawn'])[shotIdx % 7]] || '') : concept === 'in_the_mood' ? (CONCEPT_MOOD[(['in_the_mood_alley', 'in_the_mood_tunnel', 'in_the_mood_phone', 'in_the_mood_escalator', 'in_the_mood_arcade', 'in_the_mood_rooftop', 'in_the_mood_underpass'])[shotIdx % 7]] || '') : concept === 'lovesick' ? (CONCEPT_MOOD[(['lovesick_parking', 'lovesick_alley', 'lovesick_rooftop'])[shotIdx % 3]] || '') : concept === 'silver_thread' ? (CONCEPT_MOOD[(['silver_thread_atelier', 'silver_thread_fitting', 'silver_thread_staircase'])[shotIdx % 3]] || '') : concept === 'rouge_clue' ? (CONCEPT_MOOD[(['rouge_clue_alley', 'rouge_clue_carousel', 'rouge_clue_record'])[shotIdx % 3]] || '') : concept === 'summer_tape' ? (CONCEPT_MOOD[(['summer_tape_playground', 'summer_tape_corridor', 'summer_tape_rooftop'])[shotIdx % 3]] || '') : concept === 'summer_film' ? (CONCEPT_MOOD[(['summer_film_cinema', 'summer_film_bridge', 'summer_film_staircase'])[shotIdx % 3]] || '') : concept === 'lily_choucho' ? (CONCEPT_MOOD[(['lily_choucho_paddy', 'lily_choucho_corridor', 'lily_choucho_wall'])[shotIdx % 3]] || '') : (CONCEPT_MOOD[concept] || '');
 
   if (mode === 'couple') {
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
@@ -991,63 +1003,6 @@ router.post('/generate', authMiddleware, async (req: AuthRequest, res) => {
     await prisma.snapPack.update({ where: { id: packId }, data: { usedSnaps: pack.usedSnaps + 1 } });
 
     try {
-      if (pack.preferredEngine === 'seedream' && ARK_API_KEY) {
-        console.log('[snapPack SeeDream] generating with ARK for snap:', snap.id, 'mode:', effectiveMode);
-        let refUrl = '';
-        if (effectiveMode === 'bride' && inputUrlsArr.length >= 2) {
-          refUrl = inputUrlsArr[1];
-        } else if (effectiveMode === 'couple' && inputUrlsArr.length >= 3) {
-          refUrl = inputUrlsArr[2];
-        } else {
-          refUrl = inputUrlsArr[0];
-        }
-        const allC = { ...STUDIO_CONCEPTS, ...CINEMATIC_CONCEPTS };
-        const sceneBase = allC[pack.concept]?.base || 'elegant white wedding studio with soft natural window light';
-        let sdPrompt = '';
-        if (effectiveMode === 'couple') {
-          const gOutfit = OUTFIT_GROOM[pack.concept] || OUTFIT_GROOM.studio_classic;
-          const bOutfit = OUTFIT_BRIDE[pack.concept] || OUTFIT_BRIDE.studio_classic;
-          sdPrompt = 'Portrait 3:4 ratio. The same couple from the reference image. The man ' + gOutfit + '. The woman ' + bOutfit + '. ' + sceneBase + '. Each person must retain their own distinct unique facial features from the reference photo, the man and woman must have clearly different faces, the man must look masculine with his own jawline and bone structure, the woman must look feminine with her own separate distinct features, do NOT merge or blend their faces, do NOT make them look like siblings or the same person. Warm friendly natural expressions with genuine gentle smiles and kind soft eyes, relaxed comfortable intimate mood, NOT stern NOT cold NOT serious NOT expressionless NOT frowning. Photorealistic editorial photograph, soft natural skin texture with visible pores, warm natural skin tone, 50mm lens, shallow depth of field, no AI artifacts no plastic skin no uncanny valley';
-        } else if (effectiveMode === 'groom') {
-          const outfit = OUTFIT_GROOM[pack.concept] || OUTFIT_GROOM.studio_classic;
-          sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + sceneBase + '. Warm friendly natural expression with genuine gentle smile and kind soft eyes, relaxed comfortable body language, NOT stern NOT cold NOT serious NOT expressionless NOT frowning. Photorealistic editorial photograph, soft natural skin texture with visible pores, warm natural skin tone, 50mm lens, shallow depth of field, no AI artifacts no plastic skin no uncanny valley';
-        } else {
-          const outfit = OUTFIT_BRIDE[pack.concept] || OUTFIT_BRIDE.studio_classic;
-          sdPrompt = 'Portrait 3:4 ratio. The same person from the reference image. ' + outfit + '. ' + sceneBase + '. Warm friendly natural expression with genuine gentle smile and kind soft eyes, relaxed comfortable body language, NOT stern NOT cold NOT serious NOT expressionless NOT frowning. Photorealistic editorial photograph, soft natural skin texture with visible pores, warm natural skin tone, 50mm lens, shallow depth of field, no AI artifacts no plastic skin no uncanny valley';
-        }
-
-        const arkRes = await fetch(ARK_BASE + '/images/generations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ARK_API_KEY },
-          body: JSON.stringify({ model: 'seedream-5-0-260128', prompt: sdPrompt, image: refUrl, size: '2K', output_format: 'png', watermark: false }),
-        });
-
-        if (!arkRes.ok) {
-          const errText = await arkRes.text().catch(() => '');
-          console.error('[snapPack SeeDream] failed:', arkRes.status, errText.slice(0, 500));
-          await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: 'SeeDream generation failed' } });
-          return res.json({ snapId: snap.id, status: 'failed' });
-        }
-
-        const arkData = await arkRes.json();
-        const sdUrl = arkData.data?.[0]?.url;
-        if (!sdUrl) {
-          console.error('[snapPack SeeDream] no image url:', JSON.stringify(arkData).slice(0, 500));
-          await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'failed', errorMsg: 'No image from SeeDream' } });
-          return res.json({ snapId: snap.id, status: 'failed' });
-        }
-
-        const uploadedUrl = await uploadToCloudinary(sdUrl, snap.id);
-        const updatedChain = { ...chainRefs };
-        if (effectiveMode === 'groom') updatedChain.groom = uploadedUrl;
-        else if (effectiveMode === 'bride') updatedChain.bride = uploadedUrl;
-        else updatedChain.couple = uploadedUrl;
-        await prisma.snapPack.update({ where: { id: packId }, data: { chainRefUrls: updatedChain } });
-        await prisma.aiSnap.update({ where: { id: snap.id }, data: { status: 'done', resultUrl: uploadedUrl, engine: 'seedream' } });
-        console.log('[snapPack SeeDream] done:', uploadedUrl.slice(0, 80));
-        return res.json({ snapId: snap.id, status: 'done', resultUrl: uploadedUrl });
-      }
-
         const submit = await falFetch(`${FAL_QUEUE}/fal-ai/nano-banana-2/edit`, {
           method: 'POST',
           body: JSON.stringify({ prompt, image_urls: imageUrls, num_images: 1, aspect_ratio: '3:4', resolution: '1K', output_format: 'png', thinking_level: 'high' }),

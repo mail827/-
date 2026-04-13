@@ -63,7 +63,7 @@ export default function TabMarketing() {
     if (generating) return;
     setGenerating(true);
     try {
-      const res = await fetch(`${API}/admin/marketing/generate`, { method: 'POST', headers });
+      const res = await fetch(`${API}/admin/marketing/generate`, { method: 'POST', headers, body: JSON.stringify({ weekId }) });
       if (res.ok) {
         await fetchInsights();
       } else {

@@ -50,6 +50,8 @@ const CONCEPTS = [
   { id: 'summer_tape', label: '서머테이프' },
   { id: 'rouge_clue', label: '루즈클루' },
   { id: 'in_the_mood', label: '화양연화' },
+  { id: 'summer_film', label: '썸머필름' },
+  { id: 'lily_choucho', label: '릴리슈슈' },
 ];
 
 interface Sample { id: string; concept: string; mode: string; imageUrl: string; sortOrder: number }

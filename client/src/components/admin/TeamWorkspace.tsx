@@ -8,6 +8,7 @@ import TabExpenses from './team/TabExpenses';
 import TabMarketing from './team/TabMarketing';
 import TabCounseling from './team/TabCounseling';
 import TabFinanceAnalysis from './team/TabFinanceAnalysis';
+import TabThread from './team/TabThread';
 
 const TABS = [
   { id: 'overview', label: '대시보드' },
@@ -18,6 +19,7 @@ const TABS = [
   { id: 'marketing', label: '마케팅 AI' },
   { id: 'counseling', label: '상담심리' },
   { id: 'finance', label: '재정 분석' },
+  { id: 'thread', label: '스레드 기획' },
 ] as const;
 
 type TabId = typeof TABS[number]['id'];
@@ -59,6 +61,7 @@ export default function TeamWorkspace() {
         {activeTab === 'marketing' && <TabMarketing />}
         {activeTab === 'counseling' && <TabCounseling />}
         {activeTab === 'finance' && <TabFinanceAnalysis />}
+        {activeTab === 'thread' && <TabThread />}
       </motion.div>
     </div>
   );
