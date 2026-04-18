@@ -27,7 +27,7 @@ const CATEGORY_ORDER = [
   { key: 'CRUISE', label: '크루즈', ids: ['cruise_sunset', 'cruise_bluesky'] },
   { key: 'SELFIE', label: '셀카', ids: ['iphone_selfie', 'iphone_mirror'] },
   { key: 'UNIFORM', label: '교복', ids: ['summer_film', 'lily_choucho'] },
-  { key: 'EDITORIAL', label: '에디토리얼', ids: ['nocturnal_animals', 'santorini_linen', 'age_of_innocence'] },
+  { key: 'EDITORIAL', label: '에디토리얼', ids: ['nocturnal_animals', 'santorini_linen', 'age_of_innocence', 'blurred_spring', 'rosewater_ballet'] },
   { key: 'SPECIAL', label: '스페셜', ids: ['aao'] },
 ];
 
@@ -75,6 +75,8 @@ const CONCEPT_META: Record<string, { emoji: string; sub: string }> = {
   nocturnal_animals: { emoji: 'E', sub: '녹터널 애니멀즈' },
   santorini_linen: { emoji: 'E', sub: '산토리니 리넨' },
   age_of_innocence: { emoji: 'E', sub: '순수의 시대' },
+  blurred_spring: { emoji: 'E', sub: '흐릿한 봄' },
+  rosewater_ballet: { emoji: 'E', sub: '사랑방다실' },
   aao: { emoji: 'A', sub: '어떤 우주에서든' },
 };
 

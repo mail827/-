@@ -67,6 +67,8 @@ const CONCEPT_CATEGORIES = [
     { id: 'nocturnal_animals', label: '녹터널 애니멀즈', sub: '밤의 동물들' },
     { id: 'santorini_linen', label: '산토리니 리넨', sub: '지중해의 본화이트' },
     { id: 'age_of_innocence', label: '순수의 시대', sub: '길디드 에이지 오페라' },
+    { id: 'blurred_spring', label: '흐릿한 봄', sub: '버진 스유사이드의 여름' },
+    { id: 'rosewater_ballet', label: '사랑방다실', sub: '리틀위민의 로즈워터' },
   ]},
   { category: 'SPECIAL', label: '스페셜', concepts: [
     { id: 'aao', label: '에에올', sub: '어떤 우주에서든' },

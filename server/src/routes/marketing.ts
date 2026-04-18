@@ -579,7 +579,7 @@ router.post('/threads/generate', authMiddleware, adminOnly, ownerOnly, async (re
 
 1. AI웨딩스냅 (디지털 다운로드)
 - 셀카 2장 업로드 → AI가 47개 컨셉 중 선택한 스타일로 웨딩 화보 생성
-- 컨셉 예시: summer_film(교복), lily_choucho(릴리슈슈 교복), nocturnal_animals(블랙 에디토리얼), santorini_linen(지중해 본화이트), age_of_innocence(순수의 시대 오페라), cathedral(성당), hanbok_wonsam(원삼), velvet_rouge, black_swan, castle_garden, cherry_blossom 등
+- 컨셉 예시: summer_film(교복), lily_choucho(릴리슈슈 교복), nocturnal_animals(블랙 에디토리얼), santorini_linen(지중해 본화이트), age_of_innocence(순수의 시대 오페라), blurred_spring(흐릿한 봄 버진 스유사이드), rosewater_ballet(사랑방다실 리틀위민), cathedral(성당), hanbok_wonsam(원삼), velvet_rouge, black_swan, castle_garden, cherry_blossom 등
 - 가격: 3장 5,900원 / 5장 9,900원 / 10장 14,900원 / 20장 24,900원
 - 결과물: PNG 디지털 파일, 사이트에서 바로 다운로드 (실물 배송 없음)
 
@@ -620,7 +620,7 @@ router.post('/threads/generate', authMiddleware, adminOnly, ownerOnly, async (re
 8. 실제 가격 외에 다른 가격 언급 금지
 9. 언급 가능한 것만 언급: 위 [실제 서비스] 목록에 있는 것만
 
-컨셉 이름을 사용할 때는 반드시 위 예시에서 나온 것만: summer_film, lily_choucho, nocturnal_animals, santorini_linen, age_of_innocence, cathedral, hanbok_wonsam, velvet_rouge, black_swan, castle_garden, cherry_blossom
+컨셉 이름을 사용할 때는 반드시 위 예시에서 나온 것만: summer_film, lily_choucho, nocturnal_animals, santorini_linen, age_of_innocence, blurred_spring, rosewater_ballet, cathedral, hanbok_wonsam, velvet_rouge, black_swan, castle_garden, cherry_blossom
 가격을 언급할 때는 반드시 위에 명시된 금액만 사용`;
 
     const researchPrompt = `너는 웨딩 커뮤니티 리서치 전문가야. 아래 주제를 web_search로 검색해서 최신 반응을 수집해:
