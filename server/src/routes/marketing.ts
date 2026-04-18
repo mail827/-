@@ -336,7 +336,7 @@ router.post('/generate', authMiddleware, adminOnly, ownerOnly, async (req, res) 
 ${serviceSpec}
 
 [회원 현황]
-- 총 회원: \${totalUsers}명 (이번 주 신규: \${newUsers}명)
+- 총 회원: ${totalUsers}명 (이번 주 신규: ${newUsers}명)
 
 [판매 우선순위 - 절대 고정]
 1. AI스냅 (최우선)
@@ -345,7 +345,7 @@ ${serviceSpec}
 4. 청첩장 (보조 연결만)
 
 [VIP/리피터 현황]
-\${topBuyerDetails.length > 0 ? topBuyerDetails.map((b: any) => '- ' + b.name + ': ' + b.packCount + '팩 구매, 총 ' + b.totalSpent.toLocaleString() + '원, 컨셉: ' + b.concepts.join('/') ).join('\n') : '리피터 없음'}
+${topBuyerDetails.length > 0 ? topBuyerDetails.map((b: any) => '- ' + b.name + ': ' + b.packCount + '팩 구매, 총 ' + b.totalSpent.toLocaleString() + '원, 컨셉: ' + b.concepts.join('/') ).join('\n') : '리피터 없음'}
 
 [이번 주 실적 데이터 (${startDate} ~ ${endDate})]
 - 청첩장 주문: ${orderSummary.total}건, 매출 ${orderSummary.revenue.toLocaleString()}원, 타입별: ${JSON.stringify(orderSummary.byType)}
@@ -575,20 +575,60 @@ router.post('/threads/generate', authMiddleware, adminOnly, ownerOnly, async (re
   try {
     const topic = req.body?.topic || '';
 
-    const serviceSpec = `[청첩장 작업실 서비스]
-- AI웨딩스냅: 47컨셉, 3장 5,900원~20장 24,900원
-- 웨딩시네마: photo 29,000 / selfie 39,000원
-- 웨딩포스터: 41컨셉, AI생성 5,000원 / 사진 3,000원
-- 모바일청첩장: Standard 9,900원 / Premium 29,900원
-- 영구아카이브: 9,900원
-- 사이트: weddingshop.cloud / 인스타: @weddingstudiolab`;
+    const serviceSpec = `[청첩장 작업실 실제 서비스 - 이것 외에는 존재하지 않음]
+
+1. AI웨딩스냅 (디지털 다운로드)
+- 셀카 2장 업로드 → AI가 47개 컨셉 중 선택한 스타일로 웨딩 화보 생성
+- 컨셉 예시: summer_film(교복), lily_choucho(릴리슈슈 교복), nocturnal_animals(블랙 에디토리얼), santorini_linen(지중해 본화이트), age_of_innocence(순수의 시대 오페라), cathedral(성당), hanbok_wonsam(원삼), velvet_rouge, black_swan, castle_garden, cherry_blossom 등
+- 가격: 3장 5,900원 / 5장 9,900원 / 10장 14,900원 / 20장 24,900원
+- 결과물: PNG 디지털 파일, 사이트에서 바로 다운로드 (실물 배송 없음)
+
+2. 웨딩시네마 (구 식전영상)
+- 사진 3장 업로드해서 영상 만들기(photo 29,000원) / 셀카만으로 AI 글래머 스냅 먼저 생성 후 영상화(selfie 39,000원)
+- Seedance 1.5 Pro I2V로 10장 샷 연결한 식전영상 MP4 제공
+- 결과물: MP4 다운로드 (디지털)
+
+3. 웨딩포스터 (디지털 다운로드)
+- 41개 컨셉 중 선택
+- AI 생성 5,000원 / 사진 업로드 편집 3,000원
+- 결과물: 고해상도 이미지 파일 (실물 인쇄/배송 없음)
+
+4. 모바일청첩장
+- Standard 9,900원: 27개 테마 + 종이청첩장 PDF + QR카드 + RSVP + 축의금 + 방명록 + 갤러리 + 배경음악 + D-Day
+- Premium 29,900원: Standard 전체 + AI컨시어지(웨딩이) + AI웨딩스냅 47컨셉 + 하객 AI 포토부스
+
+5. 영구아카이브 9,900원 (결혼식 이후 청첩장을 영구 보관)
+
+[현재 진행중인 실제 제휴 쿠폰 - 이것 외에는 없음]
+- FOREVER20 (포에버웨딩 제휴, 20% 할인)
+- ZOOMIN20 (웨딩줌인 제휴, 20% 할인)
+- WEABLE30 (위에이블 제휴, 30% 할인)
+
+[공식 채널]
+- 사이트: weddingshop.cloud
+- 인스타: @weddingstudiolab
+- 카톡 채널: pf.kakao.com/_xkaQxon`;
+
+    const FORBIDDEN_RULES = `[절대 창작 금지 - 위반 시 실패]
+1. 없는 이벤트/챌린지/공모전 언급 금지 (예: "챌린지 참여", "공모전", "이벤트 응모", "인증샷 올리면")
+2. 없는 배송/실물 언급 금지 (모든 제품은 디지털 다운로드)
+3. 없는 할인/프로모션 언급 금지 (진행중인 쿠폰은 위 3개뿐)
+4. 없는 컨셉명/테마명 창작 금지 ("School Romance", "Retro Tender" 같은 한글도 영어도 아닌 이름 창작 X)
+5. 없는 증정품/사은품 언급 금지 ("할인권 증정", "무료 리터칭" 등)
+6. 없는 기한/마감 언급 금지 (이달 말, 선착순 등)
+7. "청첩장 작업실이 미친 짓을 했다" 같은 가짜 뉴스톤 금지
+8. 실제 가격 외에 다른 가격 언급 금지
+9. 언급 가능한 것만 언급: 위 [실제 서비스] 목록에 있는 것만
+
+컨셉 이름을 사용할 때는 반드시 위 예시에서 나온 것만: summer_film, lily_choucho, nocturnal_animals, santorini_linen, age_of_innocence, cathedral, hanbok_wonsam, velvet_rouge, black_swan, castle_garden, cherry_blossom
+가격을 언급할 때는 반드시 위에 명시된 금액만 사용`;
 
     const researchPrompt = `너는 웨딩 커뮤니티 리서치 전문가야. 아래 주제를 web_search로 검색해서 최신 반응을 수집해:
 1. 스레드에서 예비신부들이 빡치는 웨딩 이슈
 2. 인스타 웨딩 계정 중 바이럴 된 포스트 패턴
 3. 웨딩카페(더웨딩/웨딩의여신)에서 논쟁중인 주제
 4. AI 웨딩 관련 최신 반응
-\${topic ? '5. 추가 주제: ' + topic : ''}
+${topic ? '5. 추가 주제: ' + topic : ''}
 각 주제별 구체적 사례와 반응 정리해줘.`;
 
     const research = await callClaude(researchPrompt, 2000, true);
@@ -596,10 +636,13 @@ router.post('/threads/generate', authMiddleware, adminOnly, ownerOnly, async (re
 
     const generatePrompt = `너는 '청첩장 작업실(@weddingstudiolab)'의 스레드/인스타 바이럴 글 기획 AI야.
 개발자 다겸이 직접 만든 2인 스타트업. 톤은 솔직하고 약간 시비조, MZ 말투.
-\${serviceSpec}
 
-[웹 리서치 결과]
-\${research}
+${serviceSpec}
+
+${FORBIDDEN_RULES}
+
+[웹 리서치 결과 - 참고만 할 것, 여기 나온 제품/서비스를 우리 것이라고 착각하지 말 것]
+${research}
 
 [출력 규칙]
 1) JSON 배열만 반환 (배열 앞뒤 텍스트 금지)
@@ -630,7 +673,7 @@ router.post('/threads/generate', authMiddleware, adminOnly, ownerOnly, async (re
 - 실제 복붙해서 바로 올릴 수 있는 완성된 글로 작성
 - content에 해시태그 3~5개 포함 (마지막 줄에)
 - 청첩장 작업실 검색 유도 CTA 자연스럽게 포함
-\${topic ? '\n[지정 주제 반영]\n' + topic + '를 반드시 1개 이상 글에 녹여줘' : ''}`;
+${topic ? '\n[지정 주제 반영]\n' + topic + '를 반드시 1개 이상 글에 녹여줘' : ''}`;
 
     const raw = await callClaude(generatePrompt, 3000, false);
     const { cards, parseFailed } = safeParseThreadCards(raw);

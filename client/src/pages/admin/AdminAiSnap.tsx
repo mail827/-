@@ -65,6 +65,9 @@ const CONCEPTS = [
   { id: 'in_the_mood', label: '화양연화' },
   { id: 'summer_film', label: '썸머필름' },
   { id: 'lily_choucho', label: '릴리슈슈' },
+  { id: 'nocturnal_animals', label: '녹터널 애니멀즈' },
+  { id: 'santorini_linen', label: '산토리니 리넨' },
+  { id: 'age_of_innocence', label: '순수의 시대' },
 ];
 
 const CONCEPT_MAP = Object.fromEntries(CONCEPTS.map(c => [c.id, c.label]));

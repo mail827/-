@@ -91,19 +91,19 @@ export default function AdminIdPhoto() {
   const [giftPhone, setGiftPhone] = useState('');
 
   const handleGift = async () => {
-    if (!giftTarget || (!giftEmail && !giftPhone)) return;
+    if (!giftEmail && !giftPhone) return;
     try {
-      const res = await fetch(`${API}/id-photo/admin/gift`, {
+      const res = await fetch(`${API}/id-photo/gift/create`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idPhotoId: giftTarget, toEmail: giftEmail || undefined, toPhone: giftPhone || undefined })
+        body: JSON.stringify({ toEmail: giftEmail || undefined, toPhone: giftPhone || undefined, message: '' })
       });
       const data = await res.json();
-      if (data.success) alert('선물 완료');
+      if (data.success) alert('사용권 발급 완료: ' + data.code);
       setGiftTarget(null);
       setGiftEmail('');
       setGiftPhone('');
-    } catch { alert('선물 실패'); }
+    } catch { alert('발급 실패'); }
   };
 
   const filtered = photos.filter(p => {
@@ -121,14 +121,20 @@ export default function AdminIdPhoto() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-stone-900">AI ID 포트레이트</h1>
           <p className="text-sm text-stone-500 mt-1">결제 없이 직접 생성 / 선물하기</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button onClick={() => fetchList()} className="p-2 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors">
             <RefreshCw className="w-4 h-4 text-stone-600" />
+          </button>
+          <button
+            onClick={() => { setGiftTarget('new'); setGiftEmail(''); setGiftPhone(''); }}
+            className="flex items-center gap-2 px-4 py-2 border border-stone-200 text-sm font-medium rounded-lg hover:bg-stone-50 transition-colors"
+          >
+            <Gift className="w-4 h-4" /> 사용권 선물
           </button>
           <button
             onClick={() => fileRef.current?.click()}
@@ -159,7 +165,7 @@ export default function AdminIdPhoto() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-20 text-stone-400 text-sm">데이터 없음</div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map(p => (
             <div key={p.id} className="bg-white border border-stone-200 rounded-xl overflow-hidden">
               <div className="aspect-[3/4] bg-stone-100 relative">
@@ -187,9 +193,7 @@ export default function AdminIdPhoto() {
                     <a href={p.resultUrl} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[11px] border border-stone-200 rounded-lg hover:bg-stone-50 text-stone-700">
                       <Download className="w-3 h-3" /> 다운
                     </a>
-                    <button onClick={() => { setGiftTarget(p.id); setGiftEmail(''); }} className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[11px] bg-stone-900 text-white rounded-lg hover:bg-stone-800">
-                      <Gift className="w-3 h-3" /> 선물
-                    </button>
+                    
                   </div>
                 )}
               </div>
@@ -202,7 +206,7 @@ export default function AdminIdPhoto() {
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setGiftTarget(null)}>
           <div className="bg-white rounded-xl p-6 w-full max-w-sm space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-stone-900">선물하기</p>
+              <p className="text-sm font-medium text-stone-900">사용권 선물하기</p>
               <button onClick={() => setGiftTarget(null)}><X className="w-4 h-4 text-stone-400" /></button>
             </div>
             <input
@@ -218,7 +222,7 @@ export default function AdminIdPhoto() {
               className="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-stone-400"
             />
             <button onClick={handleGift} disabled={!giftEmail && !giftPhone} className="w-full py-2.5 bg-stone-900 text-white text-sm font-medium rounded-lg hover:bg-stone-800 disabled:opacity-50">
-              선물 보내기
+              사용권 발급
             </button>
           </div>
         </div>

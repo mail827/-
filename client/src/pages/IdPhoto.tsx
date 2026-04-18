@@ -226,18 +226,27 @@ export default function IdPhoto() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-stone-900 mb-3">분석 완료</p>
                 <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-500" strokeWidth={2} />
-                    <span className="text-xs text-stone-600">{analysis.gender === 'male' ? '남성' : '여성'} / {analysis.age_range}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-500" strokeWidth={2} />
-                    <span className="text-xs text-stone-600">{analysis.hair}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-500" strokeWidth={2} />
-                    <span className="text-xs text-stone-600">{analysis.glasses ? '안경 착용' : '안경 미착용'}</span>
-                  </div>
+                  {analysis.gender && analysis.gender !== 'unknown' ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-emerald-500" strokeWidth={2} />
+                        <span className="text-xs text-stone-600">{analysis.gender === 'male' ? '남성' : '여성'} / {analysis.age_range}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-emerald-500" strokeWidth={2} />
+                        <span className="text-xs text-stone-600">{analysis.hair}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-emerald-500" strokeWidth={2} />
+                        <span className="text-xs text-stone-600">{analysis.glasses ? '안경 착용' : '안경 미착용'}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-emerald-500" strokeWidth={2} />
+                      <span className="text-xs text-stone-600">얼굴 특징 확인 완료</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

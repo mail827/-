@@ -60,6 +60,7 @@ import GiftRedeem from "./pages/GiftRedeem";
 import ArchiveSuccess from "./pages/ArchiveSuccess";
 import IdPhoto from "./pages/IdPhoto";
 import IdPhotoCallback from "./pages/IdPhotoCallback";
+import IdPhotoRedeem from "./pages/IdPhotoRedeem";
 import GiftRedirect from './pages/GiftRedirect';
 import GiftSend from "./pages/GiftSend";
 import MyGifts from "./pages/MyGifts";
@@ -108,6 +109,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/id-photo" element={<IdPhoto />} />
+      <Route path="/id-photo/redeem" element={<IdPhotoRedeem />} />
       <Route path="/id-photo/callback" element={<IdPhotoCallback />} />
       <Route path="/ai-snap" element={<AiSnapFree />} />
       <Route path="/ai-snap/studio" element={<AiSnapStudioPage />} />

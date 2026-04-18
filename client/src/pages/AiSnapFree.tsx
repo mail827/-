@@ -61,6 +61,13 @@ const CONCEPT_CATEGORIES = [
     { id: 'iphone_selfie', label: '셀카 스냅', sub: 'iPhone 감성' },
     { id: 'iphone_mirror', label: '거울 셀카', sub: '미러 셀카' },
   ]},
+  { category: 'UNIFORM', label: '교복', concepts: [
+    { id: 'summer_film', label: '썸머필름', sub: '여름날의 시네마' },
+    { id: 'lily_choucho', label: '릴리슈슈', sub: '소년소녀의 기억' },
+    { id: 'nocturnal_animals', label: '녹터널 애니멀즈', sub: '밤의 동물들' },
+    { id: 'santorini_linen', label: '산토리니 리넨', sub: '지중해의 본화이트' },
+    { id: 'age_of_innocence', label: '순수의 시대', sub: '길디드 에이지 오페라' },
+  ]},
   { category: 'SPECIAL', label: '스페셜', concepts: [
     { id: 'aao', label: '에에올', sub: '어떤 우주에서든' },
   ]},

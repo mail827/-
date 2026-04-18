@@ -231,8 +231,26 @@ const CINEMATIC_CONCEPTS: Record<string, { label: string; base: string }> = {
     label: '루즈 클루',
     base: 'over-saturated emerald green and crimson red whimsical romantic atmosphere, celluloid grain photorealistic cinematic',
   },
-
-
+  summer_film: {
+    label: '썸머필름',
+    base: 'late afternoon golden sun on quiet Korean street, old cinema facades, warm celluloid nostalgia, school uniform atmosphere, photorealistic cinematic',
+  },
+  lily_choucho: {
+    label: '릴리슈슈',
+    base: 'vast green rice paddies under heavy overcast grey sky, narrow dirt paths between fields, wind bending rice plants, oversaturated green grey melancholic atmosphere, photorealistic cinematic',
+  },
+  nocturnal_animals: {
+    label: '녹터널 애니멀즈',
+    base: 'minimalist brutalist gallery hall with raw concrete walls polished black terrazzo floor six-meter ceiling single enormous abstract monochrome painting on far wall, hard cone ceiling spotlights deep black shadow rest of hall, Vivienne Westwood baroque pearl accent photorealistic cinematic celluloid grain',
+  },
+  santorini_linen: {
+    label: '산토리니 리넨',
+    base: 'sunlit white limestone cliff-top villages of southern Italy blown-out Mediterranean noon sun bleached lime-washed stone walls deep inset window shadows heat haze halation bloom celluloid grain photorealistic cinematic',
+  },
+  age_of_innocence: {
+    label: '순수의 시대',
+    base: '1880s Gilded Age Metropolitan Opera House with private velvet-lined opera boxes grand curved Carrara marble staircase in lobby gas-lit crystal chandeliers mahogany panelling bone-white mikado gowns and suits warm amber gaslight honey-gold light deep crimson velvet shadow celluloid grain photorealistic cinematic',
+  },
 
 };
 
@@ -344,6 +362,9 @@ const COUPLE_SHOT_VARIANTS = [
 const OUTFIT_GROOM: Record<string, string> = {
   summer_film: 'deep navy blue wool serge gakuran-style school uniform with standing mandarin collar buttoned to top with five gold metal buttons in single column, structured shoulders, white cotton shirt visible at collar edge, matching deep navy straight-leg trousers, black leather lace-up shoes',
   lily_choucho: 'muted ash grey wool blazer with single button, slim fit, notch lapels, faded navy school crest embroidered on left chest pocket, white cotton dress shirt with point collar, thin muted olive green woven necktie in loose four-in-hand knot, dark charcoal grey wool straight-leg trousers, black leather oxford lace-up shoes',
+  nocturnal_animals: 'pure black wool grain de poudre double-breasted tuxedo with satin peaked lapels and six satin-covered buttons, structured squared shoulders, high-waisted slim tapered trousers with black satin side-stripe, pure black silk satin collarless shirt buttoned to top, thin black grosgrain ribbon tied in flat knot at left side of neck with two short tails, oversized cream baroque pearl pin on left lapel, black patent leather Chelsea boots',
+  santorini_linen: 'matte bone-white wool-silk blend double-breasted two-piece suit with structured squared shoulders and sharp wide peaked lapels in matching matte bone-white self-faced fabric, six covered bone-white buttons, high-necked pure bone-white silk crepe band-collar shirt fastened to throat no tie, slim straight-leg trousers in same bone-white wool-silk with clean single front pleat, matte bone-white suede ankle boots, single clear round-cut crystal boutonniere on left lapel',
+  age_of_innocence: 'bone-white silk-wool blend single-breasted two-piece suit with single covered button closure at natural waist and clean notched lapels in matching bone-white silk-wool self-faced not shiny, structured but natural shoulders jacket length ending just below hip welt pockets at hip no flap, high-necked bone-white silk crepe mandarin-collar shirt fastened cleanly to throat with single covered button at collar no tie no bow tie no pocket square, slim straight-leg trousers in same bone-white silk-wool with clean single front pleat breaking cleanly at ankle, matte bone-white suede oxford shoes, single elongated teardrop-shaped cream pearl fifteen millimeters long pinned at center of left lapel just below lapel notch hanging on tiny invisible thread dangling freely one centimeter below pin point, NOT wearing dress NOT skirt NOT gown NOT feminine clothing',
 
   studio_classic: 'wearing elegant black tuxedo with white dress shirt, black bow tie, polished shoes',
   studio_gallery: 'wearing charcoal grey wool-silk single-breasted one-button blazer with exaggerated angular peaked lapel with crisp geometric edges, light grey silk mock-neck top no collar, charcoal tailored straight-leg trousers with sharp center crease, black matte leather oxford shoes, architectural sharp silhouette',
@@ -396,6 +417,9 @@ const OUTFIT_GROOM: Record<string, string> = {
 const OUTFIT_BRIDE: Record<string, string> = {
   summer_film: 'deep navy blue wool serge sailor-style school uniform with broad square sailor collar flap edged with three thin white stripe lines, white cotton inner blouse with rounded collar, single crimson red silk ribbon tied in neat bow at center of V-opening, fitted waist, knife-pleated matching deep navy skirt ending above knee, white cotton knee-high socks, dark brown leather Mary Jane strap shoes',
   lily_choucho: 'muted ash grey wool blazer with single button, slim fit, notch lapels, faded navy school crest on left chest pocket, white cotton dress shirt with soft point collar, thin muted olive green satin ribbon tie in small neat bow at collar, dark charcoal grey-green tartan check pleated skirt ending above knee with muted tones of charcoal and dark olive woven together knife pleats pressed, dark grey cotton knee-high socks, black leather penny loafer shoes',
+  nocturnal_animals: 'pure black heavy silk duchess satin off-shoulder ball gown with sharp angular V sweetheart neckline, structured boned corset bodice with single diagonal seam of jet black Swarovski crystals from right neckline to left waist, massive voluminous bell-shaped skirt in five cascading tiers of black silk organza with raw frayed edges, Vivienne Westwood three-strand pearl choker with oversized cream baroque pearls and gold orb pendant at center front, small cream pearl stud earrings, scarlet matte red lipstick',
+  santorini_linen: 'matte bone-white strapless bustier ball gown with perfectly straight horizontal neckline across upper chest no sweetheart curve, heavily boned fitted bustier bodice in matte bone-white silk taffeta with six internal vertical stays, dramatically voluminous bell ball skirt of hundreds of dense knife-sharp vertical pleats in bone-white silk organza, 2.5 meter cathedral-length veil in bone-white silk organza with raw unfinished edges, single-strand clear crystal rivière necklace at collarbone with fifteen graduated round-cut crystals, natural elegant makeup with light freckles',
+  age_of_innocence: 'bone-white silk mikado wedding gown with high-necked bodice in solid opaque matte bone-white silk mikado fitted with clean princess seam tailoring, high symmetric stand collar in matching bone-white silk mikado 2.5 centimeters tall rising cleanly straight up to sit just below jawline fully enclosing entire throat, long fitted sleeves in same bone-white silk mikado extending from shoulders all the way down arms to wrists ending in clean straight cuffs at wrist bone no buttons no cuff detail, single vertical line of fifteen individual cream freshwater pearls hand-sewn one at a time in perfect alignment directly down exact center front of bodice from base of high collar at hollow of throat straight down to center of natural waistline graduating in size from smallest three millimeters at throat to largest ten millimeters just above waist spaced approximately one and a half centimeters apart, single elongated teardrop-shaped pearl approximately fifteen millimeters long hanging freely from tiny invisible thread below waistline seam dangling down onto upper skirt, full floor-length A-line skirt in same heavy bone-white silk mikado in clean architectural bell-shaped folds no pleats no drape no tiers no decoration, cathedral-length veil in bone-white silk tulle 2.5 meters long attached at back of bodice below high collar flowing past both sides of skirt raw unfinished edges, natural elegant makeup with light freckles',
 
   studio_classic: 'wearing white haute couture strapless sweetheart bell gown with sculpted white silk mikado bodice, bell skirt constructed of hundreds of individually cut white silk organza petals in elongated wave shapes layered and overlapping like ocean ripples frozen in motion, each petal heat-shaped to curl slightly at edges creating three-dimensional depth, petals denser at waist gradually more sparse toward hem revealing sheer tulle underneath, long sweeping train',
   studio_gallery: 'wearing white haute couture strapless sweetheart bell gown with sculpted white silk mikado bodice, bell skirt constructed of hundreds of individually cut white silk organza petals in elongated wave shapes layered and overlapping like ocean ripples frozen in motion, each petal heat-shaped to curl at edges creating three-dimensional depth, petals denser at waist gradually sparse toward hem revealing tulle underneath, long sweeping train, natural elegant makeup',
@@ -670,6 +694,15 @@ const CONCEPT_MOOD: Record<string, string> = {
   lily_choucho_paddy: 'vast green rice paddy field under heavy overcast grey sky, narrow dirt path between oversaturated green rice plants, flat grey light, digital video texture, 50mm lens',
   lily_choucho_corridor: 'long school corridor with old worn wooden floor and tall windows casting repeating rectangles of grey light creating alternating bars of light and shadow, corridor stretching to vanishing point, digital video texture, 50mm lens',
   lily_choucho_wall: 'behind school building stained concrete wall with green moss cracks, flat grey light, damp concrete texture, sharing earphones backs against wall, digital video texture, 85mm lens',
+  nocturnal_animals_gallery: 'vast minimalist brutalist gallery hall with raw concrete walls polished black terrazzo floor six-meter ceiling single enormous abstract monochrome painting on far wall, hard cone ceiling spotlights drop circles of light rest of hall in deep black shadow, celluloid grain, 35mm lens',
+  nocturnal_animals_armchair: 'deep emerald green velvet mid-century armchairs in modernist living room with low black marble coffee table, black brass floor lamps with amber tungsten globe bulbs casting warm one-side face light with cool shadow on other side, celluloid grain, 50mm lens',
+  nocturnal_animals_sedan: 'modern black sedan interior on night highway, amber dashboard backlight on lower faces, streaks of cold sodium-orange street lamp light slipping across faces through windshield in rhythmic flashes, celluloid grain, 35mm lens',
+  santorini_linen_wall: 'massive sunlit white limestone wall of old Southern Italian cliff-top village ten meters high in bleached lime-washed stone with deep inset rectangular window shadows, Mediterranean noon sun blasting wall into blown-out highlights heat haze rising, celluloid grain halation bloom, 35mm lens',
+  santorini_linen_alley: 'narrow sunlit alley between two towering white limestone walls of Italian cliff village barely two meters wide pale stone pavement, overhead sun blasting walls into pure blown-out white far end of alley glowing white rectangle, celluloid grain halation bloom, 50mm lens',
+  santorini_linen_cliff: 'white limestone cliff-top overlooking Mediterranean at late golden hour soft gradient pale honey-gold at horizon fading through apricot to lavender warm rose-gold light, celluloid grain, 24mm wide lens',
+  age_of_innocence_stairs: 'grand curved white Carrara marble staircase inside 1880s Metropolitan Opera House lobby dark mahogany bannister curving behind massive crystal chandelier above glowing in warm gaslight gilded mirror on far wall reflecting distant evening-dress figures as blurred spots honey-gold marble warm amber wash, celluloid grain, 35mm lens',
+  age_of_innocence_opera_box: 'private velvet-lined opera box overlooking vast 1880s Gilded Age opera house deep crimson velvet upholstered chairs dark mahogany railing gas-lit crystal chandelier glowing far in distance warm amber gaslight washing from front deep velvet shadow behind bone-white garments glowing against crimson velvet, celluloid grain, 50mm lens',
+  age_of_innocence_study: 'Gilded Age private study with mahogany panelled walls lined with leather-bound books large marble fireplace with low orange flame walnut writing desk with silver dip pen glass inkwell ivory letter card single yellow rose on desk single tungsten reading lamp casting warm amber pool deep cool shadow behind, celluloid grain, 50mm lens',
 };
 
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {
@@ -703,7 +736,7 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
   const GRASS_RAIN_SCENES = ['grass_rain_overcast', 'grass_rain_heavy', 'grass_rain_motion'];
   const ETERNAL_BLUE_SCENES = ['eternal_blue_beach', 'eternal_blue_frozen', 'eternal_blue_bookstore'];
   const HEART_EDITORIAL_SCENES = ['heart_editorial_spotlight', 'heart_editorial_shadow', 'heart_editorial_dark'];
-  const mood = concept === 'velvet_rouge' ? (CONCEPT_MOOD[VELVET_ROUGE_SCENES[shotIdx % 3]] || '') : concept === 'water_memory' ? (CONCEPT_MOOD[WATER_MEMORY_SCENES[shotIdx % 3]] || '') : concept === 'rose_garden' ? (CONCEPT_MOOD[ROSE_GARDEN_SCENES[shotIdx % 3]] || '') : concept === 'grass_rain' ? (CONCEPT_MOOD[GRASS_RAIN_SCENES[shotIdx % 3]] || '') : concept === 'eternal_blue' ? (CONCEPT_MOOD[ETERNAL_BLUE_SCENES[shotIdx % 3]] || '') : concept === 'vintage_tungsten' ? (CONCEPT_MOOD[(['vintage_tungsten_sofa', 'vintage_tungsten_floor', 'vintage_tungsten_stairs', 'vintage_tungsten_portrait', 'vintage_tungsten_hug', 'vintage_tungsten_hallway', 'vintage_tungsten_studio'])[shotIdx % 7]] || '') : concept === 'aao' ? (CONCEPT_MOOD[(['aao_convenience', 'aao_rooftop', 'aao_pool', 'aao_subway', 'aao_parking', 'aao_stairwell', 'aao_convenience_final'])[shotIdx % 7]] || '') : concept === 'heart_editorial' ? (CONCEPT_MOOD[HEART_EDITORIAL_SCENES[shotIdx % 3]] || '') : concept === 'spring_letter' ? (CONCEPT_MOOD[(['spring_letter_library', 'spring_letter_corridor', 'spring_letter_steps', 'spring_letter_bicycle', 'spring_letter_window', 'spring_letter_field', 'spring_letter_letter'])[shotIdx % 7]] || '') : concept === 'summer_rain' ? (CONCEPT_MOOD[(['summer_rain_tree', 'summer_rain_stream', 'summer_rain_curtain', 'summer_rain_porch', 'summer_rain_storm', 'summer_rain_downpour', 'summer_rain_rainbow'])[shotIdx % 7]] || '') : concept === 'autumn_film' ? (CONCEPT_MOOD[(['autumn_film_studio', 'autumn_film_alley', 'autumn_film_crossing', 'autumn_film_rooftop', 'autumn_film_store', 'autumn_film_glass', 'autumn_film_dawn'])[shotIdx % 7]] || '') : concept === 'winter_zhivago' ? (CONCEPT_MOOD[(['winter_zhivago_breath', 'winter_zhivago_frost', 'winter_zhivago_candles', 'winter_zhivago_tracks', 'winter_zhivago_piano', 'winter_zhivago_dance', 'winter_zhivago_dawn'])[shotIdx % 7]] || '') : concept === 'in_the_mood' ? (CONCEPT_MOOD[(['in_the_mood_alley', 'in_the_mood_tunnel', 'in_the_mood_phone', 'in_the_mood_escalator', 'in_the_mood_arcade', 'in_the_mood_rooftop', 'in_the_mood_underpass'])[shotIdx % 7]] || '') : concept === 'lovesick' ? (CONCEPT_MOOD[(['lovesick_parking', 'lovesick_alley', 'lovesick_rooftop'])[shotIdx % 3]] || '') : concept === 'silver_thread' ? (CONCEPT_MOOD[(['silver_thread_atelier', 'silver_thread_fitting', 'silver_thread_staircase'])[shotIdx % 3]] || '') : concept === 'rouge_clue' ? (CONCEPT_MOOD[(['rouge_clue_alley', 'rouge_clue_carousel', 'rouge_clue_record'])[shotIdx % 3]] || '') : concept === 'summer_tape' ? (CONCEPT_MOOD[(['summer_tape_playground', 'summer_tape_corridor', 'summer_tape_rooftop'])[shotIdx % 3]] || '') : concept === 'summer_film' ? (CONCEPT_MOOD[(['summer_film_cinema', 'summer_film_bridge', 'summer_film_staircase'])[shotIdx % 3]] || '') : concept === 'lily_choucho' ? (CONCEPT_MOOD[(['lily_choucho_paddy', 'lily_choucho_corridor', 'lily_choucho_wall'])[shotIdx % 3]] || '') : (CONCEPT_MOOD[concept] || '');
+  const mood = concept === 'velvet_rouge' ? (CONCEPT_MOOD[VELVET_ROUGE_SCENES[shotIdx % 3]] || '') : concept === 'water_memory' ? (CONCEPT_MOOD[WATER_MEMORY_SCENES[shotIdx % 3]] || '') : concept === 'rose_garden' ? (CONCEPT_MOOD[ROSE_GARDEN_SCENES[shotIdx % 3]] || '') : concept === 'grass_rain' ? (CONCEPT_MOOD[GRASS_RAIN_SCENES[shotIdx % 3]] || '') : concept === 'eternal_blue' ? (CONCEPT_MOOD[ETERNAL_BLUE_SCENES[shotIdx % 3]] || '') : concept === 'vintage_tungsten' ? (CONCEPT_MOOD[(['vintage_tungsten_sofa', 'vintage_tungsten_floor', 'vintage_tungsten_stairs', 'vintage_tungsten_portrait', 'vintage_tungsten_hug', 'vintage_tungsten_hallway', 'vintage_tungsten_studio'])[shotIdx % 7]] || '') : concept === 'aao' ? (CONCEPT_MOOD[(['aao_convenience', 'aao_rooftop', 'aao_pool', 'aao_subway', 'aao_parking', 'aao_stairwell', 'aao_convenience_final'])[shotIdx % 7]] || '') : concept === 'heart_editorial' ? (CONCEPT_MOOD[HEART_EDITORIAL_SCENES[shotIdx % 3]] || '') : concept === 'spring_letter' ? (CONCEPT_MOOD[(['spring_letter_library', 'spring_letter_corridor', 'spring_letter_steps', 'spring_letter_bicycle', 'spring_letter_window', 'spring_letter_field', 'spring_letter_letter'])[shotIdx % 7]] || '') : concept === 'summer_rain' ? (CONCEPT_MOOD[(['summer_rain_tree', 'summer_rain_stream', 'summer_rain_curtain', 'summer_rain_porch', 'summer_rain_storm', 'summer_rain_downpour', 'summer_rain_rainbow'])[shotIdx % 7]] || '') : concept === 'autumn_film' ? (CONCEPT_MOOD[(['autumn_film_studio', 'autumn_film_alley', 'autumn_film_crossing', 'autumn_film_rooftop', 'autumn_film_store', 'autumn_film_glass', 'autumn_film_dawn'])[shotIdx % 7]] || '') : concept === 'winter_zhivago' ? (CONCEPT_MOOD[(['winter_zhivago_breath', 'winter_zhivago_frost', 'winter_zhivago_candles', 'winter_zhivago_tracks', 'winter_zhivago_piano', 'winter_zhivago_dance', 'winter_zhivago_dawn'])[shotIdx % 7]] || '') : concept === 'in_the_mood' ? (CONCEPT_MOOD[(['in_the_mood_alley', 'in_the_mood_tunnel', 'in_the_mood_phone', 'in_the_mood_escalator', 'in_the_mood_arcade', 'in_the_mood_rooftop', 'in_the_mood_underpass'])[shotIdx % 7]] || '') : concept === 'lovesick' ? (CONCEPT_MOOD[(['lovesick_parking', 'lovesick_alley', 'lovesick_rooftop'])[shotIdx % 3]] || '') : concept === 'silver_thread' ? (CONCEPT_MOOD[(['silver_thread_atelier', 'silver_thread_fitting', 'silver_thread_staircase'])[shotIdx % 3]] || '') : concept === 'rouge_clue' ? (CONCEPT_MOOD[(['rouge_clue_alley', 'rouge_clue_carousel', 'rouge_clue_record'])[shotIdx % 3]] || '') : concept === 'summer_tape' ? (CONCEPT_MOOD[(['summer_tape_playground', 'summer_tape_corridor', 'summer_tape_rooftop'])[shotIdx % 3]] || '') : concept === 'summer_film' ? (CONCEPT_MOOD[(['summer_film_cinema', 'summer_film_bridge', 'summer_film_staircase'])[shotIdx % 3]] || '') : concept === 'lily_choucho' ? (CONCEPT_MOOD[(['lily_choucho_paddy', 'lily_choucho_corridor', 'lily_choucho_wall'])[shotIdx % 3]] || '') : concept === 'nocturnal_animals' ? (CONCEPT_MOOD[(['nocturnal_animals_gallery', 'nocturnal_animals_armchair', 'nocturnal_animals_sedan'])[shotIdx % 3]] || '') : concept === 'santorini_linen' ? (CONCEPT_MOOD[(['santorini_linen_wall', 'santorini_linen_alley', 'santorini_linen_cliff'])[shotIdx % 3]] || '') : concept === 'age_of_innocence' ? (CONCEPT_MOOD[(['age_of_innocence_stairs', 'age_of_innocence_opera_box', 'age_of_innocence_study'])[shotIdx % 3]] || '') : (CONCEPT_MOOD[concept] || '');
 
   if (mode === 'couple') {
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
@@ -802,6 +835,7 @@ router.get('/concepts', (_req, res) => {
 router.post('/create-order', authMiddleware, async (req: AuthRequest, res) => {
   const userId = (req as AuthRequest).user?.id;
   if (!userId) return res.status(401).json({ error: '로그인 필요' });
+  const isAdmin = req.user?.role === 'ADMIN';
 
   const { tier, concept, category, mode, imageUrls, couponCode } = req.body;
   const tierInfo = TIERS[tier];
@@ -816,10 +850,22 @@ router.post('/create-order', authMiddleware, async (req: AuthRequest, res) => {
     data: {
       userId, tier, totalSnaps: tierInfo.snaps, concept,
       category: category || 'studio', mode: mode || 'groom',
-      inputUrls: imageUrls, amount: finalPrice, orderId,
-      couponCode: valid ? validCode : null,
+      inputUrls: imageUrls,
+      amount: isAdmin ? 0 : finalPrice,
+      orderId,
+      couponCode: isAdmin ? null : (valid ? validCode : null),
+      status: isAdmin ? 'PAID' : 'PENDING',
+      paidAt: isAdmin ? new Date() : null,
+      paymentKey: isAdmin ? 'ADMIN_FREE' : null,
     },
   });
+
+  if (isAdmin) {
+    return res.json({
+      packId: pack.id, orderId, amount: 0, label: tierInfo.label,
+      skipPayment: true,
+    });
+  }
 
   res.json({
     packId: pack.id, orderId, amount: finalPrice, label: tierInfo.label,
