@@ -236,4 +236,50 @@ router.post('/archive/payment-confirm', async (req, res) => {
   }
 });
 
+
+// 내부 테스트 계정 (매출 통계에서 제외)
+const INTERNAL_EMAILS = ['hae051198@naver.com', 'oicrcutie@gmail.com'];
+
+// 5분 캐시
+let statsCache: { data: any; expiresAt: number } | null = null;
+const STATS_TTL_MS = 5 * 60 * 1000;
+
+router.get('/stats', async (_req, res) => {
+  try {
+    const now = Date.now();
+    if (statsCache && statsCache.expiresAt > now) {
+      return res.json(statsCache.data);
+    }
+
+    const internalUsers = await prisma.user.findMany({
+      where: { email: { in: INTERNAL_EMAILS } },
+      select: { id: true }
+    });
+    const internalIds = internalUsers.map((u: { id: string }) => u.id);
+
+    const totalSnaps = await prisma.aiSnap.count({
+      where: {
+        resultUrl: { not: null },
+        userId: internalIds.length ? { notIn: internalIds } : undefined
+      }
+    });
+
+    const userGroups = await prisma.aiSnap.groupBy({
+      by: ['userId'],
+      where: {
+        resultUrl: { not: null },
+        userId: internalIds.length ? { notIn: internalIds } : { not: null }
+      }
+    });
+    const totalUsers = userGroups.length;
+
+    const data = { totalSnaps, totalUsers };
+    statsCache = { data, expiresAt: now + STATS_TTL_MS };
+    res.json(data);
+  } catch (e) {
+    console.error('stats error', e);
+    res.json({ totalSnaps: 0, totalUsers: 0 });
+  }
+});
+
 export default router;

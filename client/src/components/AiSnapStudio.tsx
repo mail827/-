@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles, Camera, X, Download,
-  Loader2, Trash2, ChevronRight, Image, Users, User, Zap, ImagePlus, RefreshCw
+  Loader2, Trash2, ChevronRight, Image, Users, User, Zap, ImagePlus
 } from 'lucide-react';
 import { at } from '../utils/appI18n';
 import { useLocaleStore } from '../store/useLocaleStore';
@@ -112,7 +112,6 @@ export default function AiSnapStudio({ weddingId }: Props) {
   const [pollingId, setPollingId] = useState<string | null>(null);
   const [snaps, setSnaps] = useState<AiSnap[]>([]);
   const [viewSnap, setViewSnap] = useState<AiSnap | null>(null);
-  const [retrying, setRetrying] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
   const [compareView, setCompareView] = useState<'original' | 'new'>('original');
   const [progress, setProgress] = useState(0);
@@ -160,24 +159,6 @@ export default function AiSnapStudio({ weddingId }: Props) {
     }, 3000);
     return () => clearInterval(intervalRef.current);
   }, [pollingId]);
-
-  useEffect(() => {
-    const retryingSnaps = snaps.filter(s => s.retryStatus === 'generating');
-    if (retryingSnaps.length === 0) return;
-    const retryInterval = setInterval(async () => {
-      for (const s of retryingSnaps) {
-        try {
-          const res = await api(`/status/${s.id}`);
-          const updated = await res.json();
-          if (updated.retryStatus === 'done' || updated.retryStatus === 'failed') {
-            setSnaps(prev => prev.map(p => p.id === s.id ? { ...p, retryStatus: updated.retryStatus, retryResultUrl: updated.retryResultUrl } : p));
-            if (viewSnap?.id === s.id) setViewSnap(v => v ? { ...v, retryStatus: updated.retryStatus, retryResultUrl: updated.retryResultUrl } : v);
-          }
-        } catch {}
-      }
-    }, 5000);
-    return () => clearInterval(retryInterval);
-  }, [snaps.filter(s => s.retryStatus === 'generating').length]);
 
   const uploadPhoto = async (file: File, type: 'groom' | 'bride' | 'couple') => {
     setUploading(type);
@@ -231,35 +212,6 @@ export default function AiSnapStudio({ weddingId }: Props) {
         setSnaps(prev => [{ ...data, concept: selectedConcept, engine: 'nano-banana-pro', createdAt: new Date().toISOString() }, ...prev]);
       }
     } catch {
-      setGenerating(false);
-    }
-  };
-
-  const handleRegenerate = async (snap: any) => {
-    if (generating) return;
-    setGenerating(true);
-    setProgress(0);
-    progressRef.current = setInterval(() => setProgress(p => p >= 92 ? 92 : p + Math.random() * 8), 800);
-    try {
-      await api('/' + snap.id, { method: 'DELETE' });
-      setSnaps(prev => prev.filter(s => s.id !== snap.id));
-      const res = await api('/generate', {
-        method: 'POST',
-        body: JSON.stringify({ weddingId, concept: snap.concept || selectedConcept, imageUrls: getImageUrls(), mode: snap.mode || mode }),
-      });
-      const data = await res.json();
-      if (data.error) {
-        clearInterval(progressRef.current);
-        setGenerating(false);
-        return;
-      }
-      if (data.id) {
-        setPollingId(data.id);
-        if (data.quota) setQuota(data.quota);
-        setSnaps(prev => [{ ...data, concept: snap.concept || selectedConcept, engine: 'nano-banana-pro', createdAt: new Date().toISOString() }, ...prev]);
-      }
-    } catch {
-      clearInterval(progressRef.current);
       setGenerating(false);
     }
   };
@@ -420,9 +372,8 @@ export default function AiSnapStudio({ weddingId }: Props) {
                     <img src={snap.resultUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
                   </div>
                 ) : snap.status === 'failed' ? (
-                  <div onClick={() => { if (generating) return; handleRegenerate(snap); }} className="aspect-[3/4] rounded-2xl border border-red-100 flex flex-col items-center justify-center bg-red-50/50 cursor-pointer hover:bg-red-100/50 transition-colors">
-                    {generating ? <Loader2 className="w-5 h-5 text-red-300 animate-spin mb-1" /> : <RefreshCw className="w-5 h-5 text-red-300 mb-1" />}
-                    <p className="text-[11px] text-red-400">{generating ? at('snapRegenerating', sl) : at('snapTapRegenerate', sl)}</p>
+                  <div className="aspect-[3/4] rounded-2xl border border-red-100 flex flex-col items-center justify-center bg-red-50/50">
+                    <p className="text-[11px] text-red-400">{at('snapFailed', sl) || '생성 실패'}</p>
                   </div>
                 ) : (
                   <div className="aspect-[3/4] rounded-2xl border border-stone-200 flex flex-col items-center justify-center bg-stone-50/50">
@@ -517,32 +468,8 @@ export default function AiSnapStudio({ weddingId }: Props) {
                   <span className="px-3 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full">
                     {concepts.find(c => c.id === viewSnap.concept)?.label || viewSnap.concept}
                   </span>
-                  {viewSnap.retryStatus === 'done' && viewSnap.retryResultUrl ? (
-                    <button onClick={e => { e.stopPropagation(); setCompareMode(true); }}
-                      className="flex items-center gap-1.5 px-4 py-1.5 bg-stone-800 text-white rounded-full text-xs font-medium hover:bg-stone-700 transition-colors">
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      비교하기
-                    </button>
-                  ) : viewSnap.retryStatus === 'generating' ? (
-                    <span className="flex items-center gap-1.5 px-4 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      새 버전 생성중
-                    </span>
-                  ) : !viewSnap.retryStatus ? (
-                    <button onClick={async e => {
-                      e.stopPropagation();
-                      setRetrying(true);
-                      try {
-                        await api('/' + viewSnap.id + '/retry', { method: 'POST' });
-                        setSnaps(prev => prev.map(s => s.id === viewSnap.id ? { ...s, retryStatus: 'generating' } : s));
-                        setViewSnap({ ...viewSnap, retryStatus: 'generating' });
-                      } catch {}
-                      setRetrying(false);
-                    }} disabled={retrying}
-                      className="flex items-center gap-1.5 px-4 py-1.5 bg-white/10 backdrop-blur-md text-white/80 text-xs rounded-full hover:bg-white/20 transition-colors">
-                      {retrying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-                      {retrying ? '요청중...' : '다른 느낌으로'}
-                    </button>
+                  {viewSnap.resultUrl ? (
+                    <img src={viewSnap.resultUrl} className="w-full rounded-2xl" alt="" />
                   ) : null}
                   <a href={viewSnap.resultUrl} download target="_blank" onClick={e => e.stopPropagation()}
                     className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-stone-900 rounded-full text-xs font-medium hover:bg-stone-100 transition-colors">

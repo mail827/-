@@ -1,10 +1,12 @@
 import { useLocaleStore } from '../store/useLocaleStore';
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { conceptLabel } from '../utils/conceptLabels';
+import AnimatedNumber from "../components/AnimatedNumber";
 import {
-  ArrowRight, Check, Sparkles, Heart, MapPin, Calendar,
-  Send, Copy, CreditCard, Camera, ChevronDown, Film, Gift, MessageCircle, Zap, X,
+  ArrowRight, Check, Sparkles,
+  Send, Camera, ChevronDown, Gift, MessageCircle, X,
   Mail, Loader2
 } from "lucide-react";
 import ThemeShowcaseModal from "../components/ThemeShowcaseModal";
@@ -50,7 +52,6 @@ function trPkgDesc(text: string, locale: string): string {
   return map[text] || text;
 }
 
-import HighlightVideoSection from "../components/HighlightVideoSection";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -79,19 +80,6 @@ interface ChatMessage {
   content: string;
 }
 
-const CHAT_SEQUENCE_KO = [
-  { q: "주차 어디로 가면 되나요?", a: "그랜드컨벤션 지하 2층 무료 주차장 이용 가능합니다. 만차 시 인근 공영주차장도 도보 2분 거리에 있어요.", delay: 800 },
-  { q: "식사는 몇 시부터 가능한가요?", a: "2시 30분부터 식사 가능합니다. 뷔페식으로 준비되어 있으며 예식 후에도 여유롭게 이용하실 수 있어요.", delay: 400 },
-  { q: "축의금 계좌 알려주세요", a: "신랑 측 카카오뱅크 3333-12-XXXXXX (김현우)입니다. 아래 카카오페이 송금 버튼으로 바로 보내실 수도 있어요.", delay: 400 },
-];
-
-let CHAT_SEQUENCE = CHAT_SEQUENCE_KO;
-
-const CHAT_SEQUENCE_EN = [
-  { q: "Where should I park?", a: "Free parking is available at Grand Convention B2. If it's full, there's a public lot within a 2-minute walk.", delay: 800 },
-  { q: "When does the meal start?", a: "Meal service begins at 2:30 PM. It's a buffet, so you can enjoy it even after the ceremony.", delay: 400 },
-  { q: "Can I get the gift account?", a: "Groom's side: KakaoBank 3333-12-XXXXXX (Hyunwoo Kim). You can also send via KakaoPay below.", delay: 400 },
-];
 
 
 
@@ -110,249 +98,7 @@ function useInView(threshold = 0.15) {
   return [ref, inView] as const;
 }
 
-function PhoneMockup({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={className}>
-      <div style={{ width: 280, height: 580, borderRadius: 40, border: "6px solid #1a1a1a", background: "#000", padding: 2, boxShadow: "0 25px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.08)" }}>
-        <div style={{ width: "100%", height: "100%", borderRadius: 34, overflow: "hidden", background: "#fff", position: "relative" }}>
-          <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 100, height: 28, background: "#1a1a1a", borderBottomLeftRadius: 16, borderBottomRightRadius: 16, zIndex: 10 }} />
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function HeroPhone({ url }: { url?: string }) {
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    if (!url) return;
-    try {
-      const origin = new URL(url).origin;
-      if (!document.querySelector(`link[href="${origin}"]`)) {
-        const link = document.createElement("link");
-        link.rel = "preconnect";
-        link.href = origin;
-        document.head.appendChild(link);
-      }
-    } catch {}
-  }, [url]);
-  return (
-    <PhoneMockup>
-      {url ? (
-        <div style={{ position: "absolute", inset: 0 }}>
-          {!loaded && (
-            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#FAF9F7", zIndex: 2, gap: 16 }}>
-              <div style={{ width: "70%", aspectRatio: "3/4", borderRadius: 4, background: "linear-gradient(135deg, #EDE9E3 0%, #E0DDD8 100%)", animation: "pulse 1.8s ease-in-out infinite" }} />
-              <div style={{ width: 60, height: 1, background: "#D4CFC8" }} />
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <div style={{ width: 40, height: 10, borderRadius: 2, background: "#E0DDD8" }} />
-                <div style={{ fontSize: 12, color: "#ccc" }}>&</div>
-                <div style={{ width: 40, height: 10, borderRadius: 2, background: "#E0DDD8" }} />
-              </div>
-              <div style={{ width: 80, height: 8, borderRadius: 2, background: "#E8E5E0", marginTop: 4 }} />
-              <style>{`@keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }`}</style>
-            </div>
-          )}
-          <iframe
-            src={url}
-            onLoad={() => setLoaded(true)}
-            style={{ width: "100%", height: "100%", border: "none", opacity: loaded ? 1 : 0, transition: "opacity 0.5s ease" }}
-            title="청첩장 미리보기"
-            loading="eager"
-          />
-        </div>
-      ) : (
-        <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
-          <div className="hero-scroll-content" style={{ position: "absolute", top: 0, left: 0, right: 0 }}>
-            <div style={{ background: "linear-gradient(180deg, #F4F1EC 0%, #E8EBE4 100%)", minHeight: 1200, padding: "60px 24px 40px" }}>
-              <div style={{ textAlign: "center", paddingTop: 20 }}>
-                <div style={{ width: 40, height: 1, background: "#7C8C6E", margin: "0 auto 20px", opacity: 0.5 }} />
-                <p style={{ fontFamily: "'BookendBatang', serif", fontSize: 13, letterSpacing: 3, color: "#7C8C6E", textTransform: "uppercase", marginBottom: 24 }}>Wedding Invitation</p>
-                <h3 style={{ fontFamily: "'BookendBatang', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 4 }}>현우</h3>
-                <p style={{ fontFamily: "'BookendBatang', serif", fontSize: 16, color: "#999", margin: "8px 0" }}>&</p>
-                <h3 style={{ fontFamily: "'BookendBatang', serif", fontSize: 28, fontWeight: 300, color: "#2C2C2C", lineHeight: 1.4, marginBottom: 20 }}>수빈</h3>
-                <p style={{ fontSize: 12, color: "#888", letterSpacing: 1.5, marginBottom: 28 }}>2025. 06. 14 SAT PM 2:00</p>
-              </div>
-              <div style={{ width: "100%", height: 240, borderRadius: 4, background: "linear-gradient(135deg, #D4C5B0 0%, #B8A88A 50%, #C4B496 100%)", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Heart size={20} color="#fff" strokeWidth={1} style={{ opacity: 0.7 }} />
-              </div>
-              <div style={{ textAlign: "center", padding: "16px 0", borderTop: "1px solid rgba(124,140,110,0.15)", borderBottom: "1px solid rgba(124,140,110,0.15)", marginBottom: 24 }}>
-                <p style={{ fontSize: 13, color: "#666", lineHeight: 2 }}>서로의 마음을 확인하고<br />하나의 길을 함께 걸으려 합니다</p>
-              </div>
-              <div style={{ padding: "16px 0" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                  <MapPin size={14} color="#7C8C6E" />
-                  <p style={{ fontSize: 12, color: "#555" }}>그랜드컨벤션 3층 그랜드홀</p>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-                  <Calendar size={14} color="#7C8C6E" />
-                  <p style={{ fontSize: 12, color: "#555" }}>2025년 6월 14일 토요일 오후 2시</p>
-                </div>
-                <div style={{ width: "100%", height: 140, borderRadius: 4, background: "#E8E5E0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <p style={{ fontSize: 11, color: "#aaa", letterSpacing: 1 }}>MAP</p>
-                </div>
-              </div>
-              <div style={{ marginTop: 20, padding: "20px 0", borderTop: "1px solid rgba(124,140,110,0.15)" }}>
-                <p style={{ fontSize: 12, color: "#888", textAlign: "center", marginBottom: 16 }}>참석 여부를 알려주세요</p>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <div style={{ flex: 1, padding: "12px 0", borderRadius: 4, background: "#7C8C6E", textAlign: "center" }}>
-                    <p style={{ fontSize: 12, color: "#fff" }}>참석</p>
-                  </div>
-                  <div style={{ flex: 1, padding: "12px 0", borderRadius: 4, border: "1px solid #ddd", textAlign: "center" }}>
-                    <p style={{ fontSize: 12, color: "#888" }}>미정</p>
-                  </div>
-                </div>
-              </div>
-              <div style={{ marginTop: 20, padding: "20px 0", borderTop: "1px solid rgba(124,140,110,0.15)" }}>
-                <p style={{ fontSize: 12, color: "#888", textAlign: "center", marginBottom: 16 }}>축의금 안내</p>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <div style={{ flex: 1, padding: "10px", borderRadius: 4, border: "1px solid #e0e0e0", textAlign: "center" }}>
-                    <p style={{ fontSize: 10, color: "#aaa", marginBottom: 2 }}>신랑 측</p>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                      <Copy size={10} color="#999" />
-                      <p style={{ fontSize: 11, color: "#666" }}>계좌복사</p>
-                    </div>
-                  </div>
-                  <div style={{ flex: 1, padding: "10px", borderRadius: 4, border: "1px solid #e0e0e0", textAlign: "center" }}>
-                    <p style={{ fontSize: 10, color: "#aaa", marginBottom: 2 }}>신부 측</p>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                      <CreditCard size={10} color="#999" />
-                      <p style={{ fontSize: 11, color: "#666" }}>카카오페이</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </PhoneMockup>
-  );
-}
-
-function AiChatDemo({ landingLocale }: { landingLocale: LandingLocale }) {
-  const [step, setStep] = useState(0);
-  const [typing, setTyping] = useState(false);
-  const [messages, setMessages] = useState<{ type: string; text: string }[]>([]);
-  const chatRef = useRef<HTMLDivElement>(null);
-
-  const runSequence = useCallback(() => {
-    setMessages([]);
-    setStep(0);
-    setTyping(false);
-  }, []);
-
-  useEffect(() => {
-    if (step >= CHAT_SEQUENCE.length) {
-      const t = setTimeout(runSequence, 3500);
-      return () => clearTimeout(t);
-    }
-    const item = CHAT_SEQUENCE[step];
-    const t1 = setTimeout(() => {
-      setMessages(prev => [...prev, { type: "user", text: item.q }]);
-      setTyping(true);
-    }, item.delay);
-    const t2 = setTimeout(() => {
-      setTyping(false);
-      setMessages(prev => [...prev, { type: "ai", text: item.a }]);
-      setStep(prev => prev + 1);
-    }, item.delay + 2000);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [step, runSequence]);
-
-  useEffect(() => {
-    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
-  }, [messages, typing]);
-
-  return (
-    <PhoneMockup>
-      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", background: "#FAF9F7" }}>
-        <div style={{ padding: "44px 16px 12px", borderBottom: "1px solid #E8E5E0", display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #2C2C2C, #555)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Sparkles size={14} color="#fff" />
-          </div>
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>{landingLocale === 'en' ? 'AI Wedding Concierge' : 'AI 웨딩 비서'}</p>
-            <p style={{ fontSize: 10, color: "#7C8C6E" }}>{landingLocale === 'en' ? 'Hyunwoo & Subin Wedding' : '현우 · 수빈 결혼식'}</p>
-          </div>
-          <div style={{ marginLeft: "auto", width: 6, height: 6, borderRadius: "50%", background: "#7C8C6E" }} />
-        </div>
-        <div ref={chatRef} style={{ flex: 1, overflow: "auto", padding: "16px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
-          <div style={{ alignSelf: "flex-start", maxWidth: "82%", padding: "10px 14px", borderRadius: "4px 16px 16px 16px", background: "#fff", border: "1px solid #E8E5E0" }}>
-            <p style={{ fontSize: 12, color: "#555", lineHeight: 1.6 }}>{landingLocale === 'en' ? "Hi! Feel free to ask anything about Hyunwoo & Subin's wedding." : '안녕하세요! 현우 · 수빈 결혼식에 대해 궁금한 점이 있으시면 편하게 물어보세요.'}</p>
-          </div>
-          {messages.map((msg, i) => (
-            msg.type === "user" ? (
-              <div key={i} className="chat-msg-enter" style={{ alignSelf: "flex-end", maxWidth: "75%", padding: "10px 14px", borderRadius: "16px 4px 16px 16px", background: "#2C2C2C" }}>
-                <p style={{ fontSize: 12, color: "#fff", lineHeight: 1.5 }}>{msg.text}</p>
-              </div>
-            ) : (
-              <div key={i} className="chat-msg-enter" style={{ alignSelf: "flex-start", maxWidth: "82%", padding: "10px 14px", borderRadius: "4px 16px 16px 16px", background: "#fff", border: "1px solid #E8E5E0" }}>
-                <p style={{ fontSize: 12, color: "#555", lineHeight: 1.6 }}>{msg.text}</p>
-              </div>
-            )
-          ))}
-          {typing && (
-            <div style={{ alignSelf: "flex-start", padding: "12px 18px", borderRadius: "4px 16px 16px 16px", background: "#fff", border: "1px solid #E8E5E0" }}>
-              <div style={{ display: "flex", gap: 4 }}>
-                {[0, 200, 400].map(d => <span key={d} className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#bbb", animationDelay: `${d}ms` }} />)}
-              </div>
-            </div>
-          )}
-        </div>
-        <div style={{ padding: "10px 14px 24px", borderTop: "1px solid #E8E5E0" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 24, border: "1px solid #E0DDD8", background: "#fff" }}>
-            <p style={{ flex: 1, fontSize: 12, color: "#bbb" }}>{landingLocale === 'en' ? 'Type a message' : '메시지를 입력하세요'}</p>
-            <Send size={16} color="#ccc" />
-          </div>
-        </div>
-      </div>
-    </PhoneMockup>
-  );
-}
-
-function ScenarioCard({ item, index, parentInView }: { item: { q: string; a: string }; index: number; parentInView: boolean }) {
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [typedText, setTypedText] = useState("");
-
-  useEffect(() => {
-    if (!parentInView) return;
-    const t = setTimeout(() => setShowAnswer(true), 1200 + index * 1800);
-    return () => clearTimeout(t);
-  }, [parentInView, index]);
-
-  useEffect(() => {
-    if (!showAnswer) return;
-    let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      setTypedText(item.a.slice(0, i));
-      if (i >= item.a.length) clearInterval(interval);
-    }, 18);
-    return () => clearInterval(interval);
-  }, [showAnswer, item.a]);
-
-  return (
-    <div style={{ padding: "14px 16px", borderRadius: 10, border: "1px solid #E8E5E0", background: "#FAFAF8", opacity: parentInView ? 1 : 0, transform: parentInView ? "translateY(0)" : "translateY(12px)", transition: `all 0.5s cubic-bezier(0.22,1,0.36,1) ${index * 400}ms` }}>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: showAnswer ? 8 : 0 }}>
-        <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#E8E5E0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-          <MessageCircle size={9} color="#999" />
-        </div>
-        <p style={{ fontSize: 12, color: "#999" }}>{item.q}</p>
-      </div>
-      {showAnswer && (
-        <div className="chat-msg-enter" style={{ display: "flex", alignItems: "flex-start", gap: 8, paddingLeft: 26 }}>
-          <ArrowRight size={10} color="#bbb" style={{ marginTop: 3, flexShrink: 0 }} />
-          <p style={{ fontSize: 12, color: "#555", lineHeight: 1.5 }}>{typedText}<span style={{ opacity: typedText.length < item.a.length ? 1 : 0, transition: "opacity 0.3s" }}>|</span></p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-
-function ThemeShowcase({ onLogin, landingLocale }: { onLogin: () => void; landingLocale: LandingLocale }) {
+function ThemeShowcase({ onLogin, landingLocale, packages, onStartCreate }: { onLogin: () => void; landingLocale: LandingLocale; packages: Package[]; onStartCreate: () => void }) {
   const [ref, inView] = useInView(0.08);
   const [showcases, setShowcases] = useState<{ name: string; url: string; description?: string }[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -415,9 +161,60 @@ function ThemeShowcase({ onLogin, landingLocale }: { onLogin: () => void; landin
     return `${baseUrl}${separator}${params.toString()}`;
   };
 
+
+const pricingBlock = packages.length > 0 ? (
+    <section style={{ padding: "80px 0 100px", background: "#FAFAF8", borderTop: "1px solid #E8E5E0" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px" }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#999", letterSpacing: 3, marginBottom: 12, textTransform: "uppercase" }}>Invitation Pricing</p>
+          <h3 className="serif" style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 400, color: "#1a1a1a", marginBottom: 10, letterSpacing: "-0.02em" }}>{landingLocale === 'ko' ? '이 청첩장, 얼마인가요?' : 'How much is this invitation?'}</h3>
+          <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 13, color: "#999" }}>{landingLocale === 'ko' ? '무제한 수정 · 영구 아카이브 별도' : 'Unlimited edits · Archive separate'}</p>
+        </div>
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <a href="/gift/redeem" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 18px", borderRadius: 100, border: "1px solid #E0DDD8", fontSize: 12, color: "#888", textDecoration: "none" }}>
+            <Gift size={13} />
+            {lt('pricing','giftCode',landingLocale)}
+          </a>
+        </div>
+        <div className="pricing-grid snap-pill" style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: "14px 0 16px", scrollbarWidth: "none", maxWidth: 1100, margin: "0 auto", justifyContent: "center" }}>
+          {packages.map((pkg) => {
+            const isHighlight = pkg.slug === "premium";
+            return (
+              <div key={pkg.id} style={{ minWidth: 280, flex: "0 0 280px", scrollSnapAlign: "start", padding: "32px 24px", borderRadius: 14, border: isHighlight ? "2px solid #1a1a1a" : "1px solid #E8E5E0", background: isHighlight ? "#fff" : "#fff", position: "relative" }}>
+                {pkg.slug === "premium" && <div style={{ position: "absolute", top: -1, left: 24, transform: "translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 12px", borderRadius: 100, fontWeight: 500 }}>BEST</div>}
+                <p style={{ fontSize: 11, color: "#bbb", marginBottom: 4 }}>{trPkgDesc(pkg.description, landingLocale)}</p>
+                <p style={{ fontSize: 16, fontWeight: 600, color: "#1a1a1a", marginBottom: 16 }}>{pkg.name}</p>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 2, marginBottom: 20 }}>
+                  <p className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a" }}>{pkg.price.toLocaleString()}</p>
+                  <p style={{ fontSize: 13, color: "#999" }}>{landingLocale === 'en' ? 'KRW' : '원'}</p>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
+                  {pkg.features.slice(0, 6).map((f, j) => (
+                    <div key={j} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Check size={13} color={isHighlight ? "#1a1a1a" : "#ccc"} strokeWidth={2} />
+                      <p style={{ fontSize: 13, color: "#666" }}>{trFeature(f, landingLocale)}</p>
+                    </div>
+                  ))}
+                  {pkg.features.length > 6 && <p style={{ fontSize: 12, color: "#bbb", paddingLeft: 21 }}>+{pkg.features.length - 6}{landingLocale === 'en' ? ' more' : '개 더'}</p>}
+                </div>
+                <button onClick={onStartCreate} style={{ display: "block", width: "100%", textAlign: "center", padding: "12px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, background: isHighlight ? "#1a1a1a" : "transparent", color: isHighlight ? "#fff" : "#1a1a1a", border: isHighlight ? "none" : "1px solid #E0DDD8", cursor: "pointer" }}>{lt('pricing','startBtn',landingLocale)}</button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  ) : null;
+
   if (showcases.length === 0) {
     return (
-      <section id="themes" ref={ref as React.RefObject<HTMLElement>} style={{ padding: "100px 0", borderTop: "1px solid #E8E5E0" }}>
+      <>
+        <section style={{ padding: "80px 24px 40px", background: "#F5F1EB", textAlign: "center", borderTop: "1px solid rgba(26,26,26,0.08)" }}>
+          <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#999", letterSpacing: 3, marginBottom: 14, textTransform: "uppercase", fontWeight: 500 }}>THE WEDDING INVITATION</p>
+          <h2 className="serif" style={{ fontSize: "clamp(32px, 4.5vw, 48px)", fontWeight: 400, color: "#1a1a1a", marginBottom: 12, letterSpacing: "-0.02em", lineHeight: 1.2 }}>{landingLocale === 'ko' ? '이름을 입으면, 청첩장이 됩니다.' : 'Wear your names. It becomes an invitation.'}</h2>
+          <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 14, color: "#888", maxWidth: 480, margin: "0 auto", lineHeight: 1.7 }}>{landingLocale === 'ko' ? '27개 테마 · AI 컨시어지 · 무제한 수정.' : '27 themes · AI concierge · unlimited edits.'}</p>
+        </section>
+        <section id="themes" ref={ref as React.RefObject<HTMLElement>} style={{ padding: "100px 0", borderTop: "1px solid #E8E5E0" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px", textAlign: "center" }}>
           <div style={{ opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
             <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Themes</p>
@@ -427,6 +224,8 @@ function ThemeShowcase({ onLogin, landingLocale }: { onLogin: () => void; landin
           </div>
         </div>
       </section>
+      {pricingBlock}
+      </>
     );
   }
 
@@ -436,6 +235,12 @@ function ThemeShowcase({ onLogin, landingLocale }: { onLogin: () => void; landin
   const filledCount = [formData.groom, formData.bride, formData.date, formData.venue, formData.heroMedia].filter(Boolean).length;
 
   return (
+    <>
+        <section style={{ padding: "80px 24px 40px", background: "#F5F1EB", textAlign: "center", borderTop: "1px solid rgba(26,26,26,0.08)" }}>
+          <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#999", letterSpacing: 3, marginBottom: 14, textTransform: "uppercase", fontWeight: 500 }}>THE WEDDING INVITATION</p>
+          <h2 className="serif" style={{ fontSize: "clamp(32px, 4.5vw, 48px)", fontWeight: 400, color: "#1a1a1a", marginBottom: 12, letterSpacing: "-0.02em", lineHeight: 1.2 }}>{landingLocale === 'ko' ? '이름을 입으면, 청첩장이 됩니다.' : 'Wear your names. It becomes an invitation.'}</h2>
+          <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 14, color: "#888", maxWidth: 480, margin: "0 auto", lineHeight: 1.7 }}>{landingLocale === 'ko' ? '27개 테마 · AI 컨시어지 · 무제한 수정.' : '27 themes · AI concierge · unlimited edits.'}</p>
+        </section>
     <section id="themes" ref={ref as React.RefObject<HTMLElement>} style={{ padding: "100px 0", borderTop: "1px solid #E8E5E0" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px" }}>
         <div style={{ textAlign: "center", marginBottom: 56, opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
@@ -464,7 +269,7 @@ function ThemeShowcase({ onLogin, landingLocale }: { onLogin: () => void; landin
                   <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: "none" }} id="showcase-photo" />
                   {photoPreview ? (
                     <div style={{ position: "relative", borderRadius: 8, overflow: "hidden", border: "1px solid #E0DDD8" }}>
-                      <img src={photoPreview} alt="" style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
+                      <img src={photoPreview} alt="" style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} loading="lazy" decoding="async" />
                       {uploading && <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}><Loader2 size={20} color="#999" style={{ animation: "spin 1s linear infinite" }} /></div>}
                       <button onClick={removePhoto} style={{ position: "absolute", top: 6, right: 6, width: 24, height: 24, borderRadius: "50%", background: "rgba(0,0,0,0.5)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={12} color="#fff" /></button>
                     </div>
@@ -513,6 +318,8 @@ function ThemeShowcase({ onLogin, landingLocale }: { onLogin: () => void; landin
         </div>
       </div>
     </section>
+    {pricingBlock}
+    </>
   );
 }
 
@@ -520,7 +327,6 @@ function ThemeShowcase({ onLogin, landingLocale }: { onLogin: () => void; landin
 export default function Landing() {
   const [searchParams] = useSearchParams();
   const [packages, setPackages] = useState<Package[]>([]);
-  const [reviews, setReviews] = useState<{ id: string; rating: number; content: string; source: string; groomName: string; brideName: string; packageName: string | null; createdAt: string }[]>([]);
   const [guides, setGuides] = useState<{ id: string; title: string; description: string | null; videoUrl: string; videoType?: string; category: string }[]>([]);
   const [selectedGuide, setSelectedGuide] = useState<typeof guides[0] | null>(null);
 
@@ -541,7 +347,6 @@ export default function Landing() {
   const { locale: appLocale, setLocale: setAppLocale } = useLocaleStore();
   const [landingLocale, setLandingLocale] = useState<LandingLocale>(appLocale as LandingLocale);
   useEffect(() => { setLandingLocale(appLocale as LandingLocale); }, [appLocale]);
-  CHAT_SEQUENCE = landingLocale === 'en' ? CHAT_SEQUENCE_EN : CHAT_SEQUENCE_KO;
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{ role: "assistant", content: "안녕하세요! 청첩장 작업실 웨딩이예요.\n\n결혼 준비하시나요? 축하드려요!\n궁금한 거 있으시면 편하게 물어보세요~" }]);
   const [chatInput, setChatInput] = useState("");
@@ -550,22 +355,16 @@ export default function Landing() {
   const [greeting, setGreeting] = useState(false);
   const [greetingDismissed, setGreetingDismissed] = useState(false);
   const [snapSamples, setSnapSamples] = useState<{ id: string; concept: string; imageUrl: string; mode: string }[]>([]);
-  const [selectedSnap, setSelectedSnap] = useState<string | null>(null);
-  const [heroShowcaseUrl, setHeroShowcaseUrl] = useState<string | undefined>(() => {
-    try { return localStorage.getItem("heroShowcaseUrl") || undefined; } catch { return undefined; }
-  });
+  const [stats, setStats] = useState<{ totalSnaps: number; totalUsers: number } | null>(null);
+  // Step 1 Hero 3-Act로 전환 시 미사용. 추후 다른 섹션에서 재활용 가능하도록 주석 보존.
+  // const [heroShowcaseUrl, setHeroShowcaseUrl] = useState<string | undefined>(() => {
+  //   try { return localStorage.getItem("heroShowcaseUrl") || undefined; } catch { return undefined; }
+  // });
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const isLoggedIn = !!localStorage.getItem("token");
 
   const [heroRef, heroInView] = useInView(0.05);
-  const [problemRef, problemInView] = useInView(0.15);
-  const [engineRef, engineInView] = useInView(0.1);
-  const [chatSectionRef, chatSectionInView] = useInView(0.1);
-  const [snapRef, snapInView] = useInView(0.1);
-  const [specRef, specInView] = useInView(0.1);
-  const [pricingRef, pricingInView] = useInView(0.1);
-  const [ctaRef, ctaInView] = useInView(0.1);
 
   useEffect(() => {
     if (searchParams.get("login") === "pair") setShowLoginModal(true);
@@ -574,15 +373,16 @@ export default function Landing() {
   useEffect(() => {
     localStorage.setItem("visitorId", visitorId);
     fetch(`${API}/payment/packages`).then(r => r.json()).then(setPackages).catch(() => {});
-    fetch(`${API}/public/reviews`).then(r => r.json()).then(setReviews).catch(() => {});
     fetch(`${API}/guide`).then(r => r.json()).then(setGuides).catch(() => {});
     fetch(`${API}/admin/snap-samples`).then(r => r.json()).then(setSnapSamples).catch(() => {});
-    fetch(`${API}/public/hero-showcase`).then(r => r.json()).then((data: { url: string }) => {
-      if (data.url) {
-        setHeroShowcaseUrl(data.url);
-        try { localStorage.setItem("heroShowcaseUrl", data.url); } catch {}
-      }
-    }).catch(() => {});
+    fetch(`${API}/public/stats`).then(r => r.json()).then(setStats).catch(() => {});
+    // Step 1: Hero 3-Act는 heroShowcase 대신 snapSamples 사용. 아래 fetch는 주석으로 보존.
+    // fetch(`${API}/public/hero-showcase`).then(r => r.json()).then((data: { url: string }) => {
+    //   if (data.url) {
+    //     setHeroShowcaseUrl(data.url);
+    //     try { localStorage.setItem("heroShowcaseUrl", data.url); } catch {}
+    //   }
+    // }).catch(() => {});
 
   }, []);
 
@@ -686,25 +486,25 @@ export default function Landing() {
     }
   }, []);
 
-  const specs = [
-    { num: lt('spec','s1num',landingLocale), label: lt('spec','s1label',landingLocale), desc: lt('spec','s1desc',landingLocale) },
-    { num: lt('spec','s2num',landingLocale), label: lt('spec','s2label',landingLocale), desc: lt('spec','s2desc',landingLocale) },
-    { num: lt('spec','s3num',landingLocale), label: lt('spec','s3label',landingLocale), desc: lt('spec','s3desc',landingLocale) },
-    { num: lt('spec','s4num',landingLocale), label: lt('spec','s4label',landingLocale), desc: lt('spec','s4desc',landingLocale) },
-    { num: lt('spec','s5num',landingLocale), label: lt('spec','s5label',landingLocale), desc: lt('spec','s5desc',landingLocale) },
-    { num: lt('spec','s6num',landingLocale), label: lt('spec','s6label',landingLocale), desc: lt('spec','s6desc',landingLocale) },
-  ];
 
   return (
     <>
       <style>{`
+        .showcase-tile { transition: transform 0.3s ease; }
+        .showcase-tile:hover { transform: scale(1.02); }
+        .showcase-tile:hover .showcase-overlay { opacity: 1 !important; }
+        .engine-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.06); border-color: #1a1a1a !important; }
+        .engine-card[href="/create"]:hover { background: #2a2a2a !important; }
+        .proof-stat { animation: proofFade 1s ease-out both; }
+        .proof-stat:nth-child(3) { animation-delay: 0.2s; }
+        @keyframes proofFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @import url('${FONT_LINK}');
         @font-face { font-family: 'BookendBatang'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2410-2@1.0/TTBookendBatangR.woff2') format('woff2'); font-weight: 400; font-display: swap; }
         @font-face { font-family: 'BookendBatang'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2410-2@1.0/TTBookendBatangSB.woff2') format('woff2'); font-weight: 700; font-display: swap; }
         .serif { font-family: 'BookendBatang', 'Georgia', serif; }
-        @keyframes heroScroll { 0%, 8% { transform: translateY(0); } 42%, 58% { transform: translateY(calc(-100% + 580px)); } 92%, 100% { transform: translateY(0); } }
+        
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .hero-scroll-content { animation: heroScroll 8s cubic-bezier(0.45,0,0.55,1) infinite; }
+        
         @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
         .typing-dot { animation: typingBounce 1.2s infinite; }
         @keyframes chatEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -718,19 +518,30 @@ export default function Landing() {
             .nav-blur > div > div:last-child a { display: none !important; }
             .nav-blur > div > div:last-child button:last-child { padding: 7px 14px !important; font-size: 11px !important; }
           }
-          @media (max-width: 640px) {
-            .hero-btns { flex-direction: column !important; width: 100%; }
-            .hero-btns button, .hero-btns a { width: 100% !important; justify-content: center !important; padding: 14px 20px !important; font-size: 14px !important; box-sizing: border-box; }
-            .hero-stats { gap: 20px !important; }
-          }
+
         .landing-body ::-webkit-scrollbar { display: none; }
         .snap-pill::-webkit-scrollbar { display: none; }
         @media (max-width: 768px) {
-          .hero-grid { flex-direction: column !important; text-align: center !important; padding: 100px 20px 60px !important; gap: 40px !important; }
-          .hero-text h1 { font-size: 26px !important; line-height: 1.4 !important; letter-spacing: -0.3px !important; }
-          .hero-stats { justify-content: center !important; }
-          .hero-btns { justify-content: center !important; }
+          .hero-flat { padding-top: 60px !important; }
+          .hero-logo img { width: 200px !important; height: 200px !important; }
+          .hero-title { font-size: clamp(48px, 12vw, 72px) !important; }
           .engine-grid { grid-template-columns: 1fr !important; }
+          .showcase-rug { padding: 0 16px 8px !important; }
+          .showcase-rug > a:first-child, .showcase-rug > div:first-child { width: 280px !important; }
+          .showcase-rug > a:not(:first-child), .showcase-rug > div:not(:first-child) { width: 180px !important; }
+          .hero-content { flex-direction: column-reverse !important; padding: 40px 24px 60px !important; min-height: calc(100vh - 60px) !important; gap: 32px !important; }
+          .hero-left { flex: 1 1 auto !important; width: 100% !important; }
+          .hero-right { flex: 0 0 auto !important; width: 100% !important; max-height: 40vh !important; }
+          .hero-right img { max-width: 280px !important; }
+          .hero-title { font-size: 52px !important; line-height: 1.05 !important; margin-bottom: 20px !important; }
+          .hero-desc { font-size: 17px !important; }
+          .hero-ctas { gap: 20px !important; }
+          .hero-cta-primary { width: 100% !important; justify-content: center !important; }
+          .hero-stats-inline { font-size: 11px !important; gap: 14px !important; flex-wrap: wrap !important; }
+          .engine-grid { grid-template-columns: 1fr !important; }
+          .showcase-rug { padding: 0 16px 8px !important; }
+          .showcase-rug > a:first-child, .showcase-rug > div:first-child { width: 280px !important; }
+          .showcase-rug > a:not(:first-child), .showcase-rug > div:not(:first-child) { width: 180px !important; }
           .chat-section { flex-direction: column !important; padding: 60px 20px !important; gap: 40px !important; }
           .idphoto-section { flex-direction: column !important; padding: 60px 20px !important; gap: 40px !important; }
           .idphoto-section > div { width: 100% !important; max-width: 100% !important; }
@@ -756,6 +567,9 @@ export default function Landing() {
           section h2.serif { font-size: 24px !important; line-height: 1.4 !important; word-break: keep-all !important; }
           section h3.serif { font-size: 22px !important; line-height: 1.4 !important; word-break: keep-all !important; }
         }
+        @keyframes scrollHint { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+        .hero-scroll-indicator { animation: scrollHint 2s ease-in-out infinite; }
+
         .landing-product-grid { grid-template-columns: 1fr 1fr; }
         @media (max-width: 640px) { .landing-product-grid { grid-template-columns: 1fr !important; } }
       `}</style>
@@ -777,542 +591,202 @@ export default function Landing() {
           </div>
         </nav>
 
-        <section ref={heroRef as React.RefObject<HTMLElement>} className="hero-grid" style={{ maxWidth: 1200, margin: "0 auto", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "120px 48px 80px", gap: 60 }}>
-          <div className="hero-text" style={{ maxWidth: 540, opacity: heroInView ? 1 : 0, transform: heroInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1)" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 100, border: "1px solid #E0DDD8", marginBottom: 28, background: "#fff" }}>
-              <Zap size={11} color="#999" />
-              <p style={{ fontSize: 11, color: "#888", letterSpacing: 0.3 }}>{lt('hero','badge',landingLocale)}</p>
+        <section ref={heroRef as React.RefObject<HTMLElement>} className="hero-flat" style={{ position: "relative", minHeight: "100vh", overflow: "hidden", background: "#F5F1EB", paddingTop: 70 }}>
+
+          <div className="hero-content" style={{ position: "relative", zIndex: 2, maxWidth: 920, margin: "0 auto", padding: "60px 48px 80px", minHeight: "calc(100vh - 70px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+
+            <div className="hero-logo" style={{ marginBottom: 48, opacity: heroInView ? 1 : 0, transform: heroInView ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.98)", transition: "opacity 1.2s ease, transform 1.2s ease" }}>
+              <img src="/logo.png" alt="Wedding Engine" style={{ width: 280, height: 280, objectFit: "contain", mixBlendMode: "multiply" }} loading="eager" />
             </div>
-            <h1 className="serif" style={{ fontSize: landingLocale === 'en' ? 46 : 42, fontWeight: 400, lineHeight: landingLocale === 'en' ? 1.2 : 1.35, color: "#1a1a1a", marginBottom: 24, letterSpacing: landingLocale === 'en' ? -1.5 : -0.5 }}>
-              {lt('hero','h1_1',landingLocale)}<br />
-              <span style={{ color: "#999" }}>{lt('hero','h1_2',landingLocale)}<br />{lt('hero','h1_3',landingLocale)}</span> {lt('hero','h1_4',landingLocale)}
+
+            <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#999", letterSpacing: 4, marginBottom: 28, textTransform: "uppercase", fontWeight: 500, opacity: heroInView ? 1 : 0, transition: "opacity 0.8s ease 0.2s" }}>Wedding AI Studio · 2026</p>
+
+            <h1 className="hero-title" style={{ fontFamily: "Fraunces, Times New Roman, serif", fontSize: "clamp(56px, 10vw, 128px)", fontWeight: 300, fontStyle: "italic", lineHeight: 0.95, color: "#1a1a1a", letterSpacing: "-0.04em", marginBottom: 36, opacity: heroInView ? 1 : 0, transform: heroInView ? "translateY(0)" : "translateY(16px)", transition: "opacity 1s ease 0.3s, transform 1s ease 0.3s" }}>
+              Wedding<br/>Engine
             </h1>
-            <p style={{ fontSize: 15, color: "#777", lineHeight: 1.8, marginBottom: 36 }}>
-              {lt('hero','desc1',landingLocale)}<br />
-              {lt('hero','desc2',landingLocale)}
+
+            <div style={{ width: 40, height: 1, background: "#1a1a1a", marginBottom: 32, opacity: heroInView ? 0.4 : 0, transition: "opacity 1s ease 0.5s" }} />
+
+            <p className="hero-desc" style={{ fontFamily: "Pretendard, sans-serif", fontSize: "clamp(15px, 1.6vw, 18px)", color: "#333", lineHeight: 1.6, marginBottom: 8, fontWeight: 400, maxWidth: 520, opacity: heroInView ? 1 : 0, transform: heroInView ? "translateY(0)" : "translateY(12px)", transition: "opacity 0.8s ease 0.6s, transform 0.8s ease 0.6s" }}>
+              {lt('hero','h1_1',landingLocale)} {lt('hero','h1_2',landingLocale)} {lt('hero','h1_3',landingLocale)}
             </p>
-            <div className="hero-btns" style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 48, flexWrap: "wrap" }}>
-              <button onClick={() => setShowCreateModal(true)} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#fff", background: "#1a1a1a", padding: "14px 28px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 500 }}>
+
+            <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 13, color: "#999", marginBottom: 48, fontWeight: 400, opacity: heroInView ? 1 : 0, transition: "opacity 0.8s ease 0.75s" }}>
+              {lt('hero','desc1',landingLocale)} · {lt('hero','desc2',landingLocale)}
+            </p>
+
+            <div className="hero-ctas" style={{ display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap", marginBottom: 56, opacity: heroInView ? 1 : 0, transform: heroInView ? "translateY(0)" : "translateY(12px)", transition: "opacity 0.8s ease 0.9s, transform 0.8s ease 0.9s" }}>
+              <a href="/ai-snap" className="hero-cta-primary" style={{ fontFamily: "Pretendard, sans-serif", display: "inline-flex", alignItems: "center", gap: 10, fontSize: 14, fontWeight: 500, color: "#1a1a1a", background: "transparent", padding: "16px 32px", border: "1px solid #1a1a1a", textDecoration: "none", transition: "all 0.25s ease" }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#1a1a1a"; (e.currentTarget as HTMLElement).style.color = "#F5F1EB"; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "#1a1a1a"; }}>
                 {lt('hero','btnCreate',landingLocale)}
-                <ArrowRight size={16} />
-              </button>
-              <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#1a1a1a", background: "#fff", padding: "14px 28px", borderRadius: 8, border: "1px solid #E0DDD8", textDecoration: "none", fontWeight: 500 }}>
-                <Camera size={16} />
+                <ArrowRight size={14} />
+              </a>
+              <button onClick={() => setShowCreateModal(true)} style={{ fontFamily: "Pretendard, sans-serif", background: "transparent", border: "none", padding: "4px 0", fontSize: 14, fontWeight: 500, color: "#1a1a1a", cursor: "pointer", borderBottom: "1px solid #1a1a1a", lineHeight: 1.2 }}>
                 {lt('hero','btnSnap',landingLocale)}
-              </a>
-              <a href="/prewedding-video" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#1a1a1a", background: "#fff", padding: "14px 28px", borderRadius: 8, border: "1px solid #E0DDD8", textDecoration: "none", fontWeight: 500 }}>
-                <Film size={16} />
-                {landingLocale === 'ko' ? '웨딩시네마' : 'Wedding Cinema'}
-              </a>
+              </button>
+            </div>
 
+            <div className="hero-stats-inline" style={{ display: "flex", alignItems: "center", gap: 24, fontFamily: "Pretendard, sans-serif", fontSize: 12, color: "#888", letterSpacing: 0.5, opacity: heroInView ? 1 : 0, transition: "opacity 0.8s ease 1.05s" }}>
+              <span><strong style={{ fontWeight: 600, color: "#1a1a1a" }}>54</strong> {lt('hero','statSnap',landingLocale)}</span>
+              <span style={{ color: "#ccc" }}>·</span>
+              <span><strong style={{ fontWeight: 600, color: "#1a1a1a" }}>41</strong> {lt('hero','statPaper',landingLocale)}</span>
+              <span style={{ color: "#ccc" }}>·</span>
+              <span><strong style={{ fontWeight: 600, color: "#1a1a1a" }}>27</strong> {lt('hero','statTheme',landingLocale)}</span>
             </div>
-            <p style={{ fontSize: 12, color: "#bbb", marginTop: 12 }}>{lt('hero','noLogin',landingLocale)}</p>
-            <div className="hero-stats" style={{ display: "flex", gap: 36, paddingTop: 32, borderTop: "1px solid #E8E5E0", marginTop: 32 }}>
-              {[["26", lt('hero','statTheme',landingLocale)], ["39", lt('hero','statSnap',landingLocale)], ["10", lt('hero','statPaper',landingLocale)]].map(([n, l]) => (
-                <div key={l}>
-                  <p className="serif" style={{ fontSize: 28, fontWeight: 200, color: "#1a1a1a" }}>{n}</p>
-                  <p style={{ fontSize: 11, color: "#aaa", marginTop: 2, letterSpacing: 0.5 }}>{l}</p>
-                </div>
-              ))}
+
+          </div>
+
+        </section>
+<section className="proof-bar" style={{ background: "#F5F1EB", padding: "48px 24px", borderTop: "1px solid rgba(26,26,26,0.06)", borderBottom: "1px solid rgba(26,26,26,0.06)", textAlign: "center", overflow: "hidden" }}>
+          <div style={{ maxWidth: 880, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", gap: "clamp(32px, 6vw, 80px)", flexWrap: "wrap" }}>
+            <div className="proof-stat" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+              <AnimatedNumber value={stats?.totalSnaps ?? 0} duration={1800} />
+              <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#888", letterSpacing: 2, textTransform: "uppercase", margin: 0, fontWeight: 500 }}>AI Wedding Photos</p>
+            </div>
+            <div style={{ width: 1, height: 40, background: "rgba(26,26,26,0.12)" }} className="proof-divider" />
+            <div className="proof-stat" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+              <AnimatedNumber value={stats?.totalUsers ?? 0} duration={1800} />
+              <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#888", letterSpacing: 2, textTransform: "uppercase", margin: 0, fontWeight: 500 }}>Couples</p>
             </div>
           </div>
-          <div style={{ opacity: heroInView ? 1 : 0, transform: heroInView ? "translateY(0)" : "translateY(40px)", transition: "all 1s cubic-bezier(0.22,1,0.36,1) 0.2s" }}>
-            <HeroPhone url={heroShowcaseUrl} />
-          </div>
+          <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 13, color: "#666", marginTop: 20, margin: "20px 0 0", fontWeight: 400, opacity: stats ? 1 : 0, transition: "opacity 1s ease 0.8s" }}>
+            {landingLocale === 'en' ? 'Already created and counting.' : '지금 이 순간에도 만들어지고 있어요.'}
+          </p>
         </section>
 
-        <section ref={problemRef as React.RefObject<HTMLElement>} style={{ padding: "80px 48px", borderTop: "1px solid #E8E5E0" }}>
-          <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center", opacity: problemInView ? 1 : 0, transform: problemInView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
-            <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1, marginBottom: 20, textTransform: "uppercase" }}>{lt('problem','tag',landingLocale)}</p>
-            <h2 className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a", lineHeight: 1.5, marginBottom: 20 }}>{lt('problem','h2_1',landingLocale)}<br />{lt('problem','h2_2',landingLocale)}</h2>
-            <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 40 }}>{lt('problem','desc1',landingLocale)}<br />{lt('problem','desc2',landingLocale)}</p>
-            <div className="problem-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, textAlign: "left" }}>
-              {[
-                { icon: <MessageCircle size={18} />, title: lt("problem","card1Title",landingLocale), desc: lt("problem","card1Desc",landingLocale) },
-                { icon: <Copy size={18} />, title: lt("problem","card2Title",landingLocale), desc: lt("problem","card2Desc",landingLocale) },
-                { icon: <MapPin size={18} />, title: lt("problem","card3Title",landingLocale), desc: lt("problem","card3Desc",landingLocale) },
-              ].map((item, i) => (
-                <div key={i} style={{ padding: 24, borderRadius: 12, border: "1px solid #E8E5E0", background: "#fff", opacity: problemInView ? 1 : 0, transform: problemInView ? "translateY(0)" : "translateY(15px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${200 + i * 100}ms` }}>
-                  <div style={{ color: "#bbb", marginBottom: 12 }}>{item.icon}</div>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>{item.title}</p>
-                  <p style={{ fontSize: 12, color: "#999", lineHeight: 1.6 }}>{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="engine" ref={engineRef as React.RefObject<HTMLElement>} style={{ padding: "80px 48px", background: "#F5F4F1", borderTop: "1px solid #E8E5E0", borderBottom: "1px solid #E8E5E0" }}>
-          <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: 48, opacity: engineInView ? 1 : 0, transform: engineInView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
-              <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1, marginBottom: 16, textTransform: "uppercase" }}>{lt('engine','tag',landingLocale)}</p>
-              <h2 className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>{lt('engine','h2',landingLocale)}</h2>
-              <p style={{ fontSize: 14, color: "#999" }}>{lt('engine','desc',landingLocale)}</p>
-            </div>
-            <div className="engine-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-              {[
-                { icon: <MessageCircle size={20} color="#1a1a1a" />, tag: lt("engine","e1Tag",landingLocale), title: lt("engine","e1Title",landingLocale), desc: lt("engine","e1Desc",landingLocale), features: [lt("engine","e1f1",landingLocale), lt("engine","e1f2",landingLocale), lt("engine","e1f3",landingLocale), lt("engine","e1f4",landingLocale)], delay: 0.15 },
-                { icon: <Camera size={20} color="#1a1a1a" />, tag: lt("engine","e2Tag",landingLocale), title: lt("engine","e2Title",landingLocale), desc: lt("engine","e2Desc",landingLocale), features: [lt("engine","e2f1",landingLocale), lt("engine","e2f2",landingLocale), lt("engine","e2f3",landingLocale), lt("engine","e2f4",landingLocale)], delay: 0.3 },
-              ].map((e, i) => (
-                <div key={i} style={{ padding: "40px 36px", borderRadius: 16, background: "#fff", border: "1px solid #E8E5E0", opacity: engineInView ? 1 : 0, transform: engineInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.7s cubic-bezier(0.22,1,0.36,1) ${e.delay}s` }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "#F5F4F1", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>{e.icon}</div>
-                  <p style={{ fontSize: 12, color: "#bbb", letterSpacing: 1, marginBottom: 8, textTransform: "uppercase" }}>{e.tag}</p>
-                  <h3 style={{ fontSize: 20, fontWeight: 600, color: "#1a1a1a", marginBottom: 12 }}>{e.title}</h3>
-                  <p style={{ fontSize: 14, color: "#888", lineHeight: 1.8, marginBottom: 20, whiteSpace: "pre-line" }}>{e.desc}</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {e.features.map((f, j) => (
-                      <div key={j} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <Check size={12} color="#bbb" strokeWidth={2.5} />
-                        <p style={{ fontSize: 12, color: "#666" }}>{f}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section style={{ padding: "100px 48px", borderTop: "1px solid #E8E5E0" }}>
-          <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: 56 }}>
-              <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>{lt('features','tag',landingLocale)}</p>
-              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>{lt('features','h2',landingLocale)}</h2>
-              <p style={{ fontSize: 14, color: "#999" }}>{lt('features','desc',landingLocale)}</p>
-            </div>
-            <div style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: "4px 0 16px", scrollbarWidth: "none" }}>
-              {[
-                { title: lt('featureCards','f1t',landingLocale), desc: lt('featureCards','f1d',landingLocale), tag: lt('featureCards','tag1',landingLocale) },
-                { title: lt('featureCards','f2t',landingLocale), desc: lt('featureCards','f2d',landingLocale), tag: lt('featureCards','tag2',landingLocale) },
-                { title: lt('featureCards','f3t',landingLocale), desc: lt('featureCards','f3d',landingLocale), tag: lt('featureCards','tag3',landingLocale) },
-                { title: lt('featureCards','f4t',landingLocale), desc: lt('featureCards','f4d',landingLocale), tag: lt('featureCards','tag4',landingLocale) },
-                { title: lt('featureCards','f5t',landingLocale), desc: lt('featureCards','f5d',landingLocale), tag: lt('featureCards','tag5',landingLocale) },
-                { title: lt('featureCards','f6t',landingLocale), desc: lt('featureCards','f6d',landingLocale), tag: lt('featureCards','tag6',landingLocale) },
-                { title: lt('featureCards','f7t',landingLocale), desc: lt('featureCards','f7d',landingLocale), tag: lt('featureCards','tag7',landingLocale) },
-                { title: lt('featureCards','f8t',landingLocale), desc: lt('featureCards','f8d',landingLocale), tag: lt('featureCards','tag8',landingLocale) },
-                { title: lt('featureCards','f9t',landingLocale), desc: lt('featureCards','f9d',landingLocale), tag: lt('featureCards','tag9',landingLocale) },
-                { title: lt('featureCards','f10t',landingLocale), desc: lt('featureCards','f10d',landingLocale), tag: lt('featureCards','tag10',landingLocale) },
-                { title: lt('featureCards','f11t',landingLocale), desc: lt('featureCards','f11d',landingLocale), tag: lt('featureCards','tag11',landingLocale) },
-                { title: lt('featureCards','f12t',landingLocale), desc: lt('featureCards','f12d',landingLocale), tag: lt('featureCards','tag12',landingLocale) },
-              ].map((f, i) => (
-                <div key={i} style={{ minWidth: 220, padding: "24px 20px", borderRadius: 14, border: "1px solid #E8E5E0", background: "#fff", scrollSnapAlign: "start", flexShrink: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                    <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a" }}>{f.title}</p>
-                    <span style={{ fontSize: 10, color: "#888", padding: "3px 10px", borderRadius: 100, background: "#F5F4F1", fontWeight: 500 }}>{f.tag}</span>
-                  </div>
-                  <p style={{ fontSize: 13, color: "#888", lineHeight: 1.7 }}>{f.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section ref={chatSectionRef as React.RefObject<HTMLElement>} className="chat-section" style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "100px 48px", gap: 72 }}>
-          <div className="chat-text-col" style={{ maxWidth: 440, opacity: chatSectionInView ? 1 : 0, transform: chatSectionInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1)" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 100, border: "1px solid #E0DDD8", marginBottom: 24, background: "#F5F4F1" }}>
-              <Sparkles size={11} color="#999" />
-              <p style={{ fontSize: 11, color: "#888" }}>AI Reception</p>
-            </div>
-            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.4, color: "#1a1a1a", marginBottom: 16 }}>{lt('chat','h2_1',landingLocale)}<br />{lt('chat','h2_2',landingLocale)}</h2>
-            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 32 }}>{lt('chat','desc1',landingLocale)}<br />{lt('chat','desc2',landingLocale)}</p>
-            <div style={{ marginBottom: 32 }}>
-              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 1, marginBottom: 16, textTransform: "uppercase" }}>{lt('chat','scenario',landingLocale)}</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {(landingLocale === 'en' ? CHAT_SEQUENCE_EN : CHAT_SEQUENCE_KO).map((item, i) => (
-                  <ScenarioCard key={i} item={item} index={i} parentInView={chatSectionInView} />
-                ))}
-              </div>
-            </div>
-            <div style={{ padding: "16px 20px", borderRadius: 10, background: "#1a1a1a" }}>
-              <p style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>{lt('chat','premiumLabel',landingLocale)}</p>
-              <p style={{ fontSize: 14, color: "#fff" }}>{lt('chat','premiumDesc',landingLocale)}<span style={{ fontWeight: 600 }}>{lt('chat','premiumBold',landingLocale)}</span>{lt('chat','premiumIncl',landingLocale)}</p>
-              <p className="serif" style={{ fontSize: 24, fontWeight: 400, color: "#fff", marginTop: 8 }}>29,900<span style={{ fontSize: 13, color: "#666", fontFamily: "'Noto Sans KR', sans-serif" }}>원</span></p>
-            </div>
-          </div>
-          <div style={{ opacity: chatSectionInView ? 1 : 0, transform: chatSectionInView ? "translateY(0)" : "translateY(40px)", transition: "all 1s cubic-bezier(0.22,1,0.36,1) 0.2s" }}>
-            <AiChatDemo landingLocale={landingLocale} />
-          </div>
-        </section>
-
-        <section ref={snapRef as React.RefObject<HTMLElement>} className="snap-section" style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "100px 48px", gap: 72, borderTop: "1px solid #E8E5E0" }}>
-          <div style={{ opacity: snapInView ? 1 : 0, transform: snapInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1)" }}>
-            <div style={{ width: 480, overflow: "hidden" }}>
-              <div style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", paddingBottom: 8, scrollbarWidth: "none" }} >
-                {(() => {
-                  const showcaseConcepts = ["studio_classic", "studio_gallery", "studio_fog", "studio_mocha", "studio_sage", "black_swan", "water_memory", "velvet_rouge", "blue_hour", "magazine_cover", "hanbok_wonsam", "hanbok_dangui", "hanbok_modern", "hanbok_saeguk", "hanbok_flower", "cruise_sunset", "cruise_bluesky", "retro_hongkong", "vintage_record", "iphone_selfie", "iphone_mirror"];
-                  const fallbacks = [
-                    { label: "스튜디오 클래식", gradient: "linear-gradient(135deg, #E8E4DE 0%, #D5CEC5 100%)" },
-                    { label: "갤러리", gradient: "linear-gradient(135deg, #E8E4DE 0%, #F5F2ED 100%)" },
-                    { label: "포그", gradient: "linear-gradient(135deg, #D5CEC5 0%, #E8E2DA 100%)" },
-                    { label: "모카", gradient: "linear-gradient(135deg, #3E2C23 0%, #6B4E3D 100%)" },
-                    { label: "세이지", gradient: "linear-gradient(135deg, #5C6B4E 0%, #8A9A72 100%)" },
-                    { label: "블랙스완", gradient: "linear-gradient(135deg, #1A1A2E 0%, #16213E 100%)" },
-                    { label: "물의 기억", gradient: "linear-gradient(135deg, #0D4F4F 0%, #1A7A6D 100%)" },
-                    { label: "벨벳 루즈", gradient: "linear-gradient(135deg, #6B1D2A 0%, #8B2F3F 100%)" },
-                    { label: "블루아워", gradient: "linear-gradient(135deg, #1B2838 0%, #2C4A6E 100%)" },
-                    { label: "매거진 커버", gradient: "linear-gradient(135deg, #2C2C2C 0%, #4A4A4A 100%)" },
-                    { label: "궁중혼례", gradient: "linear-gradient(135deg, #8B6914 0%, #C4956A 100%)" },
-                    { label: "당의 한복", gradient: "linear-gradient(135deg, #B8A088 0%, #D4C4A8 100%)" },
-                    { label: "모던 한복", gradient: "linear-gradient(135deg, #7C8C6E 0%, #A0B090 100%)" },
-                    { label: "사극풍", gradient: "linear-gradient(135deg, #6B4226 0%, #8B6240 100%)" },
-                    { label: "꽃한복", gradient: "linear-gradient(135deg, #C48B9F 0%, #D4A0B0 100%)" },
-                    { label: "크루즈 선셋", gradient: "linear-gradient(135deg, #B08968 0%, #D4B896 100%)" },
-                    { label: "크루즈 블루", gradient: "linear-gradient(135deg, #4A7C9B 0%, #6A9CB8 100%)" },
-                    { label: "레트로 홍콩", gradient: "linear-gradient(135deg, #8B2020 0%, #C44040 100%)" },
-                    { label: "빈티지 레코드", gradient: "linear-gradient(135deg, #8B7355 0%, #B09070 100%)" },
-                    { label: "셀카 스냅", gradient: "linear-gradient(135deg, #5A6B7A 0%, #8A9BAA 100%)" },
-                    { label: "거울 셀카", gradient: "linear-gradient(135deg, #6A6A6A 0%, #9A9A9A 100%)" },
-                  ];
-                  return showcaseConcepts.map((concept, i) => {
-                    const sample = snapSamples.find(s => s.concept === concept);
-                    return (
-                      <div key={i} style={{ minWidth: 200, height: 280, borderRadius: 14, background: sample ? `url(${sample.imageUrl}) center/cover` : fallbacks[i].gradient, display: "flex", alignItems: "flex-end", padding: 16, position: "relative", overflow: "hidden", cursor: "pointer", scrollSnapAlign: "start", flexShrink: 0 }} onClick={() => setSelectedSnap(selectedSnap === concept ? null : concept)}>
-                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.6) 100%)" }} />
-                        <p style={{ fontSize: 13, color: "#fff", position: "relative", fontWeight: 500, letterSpacing: 0.5 }}>{fallbacks[i].label}</p>
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
-              <p style={{ textAlign: "center", marginTop: 14, fontSize: 11, color: "#bbb" }}>
-                {snapSamples.length > 0 ? `${snapSamples.length}개 샘플 등록됨` : "43개 컨셉 — 스와이프하여 둘러보기"}
+        <section className="pricing-strip" style={{ padding: "44px 24px", background: "#1a1a1a", textAlign: "center" }}>
+          <div style={{ maxWidth: 880, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", gap: "clamp(20px, 4vw, 48px)", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "rgba(245,241,235,0.5)", letterSpacing: 2, margin: 0, textTransform: "uppercase", fontWeight: 500 }}>{landingLocale === 'ko' ? '지금 시작하면' : 'Start now'}</p>
+              <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: "clamp(16px, 2vw, 18px)", color: "#F5F1EB", margin: 0, fontWeight: 400, letterSpacing: "-0.01em" }}>
+                {landingLocale === 'ko' ? (
+                  <>첫 장 <span style={{ fontWeight: 600 }}>무료</span>. 그 다음부터 <span style={{ fontWeight: 600 }}>5,900원</span>.</>
+                ) : (
+                  <>First one <span style={{ fontWeight: 600 }}>free</span>. Then <span style={{ fontWeight: 600 }}>5,900 KRW</span>.</>
+                )}
               </p>
             </div>
-            {selectedSnap && snapSamples.filter(s => s.concept === selectedSnap).length > 0 && (
-              <div style={{ marginTop: 12, display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
-                {snapSamples.filter(s => s.concept === selectedSnap).map(s => (
-                  <div key={s.id} style={{ flexShrink: 0, width: 100, height: 130, borderRadius: 8, overflow: "hidden", border: "1px solid #E8E5E0" }}>
-                    <img src={s.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="snap-text" style={{ maxWidth: 440, opacity: snapInView ? 1 : 0, transform: snapInView ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s cubic-bezier(0.22,1,0.36,1) 0.15s" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 100, border: "1px solid #E0DDD8", marginBottom: 24, background: "#F5F4F1" }}>
-              <Camera size={11} color="#999" />
-              <p style={{ fontSize: 11, color: "#888" }}>AI Wedding Snap</p>
-            </div>
-            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.4, color: "#1a1a1a", marginBottom: 8 }}>{lt('snap','h2_1',landingLocale)}<br />{lt('snap','h2_2',landingLocale)}</h2>
-            <p className="serif" style={{ fontSize: 20, fontWeight: 300, color: "#aaa", marginBottom: 20 }}>{lt('snap','sub',landingLocale)}</p>
-            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 24 }}>{lt('snap','desc1',landingLocale)}<br />{lt('snap','desc2',landingLocale)}</p>
-            <div style={{ padding: "16px 18px", borderRadius: 10, border: "1px solid #E8E5E0", background: "#FAFAF8", marginBottom: 24 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>{lt('snap','boxTitle',landingLocale)}</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {[lt("snap","boxF1",landingLocale), lt("snap","boxF2",landingLocale), lt("snap","boxF3",landingLocale)].map((t, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <Check size={11} color="#bbb" strokeWidth={2.5} />
-                    <p style={{ fontSize: 12, color: "#666" }}>{t}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#1a1a1a", textDecoration: "none", fontWeight: 500, padding: "10px 20px", borderRadius: 8, border: "1px solid #E0DDD8" }}>
-              {lt('snap','cta',landingLocale)}
-              <ArrowRight size={14} />
+            <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", background: "#F5F1EB", color: "#1a1a1a", textDecoration: "none", fontFamily: "Pretendard, sans-serif", fontSize: 13, fontWeight: 500, letterSpacing: 0.2, transition: "transform 0.2s ease" }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}>
+              {landingLocale === 'ko' ? '무료로 시작하기' : 'Start for free'}
+              <span>→</span>
             </a>
           </div>
         </section>
 
 
-        <section className="idphoto-section" style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "100px 48px", gap: 72, borderTop: "1px solid #E8E5E0" }}>
-          <div style={{ maxWidth: 440 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 100, border: "1px solid #E0DDD8", marginBottom: 24, background: "#F5F4F1" }}>
-              <Camera size={11} color="#999" />
-              <p style={{ fontSize: 11, color: "#888" }}>AI ID Portrait</p>
-            </div>
-            <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.4, color: "#1a1a1a", marginBottom: 8 }}>셀카 한 장으로<br />정합도 높은 기초사진</h2>
-            <p className="serif" style={{ fontSize: 20, fontWeight: 300, color: "#aaa", marginBottom: 20 }}>AI 스냅의 퀄리티를 한 단계 올려주는 첫 번째 단계</p>
-            <p style={{ fontSize: 14, color: "#888", lineHeight: 1.9, marginBottom: 24 }}>AI가 얼굴 특징을 정밀하게 읽어내고<br />스튜디오급 정면 포트레이트로 자동 변환해드려요</p>
-            <div style={{ padding: "16px 18px", borderRadius: 10, border: "1px solid #E8E5E0", background: "#FAFAF8", marginBottom: 24 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a", marginBottom: 8 }}>이런 분께 추천</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {["AI 스냅 결과에서 얼굴이 안 닮는 분", "셀카밖에 없는데 화보를 만들고 싶은 분", "정면 스튜디오 사진이 필요한 분"].map((t, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <Check size={11} color="#bbb" strokeWidth={2.5} />
-                    <p style={{ fontSize: 12, color: "#666" }}>{t}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <a href="/id-photo" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#fff", background: "#1a1a1a", textDecoration: "none", fontWeight: 500, padding: "12px 24px", borderRadius: 8 }}>
-              1,000원으로 시작하기
-              <ArrowRight size={14} />
-            </a>
-          </div>
-          <div style={{ width: 380, height: 480, borderRadius: 20, background: "linear-gradient(160deg, #F5F4F1 0%, #E8E5E0 100%)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16, border: "1px solid #E8E5E0" }}>
-            <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-              <div style={{ width: 120, height: 160, borderRadius: 12, background: "linear-gradient(135deg, #D5CEC5 0%, #C4BCB0 100%)", display: "flex", alignItems: "center", justifyContent: "center", border: "2px dashed #bbb" }}>
-                <Camera size={28} color="#999" />
-              </div>
-              <ArrowRight size={20} color="#bbb" />
-              <div style={{ width: 120, height: 160, borderRadius: 12, background: "linear-gradient(135deg, #E8E5E0 0%, #F5F4F1 100%)", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #ccc", boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
-                <Camera size={28} color="#666" />
-              </div>
-            </div>
-            <p style={{ fontSize: 12, color: "#999", fontWeight: 500 }}>셀카 → AI 정면 포트레이트</p>
-          </div>
-        </section>
 
-        <ThemeShowcase onLogin={openLogin} landingLocale={landingLocale} />
+<section className="snap-showcase" style={{ padding: "100px 0 120px", background: "#FAF9F7" }}>
+          <div style={{ maxWidth: 1600, margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: 48, padding: "0 24px" }}>
+              <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#999", letterSpacing: 3, marginBottom: 12, textTransform: "uppercase" }}>{snapSamples.length > 0 ? Array.from(new Set(snapSamples.map(s => s.concept))).length + " CONCEPTS" : "54 CONCEPTS"}</p>
+              <h2 className="serif" style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 400, color: "#1a1a1a", marginBottom: 10, letterSpacing: "-0.02em" }}>{landingLocale === 'ko' ? '셀카 하나가 이렇게 됩니다.' : 'One selfie, endless outcomes.'}</h2>
+              <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 13, color: "#888" }}>{landingLocale === 'ko' ? '스와이프하여 둘러보세요' : 'Swipe to browse'}</p>
+            </div>
 
-        <section ref={specRef as React.RefObject<HTMLElement>} style={{ padding: "80px 0", background: "#1a1a1a" }}>
-          <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-            <div className="specs-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, padding: "0 48px" }}>
-              {specs.map((s, i) => (
-                <div key={i} style={{ textAlign: "center", padding: "40px 16px", opacity: specInView ? 1 : 0, transform: specInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 100}ms` }}>
-                  <p className="serif" style={{ fontSize: 48, fontWeight: 300, color: "#fff", marginBottom: 8 }}>{s.num}</p>
-                  <p style={{ fontSize: 14, color: "#fff", marginBottom: 8, fontWeight: 500 }}>{s.label}</p>
-                  <p style={{ fontSize: 12, color: "#666", lineHeight: 1.5 }}>{s.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="pricing" ref={pricingRef as React.RefObject<HTMLElement>} style={{ padding: "100px 0" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px" }}>
-            <div style={{ textAlign: "center", marginBottom: 56 }}>
-              <p style={{ fontSize: 13, color: "#bbb", letterSpacing: 1.5, marginBottom: 12, textTransform: "uppercase" }}>Pricing</p>
-              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 12 }}>{lt('pricing','h2',landingLocale)}</h2>
-              <p style={{ fontSize: 14, color: "#999" }}>{lt('pricing','desc',landingLocale)}</p>
-            </div>
-            <div style={{ textAlign: "center", marginBottom: 24 }}>
-              <a href="/gift/redeem" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 20px", borderRadius: 100, border: "1px solid #E0DDD8", fontSize: 13, color: "#888", textDecoration: "none" }}>
-                <Gift size={14} />
-                {lt('pricing','giftCode',landingLocale)}
-              </a>
-            </div>
-            {packages.length > 0 ? (
-              <div className="pricing-grid snap-pill" style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: "14px 0 16px", scrollbarWidth: "none", maxWidth: 1100, margin: "0 auto", justifyContent: "center" }}>
-                {packages.map((pkg, i) => {
-                  const isHighlight = pkg.slug === "premium";
-                  return (
-                    <div key={pkg.id} style={{ minWidth: 280, flex: "0 0 280px", scrollSnapAlign: "start", padding: "32px 24px", borderRadius: 14, border: isHighlight ? "2px solid #1a1a1a" : "1px solid #E8E5E0", background: isHighlight ? "#FAFAF8" : "#fff", position: "relative", opacity: pricingInView ? 1 : 0, transform: pricingInView ? "translateY(0)" : "translateY(20px)", transition: `all 0.6s cubic-bezier(0.22,1,0.36,1) ${i * 80}ms` }}>
-                      {pkg.slug === "premium" && <div style={{ position: "absolute", top: -1, left: 24, transform: "translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 12px", borderRadius: 100, fontWeight: 500 }}>BEST</div>}
-                      <p style={{ fontSize: 11, color: "#bbb", marginBottom: 4 }}>{trPkgDesc(pkg.description, landingLocale)}</p>
-                      <p style={{ fontSize: 16, fontWeight: 600, color: "#1a1a1a", marginBottom: 16 }}>{pkg.name}</p>
-                      <div style={{ display: "flex", alignItems: "baseline", gap: 2, marginBottom: 20 }}>
-                        <p className="serif" style={{ fontSize: 30, fontWeight: 400, color: "#1a1a1a" }}>{pkg.price.toLocaleString()}</p>
-                        <p style={{ fontSize: 13, color: "#999" }}>{landingLocale === 'en' ? 'KRW' : '원'}</p>
+            <div className="showcase-rug" style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: "0 24px 8px", scrollbarWidth: "none" }}>
+              {snapSamples.length === 0 ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} style={{ flexShrink: 0, width: i === 0 ? 400 : 240, aspectRatio: i === 0 ? "4 / 5" : "3 / 4", borderRadius: 10, background: "linear-gradient(135deg, #E8E4DE 0%, #D5CEC5 100%)", opacity: 0.4, scrollSnapAlign: "start" }} />
+                ))
+              ) : (
+                Array.from(new Map(snapSamples.map(s => [s.concept, s])).values()).map((s, i) => (
+                  <a key={s.id} href="/ai-snap" className="showcase-tile" style={{ flexShrink: 0, width: i === 0 ? 400 : 240, aspectRatio: i === 0 ? "4 / 5" : "3 / 4", borderRadius: 10, overflow: "hidden", position: "relative", display: "block", background: "url(" + s.imageUrl + ") center/cover", cursor: "pointer", textDecoration: "none", scrollSnapAlign: "start" }}>
+                    <div className="showcase-overlay" style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 45%)", opacity: i === 0 ? 1 : 0, transition: "opacity 0.3s ease", display: "flex", alignItems: "flex-end", padding: 18 }}>
+                      <div>
+                        {i === 0 && <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 10, color: "rgba(255,255,255,0.6)", letterSpacing: 2, margin: "0 0 6px", textTransform: "uppercase", fontWeight: 500 }}>Featured</p>}
+                        <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: i === 0 ? 18 : 13, color: "#fff", fontWeight: i === 0 ? 500 : 500, margin: 0, letterSpacing: -0.2 }}>{conceptLabel(s.concept)}</p>
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
-                        {pkg.features.slice(0, 6).map((f, j) => (
-                          <div key={j} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <Check size={13} color={isHighlight ? "#1a1a1a" : "#ccc"} strokeWidth={2} />
-                            <p style={{ fontSize: 13, color: "#666" }}>{trFeature(f, landingLocale)}</p>
-                          </div>
-                        ))}
-                        {pkg.features.length > 6 && <p style={{ fontSize: 12, color: "#bbb", paddingLeft: 21 }}>+{pkg.features.length - 6}{landingLocale === 'en' ? ' more' : '개 더'}</p>}
-                      </div>
-                      <button onClick={() => setShowCreateModal(true)} style={{ display: "block", width: "100%", textAlign: "center", padding: "12px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, background: isHighlight ? "#1a1a1a" : "transparent", color: isHighlight ? "#fff" : "#1a1a1a", border: isHighlight ? "none" : "1px solid #E0DDD8", cursor: "pointer" }}>{lt('pricing','startBtn',landingLocale)}</button>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div style={{ textAlign: "center", padding: 40, color: "#bbb", fontSize: 13 }}>요금 정보를 불러오는 중...</div>
-            )}
-          </div>
-        </section>
+                  </a>
+                ))
+              )}
+            </div>
 
-        <section id="ai-snap-pricing" style={{ padding: "100px 0", background: "#F5F4F1", borderTop: "1px solid #E8E5E0", borderBottom: "1px solid #E8E5E0" }}>
-          <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 48px" }}>
-            <div style={{ textAlign: "center", marginBottom: 48 }}>
-              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>{lt('snapPricing','tag',landingLocale)}</p>
-              <h2 className="serif" style={{ fontSize: 34, fontWeight: 400, color: "#1a1a1a", marginBottom: 10 }}>{lt('snapPricing','h2',landingLocale)}</h2>
-              <p style={{ fontSize: 14, color: "#999" }}>{lt('snapPricing','desc',landingLocale)}</p>
-            </div>
-            <div className="snap-pack-grid snap-pill" style={{ display: "flex", gap: 12, overflowX: "auto", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", padding: "14px 0 16px", scrollbarWidth: "none", justifyContent: "center" }}>
-              {[
-                { name: landingLocale === 'en' ? '3-Photo Pack' : '3장 세트', per: landingLocale === 'en' ? '$1.97/shot' : '장당 1,967원', price: '5,900', popular: false },
-                { name: landingLocale === 'en' ? '5-Photo Pack' : '5장 세트', per: landingLocale === 'en' ? '$1.98/shot' : '장당 1,980원', price: '9,900', popular: false },
-                { name: landingLocale === 'en' ? '10-Photo Pack' : '10장 세트', per: landingLocale === 'en' ? '$1.49/shot' : '장당 1,490원', price: '14,900', popular: true },
-                { name: landingLocale === 'en' ? '20-Photo Pack' : '20장 세트', per: landingLocale === 'en' ? '$1.25/shot' : '장당 1,245원', price: '24,900', popular: false },
-              ].map((pack) => (
-                <div key={pack.name} style={{ minWidth: 220, flex: "0 0 220px", scrollSnapAlign: "start", padding: "28px 20px", borderRadius: 14, background: "#fff", border: pack.popular ? "2px solid #1a1a1a" : "1px solid #E8E5E0", textAlign: "left", position: "relative" }}>
-                  {pack.popular && <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%) translateY(-50%)", background: "#1a1a1a", color: "#fff", fontSize: 10, padding: "4px 14px", borderRadius: 100, fontWeight: 500 }}>{lt('snapPricing','popular',landingLocale)}</div>}
-                  <p style={{ fontSize: 16, fontWeight: 600, color: "#1a1a1a", marginBottom: 4 }}>{pack.name}</p>
-                  <p style={{ fontSize: 11, color: "#bbb", marginBottom: 16 }}>{pack.per}</p>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 2, marginBottom: 20 }}>
-                    <p className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a" }}>{pack.price}</p>
-                    <p style={{ fontSize: 12, color: "#999" }}>{landingLocale === 'en' ? 'KRW' : '원'}</p>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
-                    {[lt("snapPricing","f1",landingLocale), lt("snapPricing","f2",landingLocale), lt("snapPricing","f3",landingLocale)].map((f, j) => (
-                      <div key={j} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <Check size={12} color={pack.popular ? "#1a1a1a" : "#ccc"} strokeWidth={2} />
-                        <p style={{ fontSize: 12, color: "#666" }}>{f}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <a href="/ai-snap/studio" style={{ display: "block", textAlign: "center", padding: "11px 0", borderRadius: 8, fontSize: 13, fontWeight: 500, textDecoration: "none", background: pack.popular ? "#1a1a1a" : "transparent", color: pack.popular ? "#fff" : "#1a1a1a", border: pack.popular ? "none" : "1px solid #E0DDD8" }}>{lt('pricing','startBtn',landingLocale)}</a>
-                </div>
-              ))}
-            </div>
-            <div style={{ textAlign: "center", marginTop: 16 }}>
-              <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: "#fff", background: "#1a1a1a", padding: "14px 28px", borderRadius: 10, textDecoration: "none", fontWeight: 500 }}>
-                {lt('snapPricing','freeCta',landingLocale)}
-                <Camera size={16} />
+            <div style={{ textAlign: "center", marginTop: 48, padding: "0 24px" }}>
+              <a href="/ai-snap" style={{ display: "inline-flex", alignItems: "center", gap: 10, fontFamily: "Pretendard, sans-serif", fontSize: 14, fontWeight: 500, color: "#1a1a1a", padding: "16px 32px", border: "1px solid #1a1a1a", textDecoration: "none", transition: "all 0.25s ease" }} onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = "#1a1a1a"; el.style.color = "#F5F1EB"; }} onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = "transparent"; el.style.color = "#1a1a1a"; }}>
+                {landingLocale === 'ko' ? '무료로 1장 만들어보기' : 'Try 1 for free'}
+                <span>→</span>
               </a>
             </div>
           </div>
         </section>
 
-        <section style={{ padding: "100px 0", borderTop: "1px solid #E8E5E0" }}>
-          <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 20px" }}>
-            <div className="landing-product-grid" style={{ display: "grid", gap: 24 }}>
-              <a href="/prewedding-video" style={{ textDecoration: "none", padding: "48px 36px", borderRadius: 16, border: "1px solid #E8E5E0", background: "#fff", display: "flex", flexDirection: "column", gap: 16, transition: "all 0.3s" }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: "#F5F4F1", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="1.5"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+        <a href="/id-photo" className="idphoto-hook" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, padding: "28px 24px", background: "#F5F1EB", borderTop: "1px solid rgba(26,26,26,0.06)", borderBottom: "1px solid rgba(26,26,26,0.06)", textDecoration: "none", transition: "background 0.2s ease" }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#EEE9E0"; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#F5F1EB"; }}>
+          <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 13, color: "#666", fontWeight: 400, letterSpacing: 0.2 }}>{landingLocale === 'ko' ? '정합도 높은 사진을 원하신다면?' : 'Need higher-fidelity photos?'}</span>
+          <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 13, color: "#1a1a1a", fontWeight: 500, letterSpacing: 0.2 }}>{landingLocale === 'ko' ? 'AI 프로필 촬영' : 'AI Portrait'}</span>
+          <span style={{ fontSize: 13, color: "#1a1a1a" }}>→</span>
+        </a>
+
+
+
+
+
+        <section style={{ padding: "120px 0 100px", borderTop: "1px solid #E8E5E0", background: "#FAF9F7" }}>
+          <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
+            <div style={{ textAlign: "center", marginBottom: 64 }}>
+              <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#999", letterSpacing: 3, marginBottom: 12, textTransform: "uppercase" }}>THE ENGINE</p>
+              <h2 className="serif" style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 400, color: "#1a1a1a", marginBottom: 12, letterSpacing: "-0.02em" }}>{lt('engine','h2',landingLocale)}</h2>
+              <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 14, color: "#888" }}>{lt('engine','desc',landingLocale)}</p>
+            </div>
+
+            <div className="engine-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20 }}>
+
+              <a href="/ai-snap" className="engine-card" style={{ textDecoration: "none", padding: "40px 32px", borderRadius: 20, border: "1px solid #E8E5E0", background: "#fff", display: "flex", flexDirection: "column", gap: 14, minHeight: 280, transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#bbb", letterSpacing: 2, fontWeight: 500 }}>01 · AI WEDDING SNAP</span>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#1a1a1a", padding: "4px 10px", borderRadius: 100, background: "#F5F1EB", fontWeight: 500 }}>54 concepts</span>
                 </div>
-                <div>
-                  <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 6 }}>WEDDING CINEMA</p>
-                  <p className="serif" style={{ fontSize: 22, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>{landingLocale === 'ko' ? '\uc6e8\ub529\uc2dc\ub124\ub9c8' : 'Wedding Cinema'}</p>
-                  <p style={{ fontSize: 13, color: "#999", lineHeight: 1.6 }}>{landingLocale === 'ko' ? 'AI\uac00 \ub9cc\ub4dc\ub294 \uc2dc\ub124\ub9c8\ud2f1 \uc6e8\ub529 \uc601\uc0c1.\n\uc0ac\uc9c4\ub9cc \uc62c\ub9ac\uba74 \uc790\ub9c9\uacfc \uc74c\uc545\uc774 \uc785\ud600\uc9c4 1\ubd84 \uc601\uc0c1\uc774 \uc644\uc131\ub429\ub2c8\ub2e4.' : 'Cinematic wedding video powered by AI.\nJust upload photos to get a 1-min film with subtitles and music.'}</p>
-                </div>
-                <div style={{ display: "flex", gap: 12, marginTop: "auto" }}>
-                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Photo 29,000원</span>
-                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Selfie 39,000원</span>
+                <p className="serif" style={{ fontSize: 26, fontWeight: 400, color: "#1a1a1a", marginBottom: 4, letterSpacing: "-0.02em" }}>{landingLocale === 'ko' ? '셀카가 화보가 됩니다' : 'A selfie becomes a wedding photo'}</p>
+                <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 13, color: "#888", lineHeight: 1.65, flex: 1 }}>{landingLocale === 'ko' ? '한복·스튜디오·셀카·시네마틱까지 54개 컨셉. 스튜디오 촬영 없이 완성.' : 'Hanbok, studio, selfie, cinematic — 54 concepts. Without a photoshoot.'}</p>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid #F0EDE8" }}>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 12, color: "#666", fontWeight: 500 }}>{landingLocale === 'ko' ? '5,900원부터 · 무료 체험 1장' : 'From 5,900 KRW · 1 free trial'}</span>
+                  <span style={{ fontSize: 14, color: "#1a1a1a" }}>→</span>
                 </div>
               </a>
 
-              <a href="/poster" style={{ textDecoration: "none", padding: "48px 36px", borderRadius: 16, border: "1px solid #E8E5E0", background: "#fff", display: "flex", flexDirection: "column", gap: 16, transition: "all 0.3s" }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: "#F5F4F1", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
+              <a href="/prewedding-video" className="engine-card" style={{ textDecoration: "none", padding: "40px 32px", borderRadius: 20, border: "1px solid #E8E5E0", background: "#fff", display: "flex", flexDirection: "column", gap: 14, minHeight: 280, transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#bbb", letterSpacing: 2, fontWeight: 500 }}>02 · WEDDING CINEMA</span>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#1a1a1a", padding: "4px 10px", borderRadius: 100, background: "#F5F1EB", fontWeight: 500 }}>3–10 min</span>
                 </div>
-                <div>
-                  <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 6 }}>WEDDING POSTER</p>
-                  <p className="serif" style={{ fontSize: 22, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>{landingLocale === 'ko' ? '\uc6e8\ub529\ud3ec\uc2a4\ud130' : 'Wedding Poster'}</p>
-                  <p style={{ fontSize: 13, color: "#999", lineHeight: 1.6 }}>{landingLocale === 'ko' ? '\ub2f9\uc2e0\uc758 \uc6e8\ub529 \uc0ac\uc9c4\uc744 \uc601\ud654 \ud3ec\uc2a4\ud130\ucc98\ub7fc.\n\uc0ac\uacc4 12\uc885 \ucee8\uc149 + 7\uc885 \ud3f0\ud2b8 \ud0c0\uc774\ud3ec\uadf8\ub798\ud53c.' : 'Turn your wedding photos into cinematic posters.\n12 seasonal concepts + 7 typography fonts.'}</p>
-                </div>
-                <div style={{ display: "flex", gap: 12, marginTop: "auto" }}>
-                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>Photo 3,000원</span>
-                  <span style={{ fontSize: 12, color: "#999", padding: "4px 10px", borderRadius: 6, background: "#F5F4F1" }}>AI 5,000원</span>
+                <p className="serif" style={{ fontSize: 26, fontWeight: 400, color: "#1a1a1a", marginBottom: 4, letterSpacing: "-0.02em" }}>{landingLocale === 'ko' ? '사진이 영화가 됩니다' : 'Photos become a cinema'}</p>
+                <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 13, color: "#888", lineHeight: 1.65, flex: 1 }}>{landingLocale === 'ko' ? '사진만 올리면 AI가 자막·음악을 입혀 3~10분 시네마를 완성합니다.' : 'Upload photos, AI layers subtitles and music into a 3–10 min cinema.'}</p>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid #F0EDE8" }}>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 12, color: "#666", fontWeight: 500 }}>{landingLocale === 'ko' ? '29,000원부터' : 'From 29,000 KRW'}</span>
+                  <span style={{ fontSize: 14, color: "#1a1a1a" }}>→</span>
                 </div>
               </a>
-            </div>
-          </div>
-        </section>
 
-        <section style={{ padding: "80px 48px", background: "#FAF9F7" }}>
-          <div style={{ maxWidth: 900, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: 36 }}>
-              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>{lt('video','tag',landingLocale)}</p>
-              <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>{lt('video','h3',landingLocale)}</h3>
-              <p style={{ fontSize: 13, color: "#999", lineHeight: 1.8 }}>{lt('video','desc',landingLocale)}</p>
-            </div>
-              <HighlightVideoSection />
-          </div>
-        </section>
-
-        {guides.length > 0 && (
-          <section style={{ padding: "80px 48px", background: "#F5F4F1", borderTop: "1px solid #E8E5E0" }}>
-            <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-              <div style={{ textAlign: "center", marginBottom: 40 }}>
-                <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>{lt('guide','tag',landingLocale)}</p>
-                <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>{lt('guide','h3',landingLocale)}</h3>
-              </div>
-              <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 16 }} className="snap-pill">
-                {guides.map((g) => (
-                  <div key={g.id} onClick={() => setSelectedGuide(g)} style={{ flex: "0 0 280px", borderRadius: 14, overflow: "hidden", background: "#fff", border: "1px solid #E8E5E0", cursor: "pointer" }}>
-                    <div style={{ aspectRatio: "16/9", background: "#E8E5E0", position: "relative", overflow: "hidden" }}>
-                      {g.videoType === "YOUTUBE" ? (
-                        <img src={`https://img.youtube.com/vi/${g.videoUrl.split("/embed/")[1]}/mqdefault.jpg`} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt={g.title} />
-                      ) : (
-                        <video src={g.videoUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} preload="metadata" muted />
-                      )}
-                      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.2)", opacity: 0, transition: "opacity 0.2s" }} onMouseEnter={e => (e.currentTarget.style.opacity = "1")} onMouseLeave={e => (e.currentTarget.style.opacity = "0")}>
-                        <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <svg style={{ width: 18, height: 18, marginLeft: 2 }} fill="#1a1a1a" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ padding: "14px 16px" }}>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1a1a", marginBottom: 4 }}>{g.title}</p>
-                      {g.description && <p style={{ fontSize: 12, color: "#999" }}>{g.description}</p>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {reviews.length > 0 && (
-          <section style={{ padding: "80px 48px", borderTop: "1px solid #E8E5E0" }}>
-            <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-              <div style={{ textAlign: "center", marginBottom: 40 }}>
-                <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>{lt('review','tag',landingLocale)}</p>
-                <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8 }}>{lt('review','h3',landingLocale)}</h3>
-              </div>
-              <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 16 }} className="snap-pill">
-                {reviews.map((r) => (
-                  <div key={r.id} style={{ flex: "0 0 240px", padding: 20, borderRadius: 14, border: "1px solid #E8E5E0", background: "#fff" }}>
-                    <div style={{ display: "flex", gap: 2, marginBottom: 10 }}>
-                      {[...Array(5)].map((_, j) => (
-                        <svg key={j} style={{ width: 12, height: 12 }} viewBox="0 0 24 24" fill={j < r.rating ? "#F59E0B" : "#E8E5E0"}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
-                      ))}
-                    </div>
-                    <p style={{ fontSize: 12, color: "#555", lineHeight: 1.6, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{r.content || "정말 만족스러웠어요!"}</p>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#bbb" }}>
-                      <span>{r.groomName} & {r.brideName}</span>
-                      <span>{new Date(r.createdAt).toLocaleDateString("ko-KR")}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        <section style={{ padding: "100px 48px", borderTop: "1px solid #E8E5E0" }}>
-          <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", alignItems: "center", gap: 56 }} className="weddingai-grid">
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 11, color: "#bbb", letterSpacing: 2, marginBottom: 10 }}>{lt('weddingAi','tag',landingLocale)}</p>
-              <h3 className="serif" style={{ fontSize: 28, fontWeight: 400, color: "#1a1a1a", marginBottom: 8, lineHeight: 1.4 }}>{lt('weddingAi','h3',landingLocale)}</h3>
-              <p style={{ fontSize: 14, color: "#999", lineHeight: 1.8, marginBottom: 28 }}>{lt('weddingAi','desc1',landingLocale)}<br />{lt('weddingAi','desc2',landingLocale)}</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
-                {[lt("weddingAi","f1",landingLocale), lt("weddingAi","f2",landingLocale), lt("weddingAi","f3",landingLocale)].map((f, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <Check size={12} color="#bbb" strokeWidth={2.5} />
-                    <p style={{ fontSize: 13, color: "#666" }}>{f}</p>
-                  </div>
-                ))}
-              </div>
-              <p style={{ fontSize: 11, color: "#ccc" }}>{lt('weddingAi','tip',landingLocale)}</p>
-            </div>
-            <div style={{ width: 300, flexShrink: 0 }}>
-              <div style={{ borderRadius: 16, border: "1px solid #E8E5E0", background: "#fff", overflow: "hidden", boxShadow: "0 8px 30px rgba(0,0,0,0.06)" }}>
-                <div style={{ padding: "14px 16px", borderBottom: "1px solid #F0EFEC", display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#1a1a1a", display: "flex", alignItems: "center", justifyContent: "center" }}><Sparkles size={12} color="#fff" /></div>
-                  <div>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: "#1a1a1a" }}>{landingLocale === 'en' ? 'Wedding AI' : '웨딩이'}</p>
-                    <p style={{ fontSize: 9, color: "#7C8C6E" }}>{landingLocale === 'en' ? 'Online' : '온라인'}</p>
-                  </div>
+              <a href="/poster" className="engine-card" style={{ textDecoration: "none", padding: "40px 32px", borderRadius: 20, border: "1px solid #E8E5E0", background: "#fff", display: "flex", flexDirection: "column", gap: 14, minHeight: 280, transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#bbb", letterSpacing: 2, fontWeight: 500 }}>03 · WEDDING POSTER</span>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#1a1a1a", padding: "4px 10px", borderRadius: 100, background: "#F5F1EB", fontWeight: 500 }}>41 concepts</span>
                 </div>
-                <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-                  <div style={{ alignSelf: "flex-end", maxWidth: "80%", padding: "9px 13px", borderRadius: "14px 4px 14px 14px", background: "#2C2C2C" }}><p style={{ fontSize: 11, color: "#fff" }}>{landingLocale === 'en' ? 'Recommend a theme' : '테마 추천해주세요'}</p></div>
-                  <div style={{ alignSelf: "flex-start", maxWidth: "85%", padding: "9px 13px", borderRadius: "4px 14px 14px 14px", background: "#F5F4F1" }}><p style={{ fontSize: 11, color: "#555", lineHeight: 1.6 }}>{landingLocale === 'en' ? 'What vibe do you prefer? Natural, modern, or classic? Pick one and I\'ll find the perfect theme.' : '어떤 분위기를 좋아하세요? 내추럴, 모던, 클래식 중 골라주시면 딱 맞는 테마를 추천해드릴게요.'}</p></div>
-                  <div style={{ alignSelf: "flex-end", maxWidth: "80%", padding: "9px 13px", borderRadius: "14px 4px 14px 14px", background: "#2C2C2C" }}><p style={{ fontSize: 11, color: "#fff" }}>{landingLocale === 'en' ? 'Natural!' : '내추럴이요!'}</p></div>
-                  <div style={{ alignSelf: "flex-start", maxWidth: "85%", padding: "9px 13px", borderRadius: "4px 14px 14px 14px", background: "#F5F4F1" }}><p style={{ fontSize: 11, color: "#555", lineHeight: 1.6 }}>{landingLocale === 'en' ? 'I recommend the Botanical theme! Sage green tones with a natural feel.' : 'Botanical 테마 추천드려요! 세이지그린 톤에 자연스러운 느낌이에요.'}</p></div>
+                <p className="serif" style={{ fontSize: 26, fontWeight: 400, color: "#1a1a1a", marginBottom: 4, letterSpacing: "-0.02em" }}>{landingLocale === 'ko' ? '사진이 포스터가 됩니다' : 'Photos become a poster'}</p>
+                <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 13, color: "#888", lineHeight: 1.65, flex: 1 }}>{landingLocale === 'ko' ? '영화 포스터 같은 웨딩 포스터. 41개 컨셉 · 30초 생성.' : 'Movie poster meets wedding. 41 concepts, generated in 30 sec.'}</p>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid #F0EDE8" }}>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 12, color: "#666", fontWeight: 500 }}>{landingLocale === 'ko' ? '3,000원부터' : 'From 3,000 KRW'}</span>
+                  <span style={{ fontSize: 14, color: "#1a1a1a" }}>→</span>
                 </div>
-              </div>
+              </a>
+
+              <a href="/create" className="engine-card" style={{ textDecoration: "none", padding: "40px 32px", borderRadius: 20, border: "1px solid #1a1a1a", background: "#1a1a1a", display: "flex", flexDirection: "column", gap: 14, minHeight: 280, transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "rgba(245,241,235,0.5)", letterSpacing: 2, fontWeight: 500 }}>04 · INVITATION</span>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 11, color: "#1a1a1a", padding: "4px 10px", borderRadius: 100, background: "#F5F1EB", fontWeight: 500 }}>27 themes</span>
+                </div>
+                <p className="serif" style={{ fontSize: 26, fontWeight: 400, color: "#F5F1EB", marginBottom: 4, letterSpacing: "-0.02em" }}>{landingLocale === 'ko' ? '그리고, 청첩장까지' : 'And the invitation, too'}</p>
+                <p style={{ fontFamily: "Pretendard, sans-serif", fontSize: 13, color: "rgba(245,241,235,0.6)", lineHeight: 1.65, flex: 1 }}>{landingLocale === 'ko' ? 'AI 컨시어지가 탑재된 모바일 청첩장. 종이·QR카드 무료 포함.' : 'Mobile invitation with AI concierge. Free paper cards & QR included.'}</p>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid rgba(245,241,235,0.1)" }}>
+                  <span style={{ fontFamily: "Pretendard, sans-serif", fontSize: 12, color: "rgba(245,241,235,0.7)", fontWeight: 500 }}>{landingLocale === 'ko' ? '9,900원부터' : 'From 9,900 KRW'}</span>
+                  <span style={{ fontSize: 14, color: "#F5F1EB" }}>→</span>
+                </div>
+              </a>
+
             </div>
           </div>
         </section>
 
-        <section ref={ctaRef as React.RefObject<HTMLElement>} style={{ padding: "100px 48px", textAlign: "center" }}>
-          <div style={{ opacity: ctaInView ? 1 : 0, transform: ctaInView ? "translateY(0)" : "translateY(20px)", transition: "all 0.7s cubic-bezier(0.22,1,0.36,1)" }}>
-            <h2 className="serif" style={{ fontSize: 38, fontWeight: 400, color: "#1a1a1a", marginBottom: 16 }}>{lt('cta','h2_1',landingLocale)}<br />{lt('cta','h2_2',landingLocale)}</h2>
-            <p style={{ fontSize: 14, color: "#999", marginBottom: 36, lineHeight: 1.8 }}>{lt('cta','desc1',landingLocale)}<br />{lt('cta','desc2',landingLocale)}</p>
-            <button onClick={() => setShowCreateModal(true)} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 15, color: "#fff", background: "#1a1a1a", padding: "16px 36px", borderRadius: 10, border: "none", cursor: "pointer", fontWeight: 500 }}>
-              {lt('cta','btn',landingLocale)}
-              <ArrowRight size={18} />
-            </button>
-          </div>
-        </section>
-
+        <ThemeShowcase onLogin={openLogin} landingLocale={landingLocale} packages={packages} onStartCreate={() => setShowCreateModal(true)} />
         <footer style={{ borderTop: "1px solid #E8E5E0" }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 48px" }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 20 }}>
@@ -1412,7 +886,7 @@ export default function Landing() {
                   {lt('chatBot','inquiry',landingLocale)}
                 </button>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendChat()} onFocus={() => window.scrollTo(0, 0)} placeholder={landingLocale === "en" ? "Type a message..." : "메시지를 입력하세요..."} style={{ flex: 1, padding: "12px 16px", borderRadius: 24, border: "1px solid #E0DDD8", background: "#F5F4F1", fontSize: 13, outline: "none" }} />
+                  <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) sendChat(); }} onFocus={() => window.scrollTo(0, 0)} placeholder={landingLocale === "en" ? "Type a message..." : "메시지를 입력하세요..."} style={{ flex: 1, padding: "12px 16px", borderRadius: 24, border: "1px solid #E0DDD8", background: "#F5F4F1", fontSize: 13, outline: "none" }} />
                   <button onClick={sendChat} disabled={chatLoading || !chatInput.trim()} style={{ width: 44, height: 44, borderRadius: "50%", background: "#1a1a1a", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: chatLoading || !chatInput.trim() ? 0.4 : 1 }}><Send size={16} color="#fff" /></button>
                 </div>
               </div>

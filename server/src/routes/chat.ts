@@ -36,13 +36,8 @@ const functions: OpenAI.Chat.ChatCompletionCreateParams.Function[] = [
     }
   },
   {
-    name: 'open_kakao_wedding',
-    description: '청첩장 1:1 상담 카카오톡 연결. 청첩장 커스텀/상담/문의 원할 때',
-    parameters: { type: 'object', properties: {} }
-  },
-  {
-    name: 'open_kakao_video',
-    description: '영상 제작 상담 카카오톡 연결 (토끼편집실). 영상/시네마틱/하이라이트 문의할 때',
+    name: 'open_kakao_channel',
+    description: '카카오톡 채널로 연결. 청첩장/AI스냅/영상/시네마/커스텀 등 모든 상담 및 문의에 사용',
     parameters: { type: 'object', properties: {} }
   },
   {
@@ -126,24 +121,13 @@ router.post('/', async (req, res) => {
           });
           break;
           
-        case 'open_kakao_wedding':
-          reply = reply || `청첩장 상담 카카오톡으로 연결해드릴게요! 💕`;
+        case 'open_kakao_channel':
+          reply = reply || `카카오톡 채널로 연결해드릴게요! 💬`;
           actions.push({
             type: 'button',
-            label: '청첩장 1:1 상담',
+            label: '카카오톡 채널 상담',
             action: 'external',
-            url: 'https://open.kakao.com/o/sNEtHU7h',
-            style: 'kakao'
-          });
-          break;
-          
-        case 'open_kakao_video':
-          reply = reply || `영상 제작은 토끼편집실에서 담당해요! 🎬 카톡으로 연결해드릴게요~`;
-          actions.push({
-            type: 'button',
-            label: '영상 상담 (토끼편집실)',
-            action: 'external',
-            url: 'https://open.kakao.com/o/sJFmCzai',
+            url: 'https://pf.kakao.com/_xkaQxon',
             style: 'kakao'
           });
           break;

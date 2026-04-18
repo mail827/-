@@ -7,3 +7,4 @@ dist
 *.broken.*
 *.bak
 *.bak.*
+.fonts-trash/
