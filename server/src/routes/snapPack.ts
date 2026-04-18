@@ -723,6 +723,8 @@ const CONCEPT_MOOD: Record<string, string> = {
   rosewater_ballet_attic: 'sloped-ceiling attic writing room of New England 1860s wooden house with small wooden writing desk beneath sloped attic window glass inkwell with dark brown-black ink stack of cream manuscript pages with copperplate handwriting brass oil lamp cool-warm balanced morning light pouring diagonally through window gentle peachy-cream beam filled with floating dust motes rose-cream shadow of sloped wooden beams, Tiffen Classic Soft and Rose FX Kodak VISION3 500T celluloid grain, 85mm lens',
 };
 
+const EDITORIAL_CONCEPTS = new Set(['nocturnal_animals', 'santorini_linen', 'age_of_innocence', 'blurred_spring', 'rosewater_ballet']);
+
 const buildPrompt = (concept: string, category: string, mode: string, shotIdx: number): string => {
   const allConcepts = { ...STUDIO_CONCEPTS, ...CINEMATIC_CONCEPTS };
   const scene = allConcepts[concept]?.base || STUDIO_CONCEPTS.studio_classic.base;
@@ -760,14 +762,16 @@ const buildPrompt = (concept: string, category: string, mode: string, shotIdx: n
     const gOutfit = OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic;
     const bOutfit = OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic;
     const coupleNatural = 'natural relaxed body language, genuine warm smiles, not stiff not rigid, candid authentic interaction';
-    return `${face}. ${mood ? mood + '. ' : ''}${scene}. A couple: the man ${gOutfit}. The woman ${bOutfit}. They have natural relaxed body language with genuine warm smiles. ${shot.prompt}. ${isCinematic ? 'Cinematic' : 'Professional'} wedding photograph${hanbokExtra}. ${detailFocus}`.replace(/\. \./g, '.').trim();
+    const coupleShot = EDITORIAL_CONCEPTS.has(concept) ? '' : `${shot.prompt}. `;
+    return `${face}. ${mood ? mood + '. ' : ''}${scene}. A Korean couple: the man ${gOutfit}. The woman ${bOutfit}. They have natural relaxed body language with genuine warm smiles. ${coupleShot}${isCinematic ? 'Cinematic' : 'Professional'} wedding photograph${hanbokExtra}. ${detailFocus}`.replace(/\. \./g, '.').trim();
   }
 
   const clothe = mode === 'groom'
     ? (OUTFIT_GROOM[concept] || OUTFIT_GROOM.studio_classic)
     : (OUTFIT_BRIDE[concept] || OUTFIT_BRIDE.studio_classic);
   const subj = mode === 'groom' ? 'Korean groom' : 'Korean bride';
-  return `${face}. ${mood ? mood + '. ' : ''}${scene}. The person is a ${subj}, ${clothe}. ${shot.prompt}. ${isCinematic ? 'Cinematic' : 'Professional'} wedding photograph${hanbokExtra}. ${detailFocus}`.replace(/\. \./g, '.').trim();
+  const soloShot = EDITORIAL_CONCEPTS.has(concept) ? '' : `${shot.prompt}. `;
+  return `${face}. ${mood ? mood + '. ' : ''}${scene}. The person is a ${subj}, ${clothe}. ${soloShot}${isCinematic ? 'Cinematic' : 'Professional'} wedding photograph${hanbokExtra}. ${detailFocus}`.replace(/\. \./g, '.').trim();
 };
 
 const buildNegativePrompt = (mode: string, concept: string, shotIdx?: number): string => {
